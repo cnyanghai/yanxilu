@@ -7,7 +7,8 @@
 import re, pathlib
 root = pathlib.Path(__file__).parent
 page = (root / "src/page.html").read_text(encoding="utf-8")
-data = (root / "src/data.js").read_text(encoding="utf-8")
+data = (root / "src/data.js").read_text(encoding="utf-8") + "\n" + "\n".join(
+    f.read_text(encoding="utf-8") for f in sorted((root / "src").glob("deep-*.js")))
 app = (root / "src/app.js").read_text(encoding="utf-8")
 
 body = page.rstrip() + "\n<script>\n" + data.strip() + "\n</script>\n<script>\n" + app.strip() + "\n</script>\n"

@@ -41,7 +41,10 @@
     mode: "pending", canEdit: false, db: null,
     data: Object.assign(emptyData(), clone(REC.data || {})), local: emptyData(),
     route: "home", bookTab: "intro", openCh: {}, flipped: {}, hl: null, rv: null,
-    confirmDel: null, dirty: false, raf: 0
+    confirmDel: null, dirty: false, raf: 0,
+    zoom: "gist", secOpen: {}, prShown: {}, prDone: {}, pendingSec: null,
+    practice: "switch", sw: { A1: true, A2: true, A3: true, A4: true, A5: true },
+    mapMode: "trunk", mapOpen: {}
   };
   COLLS.forEach(function (c) { S.data[c] = S.data[c] || {}; });
 
@@ -55,7 +58,19 @@
   function bookProg(bid) { var b = LIB.books[bid]; return { total: b.chapters.length, done: b.chapters.filter(function (c) { return isDone(chId(bid, c.n)); }).length }; }
   function allItems() { return Object.keys(ITEMS); }
   function boxOf(id) { var c = S.data.cards[id]; return (c && c.box) || 0; }
-  function dueCards() { var t = today(); return CARDS.filter(function (c) { var s = S.data.cards[c.id]; return !s || !s.due || s.due <= t; }); }
+  function dueCards() {
+    var t = today();
+    return CARDS.filter(function (c) {
+      var s = S.data.cards[c.id];
+      if (c.prompt && !s) return false; // 嵌入式自测题：读到并自评过之后才进入复习
+      return !s || !s.due || s.due <= t;
+    });
+  }
+  function gradeCard(id, g) {
+    var cur = S.data.cards[id] || {}, box = cur.box || 0;
+    if (g === "again") box = 1; else if (g === "good") box = Math.min(5, box + 1); else box = Math.max(1, box);
+    return put("cards", id, { box: box, due: addDays(today(), BOX_DAYS[box]), last: today() });
+  }
   function journalEntries() {
     return Object.keys(S.data.journal).map(function (k) { return Object.assign({ id: k }, S.data.journal[k]); })
       .sort(function (a, b) { return a.date === b.date ? String(b.t || "").localeCompare(String(a.t || "")) : String(b.date).localeCompare(String(a.date)); });
@@ -218,7 +233,10 @@
       '<div class="lab">学习方向</div>';
     LIB.tracks.forEach(function (t) { var p = trackProg(t); h += '<a href="#t-' + t.id + '"' + cur("t-" + t.id) + "><span>" + esc(t.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>"; });
     h += '<div class="lab">精读</div>';
-    Object.keys(LIB.books).forEach(function (id) { var b = LIB.books[id], p = bookProg(id); h += '<a href="#b-' + id + '"' + cur("b-" + id) + "><span>" + esc(b.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>"; });
+    Object.keys(LIB.books).forEach(function (id) {
+      var b = LIB.books[id], p = bookProg(id), here = r === "b-" + id || r.indexOf("r-" + id + "-") === 0;
+      h += '<a href="#b-' + id + '"' + (here ? ' aria-current="page"' : "") + "><span>" + esc(b.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>";
+    });
     var due = dueCards().length;
     h += '<div class="lab">记录</div><a href="#journal"' + cur("journal") + '><span>学习足迹</span><span class="n">' + Object.keys(S.data.journal).length + "</span></a>" +
       '<a href="#review"' + cur("review") + "><span>复习</span>" + (due ? '<span class="n due">' + due + "</span>" : "") + "</a></nav>";
@@ -244,7 +262,9 @@
       '<section class="focus" aria-labelledby="focus-h"><p class="eyebrow">正在精读</p>' +
       '<h2 id="focus-h"><a href="#b-' + fid + '">' + esc(f.title) + '</a></h2><p class="meta">' + esc(f.author) + " · 已读完 " + bp.done + " / " + bp.total + " 章</p>" +
       stripHTML(fid) +
-      '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + fid + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章 " + esc(next.title) + '</button><a class="btn ghost" href="#review">复习概念卡</a></div></section>' +
+      '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + fid + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章 " + esc(next.title) + "</button>" +
+      Object.keys(f.deep || {}).map(function (k) { return '<a class="btn ghost" href="#r-' + fid + "-" + k + '">第' + CN[+k] + "章精读稿</a>"; }).join("") +
+      '<a class="btn ghost" href="#review">复习概念卡</a></div></section>' +
       '<section><h2>五个学习方向</h2><div class="tracks">' + rows + "</div></section>" +
       '<section class="pair"><div class="col"><h2>最近的学习足迹</h2>' + journalList(js.slice(0, 4), false) + '<p class="more"><a href="#journal">全部足迹</a></p></div>' +
       '<div class="col"><h2>怎么用</h2><ol class="steps">' +
@@ -278,13 +298,14 @@
   }
 
   /* ---------- 精读页 ---------- */
-  var TABS = [["intro", "导读"], ["chapters", "章节精读"], ["cards", "概念卡"], ["debate", "争鸣与延伸"], ["framework", "分析框架"]];
+  var TABS = [["intro", "导读"], ["chapters", "章节精读"], ["argmap", "论证地图"], ["practice", "练习"], ["debate", "争鸣与延伸"]];
+  var PRACTICE = [["switch", "假设开关"], ["cards", "概念卡"], ["framework", "分析框架"]];
   function bookHTML(bid) {
     var b = LIB.books[bid], bp = bookProg(bid), tr = TRACK[b.track];
     var tabs = '<div class="tabs" role="tablist">' + TABS.map(function (x) {
       return '<button type="button" role="tab" id="tab-' + x[0] + '" aria-selected="' + (S.bookTab === x[0]) + '" data-act="tab" data-tab="' + x[0] + '">' + x[1] + "</button>";
     }).join("") + "</div>";
-    var body = S.bookTab === "chapters" ? chaptersTab(bid) : S.bookTab === "cards" ? cardsTab(bid) : S.bookTab === "debate" ? debateTab(bid) : S.bookTab === "framework" ? frameworkTab(bid) : introTab(bid);
+    var body = S.bookTab === "chapters" ? chaptersTab(bid) : S.bookTab === "argmap" ? argmapTab(bid) : S.bookTab === "practice" ? practiceTab(bid) : S.bookTab === "debate" ? debateTab(bid) : introTab(bid);
     return '<div class="view">' + bannerHTML() + '<header><p class="eyebrow">精读 · <a href="#t-' + tr.id + '">' + esc(tr.name) + "</a></p><h1>" + esc(b.title) + "</h1>" +
       '<p class="sub">' + esc(b.en) + " · " + esc(b.author) + "</p>" +
       '<div class="book-prog"><span class="meta">已读完 ' + bp.done + " / " + bp.total + " 章</span>" + stripHTML(bid) + '<div class="whole">' + statusCtl(bid, b.title) + '<span class="meta">整本书</span></div></div></header>' +
@@ -292,7 +313,9 @@
   }
   function introTab(bid) {
     var b = LIB.books[bid];
+    var deepNs = Object.keys(b.deep || {});
     return '<p class="thesis"><span class="k">主旨</span>' + esc(b.thesis) + "</p>" +
+      (deepNs.length ? '<p class="deep-line"><span class="k">精读稿</span>已完成 ' + deepNs.length + " / " + b.chapters.length + " 章：" + deepNs.map(function (k) { return '<a href="#r-' + bid + "-" + k + '">第' + CN[+k] + "章</a>"; }).join("、") + "。其余章节按你的阅读进度补齐。</p>" : "") +
       '<section><h2>这本书</h2><dl class="facts">' + b.facts.map(function (f) { return "<dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd>"; }).join("") + "</dl></section>" +
       '<section><h2>理论链条</h2><ol class="chain">' + b.chain.map(function (c) { return '<li><span class="k">' + esc(c[0]) + "</span><span>" + esc(c[1]) + "</span></li>"; }).join("") + "</ol></section>" +
       '<section><h2>建议的阅读顺序</h2><ol class="order">' + b.order.map(function (o) { return "<li>" + esc(o) + "</li>"; }).join("") + "</ol></section>" +
@@ -303,9 +326,11 @@
     return '<div class="chs">' + b.chapters.map(function (c) {
       var id = chId(bid, c.n), open = !!S.openCh[id];
       var concepts = c.concepts.length ? '<div><h4>关键概念</h4><div class="chips">' + c.concepts.map(function (k) { return '<button type="button" class="chip" data-act="goto-card" data-card="' + k + '">' + esc(CARD[k].f) + "</button>"; }).join("") + "</div></div>" : "";
+      var deep = b.deep && b.deep[c.n];
       return '<details class="ch" id="d-' + id + '" data-ch="' + id + '"' + (open ? " open" : "") + "><summary>" +
-        '<span class="no">第' + CN[c.n] + "章</span><span class=\"ttl\">" + esc(c.title) + '<span class="depth">' + esc(c.depth) + "</span></span>" + statusChip(id) + "</summary>" +
-        '<div class="ch-body"><div class="ch-st">' + statusCtl(id, "第" + CN[c.n] + "章") + "</div>" +
+        '<span class="no">第' + CN[c.n] + "章</span><span class=\"ttl\">" + esc(c.title) + '<span class="depth">' + esc(c.depth) + "</span>" + (deep ? '<span class="deep-tag">精读稿</span>' : "") + "</span>" + statusChip(id) + "</summary>" +
+        '<div class="ch-body"><div class="ch-st">' + statusCtl(id, "第" + CN[c.n] + "章") +
+        (deep ? '<a class="btn" href="#r-' + bid + "-" + c.n + '">进入精读稿：' + deep.sections.length + " 个论证单元</a>" : '<span class="meta">精读稿待写：读到这一章时告诉我。</span>') + "</div>" +
         (c.tip ? '<p class="tip">' + esc(c.tip) + "</p>" : "") +
         '<div><h4>本章要回答</h4><p class="q">' + esc(c.q) + "</p></div>" +
         '<div><h4>核心论点</h4><ol>' + c.points.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ol></div>" +
@@ -319,12 +344,13 @@
   function cardMeta(id) {
     var c = S.data.cards[id];
     if (!c || !c.box) return "新卡";
-    return "第" + c.box + " 盒 · 下次 " + (c.due || "");
+    return "第 " + c.box + " 盒 · 下次 " + (c.due || "");
   }
   function cardsTab(bid) {
     var b = LIB.books[bid], due = dueCards().filter(function (c) { return c.book === bid; }).length;
-    return '<div class="cards-head"><p>点卡片翻面。复习时按记忆程度分盒，记得越牢，下次复习隔得越久。</p><a class="btn" href="#review">' + (due ? "开始复习（" + due + " 张到期）" : "今天没有到期的卡片") + "</a></div>" +
-      '<div class="cards">' + b.cards.map(function (c) {
+    var nPrompt = b.cards.filter(function (c) { return c.prompt; }).length;
+    return '<div class="cards-head"><p>点卡片翻面。复习时按记忆程度分盒，记得越牢，下次复习隔得越久。' + (nPrompt ? "精读稿里另有 " + nPrompt + " 道嵌入自测题，读到并自评之后才进入复习。" : "") + '</p><a class="btn" href="#review">' + (due ? "开始复习（" + due + " 张到期）" : "今天没有到期的卡片") + "</a></div>" +
+      '<div class="cards">' + b.cards.filter(function (c) { return !c.prompt; }).map(function (c) {
         var fl = !!S.flipped[c.id];
         return '<button type="button" class="card' + (fl ? " flipped" : "") + (S.hl === c.id ? " hl" : "") + '" id="card-' + c.id + '" data-act="flip" data-card="' + c.id + '" aria-pressed="' + fl + '">' +
           '<span class="front">' + esc(c.f) + "</span>" + (fl ? '<span class="back">' + esc(c.b) + "</span>" : '<span class="hint">点击查看解释</span>') +
@@ -353,6 +379,140 @@
         return '<div class="fwp"><h3>' + esc(p[0]) + "</h3><ol start=\"" + (n + 1) + '">' + p[1].map(function (q) { n++; return "<li>" + esc(q) + "</li>"; }).join("") + "</ol></div>";
       }).join("") + "</div>" +
       '<p class="meta fw-foot">用法：选一场冲突，把清单复制到和 Claude 的对话里逐条回答；分析成文后，可以作为“专题实战”的成果收进研习录。</p>';
+  }
+
+  /* ---------- 练习：假设开关 / 概念卡 / 分析框架 ---------- */
+  function practiceTab(bid) {
+    var b = LIB.books[bid], subs = PRACTICE.filter(function (p) { return p[0] !== "switch" || b.switches; });
+    if (!subs.some(function (p) { return p[0] === S.practice; })) S.practice = subs[0][0];
+    var nav = '<div class="seg" role="group" aria-label="练习类型">' + subs.map(function (p) {
+      return '<button type="button" data-act="practice" data-p="' + p[0] + '" aria-pressed="' + (S.practice === p[0]) + '">' + p[1] + "</button>";
+    }).join("") + "</div>";
+    var body = S.practice === "cards" ? cardsTab(bid) : S.practice === "framework" ? frameworkTab(bid) : switchHTML(bid);
+    return '<div class="practice">' + nav + body + "</div>";
+  }
+  function secLink(bid, ref, label) {
+    var m = /^(\d+):(s\d+)$/.exec(ref);
+    if (m && LIB.books[bid].deep && LIB.books[bid].deep[+m[1]]) {
+      var d = LIB.books[bid].deep[+m[1]], idx = d.sections.map(function (s) { return s.id; }).indexOf(m[2]) + 1;
+      return '<button type="button" class="xref" data-act="goto-sec" data-book="' + bid + '" data-n="' + m[1] + '" data-sec="' + m[2] + '">' + (label || ("第" + CN[+m[1]] + "章 §" + idx)) + "</button>";
+    }
+    if (/^\d+$/.test(ref)) return '<button type="button" class="xref" data-act="open-ch" data-book="' + bid + '" data-n="' + ref + '">' + (label || ("第" + CN[+ref] + "章")) + "</button>";
+    return "";
+  }
+  function switchHTML(bid) {
+    var sw = LIB.books[bid].switches, on = S.sw, NODE = {};
+    sw.nodes.forEach(function (x) { NODE[x.id] = x; });
+    function ok(id) { return id in on ? on[id] : NODE[id].needs.every(ok); }
+    function label(id) { if (id in on) { var a = sw.assumptions.filter(function (x) { return x.id === id; })[0]; return a.name; } return NODE[id].name; }
+    var cardsA = sw.assumptions.map(function (a, i) {
+      var v = on[a.id];
+      return '<button type="button" class="asw' + (v ? " on" : " off") + '" data-act="sw" data-id="' + a.id + '" aria-pressed="' + v + '">' +
+        '<span class="asw-top"><span class="asw-no">假设' + CN[i + 1] + '</span><span class="tog" aria-hidden="true"><i></i></span></span>' +
+        '<span class="asw-name">' + esc(a.name) + '</span><span class="asw-desc">' + esc(v ? a.on : a.off) + "</span>" +
+        (a.critic ? '<span class="asw-critic">挑战这一条：' + esc(a.critic) + "</span>" : "") + "</button>";
+    }).join("");
+    function nodeHTML(id) {
+      var x = NODE[id], holds = ok(id), fails = x.needs.filter(function (k) { return !ok(k); });
+      return '<div class="cn' + (holds ? " ok" : " broken") + '"><div class="cn-head"><span class="cn-name">' + esc(x.name) + '</span><span class="cn-st">' + (holds ? "成立" : "断裂") + "</span></div>" +
+        '<div class="cn-needs">需要：' + x.needs.map(function (k) { return '<span class="need' + (ok(k) ? "" : " miss") + '">' + esc(label(k)) + "</span>"; }).join("") + "</div>" +
+        (fails.length ? '<ul class="cn-why">' + fails.map(function (k) { return "<li>" + esc(x.why[k] || "") + "</li>"; }).join("") + "</ul>" : "") +
+        (x.critic && holds ? '<p class="cn-critic">' + esc(x.critic) + "</p>" : "") +
+        '<div class="cn-link">' + secLink(bid, "2:" + x.sec, "读这一单元") + "</div></div>";
+    }
+    var offs = sw.assumptions.filter(function (a) { return !on[a.id]; });
+    var broken = sw.nodes.filter(function (x) { return !ok(x.id); }).map(function (x) { return x.name; });
+    var result = !offs.length ? sw.allOn : "关掉了" + offs.map(function (a) { return "“" + a.name + "”"; }).join("、") + "，推论链断在：" + broken.join("、") + "。" + (broken.length === sw.nodes.length ? "作者描绘的世界完全不成立。" : "");
+    return '<div class="sw"><p class="sw-intro">' + esc(sw.intro) + "</p>" +
+      '<div class="asws">' + cardsA + "</div>" +
+      '<div class="chainx" aria-live="polite"><div class="row2">' + nodeHTML("F") + nodeHTML("S") + '</div><div class="arrow" aria-hidden="true"></div>' +
+      nodeHTML("P") + '<div class="arrow" aria-hidden="true"></div><div class="row2">' + nodeHTML("H") + nodeHTML("C") + "</div></div>" +
+      '<div class="sw-result"><span class="k">结果</span><p>' + esc(result) + "</p>" + (offs.length ? '<button type="button" class="btn small ghost" data-act="sw-reset">全部打开</button>' : "") + "</div></div>";
+  }
+
+  /* ---------- 论证地图 ---------- */
+  var MAP_TYPE = { claim: "论点", premise: "前提", evidence: "证据", objection: "反驳" };
+  function countNodes(x) { return 1 + x.kids.reduce(function (a, k) { return a + countNodes(k); }, 0); }
+  function argmapTab(bid) {
+    var root = LIB.books[bid].argmap;
+    if (!root) return '<p class="empty-line">这本书的论证地图还没有做。</p>';
+    function nodeHTML(x, key, depth) {
+      var has = x.kids.length, open = key in S.mapOpen ? S.mapOpen[key] : (S.mapMode === "all" || depth === 0);
+      var row = '<div class="mrow">' + (has ? '<button type="button" class="mtog" data-act="map-tog" data-key="' + key + '" aria-expanded="' + open + '" aria-label="' + (open ? "收起" : "展开") + '"><i></i></button>' : '<span class="mtog leaf" aria-hidden="true"></span>') +
+        '<span class="mtype">' + MAP_TYPE[x.t] + '</span><span class="mtext">' + esc(x.text) + (has && !open ? '<span class="mcount">' + (countNodes(x) - 1) + "</span>" : "") + "</span>" + (x.ref ? secLink(bid, x.ref) : "") + "</div>";
+      return '<li class="mn t-' + x.t + '">' + row + (has && open ? "<ul>" + x.kids.map(function (k, i) { return nodeHTML(k, key + "." + i, depth + 1); }).join("") + "</ul>" : "") + "</li>";
+    }
+    return '<div class="map-head"><p>全书的论证长成一棵树：根是全书的核心论点，往下是前提、推论、证据，以及批评者的反驳。第二章的节点直接连到精读稿的对应单元，其他章节的精读稿写好后会接上。</p>' +
+      '<div class="legend">' + Object.keys(MAP_TYPE).map(function (t) { return '<span class="lg t-' + t + '"><span class="mtype">' + MAP_TYPE[t] + "</span></span>"; }).join("") + "</div>" +
+      '<div class="seg" role="group" aria-label="展开程度"><button type="button" data-act="map-mode" data-m="trunk" aria-pressed="' + (S.mapMode === "trunk") + '">只看主干</button><button type="button" data-act="map-mode" data-m="all" aria-pressed="' + (S.mapMode === "all") + '">全部展开</button></div></div>' +
+      '<div class="mapwrap"><ul class="mtree">' + nodeHTML(root, "r", 0) + "</ul></div>";
+  }
+
+  /* ---------- 精读稿（伸缩阅读 + 嵌入自测） ---------- */
+  function secKey(bid, n, sid) { return bid + "-" + n + "-" + sid; }
+  function promptHTML(c) {
+    var s = S.data.cards[c.id], shown = S.prShown[c.id];
+    var meta = s && s.box ? "已进入复习 · 第 " + s.box + " 盒 · 下次 " + s.due : "";
+    var h = '<div class="pr" id="pr-' + c.id + '"><p class="pq"><span class="k">自测</span>' + esc(c.f) + "</p>";
+    if (!shown) h += '<div class="pr-acts"><button type="button" class="btn small ghost" data-act="pr-show" data-card="' + c.id + '">想好了，看答案</button>' + (meta ? '<span class="meta">' + esc(meta) + "</span>" : "") + "</div>";
+    else {
+      h += '<p class="pa">' + esc(c.b) + "</p>";
+      if (S.canEdit && !S.prDone[c.id]) h += '<div class="pr-acts"><button type="button" class="btn small again" data-act="pr-grade" data-g="again" data-card="' + c.id + '">没记住</button><button type="button" class="btn small good" data-act="pr-grade" data-g="good" data-card="' + c.id + '">记住了</button></div>';
+      else if (meta) h += '<div class="pr-acts"><span class="meta">' + esc(meta) + "</span></div>";
+    }
+    return h + "</div>";
+  }
+  function sectionText(s) {
+    return s.claim.join("") + s.steps.join("") + s.evidence.map(function (e) { return e.text; }).join("") + s.replies.map(function (r) { return r.obj + r.ans; }).join("");
+  }
+  function readerHTML(bid, n) {
+    var b = LIB.books[bid], d = b.deep[n], ch = b.chapters.filter(function (c) { return c.n === n; })[0], cid = chId(bid, n);
+    var secs = d.sections;
+    var nChecks = secs.reduce(function (a, s) { return a + s.check.length; }, 0);
+    var prompts = CARDS.filter(function (c) { return c.book === bid && c.ch === n && c.prompt; });
+    var chars = secs.reduce(function (a, s) { return a + sectionText(s).replace(/\s/g, "").length; }, 0);
+    var answered = prompts.filter(function (c) { return S.data.cards[c.id]; }).length;
+    var ZOOM = [["one", "一句话"], ["gist", "提要"], ["full", "全文"]];
+    var zoom = '<div class="seg zoom" role="group" aria-label="阅读详略">' + ZOOM.map(function (z) {
+      return '<button type="button" data-act="zoom" data-z="' + z[0] + '" aria-pressed="' + (S.zoom === z[0]) + '">' + z[1] + "</button>";
+    }).join("") + "</div>";
+    var body;
+    if (S.zoom === "one") {
+      body = '<p class="oneline">' + esc(d.oneLine) + "</p>" +
+        '<ol class="toc">' + secs.map(function (s, i) {
+          return '<li><button type="button" data-act="sec-jump" data-book="' + bid + '" data-n="' + n + '" data-sec="' + s.id + '"><span class="secno">§' + (i + 1) + "</span>" + esc(s.title) + "</button></li>";
+        }).join("") + "</ol>";
+    } else {
+      body = '<p class="oneline small"><span class="k">本章一句话</span>' + esc(d.oneLine) + "</p>" + secs.map(function (s, i) {
+        var key = secKey(bid, n, s.id), open = S.zoom === "full" || !!S.secOpen[key];
+        var h = '<section class="sec' + (open ? " open" : "") + '" id="sec-' + s.id + '"><div class="sec-head"><span class="secno">§' + (i + 1) + "</span><h2>" + esc(s.title) + "</h2></div>" +
+          '<p class="gist">' + esc(s.gist) + "</p>";
+        if (!open) return h + '<button type="button" class="more-btn" data-act="sec-toggle" data-key="' + key + '" aria-expanded="false">展开这一单元</button></section>';
+        h += '<div class="sec-body">' + s.claim.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("");
+        if (s.steps.length) h += '<div class="blk"><h4>推理</h4><ol class="reason">' + s.steps.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ol></div>";
+        if (s.evidence.length) h += '<div class="blk"><h4>例证</h4><ul class="evid">' + s.evidence.map(function (e) {
+          return '<li><span class="etag">' + esc(e.tag) + '</span><span class="esrc ' + (e.src === "书" ? "book" : "added") + '">' + (e.src === "书" ? "书中" : "补充") + "</span><span>" + esc(e.text) + "</span></li>";
+        }).join("") + "</ul></div>";
+        if (s.replies.length) h += '<div class="blk"><h4>反驳与回应</h4>' + s.replies.map(function (r) {
+          return '<div class="qa"><p class="obj"><span class="k">有人说</span>' + esc(r.obj) + '</p><p class="ans"><span class="k">作者答</span>' + esc(r.ans) + "</p></div>";
+        }).join("") + "</div>";
+        if (s.practice) h += '<p class="go-practice"><button type="button" class="xref" data-act="goto-switch" data-book="' + bid + '">去练习：用假设开关检验这五条</button></p>';
+        if (s.check.length) h += '<div class="chk"><span class="k">待核对</span><ul>' + s.check.map(function (c) { return "<li>" + esc(c) + "</li>"; }).join("") + "</ul></div>";
+        var ps = prompts.filter(function (c) { return c.sec === s.id; });
+        if (ps.length) h += '<div class="prs">' + ps.map(promptHTML).join("") + "</div>";
+        h += "</div>";
+        if (S.zoom !== "full") h += '<button type="button" class="more-btn" data-act="sec-toggle" data-key="' + key + '" aria-expanded="true">收起</button>';
+        return h + "</section>";
+      }).join("");
+    }
+    return '<div class="view reader">' + bannerHTML() +
+      '<header><p class="eyebrow"><a href="#b-' + bid + '">《' + esc(b.title) + "》</a> · 精读稿</p><h1>第" + CN[n] + "章　" + esc(ch.title) + "</h1>" +
+      '<div class="stats"><span><b>' + Math.round(chars / 100) / 10 + "</b>千字</span><span><b>" + secs.length + "</b>个论证单元</span><span><b>" + answered + "</b>/ " + prompts.length + " 道自测已作答</span><span><b>" + nChecks + "</b>处待核对</span></div>" +
+      '<div class="reader-bar">' + zoom + '<div class="whole">' + statusCtl(cid, "第" + CN[n] + "章") + "</div></div>" +
+      '<p class="meta reader-note">' + esc(d.note) + " 例证标“书中”的是作者在书里用的，标“补充”的是本页为帮助理解加的。</p></header>" +
+      '<div class="reader-body">' + body + "</div>" +
+      '<section class="reader-foot">' + noteBlock(cid, "我的批注", "这一章读完后，用自己的话写下最关键的推理，以及你最怀疑的一环。也可以记下原书中与这里不一致的地方（附页码）。") +
+      '<div class="btns"><a class="btn ghost" href="#b-' + bid + '">返回《' + esc(b.title) + '》</a><button type="button" class="btn ghost" data-act="goto-switch" data-book="' + bid + '">假设开关</button><button type="button" class="btn ghost" data-act="goto-map" data-book="' + bid + '">论证地图</button></div></section></div>';
   }
 
   /* ---------- 学习足迹 ---------- */
@@ -402,7 +562,7 @@
   function reviewHTML() {
     if (!S.rv) startReview();
     var rv = S.rv, head = '<header><p class="eyebrow">记录</p><h1>复习</h1><p class="lede">间隔重复：记住了的卡片升一盒，下次隔得更久；没记住的回到第一盒。各盒间隔依次为 1、3、7、16、35 天。</p></header>';
-    var boxes = [0, 0, 0, 0, 0, 0]; CARDS.forEach(function (c) { boxes[boxOf(c.id)]++; });
+    var boxes = [0, 0, 0, 0, 0, 0]; CARDS.forEach(function (c) { if (c.prompt && !S.data.cards[c.id]) return; boxes[boxOf(c.id)]++; });
     var boxLine = '<div class="boxes" aria-label="各盒卡片数">' + boxes.map(function (n, i) { return '<span class="bx"><b>' + n + "</b>" + (i ? "第" + i + "盒" : "新卡") + "</span>"; }).join("") + "</div>";
     if (!rv.q.length || rv.i >= rv.q.length) {
       var done = rv.q.length && rv.i >= rv.q.length;
@@ -422,28 +582,45 @@
       '<p class="front">' + esc(c.f) + "</p>" + (rv.show ? '<p class="back">' + esc(c.b) + "</p>" : "") + acts + "</div></div>";
   }
   function grade(g) {
-    var rv = S.rv, id = rv.q[rv.i], cur = S.data.cards[id] || {}, box = cur.box || 0;
-    if (g === "again") box = 1; else if (g === "good") box = Math.min(5, box + 1); else box = Math.max(1, box);
-    put("cards", id, { box: box, due: addDays(today(), BOX_DAYS[box]), last: today() });
+    var rv = S.rv, id = rv.q[rv.i];
+    gradeCard(id, g);
     rv.tally[g]++; rv.i++; rv.show = false; render();
   }
 
   /* ---------- 主渲染 ---------- */
   var ROUTES = { home: 1, journal: 1, review: 1 };
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
-  Object.keys(LIB.books).forEach(function (b) { ROUTES["b-" + b] = 1; });
+  Object.keys(LIB.books).forEach(function (b) {
+    ROUTES["b-" + b] = 1;
+    Object.keys(LIB.books[b].deep || {}).forEach(function (n) { ROUTES["r-" + b + "-" + n] = 1; });
+  });
   function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] ? h : "home"; }
 
   function render(scrollTop) {
     $("#rail").innerHTML = railHTML();
-    var r = S.route, html;
-    if (r.indexOf("t-") === 0) html = trackHTML(r.slice(2));
+    var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);
+    if (rm) html = readerHTML(rm[1], +rm[2]);
+    else if (r.indexOf("t-") === 0) html = trackHTML(r.slice(2));
     else if (r.indexOf("b-") === 0) html = bookHTML(r.slice(2));
     else if (r === "journal") html = journalHTML();
     else if (r === "review") html = reviewHTML();
     else html = homeHTML();
     $("#main").innerHTML = html;
     if (scrollTop) window.scrollTo(0, 0);
+    if (S.pendingSec) {
+      var sid = S.pendingSec; S.pendingSec = null;
+      setTimeout(function () { var el = document.getElementById("sec-" + sid); if (el) el.scrollIntoView({ block: "start", behavior: "smooth" }); }, 60);
+    }
+  }
+  function gotoSec(bid, n, sid) {
+    S.secOpen[secKey(bid, n, sid)] = true; S.pendingSec = sid;
+    if (S.zoom === "one") S.zoom = "gist";
+    var r = "r-" + bid + "-" + n;
+    if (S.route === r) render(); else location.hash = r;
+  }
+  function gotoBookTab(bid, tab) {
+    S.bookTab = tab;
+    if (S.route === "b-" + bid) render(); else location.hash = "b-" + bid;
   }
 
   /* ---------- 交互 ---------- */
@@ -474,8 +651,20 @@
     if (act === "tab") { S.bookTab = t.getAttribute("data-tab"); render(); return; }
     if (act === "open-ch") { e.preventDefault(); openChapter(t.getAttribute("data-book"), +t.getAttribute("data-n")); return; }
     if (act === "flip") { var cid = t.getAttribute("data-card"); S.flipped[cid] = !S.flipped[cid]; S.hl = null; render(); var el = document.getElementById("card-" + cid); if (el) el.focus({ preventScroll: true }); return; }
+    if (act === "zoom") { S.zoom = t.getAttribute("data-z"); render(); return; }
+    if (act === "sec-toggle") { var sk = t.getAttribute("data-key"), sec = t.closest("section.sec"); S.secOpen[sk] = !S.secOpen[sk]; render(); if (!S.secOpen[sk] && sec) { var el2 = document.getElementById(sec.id); if (el2 && el2.getBoundingClientRect().top < 0) el2.scrollIntoView({ block: "start" }); } return; }
+    if (act === "sec-jump" || act === "goto-sec") { gotoSec(t.getAttribute("data-book"), +t.getAttribute("data-n"), t.getAttribute("data-sec")); return; }
+    if (act === "pr-show") { S.prShown[t.getAttribute("data-card")] = true; render(); return; }
+    if (act === "pr-grade") { var pc = t.getAttribute("data-card"); S.prDone[pc] = true; gradeCard(pc, t.getAttribute("data-g")); render(); return; }
+    if (act === "practice") { S.practice = t.getAttribute("data-p"); render(); return; }
+    if (act === "sw") { var aid = t.getAttribute("data-id"); S.sw[aid] = !S.sw[aid]; render(); var b2 = document.querySelector('[data-act="sw"][data-id="' + aid + '"]'); if (b2) b2.focus({ preventScroll: true }); return; }
+    if (act === "sw-reset") { Object.keys(S.sw).forEach(function (k) { S.sw[k] = true; }); render(); return; }
+    if (act === "goto-switch") { S.practice = "switch"; gotoBookTab(t.getAttribute("data-book"), "practice"); return; }
+    if (act === "goto-map") { gotoBookTab(t.getAttribute("data-book"), "argmap"); return; }
+    if (act === "map-tog") { var mk = t.getAttribute("data-key"); S.mapOpen[mk] = t.getAttribute("aria-expanded") !== "true"; render(); var b3 = document.querySelector('[data-act="map-tog"][data-key="' + mk + '"]'); if (b3) b3.focus({ preventScroll: true }); return; }
+    if (act === "map-mode") { S.mapMode = t.getAttribute("data-m"); S.mapOpen = {}; render(); return; }
     if (act === "goto-card") {
-      var k = t.getAttribute("data-card"); S.bookTab = "cards"; S.flipped[k] = true; S.hl = k; render();
+      var k = t.getAttribute("data-card"); S.bookTab = "practice"; S.practice = "cards"; S.flipped[k] = true; S.hl = k; render();
       setTimeout(function () { var el = document.getElementById("card-" + k); if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 60); return;
     }
     if (act === "reveal") { S.rv.show = true; render(); return; }

@@ -279,8 +279,138 @@ details.ch summary:hover .ttl{color:var(--indigo)}
   .focus{padding:18px}
   .strip{gap:3px}
 }
+/* 通用：分段按钮、跳转链接 */
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:3px;background:var(--leaf);border:1px solid var(--rule);border-radius:999px}
+.seg button{font-family:var(--f-ui);font-size:13px;border:0;background:transparent;color:var(--ink-3);padding:5px 14px;border-radius:999px;cursor:pointer}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.xref{font-family:var(--f-ui);font-size:12.5px;background:none;border:0;padding:0;color:var(--indigo);cursor:pointer;white-space:nowrap;text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:3px}
+.deep-tag{display:inline-block;font-family:var(--f-ui);font-size:11px;letter-spacing:.06em;color:var(--seal);background:var(--seal-wash);border-radius:999px;padding:0 8px;margin-left:8px;vertical-align:3px}
+.ch-st{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px}
+.deep-line{margin:18px 0 0;font-size:15px;color:var(--ink-2)}
+.deep-line .k{font-family:var(--f-ui);font-size:12px;letter-spacing:.16em;color:var(--seal);font-weight:600;margin-right:10px}
+.practice{margin-top:28px}
+.practice > .cards-head,.practice > .fw-head{margin-top:24px}
+
+/* 精读稿 */
+.reader-bar{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-top:22px}
+.reader-note{margin-top:14px;line-height:1.7}
+.reader-body{margin-top:30px;border-top:1px solid var(--ink)}
+.oneline{font-family:var(--f-display);font-size:24px;line-height:1.65;letter-spacing:.02em;margin:26px 0 0}
+.oneline.small{font-family:var(--f-body);font-size:17px;line-height:1.85;color:var(--ink-2);margin:20px 0 6px}
+.oneline .k,.pq .k,.qa .k,.chk .k,.sw-result .k{display:block;font-family:var(--f-ui);font-size:12px;letter-spacing:.16em;color:var(--seal);font-weight:600;margin-bottom:4px}
+.toc{list-style:none;margin:26px 0 0;padding:0;border-top:1px solid var(--rule)}
+.toc li{border-bottom:1px solid var(--rule)}
+.toc button{display:flex;gap:14px;width:100%;text-align:left;background:none;border:0;padding:11px 0;font-family:var(--f-body);font-size:16px;cursor:pointer}
+.toc button:hover{color:var(--indigo)}
+.secno{font-family:var(--f-mono);font-size:13px;color:var(--seal);min-width:2.4em;font-variant-numeric:tabular-nums}
+.sec{padding:22px 0 20px;border-bottom:1px solid var(--rule);scroll-margin-top:16px}
+.sec-head{display:flex;align-items:baseline;gap:10px}
+.sec-head h2{font-size:22px;margin:0}
+.gist{margin:6px 0 0;padding-left:calc(2.4em + 10px);font-size:16.5px;font-weight:600;line-height:1.75}
+.more-btn{margin:10px 0 0 calc(2.4em + 10px);background:none;border:0;padding:0;font-family:var(--f-ui);font-size:13px;color:var(--indigo);cursor:pointer}
+.more-btn::after{content:" ↓"}
+.more-btn[aria-expanded="true"]::after{content:" ↑"}
+.sec-body{padding-left:calc(2.4em + 10px);display:grid;gap:14px;margin-top:12px}
+.sec-body > p{margin:0;font-size:16px;line-height:1.9}
+.blk h4{font-family:var(--f-ui);font-size:12px;letter-spacing:.14em;color:var(--ink-3);font-weight:600;margin:4px 0 6px}
+.reason{margin:0;padding-left:1.4em;display:grid;gap:4px;font-size:15px;color:var(--ink-2)}
+.reason li::marker{font-family:var(--f-mono);font-size:12px;color:var(--indigo)}
+.evid{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.evid li{display:flex;flex-wrap:wrap;align-items:baseline;gap:4px 8px;font-size:15px;line-height:1.75}
+.evid li > span:last-child{flex:1 1 280px;min-width:0}
+.etag,.esrc{font-family:var(--f-ui);font-size:11px;border-radius:2px;padding:0 6px;line-height:1.7}
+.etag{border:1px solid var(--rule);color:var(--ink-2)}
+.esrc.book{background:var(--indigo-wash);color:var(--indigo)}
+.esrc.added{background:var(--leaf);color:var(--ink-3);border:1px dashed var(--rule)}
+.qa{display:grid;gap:6px;background:var(--leaf);border:1px solid var(--rule);border-radius:6px;padding:12px 14px}
+.qa p{margin:0;font-size:15px;line-height:1.75}
+.qa .ans .k{color:var(--indigo)}
+.chk{font-size:14px;color:var(--ink-2);background:var(--seal-wash);border-radius:6px;padding:10px 14px}
+.chk ul{margin:0;padding-left:1.2em}
+.go-practice{margin:0}
+.prs{display:grid;gap:10px;margin-top:4px}
+.pr{border:1px dashed var(--ink-3);border-radius:6px;padding:12px 14px;display:grid;gap:8px}
+.pq{margin:0;font-size:15.5px;font-weight:600;line-height:1.7}
+.pa{margin:0;font-size:15px;line-height:1.75;color:var(--ink-2);border-top:1px solid var(--rule);padding-top:8px}
+.pr-acts{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px}
+.reader-foot{margin-top:40px}
+.reader-foot .btns{margin-top:22px}
+
+/* 假设开关 */
+.sw{margin-top:22px}
+.sw-intro{margin:0 0 16px;font-size:15px;color:var(--ink-2);max-width:40em}
+.asws{display:grid;grid-template-columns:repeat(auto-fit,minmax(132px,1fr));gap:10px}
+.asw{display:flex;flex-direction:column;gap:6px;text-align:left;background:var(--leaf);border:1px solid var(--rule);border-radius:6px;padding:12px;cursor:pointer;min-width:0}
+.asw.off{background:transparent;border-style:dashed}
+.asw-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.asw-no{font-family:var(--f-ui);font-size:11px;letter-spacing:.12em;color:var(--ink-3)}
+.tog{width:30px;height:17px;border-radius:999px;background:var(--rule);position:relative;flex:none}
+.tog i{position:absolute;top:2px;left:2px;width:13px;height:13px;border-radius:50%;background:var(--leaf);transition:left .15s}
+.asw.on .tog{background:var(--indigo)}
+.asw.on .tog i{left:15px}
+.asw-name{font-family:var(--f-display);font-size:18px;letter-spacing:.03em}
+.asw.off .asw-name{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--seal)}
+.asw-desc{font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+.asw-critic{font-family:var(--f-ui);font-size:11.5px;line-height:1.55;color:var(--ink-3);border-top:1px solid var(--rule);padding-top:6px}
+.chainx{margin-top:22px;display:grid;gap:0}
+.row2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.arrow{height:22px;position:relative}
+.arrow::before{content:"";position:absolute;left:50%;top:3px;bottom:3px;border-left:1px solid var(--ink-3)}
+.arrow::after{content:"";position:absolute;left:calc(50% - 4px);bottom:2px;border:4px solid transparent;border-top-color:var(--ink-3);border-bottom:0}
+.cn{border:1px solid var(--rule);border-radius:6px;padding:12px 14px;background:var(--leaf);display:grid;gap:6px;min-width:0}
+.cn.ok{border-color:var(--indigo)}
+.cn.broken{background:transparent;border-color:var(--seal);border-style:dashed}
+.cn-head{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.cn-name{font-family:var(--f-display);font-size:19px;letter-spacing:.03em}
+.cn-st{font-family:var(--f-ui);font-size:12px;font-weight:600;color:var(--indigo)}
+.cn.broken .cn-st{color:var(--seal)}
+.cn.broken .cn-name{color:var(--ink-3)}
+.cn-needs{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-family:var(--f-ui);font-size:12px;color:var(--ink-3)}
+.need{border:1px solid var(--rule);border-radius:2px;padding:0 6px;color:var(--ink-2)}
+.need.miss{border-color:var(--seal);color:var(--seal);text-decoration:line-through}
+.cn-why{margin:0;padding-left:1.2em;font-size:13.5px;line-height:1.6;color:var(--ink-2)}
+.cn-critic{margin:0;font-family:var(--f-ui);font-size:12px;line-height:1.55;color:var(--ink-3)}
+.sw-result{margin-top:20px;border-top:1px solid var(--ink);padding-top:14px;display:grid;gap:10px;justify-items:start}
+.sw-result p{margin:0;font-size:16px;line-height:1.8}
+
+/* 论证地图 */
+.map-head{display:grid;gap:12px;margin-top:24px}
+.map-head p{margin:0;font-size:15px;color:var(--ink-2);max-width:40em}
+.legend{display:flex;flex-wrap:wrap;gap:6px}
+.map-head .seg{justify-self:start}
+.mapwrap{margin-top:20px;overflow-x:auto;border-top:1px solid var(--ink);padding-top:14px}
+.mtree,.mtree ul{list-style:none;margin:0;padding:0}
+.mtree ul{margin-left:11px;padding-left:18px;border-left:1px solid var(--rule)}
+.mn{position:relative}
+.mtree ul > .mn::before{content:"";position:absolute;left:-18px;top:19px;width:14px;border-top:1px solid var(--rule)}
+.mrow{display:flex;align-items:flex-start;gap:8px;padding:6px 0;min-width:0}
+.mtog{flex:none;width:22px;height:22px;margin-top:2px;border:1px solid var(--rule);border-radius:3px;background:var(--leaf);cursor:pointer;position:relative;padding:0}
+.mtog i{position:absolute;left:7px;top:6px;border:5px solid transparent;border-left-color:var(--ink-2);border-right:0}
+.mtog[aria-expanded="true"] i{left:5px;top:8px;border:5px solid transparent;border-top-color:var(--ink-2);border-bottom:0}
+.mtog.leaf{border:0;background:transparent;cursor:default}
+.mtype{flex:none;font-family:var(--f-ui);font-size:11px;letter-spacing:.06em;border-radius:2px;padding:1px 6px;margin-top:3px;line-height:1.6}
+.t-claim .mtype{background:var(--ink);color:var(--paper)}
+.t-premise .mtype{background:var(--indigo-wash);color:var(--indigo)}
+.t-evidence .mtype{border:1px solid var(--ink-3);color:var(--ink-2)}
+.t-objection .mtype{background:var(--seal-wash);color:var(--seal)}
+.mtext{flex:1 1 auto;min-width:0;font-size:15.5px;line-height:1.65}
+.mtree > .mn > .mrow .mtext{font-family:var(--f-display);font-size:20px;line-height:1.5}
+.t-objection > .mrow .mtext{color:var(--ink-2)}
+.mcount{font-family:var(--f-mono);font-size:11px;color:var(--ink-3);margin-left:8px}
+.mrow .xref{margin-top:4px}
+
 details.ch,.card{scroll-margin-top:16px}
-@media (max-width:880px){details.ch,.card{scroll-margin-top:118px}}
+@media (max-width:880px){details.ch,.card,.sec{scroll-margin-top:118px}}
+@media (max-width:560px){
+  .gist,.sec-body{padding-left:0}
+  .more-btn{margin-left:0}
+  .row2{grid-template-columns:minmax(0,1fr);gap:0}
+  .row2 .cn + .cn{margin-top:10px}
+  .oneline{font-size:20px}
+  .mrow{flex-wrap:wrap}
+  .mrow .xref{margin-left:30px}
+}
 @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
 </style>
 
@@ -686,6 +816,329 @@ window.YXL_RECORD = {
     cards: {}
   }
 };
+
+/* 《大国政治的悲剧》精读稿、假设开关、论证地图
+ * 精读稿用我们自己的话重建原书论证，不摘录原文。
+ * evidence.src："书" = 作者在书中使用的例证；"补" = 本页为帮助理解补充的例子。
+ * check：拿不准、需要对照原书核对的细节。
+ */
+(function () {
+  var B = window.YXL_LIB.books.tragedy;
+
+  B.deep = {
+    2: {
+      oneLine: "在没有中央权威、彼此都能伤害对方、又看不清对方意图的世界里，以生存为首要目标的理性大国只能互相恐惧、依靠自己、尽可能扩大相对权力，直到成为本地区的霸主。",
+      note: "原书本章分为若干小节。为便于理解，这里把“国家行为”一节拆成恐惧、自助、权力最大化三个论证单元，其余单元与原书小节大体对应，标题是本页的概括。",
+      sections: [
+        {
+          id: "s1", title: "理论要从可靠的假设出发",
+          gist: "作者从国际体系的结构推出大国行为，并坚持理论的假设必须大体符合现实。",
+          claim: [
+            "进攻性现实主义要回答一个问题：为什么大国总在争夺权力、追求霸权？作者不从人性、领导人性格或国内政体去找答案，而是从国际体系的结构推出来。",
+            "推理的起点是五个关于国际体系的基本假设。作者特别强调，这些假设必须是对现实的合理近似。有一派社会科学家认为，假设真不真无所谓，只要推论好用就行；作者不同意这种看法，认为建立在失真假设上的理论不可靠。"
+          ],
+          steps: [],
+          evidence: [],
+          replies: [],
+          check: ["作者在本章是否点名经济学家弗里德曼“假设不必真实”的观点，请对照原书。"]
+        },
+        {
+          id: "s2", title: "五个基本假设",
+          gist: "无政府、进攻能力、意图不确定、生存第一、理性。每一条单独看都不可怕。",
+          claim: [
+            "第一，国际体系是无政府的。体系由独立的国家组成，国家之上没有中央权威。无政府描述的是秩序原则，即主权掌握在各国手中，并不等于混乱。",
+            "第二，大国天然具有一定的进攻性军事能力，能够伤害甚至摧毁彼此。作者的意思是，这种能力永远存在，只有大小之分：即便没有任何武器，一国的人民也能徒手攻击另一国。",
+            "第三，国家永远无法确知他国的意图，也就是不知道对方会不会把手中的能力用来对付自己。意图看不见、难以核实，而且会变：今天友善的国家，明天可能变得敌对。",
+            "第四，生存是国家的首要目标，即保住领土完整和国内政治秩序的自主。国家当然还有其他目标，但生存排在第一位，因为一旦被征服，其他目标都无从谈起。",
+            "第五，大国是理性行为体。它们了解所处的外部环境，会战略性地思考如何生存：考虑别国的偏好、自己的行为会怎样影响别国，以及短期和长期的后果。"
+          ],
+          steps: [
+            "作者特别指出：单独看，没有哪一条假设要求国家互相竞争。第四条甚至是一个完全无害的动机。",
+            "危险来自五条合在一起。下面三个单元展示它们如何共同推出恐惧、自助和权力最大化。"
+          ],
+          evidence: [],
+          replies: [],
+          check: [],
+          practice: true
+        },
+        {
+          id: "s3", title: "恐惧",
+          gist: "别人有能力伤害你，你又看不清他的意图，出事也没人可求助，于是大国彼此恐惧。",
+          claim: [
+            "大国之间彼此猜疑、担心战争，几乎没有信任的空间。恐惧的强弱随时代和地区变化，但永远降不到可以忽略的程度。",
+            "恐惧之所以严重，是因为输的代价极高：战争可能意味着亡国甚至大规模屠杀。在看不清对手意图的情况下，国家倾向于按最坏的情况做打算。"
+          ],
+          steps: [
+            "他国拥有进攻能力（假设二）。",
+            "无法确知他国会不会使用这种能力（假设三）。",
+            "一旦遭到攻击，没有更高的权威来救援或惩罚侵略者（假设一）。",
+            "结论：大国彼此恐惧。"
+          ],
+          evidence: [
+            { tag: "类比", src: "补", text: "国内社会遇到危险可以报警，有警察和法院兜底；国际体系里没有这样的报警电话。" }
+          ],
+          replies: [],
+          check: ["作者在书中使用的“无人可求助”类比的具体说法，请对照原书。"]
+        },
+        {
+          id: "s4", title: "自助",
+          gist: "无人可依靠，盟友也会变，国家只能靠自己，把本国利益放在国际社会之上。",
+          claim: [
+            "在无政府体系里，国家必须自己保障生存。它们可以结盟，但同盟只是权宜之计：今天的盟友可能是明天的敌人，今天的敌人也可能成为明天的盟友。",
+            "因此，国家不会为了国际社会的整体利益牺牲本国安全。在自助的世界里，自私是划算的。"
+          ],
+          steps: [
+            "没有更高的权威提供保护（假设一）。",
+            "连盟友的意图也可能改变（假设三）。",
+            "而生存是首要目标（假设四）。",
+            "结论：国家只能依靠自己。"
+          ],
+          evidence: [
+            { tag: "历史", src: "书", text: "二战中，美国与苏联、中国并肩对抗德国和日本；冷战一开始，敌友很快互换，美国转而与西德、日本结盟，对付苏联和中国。" }
+          ],
+          replies: [],
+          check: []
+        },
+        {
+          id: "s5", title: "权力最大化",
+          gist: "相对权力越大越安全，最安全的位置是霸主，所以大国几乎从不满足于现状。",
+          claim: [
+            "国家最可靠的生存保障，是比潜在对手强大得多。最理想的位置是成为霸主：体系中唯一的大国，强到没有国家能与它打一场像样的仗。",
+            "所以大国关心的是相对权力而不是绝对权力。它们寻找机会改变力量对比，在牺牲对手的前提下增加自己的份额，同时防止对手占自己的便宜。",
+            "维持现状的国家在国际政治中很少见。成为霸主之前，大国几乎都是修正主义者；只有成为霸主之后，才会转为维持现状。",
+            "这与安全困境的概念相通：一国为增加安全采取的措施，会降低别国的安全感。作者认为，进攻性现实主义描绘的正是这样的世界。"
+          ],
+          steps: [
+            "恐惧（上一单元）加上自助（上一单元）。",
+            "生存是首要目标（假设四），国家又会理性地计算怎样才最安全（假设五）。",
+            "结论：追求相对权力最大化，以霸权为终极目标。"
+          ],
+          evidence: [
+            { tag: "概念", src: "书", text: "“安全困境”由约翰·赫兹在 1950 年提出，作者在本章引用并加以讨论。" }
+          ],
+          replies: [
+            { obj: "国家只需要“足够的”安全，不必追求最大的权力（防御性现实主义的主张）。", ans: "多少才算足够无法确定：对手未来的实力难以预测，对力量对比的估算也经常出错。今天足够，明天可能就不够，所以理性的国家宁可多取。" }
+          ],
+          check: []
+        },
+        {
+          id: "s6", title: "有计算的侵略",
+          gist: "大国想扩张，但会算账：只有收益大于代价和风险时才出手。",
+          claim: [
+            "大国并不是一有机会就发动进攻。出手之前，它们会评估力量对比，预判其他国家会怎样反应，权衡代价、风险和收益。胜算不够时，它们会等待更好的时机。",
+            "信息总是不完全的，所以大国也会算错：可能低估对手的决心，也可能没料到会出现制衡联盟。作者承认这类失误存在，但认为它不能说明扩张本身是非理性的。"
+          ],
+          steps: [],
+          evidence: [],
+          replies: [
+            { obj: "侵略往往招致对手联合制衡，最终自取灭亡，所以扩张是非理性的。", ans: "历史上侵略者常常得手；失败的案例多半源于误判，而不是扩张这件事本身不理性。作者在第六章用日本、德国、苏联、意大利的历史详细回应这一点。" }
+          ],
+          check: []
+        },
+        {
+          id: "s7", title: "霸权的限度",
+          gist: "大洋挡住了全球霸权。现实的目标是称霸本地区，并阻止其他地区出现霸主。",
+          claim: [
+            "全球霸权几乎不可能实现，主要障碍是跨越大洋、把陆军投送到另一个大国的领土上极其困难。只有获得明确的核优势才可能打破这一限制，而这在现实中同样极难做到。",
+            "因此，大国能实现的最好结果是成为地区霸主。作者认为，近代以来只有美国做到了，它是西半球的霸主。",
+            "地区霸主还会阻止其他地区出现霸主，因为一个同等的对手可能有余力插手自己的后院。它更希望其他地区至少有两个大国互相牵制。",
+            "一旦成为地区霸主，这个国家就转为维持现状。"
+          ],
+          steps: [],
+          evidence: [
+            { tag: "历史", src: "书", text: "二十世纪，美国先后出手，阻止威廉二世的德国、日本帝国、纳粹德国和苏联成为各自地区的霸主。" }
+          ],
+          replies: [],
+          check: []
+        },
+        {
+          id: "s8", title: "权力分布与恐惧的强弱",
+          gist: "恐惧有多强，取决于对手有多强、彼此隔着什么，以及体系里的力量怎么分布。",
+          claim: [
+            "对手越强，国家的恐惧就越深。",
+            "有几个因素会改变恐惧的强弱：如果双方都拥有能在遭受第一次打击后实施报复的核力量，恐惧会下降；如果大国之间隔着大片水域，恐惧也会下降；体系中力量的分布影响最大，两极还是多极、有没有潜在霸主，都会改变恐惧的程度。出现潜在霸主的不平衡多极最令人恐惧。",
+            "这一单元为第九章“大国战争的原因”埋下伏笔。"
+          ],
+          steps: [],
+          evidence: [],
+          replies: [],
+          check: ["本节列举的影响因素及其先后顺序，请对照原书。"]
+        },
+        {
+          id: "s9", title: "国家目标的层级",
+          gist: "生存排第一。其他目标可以追求，但与安全冲突时必须让路。",
+          claim: [
+            "国家也追求经济繁荣、传播意识形态、民族统一、保护人权等非安全目标，进攻性现实主义并不否认这一点。",
+            "这些目标与权力逻辑的关系有三种：互补，例如经济增长本身就增加财富，而财富是潜在权力；互不相干；或者相互冲突。冲突时，安全目标优先。",
+            "例如，大国在人权问题上的行动往往取决于代价：代价低、不损害安全利益时可能出手，代价高时通常不会。"
+          ],
+          steps: [],
+          evidence: [],
+          replies: [],
+          check: ["作者在本节使用的具体历史例子，请对照原书。"]
+        },
+        {
+          id: "s10", title: "世界秩序从何而来",
+          gist: "大国不会为了和平合力设计世界秩序。所谓秩序，是它们各自争夺权力的副产品。",
+          claim: [
+            "有观点认为，大国可以携手建立和平的国际秩序，例如集体安全体系。作者不同意：每个大国都在为自己争取最大的权力份额，而不是为全世界设计秩序。",
+            "现实中的国际秩序，往往是大国竞争的意外结果。冷战时期欧洲的安全格局，就是美苏相互制衡的产物，而不是谁事先设计好的方案。",
+            "大国会支持对自己有利的秩序安排，一旦安排不再有利，就会设法改变它。"
+          ],
+          steps: [],
+          evidence: [
+            { tag: "历史", src: "书", text: "冷战时期的欧洲安全格局，是美苏竞争的结果而非共同设计。" }
+          ],
+          replies: [],
+          check: []
+        },
+        {
+          id: "s11", title: "国家间的合作",
+          gist: "合作会发生，但难以达成也难以维持，因为国家计较相对收益，又害怕对方欺骗。",
+          claim: [
+            "计较相对收益：国家不只问“我得到多少”，更问“我比对手多得还是少得”。自由主义制度论更看重绝对收益，这是两派的关键分歧。",
+            "害怕欺骗：在军事领域尤其如此，一方违约可能让另一方陷入致命的劣势，所以国家不愿签订难以核查的协议。",
+            "尽管如此，合作确实存在：国家会结盟对付共同的敌人，对手之间有时也会合作。但这些合作都发生在一个本质上竞争的世界里。"
+          ],
+          steps: [],
+          evidence: [
+            { tag: "历史", src: "书", text: "1939 年纳粹德国与苏联签订互不侵犯条约，不到两年德国就入侵了苏联。对手之间的合作没有改变彼此竞争的本质。" },
+            { tag: "历史", src: "补", text: "冷战时期美苏签订过多项军控协议，同时从未停止军备竞争。" }
+          ],
+          replies: [
+            { obj: "国际制度能够促进合作、缓解安全竞争（自由主义制度论）。", ans: "制度反映的是大国的权力分配，大国在制度内仍然计较相对收益；制度对大国行为的约束有限。" }
+          ],
+          check: ["德苏条约一例在本章中的具体用法，请对照原书。"]
+        },
+        {
+          id: "s12", title: "结论：结构造成的悲剧",
+          gist: "不是大国天性好斗，而是体系结构逼它们这样做。没有坏人，冲突依然难以避免。",
+          claim: [
+            "大国的进攻性行为来自体系结构，而不是领导人的性格或国家的政体。为了突出结构的作用，作者把国家看作只在实力大小上有区别的单位，暂时搁置国内政治和个人因素。",
+            "作者承认这是一种简化：理论不可能解释所有事件，总会有例外，但一个好理论应当能解释大多数重要的现象。",
+            "这就是书名中“悲剧”的含义：没有哪个国家必须是坏人，冲突依然会反复发生。"
+          ],
+          steps: [],
+          evidence: [],
+          replies: [],
+          check: ["把国家比作“台球”的说法出自第一章还是第二章，请对照原书。"]
+        }
+      ]
+    }
+  };
+
+  /* 嵌入式自测题：读到对应小节时出现；自评过一次后才进入间隔复习 */
+  [
+    ["p2-01", "s1", "作者与“假设不必真实”的观点分歧在哪里？", "作者认为理论的假设必须大体符合现实；推论好用而假设失真的理论并不可靠。"],
+    ["p2-02", "s2", "五个基本假设中，哪一条单独看完全是无害的动机？", "第四条：生存是国家的首要目标。"],
+    ["p2-03", "s2", "为什么说“无政府状态”不等于“混乱”？", "它是秩序原则：国家之上没有更高的权威，主权在各国手中。体系可以很有秩序，只是没有中央政府。"],
+    ["p2-04", "s3", "推出“恐惧”需要哪三个假设？", "无政府（出事无人可求助）、进攻能力（别人能伤害你）、意图不确定（不知道他会不会）。"],
+    ["p2-05", "s3", "为什么国家倾向于按最坏的情况做打算？", "输的代价极高，可能亡国；看不清意图时，低估威胁比高估威胁危险得多。"],
+    ["p2-06", "s4", "二战前后美国的结盟变化说明了什么？", "同盟是权宜之计：二战时与苏联、中国并肩作战，冷战开始后转而与西德、日本结盟对付它们。"],
+    ["p2-07", "s4", "为什么说在自助体系里自私是划算的？", "没有谁会保障你的生存，为国际社会牺牲本国安全的国家会吃亏。"],
+    ["p2-08", "s5", "大国为什么关心相对权力，而不是绝对权力？", "安全取决于和对手比谁更强。自己变强了，但对手变得更强，反而更不安全。"],
+    ["p2-09", "s5", "为什么维持现状的大国很少见？", "成为霸主之前，大国总想改变力量对比；只有成为霸主之后才转为维持现状。"],
+    ["p2-10", "s5", "作者如何回应“国家只需要足够的安全”？", "“足够”无法确定，未来的力量对比难以预测，所以理性的国家会尽量多取。"],
+    ["p2-11", "s6", "“有计算的侵略”指什么？", "大国扩张前会评估力量对比、他国反应和成本收益，胜算不够就等待时机。"],
+    ["p2-12", "s6", "侵略者打了败仗，能否证明扩张不理性？", "作者认为不能：失败多源于信息不完全导致的误判，抓住机会扩大权力仍是理性的选择。"],
+    ["p2-13", "s7", "全球霸权为什么几乎不可能？", "跨洋投送陆军、进攻另一个大国的领土极其困难，这就是水域的阻遏力。"],
+    ["p2-14", "s7", "地区霸主为什么要阻止其他地区出现霸主？", "同等的对手可能有余力插手自己的后院；它宁愿其他地区的大国互相牵制。"],
+    ["p2-15", "s8", "哪种力量分布最让大国恐惧？", "出现潜在霸主的不平衡多极。"],
+    ["p2-16", "s8", "除了力量分布，哪两个因素会降低大国之间的恐惧？", "双方都有可靠的核报复能力；彼此之间隔着大片水域。"],
+    ["p2-17", "s9", "非安全目标与安全目标冲突时，国家会怎么做？", "安全优先。不冲突或互补（如经济增长）时，可以同时追求。"],
+    ["p2-18", "s10", "作者怎么看“大国合作建立世界秩序”？", "大国各自争夺权力份额，秩序多是竞争的副产品，而不是有意设计的结果。"],
+    ["p2-19", "s11", "阻碍国家合作的两个因素是什么？", "对相对收益的计较；对对方欺骗的担心。"],
+    ["p2-20", "s11", "现实主义与自由主义制度论在“收益”问题上分歧何在？", "现实主义强调相对收益（我比你多得多少），自由主义制度论更看重绝对收益（我得到多少）。"],
+    ["p2-21", "s12", "本章意义上的“悲剧”指什么？", "没有哪个国家必须是坏人，体系结构仍然把大国推向冲突。"]
+  ].forEach(function (p) { B.cards.push({ id: p[0], sec: p[1], f: p[2], b: p[3], ch: 2, prompt: true }); });
+
+  /* 假设开关 */
+  B.switches = {
+    intro: "五个假设各有一个开关。关掉任意一条，看作者的推论链在哪一环断掉。作者的论点是：单独一条都不会导致竞争，五条合在一起才会。",
+    assumptions: [
+      { id: "A1", name: "无政府状态", on: "国家之上没有中央权威，出事无人可求助。", off: "假设存在一个世界政府，国家受到威胁时可以求助，就像公民可以报警。", critic: "建构主义（温特）：无政府状态的后果取决于国家之间形成的观念，可以是敌人、对手或朋友三种文化。" },
+      { id: "A2", name: "进攻能力", on: "每个大国都有能力伤害甚至摧毁别国。", off: "假设没有任何国家有能力伤害别国。", critic: "" },
+      { id: "A3", name: "意图不确定", on: "无法确知他国意图，而且意图会变。", off: "假设各国意图透明可查，而且不会改变。", critic: "自由主义：国际制度、信息透明和经济相互依存可以降低对意图的不确定。" },
+      { id: "A4", name: "生存第一", on: "生存是国家的首要目标。", off: "假设国家把其他目标（例如输出意识形态）放在生存之上。", critic: "" },
+      { id: "A5", name: "理性", on: "大国会战略性地计算如何生存。", off: "假设国家不做战略计算，行为随意。", critic: "新古典现实主义：国内政治和领导人的认知会扭曲国家的“理性计算”。" }
+    ],
+    nodes: [
+      { id: "F", name: "恐惧", sec: "s3", needs: ["A1", "A2", "A3"],
+        why: { A1: "有世界政府兜底，别国的进攻能力就不那么可怕。", A2: "没有国家能伤害你，也就无所谓恐惧。", A3: "确知对方是善意的、而且不会变，就不必防备它。" } },
+      { id: "S", name: "自助", sec: "s4", needs: ["A1", "A3", "A4"],
+        why: { A1: "有更高的权威提供保护，不必事事靠自己。", A3: "盟友的意图透明、不会改变，可以放心依赖。", A4: "国家不把生存放在首位，就未必在意由谁来保障自己的安全。" } },
+      { id: "P", name: "权力最大化", sec: "s5", needs: ["F", "S", "A4", "A5"],
+        why: { F: "没有恐惧，就没有理由不断扩大相对权力。", S: "安全有人保障，就不必靠自己积累权力。", A4: "生存不是首要目标，资源会投向别处，而不是积累权力。", A5: "不做战略计算的国家，不会系统地追求相对权力，行为难以预测。" },
+        critic: "防御性现实主义接受五个假设，却不接受这一步：它认为国家追求的是适度的安全，而不是最大的权力。" },
+      { id: "H", name: "以地区霸权为目标", sec: "s7", needs: ["P"], why: { P: "不追求权力最大化，就不会把霸权当作目标。" } },
+      { id: "C", name: "持续的安全竞争", sec: "s12", needs: ["P"], why: { P: "不追求权力最大化，安全竞争就失去了根源。" } }
+    ],
+    allOn: "五条全部成立：恐惧、自助、权力最大化依次成立，大国以地区霸权为目标，安全竞争持续不断。这就是作者描绘的世界。"
+  };
+
+  /* 全书论证地图（主干）。t：claim 论点 / premise 前提 / evidence 证据 / objection 反驳 */
+  function n(t, text, ref, kids) { return { t: t, text: text, ref: ref || "", kids: kids || [] }; }
+  B.argmap = n("claim", "大国在体系结构的压力下追求权力最大化，以地区霸权为目标，这使大国政治成为悲剧", "", [
+    n("premise", "五个基本假设", "2:s2", [
+      n("premise", "国际体系是无政府的", "2:s2"),
+      n("premise", "大国都有进攻性军事能力", "2:s2"),
+      n("premise", "无法确知他国意图", "2:s2"),
+      n("premise", "生存是首要目标", "2:s2"),
+      n("premise", "大国是理性行为体", "2:s2"),
+      n("objection", "建构主义：无政府状态的含义取决于国家之间的观念", "")
+    ]),
+    n("claim", "三种行为：恐惧、自助、权力最大化", "2:s3", [
+      n("claim", "恐惧：能力加上意图不确定，又无人可求助", "2:s3"),
+      n("claim", "自助：同盟只是权宜之计", "2:s4", [
+        n("evidence", "二战后美国的敌友互换", "2:s4")
+      ]),
+      n("claim", "权力最大化：相对权力越大越安全", "2:s5", [
+        n("objection", "防御性现实主义：国家追求适度的安全，过度扩张会招致制衡", "2:s5")
+      ]),
+      n("claim", "有计算的侵略：收益大于代价时才出手", "2:s6")
+    ]),
+    n("claim", "终极目标是地区霸权", "2:s7", [
+      n("claim", "水域的阻遏力使全球霸权几乎不可能", "2:s7"),
+      n("evidence", "美国是近代唯一的地区霸主", "2:s7"),
+      n("claim", "地区霸主会阻止其他地区出现霸主", "2:s7", [
+        n("evidence", "美国先后阻止德国、日本、苏联称霸各自地区", "2:s7")
+      ])
+    ]),
+    n("claim", "合作有限，秩序是竞争的副产品", "2:s11", [
+      n("claim", "国家计较相对收益、害怕对方欺骗", "2:s11"),
+      n("evidence", "1939 年德苏条约与两年后的入侵", "2:s11"),
+      n("objection", "自由主义：国际制度与相互依存能够促进合作", "2:s11")
+    ]),
+    n("claim", "权力的衡量：财富是基础，陆军是核心", "3", [
+      n("claim", "潜在权力（人口与财富）不等于军事权力", "3"),
+      n("claim", "陆军是决定性的军事力量", "4"),
+      n("claim", "核武器降低了大国战争的可能，但安全竞争仍在", "4")
+    ]),
+    n("claim", "大国的战略工具箱", "5", [
+      n("claim", "扩张：战争、讹诈、诱敌放血、坐观流血", "5"),
+      n("claim", "遏制：制衡或推卸责任", "5"),
+      n("claim", "应当避免绥靖与追随", "5")
+    ]),
+    n("evidence", "历史检验", "6", [
+      n("evidence", "日本、德国、苏联、意大利一有机会就扩张", "6"),
+      n("evidence", "美苏都追求核优势", "6"),
+      n("evidence", "美国与英国扮演离岸平衡手", "7"),
+      n("objection", "二战后的德国和日本没有再追求地区霸权", "")
+    ]),
+    n("claim", "体系结构决定战争风险", "9", [
+      n("claim", "两极促成制衡，多极容易推卸责任", "8"),
+      n("claim", "不平衡的多极最容易爆发大战", "9"),
+      n("evidence", "1792—1990 年的欧洲大国体系", "9"),
+      n("objection", "冷战的相对和平也可能来自核武器", "9")
+    ]),
+    n("claim", "预测：中国难以和平崛起", "10", [
+      n("claim", "美国将联合中国的多数邻国加以制衡", "10"),
+      n("claim", "安全竞争激烈，存在相当的战争风险", "10"),
+      n("objection", "道义现实主义：政治领导力与战略信誉决定崛起成败", "10"),
+      n("objection", "经济相互依存与核威慑会降低战争风险", "10")
+    ])
+  ]);
+})();
 </script>
 <script>
 (function () {
@@ -731,7 +1184,10 @@ window.YXL_RECORD = {
     mode: "pending", canEdit: false, db: null,
     data: Object.assign(emptyData(), clone(REC.data || {})), local: emptyData(),
     route: "home", bookTab: "intro", openCh: {}, flipped: {}, hl: null, rv: null,
-    confirmDel: null, dirty: false, raf: 0
+    confirmDel: null, dirty: false, raf: 0,
+    zoom: "gist", secOpen: {}, prShown: {}, prDone: {}, pendingSec: null,
+    practice: "switch", sw: { A1: true, A2: true, A3: true, A4: true, A5: true },
+    mapMode: "trunk", mapOpen: {}
   };
   COLLS.forEach(function (c) { S.data[c] = S.data[c] || {}; });
 
@@ -745,7 +1201,19 @@ window.YXL_RECORD = {
   function bookProg(bid) { var b = LIB.books[bid]; return { total: b.chapters.length, done: b.chapters.filter(function (c) { return isDone(chId(bid, c.n)); }).length }; }
   function allItems() { return Object.keys(ITEMS); }
   function boxOf(id) { var c = S.data.cards[id]; return (c && c.box) || 0; }
-  function dueCards() { var t = today(); return CARDS.filter(function (c) { var s = S.data.cards[c.id]; return !s || !s.due || s.due <= t; }); }
+  function dueCards() {
+    var t = today();
+    return CARDS.filter(function (c) {
+      var s = S.data.cards[c.id];
+      if (c.prompt && !s) return false; // 嵌入式自测题：读到并自评过之后才进入复习
+      return !s || !s.due || s.due <= t;
+    });
+  }
+  function gradeCard(id, g) {
+    var cur = S.data.cards[id] || {}, box = cur.box || 0;
+    if (g === "again") box = 1; else if (g === "good") box = Math.min(5, box + 1); else box = Math.max(1, box);
+    return put("cards", id, { box: box, due: addDays(today(), BOX_DAYS[box]), last: today() });
+  }
   function journalEntries() {
     return Object.keys(S.data.journal).map(function (k) { return Object.assign({ id: k }, S.data.journal[k]); })
       .sort(function (a, b) { return a.date === b.date ? String(b.t || "").localeCompare(String(a.t || "")) : String(b.date).localeCompare(String(a.date)); });
@@ -908,7 +1376,10 @@ window.YXL_RECORD = {
       '<div class="lab">学习方向</div>';
     LIB.tracks.forEach(function (t) { var p = trackProg(t); h += '<a href="#t-' + t.id + '"' + cur("t-" + t.id) + "><span>" + esc(t.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>"; });
     h += '<div class="lab">精读</div>';
-    Object.keys(LIB.books).forEach(function (id) { var b = LIB.books[id], p = bookProg(id); h += '<a href="#b-' + id + '"' + cur("b-" + id) + "><span>" + esc(b.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>"; });
+    Object.keys(LIB.books).forEach(function (id) {
+      var b = LIB.books[id], p = bookProg(id), here = r === "b-" + id || r.indexOf("r-" + id + "-") === 0;
+      h += '<a href="#b-' + id + '"' + (here ? ' aria-current="page"' : "") + "><span>" + esc(b.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>";
+    });
     var due = dueCards().length;
     h += '<div class="lab">记录</div><a href="#journal"' + cur("journal") + '><span>学习足迹</span><span class="n">' + Object.keys(S.data.journal).length + "</span></a>" +
       '<a href="#review"' + cur("review") + "><span>复习</span>" + (due ? '<span class="n due">' + due + "</span>" : "") + "</a></nav>";
@@ -934,7 +1405,9 @@ window.YXL_RECORD = {
       '<section class="focus" aria-labelledby="focus-h"><p class="eyebrow">正在精读</p>' +
       '<h2 id="focus-h"><a href="#b-' + fid + '">' + esc(f.title) + '</a></h2><p class="meta">' + esc(f.author) + " · 已读完 " + bp.done + " / " + bp.total + " 章</p>" +
       stripHTML(fid) +
-      '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + fid + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章 " + esc(next.title) + '</button><a class="btn ghost" href="#review">复习概念卡</a></div></section>' +
+      '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + fid + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章 " + esc(next.title) + "</button>" +
+      Object.keys(f.deep || {}).map(function (k) { return '<a class="btn ghost" href="#r-' + fid + "-" + k + '">第' + CN[+k] + "章精读稿</a>"; }).join("") +
+      '<a class="btn ghost" href="#review">复习概念卡</a></div></section>' +
       '<section><h2>五个学习方向</h2><div class="tracks">' + rows + "</div></section>" +
       '<section class="pair"><div class="col"><h2>最近的学习足迹</h2>' + journalList(js.slice(0, 4), false) + '<p class="more"><a href="#journal">全部足迹</a></p></div>' +
       '<div class="col"><h2>怎么用</h2><ol class="steps">' +
@@ -968,13 +1441,14 @@ window.YXL_RECORD = {
   }
 
   /* ---------- 精读页 ---------- */
-  var TABS = [["intro", "导读"], ["chapters", "章节精读"], ["cards", "概念卡"], ["debate", "争鸣与延伸"], ["framework", "分析框架"]];
+  var TABS = [["intro", "导读"], ["chapters", "章节精读"], ["argmap", "论证地图"], ["practice", "练习"], ["debate", "争鸣与延伸"]];
+  var PRACTICE = [["switch", "假设开关"], ["cards", "概念卡"], ["framework", "分析框架"]];
   function bookHTML(bid) {
     var b = LIB.books[bid], bp = bookProg(bid), tr = TRACK[b.track];
     var tabs = '<div class="tabs" role="tablist">' + TABS.map(function (x) {
       return '<button type="button" role="tab" id="tab-' + x[0] + '" aria-selected="' + (S.bookTab === x[0]) + '" data-act="tab" data-tab="' + x[0] + '">' + x[1] + "</button>";
     }).join("") + "</div>";
-    var body = S.bookTab === "chapters" ? chaptersTab(bid) : S.bookTab === "cards" ? cardsTab(bid) : S.bookTab === "debate" ? debateTab(bid) : S.bookTab === "framework" ? frameworkTab(bid) : introTab(bid);
+    var body = S.bookTab === "chapters" ? chaptersTab(bid) : S.bookTab === "argmap" ? argmapTab(bid) : S.bookTab === "practice" ? practiceTab(bid) : S.bookTab === "debate" ? debateTab(bid) : introTab(bid);
     return '<div class="view">' + bannerHTML() + '<header><p class="eyebrow">精读 · <a href="#t-' + tr.id + '">' + esc(tr.name) + "</a></p><h1>" + esc(b.title) + "</h1>" +
       '<p class="sub">' + esc(b.en) + " · " + esc(b.author) + "</p>" +
       '<div class="book-prog"><span class="meta">已读完 ' + bp.done + " / " + bp.total + " 章</span>" + stripHTML(bid) + '<div class="whole">' + statusCtl(bid, b.title) + '<span class="meta">整本书</span></div></div></header>' +
@@ -982,7 +1456,9 @@ window.YXL_RECORD = {
   }
   function introTab(bid) {
     var b = LIB.books[bid];
+    var deepNs = Object.keys(b.deep || {});
     return '<p class="thesis"><span class="k">主旨</span>' + esc(b.thesis) + "</p>" +
+      (deepNs.length ? '<p class="deep-line"><span class="k">精读稿</span>已完成 ' + deepNs.length + " / " + b.chapters.length + " 章：" + deepNs.map(function (k) { return '<a href="#r-' + bid + "-" + k + '">第' + CN[+k] + "章</a>"; }).join("、") + "。其余章节按你的阅读进度补齐。</p>" : "") +
       '<section><h2>这本书</h2><dl class="facts">' + b.facts.map(function (f) { return "<dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd>"; }).join("") + "</dl></section>" +
       '<section><h2>理论链条</h2><ol class="chain">' + b.chain.map(function (c) { return '<li><span class="k">' + esc(c[0]) + "</span><span>" + esc(c[1]) + "</span></li>"; }).join("") + "</ol></section>" +
       '<section><h2>建议的阅读顺序</h2><ol class="order">' + b.order.map(function (o) { return "<li>" + esc(o) + "</li>"; }).join("") + "</ol></section>" +
@@ -993,9 +1469,11 @@ window.YXL_RECORD = {
     return '<div class="chs">' + b.chapters.map(function (c) {
       var id = chId(bid, c.n), open = !!S.openCh[id];
       var concepts = c.concepts.length ? '<div><h4>关键概念</h4><div class="chips">' + c.concepts.map(function (k) { return '<button type="button" class="chip" data-act="goto-card" data-card="' + k + '">' + esc(CARD[k].f) + "</button>"; }).join("") + "</div></div>" : "";
+      var deep = b.deep && b.deep[c.n];
       return '<details class="ch" id="d-' + id + '" data-ch="' + id + '"' + (open ? " open" : "") + "><summary>" +
-        '<span class="no">第' + CN[c.n] + "章</span><span class=\"ttl\">" + esc(c.title) + '<span class="depth">' + esc(c.depth) + "</span></span>" + statusChip(id) + "</summary>" +
-        '<div class="ch-body"><div class="ch-st">' + statusCtl(id, "第" + CN[c.n] + "章") + "</div>" +
+        '<span class="no">第' + CN[c.n] + "章</span><span class=\"ttl\">" + esc(c.title) + '<span class="depth">' + esc(c.depth) + "</span>" + (deep ? '<span class="deep-tag">精读稿</span>' : "") + "</span>" + statusChip(id) + "</summary>" +
+        '<div class="ch-body"><div class="ch-st">' + statusCtl(id, "第" + CN[c.n] + "章") +
+        (deep ? '<a class="btn" href="#r-' + bid + "-" + c.n + '">进入精读稿：' + deep.sections.length + " 个论证单元</a>" : '<span class="meta">精读稿待写：读到这一章时告诉我。</span>') + "</div>" +
         (c.tip ? '<p class="tip">' + esc(c.tip) + "</p>" : "") +
         '<div><h4>本章要回答</h4><p class="q">' + esc(c.q) + "</p></div>" +
         '<div><h4>核心论点</h4><ol>' + c.points.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ol></div>" +
@@ -1009,12 +1487,13 @@ window.YXL_RECORD = {
   function cardMeta(id) {
     var c = S.data.cards[id];
     if (!c || !c.box) return "新卡";
-    return "第" + c.box + " 盒 · 下次 " + (c.due || "");
+    return "第 " + c.box + " 盒 · 下次 " + (c.due || "");
   }
   function cardsTab(bid) {
     var b = LIB.books[bid], due = dueCards().filter(function (c) { return c.book === bid; }).length;
-    return '<div class="cards-head"><p>点卡片翻面。复习时按记忆程度分盒，记得越牢，下次复习隔得越久。</p><a class="btn" href="#review">' + (due ? "开始复习（" + due + " 张到期）" : "今天没有到期的卡片") + "</a></div>" +
-      '<div class="cards">' + b.cards.map(function (c) {
+    var nPrompt = b.cards.filter(function (c) { return c.prompt; }).length;
+    return '<div class="cards-head"><p>点卡片翻面。复习时按记忆程度分盒，记得越牢，下次复习隔得越久。' + (nPrompt ? "精读稿里另有 " + nPrompt + " 道嵌入自测题，读到并自评之后才进入复习。" : "") + '</p><a class="btn" href="#review">' + (due ? "开始复习（" + due + " 张到期）" : "今天没有到期的卡片") + "</a></div>" +
+      '<div class="cards">' + b.cards.filter(function (c) { return !c.prompt; }).map(function (c) {
         var fl = !!S.flipped[c.id];
         return '<button type="button" class="card' + (fl ? " flipped" : "") + (S.hl === c.id ? " hl" : "") + '" id="card-' + c.id + '" data-act="flip" data-card="' + c.id + '" aria-pressed="' + fl + '">' +
           '<span class="front">' + esc(c.f) + "</span>" + (fl ? '<span class="back">' + esc(c.b) + "</span>" : '<span class="hint">点击查看解释</span>') +
@@ -1043,6 +1522,140 @@ window.YXL_RECORD = {
         return '<div class="fwp"><h3>' + esc(p[0]) + "</h3><ol start=\"" + (n + 1) + '">' + p[1].map(function (q) { n++; return "<li>" + esc(q) + "</li>"; }).join("") + "</ol></div>";
       }).join("") + "</div>" +
       '<p class="meta fw-foot">用法：选一场冲突，把清单复制到和 Claude 的对话里逐条回答；分析成文后，可以作为“专题实战”的成果收进研习录。</p>';
+  }
+
+  /* ---------- 练习：假设开关 / 概念卡 / 分析框架 ---------- */
+  function practiceTab(bid) {
+    var b = LIB.books[bid], subs = PRACTICE.filter(function (p) { return p[0] !== "switch" || b.switches; });
+    if (!subs.some(function (p) { return p[0] === S.practice; })) S.practice = subs[0][0];
+    var nav = '<div class="seg" role="group" aria-label="练习类型">' + subs.map(function (p) {
+      return '<button type="button" data-act="practice" data-p="' + p[0] + '" aria-pressed="' + (S.practice === p[0]) + '">' + p[1] + "</button>";
+    }).join("") + "</div>";
+    var body = S.practice === "cards" ? cardsTab(bid) : S.practice === "framework" ? frameworkTab(bid) : switchHTML(bid);
+    return '<div class="practice">' + nav + body + "</div>";
+  }
+  function secLink(bid, ref, label) {
+    var m = /^(\d+):(s\d+)$/.exec(ref);
+    if (m && LIB.books[bid].deep && LIB.books[bid].deep[+m[1]]) {
+      var d = LIB.books[bid].deep[+m[1]], idx = d.sections.map(function (s) { return s.id; }).indexOf(m[2]) + 1;
+      return '<button type="button" class="xref" data-act="goto-sec" data-book="' + bid + '" data-n="' + m[1] + '" data-sec="' + m[2] + '">' + (label || ("第" + CN[+m[1]] + "章 §" + idx)) + "</button>";
+    }
+    if (/^\d+$/.test(ref)) return '<button type="button" class="xref" data-act="open-ch" data-book="' + bid + '" data-n="' + ref + '">' + (label || ("第" + CN[+ref] + "章")) + "</button>";
+    return "";
+  }
+  function switchHTML(bid) {
+    var sw = LIB.books[bid].switches, on = S.sw, NODE = {};
+    sw.nodes.forEach(function (x) { NODE[x.id] = x; });
+    function ok(id) { return id in on ? on[id] : NODE[id].needs.every(ok); }
+    function label(id) { if (id in on) { var a = sw.assumptions.filter(function (x) { return x.id === id; })[0]; return a.name; } return NODE[id].name; }
+    var cardsA = sw.assumptions.map(function (a, i) {
+      var v = on[a.id];
+      return '<button type="button" class="asw' + (v ? " on" : " off") + '" data-act="sw" data-id="' + a.id + '" aria-pressed="' + v + '">' +
+        '<span class="asw-top"><span class="asw-no">假设' + CN[i + 1] + '</span><span class="tog" aria-hidden="true"><i></i></span></span>' +
+        '<span class="asw-name">' + esc(a.name) + '</span><span class="asw-desc">' + esc(v ? a.on : a.off) + "</span>" +
+        (a.critic ? '<span class="asw-critic">挑战这一条：' + esc(a.critic) + "</span>" : "") + "</button>";
+    }).join("");
+    function nodeHTML(id) {
+      var x = NODE[id], holds = ok(id), fails = x.needs.filter(function (k) { return !ok(k); });
+      return '<div class="cn' + (holds ? " ok" : " broken") + '"><div class="cn-head"><span class="cn-name">' + esc(x.name) + '</span><span class="cn-st">' + (holds ? "成立" : "断裂") + "</span></div>" +
+        '<div class="cn-needs">需要：' + x.needs.map(function (k) { return '<span class="need' + (ok(k) ? "" : " miss") + '">' + esc(label(k)) + "</span>"; }).join("") + "</div>" +
+        (fails.length ? '<ul class="cn-why">' + fails.map(function (k) { return "<li>" + esc(x.why[k] || "") + "</li>"; }).join("") + "</ul>" : "") +
+        (x.critic && holds ? '<p class="cn-critic">' + esc(x.critic) + "</p>" : "") +
+        '<div class="cn-link">' + secLink(bid, "2:" + x.sec, "读这一单元") + "</div></div>";
+    }
+    var offs = sw.assumptions.filter(function (a) { return !on[a.id]; });
+    var broken = sw.nodes.filter(function (x) { return !ok(x.id); }).map(function (x) { return x.name; });
+    var result = !offs.length ? sw.allOn : "关掉了" + offs.map(function (a) { return "“" + a.name + "”"; }).join("、") + "，推论链断在：" + broken.join("、") + "。" + (broken.length === sw.nodes.length ? "作者描绘的世界完全不成立。" : "");
+    return '<div class="sw"><p class="sw-intro">' + esc(sw.intro) + "</p>" +
+      '<div class="asws">' + cardsA + "</div>" +
+      '<div class="chainx" aria-live="polite"><div class="row2">' + nodeHTML("F") + nodeHTML("S") + '</div><div class="arrow" aria-hidden="true"></div>' +
+      nodeHTML("P") + '<div class="arrow" aria-hidden="true"></div><div class="row2">' + nodeHTML("H") + nodeHTML("C") + "</div></div>" +
+      '<div class="sw-result"><span class="k">结果</span><p>' + esc(result) + "</p>" + (offs.length ? '<button type="button" class="btn small ghost" data-act="sw-reset">全部打开</button>' : "") + "</div></div>";
+  }
+
+  /* ---------- 论证地图 ---------- */
+  var MAP_TYPE = { claim: "论点", premise: "前提", evidence: "证据", objection: "反驳" };
+  function countNodes(x) { return 1 + x.kids.reduce(function (a, k) { return a + countNodes(k); }, 0); }
+  function argmapTab(bid) {
+    var root = LIB.books[bid].argmap;
+    if (!root) return '<p class="empty-line">这本书的论证地图还没有做。</p>';
+    function nodeHTML(x, key, depth) {
+      var has = x.kids.length, open = key in S.mapOpen ? S.mapOpen[key] : (S.mapMode === "all" || depth === 0);
+      var row = '<div class="mrow">' + (has ? '<button type="button" class="mtog" data-act="map-tog" data-key="' + key + '" aria-expanded="' + open + '" aria-label="' + (open ? "收起" : "展开") + '"><i></i></button>' : '<span class="mtog leaf" aria-hidden="true"></span>') +
+        '<span class="mtype">' + MAP_TYPE[x.t] + '</span><span class="mtext">' + esc(x.text) + (has && !open ? '<span class="mcount">' + (countNodes(x) - 1) + "</span>" : "") + "</span>" + (x.ref ? secLink(bid, x.ref) : "") + "</div>";
+      return '<li class="mn t-' + x.t + '">' + row + (has && open ? "<ul>" + x.kids.map(function (k, i) { return nodeHTML(k, key + "." + i, depth + 1); }).join("") + "</ul>" : "") + "</li>";
+    }
+    return '<div class="map-head"><p>全书的论证长成一棵树：根是全书的核心论点，往下是前提、推论、证据，以及批评者的反驳。第二章的节点直接连到精读稿的对应单元，其他章节的精读稿写好后会接上。</p>' +
+      '<div class="legend">' + Object.keys(MAP_TYPE).map(function (t) { return '<span class="lg t-' + t + '"><span class="mtype">' + MAP_TYPE[t] + "</span></span>"; }).join("") + "</div>" +
+      '<div class="seg" role="group" aria-label="展开程度"><button type="button" data-act="map-mode" data-m="trunk" aria-pressed="' + (S.mapMode === "trunk") + '">只看主干</button><button type="button" data-act="map-mode" data-m="all" aria-pressed="' + (S.mapMode === "all") + '">全部展开</button></div></div>' +
+      '<div class="mapwrap"><ul class="mtree">' + nodeHTML(root, "r", 0) + "</ul></div>";
+  }
+
+  /* ---------- 精读稿（伸缩阅读 + 嵌入自测） ---------- */
+  function secKey(bid, n, sid) { return bid + "-" + n + "-" + sid; }
+  function promptHTML(c) {
+    var s = S.data.cards[c.id], shown = S.prShown[c.id];
+    var meta = s && s.box ? "已进入复习 · 第 " + s.box + " 盒 · 下次 " + s.due : "";
+    var h = '<div class="pr" id="pr-' + c.id + '"><p class="pq"><span class="k">自测</span>' + esc(c.f) + "</p>";
+    if (!shown) h += '<div class="pr-acts"><button type="button" class="btn small ghost" data-act="pr-show" data-card="' + c.id + '">想好了，看答案</button>' + (meta ? '<span class="meta">' + esc(meta) + "</span>" : "") + "</div>";
+    else {
+      h += '<p class="pa">' + esc(c.b) + "</p>";
+      if (S.canEdit && !S.prDone[c.id]) h += '<div class="pr-acts"><button type="button" class="btn small again" data-act="pr-grade" data-g="again" data-card="' + c.id + '">没记住</button><button type="button" class="btn small good" data-act="pr-grade" data-g="good" data-card="' + c.id + '">记住了</button></div>';
+      else if (meta) h += '<div class="pr-acts"><span class="meta">' + esc(meta) + "</span></div>";
+    }
+    return h + "</div>";
+  }
+  function sectionText(s) {
+    return s.claim.join("") + s.steps.join("") + s.evidence.map(function (e) { return e.text; }).join("") + s.replies.map(function (r) { return r.obj + r.ans; }).join("");
+  }
+  function readerHTML(bid, n) {
+    var b = LIB.books[bid], d = b.deep[n], ch = b.chapters.filter(function (c) { return c.n === n; })[0], cid = chId(bid, n);
+    var secs = d.sections;
+    var nChecks = secs.reduce(function (a, s) { return a + s.check.length; }, 0);
+    var prompts = CARDS.filter(function (c) { return c.book === bid && c.ch === n && c.prompt; });
+    var chars = secs.reduce(function (a, s) { return a + sectionText(s).replace(/\s/g, "").length; }, 0);
+    var answered = prompts.filter(function (c) { return S.data.cards[c.id]; }).length;
+    var ZOOM = [["one", "一句话"], ["gist", "提要"], ["full", "全文"]];
+    var zoom = '<div class="seg zoom" role="group" aria-label="阅读详略">' + ZOOM.map(function (z) {
+      return '<button type="button" data-act="zoom" data-z="' + z[0] + '" aria-pressed="' + (S.zoom === z[0]) + '">' + z[1] + "</button>";
+    }).join("") + "</div>";
+    var body;
+    if (S.zoom === "one") {
+      body = '<p class="oneline">' + esc(d.oneLine) + "</p>" +
+        '<ol class="toc">' + secs.map(function (s, i) {
+          return '<li><button type="button" data-act="sec-jump" data-book="' + bid + '" data-n="' + n + '" data-sec="' + s.id + '"><span class="secno">§' + (i + 1) + "</span>" + esc(s.title) + "</button></li>";
+        }).join("") + "</ol>";
+    } else {
+      body = '<p class="oneline small"><span class="k">本章一句话</span>' + esc(d.oneLine) + "</p>" + secs.map(function (s, i) {
+        var key = secKey(bid, n, s.id), open = S.zoom === "full" || !!S.secOpen[key];
+        var h = '<section class="sec' + (open ? " open" : "") + '" id="sec-' + s.id + '"><div class="sec-head"><span class="secno">§' + (i + 1) + "</span><h2>" + esc(s.title) + "</h2></div>" +
+          '<p class="gist">' + esc(s.gist) + "</p>";
+        if (!open) return h + '<button type="button" class="more-btn" data-act="sec-toggle" data-key="' + key + '" aria-expanded="false">展开这一单元</button></section>';
+        h += '<div class="sec-body">' + s.claim.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("");
+        if (s.steps.length) h += '<div class="blk"><h4>推理</h4><ol class="reason">' + s.steps.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ol></div>";
+        if (s.evidence.length) h += '<div class="blk"><h4>例证</h4><ul class="evid">' + s.evidence.map(function (e) {
+          return '<li><span class="etag">' + esc(e.tag) + '</span><span class="esrc ' + (e.src === "书" ? "book" : "added") + '">' + (e.src === "书" ? "书中" : "补充") + "</span><span>" + esc(e.text) + "</span></li>";
+        }).join("") + "</ul></div>";
+        if (s.replies.length) h += '<div class="blk"><h4>反驳与回应</h4>' + s.replies.map(function (r) {
+          return '<div class="qa"><p class="obj"><span class="k">有人说</span>' + esc(r.obj) + '</p><p class="ans"><span class="k">作者答</span>' + esc(r.ans) + "</p></div>";
+        }).join("") + "</div>";
+        if (s.practice) h += '<p class="go-practice"><button type="button" class="xref" data-act="goto-switch" data-book="' + bid + '">去练习：用假设开关检验这五条</button></p>';
+        if (s.check.length) h += '<div class="chk"><span class="k">待核对</span><ul>' + s.check.map(function (c) { return "<li>" + esc(c) + "</li>"; }).join("") + "</ul></div>";
+        var ps = prompts.filter(function (c) { return c.sec === s.id; });
+        if (ps.length) h += '<div class="prs">' + ps.map(promptHTML).join("") + "</div>";
+        h += "</div>";
+        if (S.zoom !== "full") h += '<button type="button" class="more-btn" data-act="sec-toggle" data-key="' + key + '" aria-expanded="true">收起</button>';
+        return h + "</section>";
+      }).join("");
+    }
+    return '<div class="view reader">' + bannerHTML() +
+      '<header><p class="eyebrow"><a href="#b-' + bid + '">《' + esc(b.title) + "》</a> · 精读稿</p><h1>第" + CN[n] + "章　" + esc(ch.title) + "</h1>" +
+      '<div class="stats"><span><b>' + Math.round(chars / 100) / 10 + "</b>千字</span><span><b>" + secs.length + "</b>个论证单元</span><span><b>" + answered + "</b>/ " + prompts.length + " 道自测已作答</span><span><b>" + nChecks + "</b>处待核对</span></div>" +
+      '<div class="reader-bar">' + zoom + '<div class="whole">' + statusCtl(cid, "第" + CN[n] + "章") + "</div></div>" +
+      '<p class="meta reader-note">' + esc(d.note) + " 例证标“书中”的是作者在书里用的，标“补充”的是本页为帮助理解加的。</p></header>" +
+      '<div class="reader-body">' + body + "</div>" +
+      '<section class="reader-foot">' + noteBlock(cid, "我的批注", "这一章读完后，用自己的话写下最关键的推理，以及你最怀疑的一环。也可以记下原书中与这里不一致的地方（附页码）。") +
+      '<div class="btns"><a class="btn ghost" href="#b-' + bid + '">返回《' + esc(b.title) + '》</a><button type="button" class="btn ghost" data-act="goto-switch" data-book="' + bid + '">假设开关</button><button type="button" class="btn ghost" data-act="goto-map" data-book="' + bid + '">论证地图</button></div></section></div>';
   }
 
   /* ---------- 学习足迹 ---------- */
@@ -1092,7 +1705,7 @@ window.YXL_RECORD = {
   function reviewHTML() {
     if (!S.rv) startReview();
     var rv = S.rv, head = '<header><p class="eyebrow">记录</p><h1>复习</h1><p class="lede">间隔重复：记住了的卡片升一盒，下次隔得更久；没记住的回到第一盒。各盒间隔依次为 1、3、7、16、35 天。</p></header>';
-    var boxes = [0, 0, 0, 0, 0, 0]; CARDS.forEach(function (c) { boxes[boxOf(c.id)]++; });
+    var boxes = [0, 0, 0, 0, 0, 0]; CARDS.forEach(function (c) { if (c.prompt && !S.data.cards[c.id]) return; boxes[boxOf(c.id)]++; });
     var boxLine = '<div class="boxes" aria-label="各盒卡片数">' + boxes.map(function (n, i) { return '<span class="bx"><b>' + n + "</b>" + (i ? "第" + i + "盒" : "新卡") + "</span>"; }).join("") + "</div>";
     if (!rv.q.length || rv.i >= rv.q.length) {
       var done = rv.q.length && rv.i >= rv.q.length;
@@ -1112,28 +1725,45 @@ window.YXL_RECORD = {
       '<p class="front">' + esc(c.f) + "</p>" + (rv.show ? '<p class="back">' + esc(c.b) + "</p>" : "") + acts + "</div></div>";
   }
   function grade(g) {
-    var rv = S.rv, id = rv.q[rv.i], cur = S.data.cards[id] || {}, box = cur.box || 0;
-    if (g === "again") box = 1; else if (g === "good") box = Math.min(5, box + 1); else box = Math.max(1, box);
-    put("cards", id, { box: box, due: addDays(today(), BOX_DAYS[box]), last: today() });
+    var rv = S.rv, id = rv.q[rv.i];
+    gradeCard(id, g);
     rv.tally[g]++; rv.i++; rv.show = false; render();
   }
 
   /* ---------- 主渲染 ---------- */
   var ROUTES = { home: 1, journal: 1, review: 1 };
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
-  Object.keys(LIB.books).forEach(function (b) { ROUTES["b-" + b] = 1; });
+  Object.keys(LIB.books).forEach(function (b) {
+    ROUTES["b-" + b] = 1;
+    Object.keys(LIB.books[b].deep || {}).forEach(function (n) { ROUTES["r-" + b + "-" + n] = 1; });
+  });
   function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] ? h : "home"; }
 
   function render(scrollTop) {
     $("#rail").innerHTML = railHTML();
-    var r = S.route, html;
-    if (r.indexOf("t-") === 0) html = trackHTML(r.slice(2));
+    var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);
+    if (rm) html = readerHTML(rm[1], +rm[2]);
+    else if (r.indexOf("t-") === 0) html = trackHTML(r.slice(2));
     else if (r.indexOf("b-") === 0) html = bookHTML(r.slice(2));
     else if (r === "journal") html = journalHTML();
     else if (r === "review") html = reviewHTML();
     else html = homeHTML();
     $("#main").innerHTML = html;
     if (scrollTop) window.scrollTo(0, 0);
+    if (S.pendingSec) {
+      var sid = S.pendingSec; S.pendingSec = null;
+      setTimeout(function () { var el = document.getElementById("sec-" + sid); if (el) el.scrollIntoView({ block: "start", behavior: "smooth" }); }, 60);
+    }
+  }
+  function gotoSec(bid, n, sid) {
+    S.secOpen[secKey(bid, n, sid)] = true; S.pendingSec = sid;
+    if (S.zoom === "one") S.zoom = "gist";
+    var r = "r-" + bid + "-" + n;
+    if (S.route === r) render(); else location.hash = r;
+  }
+  function gotoBookTab(bid, tab) {
+    S.bookTab = tab;
+    if (S.route === "b-" + bid) render(); else location.hash = "b-" + bid;
   }
 
   /* ---------- 交互 ---------- */
@@ -1164,8 +1794,20 @@ window.YXL_RECORD = {
     if (act === "tab") { S.bookTab = t.getAttribute("data-tab"); render(); return; }
     if (act === "open-ch") { e.preventDefault(); openChapter(t.getAttribute("data-book"), +t.getAttribute("data-n")); return; }
     if (act === "flip") { var cid = t.getAttribute("data-card"); S.flipped[cid] = !S.flipped[cid]; S.hl = null; render(); var el = document.getElementById("card-" + cid); if (el) el.focus({ preventScroll: true }); return; }
+    if (act === "zoom") { S.zoom = t.getAttribute("data-z"); render(); return; }
+    if (act === "sec-toggle") { var sk = t.getAttribute("data-key"), sec = t.closest("section.sec"); S.secOpen[sk] = !S.secOpen[sk]; render(); if (!S.secOpen[sk] && sec) { var el2 = document.getElementById(sec.id); if (el2 && el2.getBoundingClientRect().top < 0) el2.scrollIntoView({ block: "start" }); } return; }
+    if (act === "sec-jump" || act === "goto-sec") { gotoSec(t.getAttribute("data-book"), +t.getAttribute("data-n"), t.getAttribute("data-sec")); return; }
+    if (act === "pr-show") { S.prShown[t.getAttribute("data-card")] = true; render(); return; }
+    if (act === "pr-grade") { var pc = t.getAttribute("data-card"); S.prDone[pc] = true; gradeCard(pc, t.getAttribute("data-g")); render(); return; }
+    if (act === "practice") { S.practice = t.getAttribute("data-p"); render(); return; }
+    if (act === "sw") { var aid = t.getAttribute("data-id"); S.sw[aid] = !S.sw[aid]; render(); var b2 = document.querySelector('[data-act="sw"][data-id="' + aid + '"]'); if (b2) b2.focus({ preventScroll: true }); return; }
+    if (act === "sw-reset") { Object.keys(S.sw).forEach(function (k) { S.sw[k] = true; }); render(); return; }
+    if (act === "goto-switch") { S.practice = "switch"; gotoBookTab(t.getAttribute("data-book"), "practice"); return; }
+    if (act === "goto-map") { gotoBookTab(t.getAttribute("data-book"), "argmap"); return; }
+    if (act === "map-tog") { var mk = t.getAttribute("data-key"); S.mapOpen[mk] = t.getAttribute("aria-expanded") !== "true"; render(); var b3 = document.querySelector('[data-act="map-tog"][data-key="' + mk + '"]'); if (b3) b3.focus({ preventScroll: true }); return; }
+    if (act === "map-mode") { S.mapMode = t.getAttribute("data-m"); S.mapOpen = {}; render(); return; }
     if (act === "goto-card") {
-      var k = t.getAttribute("data-card"); S.bookTab = "cards"; S.flipped[k] = true; S.hl = k; render();
+      var k = t.getAttribute("data-card"); S.bookTab = "practice"; S.practice = "cards"; S.flipped[k] = true; S.hl = k; render();
       setTimeout(function () { var el = document.getElementById("card-" + k); if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 60); return;
     }
     if (act === "reveal") { S.rv.show = true; render(); return; }
