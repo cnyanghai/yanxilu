@@ -13,6 +13,7 @@
 - **每日课表**：第一阶段 12 周（2026-10-12 起），SQL、Python、CFA 一级、英语、地缘政治，每天 1.5–2 小时。每天早上 7 点（北京时间）推送当天讲义，晚上 9 点打卡，没学完的课下次接着学。说明见 `study/README.md`。
 - **学习足迹**：每次学习留下的记录。
 - **复习**：概念卡按 1、3、7、16、35 天的间隔重复复习。
+- **数据专题**：[中美消费与人口](reports/consumption-population.html)，2000 年以来中美居民消费率、消费结构对比与中国人口年龄结构，配图、数据表和来源。全部序列整理成长表 CSV（`reports/data/consumption-population.csv`），可直接导入数据库练习 SQL。
 
 ## 两个版本
 
@@ -32,7 +33,9 @@ src/deep-*.js   各书的精读稿、自测题、假设开关、论证地图
 src/plan.js     每日课表：一周时段安排与各科课程顺序
 study/          课表进度（progress.json）、每日讲义（daily/）和推送、打卡脚本
 src/app.js      页面逻辑
-build.py        合成 index.html（公开版）与 dist/artifact.html（claude.ai 版）
+src/report-*.html  数据专题页模板（数据在构建时注入）
+reports/        数据专题页；data/ 下是整理脚本 make_data.py、JSON 与长表 CSV
+build.py        合成 index.html（公开版）与 dist/artifact.html（claude.ai 版），以及 reports/ 下的专题页
 ```
 
 修改内容后运行 `python3 build.py`。

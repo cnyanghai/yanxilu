@@ -29,3 +29,20 @@ full = ("<!doctype html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"utf-8\"
         + rest.strip() + "\n<script>\n" + data.strip() + "\n</script>\n<script>\n" + app.strip() + "\n</script>\n</body>\n</html>\n")
 (root / "index.html").write_text(full, encoding="utf-8")
 print("dist/artifact.html", len(body.encode()), "bytes; index.html", len(full.encode()), "bytes")
+
+# 数据专题页：src/report-*.html 里的 /*@DATA@*/ 换成 reports/data/ 下的 JSON
+REPORTS = {"report-consumption.html": ("consumption-population.json", "consumption-population.html")}
+(root / "reports").mkdir(exist_ok=True)
+for src_name, (data_name, out_name) in REPORTS.items():
+    tpl = (root / "src" / src_name).read_text(encoding="utf-8")
+    js = (root / "reports/data" / data_name).read_text(encoding="utf-8").strip()
+    assert "/*@DATA@*/null" in tpl, src_name
+    body = tpl.replace("/*@DATA@*/null", js)
+    (root / "dist" / src_name).write_text(body, encoding="utf-8")
+    hb = re.findall(r"<title>.*?</title>|<link[^>]*>", body)
+    rest = re.sub(r"<title>.*?</title>\n?|<link[^>]*>\n?", "", body)
+    page_full = ("<!doctype html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"utf-8\">\n"
+                 "<meta name=\"viewport\" content=\"width=device-width,initial-scale=1,viewport-fit=cover\">\n"
+                 + "\n".join(hb) + "\n<style>" + reset + "</style>\n</head>\n<body>\n" + rest.strip() + "\n</body>\n</html>\n")
+    (root / "reports" / out_name).write_text(page_full, encoding="utf-8")
+    print("dist/" + src_name, len(body.encode()), "bytes; reports/" + out_name, len(page_full.encode()), "bytes")
