@@ -28,7 +28,7 @@ python3 build.py                     # 改完进度后重新生成 index.html
 1. `git pull`，然后运行 `node study/today.js --record`，拿到当天的时段和课题。
 2. 看前一天的记录：如果还是 `pushed`（没打卡），讲义开头提醒一句“昨天没打卡，按没学处理，今天接着学同一课；如果其实学完了，回复一句我来补记”。如果前一天的 `note` 里有没弄懂的问题，开头先用一小段讲清楚。
 3. 按下面的“讲义写法”写 `study/daily/<日期>.md`。
-4. `python3 build.py`，提交并推送（提交信息如“每日讲义 2026-10-12”）。
+4. `python3 build.py`，提交并推送（提交信息如“每日讲义 2026-10-12”）。然后按下面“同步到研习录云端版”更新进度。
 5. 给用户发一条消息：今天几个时段、各学什么、合计多少分钟，附讲义链接 `https://github.com/cnyanghai/yanxilu/blob/main/study/daily/<日期>.md`。用户如果在这次会话里提问，就地解答。
 
 ## 晚上 9 点：打卡
@@ -36,8 +36,18 @@ python3 build.py                     # 改完进度后重新生成 index.html
 1. `git pull`，读当天的 `planned` 和讲义。
 2. 给用户发消息，逐项列出今天的时段，请他回复：哪些学完了、大概用了多久、哪里没懂。给一个回复示例，如“英语、SQL 完成，CFA 没做，用时 70 分钟，WHERE 和 HAVING 还是分不清”。
 3. 收到回复后：运行 `checkin.js` 记录；把没懂的地方当场讲清楚，并把问题写进 `--note`，第二天讲义开头再回顾一次；`python3 build.py`，提交并推送（“打卡 2026-10-12”）。
-4. 如果研习录的 Artifact 能写（ArtifactData 工具可用），在 `journal` 集合加一条学习足迹：id 为 `j-<日期去横线>-daily`，内容 `{ date, minutes, ref: "plan", text, t }`，`text` 写“每日课表：完成 英语、SQL；……”加上用户说的收获或问题。
+4. 按下面“同步到研习录云端版”更新进度，并在 `journal` 集合加一条学习足迹：id 为 `j-<日期去横线>-daily`，内容 `{ date, minutes, ref: "plan", text, t }`，`text` 写“每日课表：完成 英语、SQL；……”加上用户说的收获或问题。没学的日子不记足迹。
 5. 连续两天以上没打卡或没学，语气平和地问一句是不是时间排不开，需要的话把每天的量调小，而不是一直堆积。
+
+## 同步到研习录云端版
+
+研习录的主用版是 claude.ai 上的 Artifact（https://claude.ai/artifact/LpwLZchfacKZAnJs577MvM ），课表页从它的数据库读进度，不需要重新发布页面。每次 `progress.json` 变了之后：
+
+1. 用 ArtifactData 工具（先用 ToolSearch 加载）`get` 集合 `study`、文档 `progress`，记下返回的 `version`。
+2. 再 `set` 同一文档，`file_path` 指向 `study/progress.json`，`if_version` 填上一步的版本号。
+3. 学习足迹写在集合 `journal` 里，新建文档不用 `if_version`。
+
+工具不可用就跳过这一步，GitHub 上的公开版照样是最新的。只有改了页面代码（`src/` 下的文件）才需要用 Artifact 工具重新发布 `dist/artifact.html`。
 
 ## 讲义写法
 

@@ -1365,8 +1365,8 @@ window.YXL_STUDY = {
   document.documentElement.lang = "zh-CN";
 
   var LIB = window.YXL_LIB, REC = window.YXL_RECORD || { data: {} };
-  var PLAN = window.YXL_PLAN || null, STUDY = window.YXL_STUDY || { next: {}, days: {}, streak: 0 };
-  var COLLS = ["progress", "notes", "journal", "cards"];
+  var PLAN = window.YXL_PLAN || null, STUDY_SNAP = window.YXL_STUDY || { next: {}, days: {}, streak: 0 };
+  var COLLS = ["progress", "notes", "journal", "cards", "study"];
   var STATUS = [["todo", "未开始"], ["doing", "进行中"], ["done", "已完成"], ["review", "已内化"]];
   var STATUS_LABEL = {}; STATUS.forEach(function (s) { STATUS_LABEL[s[0]] = s[1]; });
   var MARK = { done: "阅", review: "熟" };
@@ -1382,7 +1382,7 @@ window.YXL_STUDY = {
   function today() { return ymd(new Date()); }
   function addDays(s, n) { var p = s.split("-").map(Number); return ymd(new Date(p[0], p[1] - 1, p[2] + n)); }
   function hhmm() { var d = new Date(); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
-  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {} }; }
+  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {}, study: {} }; }
 
   /* ---------- 索引 ---------- */
   var ITEMS = {};
@@ -1918,6 +1918,12 @@ window.YXL_STUDY = {
   }
 
   /* ---------- 每日课表 ---------- */
+  /* 课表进度：云端版优先读 study/progress 文档（每天早晚由定时任务写入），读不到就用构建时的快照 */
+  function curStudy() {
+    var d = S.data.study && S.data.study.progress;
+    if (d && d.days && d.next && String(d.updated || "") >= String(STUDY_SNAP.updated || "")) return d;
+    return STUDY_SNAP;
+  }
   var WD = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
   var DAY_STATUS = { done: "完成", partial: "部分完成", missed: "没学", pushed: "待打卡" };
   function bjToday() { return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10); }
@@ -1932,6 +1938,7 @@ window.YXL_STUDY = {
   }
   function weekNo(date) { var d = dayDiff(PLAN.start, date); return d >= 0 ? Math.floor(d / 7) + 1 : 0; }
   function dayPlan(date) {
+    var STUDY = curStudy();
     var wd = new Date(utcDay(date)).getUTCDay(), res = { date: date, wd: wd, slots: [] };
     if (date === PLAN.prep) { res.prep = true; return res; }
     if (dayDiff(PLAN.start, date) < 0) { res.before = true; return res; }
@@ -1966,6 +1973,7 @@ window.YXL_STUDY = {
     }).join("") + "</ul>";
   }
   function todayBlockHTML() {
+    var STUDY = curStudy();
     if (!PLAN) return "";
     var t = bjToday(), day = dayPlan(t), rec = STUDY.days[t];
     if (day.before) return "";
@@ -1976,6 +1984,7 @@ window.YXL_STUDY = {
       '<a class="btn ghost" href="#plan">看整张课表</a></div></section>';
   }
   function planHTML() {
+    var STUDY = curStudy();
     var t = bjToday(), days = Object.keys(STUDY.days).sort().reverse();
     var learned = days.filter(function (d) { var s = STUDY.days[d].status; return s === "done" || s === "partial"; });
     var mins = learned.reduce(function (a, d) { return a + (Number(STUDY.days[d].minutes) || 0); }, 0);
