@@ -9,6 +9,7 @@
   --paper:#ECEFE9; --leaf:#F7F8F4; --ink:#1B2220; --ink-2:#47524D; --ink-3:#6C7771; --rule:#D3D9CF; --grid:#DEE3DA;
   --indigo:#2A4A78; --seal:#AE3D2A; --seal-ink:#FFF7F2; --seal-wash:#F2E0DA;
   --cn:#B4442E; --us:#2A5A9A; --c3:#118B72; --neutral:#8C968F;
+  --male:#2A5A9A; --female:#B4442E; --mid:#CDD4CC; --on-fill:#FFFFFF;
   --f-display:"ZCOOL XiaoWei","Noto Serif SC","Songti SC","STSong",serif;
   --f-body:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
   --f-ui:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
@@ -20,6 +21,7 @@
     --paper:#121715; --leaf:#1A201E; --ink:#E1E6DF; --ink-2:#B2BCB6; --ink-3:#8E9993; --rule:#2D3532; --grid:#252C29;
     --indigo:#93B0DD; --seal:#B9513D; --seal-ink:#FFF7F2; --seal-wash:#36211C;
     --cn:#D05B44; --us:#5E8FD8; --c3:#3DA582; --neutral:#59635E;
+    --male:#5E8FD8; --female:#D05B44; --mid:#3A4440; --on-fill:#0F1513;
     color-scheme:dark;
   }
 }
@@ -27,6 +29,7 @@
   --paper:#121715; --leaf:#1A201E; --ink:#E1E6DF; --ink-2:#B2BCB6; --ink-3:#8E9993; --rule:#2D3532; --grid:#252C29;
   --indigo:#93B0DD; --seal:#B9513D; --seal-ink:#FFF7F2; --seal-wash:#36211C;
   --cn:#D05B44; --us:#5E8FD8; --c3:#3DA582; --neutral:#59635E;
+  --male:#5E8FD8; --female:#D05B44; --mid:#3A4440; --on-fill:#0F1513;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -104,7 +107,7 @@ details.data summary:hover{color:var(--ink)}
 .tbl tr:last-child td{border-bottom:0}
 
 /* 横向条形 / 哑铃图（HTML 绘制，便于在手机上换行） */
-.rows{display:grid;gap:2px;font-family:var(--f-ui);font-size:13px}
+.rows{position:relative;display:grid;gap:2px;font-family:var(--f-ui);font-size:13px}
 .row{display:grid;grid-template-columns:minmax(0,9.5em) minmax(0,1fr) 7.2em;align-items:center;gap:12px;padding:5px 0;border-radius:3px}
 .row:hover,.row:focus-visible{background:var(--leaf)}
 .row .nm{color:var(--ink-2);line-height:1.35;min-width:0}
@@ -159,6 +162,38 @@ table.mix td.cn{color:var(--cn);font-weight:600} table.mix td.us{color:var(--us)
 .tip .r i{width:8px;height:8px;border-radius:50%;flex:none}
 .tip .r em{font-style:normal;font-variant-numeric:tabular-nums}
 
+/* 每五年节点：三段堆叠条 */
+.nodes{position:relative;display:grid;gap:6px;font-family:var(--f-ui);font-size:13px}
+.nrow{display:grid;grid-template-columns:3.2em minmax(0,1fr) 4.2em;align-items:center;gap:12px}
+.nrow.head{font-size:12px;color:var(--ink-3)}
+.nrow .yr{font-family:var(--f-mono);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.nrow .v60{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)}
+.nbar{display:flex;gap:2px;height:26px;min-width:0}
+.nbar i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:12px;font-variant-numeric:tabular-nums;overflow:hidden;white-space:nowrap}
+.nbar i:first-child{border-radius:3px 0 0 3px} .nbar i:last-child{border-radius:0 3px 3px 0}
+.nbar .s1{background:var(--c3);color:var(--on-fill)} .nbar .s2{background:var(--mid);color:var(--ink)} .nbar .s3{background:var(--cn);color:var(--on-fill)}
+.nrow:hover .nbar i{filter:saturate(1.15)}
+.legend i.blk{width:12px;height:12px;border-radius:2px}
+
+/* 五岁组人口金字塔 */
+.pyr{display:grid;gap:2px;font-family:var(--f-ui);font-size:11.5px;font-variant-numeric:tabular-nums}
+.prow{display:grid;grid-template-columns:minmax(0,1fr) 3.6em minmax(0,1fr);align-items:center;height:19px;border-radius:2px}
+.prow:hover{background:var(--leaf)}
+.prow .ag{text-align:center;color:var(--ink-2);font-size:11.5px;white-space:nowrap}
+.pside{position:relative;height:100%}
+.pside .pb{position:absolute;top:3px;bottom:3px}
+.pside.m .pb{right:0;background:var(--male);border-radius:3px 0 0 3px}
+.pside.f .pb{left:0;background:var(--female);border-radius:0 3px 3px 0}
+.pside .po{position:absolute;top:2px;bottom:2px;border:1.5px solid var(--ink);opacity:.45;pointer-events:none}
+.pside.m .po{right:0;border-right:0;border-radius:3px 0 0 3px}
+.pside.f .po{left:0;border-left:0;border-radius:0 3px 3px 0}
+.pside .pv{position:absolute;top:50%;transform:translateY(-50%);color:var(--ink-2);white-space:nowrap}
+.pyr-head{display:grid;grid-template-columns:minmax(0,1fr) 3.6em minmax(0,1fr);font-family:var(--f-ui);font-size:12.5px;color:var(--ink-2);margin-bottom:4px}
+.pyr-head span:first-child{text-align:right;padding-right:8px} .pyr-head span:last-child{padding-left:8px}
+.pyr-sum{display:flex;flex-wrap:wrap;gap:4px 18px;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);margin-top:10px}
+.pyr-sum b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+.legend i.ol{width:12px;height:10px;border:1.5px solid var(--ink);opacity:.45;background:transparent!important;border-radius:2px}
+
 @media (max-width:640px){
   .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
   .stat,.stat+.stat,.stat:nth-child(3n+1){padding:14px 12px 14px 0;border-left:0}
@@ -167,6 +202,10 @@ table.mix td.cn{color:var(--cn);font-weight:600} table.mix td.us{color:var(--us)
   .row{grid-template-columns:minmax(0,6.6em) minmax(0,1fr) 6.4em;gap:8px;font-size:12.5px}
   h2{font-size:24px}
   section{margin-top:56px}
+  .nrow{grid-template-columns:2.8em minmax(0,1fr) 3.4em;gap:8px}
+  .nbar i{font-size:10.5px}
+  .prow,.pyr-head{grid-template-columns:minmax(0,1fr) 3.6em minmax(0,1fr)}
+  .pyr,.prow .ag{font-size:10.5px}
 }
 @media (prefers-reduced-motion:no-preference){ .chart path.ln{transition:opacity .2s} }
 </style>
@@ -323,6 +362,32 @@ table.mix td.cn{color:var(--cn);font-weight:600} table.mix td.us{color:var(--us)
     <p class="note"><b>口径</b>　2000—2012 年为《中国统计年鉴》原始数，2013—2024 年为第七次人口普查后的修订数，2025 年由国家统计局 2026 年 1 月公布的 15—64 岁、65 岁及以上人数推算。2010 年和 2020 年的跳变来自人口普查后的校正。抚养比 = 非劳动年龄人口 ÷ 15—64 岁人口。</p>
   </figure>
 
+  <h3>每五年一个节点</h3>
+  <div class="prose">
+    <p>2000—2010 年，0—14 岁占比从 22.89% 降到 16.60%，15—64 岁占比升到 74.53%，这是人口红利最厚的十年。2010 年之后形势反转：15 年里 65 岁及以上占比从 8.87% 升到 15.92%，60 岁及以上从 13.26% 升到 23.02%；2020 年全面二孩带来的出生小高峰让 0—14 岁占比短暂回升到 17.95%，2025 年又降到 15.14%。</p>
+  </div>
+  <figure class="fig">
+    <div class="fig-head"><p class="fig-title">三大年龄组占比<span>占总人口 %，每五年一个节点；右列为 60 岁及以上</span></p><div class="legend"><span><i class="blk" style="background:var(--c3)"></i>0—14 岁</span><span><i class="blk" style="background:var(--mid)"></i>15—64 岁</span><span><i class="blk" style="background:var(--cn)"></i>65 岁及以上</span></div></div>
+    <div class="nodes" id="ch-nodes"></div>
+    <details class="data"><summary>查看数据表</summary><div class="tbl" id="tb-nodes"></div></details>
+    <p class="note"><b>口径</b>　2000、2010、2020 年为人口普查公报，2005、2015 年为全国 1% 人口抽样调查公报，2025 年为国家统计局年度数据。2005、2015 年公报未列 15—64 岁，由 100 减去另两组得到；2000 年 60 岁及以上由 2005 年公报“比 2000 年上升 0.76 个百分点”推算。</p>
+  </figure>
+
+  <h3>五岁组人口金字塔</h3>
+  <div class="prose">
+    <p>每 5 岁一组看，中国的人口结构有两个突出的“鼓包”：1962—1976 年出生的一代和他们在 1986—1990 年生下的一代。2000 年最大的两组是 30—34 岁（10.25%）和 10—14 岁（10.09%）；到 2020 年，同一批人走到 50—54 岁（8.59%）和 30—34 岁（8.81%）。</p>
+    <p>2023 年抽样调查里，最大的组已经是 50—54 岁（8.54%）和 55—59 岁（8.16%），45—64 岁合计占 29.31%。这批人在 2035 年前后陆续跨过 60 岁，老年人口占比还会快速上升。金字塔底部在收窄：0—4 岁占比从 2020 年的 5.52% 降到 2023 年的 3.88%，是四个年份里最低的。</p>
+  </div>
+  <figure class="fig">
+    <div class="fig-head"><p class="fig-title" id="pyr-title">分年龄、性别人口占比<span>占总人口 %，每 5 岁一组</span></p>
+      <div class="seg" role="group" aria-label="选择年份" id="pyr-years"></div></div>
+    <div class="legend" style="margin-bottom:8px"><span><i class="blk" style="background:var(--male)"></i>男</span><span><i class="blk" style="background:var(--female)"></i>女</span><span id="pyr-ol-lg"><i class="ol"></i>2000 年轮廓（对比）</span></div>
+    <div class="chart" id="ch-pyr"><div class="pyr-head" aria-hidden="true"><span>男</span><span></span><span>女</span></div><div class="pyr" id="pyr-rows"></div></div>
+    <div class="pyr-sum" id="pyr-sum"></div>
+    <details class="data"><summary>查看四个年份的数据表</summary><div class="tbl" id="tb-pyr"></div></details>
+    <p class="note"><b>口径</b>　2000、2010、2020 年取自第五、六、七次人口普查年鉴表 3-1（31 个省区市，不含现役军人；2000 年不含漏登调整），所以三大年龄组占比与上面的公报数字略有出入；2020 年数据由年鉴图片表识别，每个五岁组都用单岁人数加总核对过。2023 年为全国人口变动情况抽样调查的样本数据（经 CEIC 获取），抽样比约 1‰，只用于计算占比。95—99 岁与 100 岁及以上合并为 95 岁及以上。</p>
+  </figure>
+
   <h3>出生与死亡</h3>
   <div class="prose">
     <p>2016 年全面二孩政策实施后，出生人口达到 1786 万，此后连续下降，2025 年为 792 万，不到 2016 年的一半（44%）。死亡人口随老龄化缓慢上升，2025 年为 1131 万。2022—2025 年人口累计减少约 771 万。</p>
@@ -378,7 +443,7 @@ const D = /*@DATA@*/null;
   "use strict";
   const NS = "http://www.w3.org/2000/svg";
   const YRS = D.years;
-  const f1 = v => (v == null ? "—" : (+v).toFixed(1));
+  const f1 = v => (v == null ? "—" : (Math.round(+v * 10 + (v >= 0 ? 1e-6 : -1e-6)) / 10).toFixed(1));
   const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
   const byYear = (obj, years) => years.map(y => obj[y] != null ? obj[y] : null);
 
@@ -667,6 +732,50 @@ const D = /*@DATA@*/null;
   $("age-dep").addEventListener("click", () => setAge("dep"));
   table($("tb-age"), ["年份", "年末人口（万）", "0—14 岁 %", "15—64 岁 %", "65 岁+ %", "60 岁+ %", "总抚养比", "少儿抚养比", "老年抚养比"],
     YRS.map((y, i) => [y, A[i].pop, f1(A[i].c), f1(A[i].w), f1(A[i].o), f1(D.old60[y]), f1(A[i].dep), f1(A[i].depc), f1(A[i].depo)]));
+
+  /* ---------- 七（续）：每五年节点、五岁组金字塔 ---------- */
+  (function () {
+    const host = $("ch-nodes");
+    host.innerHTML = '<div class="nrow head" aria-hidden="true"><span>年份</span><span>0—14 岁 · 15—64 岁 · 65 岁及以上</span><span style="text-align:right">60 岁+</span></div>' +
+      D.nodes.map(n => '<div class="nrow" data-tip="' + esc(JSON.stringify({ t: n.y + " 年", r: [
+          { c: "--c3", n: "0—14 岁", v: n.c.toFixed(2) + "%" }, { c: "--mid", n: "15—64 岁", v: n.w.toFixed(2) + "%" },
+          { c: "--cn", n: "65 岁及以上", v: n.o.toFixed(2) + "%" }, { c: "--rule", n: "60 岁及以上", v: n.o60.toFixed(2) + "%" },
+          { c: "--rule", n: "少儿 / 老年抚养比", v: n.depc.toFixed(1) + " / " + n.depo.toFixed(1) }] })) + '">' +
+        '<span class="yr">' + n.y + '</span><span class="nbar" role="img" aria-label="' + n.y + ' 年：0—14 岁 ' + n.c.toFixed(2) + '%，15—64 岁 ' + n.w.toFixed(2) + '%，65 岁及以上 ' + n.o.toFixed(2) + '%">' +
+        '<i class="s1" style="width:' + n.c + '%">' + f1(n.c) + '</i><i class="s2" style="width:' + n.w + '%">' + f1(n.w) + '</i><i class="s3" style="width:' + n.o + '%">' + f1(n.o) + "</i></span>" +
+        '<span class="v60">' + f1(n.o60) + "%</span></div>").join("");
+    rowTips(host);
+    table($("tb-nodes"), ["年份", "0—14 岁 %", "15—64 岁 %", "65 岁及以上 %", "60 岁及以上 %", "少儿抚养比", "老年抚养比", "来源"],
+      D.nodes.map(n => [n.y, n.c.toFixed(2), n.w.toFixed(2), n.o.toFixed(2), n.o60.toFixed(2), n.depc.toFixed(1), n.depo.toFixed(1), n.src]));
+
+    const YS = Object.keys(D.pyramid), AG = D.age5, MAX = 5.5, CMP = "2000";
+    const seg = $("pyr-years");
+    seg.innerHTML = YS.map(y => '<button type="button" data-y="' + y + '" aria-pressed="' + (y === "2020") + '">' + y + (y === "2023" ? " 抽样" : "") + "</button>").join("");
+    const rowsEl = $("pyr-rows");
+    const w = v => "calc((100% - 40px) * " + (v / MAX).toFixed(4) + ")";
+    function draw(y) {
+      const P = D.pyramid[y], C = y === CMP ? null : D.pyramid[CMP];
+      rowsEl.innerHTML = AG.map((g, i) => i).reverse().map(i => {
+        const tip = { t: AG[i] + " 岁 · " + y, r: [{ c: "--male", n: "男", v: P.m[i].toFixed(2) + "%" }, { c: "--female", n: "女", v: P.f[i].toFixed(2) + "%" }, { c: "--rule", n: "合计", v: P.t[i].toFixed(2) + "%" }] };
+        if (C) tip.r.push({ c: "--rule", n: CMP + " 年合计", v: C.t[i].toFixed(2) + "%" });
+        return '<div class="prow" data-tip="' + esc(JSON.stringify(tip)) + '">' +
+          '<span class="pside m">' + (C ? '<i class="po" style="width:' + w(C.m[i]) + '"></i>' : "") + '<i class="pb" style="width:' + w(P.m[i]) + '"></i><span class="pv" style="right:calc(' + w(Math.max(P.m[i], C ? C.m[i] : 0)) + ' + 4px)">' + P.m[i].toFixed(2) + "</span></span>" +
+          '<span class="ag">' + AG[i] + "</span>" +
+          '<span class="pside f">' + (C ? '<i class="po" style="width:' + w(C.f[i]) + '"></i>' : "") + '<i class="pb" style="width:' + w(P.f[i]) + '"></i><span class="pv" style="left:calc(' + w(Math.max(P.f[i], C ? C.f[i] : 0)) + ' + 4px)">' + P.f[i].toFixed(2) + "</span></span></div>";
+      }).join("");
+      $("pyr-ol-lg").hidden = !C;
+      const M = P.m.reduce((a, b) => a + b, 0);
+      $("pyr-sum").innerHTML = "<span>" + y + " 年 · " + esc(P.src) + "</span><span>0—14 岁 <b>" + P.c.toFixed(2) + "%</b></span><span>15—64 岁 <b>" + P.w.toFixed(2) + "%</b></span><span>65 岁及以上 <b>" + P.o.toFixed(2) + "%</b></span><span>男性 <b>" + M.toFixed(2) + "%</b></span>";
+      seg.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.y === y));
+      $("ch-pyr").setAttribute("aria-label", y + " 年人口金字塔");
+    }
+    seg.addEventListener("click", e => { const b = e.target.closest("button[data-y]"); if (b) draw(b.dataset.y); });
+    $("ch-pyr").setAttribute("role", "img");
+    draw("2020");
+    rowTips($("ch-pyr"));
+    const head = ["年龄组"]; YS.forEach(y => head.push(y + " 男", y + " 女", y + " 合计"));
+    table($("tb-pyr"), head, AG.map((g, i) => { const r = [g]; YS.forEach(y => { const P = D.pyramid[y]; r.push(P.m[i].toFixed(2), P.f[i].toFixed(2), P.t[i].toFixed(2)); }); return r; }));
+  })();
 
   lineChart($("ch-pop"), {
     x: YRS, y: [0, 2000], step: 500, unit: " 万", fmt: v => String(v),

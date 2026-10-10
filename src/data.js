@@ -9,7 +9,7 @@ window.YXL_LIB = {
   /* 数据专题：独立页面。href 是 GitHub 版的相对路径，artifact 是 claude.ai 上的版本 */
   reports: [
     { id: "cn-us-consumption", title: "中美消费与人口", date: "2026-10", tracks: ["cycle"],
-      desc: "2000 年以来中美居民消费率、消费结构对比，以及中国人口年龄结构；10 张图，附数据表、口径和长表 CSV。",
+      desc: "2000 年以来中美居民消费率、消费结构对比，以及中国人口年龄结构（含每五年节点和五岁组人口金字塔）；附数据表、口径和长表 CSV。",
       href: "reports/consumption-population.html", artifact: "https://claude.ai/artifact/LC5DxsG2pE1kCeXXf5p3xE" }
   ],
 

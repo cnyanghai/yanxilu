@@ -15,7 +15,7 @@
 - **每日课表**：第一阶段 12 周（2026-10-12 起），SQL、Python、CFA 一级、英语、地缘政治，每天 1.5–2 小时。每天早上 7 点（北京时间）推送当天讲义，晚上 9 点打卡，没学完的课下次接着学。说明见 `study/README.md`。
 - **学习足迹**：每次学习留下的记录。
 - **复习**：概念卡按 1、3、7、16、35 天的间隔重复复习。
-- **数据专题**：[中美消费与人口](reports/consumption-population.html)，2000 年以来中美居民消费率、消费结构对比与中国人口年龄结构，配图、数据表和来源。全部序列整理成长表 CSV（`reports/data/consumption-population.csv`），可直接导入数据库练习 SQL。
+- **数据专题**：[中美消费与人口](reports/consumption-population.html)，2000 年以来中美居民消费率、消费结构对比与中国人口年龄结构（每五年节点、五岁组人口金字塔），配图、数据表和来源。全部序列整理成长表 CSV（`reports/data/consumption-population.csv`），可直接导入数据库练习 SQL。
 
 ## 两个版本
 
