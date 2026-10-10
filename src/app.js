@@ -3,6 +3,7 @@
   document.documentElement.lang = "zh-CN";
 
   var LIB = window.YXL_LIB, REC = window.YXL_RECORD || { data: {} };
+  var PLAN = window.YXL_PLAN || null, STUDY = window.YXL_STUDY || { next: {}, days: {}, streak: 0 };
   var COLLS = ["progress", "notes", "journal", "cards"];
   var STATUS = [["todo", "未开始"], ["doing", "进行中"], ["done", "已完成"], ["review", "已内化"]];
   var STATUS_LABEL = {}; STATUS.forEach(function (s) { STATUS_LABEL[s[0]] = s[1]; });
@@ -77,6 +78,7 @@
   }
   function refLabel(ref) {
     if (!ref) return "";
+    if (ref === "plan") return "每日课表";
     if (ITEMS[ref]) return ITEMS[ref].kind === "book" ? "《" + ITEMS[ref].title + "》" : ITEMS[ref].title;
     var m = /^(.+)-ch(\d+)$/.exec(ref);
     if (m && LIB.books[m[1]]) return "《" + LIB.books[m[1]].title + "》第" + CN[+m[2]] + "章";
@@ -84,6 +86,7 @@
   }
   function refHref(ref) {
     if (!ref) return "";
+    if (ref === "plan") return "#plan";
     var m = /^(.+)-ch(\d+)$/.exec(ref);
     if (m && LIB.books[m[1]]) return "#b-" + m[1];
     var it = ITEMS[ref]; if (!it) return "";
@@ -230,6 +233,7 @@
     var h = '<a class="brand" href="#home"><span class="seal" aria-hidden="true">研习</span><span class="bt"><b>研习录</b><small>从对话到体系</small></span></a>' +
       '<div class="mode ' + mode[0] + '"><i></i>' + mode[1] + "</div>" +
       '<nav class="nav" aria-label="目录"><a href="#home"' + cur("home") + "><span>总览</span></a>" +
+      (PLAN ? '<a href="#plan"' + cur("plan") + "><span>每日课表</span>" + planBadge() + "</a>" : "") +
       '<div class="lab">学习方向</div>';
     LIB.tracks.forEach(function (t) { var p = trackProg(t); h += '<a href="#t-' + t.id + '"' + cur("t-" + t.id) + "><span>" + esc(t.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>"; });
     h += '<div class="lab">精读</div>';
@@ -259,6 +263,7 @@
       '<header><p class="eyebrow">个人知识库 · 始于 2026 年 10 月</p><h1>研习录</h1>' +
       '<p class="lede">学习计划、读书精读和复习都留在这里：给自己复盘，也留给后来的人。</p>' +
       '<div class="stats"><span><b>' + doneN + "</b>/ " + items.length + ' 项已完成</span><span><b>' + js.length + '</b>条学习足迹</span><span><b>' + (Math.round(mins / 6) / 10) + '</b>小时累计</span><span><b>' + due + "</b>张概念卡待复习</span></div></header>" +
+      todayBlockHTML() +
       '<section class="focus" aria-labelledby="focus-h"><p class="eyebrow">正在精读</p>' +
       '<h2 id="focus-h"><a href="#b-' + fid + '">' + esc(f.title) + '</a></h2><p class="meta">' + esc(f.author) + " · 已读完 " + bp.done + " / " + bp.total + " 章</p>" +
       stripHTML(fid) +
@@ -517,7 +522,7 @@
 
   /* ---------- 学习足迹 ---------- */
   function refOptions() {
-    var h = '<option value="">（不关联）</option>';
+    var h = '<option value="">（不关联）</option>' + (PLAN ? '<option value="plan">每日课表</option>' : "");
     Object.keys(LIB.books).forEach(function (bid) {
       var b = LIB.books[bid];
       h += '<optgroup label="精读 ·《' + esc(b.title) + '》"><option value="' + bid + '">整本书</option>' + b.chapters.map(function (c) { return '<option value="' + chId(bid, c.n) + '">第' + CN[c.n] + "章 " + esc(c.title) + "</option>"; }).join("") + "</optgroup>";
@@ -548,6 +553,100 @@
       '<p class="lede">每次学习留一笔：读了什么、用了多久、想明白了什么。日积月累，就是一份可以回看的学习史。</p>' +
       '<div class="stats"><span><b>' + js.length + '</b>条足迹</span><span><b>' + Object.keys(days).length + '</b>个学习日</span><span><b>' + (Math.round(mins / 6) / 10) + "</b>小时累计</span></div></header>" +
       form + (out || '<p class="empty-line">还没有学习足迹。</p>') + "</div>";
+  }
+
+  /* ---------- 每日课表 ---------- */
+  var WD = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
+  var DAY_STATUS = { done: "完成", partial: "部分完成", missed: "没学", pushed: "待打卡" };
+  function bjToday() { return new Date(Date.now() + 8 * 3600 * 1000).toISOString().slice(0, 10); }
+  function utcDay(s) { var p = s.split("-").map(Number); return Date.UTC(p[0], p[1] - 1, p[2]); }
+  function dayDiff(a, b) { return Math.round((utcDay(b) - utcDay(a)) / 86400000); }
+  function lessonList(subj) {
+    var raw = PLAN.lessons[subj] || [];
+    if (subj !== "cfa") return raw.map(function (t) { return { title: t }; });
+    var out = [];
+    raw.forEach(function (m) { for (var k = 1; k <= m[3]; k++) out.push({ title: m[0] + " " + m[1] + "（" + k + "/" + m[3] + "）", en: m[2], code: m[0] }); });
+    return out;
+  }
+  function weekNo(date) { var d = dayDiff(PLAN.start, date); return d >= 0 ? Math.floor(d / 7) + 1 : 0; }
+  function dayPlan(date) {
+    var wd = new Date(utcDay(date)).getUTCDay(), res = { date: date, wd: wd, slots: [] };
+    if (date === PLAN.prep) { res.prep = true; return res; }
+    if (dayDiff(PLAN.start, date) < 0) { res.before = true; return res; }
+    var cfa = null;
+    PLAN.week[wd].forEach(function (x) {
+      var s = { subj: x[0], mins: x[1] };
+      if (x[0] !== "en") {
+        var list = lessonList(x[0]), i = STUDY.next[x[0]] || 0;
+        s.index = i; s.total = list.length;
+        s.title = i < list.length ? list[i].title : "这一科本阶段已学完";
+        if (x[0] === "cfa") cfa = list[i];
+      }
+      res.slots.push(s);
+    });
+    res.slots.forEach(function (s) { if (s.subj === "en") s.title = wd === 0 ? "本周 CFA 词汇小测 + 1、3、7 天前的词复习" : "CFA 术语与短文" + (cfa ? "：" + cfa.en : ""); });
+    return res;
+  }
+  function lessonHref(file) { return PLAN.repo + file; }
+  function planBadge() {
+    var t = bjToday(), w = weekNo(t);
+    if (t === PLAN.prep) return '<span class="n due">今天准备</span>';
+    return w ? '<span class="n">第' + w + "周</span>" : "";
+  }
+  function slotRows(day, rec) {
+    if (day.prep) return '<ul class="slots"><li><span class="subj">准备日</span><div><b>装好工具、备好书</b><ol class="check">' +
+      PLAN.prepDay.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol></div><span class=\"mins\">约 60 分钟</span></li></ul>";
+    var planned = rec && rec.planned ? rec.planned : day.slots, done = (rec && rec.done) || [];
+    return '<ul class="slots">' + planned.map(function (s) {
+      var ok = done.indexOf(s.subj) >= 0;
+      return '<li class="' + (ok ? "ok" : "") + '"><span class="subj">' + esc((PLAN.subjects[s.subj] || {}).name || s.subj) + "</span><div><b>" + esc(s.title || "") + "</b></div>" +
+        '<span class="mins">' + (ok ? "✓ " : "") + s.mins + " 分钟</span></li>";
+    }).join("") + "</ul>";
+  }
+  function todayBlockHTML() {
+    if (!PLAN) return "";
+    var t = bjToday(), day = dayPlan(t), rec = STUDY.days[t];
+    if (day.before) return "";
+    var total = day.prep ? 60 : day.slots.reduce(function (a, s) { return a + s.mins; }, 0);
+    return '<section class="today" aria-labelledby="today-h"><p class="eyebrow">今天 · ' + t + " " + WD[day.wd] + (day.prep ? " · 准备日" : " · 第" + weekNo(t) + "周") + "</p>" +
+      '<h2 id="today-h"><a href="#plan">今天的课</a><span class="tot">' + total + " 分钟</span></h2>" + slotRows(day, rec) +
+      '<div class="btns">' + (rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '" target="_blank" rel="noopener">打开今天的讲义</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>") +
+      '<a class="btn ghost" href="#plan">看整张课表</a></div></section>';
+  }
+  function planHTML() {
+    var t = bjToday(), days = Object.keys(STUDY.days).sort().reverse();
+    var learned = days.filter(function (d) { var s = STUDY.days[d].status; return s === "done" || s === "partial"; });
+    var mins = learned.reduce(function (a, d) { return a + (Number(STUDY.days[d].minutes) || 0); }, 0);
+    var subjOrder = ["sql", "py", "cfa", "geo", "rev"];
+    var prog = subjOrder.map(function (k) {
+      var list = lessonList(k), i = Math.min(STUDY.next[k] || 0, list.length), pct = list.length ? Math.round(i / list.length * 100) : 0;
+      return '<a class="trow" href="#ls-' + k + '"><span class="tname">' + esc(PLAN.subjects[k].name) + '</span><span class="tgoal">' + (i < list.length ? "下一课：" + esc(list[i].title) : "本阶段已学完") + "</span>" +
+        '<span class="tprog"><span class="bar"><span style="width:' + pct + '%"></span></span><span>' + i + " / " + list.length + " 课</span></span></a>";
+    }).join("");
+    var wk = [1, 2, 3, 4, 5, 6, 0].map(function (wd) {
+      var sl = PLAN.week[wd], tot = sl.reduce(function (a, x) { return a + x[1]; }, 0);
+      return "<tr><th scope=\"row\">" + WD[wd] + "</th><td>" + sl.map(function (x) { return esc(PLAN.subjects[x[0]].name) + " " + x[1]; }).join(" · ") + '</td><td class="num">' + tot + "</td></tr>";
+    }).join("");
+    var log = days.length ? '<ul class="jlist">' + days.map(function (d) {
+      var r = STUDY.days[d], st = r.status || "pushed";
+      var names = (r.done || []).map(function (k) { return (PLAN.subjects[k] || {}).name || (k === "prep" ? "准备日" : k); });
+      return '<li><span class="jdate">' + esc(d) + '</span><div class="jbody"><div class="jmeta"><span class="dst ' + st + '">' + esc(DAY_STATUS[st] || st) + "</span>" +
+        (r.minutes ? '<span class="jmin">' + esc(r.minutes) + " 分钟</span>" : "") + (r.file ? '<a href="' + esc(lessonHref(r.file)) + '" target="_blank" rel="noopener">讲义</a>' : "") + "</div>" +
+        (names.length ? '<p class="jtext">完成：' + esc(names.join("、")) + "</p>" : "") + (r.note ? '<p class="jtext">' + esc(r.note) + "</p>" : "") + "</div></li>";
+    }).join("") + "</ul>" : '<p class="empty-line">还没有打卡记录。第一份讲义 ' + PLAN.prep + " 早上推送。</p>";
+    var seq = subjOrder.map(function (k) {
+      var list = lessonList(k), i = STUDY.next[k] || 0;
+      return '<details class="lsq" id="ls-' + k + '"><summary><b>' + esc(PLAN.subjects[k].name) + '</b><span class="meta">' + list.length + " 课 · 已学 " + Math.min(i, list.length) + "</span></summary>" +
+        '<p class="why">' + esc(PLAN.subjects[k].why) + "</p><ol>" + list.map(function (x, j) { return '<li class="' + (j < i ? "ok" : j === i ? "cur" : "") + '">' + esc(x.title) + "</li>"; }).join("") + "</ol></details>";
+    }).join("") + '<details class="lsq"><summary><b>英语</b><span class="meta">每天 20 分钟</span></summary><p class="why">' + esc(PLAN.subjects.en.why) + "</p></details>";
+    return '<div class="view">' + '<header><p class="eyebrow">每日 · ' + esc(PLAN.phase) + "</p><h1>每日课表</h1>" +
+      '<p class="lede">' + PLAN.weeks + " 周，" + PLAN.start + " 开课，每天 1.5–2 小时。每天早上 " + PLAN.push + "（" + PLAN.tz + "）推送当天讲义，晚上 " + PLAN.checkin + " 打卡。没学完的课下次接着学，不跳过。</p>" +
+      '<div class="stats"><span><b>' + (weekNo(t) || 0) + "</b>/ " + PLAN.weeks + ' 周</span><span><b>' + learned.length + '</b>天已打卡</span><span><b>' + (STUDY.streak || 0) + '</b>天连续</span><span><b>' + (Math.round(mins / 6) / 10) + "</b>小时累计</span></div></header>" +
+      todayBlockHTML() +
+      '<section><h2>各科进度</h2><div class="tracks">' + prog + "</div></section>" +
+      '<section><h2>一周安排</h2><table class="wk"><thead><tr><th scope="col">星期</th><th scope="col">时段（分钟）</th><th scope="col" class="num">合计</th></tr></thead><tbody>' + wk + "</tbody></table></section>" +
+      '<section><h2>打卡记录</h2>' + log + "</section>" +
+      '<section><h2>课程顺序</h2>' + seq + "</section></div>";
   }
 
   /* ---------- 复习 ---------- */
@@ -589,6 +688,7 @@
 
   /* ---------- 主渲染 ---------- */
   var ROUTES = { home: 1, journal: 1, review: 1 };
+  if (PLAN) ROUTES.plan = 1;
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
   Object.keys(LIB.books).forEach(function (b) {
     ROUTES["b-" + b] = 1;
@@ -603,6 +703,7 @@
     else if (r.indexOf("t-") === 0) html = trackHTML(r.slice(2));
     else if (r.indexOf("b-") === 0) html = bookHTML(r.slice(2));
     else if (r === "journal") html = journalHTML();
+    else if (r === "plan") html = planHTML();
     else if (r === "review") html = reviewHTML();
     else html = homeHTML();
     $("#main").innerHTML = html;

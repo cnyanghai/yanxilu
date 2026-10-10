@@ -250,6 +250,46 @@ details.ch summary:hover .ttl{color:var(--indigo)}
 
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);font-family:var(--f-ui);font-size:13px;padding:9px 16px;border-radius:999px}
 
+/* 每日课表 */
+.today{margin-top:40px;background:var(--leaf);border:1px solid var(--rule);border-radius:6px;padding:22px 24px 24px;display:grid;gap:14px}
+.today .eyebrow{margin:0}
+.today h2{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0}
+.today h2 .tot{font-family:var(--f-mono);font-size:13px;color:var(--ink-3);letter-spacing:0}
+.slots{list-style:none;margin:0;padding:0;border-top:1px solid var(--ink)}
+.slots>li{display:grid;grid-template-columns:76px minmax(0,1fr) auto;gap:4px 14px;align-items:baseline;padding:11px 0;border-bottom:1px solid var(--rule)}
+.slots .subj{font-family:var(--f-ui);font-size:12.5px;letter-spacing:.06em;color:var(--indigo)}
+.slots b{font-weight:600;font-size:15.5px}
+.slots .mins{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);font-variant-numeric:tabular-nums;white-space:nowrap}
+.slots li.ok b{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--seal)}
+.slots li.ok .mins{color:var(--seal)}
+.check{margin:6px 0 0;padding-left:1.3em;font-size:14.5px;line-height:1.7;color:var(--ink-2)}
+.wk{width:100%;border-collapse:collapse;font-family:var(--f-ui);font-size:14px;border-top:1px solid var(--ink)}
+.wk th,.wk td{text-align:left;padding:9px 8px 9px 0;border-bottom:1px solid var(--rule);vertical-align:baseline}
+.wk thead th{font-size:12px;letter-spacing:.1em;color:var(--ink-3);font-weight:400}
+.wk tbody th{font-weight:600;white-space:nowrap;width:4.5em}
+.wk td{color:var(--ink-2)}
+.wk .num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums;padding-right:0}
+.dst{font-family:var(--f-ui);font-size:12px;border-radius:2px;padding:0 6px;line-height:1.7}
+.dst.done{background:var(--seal);color:var(--seal-ink)}
+.dst.partial{background:var(--indigo-wash);color:var(--indigo)}
+.dst.missed{border:1px solid var(--rule);color:var(--ink-3)}
+.dst.pushed{border:1px dashed var(--ink-3);color:var(--ink-3)}
+.lsq{border-top:1px solid var(--rule);padding:12px 0}
+.lsq:last-child{border-bottom:1px solid var(--rule)}
+.lsq summary{cursor:pointer;display:flex;align-items:baseline;gap:12px;list-style:none}
+.lsq summary::-webkit-details-marker{display:none}
+.lsq summary::before{content:"＋";font-family:var(--f-ui);font-size:12px;color:var(--ink-3)}
+.lsq[open] summary::before{content:"－"}
+.lsq .why{font-size:14.5px;color:var(--ink-2);margin:8px 0 6px}
+.lsq ol{margin:0;padding-left:2.2em;font-size:14.5px;line-height:1.85;color:var(--ink-2)}
+.lsq li.ok{color:var(--ink-3);text-decoration:line-through;text-decoration-color:var(--rule)}
+.lsq li.cur{color:var(--ink);font-weight:600}
+.lsq li.cur::after{content:"  ← 下一课";font-family:var(--f-ui);font-size:12px;font-weight:400;color:var(--seal)}
+@media (max-width:560px){
+  .today{padding:18px 16px 20px}
+  .slots>li{grid-template-columns:minmax(0,1fr) auto}
+  .slots .subj{grid-column:1/-1}
+}
 @media (max-width:880px){
   .shell{grid-template-columns:minmax(0,1fr);gap:0;padding-inline:16px}
   .rail{position:sticky;z-index:20;max-height:none;overflow:visible;background:var(--paper);margin-inline:-16px;padding:10px 16px 0;border-bottom:1px solid var(--rule)}
