@@ -103,6 +103,15 @@ section{margin-top:52px}
 .bar{display:block;height:5px;background:var(--rule);border-radius:3px;overflow:hidden}
 .bar span{display:block;height:100%;background:var(--indigo)}
 
+/* 数据专题 */
+.reports{border-top:1px solid var(--ink)}
+.rrow{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 28px;padding:16px 0;border-bottom:1px solid var(--rule);text-decoration:none;color:inherit}
+.rname{font-family:var(--f-display);font-size:21px;letter-spacing:.04em;line-height:1.35}
+.rname .ext{font-family:var(--f-ui);font-size:14px;color:var(--ink-3);margin-left:8px}
+.rrow:hover .rname{color:var(--indigo)}
+.rdesc{grid-column:1;font-size:14px;color:var(--ink-2);line-height:1.65}
+.rmeta{grid-column:2;grid-row:1 / span 2;align-self:center;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+
 .pair{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:40px}
 .pair .col{min-width:0}
 .steps{list-style:none;counter-reset:s;margin:0;padding:0;border-top:1px solid var(--ink)}
@@ -307,6 +316,8 @@ details.ch summary:hover .ttl{color:var(--indigo)}
 }
 @media (max-width:560px){
   .trow{grid-template-columns:minmax(0,1fr)}
+  .rrow{grid-template-columns:minmax(0,1fr)}
+  .rmeta{grid-column:1;grid-row:auto}
   .tprog{grid-column:1;grid-row:auto}
   .item{grid-template-columns:minmax(0,1fr)}
   .jform .row{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
@@ -563,6 +574,13 @@ details.ch,.card{scroll-margin-top:16px}
 window.YXL_LIB = {
   focus: ["zhoulu", "tragedy"],
   kinds: { book: "书", topic: "科目", practice: "实践", concept: "专题" },
+
+  /* 数据专题：独立页面。href 是 GitHub 版的相对路径，artifact 是 claude.ai 上的版本 */
+  reports: [
+    { id: "cn-us-consumption", title: "中美消费与人口", date: "2026-10", tracks: ["cycle"],
+      desc: "2000 年以来中美居民消费率、消费结构对比，以及中国人口年龄结构；10 张图，附数据表、口径和长表 CSV。",
+      href: "reports/consumption-population.html", artifact: "https://claude.ai/artifact/LC5DxsG2pE1kCeXXf5p3xE" }
+  ],
 
   tracks: [
     {
@@ -2246,9 +2264,25 @@ window.YXL_STUDY = {
       h += '<a href="#b-' + id + '"' + (here ? ' aria-current="page"' : "") + "><span>" + esc(b.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>";
     });
     var due = dueCards().length;
+    if (REPORTS.length) {
+      h += '<div class="lab">数据专题</div>';
+      REPORTS.forEach(function (rp) { h += '<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span>' + esc(rp.title) + '</span><span class="n" aria-hidden="true">↗</span></a>'; });
+    }
     h += '<div class="lab">记录</div><a href="#journal"' + cur("journal") + '><span>学习足迹</span><span class="n">' + Object.keys(S.data.journal).length + "</span></a>" +
       '<a href="#review"' + cur("review") + "><span>复习</span>" + (due ? '<span class="n due">' + due + "</span>" : "") + "</a></nav>";
     return h;
+  }
+
+  /* ---------- 数据专题（独立页面，新标签页打开） ---------- */
+  var IN_ARTIFACT = !!(window.claude && typeof window.claude.use === "function");
+  var REPORTS = LIB.reports || [];
+  function reportHref(rp) { return IN_ARTIFACT && rp.artifact ? rp.artifact : rp.href; }
+  function reportRows(list) {
+    return list.map(function (rp) {
+      var tr = (rp.tracks || []).map(function (x) { return TRACK[x] ? TRACK[x].short : ""; }).filter(Boolean).join("、");
+      return '<a class="rrow" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span class="rname">' + esc(rp.title) + '<span class="ext" aria-hidden="true">↗</span></span>' +
+        '<span class="rdesc">' + esc(rp.desc) + '</span><span class="rmeta">' + esc(rp.date.replace("-", " 年 ") + " 月") + (tr ? " · " + esc(tr) : "") + "</span></a>";
+    }).join("");
   }
 
   /* ---------- 总览 ---------- */
@@ -2277,6 +2311,7 @@ window.YXL_STUDY = {
       '<section class="focus" aria-label="正在精读"><div class="focus-top"><p class="eyebrow">正在精读</p><a class="btn small ghost" href="#review">复习概念卡</a></div>' +
       FOCUS.map(focusBlock).join("") + "</section>" +
       '<section><h2>五个学习方向</h2><div class="tracks">' + rows + "</div></section>" +
+      (REPORTS.length ? '<section><h2>数据专题</h2><div class="reports">' + reportRows(REPORTS) + "</div></section>" : "") +
       '<section class="pair"><div class="col"><h2>最近的学习足迹</h2>' + journalList(js.slice(0, 4), false) + '<p class="more"><a href="#journal">全部足迹</a></p></div>' +
       '<div class="col"><h2>怎么用</h2><ol class="steps">' +
       "<li><span><b>读与问</b>按路线图读书；有疑问就在对话里和 Claude 讨论。</span></li>" +
@@ -2305,7 +2340,10 @@ window.YXL_STUDY = {
       return '<section class="stage"><h2><span class="no">阶段' + CN[si + 1] + " · " + sd + " / " + ids.length + "</span>" + esc(s.name) + '</h2><p class="desc">' + esc(s.desc) + '</p><ul class="items">' + lis + "</ul></section>";
     }).join("");
     return '<div class="view">' + bannerHTML() + '<header><p class="eyebrow">学习方向</p><h1>' + esc(t.name) + '</h1><p class="goal"><b>目标</b>　' + esc(t.goal) + "</p>" +
-      '<div class="stats"><span><b>' + p.done + "</b>/ " + p.total + ' 项已完成</span><span><b>' + p.doing + "</b>项进行中</span></div></header>" + stages + "</div>";
+      '<div class="stats"><span><b>' + p.done + "</b>/ " + p.total + ' 项已完成</span><span><b>' + p.doing + "</b>项进行中</span></div></header>" +
+      (function () { var rs = REPORTS.filter(function (rp) { return (rp.tracks || []).indexOf(id) >= 0; });
+        return rs.length ? '<section class="stage"><h2><span class="no">数据专题</span>用数据看这个方向</h2><div class="reports">' + reportRows(rs) + "</div></section>" : ""; })() +
+      stages + "</div>";
   }
 
   /* ---------- 精读页 ---------- */
