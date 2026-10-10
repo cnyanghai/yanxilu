@@ -33,6 +33,9 @@
     });
   });
   var TRACK = {}; LIB.tracks.forEach(function (t) { TRACK[t.id] = t; });
+  /* 正在精读的书：focus 可以是一本书的 id，也可以是几本书的数组 */
+  var FOCUS = [].concat(LIB.focus || []).filter(function (id) { return LIB.books[id]; });
+  if (!FOCUS.length) FOCUS = Object.keys(LIB.books).slice(0, 1);
   var CARDS = [], CARD = {};
   Object.keys(LIB.books).forEach(function (bid) { LIB.books[bid].cards.forEach(function (c) { var x = Object.assign({ book: bid }, c); CARDS.push(x); CARD[c.id] = x; }); });
   function chId(bid, n) { return bid + "-ch" + n; }
@@ -45,7 +48,7 @@
     confirmDel: null, dirty: false, raf: 0,
     zoom: "gist", secOpen: {}, prShown: {}, prDone: {}, pendingSec: null,
     practice: "switch", sw: { A1: true, A2: true, A3: true, A4: true, A5: true },
-    mapMode: "trunk", mapOpen: {}
+    mapMode: "trunk", mapOpen: {}, nestOff: {}
   };
   COLLS.forEach(function (c) { S.data[c] = S.data[c] || {}; });
 
@@ -204,7 +207,8 @@
   }
   function stripHTML(bid) {
     var b = LIB.books[bid];
-    return '<div class="strip" role="list" aria-label="章节进度">' + b.chapters.map(function (c) {
+    var cols = b.chapters.length === 10 ? "" : ' style="grid-template-columns:repeat(' + b.chapters.length + ',minmax(0,1fr))"';
+    return '<div class="strip" role="list" aria-label="章节进度"' + cols + ">" + b.chapters.map(function (c) {
       var s = st(chId(bid, c.n));
       return '<button type="button" role="listitem" class="cell ' + s + '" data-act="open-ch" data-book="' + bid + '" data-n="' + c.n + '" title="第' + CN[c.n] + "章 " + esc(c.title) + " · " + STATUS_LABEL[s] + '">' + c.n + "</button>";
     }).join("") + "</div>";
@@ -248,9 +252,15 @@
   }
 
   /* ---------- 总览 ---------- */
-  function homeHTML() {
-    var fid = LIB.focus, f = LIB.books[fid], bp = bookProg(fid);
+  function focusBlock(fid) {
+    var f = LIB.books[fid], bp = bookProg(fid);
     var next = f.chapters.filter(function (c) { return !isDone(chId(fid, c.n)); })[0] || f.chapters[0];
+    return '<div class="fb"><h2><a href="#b-' + fid + '">' + esc(f.title) + '</a></h2><p class="meta">' + esc(f.author) + " · 已读完 " + bp.done + " / " + bp.total + " 章</p>" +
+      stripHTML(fid) +
+      '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + fid + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章 " + esc(next.title) + "</button>" +
+      Object.keys(f.deep || {}).map(function (k) { return '<a class="btn ghost" href="#r-' + fid + "-" + k + '">第' + CN[+k] + "章精读稿</a>"; }).join("") + "</div></div>";
+  }
+  function homeHTML() {
     var items = allItems(), doneN = items.filter(isDone).length;
     var js = journalEntries(), mins = js.reduce(function (a, e) { return a + (Number(e.minutes) || 0); }, 0);
     var due = dueCards().length;
@@ -264,12 +274,8 @@
       '<p class="lede">学习计划、读书精读和复习都留在这里：给自己复盘，也留给后来的人。</p>' +
       '<div class="stats"><span><b>' + doneN + "</b>/ " + items.length + ' 项已完成</span><span><b>' + js.length + '</b>条学习足迹</span><span><b>' + (Math.round(mins / 6) / 10) + '</b>小时累计</span><span><b>' + due + "</b>张概念卡待复习</span></div></header>" +
       todayBlockHTML() +
-      '<section class="focus" aria-labelledby="focus-h"><p class="eyebrow">正在精读</p>' +
-      '<h2 id="focus-h"><a href="#b-' + fid + '">' + esc(f.title) + '</a></h2><p class="meta">' + esc(f.author) + " · 已读完 " + bp.done + " / " + bp.total + " 章</p>" +
-      stripHTML(fid) +
-      '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + fid + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章 " + esc(next.title) + "</button>" +
-      Object.keys(f.deep || {}).map(function (k) { return '<a class="btn ghost" href="#r-' + fid + "-" + k + '">第' + CN[+k] + "章精读稿</a>"; }).join("") +
-      '<a class="btn ghost" href="#review">复习概念卡</a></div></section>' +
+      '<section class="focus" aria-label="正在精读"><div class="focus-top"><p class="eyebrow">正在精读</p><a class="btn small ghost" href="#review">复习概念卡</a></div>' +
+      FOCUS.map(focusBlock).join("") + "</section>" +
       '<section><h2>五个学习方向</h2><div class="tracks">' + rows + "</div></section>" +
       '<section class="pair"><div class="col"><h2>最近的学习足迹</h2>' + journalList(js.slice(0, 4), false) + '<p class="more"><a href="#journal">全部足迹</a></p></div>' +
       '<div class="col"><h2>怎么用</h2><ol class="steps">' +
@@ -312,7 +318,7 @@
     }).join("") + "</div>";
     var body = S.bookTab === "chapters" ? chaptersTab(bid) : S.bookTab === "argmap" ? argmapTab(bid) : S.bookTab === "practice" ? practiceTab(bid) : S.bookTab === "debate" ? debateTab(bid) : introTab(bid);
     return '<div class="view">' + bannerHTML() + '<header><p class="eyebrow">精读 · <a href="#t-' + tr.id + '">' + esc(tr.name) + "</a></p><h1>" + esc(b.title) + "</h1>" +
-      '<p class="sub">' + esc(b.en) + " · " + esc(b.author) + "</p>" +
+      '<p class="sub">' + esc([b.en || b.subtitle, b.author].filter(Boolean).join(" · ")) + "</p>" +
       '<div class="book-prog"><span class="meta">已读完 ' + bp.done + " / " + bp.total + " 章</span>" + stripHTML(bid) + '<div class="whole">' + statusCtl(bid, b.title) + '<span class="meta">整本书</span></div></div></header>' +
       tabs + '<div class="tabbody" role="tabpanel" aria-labelledby="tab-' + S.bookTab + '">' + body + "</div></div>";
   }
@@ -321,13 +327,81 @@
     var deepNs = Object.keys(b.deep || {});
     return '<p class="thesis"><span class="k">主旨</span>' + esc(b.thesis) + "</p>" +
       (deepNs.length ? '<p class="deep-line"><span class="k">精读稿</span>已完成 ' + deepNs.length + " / " + b.chapters.length + " 章：" + deepNs.map(function (k) { return '<a href="#r-' + bid + "-" + k + '">第' + CN[+k] + "章</a>"; }).join("、") + "。其余章节按你的阅读进度补齐。</p>" : "") +
+      (b.timeline ? timelineHTML(bid) : "") +
       '<section><h2>这本书</h2><dl class="facts">' + b.facts.map(function (f) { return "<dt>" + esc(f[0]) + "</dt><dd>" + esc(f[1]) + "</dd>"; }).join("") + "</dl></section>" +
       '<section><h2>理论链条</h2><ol class="chain">' + b.chain.map(function (c) { return '<li><span class="k">' + esc(c[0]) + "</span><span>" + esc(c[1]) + "</span></li>"; }).join("") + "</ol></section>" +
+      (b.nest ? nestHTML(bid) : "") +
       '<section><h2>建议的阅读顺序</h2><ol class="order">' + b.order.map(function (o) { return "<li>" + esc(o) + "</li>"; }).join("") + "</ol></section>" +
       "<section>" + noteBlock(bid, "整本书的批注", "读完全书后的总体判断：同意什么，怀疑什么，它改变了你对哪件事的看法？") + "</section>";
   }
+  /* 康波时间轴：上面是长周期全景，下面放大全书覆盖的年份，章号可点 */
+  function timelineHTML(bid) {
+    var tl = LIB.books[bid].timeline, span = tl.to - tl.from, z = tl.zoom, zs = z[1] - z[0];
+    function pc(v) { return (Math.round(v * 10000) / 100) + "%"; }
+    function at(y) { return pc((y - tl.from) / span); }
+    function wd(a, b) { return pc((b - a) / span); }
+    var ticks = [];
+    for (var y = tl.from; y <= tl.to; y += 10) ticks.push('<span style="left:' + at(y) + '">' + y + "</span>");
+    var phases = tl.phases.map(function (p, i) {
+      return '<div class="kw-ph p' + i + '" style="left:' + at(p[1]) + ";width:" + wd(p[1], p[2]) + '"><b>' + esc(p[0]) + "</b><span>" + p[1] + "—" + p[2] + "</span></div>";
+    }).join("");
+    var d = new Date(), ny = d.getFullYear() + (d - new Date(d.getFullYear(), 0, 1)) / (365.25 * 864e5);
+    var now = ny > tl.from && ny < tl.to ? '<div class="kw-now" style="left:' + at(ny) + '"><span>今天</span></div>' : "";
+    var zl = (z[0] - tl.from) / span * 100, zr = (z[1] - tl.from) / span * 100;
+    var link = '<div class="kw-link" aria-hidden="true" style="clip-path:polygon(' + zl.toFixed(2) + "% 0," + zr.toFixed(2) + '% 0,100% 100%,0 100%)"></div>';
+    var zt = [];
+    for (var k = z[0]; k <= z[1]; k++) zt.push('<span style="left:' + pc((k - z[0]) / zs) + '">' + String(k).slice(2) + "</span>");
+    var covered = {};
+    var chs = tl.chapters.map(function (c) {
+      for (var yy = c[1]; yy < c[2]; yy++) covered[yy] = 1;
+      var ch = LIB.books[bid].chapters.filter(function (x) { return x.n === c[0]; })[0];
+      return '<button type="button" class="kw-ch ' + st(chId(bid, c[0])) + '" style="left:calc(' + pc((c[1] - z[0]) / zs) + " + 2px);width:calc(" + pc((c[2] - c[1]) / zs) + ' - 4px)" data-act="open-ch" data-book="' + bid + '" data-n="' + c[0] + '" title="第' + CN[c[0]] + "章 " + esc(ch ? ch.title : "") + '">' + CN[c[0]] + "</button>";
+    }).join("");
+    for (var g = z[0]; g < z[1]; g++) if (!covered[g]) chs += '<div class="kw-gap" style="left:calc(' + pc((g - z[0]) / zs) + " + 2px);width:calc(" + pc(1 / zs) + ' - 4px)" title="' + g + ' 年没有收录报告"></div>';
+    return '<section class="kw-sec"><h2>' + esc(tl.title) + "</h2>" +
+      '<div class="kw"><div class="kw-main">' + phases + '<div class="kw-zoomband" style="left:' + at(z[0]) + ";width:" + wd(z[0], z[1]) + '" aria-hidden="true"></div>' + now + "</div>" +
+      '<div class="kw-axis">' + ticks.join("") + "</div>" + link +
+      '<div class="kw-zoom" role="group" aria-label="各章覆盖的年份">' + chs + "</div>" +
+      '<div class="kw-axis small">' + zt.join("") + "</div>" +
+      '<p class="meta kw-cap">下方放大 ' + z[0] + "—" + (z[1] - 1) + " 年：每一格是一章，点章号打开该章导读。</p></div>" +
+      '<ol class="kw-ev">' + tl.events.map(function (e) { return '<li><span class="y">' + e[0] + "</span><span>" + esc(e[1]) + "</span></li>"; }).join("") + "</ol>" +
+      '<p class="meta kw-note">' + esc(tl.note) + "</p></section>";
+  }
+  /* 四周期嵌套：按长度比例画四条波，点每一层可以决定是否计入最下面的叠加曲线 */
+  function nestHTML(bid) {
+    var ns = LIB.books[bid].nest, W = 600, H = 44, N = 480;
+    function path(f) {
+      var d = "";
+      for (var i = 0; i <= N; i++) { var x = i / N * W, y = f(i / N); d += (i ? "L" : "M") + x.toFixed(1) + " " + y.toFixed(1); }
+      return d;
+    }
+    function svg(d, cls) {
+      return '<svg class="nw' + (cls ? " " + cls : "") + '" viewBox="0 0 ' + W + " " + H + '" preserveAspectRatio="none" aria-hidden="true"><line class="nz" x1="0" y1="' + H / 2 + '" x2="' + W + '" y2="' + H / 2 + '" vector-effect="non-scaling-stroke"/><path d="' + d + '" vector-effect="non-scaling-stroke"/></svg>';
+    }
+    var on = ns.rows.filter(function (r, i) { return !S.nestOff[i]; });
+    var rows = ns.rows.map(function (r, i) {
+      var inSum = !S.nestOff[i];
+      var d = path(function (t) { return H / 2 + (H / 2 - 4) * Math.cos(2 * Math.PI * r.n * t); });
+      return '<div class="nr' + (inSum ? "" : " off") + '"><button type="button" class="nl" data-act="nest-tog" data-i="' + i + '" aria-pressed="' + inSum + '">' +
+        '<span class="nchk" aria-hidden="true"></span><span class="ntx"><b>' + esc(r.name) + "</b><span>" + esc(r.alt) + " · " + esc(r.years) + '</span><span class="nd">' + esc(r.driver) + (r.n > 1 ? " · 一个康波约含 " + r.n + " 轮" : "") + "</span></span></button>" +
+        svg(d) + "</div>";
+    }).join("");
+    var tot = on.reduce(function (a, r) { return a + r.w; }, 0);
+    var sd = path(function (t) {
+      if (!tot) return H / 2;
+      var s = 0; on.forEach(function (r) { s += r.w * Math.cos(2 * Math.PI * r.n * t); });
+      return H / 2 + (H / 2 - 4) * s / tot;
+    });
+    var sumLab = on.length ? on.map(function (r) { return r.name; }).join(" + ") : "一层都没选";
+    return '<section class="nest"><h2>' + esc(ns.title) + "</h2>" +
+      '<p class="meta nest-hint">点左侧的名称，决定这一层要不要计入最下面的叠加曲线。</p>' +
+      '<div class="nrows">' + rows +
+      '<div class="nr sum"><div class="nl"><span class="ntx"><b>' + esc(ns.sum) + "</b><span>" + esc(sumLab) + '</span><span class="nd">同向处波峰波谷最深，就是共振</span></span></div>' + svg(sd, "sum") + "</div>" +
+      '<div class="nscale" aria-hidden="true"><span></span><em>一个康波，约 60 年</em><span></span></div></div>' +
+      '<p class="meta nest-note">' + esc(ns.note) + "</p></section>";
+  }
   function chaptersTab(bid) {
-    var b = LIB.books[bid];
+    var b = LIB.books[bid], casesLab = (b.labels && b.labels.cases) || "历史案例与要点";
     return '<div class="chs">' + b.chapters.map(function (c) {
       var id = chId(bid, c.n), open = !!S.openCh[id];
       var concepts = c.concepts.length ? '<div><h4>关键概念</h4><div class="chips">' + c.concepts.map(function (k) { return '<button type="button" class="chip" data-act="goto-card" data-card="' + k + '">' + esc(CARD[k].f) + "</button>"; }).join("") + "</div></div>" : "";
@@ -340,7 +414,10 @@
         '<div><h4>本章要回答</h4><p class="q">' + esc(c.q) + "</p></div>" +
         '<div><h4>核心论点</h4><ol>' + c.points.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ol></div>" +
         concepts +
-        (c.cases ? '<div><h4>历史案例与要点</h4><p>' + esc(c.cases) + "</p></div>" : "") +
+        (c.cases ? '<div><h4>' + esc(casesLab) + "</h4><p>" + esc(c.cases) + "</p></div>" : "") +
+        (c.reports ? '<div><h4>收录的报告（' + c.reports.length + ' 篇）</h4><ol class="reps">' + c.reports.map(function (r) {
+          return '<li><span class="rt">' + esc(r[0]) + '</span><span class="ry">' + esc(r[1]) + "</span>" + (r[2] ? '<span class="rh">' + esc(r[2]) + "</span>" : "") + "</li>";
+        }).join("") + "</ol></div>" : "") +
         '<div><h4>思考题</h4><ul>' + c.questions.map(function (q) { return "<li>" + esc(q) + "</li>"; }).join("") + "</ul></div>" +
         noteBlock(id, "我的批注", "这一章的要点用自己的话复述一遍，再写下疑问和反例。") +
         "</div></details>";
@@ -366,11 +443,23 @@
     var b = LIB.books[bid];
     var further = b.further.map(function (id) { var it = ITEMS[id]; return "<li><b>《" + esc(it.title) + "》</b>" + esc(it.by) + '<span class="why">' + esc(it.why) + "</span></li>"; }).join("") +
       b.furtherExtra.map(function (x) { return "<li><b>《" + esc(x[0]) + "》</b>" + esc(x[1]) + '<span class="why">' + esc(x[2]) + "</span></li>"; }).join("");
-    return '<section><h2>其他理论怎么看</h2><div class="views">' + b.debate.map(function (d) {
+    return (b.scorecard ? scorecardHTML(b.scorecard) : "") + '<section><h2>其他理论怎么看</h2><div class="views">' + b.debate.map(function (d) {
       return '<div class="v"><h3>' + esc(d.who) + '</h3><span class="who">' + esc(d.reps) + "</span><p>" + esc(d.text) + "</p></div>";
     }).join("") + "</div></section>" +
       '<section><h2>读的时候带着这些问题</h2><ul class="plain">' + b.challenges.map(function (c) { return "<li>" + esc(c) + "</li>"; }).join("") + "</ul></section>" +
       '<section><h2>延伸阅读</h2><ul class="further">' + further + "</ul></section>";
+  }
+  /* 判断对照表：当时怎么说、后来怎样 */
+  var VERDICT = { "对": "ok", "部分": "part", "偏差": "miss" };
+  function scorecardHTML(sc) {
+    var cnt = {}; sc.rows.forEach(function (r) { cnt[r.v] = (cnt[r.v] || 0) + 1; });
+    return '<section class="score"><h2>' + esc(sc.title) + "</h2>" +
+      '<div class="sc-sum">' + Object.keys(VERDICT).map(function (v) { return '<span class="vd ' + VERDICT[v] + '">' + v + " " + (cnt[v] || 0) + "</span>"; }).join("") + "</div>" +
+      '<ol class="sc">' + sc.rows.map(function (r) {
+        return '<li><span class="sc-when">' + esc(r.when) + '</span><div class="sc-body"><p class="sc-said"><span class="k">当时</span>' + esc(r.said) + '</p><p class="sc-then"><span class="k">后来</span>' + esc(r.then) + "</p></div>" +
+          '<span class="vd ' + (VERDICT[r.v] || "") + '">' + esc(r.v) + "</span></li>";
+      }).join("") + "</ol>" +
+      '<p class="meta sc-note">' + esc(sc.note) + "</p></section>";
   }
   function frameworkText(bid) {
     var fw = LIB.books[bid].framework, n = 0;
@@ -383,7 +472,7 @@
       '<div class="fw">' + fw.parts.map(function (p) {
         return '<div class="fwp"><h3>' + esc(p[0]) + "</h3><ol start=\"" + (n + 1) + '">' + p[1].map(function (q) { n++; return "<li>" + esc(q) + "</li>"; }).join("") + "</ol></div>";
       }).join("") + "</div>" +
-      '<p class="meta fw-foot">用法：选一场冲突，把清单复制到和 Claude 的对话里逐条回答；分析成文后，可以作为“专题实战”的成果收进研习录。</p>';
+      '<p class="meta fw-foot">' + esc(fw.foot || "用法：选一场冲突，把清单复制到和 Claude 的对话里逐条回答；分析成文后，可以作为“专题实战”的成果收进研习录。") + "</p>";
   }
 
   /* ---------- 练习：假设开关 / 概念卡 / 分析框架 ---------- */
@@ -447,13 +536,17 @@
         '<span class="mtype">' + MAP_TYPE[x.t] + '</span><span class="mtext">' + esc(x.text) + (has && !open ? '<span class="mcount">' + (countNodes(x) - 1) + "</span>" : "") + "</span>" + (x.ref ? secLink(bid, x.ref) : "") + "</div>";
       return '<li class="mn t-' + x.t + '">' + row + (has && open ? "<ul>" + x.kids.map(function (k, i) { return nodeHTML(k, key + "." + i, depth + 1); }).join("") + "</ul>" : "") + "</li>";
     }
-    return '<div class="map-head"><p>全书的论证长成一棵树：根是全书的核心论点，往下是前提、推论、证据，以及批评者的反驳。第二章的节点直接连到精读稿的对应单元，其他章节的精读稿写好后会接上。</p>' +
+    var dn = Object.keys(LIB.books[bid].deep || {}).map(function (k) { return "第" + CN[+k] + "章"; });
+    return '<div class="map-head"><p>全书的论证长成一棵树：根是全书的核心论点，往下是前提、推论、证据，以及批评者的反驳。' +
+      (dn.length ? dn.join("、") + "的节点直接连到精读稿的对应单元，其他节点连到章节导读，精读稿写好后会接上。" : "节点连到章节导读。") + "</p>" +
       '<div class="legend">' + Object.keys(MAP_TYPE).map(function (t) { return '<span class="lg t-' + t + '"><span class="mtype">' + MAP_TYPE[t] + "</span></span>"; }).join("") + "</div>" +
       '<div class="seg" role="group" aria-label="展开程度"><button type="button" data-act="map-mode" data-m="trunk" aria-pressed="' + (S.mapMode === "trunk") + '">只看主干</button><button type="button" data-act="map-mode" data-m="all" aria-pressed="' + (S.mapMode === "all") + '">全部展开</button></div></div>' +
       '<div class="mapwrap"><ul class="mtree">' + nodeHTML(root, "r", 0) + "</ul></div>";
   }
 
   /* ---------- 精读稿（伸缩阅读 + 嵌入自测） ---------- */
+  /* 例证来源：书中 / 作者演讲（书外，可对照） / 本页补充 */
+  var ESRC = { "书": ["book", "书中"], "演讲": ["talk", "作者演讲"], "补": ["added", "补充"] };
   function secKey(bid, n, sid) { return bid + "-" + n + "-" + sid; }
   function promptHTML(c) {
     var s = S.data.cards[c.id], shown = S.prShown[c.id];
@@ -496,12 +589,16 @@
         h += '<div class="sec-body">' + s.claim.map(function (p) { return "<p>" + esc(p) + "</p>"; }).join("");
         if (s.steps.length) h += '<div class="blk"><h4>推理</h4><ol class="reason">' + s.steps.map(function (p) { return "<li>" + esc(p) + "</li>"; }).join("") + "</ol></div>";
         if (s.evidence.length) h += '<div class="blk"><h4>例证</h4><ul class="evid">' + s.evidence.map(function (e) {
-          return '<li><span class="etag">' + esc(e.tag) + '</span><span class="esrc ' + (e.src === "书" ? "book" : "added") + '">' + (e.src === "书" ? "书中" : "补充") + "</span><span>" + esc(e.text) + "</span></li>";
+          var es = ESRC[e.src] || ESRC["补"];
+          return '<li><span class="etag">' + esc(e.tag) + '</span><span class="esrc ' + es[0] + '">' + es[1] + "</span><span>" + esc(e.text) + "</span></li>";
         }).join("") + "</ul></div>";
         if (s.replies.length) h += '<div class="blk"><h4>反驳与回应</h4>' + s.replies.map(function (r) {
           return '<div class="qa"><p class="obj"><span class="k">有人说</span>' + esc(r.obj) + '</p><p class="ans"><span class="k">作者答</span>' + esc(r.ans) + "</p></div>";
         }).join("") + "</div>";
-        if (s.practice) h += '<p class="go-practice"><button type="button" class="xref" data-act="goto-switch" data-book="' + bid + '">去练习：用假设开关检验这五条</button></p>';
+        if (s.practice) {
+          var pr = s.practice === true ? { p: "switch", label: "去练习：用假设开关检验这五条" } : s.practice;
+          h += '<p class="go-practice"><button type="button" class="xref" data-act="goto-switch" data-p="' + esc(pr.p) + '" data-book="' + bid + '">' + esc(pr.label) + "</button></p>";
+        }
         if (s.check.length) h += '<div class="chk"><span class="k">待核对</span><ul>' + s.check.map(function (c) { return "<li>" + esc(c) + "</li>"; }).join("") + "</ul></div>";
         var ps = prompts.filter(function (c) { return c.sec === s.id; });
         if (ps.length) h += '<div class="prs">' + ps.map(promptHTML).join("") + "</div>";
@@ -517,7 +614,7 @@
       '<p class="meta reader-note">' + esc(d.note) + " 例证标“书中”的是作者在书里用的，标“补充”的是本页为帮助理解加的。</p></header>" +
       '<div class="reader-body">' + body + "</div>" +
       '<section class="reader-foot">' + noteBlock(cid, "我的批注", "这一章读完后，用自己的话写下最关键的推理，以及你最怀疑的一环。也可以记下原书中与这里不一致的地方（附页码）。") +
-      '<div class="btns"><a class="btn ghost" href="#b-' + bid + '">返回《' + esc(b.title) + '》</a><button type="button" class="btn ghost" data-act="goto-switch" data-book="' + bid + '">假设开关</button><button type="button" class="btn ghost" data-act="goto-map" data-book="' + bid + '">论证地图</button></div></section></div>';
+      '<div class="btns"><a class="btn ghost" href="#b-' + bid + '">返回《' + esc(b.title) + '》</a>' + (b.switches ? '<button type="button" class="btn ghost" data-act="goto-switch" data-book="' + bid + '">假设开关</button>' : '<button type="button" class="btn ghost" data-act="goto-switch" data-p="cards" data-book="' + bid + '">概念卡</button>') + '<button type="button" class="btn ghost" data-act="goto-map" data-book="' + bid + '">论证地图</button></div></section></div>';
   }
 
   /* ---------- 学习足迹 ---------- */
@@ -678,7 +775,7 @@
       return '<div class="view">' + bannerHTML() + head + boxLine + '<div class="rv rest"><p class="front">' + (done ? "这一轮复习完成" : "今天没有到期的卡片") + "</p>" +
         (done ? "<p>记住 " + rv.tally.good + " 张，模糊 " + rv.tally.hard + " 张，没记住 " + rv.tally.again + " 张。</p>" : "") +
         (nd ? '<p class="meta">下一张到期：' + esc(nd) + "</p>" : "") +
-        '<div class="acts"><a class="btn ghost" href="#b-' + LIB.focus + '">回到精读</a>' + (dueCards().length ? '<button type="button" class="btn" data-act="rv-restart">再来一轮</button>' : "") + "</div></div></div>";
+        '<div class="acts"><a class="btn ghost" href="#b-' + FOCUS[0] + '">回到精读</a>' + (dueCards().length ? '<button type="button" class="btn" data-act="rv-restart">再来一轮</button>' : "") + "</div></div></div>";
     }
     var c = CARD[rv.q[rv.i]], b = LIB.books[c.book];
     var acts;
@@ -769,7 +866,8 @@
     if (act === "practice") { S.practice = t.getAttribute("data-p"); render(); return; }
     if (act === "sw") { var aid = t.getAttribute("data-id"); S.sw[aid] = !S.sw[aid]; render(); var b2 = document.querySelector('[data-act="sw"][data-id="' + aid + '"]'); if (b2) b2.focus({ preventScroll: true }); return; }
     if (act === "sw-reset") { Object.keys(S.sw).forEach(function (k) { S.sw[k] = true; }); render(); return; }
-    if (act === "goto-switch") { S.practice = "switch"; gotoBookTab(t.getAttribute("data-book"), "practice"); return; }
+    if (act === "goto-switch") { S.practice = t.getAttribute("data-p") || "switch"; gotoBookTab(t.getAttribute("data-book"), "practice"); return; }
+    if (act === "nest-tog") { var ni = t.getAttribute("data-i"); S.nestOff[ni] = !S.nestOff[ni]; render(); var b4 = document.querySelector('[data-act="nest-tog"][data-i="' + ni + '"]'); if (b4) b4.focus({ preventScroll: true }); return; }
     if (act === "goto-map") { gotoBookTab(t.getAttribute("data-book"), "argmap"); return; }
     if (act === "map-tog") { var mk = t.getAttribute("data-key"); S.mapOpen[mk] = t.getAttribute("aria-expanded") !== "true"; render(); var b3 = document.querySelector('[data-act="map-tog"][data-key="' + mk + '"]'); if (b3) b3.focus({ preventScroll: true }); return; }
     if (act === "map-mode") { S.mapMode = t.getAttribute("data-m"); S.mapOpen = {}; render(); return; }
