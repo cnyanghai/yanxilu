@@ -31,7 +31,8 @@ full = ("<!doctype html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"utf-8\"
 print("dist/artifact.html", len(body.encode()), "bytes; index.html", len(full.encode()), "bytes")
 
 # 数据专题页：src/report-*.html 里的 /*@DATA@*/ 换成 reports/data/ 下的 JSON
-REPORTS = {"report-consumption.html": ("consumption-population.json", "consumption-population.html")}
+REPORTS = {"report-consumption.html": ("consumption-population.json", "consumption-population.html"),
+           "report-wealth.html": ("wealth.json", "wealth.html")}
 (root / "reports").mkdir(exist_ok=True)
 for src_name, (data_name, out_name) in REPORTS.items():
     tpl = (root / "src" / src_name).read_text(encoding="utf-8")
