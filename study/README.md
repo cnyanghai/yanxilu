@@ -29,7 +29,7 @@ python3 build.py                     # 改完进度后重新生成 index.html
 2. 看前一天的记录：如果还是 `pushed`（没打卡），讲义开头提醒一句“昨天没打卡，按没学处理，今天接着学同一课；如果其实学完了，回复一句我来补记”。如果前一天的 `note` 里有没弄懂的问题，开头先用一小段讲清楚。
 3. 按下面的“讲义写法”写 `study/daily/<日期>.md`。
 4. `python3 build.py`，提交并推送（提交信息如“每日讲义 2026-10-12”）。然后按下面“同步到研习录云端版”更新进度。
-5. 给用户发一条消息：今天几个时段、各学什么、合计多少分钟，附讲义链接 `https://github.com/cnyanghai/yanxilu/blob/main/study/daily/<日期>.md`。用户如果在这次会话里提问，就地解答。
+5. 给用户发一条消息：今天几个时段、各学什么、合计多少分钟，附研习录链接 https://claude.ai/artifact/LpwLZchfacKZAnJs577MvM ，说明讲义在首页「今天的课 → 打开今天的讲义」（讲义直接在研习录里阅读，GitHub 链接只作备用）。用户如果在这次会话里提问，就地解答。
 
 ## 晚上 9 点：打卡
 
@@ -46,6 +46,7 @@ python3 build.py                     # 改完进度后重新生成 index.html
 1. 用 ArtifactData 工具（先用 ToolSearch 加载）`get` 集合 `study`、文档 `progress`，记下返回的 `version`。
 2. 再 `set` 同一文档，`file_path` 指向 `study/progress.json`，`if_version` 填上一步的版本号。
 3. 学习足迹写在集合 `journal` 里，新建文档不用 `if_version`。
+4. 每次写了或改了讲义，把讲义正文写进集合 `lessons`、文档 id 为日期（如 `2026-10-12`），内容 `{ date, md }`，`md` 是 `study/daily/<日期>.md` 的全文。最省事的做法：`python3 -c "import json,sys;d=sys.argv[1];print(json.dumps({'date':d,'md':open(f'study/daily/{d}.md',encoding='utf-8').read()},ensure_ascii=False))" <日期> > /tmp/lesson.json`，再 `set`，`file_path` 指向它。新建不用 `if_version`；重写当天讲义时先 `get` 拿版本号。研习录的讲义页（`#l-<日期>`）从这里读，读不到才用构建时嵌入的快照。
 
 工具不可用就跳过这一步，GitHub 上的公开版照样是最新的。只有改了页面代码（`src/` 下的文件）才需要用 Artifact 工具重新发布 `dist/artifact.html`。
 

@@ -559,6 +559,35 @@ details.ch,.card{scroll-margin-top:16px}
   .mrow .xref{margin-left:30px}
 }
 @media (prefers-reduced-motion: reduce){*{scroll-behavior:auto!important}}
+/* 讲义阅读 */
+.lesson .lnav{display:flex;justify-content:space-between;align-items:center;gap:8px;margin:8px 0 16px}
+.lesson .src{margin-top:24px;font-size:13px;color:var(--ink-3)}
+.md{font-size:16px;line-height:1.8;overflow-wrap:anywhere}
+.md h2{font-family:var(--f-display);font-size:28px;line-height:1.3;margin:8px 0 12px}
+.md h3{font-family:var(--f-display);font-size:22px;margin:32px 0 10px;padding-top:8px;border-top:2px solid var(--ink)}
+.md h4{font-size:18px;margin:24px 0 8px}
+.md h5{font-size:16px;margin:18px 0 6px}
+.md p{margin:10px 0}
+.md ul,.md ol{padding-left:1.6em;margin:8px 0}
+.md li{margin:4px 0}
+.md hr{border:0;border-top:1px solid var(--rule);margin:28px 0}
+.md blockquote{margin:12px 0;padding:8px 14px;border-left:3px solid var(--seal);background:var(--seal-wash);border-radius:0 var(--r) var(--r) 0}
+.md a{color:var(--indigo)}
+.md code{font-family:var(--f-mono);font-size:.88em;background:var(--leaf);border:1px solid var(--rule);border-radius:3px;padding:0 4px}
+.md .mdcode{position:relative;margin:12px 0;background:var(--leaf);border:1px solid var(--rule);border-radius:var(--r)}
+.md .mdcode .lang{position:absolute;left:12px;top:8px;font-family:var(--f-ui);font-size:12px;color:var(--ink-3)}
+.md .mdcode .btn{position:absolute;right:8px;top:6px}
+.md pre{margin:0;padding:38px 14px 14px;overflow-x:auto;font-size:13.5px;line-height:1.6}
+.md pre code{background:none;border:0;padding:0;font-size:inherit}
+.md .mdtbl{overflow-x:auto;margin:12px 0}
+.md table{border-collapse:collapse;font-size:14.5px;min-width:100%}
+.md th,.md td{border:1px solid var(--rule);padding:6px 10px;text-align:left;vertical-align:top}
+.md th{background:var(--leaf);font-family:var(--f-ui);font-weight:600}
+.md details{margin:14px 0;border:1px solid var(--rule);border-radius:var(--r);padding:4px 14px;background:var(--leaf)}
+.md details[open]{padding-bottom:12px}
+.md summary{cursor:pointer;font-family:var(--f-ui);font-weight:600;padding:6px 0;color:var(--indigo)}
+.md .mblock{text-align:center;font-family:var(--f-mono);font-size:14.5px;background:var(--leaf);padding:10px;border-radius:var(--r);overflow-x:auto}
+.md .mth{font-family:var(--f-mono);font-size:.92em}
 </style>
 
 <div class="shell">
@@ -2062,6 +2091,8 @@ window.YXL_STUDY = {
     }
   }
 };
+
+window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第一阶段明天（10 月 12 日，周一）正式开课。今天只做一件事：把工具和材料备齐，明天打开讲义就能直接学。\n\n## 今天的安排\n\n| 时段 | 科目 | 分钟 | 内容 |\n|---|---|---|---|\n| 1 | 准备日 | 60 | 装好工具、备好书、建生词本、看一遍课表 |\n\n建议分配：DB Browser 15 分钟 → Jupyter 15 分钟 → 书 15 分钟 → 生词本 5 分钟 → 课表 10 分钟。哪一步卡住了就先跳过，晚上打卡时告诉我卡在哪。\n\n---\n\n## 一、装好 DB Browser for SQLite（约 15 分钟）\n\nSQL 课前半程都用它。它是一个免费的图形界面小软件，数据库就是电脑上的一个 `.db` 文件，不需要装服务器、不需要联网。\n\n**安装步骤**\n\n1. 打开 sqlitebrowser.org → Download，Windows 选 *Standard installer for 64-bit Windows*（Mac 选 .dmg）。\n2. 一路“下一步”安装。安装界面里如果有勾选项，勾上 *DB Browser (SQLite)* 的桌面快捷方式即可，SQLCipher 版本不用。\n3. 打开软件 → 左上角 **New Database（新建数据库）** → 存到一个固定文件夹，例如 `D:\\研习录\\sql\\practice.db`。\n4. 弹出“编辑表定义”窗口时直接点 **Cancel（取消）**，我们用 SQL 语句建表。\n\n**验收：跑通下面这段脚本**\n\n切到 **Execute SQL（执行 SQL）** 标签页，把下面整段粘进去，按 `Ctrl + Enter`（或点三角形“执行全部”）：\n\n```sql\n-- 准备日验收脚本：建一张小表，插入 3 行虚构数据，再查出来\nDROP TABLE IF EXISTS test_people;\n\nCREATE TABLE test_people (\n    id      INTEGER PRIMARY KEY,\n    name    TEXT,\n    city    TEXT,\n    amount  REAL\n);\n\nINSERT INTO test_people (id, name, city, amount) VALUES\n    (1, '甲某一', '虚构市', 1200.5),\n    (2, '乙某二', '样例县', 800),\n    (3, '丙某三', '虚构市', 1500);\n\nSELECT name, city, amount\nFROM test_people\nWHERE city = '虚构市';\n```\n\n下方结果区应该出现 2 行：甲某一、丙某三。看到了就算装好了。最后点 **Write Changes（写入更改）** 保存。\n\n**常见问题**\n\n- 结果区什么都没有：确认是在 *Execute SQL* 页执行的，而不是 *Browse Data* 页。\n- 报 `near \"，\": syntax error`：SQL 里的逗号、括号、引号必须是英文半角。中文输入法下打的 `，` `（` `‘` 都会报错——这是以后最常见的错误之一，今天先记住。\n- 关软件时提示“是否保存”：选保存。\n\n---\n\n## 二、打开 Jupyter Notebook（约 15 分钟）\n\n**步骤**\n\n1. 开始菜单搜 **Anaconda Navigator** 打开（第一次启动慢，等一两分钟）。\n2. 在 Jupyter Notebook 那一格点 **Launch**，浏览器会打开一个文件列表页。\n3. 进到你想放练习的文件夹（建议 `D:\\研习录\\python`，没有就先在资源管理器里建好）。\n4. 右上角 **New → Python 3 (ipykernel)**，新建笔记本，点左上角标题改名为 `00_准备日`。\n\n**验收：依次运行下面三个单元格**（光标放在单元格里，按 `Shift + Enter` 运行并跳到下一格）\n\n单元格 1——最简单的一行：\n\n```python\nprint(\"hello\")\n```\n\n单元格 2——看看 Python 和 pandas 的版本，确认环境齐全：\n\n```python\nimport sys\nimport pandas as pd\nimport openpyxl\n\nprint(\"Python 版本：\", sys.version.split()[0])\nprint(\"pandas 版本：\", pd.__version__)\nprint(\"openpyxl 版本：\", openpyxl.__version__)\n```\n\n单元格 3——用代码现场生成一个 Excel 再读回来（以后的 Python 课都这样，不依赖外部文件）：\n\n```python\nimport pandas as pd\n\ndf = pd.DataFrame({\n    \"姓名\": [\"甲某一\", \"乙某二\", \"丙某三\"],\n    \"城市\": [\"虚构市\", \"样例县\", \"虚构市\"],\n    \"金额\": [1200.5, 800, 1500],\n})\ndf.to_excel(\"准备日_测试.xlsx\", index=False)\n\nback = pd.read_excel(\"准备日_测试.xlsx\")\nprint(back)\nprint(\"虚构市合计金额：\", back.loc[back[\"城市\"] == \"虚构市\", \"金额\"].sum())\n```\n\n最后一行应输出 `虚构市合计金额： 2700.5`。回到 Jupyter 的文件列表页，能看到多出一个 `准备日_测试.xlsx`。\n\n**常见问题**\n\n- `ModuleNotFoundError: No module named 'openpyxl'`：在一个新单元格里运行 `%pip install openpyxl`，装完后点菜单 *Kernel → Restart*，再从头运行。\n- 浏览器没自动打开：Navigator 的黑色窗口里会有一行 `http://localhost:8888/...` 开头的地址，复制到浏览器打开。\n- 单元格左边一直是 `[*]`：表示还在运行，等几秒；一直不动就 *Kernel → Restart*。\n\n---\n\n## 三、备好《大国政治的悲剧》（约 15 分钟）\n\n地缘政治这门课第一阶段精读米尔斯海默的《大国政治的悲剧》（*The Tragedy of Great Power Politics*）。纸质、电子版都行，修订版（有讨论中国崛起的一章）更好。\n\n**今天读什么**：只读**目录**和**第一章的开头几页**，不求读懂，先建立一个地图。\n\n**读之前先知道这本书在吵什么**（下面是我的概括，不是原文）：\n\n- 国际关系里有一派叫**现实主义**（realism），认为国家之间没有“世界政府”管着，所以每个国家最终只能靠自己保证安全。\n- 现实主义内部又分两种看法：一种认为国家只要“够安全”就满足了（防御性现实主义）；作者主张另一种——**进攻性现实主义**（offensive realism）：在这种环境里，大国会不断寻找机会扩大自己相对于别国的实力，最理想的状态是成为所在地区的霸主。\n- 书名里的“悲剧”指的是：没有哪个大国是天生的恶棍，但结构逼着它们互相防范、互相竞争，冲突因此反复出现。\n\n**带着三个问题翻目录**（不用写答案，脑子里过一遍即可，下周六读第一章时会正式展开）：\n\n1. 全书大致分成哪几块？哪些章讲理论，哪些章讲历史案例？\n2. 有没有专门讨论中美关系或“中国能否和平崛起”的章节？在第几章？\n3. 第一章开头，作者用什么来解释“大国为什么会互相竞争”——是领导人的性格、国家的制度，还是别的东西？\n\n精读页入口：研习录 → 地缘政治 → 《大国政治的悲剧》（https://claude.ai/artifact/LpwLZchfacKZAnJs577MvM ）。\n\n---\n\n## 四、建一个英语生词本（约 5 分钟）\n\n以后每天英语时段会给 10 个 CFA 术语，并在 1、3、7 天后让你回想。生词本用什么形式都行，关键是**每天固定写在同一个地方**。\n\n如果想用 Excel，可以在刚才的 Jupyter 里多运行一个单元格，直接生成一个带好表头的生词本：\n\n```python\nimport pandas as pd\n\ncolumns = [\"日期\", \"英文\", \"音标\", \"中文\", \"例句\", \"第1天复习\", \"第3天复习\", \"第7天复习\"]\nsample = pd.DataFrame([{\n    \"日期\": \"2026-10-11\",\n    \"英文\": \"return\",\n    \"音标\": \"/rɪˈtɜːrn/\",\n    \"中文\": \"回报；收益\",\n    \"例句\": \"The fund earned a return of 8% last year.\",\n    \"第1天复习\": \"\", \"第3天复习\": \"\", \"第7天复习\": \"\",\n}], columns=columns)\n\nsample.to_excel(\"英语生词本.xlsx\", index=False)\nprint(\"已生成：英语生词本.xlsx\")\n```\n\n第一行 `return` 就是明天 CFA 第一课（Rates and Returns）会用到的词，算提前热身。\n\n---\n\n## 五、通读课表（约 10 分钟）\n\n第一阶段 12 周，每天 1.5–2 小时，课程按顺序推进，哪天没学完下次接着学。\n\n| 星期 | 时段安排 |\n|---|---|\n| 周一、三、五 | 英语 20 + SQL 45 + CFA 35 = 100 分钟 |\n| 周二、四 | 英语 20 + Python 45 + CFA 35 = 100 分钟 |\n| 周六 | 英语 20 + 地缘政治 60（读一章）+ CFA 35 = 115 分钟 |\n| 周日 | 英语词汇小测 20 + 地缘政治 30（时事分析）+ 周复盘 50 = 100 分钟 |\n\n各科进度：SQL 36 课、Python 24 课、CFA 一级第一阶段 64 课（数量方法 + 经济学）。\n\n**明天（周一）的课**\n\n- 英语 20 分钟：CFA 术语与短文——Rates and Returns\n- SQL 45 分钟：数据库、表、行和列，建第一张表（今天装好软件，明天直接用）\n- CFA 35 分钟：Q1 收益率与回报（1/4）\n\n看完如果觉得哪天量太大、时间段不合适、或者想换顺序，今晚打卡时直接说，我来调。\n\n---\n\n## 六、热身小练习（可选，5 分钟）\n\n不算正式内容，装好软件后有余力就做。\n\n1. 在 DB Browser 里，把验收脚本最后的查询改成只查金额大于 1000 的人，应该出来几行？\n2. 在 Jupyter 里，把单元格 3 的最后一行改成计算**所有人**的金额合计，结果是多少？\n3. 假设年初存入 10,000 元，年末变成 10,800 元，这一年的收益率（return）是多少？\n\n<details>\n<summary>答案<\/summary>\n\n1. 把 `WHERE city = '虚构市'` 改成 `WHERE amount > 1000`，出来 2 行：甲某一（1200.5）、丙某三（1500）。\n2. `print(back[\"金额\"].sum())`，结果 `3500.5`。\n3. 收益率 = (期末 − 期初) ÷ 期初 = (10,800 − 10,000) ÷ 10,000 = 8%。这就是明天 CFA 第一课的起点——holding period return（持有期收益率）。\n\n<\/details>\n\n---\n\n## 今晚 9 点打卡要回答的三个问题\n\n1. 五件事完成了哪几件？（DB Browser、Jupyter、书、生词本、课表）\n2. 大概用了多久？哪一步卡住了，报错信息是什么？\n3. 看完课表，有没有想调整的地方（每天的量、时段、顺序）？\n", "2026-10-12": "# 2026-10-12（周一）第 1 周 · 第一天\n\n> 第一阶段正式开课。今天三个时段共 100 分钟：英语 → SQL → CFA。按顺序学，哪段卡住了先跳过，晚上打卡时说。\n\n## 今天的安排\n\n| 时段 | 科目 | 分钟 | 课题 |\n|---|---|---|---|\n| 1 | 英语 | 20 | CFA 术语与短文：Rates and Returns |\n| 2 | SQL | 45 | 第 1/36 课 · 数据库、表、行和列：装好 DB Browser，建第一张表 |\n| 3 | CFA 一级 | 35 | 第 1/64 课 · Q1 收益率与回报（1/4）：利率的含义与构成、持有期收益率 |\n\n**关于昨天**：昨天的准备日没有打卡。如果 DB Browser、Jupyter 还没装好，今天 SQL 时段先花 10 分钟装 DB Browser（步骤见 [昨天的讲义](2026-10-11.md) 第一节），Jupyter 明天 Python 课前装好即可。如果昨天其实都弄好了，回复一句，我来补记。\n\n---\n\n## 时段 1 · 英语（20 分钟）\n\n### 今日 10 个术语\n\n| # | 英文 | 音标 | 中文 |\n|---|---|---|---|\n| 1 | interest rate | /ˈɪntrəst reɪt/ | 利率 |\n| 2 | required rate of return | /rɪˈkwaɪərd reɪt əv rɪˈtɜːrn/ | 要求回报率 |\n| 3 | discount rate | /ˈdɪskaʊnt reɪt/ | 折现率 |\n| 4 | opportunity cost | /ˌɑːpərˈtuːnəti kɔːst/ | 机会成本 |\n| 5 | real risk-free interest rate | /ˈriːəl ˌrɪsk ˈfriː/ | 实际无风险利率 |\n| 6 | inflation premium | /ɪnˈfleɪʃn ˈpriːmiəm/ | 通胀溢价 |\n| 7 | default risk premium | /dɪˈfɔːlt rɪsk ˈpriːmiəm/ | 违约风险溢价 |\n| 8 | liquidity premium | /lɪˈkwɪdəti ˈpriːmiəm/ | 流动性溢价 |\n| 9 | maturity premium | /məˈtʃʊrəti ˈpriːmiəm/ | 期限溢价 |\n| 10 | holding period return (HPR) | /ˈhoʊldɪŋ ˈpɪriəd rɪˈtɜːrn/ | 持有期收益率 |\n\n**例句**\n\n1. The central bank raised the **interest rate** by 0.25%. —— 央行把利率上调了 0.25 个百分点。\n2. Investors set a **required rate of return** of 9% for this project. —— 投资者对这个项目设定了 9% 的要求回报率。\n3. A higher **discount rate** makes future cash flows worth less today. —— 折现率越高，未来现金流的现值越低。\n4. The **opportunity cost** of holding cash is the interest you give up. —— 持有现金的机会成本就是放弃的利息。\n5. The **real risk-free interest rate** is the return for pure waiting, with no inflation. —— 实际无风险利率是在没有通胀时单纯“等待”所得的回报。\n6. When prices rise faster, lenders demand a larger **inflation premium**. —— 物价涨得越快，出借人要求的通胀溢价越高。\n7. Bonds from weaker companies carry a higher **default risk premium**. —— 实力较弱公司的债券违约风险溢价更高。\n8. Thinly traded bonds must offer a **liquidity premium**. —— 交易清淡的债券必须提供流动性溢价。\n9. A 30-year bond usually includes a bigger **maturity premium** than a 2-year bond. —— 30 年期债券的期限溢价通常比 2 年期大。\n10. The stock's **holding period return** was 11% including dividends. —— 算上分红，这只股票的持有期收益率是 11%。\n\n### 短文阅读（158 词）\n\n**What Is an Interest Rate?**\n\nAn interest rate can be read in three ways. First, it is a required rate of return: the minimum return an investor needs before agreeing to lend money. Second, it is a discount rate, which tells us how much a payment in the future is worth today. Third, it is an opportunity cost, because money spent today gives up the interest it could have earned.\n\nInterest rates are also built from several parts. The real risk-free interest rate rewards investors simply for waiting. An inflation premium protects them against rising prices. Riskier securities add more premiums: a default risk premium if the borrower might not pay, a liquidity premium if the security is hard to sell quickly at a fair price, and a maturity premium if the money is tied up for many years.\n\nAfter an investment is made, we measure the result with the holding period return, which counts both the price change and any income received.\n\n**理解题**\n\n1. According to the passage, what are the three ways to read an interest rate?\n2. Which premium is added when a security is hard to sell quickly at a fair price?\n3. What two things does the holding period return count?\n\n<details>\n<summary>答案<\/summary>\n\n1. A required rate of return, a discount rate, and an opportunity cost.（要求回报率、折现率、机会成本）\n2. The liquidity premium.（流动性溢价）\n3. The price change and any income received (e.g., dividends or interest).（价格变动和期间收到的收入）\n\n<\/details>\n\n### 间隔回想\n\n- 1 天前（10/11 准备日）：return\n- 3 天前、7 天前：还没开课，暂无。\n\n先遮住中文自己说一遍，再把今天 10 个词抄进生词本。\n\n---\n\n## 时段 2 · SQL（45 分钟）\n\n### 本课目标\n\n1. 说清楚数据库、表、行、列分别是什么。\n2. 会用 `CREATE TABLE` 建表，知道 SQLite 常用的三种类型 `INTEGER`、`REAL`、`TEXT`。\n3. 会用 `INSERT INTO` 插入数据，用 `SELECT * FROM` 把表查出来。\n\n### 讲解：用 Excel 来类比\n\n设想你手上有一份《补贴发放名单》Excel，要和另一份《在职人员名单》核对，看有没有人“既领补贴又在编”。\n\n| Excel 里 | 数据库里 | 说明 |\n|---|---|---|\n| 整个工作簿（.xlsx 文件） | **数据库**（database，SQLite 里就是一个 `.db` 文件） | 装很多张表 |\n| 一个工作表（sheet） | **表**（table） | 一类事物一张表：补贴名单一张、在职名单一张 |\n| 一行 | **行**（row / record，记录） | 一个人、一笔发放 |\n| 一列 + 列标题 | **列**（column / field，字段） | 姓名、证件号、金额…… |\n\n和 Excel 最大的区别：**数据库的每一列在建表时就规定好类型**。“金额”列规定是数字，就不会混进“一千二”这样的文字；“证件号”规定是文本，开头的 0 不会被吃掉——这两件事在 Excel 里都是核查时的常见坑。\n\nSQLite 最常用三种类型：\n\n- `INTEGER`：整数（序号、人数）\n- `REAL`：小数（金额）\n- `TEXT`：文本（姓名、证件号、日期——SQLite 的日期统一写成 `'2026-03-05'` 这种文本）\n\n**主键**（`PRIMARY KEY`）：每张表挑一列当“身份证”，每行的值都不同、不能重复。今天用一个简单的序号 `id` 当主键。\n\n### 建表加数据脚本\n\n打开 DB Browser → 打开昨天建的 `practice.db`（没有就 *New Database* 新建一个）→ 切到 **Execute SQL** → 粘贴整段 → `Ctrl + Enter`。\n\n```sql\n-- 第 1 课：补贴发放名单（数据全部虚构）\nDROP TABLE IF EXISTS subsidy_list;\n\nCREATE TABLE subsidy_list (\n    id        INTEGER PRIMARY KEY,   -- 序号，主键\n    name      TEXT,                  -- 姓名\n    id_no     TEXT,                  -- 证件号（虚构格式）\n    town      TEXT,                  -- 乡镇\n    amount    REAL,                  -- 发放金额（元）\n    pay_date  TEXT                   -- 发放日期\n);\n\nINSERT INTO subsidy_list (id, name, id_no, town, amount, pay_date) VALUES\n    (1, '赵小一', 'XN-0000-0001', '青石镇', 1200,  '2026-03-05'),\n    (2, '钱小二', 'XN-0000-0002', '青石镇', 800,   '2026-03-05'),\n    (3, '孙小三', 'XN-0000-0003', '白沙乡', 1500,  '2026-03-06'),\n    (4, '李小四', 'XN-0000-0004', '白沙乡', 600.5, '2026-03-06'),\n    (5, '周小五', 'XN-0000-0005', '红柳镇', 1200,  '2026-03-07'),\n    (6, '吴小六', 'XN-0000-0006', '红柳镇', 950,   '2026-03-07');\n```\n\n执行后点 **Write Changes** 保存。切到 **Browse Data** 页，选 `subsidy_list`，能看到 6 行，像一张 Excel 表。\n\n逐句看：\n\n- `DROP TABLE IF EXISTS subsidy_list;`——如果已有同名表就先删掉。这样脚本可以反复运行，不会报“表已存在”。\n- `CREATE TABLE 表名 ( 列名 类型, ... );`——建表。列之间用逗号隔开，**最后一列后面不加逗号**。\n- `INSERT INTO 表名 (列1, 列2, ...) VALUES (值1, 值2, ...), (...);`——插入数据。值的顺序和前面列的顺序一一对应；文本用**单引号**，数字不加引号；多行之间用逗号，整句最后一个分号。\n- `--` 后面是注释，SQL 不执行，用来写说明。\n\n### 示例查询\n\n在 Execute SQL 页，**选中某一句再按 `Ctrl + Enter`**，就只执行选中的那句。\n\n**查询 1：看整张表**\n\n```sql\nSELECT * FROM subsidy_list;\n```\n\n`SELECT` 表示“我要取数据”，`*` 表示“所有列”，`FROM subsidy_list` 表示“从这张表取”。结果：6 行 6 列。\n\n**查询 2：只看几列**\n\n```sql\nSELECT name, town, amount FROM subsidy_list;\n```\n\n把 `*` 换成列名，列名之间逗号隔开。结果只有姓名、乡镇、金额三列，顺序就按你写的顺序。（下一课专门讲 SELECT。）\n\n**查询 3：数一数有几行**\n\n```sql\nSELECT COUNT(*) FROM subsidy_list;\n```\n\n`COUNT(*)` 数行数，结果是 `6`。拿到一份新名单，先数行数是核查的第一步——和对方说的人数对不上，后面就不用往下做了。\n\n**查询 4：看表结构**\n\n```sql\nPRAGMA table_info(subsidy_list);\n```\n\n`PRAGMA` 是 SQLite 特有的命令，列出每一列的名字和类型（`pk` 为 1 的那列是主键）。忘了列名叫什么时用它查。\n\n### 练习（由易到难）\n\n1. 查出 `subsidy_list` 的全部内容。\n2. 只查姓名和证件号两列。\n3. 青石镇新增一人：序号 7，郑小七，证件号 `XN-0000-0007`，金额 700，发放日期 2026-03-08。写 `INSERT` 插进去，再查姓名和金额，确认一共 7 行。\n4. 新建一张 `staff_list`（在职人员名单），四列：`staff_no`（整数，主键）、`name`（文本）、`id_no`（文本）、`dept`（文本），插入下面 3 行：\n   - 101，冯甲，`XN-0000-0101`，虚构局办公室\n   - 102，孙小三，`XN-0000-0003`，虚构局财务科\n   - 103，陈乙，`XN-0000-0103`，虚构局综合科\n5. 贴近实际：现在库里有两张表——补贴名单和在职名单。分别查出两张表的姓名和证件号，**用眼睛比对**：谁既在补贴名单上、又在在职名单上？想一想：为什么要用证件号比，而不是用姓名比？（几十行可以用眼睛，几万行就得靠 SQL——第 15 课左右的 JOIN 会教一句话搞定。）\n\n### 常见错误\n\n- **中文标点**：`，` `（` `‘` 会报 `syntax error`。SQL 符号一律英文半角，文本内容里的中文没关系。\n- **最后一列后面多了逗号**：`pay_date TEXT,)` 会报错。\n- **文本忘了加引号**：`VALUES (7, 郑小七, ...)` 会报 `no such column: 郑小七`——SQL 把没加引号的字当成了列名。\n- **用了双引号包文本**：SQLite 有时能容忍，但标准写法是单引号，养成习惯。\n- **主键重复**：再插一次 `id = 1` 会报 `UNIQUE constraint failed`。这正是主键的作用。\n- **忘了 Write Changes**：关掉软件后数据没了。\n\n<details>\n<summary>SQL 练习答案<\/summary>\n\n1.\n```sql\nSELECT * FROM subsidy_list;\n```\n\n2.\n```sql\nSELECT name, id_no FROM subsidy_list;\n```\n\n3.\n```sql\nINSERT INTO subsidy_list (id, name, id_no, town, amount, pay_date) VALUES\n    (7, '郑小七', 'XN-0000-0007', '青石镇', 700, '2026-03-08');\n\nSELECT name, amount FROM subsidy_list;\n```\n结果 7 行，最后一行是 郑小七 700.0。\n\n4.\n```sql\nDROP TABLE IF EXISTS staff_list;\n\nCREATE TABLE staff_list (\n    staff_no  INTEGER PRIMARY KEY,\n    name      TEXT,\n    id_no     TEXT,\n    dept      TEXT\n);\n\nINSERT INTO staff_list (staff_no, name, id_no, dept) VALUES\n    (101, '冯甲',   'XN-0000-0101', '虚构局办公室'),\n    (102, '孙小三', 'XN-0000-0003', '虚构局财务科'),\n    (103, '陈乙',   'XN-0000-0103', '虚构局综合科');\n```\n\n5.\n```sql\nSELECT name, id_no FROM subsidy_list;\nSELECT name, id_no FROM staff_list;\n```\n**孙小三**（`XN-0000-0003`）两边都有：在白沙乡领了 1500 元补贴，同时在虚构局财务科在职。\n用证件号比，是因为**姓名会重名、也会写错字**，而证件号对每个人唯一。实际工作中两份名单的姓名往往一样、证件号却不同（重名的两个人），或者姓名有出入、证件号相同（同一人录入时写错了字）——只看姓名两种情况都会判错。\n\n预告：以后一句话就能直接筛出来——\n\n```sql\nSELECT name FROM subsidy_list\nWHERE id_no IN (SELECT id_no FROM staff_list);\n```\n\n今天不要求看懂。\n\n<\/details>\n\n---\n\n## 时段 3 · CFA 一级（35 分钟）\n\n**模块**：Quantitative Methods → Rates and Returns（共 4 次课，今天第 1 次）\n\n### 学习目标\n\n- 从三个角度解释利率：要求回报率、折现率、机会成本。\n- 把利率拆成实际无风险利率加各项溢价。\n- 计算单期和多期的持有期收益率（HPR）。\n\n### 讲解一：利率的三种解读\n\n同一个利率数字，比如 5%，可以从三个角度看：\n\n1. **Required rate of return（要求回报率）**：投资者愿意把钱借出去或投进去，最低要拿到的回报。\n2. **Discount rate（折现率）**：把未来的钱换算成今天价值时用的比率。一年后的 105 元，按 5% 折现，今天值 100 元。\n3. **Opportunity cost（机会成本）**：选择把钱花掉或闲着，就放弃了本可以赚到的 5%。\n\n考试常考“某句话对应哪种解读”，记住关键词：*minimum / required* → 要求回报率；*today's value / present value* → 折现率；*forgo / give up* → 机会成本。\n\n### 讲解二：利率的构成\n\n$$\nr = \\text{实际无风险利率} + \\text{通胀溢价} + \\text{违约风险溢价} + \\text{流动性溢价} + \\text{期限溢价}\n$$\n\n| 组成部分 | 补偿什么 |\n|---|---|\n| Real risk-free interest rate | 单纯“等待”：没有通胀、没有任何风险时，推迟消费应得的回报 |\n| Inflation premium | 预期通胀让钱贬值 |\n| Default risk premium | 借款人可能不按时足额还钱 |\n| Liquidity premium | 想卖的时候难以按公允价格快速卖出 |\n| Maturity premium | 期限越长，利率变动对价格影响越大 |\n\n两个常用组合：\n\n- **Nominal risk-free rate（名义无风险利率）** = 实际无风险利率 + 通胀溢价。短期国库券（T-bill）收益率就近似它——国库券几乎没有违约风险、流动性极好、期限很短，后三项溢价约等于零。\n- 严格地说两者是相乘关系：(1 + 名义) = (1 + 实际)(1 + 通胀)。一级考试里通常直接相加近似即可，题目会说明。\n\n**例题 1**：实际无风险利率 2%，通胀溢价 3%，某公司债违约风险溢价 1.5%，流动性溢价 0.5%，期限溢价 1%。求名义无风险利率和该公司债的要求回报率。\n\n- 名义无风险利率 ≈ 2% + 3% = **5%**（严格算：1.02 × 1.03 − 1 = 5.06%）\n- 公司债要求回报率 = 5% + 1.5% + 0.5% + 1% = **8%**\n\n**例题 2**：3 个月期国库券收益率 4.0%，通胀溢价 2.5%，实际无风险利率约为多少？\n\n- 4.0% − 2.5% = **1.5%**\n\n### 讲解三：持有期收益率（HPR）\n\n**单期**：\n\n$$\nHPR = \\frac{P_1 - P_0 + D_1}{P_0}\n$$\n\n$P_0$ 期初价格，$P_1$ 期末价格，$D_1$ 期间收到的现金（股息、利息）。分子 = 价格变动（capital gain）+ 收入（income），所以 HPR = 资本利得率 + 收益率（dividend yield）。\n\n**例题 3**：以 50 元买入一只股票，持有期间收到股息 1.5 元，期末以 54 元卖出。\n\nHPR = (54 − 50 + 1.5) ÷ 50 = 5.5 ÷ 50 = **11%**（其中资本利得 8%，股息收益 3%）\n\n计算器（BA II Plus）：`54 − 50 + 1.5 = ` → `÷ 50 =` → 显示 `0.11`\n\n**多期**：把每一期“1 + 收益率”连乘，再减 1。\n\n$$\nHPR = (1 + R_1)(1 + R_2)\\cdots(1 + R_n) - 1\n$$\n\n**例题 4**：某基金连续三年收益率为 10%、−5%、8%，三年的持有期收益率是多少？\n\n(1.10)(0.95)(1.08) − 1 = 1.1286 − 1 = **12.86%**\n\n计算器：`1.1 × 0.95 × 1.08 − 1 =` → 显示 `0.1286`\n\n注意：**不能**直接相加（10 − 5 + 8 = 13%），那样忽略了复利。\n\n### 练习：仿一级考试三选一\n\n**1.** An analyst states: \"The 6% rate is the minimum return investors require before they agree to lend.\" This statement best describes the interest rate as a:\n\nA. discount rate.\nB. required rate of return.\nC. opportunity cost.\n\n**2.** Which component of an interest rate compensates investors for the risk that a security cannot be sold quickly at close to its fair value?\n\nA. Maturity premium\nB. Default risk premium\nC. Liquidity premium\n\n**3.** Given: real risk-free rate 1.5%, inflation premium 2.5%, default risk premium 2.0%, liquidity premium 0.8%, maturity premium 1.2%. The required return on the bond is closest to:\n\nA. 6.0%\nB. 7.2%\nC. 8.0%\n\n**4.** An investor buys a share at $40, receives a dividend of $0.80, and sells the share at $37. The holding period return is closest to:\n\nA. −7.5%\nB. −5.5%\nC. −2.0%\n\n**5.** A portfolio returns 12%, −8%, and 5% in three consecutive years. The three-year holding period return is closest to:\n\nA. 9.00%\nB. 8.19%\nC. 2.73%\n\n<details>\n<summary>CFA 答案与解析<\/summary>\n\n1. **B**。关键词 *minimum return investors require*。折现率强调把未来价值换算到今天；机会成本强调放弃的收益。\n2. **C**。流动性溢价补偿“难以快速按公允价卖出”。期限溢价补偿长期限下的利率风险；违约风险溢价补偿可能不还钱。\n3. **C**。1.5 + 2.5 + 2.0 + 0.8 + 1.2 = 8.0%。A 只加了前三项，漏了流动性和期限溢价（1.5 + 2.5 + 2.0 = 6.0%）。\n4. **B**。(37 − 40 + 0.80) ÷ 40 = −2.20 ÷ 40 = −5.5%。A 漏掉了股息（−3 ÷ 40 = −7.5%）。\n5. **B**。1.12 × 0.92 × 1.05 − 1 = 1.08192 − 1 = 8.19%。A 是直接相加的错误做法；C 是 8.19% 除以 3 的错误“年均”做法（年均收益率要开三次方，第 2 次课讲几何平均）。\n\n<\/details>\n\n---\n\n## 今晚 9 点打卡要回答的三个问题\n\n1. 三个时段完成了哪几个？（英语、SQL、CFA）大概用了多久？\n2. SQL：五道练习做到第几道？有没有报错，报错信息是什么？\n3. CFA：利率构成的五项、持有期收益率的单期和多期公式，哪里还模糊？\n"};
 </script>
 <script>
 (function () {
@@ -2070,6 +2101,7 @@ window.YXL_STUDY = {
 
   var LIB = window.YXL_LIB, REC = window.YXL_RECORD || { data: {} };
   var PLAN = window.YXL_PLAN || null, STUDY_SNAP = window.YXL_STUDY || { next: {}, days: {}, streak: 0 };
+  var LESSON_SNAP = window.YXL_LESSONS || {};
   var COLLS = ["progress", "notes", "journal", "cards", "study"];
   var STATUS = [["todo", "未开始"], ["doing", "进行中"], ["done", "已完成"], ["review", "已内化"]];
   var STATUS_LABEL = {}; STATUS.forEach(function (s) { STATUS_LABEL[s[0]] = s[1]; });
@@ -2297,7 +2329,7 @@ window.YXL_STUDY = {
 
   /* ---------- 侧栏 ---------- */
   function railHTML() {
-    var r = S.route;
+    var r = /^l-/.test(S.route) ? "plan" : S.route;
     function cur(h) { return r === h ? ' aria-current="page"' : ""; }
     var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录 · 可编辑"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接记录"];
     var h = '<a class="brand" href="#home"><span class="seal" aria-hidden="true">研习</span><span class="bt"><b>研习录</b><small>从对话到体系</small></span></a>' +
@@ -2784,7 +2816,113 @@ window.YXL_STUDY = {
     res.slots.forEach(function (s) { if (s.subj === "en") s.title = wd === 0 ? "本周 CFA 词汇小测 + 1、3、7 天前的词复习" : "CFA 术语与短文" + (cfa ? "：" + cfa.en : ""); });
     return res;
   }
-  function lessonHref(file) { return PLAN.repo + file; }
+  function lessonDate(file) { var m = /(\d{4}-\d{2}-\d{2})\.md$/.exec(file || ""); return m ? m[1] : ""; }
+  function lessonHref(file) { var d = lessonDate(file); return d ? "#l-" + d : PLAN.repo + file; }
+
+  /* ---------- 讲义阅读 ---------- */
+  /* 讲义正文：云端版按需读 lessons/<日期> 文档（早上定时任务写入），读不到就用构建时嵌入的快照 */
+  var LESSON = {};   // 日期 -> { md } | { loading: true } | { missing: true }
+  function lessonMd(date) {
+    var c = LESSON[date];
+    if (c && c.md) return c.md;
+    if (S.mode === "db" && S.db && !c) {
+      LESSON[date] = { loading: true };
+      S.db.collection("lessons").doc(date).get().then(function (snap) {
+        var d = snap && snap.exists ? snap.data() : null;
+        LESSON[date] = d && typeof d.md === "string" ? { md: d.md } : { missing: true };
+        if (S.route === "l-" + date) scheduleRender();
+      }, function () { LESSON[date] = { missing: true }; if (S.route === "l-" + date) scheduleRender(); });
+    }
+    if (LESSON_SNAP[date]) return LESSON_SNAP[date];
+    return null;
+  }
+  function mdInline(t) {
+    var codes = [];
+    t = t.replace(/`([^`]+)`/g, function (_, c) { codes.push(c); return "\u0000" + (codes.length - 1) + "\u0000"; });
+    t = esc(t);
+    t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (_, txt, url) {
+      var m = /^(\d{4}-\d{2}-\d{2})\.md$/.exec(url);
+      if (m) return '<a href="#l-' + m[1] + '">' + txt + "</a>";
+      if (!/^https?:/.test(url)) url = PLAN.repo + "study/daily/" + url;
+      return '<a href="' + url + '" target="_blank" rel="noopener">' + txt + "</a>";
+    });
+    t = t.replace(/(^|[\s（(])(https?:\/\/[^\s<）)]+)/g, function (_, pre, url) { return pre + '<a href="' + url + '" target="_blank" rel="noopener">' + url + "</a>"; });
+    t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>");
+    t = t.replace(/\$([^$]+)\$/g, function (_, m) { return '<span class="mth">' + mathText(m) + "</span>"; });
+    return t.replace(/\u0000(\d+)\u0000/g, function (_, i) { return "<code>" + esc(codes[+i]) + "</code>"; });
+  }
+  function mathText(m) {
+    return m.replace(/\\text\{([^}]*)\}/g, "$1").replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, "($1) ÷ ($2)").replace(/\\cdots/g, "⋯")
+      .replace(/_(\{[^}]*\}|\w)/g, function (_, x) { return "<sub>" + x.replace(/[{}]/g, "") + "</sub>"; }).replace(/\\,/g, " ");
+  }
+  function mdHTML(md) {
+    var L = md.replace(/\r/g, "").split("\n"), out = [], i = 0, list = null;
+    function closeList() { if (list) { out.push(list.sub ? "</ul></li></" + list.t + ">" : "</li></" + list.t + ">"); list = null; } }
+    while (i < L.length) {
+      var l = L[i], m;
+      if (/^```/.test(l)) {
+        closeList(); var lang = l.slice(3).trim(), buf = []; i++;
+        while (i < L.length && !/^```/.test(L[i])) buf.push(L[i++]);
+        i++; out.push('<div class="mdcode"><span class="lang">' + esc(lang || "text") + '</span><button type="button" class="btn ghost small" data-act="copy-code">复制</button><pre><code>' + esc(buf.join("\n")) + "</code></pre></div>"); continue;
+      }
+      if (/^\$\$/.test(l.trim())) {
+        closeList(); var mb = []; i++;
+        while (i < L.length && !/^\$\$/.test(L[i].trim())) mb.push(L[i++]);
+        i++; out.push('<p class="mblock">' + mathText(esc(mb.join(" ").trim())) + "</p>"); continue;
+      }
+      if (!l.trim()) { if (list && L[i + 1] && /^(\s*)([-*]|\d+\.)\s/.test(L[i + 1])) { i++; continue; } closeList(); i++; continue; }
+      if (/^<details>|^<\/details>|^<summary>.*<\/summary>$/.test(l.trim())) {
+        closeList(); var tt = l.trim();
+        out.push(tt.indexOf("<summary>") === 0 ? "<summary>" + esc(tt.replace(/<\/?summary>/g, "")) + "</summary>" : tt); i++; continue;
+      }
+      if ((m = /^(#{1,4})\s+(.*)$/.exec(l))) { closeList(); var n = m[1].length; out.push("<h" + (n + 1) + ">" + mdInline(m[2]) + "</h" + (n + 1) + ">"); i++; continue; }
+      if (/^---+\s*$/.test(l)) { closeList(); out.push("<hr>"); i++; continue; }
+      if (/^>\s?/.test(l)) {
+        closeList(); var q = [];
+        while (i < L.length && /^>\s?/.test(L[i])) q.push(L[i++].replace(/^>\s?/, ""));
+        out.push("<blockquote>" + mdInline(q.join(" ")) + "</blockquote>"); continue;
+      }
+      if (/^\|/.test(l) && L[i + 1] && /^\|[\s:|-]+\|\s*$/.test(L[i + 1])) {
+        closeList();
+        var cells = function (r) { return r.trim().replace(/^\||\|$/g, "").split("|").map(function (c) { return c.trim(); }); };
+        var h = cells(l), rows = []; i += 2;
+        while (i < L.length && /^\|/.test(L[i])) rows.push(cells(L[i++]));
+        out.push('<div class="mdtbl"><table><thead><tr>' + h.map(function (c) { return "<th>" + mdInline(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+          rows.map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + mdInline(c) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div>"); continue;
+      }
+      if ((m = /^(\s*)([-*]|\d+\.)\s+(.*)$/.exec(l))) {
+        var ind = m[1].length, t = /\d/.test(m[2]) ? "ol" : "ul";
+        if (ind >= 2 && list) {
+          if (!list.sub) { out.push("<ul>"); list.sub = true; }
+          out.push("<li>" + mdInline(m[3]) + "</li>"); i++; continue;
+        }
+        if (list && list.sub) { out.push("</ul>"); list.sub = false; }
+        if (list && list.t !== t) closeList();
+        if (!list) { list = { t: t, sub: false }; out.push("<" + t + (t === "ol" ? ' start="' + parseInt(m[2], 10) + '"' : "") + "><li>" + mdInline(m[3])); }
+        else out.push("</li><li>" + mdInline(m[3]));
+        i++; continue;
+      }
+      if (list && /^\s{2,}\S/.test(l)) { out.push("<br>" + mdInline(l.trim())); i++; continue; }
+      closeList();
+      var para = [l.trim()]; i++;
+      while (i < L.length && L[i].trim() && !/^(#{1,4}\s|```|\||>|<details>|<\/details>|<summary>|---+\s*$|\s*([-*]|\d+\.)\s|\$\$)/.test(L[i])) para.push(L[i++].trim());
+      out.push("<p>" + mdInline(para.join("\n")).replace(/\n/g, "<br>") + "</p>");
+    }
+    closeList();
+    return out.join("\n");
+  }
+  function lessonHTML(date) {
+    var md = lessonMd(date), c = LESSON[date] || {}, STUDY = curStudy(), days = Object.keys(STUDY.days).filter(function (d) { return STUDY.days[d].file; }).sort();
+    var k = days.indexOf(date), prev = k > 0 ? days[k - 1] : "", next = k >= 0 && k < days.length - 1 ? days[k + 1] : "";
+    var nav = '<nav class="lnav">' + (prev ? '<a class="btn ghost small" href="#l-' + prev + '">← ' + prev + "</a>" : "<span></span>") +
+      '<a class="btn ghost small" href="#plan">课表</a>' + (next ? '<a class="btn ghost small" href="#l-' + next + '">' + next + " →</a>" : "<span></span>") + "</nav>";
+    var gh = PLAN.repo + "study/daily/" + date + ".md";
+    var body = md ? '<article class="md">' + mdHTML(md) + "</article>"
+      : c.loading ? '<p class="empty-line">讲义加载中……</p>'
+      : '<p class="empty-line">研习录里还没有这天的讲义。可以先看 <a href="' + gh + '" target="_blank" rel="noopener">GitHub 上的版本</a>。</p>';
+    return '<div class="view lesson"><p class="eyebrow"><a href="#plan">每日课表</a> · 讲义</p>' + nav + body + nav +
+      '<p class="meta src">原文件：<a href="' + gh + '" target="_blank" rel="noopener">study/daily/' + date + ".md</a></p></div>";
+  }
   function planBadge() {
     var t = bjToday(), w = weekNo(t);
     if (t === PLAN.prep) return '<span class="n due">今天准备</span>';
@@ -2808,7 +2946,7 @@ window.YXL_STUDY = {
     var total = day.prep ? 60 : day.slots.reduce(function (a, s) { return a + s.mins; }, 0);
     return '<section class="today" aria-labelledby="today-h"><p class="eyebrow">今天 · ' + t + " " + WD[day.wd] + (day.prep ? " · 准备日" : " · 第" + weekNo(t) + "周") + "</p>" +
       '<h2 id="today-h"><a href="#plan">今天的课</a><span class="tot">' + total + " 分钟</span></h2>" + slotRows(day, rec) +
-      '<div class="btns">' + (rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '" target="_blank" rel="noopener">打开今天的讲义</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>") +
+      '<div class="btns">' + (rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">打开今天的讲义</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>") +
       '<a class="btn ghost" href="#plan">看整张课表</a></div></section>';
   }
   function planHTML() {
@@ -2830,7 +2968,7 @@ window.YXL_STUDY = {
       var r = STUDY.days[d], st = r.status || "pushed";
       var names = (r.done || []).map(function (k) { return (PLAN.subjects[k] || {}).name || (k === "prep" ? "准备日" : k); });
       return '<li><span class="jdate">' + esc(d) + '</span><div class="jbody"><div class="jmeta"><span class="dst ' + st + '">' + esc(DAY_STATUS[st] || st) + "</span>" +
-        (r.minutes ? '<span class="jmin">' + esc(r.minutes) + " 分钟</span>" : "") + (r.file ? '<a href="' + esc(lessonHref(r.file)) + '" target="_blank" rel="noopener">讲义</a>' : "") + "</div>" +
+        (r.minutes ? '<span class="jmin">' + esc(r.minutes) + " 分钟</span>" : "") + (r.file ? '<a href="' + esc(lessonHref(r.file)) + '">讲义</a>' : "") + "</div>" +
         (names.length ? '<p class="jtext">完成：' + esc(names.join("、")) + "</p>" : "") + (r.note ? '<p class="jtext">' + esc(r.note) + "</p>" : "") + "</div></li>";
     }).join("") + "</ul>" : '<p class="empty-line">还没有打卡记录。第一份讲义 ' + PLAN.prep + " 早上推送。</p>";
     var seq = subjOrder.map(function (k) {
@@ -2893,7 +3031,7 @@ window.YXL_STUDY = {
     ROUTES["b-" + b] = 1;
     Object.keys(LIB.books[b].deep || {}).forEach(function (n) { ROUTES["r-" + b + "-" + n] = 1; });
   });
-  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] ? h : "home"; }
+  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] || (PLAN && /^l-\d{4}-\d{2}-\d{2}$/.test(h)) ? h : "home"; }
 
   function render(scrollTop) {
     $("#rail").innerHTML = railHTML();
@@ -2903,6 +3041,7 @@ window.YXL_STUDY = {
     else if (r.indexOf("b-") === 0) html = bookHTML(r.slice(2));
     else if (r === "journal") html = journalHTML();
     else if (r === "plan") html = planHTML();
+    else if (/^l-\d{4}-\d{2}-\d{2}$/.test(r)) html = lessonHTML(r.slice(2));
     else if (r === "review") html = reviewHTML();
     else html = homeHTML();
     $("#main").innerHTML = html;
@@ -2973,6 +3112,7 @@ window.YXL_STUDY = {
     if (act === "rv-skip") { S.rv.i++; S.rv.show = false; render(); return; }
     if (act === "rv-restart") { startReview(); render(); return; }
     if (act === "copy-fw") { copyText(frameworkText(t.getAttribute("data-book"))); return; }
+    if (act === "copy-code") { var pre = t.parentNode.querySelector("pre"); if (pre) copyText(pre.textContent); return; }
     if (act === "export") { copyText(JSON.stringify(S.data, null, 2)); return; }
     if (act === "j-del") { S.confirmDel = t.getAttribute("data-id"); render(); return; }
     if (act === "j-del-no") { S.confirmDel = null; render(); return; }

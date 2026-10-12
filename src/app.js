@@ -4,6 +4,7 @@
 
   var LIB = window.YXL_LIB, REC = window.YXL_RECORD || { data: {} };
   var PLAN = window.YXL_PLAN || null, STUDY_SNAP = window.YXL_STUDY || { next: {}, days: {}, streak: 0 };
+  var LESSON_SNAP = window.YXL_LESSONS || {};
   var COLLS = ["progress", "notes", "journal", "cards", "study"];
   var STATUS = [["todo", "未开始"], ["doing", "进行中"], ["done", "已完成"], ["review", "已内化"]];
   var STATUS_LABEL = {}; STATUS.forEach(function (s) { STATUS_LABEL[s[0]] = s[1]; });
@@ -231,7 +232,7 @@
 
   /* ---------- 侧栏 ---------- */
   function railHTML() {
-    var r = S.route;
+    var r = /^l-/.test(S.route) ? "plan" : S.route;
     function cur(h) { return r === h ? ' aria-current="page"' : ""; }
     var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录 · 可编辑"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接记录"];
     var h = '<a class="brand" href="#home"><span class="seal" aria-hidden="true">研习</span><span class="bt"><b>研习录</b><small>从对话到体系</small></span></a>' +
@@ -718,7 +719,113 @@
     res.slots.forEach(function (s) { if (s.subj === "en") s.title = wd === 0 ? "本周 CFA 词汇小测 + 1、3、7 天前的词复习" : "CFA 术语与短文" + (cfa ? "：" + cfa.en : ""); });
     return res;
   }
-  function lessonHref(file) { return PLAN.repo + file; }
+  function lessonDate(file) { var m = /(\d{4}-\d{2}-\d{2})\.md$/.exec(file || ""); return m ? m[1] : ""; }
+  function lessonHref(file) { var d = lessonDate(file); return d ? "#l-" + d : PLAN.repo + file; }
+
+  /* ---------- 讲义阅读 ---------- */
+  /* 讲义正文：云端版按需读 lessons/<日期> 文档（早上定时任务写入），读不到就用构建时嵌入的快照 */
+  var LESSON = {};   // 日期 -> { md } | { loading: true } | { missing: true }
+  function lessonMd(date) {
+    var c = LESSON[date];
+    if (c && c.md) return c.md;
+    if (S.mode === "db" && S.db && !c) {
+      LESSON[date] = { loading: true };
+      S.db.collection("lessons").doc(date).get().then(function (snap) {
+        var d = snap && snap.exists ? snap.data() : null;
+        LESSON[date] = d && typeof d.md === "string" ? { md: d.md } : { missing: true };
+        if (S.route === "l-" + date) scheduleRender();
+      }, function () { LESSON[date] = { missing: true }; if (S.route === "l-" + date) scheduleRender(); });
+    }
+    if (LESSON_SNAP[date]) return LESSON_SNAP[date];
+    return null;
+  }
+  function mdInline(t) {
+    var codes = [];
+    t = t.replace(/`([^`]+)`/g, function (_, c) { codes.push(c); return "\u0000" + (codes.length - 1) + "\u0000"; });
+    t = esc(t);
+    t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (_, txt, url) {
+      var m = /^(\d{4}-\d{2}-\d{2})\.md$/.exec(url);
+      if (m) return '<a href="#l-' + m[1] + '">' + txt + "</a>";
+      if (!/^https?:/.test(url)) url = PLAN.repo + "study/daily/" + url;
+      return '<a href="' + url + '" target="_blank" rel="noopener">' + txt + "</a>";
+    });
+    t = t.replace(/(^|[\s（(])(https?:\/\/[^\s<）)]+)/g, function (_, pre, url) { return pre + '<a href="' + url + '" target="_blank" rel="noopener">' + url + "</a>"; });
+    t = t.replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>").replace(/(^|[^*])\*([^*\s][^*]*)\*/g, "$1<em>$2</em>");
+    t = t.replace(/\$([^$]+)\$/g, function (_, m) { return '<span class="mth">' + mathText(m) + "</span>"; });
+    return t.replace(/\u0000(\d+)\u0000/g, function (_, i) { return "<code>" + esc(codes[+i]) + "</code>"; });
+  }
+  function mathText(m) {
+    return m.replace(/\\text\{([^}]*)\}/g, "$1").replace(/\\frac\{([^}]*)\}\{([^}]*)\}/g, "($1) ÷ ($2)").replace(/\\cdots/g, "⋯")
+      .replace(/_(\{[^}]*\}|\w)/g, function (_, x) { return "<sub>" + x.replace(/[{}]/g, "") + "</sub>"; }).replace(/\\,/g, " ");
+  }
+  function mdHTML(md) {
+    var L = md.replace(/\r/g, "").split("\n"), out = [], i = 0, list = null;
+    function closeList() { if (list) { out.push(list.sub ? "</ul></li></" + list.t + ">" : "</li></" + list.t + ">"); list = null; } }
+    while (i < L.length) {
+      var l = L[i], m;
+      if (/^```/.test(l)) {
+        closeList(); var lang = l.slice(3).trim(), buf = []; i++;
+        while (i < L.length && !/^```/.test(L[i])) buf.push(L[i++]);
+        i++; out.push('<div class="mdcode"><span class="lang">' + esc(lang || "text") + '</span><button type="button" class="btn ghost small" data-act="copy-code">复制</button><pre><code>' + esc(buf.join("\n")) + "</code></pre></div>"); continue;
+      }
+      if (/^\$\$/.test(l.trim())) {
+        closeList(); var mb = []; i++;
+        while (i < L.length && !/^\$\$/.test(L[i].trim())) mb.push(L[i++]);
+        i++; out.push('<p class="mblock">' + mathText(esc(mb.join(" ").trim())) + "</p>"); continue;
+      }
+      if (!l.trim()) { if (list && L[i + 1] && /^(\s*)([-*]|\d+\.)\s/.test(L[i + 1])) { i++; continue; } closeList(); i++; continue; }
+      if (/^<details>|^<\/details>|^<summary>.*<\/summary>$/.test(l.trim())) {
+        closeList(); var tt = l.trim();
+        out.push(tt.indexOf("<summary>") === 0 ? "<summary>" + esc(tt.replace(/<\/?summary>/g, "")) + "</summary>" : tt); i++; continue;
+      }
+      if ((m = /^(#{1,4})\s+(.*)$/.exec(l))) { closeList(); var n = m[1].length; out.push("<h" + (n + 1) + ">" + mdInline(m[2]) + "</h" + (n + 1) + ">"); i++; continue; }
+      if (/^---+\s*$/.test(l)) { closeList(); out.push("<hr>"); i++; continue; }
+      if (/^>\s?/.test(l)) {
+        closeList(); var q = [];
+        while (i < L.length && /^>\s?/.test(L[i])) q.push(L[i++].replace(/^>\s?/, ""));
+        out.push("<blockquote>" + mdInline(q.join(" ")) + "</blockquote>"); continue;
+      }
+      if (/^\|/.test(l) && L[i + 1] && /^\|[\s:|-]+\|\s*$/.test(L[i + 1])) {
+        closeList();
+        var cells = function (r) { return r.trim().replace(/^\||\|$/g, "").split("|").map(function (c) { return c.trim(); }); };
+        var h = cells(l), rows = []; i += 2;
+        while (i < L.length && /^\|/.test(L[i])) rows.push(cells(L[i++]));
+        out.push('<div class="mdtbl"><table><thead><tr>' + h.map(function (c) { return "<th>" + mdInline(c) + "</th>"; }).join("") + "</tr></thead><tbody>" +
+          rows.map(function (r) { return "<tr>" + r.map(function (c) { return "<td>" + mdInline(c) + "</td>"; }).join("") + "</tr>"; }).join("") + "</tbody></table></div>"); continue;
+      }
+      if ((m = /^(\s*)([-*]|\d+\.)\s+(.*)$/.exec(l))) {
+        var ind = m[1].length, t = /\d/.test(m[2]) ? "ol" : "ul";
+        if (ind >= 2 && list) {
+          if (!list.sub) { out.push("<ul>"); list.sub = true; }
+          out.push("<li>" + mdInline(m[3]) + "</li>"); i++; continue;
+        }
+        if (list && list.sub) { out.push("</ul>"); list.sub = false; }
+        if (list && list.t !== t) closeList();
+        if (!list) { list = { t: t, sub: false }; out.push("<" + t + (t === "ol" ? ' start="' + parseInt(m[2], 10) + '"' : "") + "><li>" + mdInline(m[3])); }
+        else out.push("</li><li>" + mdInline(m[3]));
+        i++; continue;
+      }
+      if (list && /^\s{2,}\S/.test(l)) { out.push("<br>" + mdInline(l.trim())); i++; continue; }
+      closeList();
+      var para = [l.trim()]; i++;
+      while (i < L.length && L[i].trim() && !/^(#{1,4}\s|```|\||>|<details>|<\/details>|<summary>|---+\s*$|\s*([-*]|\d+\.)\s|\$\$)/.test(L[i])) para.push(L[i++].trim());
+      out.push("<p>" + mdInline(para.join("\n")).replace(/\n/g, "<br>") + "</p>");
+    }
+    closeList();
+    return out.join("\n");
+  }
+  function lessonHTML(date) {
+    var md = lessonMd(date), c = LESSON[date] || {}, STUDY = curStudy(), days = Object.keys(STUDY.days).filter(function (d) { return STUDY.days[d].file; }).sort();
+    var k = days.indexOf(date), prev = k > 0 ? days[k - 1] : "", next = k >= 0 && k < days.length - 1 ? days[k + 1] : "";
+    var nav = '<nav class="lnav">' + (prev ? '<a class="btn ghost small" href="#l-' + prev + '">← ' + prev + "</a>" : "<span></span>") +
+      '<a class="btn ghost small" href="#plan">课表</a>' + (next ? '<a class="btn ghost small" href="#l-' + next + '">' + next + " →</a>" : "<span></span>") + "</nav>";
+    var gh = PLAN.repo + "study/daily/" + date + ".md";
+    var body = md ? '<article class="md">' + mdHTML(md) + "</article>"
+      : c.loading ? '<p class="empty-line">讲义加载中……</p>'
+      : '<p class="empty-line">研习录里还没有这天的讲义。可以先看 <a href="' + gh + '" target="_blank" rel="noopener">GitHub 上的版本</a>。</p>';
+    return '<div class="view lesson"><p class="eyebrow"><a href="#plan">每日课表</a> · 讲义</p>' + nav + body + nav +
+      '<p class="meta src">原文件：<a href="' + gh + '" target="_blank" rel="noopener">study/daily/' + date + ".md</a></p></div>";
+  }
   function planBadge() {
     var t = bjToday(), w = weekNo(t);
     if (t === PLAN.prep) return '<span class="n due">今天准备</span>';
@@ -742,7 +849,7 @@
     var total = day.prep ? 60 : day.slots.reduce(function (a, s) { return a + s.mins; }, 0);
     return '<section class="today" aria-labelledby="today-h"><p class="eyebrow">今天 · ' + t + " " + WD[day.wd] + (day.prep ? " · 准备日" : " · 第" + weekNo(t) + "周") + "</p>" +
       '<h2 id="today-h"><a href="#plan">今天的课</a><span class="tot">' + total + " 分钟</span></h2>" + slotRows(day, rec) +
-      '<div class="btns">' + (rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '" target="_blank" rel="noopener">打开今天的讲义</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>") +
+      '<div class="btns">' + (rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">打开今天的讲义</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>") +
       '<a class="btn ghost" href="#plan">看整张课表</a></div></section>';
   }
   function planHTML() {
@@ -764,7 +871,7 @@
       var r = STUDY.days[d], st = r.status || "pushed";
       var names = (r.done || []).map(function (k) { return (PLAN.subjects[k] || {}).name || (k === "prep" ? "准备日" : k); });
       return '<li><span class="jdate">' + esc(d) + '</span><div class="jbody"><div class="jmeta"><span class="dst ' + st + '">' + esc(DAY_STATUS[st] || st) + "</span>" +
-        (r.minutes ? '<span class="jmin">' + esc(r.minutes) + " 分钟</span>" : "") + (r.file ? '<a href="' + esc(lessonHref(r.file)) + '" target="_blank" rel="noopener">讲义</a>' : "") + "</div>" +
+        (r.minutes ? '<span class="jmin">' + esc(r.minutes) + " 分钟</span>" : "") + (r.file ? '<a href="' + esc(lessonHref(r.file)) + '">讲义</a>' : "") + "</div>" +
         (names.length ? '<p class="jtext">完成：' + esc(names.join("、")) + "</p>" : "") + (r.note ? '<p class="jtext">' + esc(r.note) + "</p>" : "") + "</div></li>";
     }).join("") + "</ul>" : '<p class="empty-line">还没有打卡记录。第一份讲义 ' + PLAN.prep + " 早上推送。</p>";
     var seq = subjOrder.map(function (k) {
@@ -827,7 +934,7 @@
     ROUTES["b-" + b] = 1;
     Object.keys(LIB.books[b].deep || {}).forEach(function (n) { ROUTES["r-" + b + "-" + n] = 1; });
   });
-  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] ? h : "home"; }
+  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] || (PLAN && /^l-\d{4}-\d{2}-\d{2}$/.test(h)) ? h : "home"; }
 
   function render(scrollTop) {
     $("#rail").innerHTML = railHTML();
@@ -837,6 +944,7 @@
     else if (r.indexOf("b-") === 0) html = bookHTML(r.slice(2));
     else if (r === "journal") html = journalHTML();
     else if (r === "plan") html = planHTML();
+    else if (/^l-\d{4}-\d{2}-\d{2}$/.test(r)) html = lessonHTML(r.slice(2));
     else if (r === "review") html = reviewHTML();
     else html = homeHTML();
     $("#main").innerHTML = html;
@@ -907,6 +1015,7 @@
     if (act === "rv-skip") { S.rv.i++; S.rv.show = false; render(); return; }
     if (act === "rv-restart") { startReview(); render(); return; }
     if (act === "copy-fw") { copyText(frameworkText(t.getAttribute("data-book"))); return; }
+    if (act === "copy-code") { var pre = t.parentNode.querySelector("pre"); if (pre) copyText(pre.textContent); return; }
     if (act === "export") { copyText(JSON.stringify(S.data, null, 2)); return; }
     if (act === "j-del") { S.confirmDel = t.getAttribute("data-id"); render(); return; }
     if (act === "j-del-no") { S.confirmDel = null; render(); return; }
