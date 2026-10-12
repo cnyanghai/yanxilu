@@ -17,6 +17,7 @@
 - **复习**：概念卡按 1、3、7、16、35 天的间隔重复复习。
 - **数据专题**：[中美消费与人口](reports/consumption-population.html)，2000 年以来中美居民消费率、消费结构对比与中国人口年龄结构（每五年节点、五岁组人口金字塔），配图、数据表和来源。全部序列整理成长表 CSV（`reports/data/consumption-population.csv`），可直接导入数据库练习 SQL。
 - **数据专题**：[中美日财富存量](reports/wealth.html)，居民存款、股票、债券、期货、黄金储备、住房市值与住房、汽车保有量的三国对比（2025 年末），长表 CSV 在 `reports/data/wealth.csv`。
+- **知识专题**：[期货做市商](reports/market-making.html)，准入条件、盈亏方程（可切换情景的示意账）、七块核心知识、可调参数的 Avellaneda-Stoikov 报价演示、跨期与对冲、常见亏法、学习路线与书单、自测题。
 
 ## 两个版本
 
@@ -36,7 +37,7 @@ src/deep-*.js   各书的精读稿、自测题、假设开关、论证地图（d
 src/plan.js     每日课表：一周时段安排与各科课程顺序
 study/          课表进度（progress.json）、每日讲义（daily/）和推送、打卡脚本
 src/app.js      页面逻辑
-src/report-*.html  数据专题页模板（数据在构建时注入）
+src/report-*.html  专题页模板（数据专题的数据在构建时注入；知识专题不需要数据）
 reports/        数据专题页；data/ 下是整理脚本 make_data.py、JSON 与长表 CSV
 build.py        合成 index.html（公开版）与 dist/artifact.html（claude.ai 版），以及 reports/ 下的专题页
 ```

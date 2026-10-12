@@ -6,8 +6,16 @@ window.YXL_LIB = {
   focus: ["zhoulu", "tragedy"],
   kinds: { book: "书", topic: "科目", practice: "实践", concept: "专题" },
 
-  /* 数据专题：独立页面。href 是 GitHub 版的相对路径，artifact 是 claude.ai 上的版本 */
+  /* 专题：独立页面。href 是 GitHub 版的相对路径，artifact 是 claude.ai 上的版本。
+   * group 决定归到哪一组（见 reportGroups），不写就是数据专题。 */
+  reportGroups: [
+    { id: "data", name: "数据专题", trackHead: "用数据看这个方向" },
+    { id: "note", name: "知识专题", trackHead: "专题笔记" }
+  ],
   reports: [
+    { id: "futures-market-making", group: "note", title: "期货做市商", date: "2026-10", tracks: ["fut"],
+      desc: "做市商靠什么赚、在哪里亏：准入条件、盈亏方程、七块核心知识、可以动手调的报价模型、跨期对冲、常见亏法、学习路线和自测题。",
+      href: "reports/market-making.html", artifact: "https://claude.ai/artifact/Dnfuoje3rEV1HL39iURdtc" },
     { id: "cn-us-consumption", title: "中美消费与人口", date: "2026-10", tracks: ["cycle"],
       desc: "2000 年以来中美居民消费率、消费结构对比，以及中国人口年龄结构（含每五年节点和五岁组人口金字塔）；附数据表、口径和长表 CSV。",
       href: "reports/consumption-population.html", artifact: "https://claude.ai/artifact/LC5DxsG2pE1kCeXXf5p3xE" },
@@ -138,7 +146,8 @@ window.YXL_LIB = {
         ]},
         { name: "交易与量化", desc: "把判断变成规则", items: [
           { id: "murphy", kind: "book", title: "期货市场技术分析", by: "约翰·墨菲", why: "技术分析的经典教科书。" },
-          { id: "fut-backtest", kind: "practice", title: "把一个日内交易想法写成规则并回测", why: "规则明确、回测通过，再决定要不要实盘。" }
+          { id: "fut-backtest", kind: "practice", title: "把一个日内交易想法写成规则并回测", why: "规则明确、回测通过，再决定要不要实盘。" },
+          { id: "fut-mm", kind: "concept", title: "期货做市商", why: "做市商靠价差和交易所激励赚钱、被逆向选择和库存拖累：准入、盈亏方程、报价模型、跨期对冲与学习路线，整理成一个知识专题。", report: "futures-market-making" }
         ]}
       ]
     }
@@ -703,7 +712,7 @@ window.YXL_LIB = {
 
 /* 学习痕迹快照：由 Claude 从网页记录同步而来，公开版（GitHub）显示的就是这里的内容。 */
 window.YXL_RECORD = {
-  syncedAt: "2026-10-10",
+  syncedAt: "2026-10-11",
   data: {
     progress: {
       zhoulu: { s: "doing", t: "2026-10-10T10:50:00.000Z" }
@@ -712,7 +721,8 @@ window.YXL_RECORD = {
     journal: {
       "j-202609-goals": { date: "2026-09", minutes: 0, ref: "", text: "确立五个长期学习方向：地缘政治与战争、CFA 级金融知识、上市公司与行业分析、经济周期、期货与大宗商品。", t: "2026-09-30T00:00:00Z" },
       "j-20261007-start": { date: "2026-10-07", minutes: 0, ref: "tragedy", text: "建立研习录：把五个方向整理成分阶段的路线图，开设《大国政治的悲剧》精读模块（章节导读、概念卡、争鸣、分析框架）。", t: "2026-10-07T18:40:00-07:00" },
-      "j-20261010-zhoulu": { date: "2026-10-10", minutes: 0, ref: "zhoulu", text: "开始读《涛动周期录》，开设精读模块：康波时间轴、四周期嵌套图、七章导读与 48 篇报告清单、22 张概念卡、判断对照表、四周期定位清单、论证地图，以及第七章“周期真实义”精读稿。", t: "2026-10-10T03:50:00-07:00" }
+      "j-20261010-zhoulu": { date: "2026-10-10", minutes: 0, ref: "zhoulu", text: "开始读《涛动周期录》，开设精读模块：康波时间轴、四周期嵌套图、七章导读与 48 篇报告清单、22 张概念卡、判断对照表、四周期定位清单、论证地图，以及第七章“周期真实义”精读稿。", t: "2026-10-10T03:50:00-07:00" },
+      "j-20261011-mm": { date: "2026-10-11", minutes: 0, ref: "fut-mm", text: "整理期货做市商知识专题：准入条件、盈亏方程、七块核心知识、可调参数的报价模型演示、跨期与对冲、常见亏法、学习路线和自测题，挂到首页“知识专题”和期货与商品方向。", t: "2026-10-11T19:30:00-07:00" }
     },
     cards: {}
   }

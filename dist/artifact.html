@@ -575,8 +575,16 @@ window.YXL_LIB = {
   focus: ["zhoulu", "tragedy"],
   kinds: { book: "书", topic: "科目", practice: "实践", concept: "专题" },
 
-  /* 数据专题：独立页面。href 是 GitHub 版的相对路径，artifact 是 claude.ai 上的版本 */
+  /* 专题：独立页面。href 是 GitHub 版的相对路径，artifact 是 claude.ai 上的版本。
+   * group 决定归到哪一组（见 reportGroups），不写就是数据专题。 */
+  reportGroups: [
+    { id: "data", name: "数据专题", trackHead: "用数据看这个方向" },
+    { id: "note", name: "知识专题", trackHead: "专题笔记" }
+  ],
   reports: [
+    { id: "futures-market-making", group: "note", title: "期货做市商", date: "2026-10", tracks: ["fut"],
+      desc: "做市商靠什么赚、在哪里亏：准入条件、盈亏方程、七块核心知识、可以动手调的报价模型、跨期对冲、常见亏法、学习路线和自测题。",
+      href: "reports/market-making.html", artifact: "https://claude.ai/artifact/Dnfuoje3rEV1HL39iURdtc" },
     { id: "cn-us-consumption", title: "中美消费与人口", date: "2026-10", tracks: ["cycle"],
       desc: "2000 年以来中美居民消费率、消费结构对比，以及中国人口年龄结构（含每五年节点和五岁组人口金字塔）；附数据表、口径和长表 CSV。",
       href: "reports/consumption-population.html", artifact: "https://claude.ai/artifact/LC5DxsG2pE1kCeXXf5p3xE" },
@@ -707,7 +715,8 @@ window.YXL_LIB = {
         ]},
         { name: "交易与量化", desc: "把判断变成规则", items: [
           { id: "murphy", kind: "book", title: "期货市场技术分析", by: "约翰·墨菲", why: "技术分析的经典教科书。" },
-          { id: "fut-backtest", kind: "practice", title: "把一个日内交易想法写成规则并回测", why: "规则明确、回测通过，再决定要不要实盘。" }
+          { id: "fut-backtest", kind: "practice", title: "把一个日内交易想法写成规则并回测", why: "规则明确、回测通过，再决定要不要实盘。" },
+          { id: "fut-mm", kind: "concept", title: "期货做市商", why: "做市商靠价差和交易所激励赚钱、被逆向选择和库存拖累：准入、盈亏方程、报价模型、跨期对冲与学习路线，整理成一个知识专题。", report: "futures-market-making" }
         ]}
       ]
     }
@@ -1272,7 +1281,7 @@ window.YXL_LIB = {
 
 /* 学习痕迹快照：由 Claude 从网页记录同步而来，公开版（GitHub）显示的就是这里的内容。 */
 window.YXL_RECORD = {
-  syncedAt: "2026-10-10",
+  syncedAt: "2026-10-11",
   data: {
     progress: {
       zhoulu: { s: "doing", t: "2026-10-10T10:50:00.000Z" }
@@ -1281,7 +1290,8 @@ window.YXL_RECORD = {
     journal: {
       "j-202609-goals": { date: "2026-09", minutes: 0, ref: "", text: "确立五个长期学习方向：地缘政治与战争、CFA 级金融知识、上市公司与行业分析、经济周期、期货与大宗商品。", t: "2026-09-30T00:00:00Z" },
       "j-20261007-start": { date: "2026-10-07", minutes: 0, ref: "tragedy", text: "建立研习录：把五个方向整理成分阶段的路线图，开设《大国政治的悲剧》精读模块（章节导读、概念卡、争鸣、分析框架）。", t: "2026-10-07T18:40:00-07:00" },
-      "j-20261010-zhoulu": { date: "2026-10-10", minutes: 0, ref: "zhoulu", text: "开始读《涛动周期录》，开设精读模块：康波时间轴、四周期嵌套图、七章导读与 48 篇报告清单、22 张概念卡、判断对照表、四周期定位清单、论证地图，以及第七章“周期真实义”精读稿。", t: "2026-10-10T03:50:00-07:00" }
+      "j-20261010-zhoulu": { date: "2026-10-10", minutes: 0, ref: "zhoulu", text: "开始读《涛动周期录》，开设精读模块：康波时间轴、四周期嵌套图、七章导读与 48 篇报告清单、22 张概念卡、判断对照表、四周期定位清单、论证地图，以及第七章“周期真实义”精读稿。", t: "2026-10-10T03:50:00-07:00" },
+      "j-20261011-mm": { date: "2026-10-11", minutes: 0, ref: "fut-mm", text: "整理期货做市商知识专题：准入条件、盈亏方程、七块核心知识、可调参数的报价模型演示、跨期与对冲、常见亏法、学习路线和自测题，挂到首页“知识专题”和期货与商品方向。", t: "2026-10-11T19:30:00-07:00" }
     },
     cards: {}
   }
@@ -2302,18 +2312,22 @@ window.YXL_STUDY = {
       h += '<a href="#b-' + id + '"' + (here ? ' aria-current="page"' : "") + "><span>" + esc(b.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>";
     });
     var due = dueCards().length;
-    if (REPORTS.length) {
-      h += '<div class="lab">数据专题</div>';
-      REPORTS.forEach(function (rp) { h += '<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span>' + esc(rp.title) + '</span><span class="n" aria-hidden="true">↗</span></a>'; });
-    }
+    RGROUPS.forEach(function (g) {
+      var rs = reportsIn(g.id);
+      if (!rs.length) return;
+      h += '<div class="lab">' + esc(g.name) + '</div>';
+      rs.forEach(function (rp) { h += '<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span>' + esc(rp.title) + '</span><span class="n" aria-hidden="true">↗</span></a>'; });
+    });
     h += '<div class="lab">记录</div><a href="#journal"' + cur("journal") + '><span>学习足迹</span><span class="n">' + Object.keys(S.data.journal).length + "</span></a>" +
       '<a href="#review"' + cur("review") + "><span>复习</span>" + (due ? '<span class="n due">' + due + "</span>" : "") + "</a></nav>";
     return h;
   }
 
-  /* ---------- 数据专题（独立页面，新标签页打开） ---------- */
+  /* ---------- 专题（独立页面，新标签页打开；按 reportGroups 分组） ---------- */
   var IN_ARTIFACT = !!(window.claude && typeof window.claude.use === "function");
   var REPORTS = LIB.reports || [];
+  var RGROUPS = LIB.reportGroups || [{ id: "data", name: "数据专题", trackHead: "用数据看这个方向" }];
+  function reportsIn(gid, list) { return (list || REPORTS).filter(function (rp) { return (rp.group || "data") === gid; }); }
   function reportHref(rp) { return IN_ARTIFACT && rp.artifact ? rp.artifact : rp.href; }
   function reportRows(list) {
     return list.map(function (rp) {
@@ -2349,7 +2363,8 @@ window.YXL_STUDY = {
       '<section class="focus" aria-label="正在精读"><div class="focus-top"><p class="eyebrow">正在精读</p><a class="btn small ghost" href="#review">复习概念卡</a></div>' +
       FOCUS.map(focusBlock).join("") + "</section>" +
       '<section><h2>五个学习方向</h2><div class="tracks">' + rows + "</div></section>" +
-      (REPORTS.length ? '<section><h2>数据专题</h2><div class="reports">' + reportRows(REPORTS) + "</div></section>" : "") +
+      RGROUPS.map(function (g) { var rs = reportsIn(g.id);
+        return rs.length ? '<section><h2>' + esc(g.name) + '</h2><div class="reports">' + reportRows(rs) + "</div></section>" : ""; }).join("") +
       '<section class="pair"><div class="col"><h2>最近的学习足迹</h2>' + journalList(js.slice(0, 4), false) + '<p class="more"><a href="#journal">全部足迹</a></p></div>' +
       '<div class="col"><h2>怎么用</h2><ol class="steps">' +
       "<li><span><b>读与问</b>按路线图读书；有疑问就在对话里和 Claude 讨论。</span></li>" +
@@ -2369,6 +2384,7 @@ window.YXL_STUDY = {
         var also = it.tracks.filter(function (x) { return x !== id; }).map(function (x) { return '<a href="#t-' + x + '">' + esc(TRACK[x].short) + "</a>"; });
         var links = [];
         if (it.module) links.push('<a class="go" href="#b-' + it.module + '">进入精读模块</a>');
+        if (it.report) { var rp = REPORTS.filter(function (x) { return x.id === it.report; })[0]; if (rp) links.push('<a class="go" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开专题页 ↗</a>'); }
         if (also.length) links.push('<span class="also">亦属：' + also.join("、") + "</span>");
         return '<li class="item"><div class="main-col"><div><span class="kind">' + esc(LIB.kinds[it.kind] || "") + '</span><span class="t">' + (it.kind === "book" ? "《" + esc(it.title) + "》" : esc(it.title)) + "</span>" +
           (it.by ? '<span class="by">' + esc(it.by) + "</span>" : "") + "</div>" +
@@ -2379,8 +2395,9 @@ window.YXL_STUDY = {
     }).join("");
     return '<div class="view">' + bannerHTML() + '<header><p class="eyebrow">学习方向</p><h1>' + esc(t.name) + '</h1><p class="goal"><b>目标</b>　' + esc(t.goal) + "</p>" +
       '<div class="stats"><span><b>' + p.done + "</b>/ " + p.total + ' 项已完成</span><span><b>' + p.doing + "</b>项进行中</span></div></header>" +
-      (function () { var rs = REPORTS.filter(function (rp) { return (rp.tracks || []).indexOf(id) >= 0; });
-        return rs.length ? '<section class="stage"><h2><span class="no">数据专题</span>用数据看这个方向</h2><div class="reports">' + reportRows(rs) + "</div></section>" : ""; })() +
+      (function () { var mine = REPORTS.filter(function (rp) { return (rp.tracks || []).indexOf(id) >= 0; });
+        return RGROUPS.map(function (g) { var rs = reportsIn(g.id, mine);
+          return rs.length ? '<section class="stage"><h2><span class="no">' + esc(g.name) + '</span>' + esc(g.trackHead || "") + '</h2><div class="reports">' + reportRows(rs) + "</div></section>" : ""; }).join(""); })() +
       stages + "</div>";
   }
 

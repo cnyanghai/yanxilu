@@ -246,18 +246,22 @@
       h += '<a href="#b-' + id + '"' + (here ? ' aria-current="page"' : "") + "><span>" + esc(b.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>";
     });
     var due = dueCards().length;
-    if (REPORTS.length) {
-      h += '<div class="lab">数据专题</div>';
-      REPORTS.forEach(function (rp) { h += '<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span>' + esc(rp.title) + '</span><span class="n" aria-hidden="true">↗</span></a>'; });
-    }
+    RGROUPS.forEach(function (g) {
+      var rs = reportsIn(g.id);
+      if (!rs.length) return;
+      h += '<div class="lab">' + esc(g.name) + '</div>';
+      rs.forEach(function (rp) { h += '<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span>' + esc(rp.title) + '</span><span class="n" aria-hidden="true">↗</span></a>'; });
+    });
     h += '<div class="lab">记录</div><a href="#journal"' + cur("journal") + '><span>学习足迹</span><span class="n">' + Object.keys(S.data.journal).length + "</span></a>" +
       '<a href="#review"' + cur("review") + "><span>复习</span>" + (due ? '<span class="n due">' + due + "</span>" : "") + "</a></nav>";
     return h;
   }
 
-  /* ---------- 数据专题（独立页面，新标签页打开） ---------- */
+  /* ---------- 专题（独立页面，新标签页打开；按 reportGroups 分组） ---------- */
   var IN_ARTIFACT = !!(window.claude && typeof window.claude.use === "function");
   var REPORTS = LIB.reports || [];
+  var RGROUPS = LIB.reportGroups || [{ id: "data", name: "数据专题", trackHead: "用数据看这个方向" }];
+  function reportsIn(gid, list) { return (list || REPORTS).filter(function (rp) { return (rp.group || "data") === gid; }); }
   function reportHref(rp) { return IN_ARTIFACT && rp.artifact ? rp.artifact : rp.href; }
   function reportRows(list) {
     return list.map(function (rp) {
@@ -293,7 +297,8 @@
       '<section class="focus" aria-label="正在精读"><div class="focus-top"><p class="eyebrow">正在精读</p><a class="btn small ghost" href="#review">复习概念卡</a></div>' +
       FOCUS.map(focusBlock).join("") + "</section>" +
       '<section><h2>五个学习方向</h2><div class="tracks">' + rows + "</div></section>" +
-      (REPORTS.length ? '<section><h2>数据专题</h2><div class="reports">' + reportRows(REPORTS) + "</div></section>" : "") +
+      RGROUPS.map(function (g) { var rs = reportsIn(g.id);
+        return rs.length ? '<section><h2>' + esc(g.name) + '</h2><div class="reports">' + reportRows(rs) + "</div></section>" : ""; }).join("") +
       '<section class="pair"><div class="col"><h2>最近的学习足迹</h2>' + journalList(js.slice(0, 4), false) + '<p class="more"><a href="#journal">全部足迹</a></p></div>' +
       '<div class="col"><h2>怎么用</h2><ol class="steps">' +
       "<li><span><b>读与问</b>按路线图读书；有疑问就在对话里和 Claude 讨论。</span></li>" +
@@ -313,6 +318,7 @@
         var also = it.tracks.filter(function (x) { return x !== id; }).map(function (x) { return '<a href="#t-' + x + '">' + esc(TRACK[x].short) + "</a>"; });
         var links = [];
         if (it.module) links.push('<a class="go" href="#b-' + it.module + '">进入精读模块</a>');
+        if (it.report) { var rp = REPORTS.filter(function (x) { return x.id === it.report; })[0]; if (rp) links.push('<a class="go" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开专题页 ↗</a>'); }
         if (also.length) links.push('<span class="also">亦属：' + also.join("、") + "</span>");
         return '<li class="item"><div class="main-col"><div><span class="kind">' + esc(LIB.kinds[it.kind] || "") + '</span><span class="t">' + (it.kind === "book" ? "《" + esc(it.title) + "》" : esc(it.title)) + "</span>" +
           (it.by ? '<span class="by">' + esc(it.by) + "</span>" : "") + "</div>" +
@@ -323,8 +329,9 @@
     }).join("");
     return '<div class="view">' + bannerHTML() + '<header><p class="eyebrow">学习方向</p><h1>' + esc(t.name) + '</h1><p class="goal"><b>目标</b>　' + esc(t.goal) + "</p>" +
       '<div class="stats"><span><b>' + p.done + "</b>/ " + p.total + ' 项已完成</span><span><b>' + p.doing + "</b>项进行中</span></div></header>" +
-      (function () { var rs = REPORTS.filter(function (rp) { return (rp.tracks || []).indexOf(id) >= 0; });
-        return rs.length ? '<section class="stage"><h2><span class="no">数据专题</span>用数据看这个方向</h2><div class="reports">' + reportRows(rs) + "</div></section>" : ""; })() +
+      (function () { var mine = REPORTS.filter(function (rp) { return (rp.tracks || []).indexOf(id) >= 0; });
+        return RGROUPS.map(function (g) { var rs = reportsIn(g.id, mine);
+          return rs.length ? '<section class="stage"><h2><span class="no">' + esc(g.name) + '</span>' + esc(g.trackHead || "") + '</h2><div class="reports">' + reportRows(rs) + "</div></section>" : ""; }).join(""); })() +
       stages + "</div>";
   }
 
