@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-12",
+  "updated": "2026-10-13",
   "next": {
     "sql": 0,
     "py": 0,
@@ -41,6 +41,29 @@
         }
       ],
       "file": "study/daily/2026-10-12.md",
+      "status": "pushed"
+    },
+    "2026-10-13": {
+      "planned": [
+        {
+          "subj": "en",
+          "mins": 20,
+          "title": "CFA 术语与短文：Rates and Returns"
+        },
+        {
+          "subj": "py",
+          "mins": 45,
+          "index": 0,
+          "title": "环境：Anaconda 与 Jupyter，第一个程序"
+        },
+        {
+          "subj": "cfa",
+          "mins": 35,
+          "index": 0,
+          "title": "Q1 收益率与回报（1/4）"
+        }
+      ],
+      "file": "study/daily/2026-10-13.md",
       "status": "pushed"
     }
   }
