@@ -614,6 +614,9 @@ window.YXL_LIB = {
     { id: "futures-market-making", group: "note", title: "期货做市商", date: "2026-10", tracks: ["fut"],
       desc: "做市商靠什么赚、在哪里亏：准入条件、盈亏方程、七块核心知识、可以动手调的报价模型、跨期对冲、常见亏法、学习路线和自测题。",
       href: "reports/market-making.html", artifact: "https://claude.ai/artifact/Dnfuoje3rEV1HL39iURdtc" },
+    { id: "futures-mm-plan", group: "note", title: "做市商研习计划", date: "2026-10", tracks: ["fut"],
+      desc: "12 周，书和模型同步：每周一读一做，跟着每日课表的 SQL、Python 进度加深；附一天的模拟 tick 练习数据、纸上做市、SQL 与 Python 习题和参考答案。",
+      href: "reports/market-making-plan.html", artifact: "https://claude.ai/artifact/Vr3cJGdvYnTA8xiR4m9qFZ" },
     { id: "cn-us-consumption", title: "中美消费与人口", date: "2026-10", tracks: ["cycle"],
       desc: "2000 年以来中美居民消费率、消费结构对比，以及中国人口年龄结构（含每五年节点和五岁组人口金字塔）；附数据表、口径和长表 CSV。",
       href: "reports/consumption-population.html", artifact: "https://claude.ai/artifact/LC5DxsG2pE1kCeXXf5p3xE" },
@@ -744,8 +747,18 @@ window.YXL_LIB = {
         ]},
         { name: "交易与量化", desc: "把判断变成规则", items: [
           { id: "murphy", kind: "book", title: "期货市场技术分析", by: "约翰·墨菲", why: "技术分析的经典教科书。" },
-          { id: "fut-backtest", kind: "practice", title: "把一个日内交易想法写成规则并回测", why: "规则明确、回测通过，再决定要不要实盘。" },
-          { id: "fut-mm", kind: "concept", title: "期货做市商", why: "做市商靠价差和交易所激励赚钱、被逆向选择和库存拖累：准入、盈亏方程、报价模型、跨期对冲与学习路线，整理成一个知识专题。", report: "futures-market-making" }
+          { id: "fut-backtest", kind: "practice", title: "把一个日内交易想法写成规则并回测", why: "规则明确、回测通过，再决定要不要实盘。" }
+        ]},
+        { name: "做市专题研习", desc: "12 周，每周一读一做，与每日课表第一阶段同时进行", items: [
+          { id: "fut-mm", kind: "concept", title: "期货做市商", why: "做市商靠价差和交易所激励赚钱、被逆向选择和库存拖累：准入、盈亏方程、报价模型、跨期对冲与学习路线，整理成一个知识专题。", report: "futures-market-making" },
+          { id: "mm-harris", kind: "book", title: "Trading and Exchanges", by: "拉里·哈里斯", why: "第 1—3 周：做市商、买卖价差、知情交易者三章，配报价演示实验和两轮纸上做市。", report: "futures-mm-plan" },
+          { id: "mm-rules", kind: "practice", title: "整理一个品种的做市义务表", why: "第 4 周：读上期所、郑商所和中期协的做市规则原文，查清价差、报价量、报价时间、激励和考核。", report: "futures-mm-plan" },
+          { id: "mm-ohara", kind: "book", title: "Market Microstructure Theory", by: "莫琳·奥哈拉", why: "第 5—7 周：第 1—4 章，存货模型、信息模型和 Kyle 模型。", report: "futures-mm-plan" },
+          { id: "mm-data", kind: "practice", title: "练习数据：价差、盘口失衡与成交后走势", why: "第 5—8 周：用 SQL 和 pandas 在模拟 tick 数据里量出逆向选择。", report: "futures-mm-plan" },
+          { id: "mm-cartea", kind: "book", title: "Algorithmic and High-Frequency Trading", by: "阿尔瓦罗·卡特亚 等", why: "第 8、10、11 周：微观结构的实证事实，第 10 章做市，第 12 章盘口失衡。", report: "futures-mm-plan" },
+          { id: "mm-as", kind: "practice", title: "Avellaneda-Stoikov 论文与报价函数", why: "第 9 周：读原论文，把公式写成 quote() 函数，和专题页演示对数。", report: "futures-mm-plan" },
+          { id: "mm-backtest", kind: "practice", title: "做市回测与盈亏拆分", why: "第 10—11 周：固定挂单、库存后撤、失衡过滤，换成交假设、扣手续费比较。", report: "futures-mm-plan" },
+          { id: "mm-summary", kind: "practice", title: "一页总结，定下一阶段", why: "第 12 周：钱从哪来、在哪漏，哪些假设在真实品种上最先失效。", report: "futures-mm-plan" }
         ]}
       ]
     }
@@ -1320,7 +1333,8 @@ window.YXL_RECORD = {
       "j-202609-goals": { date: "2026-09", minutes: 0, ref: "", text: "确立五个长期学习方向：地缘政治与战争、CFA 级金融知识、上市公司与行业分析、经济周期、期货与大宗商品。", t: "2026-09-30T00:00:00Z" },
       "j-20261007-start": { date: "2026-10-07", minutes: 0, ref: "tragedy", text: "建立研习录：把五个方向整理成分阶段的路线图，开设《大国政治的悲剧》精读模块（章节导读、概念卡、争鸣、分析框架）。", t: "2026-10-07T18:40:00-07:00" },
       "j-20261010-zhoulu": { date: "2026-10-10", minutes: 0, ref: "zhoulu", text: "开始读《涛动周期录》，开设精读模块：康波时间轴、四周期嵌套图、七章导读与 48 篇报告清单、22 张概念卡、判断对照表、四周期定位清单、论证地图，以及第七章“周期真实义”精读稿。", t: "2026-10-10T03:50:00-07:00" },
-      "j-20261011-mm": { date: "2026-10-11", minutes: 0, ref: "fut-mm", text: "整理期货做市商知识专题：准入条件、盈亏方程、七块核心知识、可调参数的报价模型演示、跨期与对冲、常见亏法、学习路线和自测题，挂到首页“知识专题”和期货与商品方向。", t: "2026-10-11T19:30:00-07:00" }
+      "j-20261011-mm": { date: "2026-10-11", minutes: 0, ref: "fut-mm", text: "整理期货做市商知识专题：准入条件、盈亏方程、七块核心知识、可调参数的报价模型演示、跨期与对冲、常见亏法、学习路线和自测题，挂到首页“知识专题”和期货与商品方向。", t: "2026-10-11T19:30:00-07:00" },
+      "j-20261011-mmplan": { date: "2026-10-11", minutes: 0, ref: "fut-mm", text: "定下做市商的学法：书和模型同步，12 周、每周一读一做，跟着每日课表的 SQL、Python 进度加深。开设“做市商研习计划”页：十二周安排、一天的模拟 tick 练习数据、两轮纸上做市、SQL 与 Python 习题和参考答案；期货方向新增“做市专题研习”阶段。", t: "2026-10-11T20:40:00-07:00" }
     },
     cards: {}
   }
@@ -2416,7 +2430,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
         var also = it.tracks.filter(function (x) { return x !== id; }).map(function (x) { return '<a href="#t-' + x + '">' + esc(TRACK[x].short) + "</a>"; });
         var links = [];
         if (it.module) links.push('<a class="go" href="#b-' + it.module + '">进入精读模块</a>');
-        if (it.report) { var rp = REPORTS.filter(function (x) { return x.id === it.report; })[0]; if (rp) links.push('<a class="go" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开专题页 ↗</a>'); }
+        if (it.report) { var rp = REPORTS.filter(function (x) { return x.id === it.report; })[0]; if (rp) links.push('<a class="go" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开「' + esc(rp.title) + '」↗</a>'); }
         if (also.length) links.push('<span class="also">亦属：' + also.join("、") + "</span>");
         return '<li class="item"><div class="main-col"><div><span class="kind">' + esc(LIB.kinds[it.kind] || "") + '</span><span class="t">' + (it.kind === "book" ? "《" + esc(it.title) + "》" : esc(it.title)) + "</span>" +
           (it.by ? '<span class="by">' + esc(it.by) + "</span>" : "") + "</div>" +

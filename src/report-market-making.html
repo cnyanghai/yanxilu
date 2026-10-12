@@ -430,6 +430,7 @@ dl.terms dd{margin:0;color:var(--ink-2)}
 
 <section id="path">
   <div class="sec"><span class="no">七</span><h2>学习路线</h2></div>
+  <div class="callout"><b>已经排成 12 周计划。</b>书和模型同步，每周一读一做，和每日课表第一阶段同时进行，附模拟 tick 练习数据、纸上做市、SQL 与 Python 习题和参考答案：<a href="market-making-plan.html" id="plan-link">做市商研习计划</a>。</div>
   <ol class="points">
     <li><span><b>先读理论。</b>按下面的书单顺序读：微观结构入门，再到理论，再到做市模型的数学推导。期权做市另加波动率的书。</span></li>
     <li><span><b>再碰数据。</b>拿一个品种的 tick 数据导入数据库，用 SQL 和 Python 分析：价差的分布、盘口失衡和下一跳价格的关系、不同时段的成交强度、成交之后价格往哪边走（逆向选择有多大）。</span></li>
@@ -481,6 +482,10 @@ dl.terms dd{margin:0;color:var(--ink-2)}
 (function(){
   "use strict";
   const $ = id => document.getElementById(id);
+  /* 研习计划链接：claude.ai 上指向计划页的 Artifact，GitHub 上用相对路径 */
+  if (window.claude && typeof window.claude.use === "function") {
+    const pl = $("plan-link"); pl.href = "https://claude.ai/artifact/Vr3cJGdvYnTA8xiR4m9qFZ"; pl.target = "_blank"; pl.rel = "noopener";
+  }
   const sign = n => (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n).toLocaleString("en-US");
 
   /* ---------- 二、盈亏瀑布 ---------- */

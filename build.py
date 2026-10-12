@@ -37,10 +37,16 @@ print("dist/artifact.html", len(body.encode()), "bytes; index.html", len(full.en
 # 专题页：src/report-*.html 里的 /*@DATA@*/ 换成 reports/data/ 下的 JSON；知识专题没有数据文件，填 None
 REPORTS = {"report-consumption.html": ("consumption-population.json", "consumption-population.html"),
            "report-wealth.html": ("wealth.json", "wealth.html"),
-           "report-market-making.html": (None, "market-making.html")}
+           "report-market-making.html": (None, "market-making.html"),
+           "report-market-making-plan.html": (None, "market-making-plan.html")}
 (root / "reports").mkdir(exist_ok=True)
+import html as _html
+def insert_code(tpl):
+    """<!--@CODE:路径@--> 换成 reports/data/ 下对应文件的内容（转义后放进 <pre><code>）"""
+    return re.sub(r"<!--@CODE:([\w./-]+)@-->",
+                  lambda m: _html.escape((root / "reports/data" / m.group(1)).read_text(encoding="utf-8").rstrip(), quote=False), tpl)
 for src_name, (data_name, out_name) in REPORTS.items():
-    tpl = (root / "src" / src_name).read_text(encoding="utf-8")
+    tpl = insert_code((root / "src" / src_name).read_text(encoding="utf-8"))
     if data_name is None:
         body = tpl
     else:

@@ -319,7 +319,7 @@
         var also = it.tracks.filter(function (x) { return x !== id; }).map(function (x) { return '<a href="#t-' + x + '">' + esc(TRACK[x].short) + "</a>"; });
         var links = [];
         if (it.module) links.push('<a class="go" href="#b-' + it.module + '">进入精读模块</a>');
-        if (it.report) { var rp = REPORTS.filter(function (x) { return x.id === it.report; })[0]; if (rp) links.push('<a class="go" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开专题页 ↗</a>'); }
+        if (it.report) { var rp = REPORTS.filter(function (x) { return x.id === it.report; })[0]; if (rp) links.push('<a class="go" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开「' + esc(rp.title) + '」↗</a>'); }
         if (also.length) links.push('<span class="also">亦属：' + also.join("、") + "</span>");
         return '<li class="item"><div class="main-col"><div><span class="kind">' + esc(LIB.kinds[it.kind] || "") + '</span><span class="t">' + (it.kind === "book" ? "《" + esc(it.title) + "》" : esc(it.title)) + "</span>" +
           (it.by ? '<span class="by">' + esc(it.by) + "</span>" : "") + "</div>" +

@@ -18,6 +18,7 @@
 - **数据专题**：[中美消费与人口](reports/consumption-population.html)，2000 年以来中美居民消费率、消费结构对比与中国人口年龄结构（每五年节点、五岁组人口金字塔），配图、数据表和来源。全部序列整理成长表 CSV（`reports/data/consumption-population.csv`），可直接导入数据库练习 SQL。
 - **数据专题**：[中美日财富存量](reports/wealth.html)，居民存款、股票、债券、期货、黄金储备、住房市值与住房、汽车保有量的三国对比（2025 年末），长表 CSV 在 `reports/data/wealth.csv`。
 - **知识专题**：[期货做市商](reports/market-making.html)，准入条件、盈亏方程（可切换情景的示意账）、七块核心知识、可调参数的 Avellaneda-Stoikov 报价演示、跨期与对冲、常见亏法、学习路线与书单、自测题。
+- **知识专题**：[做市商研习计划](reports/market-making-plan.html)，12 周、每周一读一做，与每日课表第一阶段同步；附一天的模拟 tick 练习数据（`reports/data/mm_ticks.csv`，生成脚本 `make_mm_ticks.py`）、两轮纸上做市、SQL 与 Python 习题，参考答案在 `reports/data/mm_exercises/`。页面里的代码由构建脚本从这些文件插入。
 
 ## 两个版本
 
