@@ -11,6 +11,8 @@ data = (root / "src/data.js").read_text(encoding="utf-8") + "\n" + "\n".join(
     f.read_text(encoding="utf-8") for f in sorted((root / "src").glob("deep-*.js")))
 # 每日课表：课程安排 + 打卡进度快照（study/progress.json 由早晚两个定时任务更新）
 data += "\n" + (root / "src/plan.js").read_text(encoding="utf-8")
+# 线网图布局
+data += "\n" + (root / "src/metro.js").read_text(encoding="utf-8")
 data += "\nwindow.YXL_STUDY = " + (root / "study/progress.json").read_text(encoding="utf-8").strip() + ";\n"
 # 每日讲义快照：GitHub 版直接读它；云端版优先读数据库 lessons/<日期>，读不到再用它
 import json

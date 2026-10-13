@@ -1,29 +1,45 @@
 <title>研习录</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Noto+Serif+SC:wght@400;600;700&family=ZCOOL+XiaoWei&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+SC:wght@400;500;700&display=swap">
 <style>
-/* 布局：左侧书目索引栏 + 右侧阅读主栏（正文约 40 字宽）；窄屏时索引栏收为顶部横向目录。
-   颜色：冷调宣纸底、墨色正文、靛青表示“进行中”、朱砂印表示“已完成 / 已内化”。 */
+/* 布局：顶部五个入口（手机上是底部标签栏）+ 居中的主栏；首页是全宽的线网图。
+   字体：Barlow（数字、拉丁字母）配思源黑体；颜色：白底黑线，每条学习线一种颜色，区域底色表示学习方向。 */
 :root{
-  --paper:#ECEFE9; --leaf:#F7F8F4; --ink:#1B2220; --ink-2:#47524D; --ink-3:#727D77; --rule:#D3D9CF;
-  --indigo:#2A4A78; --indigo-wash:#DCE4EF; --seal:#AE3D2A; --seal-wash:#F2E0DA; --seal-ink:#FFF7F2;
-  --f-display:"ZCOOL XiaoWei","Noto Serif SC","Songti SC","STSong",serif;
-  --f-body:"Noto Serif SC","Songti SC","STSong","SimSun",serif;
-  --f-ui:-apple-system,BlinkMacSystemFont,"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",sans-serif;
+  --paper:#F7F7F4; --leaf:#FFFFFF; --ink:#1A1A1A; --ink-2:#4A4F4C; --ink-3:#686D6A; --rule:#DDDDD6; --rule-strong:#B9BCB6;
+  --indigo:#1F5FAE; --indigo-wash:#E4EDF8; --seal:#D4402F; --seal-wash:#FBE9E6; --seal-ink:#FFFFFF;
+  --map-bg:#FFFFFF;
+  --ln-en:#E09A1E; --ln-cfa:#8A3A8E; --ln-sql:#00897B; --ln-py:#2B5FAE; --ln-geo:#D4402F; --ln-tao:#9A5B2E; --ln-mm:#7C9A1E; --ln-rev:#727775;
+  --z-cycle:#FBF1E6; --z-geo:#FBEBE8; --z-fin:#F5EEF6; --z-data:#E7F3F1; --z-fut:#F1F4E2;
+  --zi-cycle:#8A5A2B; --zi-geo:#A8352A; --zi-fin:#6E3A73; --zi-data:#00695C; --zi-fut:#556E12; --zi-co:#686D6A;
+  --bdg-on:#FFFFFF; --bdg-on-dk:#1A1A1A; --late:#F2B23E; --early:#7FD1E3; --on-signal:#1A1A1A;
+  --f-display:"Barlow","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --f-ui:"Barlow","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
+  --f-num:"Barlow Condensed","Barlow",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
-  --r:4px;
+  --r:6px;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
-    --paper:#121715; --leaf:#1A201E; --ink:#E1E6DF; --ink-2:#B2BCB6; --ink-3:#86918B; --rule:#2D3532;
-    --indigo:#93B0DD; --indigo-wash:#1E293A; --seal:#B9513D; --seal-wash:#36211C; --seal-ink:#FFF7F2;
+    --paper:#121313; --leaf:#1B1C1C; --ink:#EDEDEA; --ink-2:#C2C6C3; --ink-3:#9DA19E; --rule:#2F3130; --rule-strong:#4A4D4B;
+    --indigo:#8FB4E6; --indigo-wash:#1D2735; --seal:#F06A57; --seal-wash:#3A221E; --seal-ink:#121313;
+    --map-bg:#161717;
+    --ln-en:#F2B23E; --ln-cfa:#C688CB; --ln-sql:#2DB4A4; --ln-py:#6F9DE2; --ln-geo:#F06A57; --ln-tao:#CF925F; --ln-mm:#A9C443; --ln-rev:#A3A8A5;
+    --z-cycle:#2A231B; --z-geo:#2D1F1C; --z-fin:#271F29; --z-data:#152826; --z-fut:#222716;
+    --zi-cycle:#E2B486; --zi-geo:#F29A8C; --zi-fin:#D9A6DD; --zi-data:#6FD3C4; --zi-fut:#C3DA6E; --zi-co:#9DA19E;
+    --bdg-on:#121313; --bdg-on-dk:#121313; --late:#F2B23E; --early:#7FD1E3; --on-signal:#121313;
     color-scheme:dark;
   }
 }
 :root[data-theme="dark"]{
-  --paper:#121715; --leaf:#1A201E; --ink:#E1E6DF; --ink-2:#B2BCB6; --ink-3:#86918B; --rule:#2D3532;
-  --indigo:#93B0DD; --indigo-wash:#1E293A; --seal:#B9513D; --seal-wash:#36211C; --seal-ink:#FFF7F2;
+  --paper:#121313; --leaf:#1B1C1C; --ink:#EDEDEA; --ink-2:#C2C6C3; --ink-3:#9DA19E; --rule:#2F3130; --rule-strong:#4A4D4B;
+  --indigo:#8FB4E6; --indigo-wash:#1D2735; --seal:#F06A57; --seal-wash:#3A221E; --seal-ink:#121313;
+  --map-bg:#161717;
+  --ln-en:#F2B23E; --ln-cfa:#C688CB; --ln-sql:#2DB4A4; --ln-py:#6F9DE2; --ln-geo:#F06A57; --ln-tao:#CF925F; --ln-mm:#A9C443; --ln-rev:#A3A8A5;
+  --z-cycle:#2A231B; --z-geo:#2D1F1C; --z-fin:#271F29; --z-data:#152826; --z-fut:#222716;
+  --zi-cycle:#E2B486; --zi-geo:#F29A8C; --zi-fin:#D9A6DD; --zi-data:#6FD3C4; --zi-fut:#C3DA6E; --zi-co:#9DA19E;
+  --bdg-on:#121313; --bdg-on-dk:#121313; --late:#F2B23E; --early:#7FD1E3; --on-signal:#121313;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -34,30 +50,30 @@ button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 h1,h2,h3{text-wrap:balance}
 
-.shell{display:grid;grid-template-columns:212px minmax(0,1fr);gap:56px;max-width:1160px;margin:0 auto;padding-inline:28px}
-.rail{position:sticky;top:env(safe-area-inset-top,0px);align-self:start;max-height:100vh;overflow-y:auto;padding-block:32px 24px;font-family:var(--f-ui);font-size:14px}
-.brand{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--ink)}
-.seal{display:inline-grid;place-items:center;flex:none;width:42px;height:42px;background:var(--seal);color:var(--seal-ink);font-family:var(--f-display);font-size:16px;line-height:1;border-radius:3px;writing-mode:vertical-rl;letter-spacing:.06em}
-.bt b{display:block;font-family:var(--f-display);font-weight:400;font-size:24px;letter-spacing:.1em;line-height:1.2}
-.bt small{display:block;color:var(--ink-3);font-size:12px;letter-spacing:.06em}
-.mode{display:flex;align-items:center;gap:7px;margin-block:16px 10px;font-size:12px;color:var(--ink-3)}
-.mode i{width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
-.mode.db i{background:var(--indigo)}
-.mode.local i{background:var(--seal)}
-.nav{display:grid;gap:1px}
-.nav .lab{font-size:11px;letter-spacing:.18em;color:var(--ink-3);margin:18px 0 4px;padding-left:10px}
-.nav a{display:flex;justify-content:space-between;align-items:baseline;gap:8px;padding:6px 10px;border-radius:var(--r);color:var(--ink-2);text-decoration:none}
-.nav a:hover{background:var(--leaf);color:var(--ink)}
-.nav a[aria-current="page"]{background:var(--leaf);color:var(--ink);font-weight:600}
-.nav .n{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);font-weight:400;font-variant-numeric:tabular-nums}
-.nav .n.due{color:var(--seal)}
+.topbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:30;background:var(--leaf);border-bottom:3px solid var(--ink)}
+.tb-in{max-width:1400px;margin:0 auto;padding:10px 28px;display:flex;align-items:center;gap:12px 28px}
+.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;flex:none}
+.brand b{font-family:var(--f-display);font-size:20px;font-weight:700;letter-spacing:.06em}
+.roundel{position:relative;display:block;width:30px;height:30px;border-radius:50%;border:5px solid var(--seal);box-sizing:border-box}
+.roundel i{position:absolute;left:-7px;right:-7px;top:6px;height:8px;background:var(--ink);border-radius:1px}
+.mainnav{display:flex;gap:4px;flex:1 1 auto}
+.mainnav a{display:inline-flex;align-items:center;gap:7px;min-height:40px;padding:0 15px;border-radius:20px;color:var(--ink);text-decoration:none;font-family:var(--f-ui);font-size:15px;font-weight:500;position:relative}
+.mainnav a:hover{background:var(--paper)}
+.mainnav a[aria-current="page"]{background:var(--ink);color:var(--leaf);font-weight:700}
+.mainnav svg{width:18px;height:18px;flex:none}
+.mainnav .nb{font-family:var(--f-num);font-size:13px;font-weight:600;line-height:1;color:#FFFFFF;background:var(--seal);border-radius:9px;padding:2px 6px}
+.topbar .mode{display:flex;align-items:center;gap:7px;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.topbar .mode i{width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.topbar .mode.db i{background:var(--ln-sql)}
+.topbar .mode.local i{background:var(--seal)}
 
-main{min-width:0;padding-block:40px 96px}
-.view{max-width:740px}
+main{display:block;min-width:0;max-width:1400px;margin:0 auto;padding:32px 28px 96px}
+.view{max-width:760px;margin-inline:auto}
+.view.home{max-width:none}
 .eyebrow{font-family:var(--f-ui);font-size:12px;letter-spacing:.16em;color:var(--ink-3);margin:0 0 8px}
 .eyebrow a{color:inherit}
-h1{font-family:var(--f-display);font-weight:400;font-size:clamp(36px,6vw,54px);line-height:1.12;letter-spacing:.05em;margin:0}
-h2{font-family:var(--f-display);font-weight:400;font-size:25px;line-height:1.3;letter-spacing:.04em;margin:0 0 14px}
+h1{font-family:var(--f-display);font-weight:700;font-size:clamp(32px,5vw,46px);line-height:1.15;letter-spacing:.01em;margin:0}
+h2{font-family:var(--f-display);font-weight:700;font-size:23px;line-height:1.3;letter-spacing:.01em;margin:0 0 14px}
 h2 a{color:inherit;text-decoration:none}
 h2 a:hover{color:var(--indigo)}
 h3{font-size:17px;font-weight:700;margin:0}
@@ -300,17 +316,6 @@ details.ch summary:hover .ttl{color:var(--indigo)}
   .slots .subj{grid-column:1/-1}
 }
 @media (max-width:880px){
-  .shell{grid-template-columns:minmax(0,1fr);gap:0;padding-inline:16px}
-  .rail{position:sticky;z-index:20;max-height:none;overflow:visible;background:var(--paper);margin-inline:-16px;padding:10px 16px 0;border-bottom:1px solid var(--rule)}
-  .seal{width:32px;height:32px;font-size:12.5px}
-  .bt b{font-size:19px}
-  .bt small{display:none}
-  .mode{position:absolute;top:18px;right:16px;margin:0}
-  .nav{display:flex;gap:2px;overflow-x:auto;margin-inline:-16px;padding:8px 16px;scrollbar-width:none}
-  .nav::-webkit-scrollbar{display:none}
-  .nav .lab{display:none}
-  .nav a{flex:none;white-space:nowrap;padding:5px 10px}
-  main{padding-block:28px 80px}
   .pair{grid-template-columns:minmax(0,1fr);gap:0}
   .fw{grid-template-columns:minmax(0,1fr)}
 }
@@ -588,12 +593,136 @@ details.ch,.card{scroll-margin-top:16px}
 .md summary{cursor:pointer;font-family:var(--f-ui);font-weight:600;padding:6px 0;color:var(--indigo)}
 .md .mblock{text-align:center;font-family:var(--f-mono);font-size:14.5px;background:var(--leaf);padding:10px;border-radius:var(--r);overflow-x:auto}
 .md .mth{font-family:var(--f-mono);font-size:.92em}
+
+/* 换字体后的标题字重（原来的展示字体只有一种字重） */
+.tname,.rname,.ch .ttl,.card .front,.rv .front,.asw-name,.cn-name,.mtree > .mn > .mrow .mtext,.kw-ph b,.ntx b,.md h2,.md h3,.kw-ch{font-weight:600;letter-spacing:.01em}
+.oneline{font-weight:500;letter-spacing:0}
+.tname,.rname{font-size:19px}
+
+/* 首页：今日路线 */
+.tstrip{background:var(--leaf);border:1px solid var(--rule);border-radius:18px;padding:22px 26px 20px}
+.ts-top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 24px}
+.ts-top h1{font-size:32px;line-height:1.15;margin:0}
+.ts-top .eyebrow{margin:0 0 6px}
+.seg .segn{font-family:var(--f-num);font-weight:600;opacity:.75;margin-left:2px}
+.ts-route{display:flex;align-items:flex-start;margin-top:22px}
+.stp{display:grid;grid-template-columns:28px minmax(0,1fr);grid-template-rows:28px auto;flex:1 1 0;min-width:0}
+.stp-dot{grid-area:1/1;width:28px;height:28px;border-radius:50%;border:6px solid var(--ink);background:var(--leaf);box-sizing:border-box;position:relative;z-index:1}
+.stp-bar{grid-area:1/2;align-self:center;height:12px;background:var(--c);margin-left:-2px}
+.stp.extra .stp-bar{background:repeating-linear-gradient(90deg,var(--c) 0 14px,transparent 14px 20px)}
+.stp-tx{grid-area:2/1/3/3;display:flex;flex-direction:column;align-items:flex-start;gap:4px;padding:12px 18px 0 0;min-width:0}
+.stp-tag{display:flex;align-items:center;gap:8px}
+.lbadge{display:inline-block;font-family:var(--f-ui);font-size:12.5px;font-weight:700;line-height:1.55;color:var(--bdg-on);background:var(--c);border-radius:4px;padding:0 7px;white-space:nowrap}
+.lbadge.dk{color:var(--bdg-on-dk)}
+.stp-min{font-family:var(--f-num);font-size:18px;font-weight:600;line-height:1.2}
+.stp-title{font-size:16px;font-weight:600;line-height:1.5}
+.stp-seq{font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
+.stp.end{flex:0 0 auto;grid-template-columns:32px;grid-template-rows:28px auto}
+.stp.end .stp-dot{width:32px;height:32px;margin-top:-2px;box-shadow:0 0 0 4px var(--leaf),0 0 0 7px var(--ink)}
+.stp.end .stp-tx{grid-area:2/1;justify-self:end;align-items:flex-end;text-align:right;padding-right:0;white-space:nowrap}
+.ts-foot{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-top:20px}
+.ts-note{flex:1 1 320px;min-width:0;margin:0;font-size:14.5px;line-height:1.75;color:var(--ink-2)}
+.ts-warn{margin:16px 0 0;padding-top:12px;border-top:1px dashed var(--rule-strong);font-size:14px;line-height:1.75;color:var(--ink-2)}
+.ts-warn b{color:var(--seal)}
+
+/* 首页：线网图 */
+.mwrap{margin-top:30px}
+.mhead{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px 20px;margin-bottom:12px}
+.mhead h2{margin:0;font-size:24px}
+.mhead .meta{margin-top:4px}
+.chipbtn{min-height:38px;padding:0 14px;border:1px solid var(--rule-strong);border-radius:19px;background:var(--leaf);color:var(--ink);font-family:var(--f-ui);font-size:14px;cursor:pointer}
+.chipbtn[aria-pressed="true"]{border:2px solid var(--ink);font-weight:700}
+.mscroll{overflow-x:auto;border:1px solid var(--rule);border-radius:18px;background:var(--map-bg);-webkit-overflow-scrolling:touch}
+.minner{position:relative;min-width:1040px}
+svg.metro{display:block;width:100%;height:auto;font-family:var(--f-ui)}
+.metro text{font-size:13px;fill:var(--ink);paint-order:stroke;stroke:var(--map-bg);stroke-width:4px;stroke-linejoin:round}
+.metro text.mut{fill:var(--ink-3)}
+.metro text.mzl{font-size:13px;font-weight:700;letter-spacing:.06em;stroke:none}
+.metro .mzone:hover text{text-decoration:underline}
+.metro .mbdg text{stroke:none;font-size:12.5px;font-weight:700}
+.metro .mlg text{stroke:none}
+.metro .mlg text.h{font-size:15px;font-weight:700}
+.metro .mst{cursor:pointer}
+.metro .mst:focus{outline:none}
+.metro .hit{fill:transparent}
+.metro .mst:hover .hit{fill:var(--rule-strong);fill-opacity:.35}
+.metro .mst:focus-visible .hit{stroke:var(--indigo);stroke-width:2.5}
+.metro .mlm:hover text{text-decoration:underline}
+.metro .mhalo{fill:none;stroke-width:3;transform-box:fill-box;transform-origin:center;animation:mpulse 2.4s ease-out infinite}
+@keyframes mpulse{0%{transform:scale(.75);opacity:.75}100%{transform:scale(1.55);opacity:0}}
+@media (prefers-reduced-motion: reduce){.metro .mhalo{animation:none;opacity:.35}}
+.metro .mline{transition:opacity .2s}
+.metro.today-only .mline:not(.is-today){opacity:.14}
+.mpop{position:absolute;z-index:5;width:310px;max-width:calc(100% - 16px);background:var(--leaf);border:2px solid var(--ink);border-radius:14px;padding:14px 16px;box-shadow:0 10px 30px rgba(0,0,0,.18);font-size:14.5px;line-height:1.65}
+.mpop .mp-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;padding-right:30px}
+.mpop .mp-pos{font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
+.mpop .mp-t{margin:8px 0 0;font-size:16px;font-weight:700;line-height:1.5}
+.mpop .mp-s{margin:4px 0 0;font-size:13.5px;color:var(--ink-2)}
+.mpop .btns{margin-top:12px;gap:8px}
+.mpop .mp-x{position:absolute;top:8px;right:8px;width:32px;height:32px;border:0;border-radius:16px;background:transparent;color:var(--ink-2);font-size:20px;line-height:1;cursor:pointer}
+.mpop .mp-x:hover{background:var(--paper)}
+.mpop ul{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:6px}
+.linkrow{display:block;width:100%;text-align:left;background:none;border:0;padding:6px 0;font:inherit;font-size:14px;line-height:1.6;color:var(--ink);cursor:pointer}
+.linkrow:hover{color:var(--indigo)}
+.mhint{margin-top:8px}
+
+/* 首页：各线到站、地标、运行规则 */
+.hgrid{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;margin-top:28px;align-items:start}
+.panel{background:var(--leaf);border:1px solid var(--rule);border-radius:18px;padding:20px 22px}
+.panel h2{font-size:20px;margin:0 0 6px}
+.brow{display:grid;grid-template-columns:112px minmax(0,1fr) 44px 84px;gap:4px 12px;align-items:center;padding:11px 0;border-top:1px solid var(--rule);font-size:14.5px}
+.brow .bnext{min-width:0;line-height:1.55}
+.brow .bwhen{font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
+.pill{justify-self:end;display:inline-block;font-family:var(--f-ui);font-size:12.5px;font-weight:700;line-height:1.5;border-radius:11px;padding:1px 9px;white-space:nowrap;border:1.5px solid var(--ink);color:var(--ink)}
+.pill.late{background:var(--late);border-color:var(--late);color:var(--on-signal)}
+.pill.early{background:var(--early);border-color:var(--early);color:var(--on-signal)}
+.pill.free{border-style:dashed;border-color:var(--rule-strong);color:var(--ink-2);font-weight:500}
+.badvice{margin:12px 0 0;font-size:14px;line-height:1.75;color:var(--ink-2)}
+.lmk-list{display:grid;margin-top:8px}
+.lmk{display:grid;grid-template-columns:22px minmax(0,1fr);gap:2px 10px;padding:10px 0;border-top:1px solid var(--rule);color:var(--ink);text-decoration:none}
+.lmk-sq{grid-row:1/3;width:16px;height:16px;margin-top:4px;box-sizing:border-box;border:3px solid var(--ink);background:var(--leaf)}
+.lmk-t{font-weight:700}
+.lmk:hover .lmk-t{color:var(--indigo)}
+.lmk-d{font-size:13.5px;line-height:1.65;color:var(--ink-2)}
+.rules{margin-top:22px;border-top:3px solid var(--ink);padding-top:10px}
+.rules summary{cursor:pointer;font-family:var(--f-ui);font-size:16px;font-weight:700;padding:6px 0}
+.rules ol{margin:8px 0 0;padding-left:1.4em;display:grid;gap:6px;font-size:15px;line-height:1.75;max-width:52em}
+
+@media (max-width:980px){.hgrid{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:720px){
+  .topbar{position:static;border-bottom-width:2px}
+  .tb-in{padding:10px 16px;justify-content:space-between}
+  .mainnav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:0;background:var(--leaf);border-top:2px solid var(--ink);padding:6px 4px calc(8px + env(safe-area-inset-bottom,0px))}
+  .mainnav a{flex-direction:column;justify-content:center;gap:3px;min-height:50px;padding:0;border-radius:10px;font-size:12px}
+  .mainnav a[aria-current="page"]{background:transparent;color:var(--ink);font-weight:700}
+  .mainnav a[aria-current="page"]::before{content:"";position:absolute;top:-6px;left:30%;right:30%;height:3px;border-radius:2px;background:var(--seal)}
+  .mainnav .nb{position:absolute;top:2px;left:calc(50% + 6px);font-size:11px;padding:1px 5px}
+  main{padding:20px 16px calc(96px + env(safe-area-inset-bottom,0px))}
+  .toast{bottom:calc(84px + env(safe-area-inset-bottom,0px))}
+}
+@media (max-width:640px){
+  .tstrip{padding:18px 16px}
+  .ts-top h1{font-size:26px}
+  .ts-top .seg{width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
+  .ts-route{flex-direction:column}
+  .stp{grid-template-columns:28px minmax(0,1fr);grid-template-rows:28px minmax(18px,auto);flex:none;width:100%}
+  .stp-bar{grid-area:2/1;justify-self:center;align-self:stretch;width:8px;height:auto;margin:-2px 0 0}
+  .stp-tx{grid-area:1/2/3/3;padding:2px 0 18px 14px}
+  .stp.extra .stp-bar{background:repeating-linear-gradient(180deg,var(--c) 0 12px,transparent 12px 18px)}
+  .stp.end{grid-template-columns:32px minmax(0,1fr);grid-template-rows:32px}
+  .stp.end .stp-tx{grid-area:1/2;justify-self:start;text-align:left;flex-direction:row;align-items:baseline;gap:8px;padding:4px 0 0 14px}
+  .mscroll{margin-inline:-16px;border-radius:0;border-inline:0}
+  .panel{padding:18px 16px}
+  .brow{grid-template-columns:minmax(0,1fr) auto}
+  .brow .bline{grid-column:1;grid-row:1}
+  .brow .pill{grid-column:2;grid-row:1}
+  .brow .bnext{grid-column:1/-1;grid-row:2}
+  .brow .bwhen{grid-column:1/-1;grid-row:3}
+}
 </style>
 
-<div class="shell">
-  <aside class="rail" id="rail" aria-label="目录"></aside>
-  <main id="main" tabindex="-1"></main>
-</div>
+<header class="topbar" id="rail"></header>
+<main id="main" tabindex="-1"></main>
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <script>
 /* 研习录 · 内容数据
@@ -2058,6 +2187,106 @@ window.YXL_PLAN = {
   }
 };
 
+/* 研习录 · 线网图布局
+ * 坐标系 1360 × 900（SVG viewBox）。线路只走横竖两个方向，拐角由页面画成圆角。
+ * 一条线上的站点均匀排在相邻两个“锚点”之间：anchors 里的 [站序号, pts 下标] 把某一站钉在某个拐点或换乘点上。
+ * 站点内容不写在这里，由页面从课表（src/plan.js）、书（data.js）和下面的 mmWeeks 读取。
+ * 新增地标：在 data.js 的 reports 里加专题，再在下面 landmarks 里给它一个位置；没给位置的专题也会出现在首页“地标”列表里。
+ */
+window.YXL_METRO = {
+  w: 1360,
+  h: 900,
+
+  /* 区域 = 学习方向（track 对应 data.js 里 tracks 的 id；点区域名进入该方向） */
+  zones: [
+    { track: "cycle", name: "经济周期", x: 540, y: 70, w: 340, h: 225, fill: "--z-cycle", ink: "--zi-cycle", lx: 554, ly: 92 },
+    { track: "geo", name: "地缘与战争", x: 920, y: 56, w: 400, h: 238, fill: "--z-geo", ink: "--zi-geo", lx: 934, ly: 78 },
+    { track: "fin", name: "", x: 150, y: 300, w: 1070, h: 80, fill: "--z-fin", ink: "--zi-fin" },
+    { track: "", name: "数据技能 · SQL 与 Python", x: 60, y: 404, w: 960, h: 400, fill: "--z-data", ink: "--zi-data", lx: 74, ly: 792 },
+    { track: "fut", name: "期货与商品", x: 1040, y: 700, w: 290, h: 186, fill: "--z-fut", ink: "--zi-fut", lx: 1054, ly: 722 },
+    { track: "co", name: "公司与行业 · 第二阶段", x: 1060, y: 420, w: 270, h: 240, dashed: true, ink: "--zi-co", lx: 1074, ly: 442 }
+  ],
+
+  /* 线路。src：plan:<科目> 读课表，book:<书 id> 读章节，mm 读下面的 mmWeeks；没有 src 的只画线 */
+  lines: [
+    { id: "en", subj: "en", name: "英语", color: "--ln-en", r: 3, pts: [[180, 348], [1180, 348]] },
+    { id: "cfa", subj: "cfa", name: "CFA 一级", color: "--ln-cfa", src: "plan:cfa", pts: [[180, 330], [820, 330], [980, 330], [1180, 330]], anchors: [[0, 0], [40, 1], [51, 2], [63, 3]], hubs: [40, 51], small: true },
+    { id: "p2", name: "第二阶段（规划中）", color: "--ln-cfa", dash: true, r: 3, pts: [[1180, 330], [1290, 330], [1290, 560]] },
+    { id: "tao", book: "zhoulu", name: "涛动周期录", color: "--ln-tao", src: "book:zhoulu", free: true, pts: [[600, 160], [820, 160], [820, 330]], anchors: [[0, 0], [6, 2]], hubs: [6] },
+    { id: "geo", subj: "geo", book: "tragedy", name: "地缘 · 大国政治的悲剧", color: "--ln-geo", src: "plan:geo", pts: [[980, 330], [980, 110], [1290, 110]], anchors: [[0, 0], [23, 2]], hubs: [0] },
+    { id: "sql", subj: "sql", name: "SQL", color: "--ln-sql", src: "plan:sql", pts: [[120, 620], [302, 620], [380, 620], [960, 620]], anchors: [[0, 0], [7, 1], [10, 2], [35, 3]], hubs: [7, 10] },
+    { id: "py", subj: "py", name: "Python", color: "--ln-py", src: "plan:py", pts: [[120, 450], [380, 450], [380, 520], [380, 620], [380, 760], [700, 760]], anchors: [[0, 0], [12, 2], [16, 3], [23, 5]], hubs: [12, 16] },
+    { id: "mm", report: "futures-mm-plan", name: "做市商研习", color: "--ln-mm", src: "mm", pts: [[1220, 840], [302, 840], [302, 620], [302, 520], [380, 520], [700, 520]], anchors: [[0, 0], [4, 2], [7, 4], [11, 5]], hubs: [4, 7] }
+  ],
+
+  /* 换乘站：两条线在这里用到同一块知识。at = [线 id, 站序号] */
+  hubs: [
+    { x: 820, y: 339, cap: true, name: "经济周期", sub: "CFA E2「理解经济周期」和《涛动周期录》第七章「周期真实义」都在讲经济周期怎样运行，可以对照着读。", at: [["cfa", 40], ["tao", 6]] },
+    { x: 980, y: 339, cap: true, name: "地缘政治", sub: "CFA E5「地缘政治入门」与地缘线的起点《大国政治的悲剧》第一章相互补充。", at: [["cfa", 51], ["geo", 0]] },
+    { x: 302, y: 620, name: "GROUP BY", sub: "做市商第 5 周用 SQL 统计盘口数据，前置是 SQL 第 8 课 GROUP BY。", at: [["sql", 7], ["mm", 4]] },
+    { x: 380, y: 620, name: "表比对", sub: "SQL 第 11 课 INNER JOIN 和 Python 第 17 课 merge 是同一种操作：两张表按关键字对上。", at: [["sql", 10], ["py", 16]] },
+    { x: 380, y: 520, name: "pandas 入门", sub: "做市商第 8 周用 pandas 重做分析，前置是 Python 第 13 课 pandas 入门。", at: [["py", 12], ["mm", 7]] }
+  ],
+
+  /* 线名牌 */
+  badges: [
+    { line: "cfa", x: 70, y: 304, t: "CFA 一级" },
+    { line: "en", x: 40, y: 354, t: "英语 · 跟着 CFA 主题", dark: true },
+    { line: "sql", x: 40, y: 611, t: "SQL" },
+    { line: "py", x: 40, y: 441, t: "Python" },
+    { line: "tao", x: 600, y: 126, t: "涛动周期录 · 自由线" },
+    { line: "geo", x: 996, y: 222, t: "地缘 · 大国政治的悲剧" },
+    { line: "mm", x: 1100, y: 860, t: "做市商研习 · 12 周", dark: true }
+  ],
+
+  /* 固定文字。b 粗体在前，t 常规在后；anchor: "end" 右对齐 */
+  labels: [
+    { x: 460, y: 318, b: "", t: "数量方法 · 36 讲", anchor: "middle", muted: true },
+    { x: 1080, y: 318, b: "", t: "经济学 · 28 讲", anchor: "middle", muted: true },
+    { x: 776, y: 377, b: "经济周期", t: " E2 与第七章" },
+    { x: 958, y: 377, b: "地缘政治", t: " E5 与第一章" },
+    { x: 1150, y: 318, b: "", t: "ER 总复习" },
+    { x: 1074, y: 588, b: "", t: "规划中：第二阶段", muted: true },
+    { x: 1074, y: 606, b: "", t: "财务报表分析、公司估值", muted: true },
+    { x: 580, y: 187, b: "", t: "第一章 走向成熟" },
+    { x: 966, y: 288, b: "", t: "第二章 · 已有精读稿", anchor: "end" },
+    { x: 1300, y: 94, b: "", t: "实战：两种理论各写一页", anchor: "end" },
+    { x: 392, y: 504, b: "pandas 入门", t: " 做市商第 8 周" },
+    { x: 714, y: 765, b: "", t: "小项目：清洗加比对" },
+    { x: 714, y: 525, b: "", t: "第 12 周 · 一页总结" },
+    { x: 288, y: 586, b: "GROUP BY", t: "", anchor: "end" },
+    { x: 288, y: 603, b: "", t: "做市商第 5 周", anchor: "end" },
+    { x: 392, y: 650, b: "表比对", t: " SQL JOIN 与 Python merge" },
+    { x: 446, y: 606, b: "", t: "实战一：名单比对" },
+    { x: 650, y: 606, b: "", t: "实战二：清洗后比对" },
+    { x: 816, y: 606, b: "", t: "导入 CSV" },
+    { x: 974, y: 624, b: "", t: "综合项目" }
+  ],
+
+  /* 地标：讨论和查到的资料，不在任何线上，不算进度。report = data.js 里专题的 id */
+  landmarks: [
+    { report: "futures-market-making", x: 1290, y: 840, walk: [[1232, 840], [1282, 840]], lx: 1250, ly: 874, sub: "" },
+    { report: "cn-us-consumption", x: 844, y: 700, walk: [[844, 628], [844, 692]], lx: 860, ly: 704, sub: "CSV 可直接导入练 SQL" },
+    { report: "cn-us-jp-wealth", x: 690, y: 245, lx: 706, ly: 250, sub: "" }
+  ],
+
+  /* 做市商研习计划：12 周，每周一站（详见专题页“十二周安排”） */
+  mmWeeks: [
+    "读 Harris“Dealers”，报价演示五组实验",
+    "读 Harris“Bid/Ask Spreads”，纸上做市（一）",
+    "读 Harris“Informed Traders”，纸上做市（二）",
+    "读交易所做市规则，整理一个品种的做市义务表",
+    "读 O'Hara 第 1—2 章，导入练习数据，SQL 四题",
+    "读 O'Hara 第 3 章，SQL：盘口失衡能不能预测下一跳",
+    "读 O'Hara 第 4 章，SQL：被吃之后 30 秒的盈亏",
+    "读 Cartea 第 1—4 章，用 pandas 重做并画成交后走势",
+    "读 Avellaneda、Stoikov 原论文，写 quote() 函数",
+    "读 Cartea 第 10.1—10.3 节，第一个回测与盈亏拆分",
+    "读 Cartea 第 10.4 节与第 12 章，库存后撤与失衡过滤",
+    "回看笔记，写一页总结，定下一阶段"
+  ]
+};
+
 window.YXL_STUDY = {
   "updated": "2026-10-13",
   "next": {
@@ -2364,32 +2593,23 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }).join("") + "</ul>";
   }
 
-  /* ---------- 侧栏 ---------- */
+  /* ---------- 顶部导航（手机上是底部标签栏） ---------- */
+  var ICON = {
+    home: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="7" r="2.2"></circle><circle cx="19" cy="17" r="2.2"></circle><path d="M7.2 7H13a3 3 0 0 1 3 3v4.8"></path><path d="M3 17h6M12 3v4"></path></svg>',
+    plan: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 9.5h16M9 3v4M15 3v4"></path></svg>',
+    shelf: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4v16H5zM10 4h4v16h-4zM15.5 5l3.6-1 2.4 15.4-3.6 1z"></path></svg>',
+    review: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"></path><path d="M4 4v4h4"></path></svg>',
+    journal: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20c-1.5-2-1.5-5 0-7s1.5-5 0-7M17 18c-1.5-2-1.5-5 0-7s1.5-5 0-7"></path></svg>'
+  };
   function railHTML() {
-    var r = /^l-/.test(S.route) ? "plan" : S.route;
-    function cur(h) { return r === h ? ' aria-current="page"' : ""; }
-    var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录 · 可编辑"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接记录"];
-    var h = '<a class="brand" href="#home"><span class="seal" aria-hidden="true">研习</span><span class="bt"><b>研习录</b><small>从对话到体系</small></span></a>' +
-      '<div class="mode ' + mode[0] + '"><i></i>' + mode[1] + "</div>" +
-      '<nav class="nav" aria-label="目录"><a href="#home"' + cur("home") + "><span>总览</span></a>" +
-      (PLAN ? '<a href="#plan"' + cur("plan") + "><span>每日课表</span>" + planBadge() + "</a>" : "") +
-      '<div class="lab">学习方向</div>';
-    LIB.tracks.forEach(function (t) { var p = trackProg(t); h += '<a href="#t-' + t.id + '"' + cur("t-" + t.id) + "><span>" + esc(t.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>"; });
-    h += '<div class="lab">精读</div>';
-    Object.keys(LIB.books).forEach(function (id) {
-      var b = LIB.books[id], p = bookProg(id), here = r === "b-" + id || r.indexOf("r-" + id + "-") === 0;
-      h += '<a href="#b-' + id + '"' + (here ? ' aria-current="page"' : "") + "><span>" + esc(b.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>";
-    });
+    var r = S.route, sec = r === "plan" || /^l-/.test(r) ? "plan" : r === "shelf" || /^[tbr]-/.test(r) ? "shelf" : r;
     var due = dueCards().length;
-    RGROUPS.forEach(function (g) {
-      var rs = reportsIn(g.id);
-      if (!rs.length) return;
-      h += '<div class="lab">' + esc(g.name) + '</div>';
-      rs.forEach(function (rp) { h += '<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span>' + esc(rp.title) + '</span><span class="n" aria-hidden="true">↗</span></a>'; });
-    });
-    h += '<div class="lab">记录</div><a href="#journal"' + cur("journal") + '><span>学习足迹</span><span class="n">' + Object.keys(S.data.journal).length + "</span></a>" +
-      '<a href="#review"' + cur("review") + "><span>复习</span>" + (due ? '<span class="n due">' + due + "</span>" : "") + "</a></nav>";
-    return h;
+    function it(id, label, extra) { return '<a href="#' + id + '"' + (sec === id ? ' aria-current="page"' : "") + ">" + ICON[id] + "<span>" + label + "</span>" + (extra || "") + "</a>"; }
+    var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接"];
+    return '<div class="tb-in"><a class="brand" href="#home" aria-label="研习录，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>研习录</b></a>' +
+      '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + (PLAN ? it("plan", "课表") : "") + it("shelf", "书架") +
+      it("review", "复习", due ? '<span class="nb">' + due + "</span>" : "") + it("journal", "足迹") + "</nav>" +
+      '<span class="mode ' + mode[0] + '"><i></i>' + mode[1] + "</span></div>";
   }
 
   /* ---------- 专题（独立页面，新标签页打开；按 reportGroups 分组） ---------- */
@@ -2415,7 +2635,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + fid + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章 " + esc(next.title) + "</button>" +
       Object.keys(f.deep || {}).map(function (k) { return '<a class="btn ghost" href="#r-' + fid + "-" + k + '">第' + CN[+k] + "章精读稿</a>"; }).join("") + "</div></div>";
   }
-  function homeHTML() {
+  function shelfHTML() {
     var items = allItems(), doneN = items.filter(isDone).length;
     var js = journalEntries(), mins = js.reduce(function (a, e) { return a + (Number(e.minutes) || 0); }, 0);
     var due = dueCards().length;
@@ -2425,10 +2645,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
         '<span class="tprog"><span class="bar"><span style="width:' + pct + '%"></span></span><span>' + p.done + " / " + p.total + " 项" + (p.doing ? " · " + p.doing + " 项进行中" : "") + "</span></span></a>";
     }).join("");
     return '<div class="view">' + bannerHTML() +
-      '<header><p class="eyebrow">个人知识库 · 始于 2026 年 10 月</p><h1>研习录</h1>' +
-      '<p class="lede">学习计划、读书精读和复习都留在这里：给自己复盘，也留给后来的人。</p>' +
+      '<header><p class="eyebrow">研习录 · 始于 2026 年 10 月</p><h1>书架</h1>' +
+      '<p class="lede">正在精读的书、五个学习方向和全部专题都在这里。每天学什么，回到首页的线网看。</p>' +
       '<div class="stats"><span><b>' + doneN + "</b>/ " + items.length + ' 项已完成</span><span><b>' + js.length + '</b>条学习足迹</span><span><b>' + (Math.round(mins / 6) / 10) + '</b>小时累计</span><span><b>' + due + "</b>张概念卡待复习</span></div></header>" +
-      todayBlockHTML() +
       '<section class="focus" aria-label="正在精读"><div class="focus-top"><p class="eyebrow">正在精读</p><a class="btn small ghost" href="#review">复习概念卡</a></div>' +
       FOCUS.map(focusBlock).join("") + "</section>" +
       '<section><h2>五个学习方向</h2><div class="tracks">' + rows + "</div></section>" +
@@ -3060,8 +3279,330 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     rv.tally[g]++; rv.i++; rv.show = false; render();
   }
 
+  /* ---------- 线网（首页） ---------- */
+  var M = window.YXL_METRO || null;
+  var LINE_COLOR = { en: "--ln-en", sql: "--ln-sql", py: "--ln-py", cfa: "--ln-cfa", geo: "--ln-geo", rev: "--ln-rev", prep: "--ln-rev", tao: "--ln-tao", mm: "--ln-mm" };
+  var DARK_INK = { en: 1, mm: 1 };
+  var MCACHE = {};
+  function subjName(s) { return s === "prep" ? "准备日" : ((PLAN && PLAN.subjects[s]) || {}).name || s; }
+  function lineById(id) { return M.lines.filter(function (l) { return l.id === id; })[0]; }
+  function lineOfSubj(subj) { return M.lines.filter(function (l) { return l.subj === subj && l.src; })[0]; }
+  function addDaysBJ(d, n) { return new Date(utcDay(d) + n * 86400000).toISOString().slice(0, 10); }
+  function wdOf(d) { return new Date(utcDay(d)).getUTCDay(); }
+  function cnDate(d) { return +d.slice(5, 7) + "月" + +d.slice(8, 10) + "日"; }
+  function onDay(subj, d) { return (PLAN.week[wdOf(d)] || []).some(function (x) { return x[0] === subj; }); }
+  function plannedBy(subj, d) { var n = 0, k = dayDiff(PLAN.start, d); for (var i = 0; i < k; i++) if (onDay(subj, addDaysBJ(PLAN.start, i))) n++; return n; }
+  function checkedIn(rec) { return !!(rec && rec.status && rec.status !== "pushed"); }
+  /* 晚点（正数）/ 早到（负数）几站：按时刻表到今天该走完几站，减去实际走完几站 */
+  function lineDelay(subj) {
+    var t = bjToday(), STUDY = curStudy(), list = lessonList(subj);
+    var plan = plannedBy(subj, t) + (checkedIn(STUDY.days[t]) && onDay(subj, t) ? 1 : 0);
+    return Math.min(plan, list.length) - Math.min(STUDY.next[subj] || 0, list.length);
+  }
+  function nextWhen(subj) {
+    var t = bjToday();
+    for (var k = 0; k < 8; k++) { var d = addDaysBJ(t, k); if (onDay(subj, d)) return k === 0 ? "今天" : k === 1 ? "明天" : WD[wdOf(d)]; }
+    return "";
+  }
+  function mmWeek() { return Math.max(0, Math.min(11, Math.floor(dayDiff(PLAN.start, bjToday()) / 7))); }
+  function stationXY(ln) {
+    if (MCACHE[ln.id]) return MCACHE[ln.id];
+    var p = ln.pts, cum = [0], out = [], A = ln.anchors || [];
+    for (var k = 1; k < p.length; k++) cum[k] = cum[k - 1] + Math.abs(p[k][0] - p[k - 1][0]) + Math.abs(p[k][1] - p[k - 1][1]);
+    function at(d) {
+      for (var k = 1; k < p.length; k++) if (d <= cum[k] + 0.001) { var f = (d - cum[k - 1]) / ((cum[k] - cum[k - 1]) || 1); return [p[k - 1][0] + (p[k][0] - p[k - 1][0]) * f, p[k - 1][1] + (p[k][1] - p[k - 1][1]) * f]; }
+      return p[p.length - 1];
+    }
+    for (var a = 0; a < A.length - 1; a++) {
+      var i0 = A[a][0], p0 = A[a][1], i1 = A[a + 1][0], p1 = A[a + 1][1], last = a === A.length - 2;
+      for (var i = i0; i < (last ? i1 + 1 : i1); i++) { var xy = at(cum[p0] + (cum[p1] - cum[p0]) * (i - i0) / (i1 - i0)); out.push([Math.round(xy[0] * 10) / 10, Math.round(xy[1] * 10) / 10]); }
+    }
+    return (MCACHE[ln.id] = out);
+  }
+  function linePath(pts, rad) {
+    var d = "M" + pts[0][0] + " " + pts[0][1];
+    for (var i = 1; i < pts.length; i++) {
+      var p = pts[i];
+      if (i < pts.length - 1) {
+        var a = pts[i - 1], b = pts[i + 1];
+        var straight = (a[0] === p[0] && p[0] === b[0]) || (a[1] === p[1] && p[1] === b[1]);
+        if (!straight) {
+          var r = Math.min(rad, (Math.abs(p[0] - a[0]) + Math.abs(p[1] - a[1])) / 2, (Math.abs(b[0] - p[0]) + Math.abs(b[1] - p[1])) / 2);
+          var ux = Math.sign(p[0] - a[0]), uy = Math.sign(p[1] - a[1]), vx = Math.sign(b[0] - p[0]), vy = Math.sign(b[1] - p[1]);
+          d += " L" + (p[0] - ux * r) + " " + (p[1] - uy * r) + " Q" + p[0] + " " + p[1] + " " + (p[0] + vx * r) + " " + (p[1] + vy * r);
+          continue;
+        }
+      }
+      d += " L" + p[0] + " " + p[1];
+    }
+    return d;
+  }
+  /* 一条线上每一站的内容和状态：done 学完 / cur 下一站 / todo 未到 / free 自由线的下一章 / week 本周 */
+  function lineStops(ln) {
+    var STUDY = curStudy(), out = [];
+    if (!ln.src) return out;
+    if (ln.src.indexOf("plan:") === 0) {
+      var subj = ln.src.slice(5), list = lessonList(subj), nx = STUDY.next[subj] || 0;
+      list.forEach(function (x, i) { out.push({ title: x.title, state: i < nx ? "done" : i === nx ? "cur" : "todo" }); });
+    } else if (ln.src.indexOf("book:") === 0) {
+      var bid = ln.src.slice(5), b = LIB.books[bid], first = -1;
+      b.chapters.forEach(function (c, i) { var dn = isDone(chId(bid, c.n)); if (!dn && first < 0) first = i; out.push({ title: "第" + CN[c.n] + "章 " + c.title, n: c.n, state: dn ? "done" : "todo" }); });
+      if (first >= 0) out[first].state = "free";
+    } else if (ln.src === "mm") {
+      var wk = mmWeek();
+      M.mmWeeks.forEach(function (t, i) { out.push({ title: "第 " + (i + 1) + " 周 · " + t, state: i === wk ? "week" : "todo" }); });
+    }
+    return out;
+  }
+  function todayInfo() {
+    var STUDY = curStudy(), t = bjToday(), rec = STUDY.days[t], day = dayPlan(t), slots;
+    if (rec && rec.planned && rec.planned.length) {
+      slots = rec.planned.map(function (p) {
+        var o = { subj: p.subj, mins: p.mins, title: p.title, index: p.index };
+        if (PLAN.lessons[p.subj]) o.total = lessonList(p.subj).length;
+        return o;
+      });
+    } else slots = day.slots || [];
+    return { t: t, rec: rec, day: day, slots: slots };
+  }
+  function metroMode() {
+    if (!S.metroMode) { try { S.metroMode = localStorage.getItem("yanxilu-route-" + bjToday()) || "std"; } catch (e) { S.metroMode = "std"; } }
+    return S.metroMode;
+  }
+  /* 保底：只走英语一站；标准：时刻表；加开：再多走一站，优先补晚点最多的线 */
+  function routeFor(ti, mode) {
+    var slots = ti.slots;
+    if (mode === "min") { var en = slots.filter(function (s) { return s.subj === "en"; }); return { stops: en.length ? en : slots.slice(0, 1) }; }
+    if (mode !== "plus") return { stops: slots };
+    function mk(subj, ahead) {
+      var list = lessonList(subj), i = (curStudy().next[subj] || 0) + ahead;
+      if (i >= list.length) return null;
+      return { subj: subj, mins: subj === "cfa" ? 35 : subj === "geo" ? 30 : 45, title: list[i].title, index: i, total: list.length, extra: true };
+    }
+    var late = ["sql", "py", "cfa", "geo"].map(function (s) { return { s: s, d: lineDelay(s) }; }).filter(function (x) { return x.d > 0; }).sort(function (a, b) { return b.d - a.d; });
+    for (var k = 0; k < late.length; k++) {
+      var s = late[k].s, inToday = slots.some(function (x) { return x.subj === s; });
+      var ex = mk(s, inToday ? 1 : 0);
+      if (ex && (!inToday || late[k].d > 1)) return { stops: slots.concat([ex]), catchUp: { subj: s, d: late[k].d } };
+    }
+    var base = slots.filter(function (x) { return x.subj !== "en" && PLAN.lessons[x.subj]; })[0], ex2 = base ? mk(base.subj, 1) : null;
+    return { stops: ex2 ? slots.concat([ex2]) : slots };
+  }
+
+  function stopSeq(s) {
+    if (s.subj === "en") return "跟着 CFA 主题";
+    if (!PLAN.lessons[s.subj]) return "";
+    return "第 " + ((s.index || 0) + 1) + " / " + (s.total || lessonList(s.subj).length) + " 站";
+  }
+  function todayStripHTML(ti) {
+    var mode = metroMode(), r = routeFor(ti, mode), stops = r.stops, t = ti.t, rec = ti.rec, day = ti.day;
+    var total = stops.reduce(function (a, s) { return a + (s.mins || 0); }, 0);
+    var head = '<div class="ts-top"><div><p class="eyebrow">今天 · ' + cnDate(t) + " " + WD[day.wd] + (day.prep ? " · 准备日" : day.before ? "" : " · 第 " + weekNo(t) + " 周第 " + (dayDiff(PLAN.start, t) % 7 + 1) + " 天") + '</p><h1 id="ts-h">今日路线</h1></div>' +
+      '<div class="seg" role="group" aria-label="今天坐多远">' + [["min", "保底"], ["std", "标准"], ["plus", "加开"]].map(function (m) {
+        var mins = m[0] === "std" ? ti.slots.reduce(function (a, s) { return a + (s.mins || 0); }, 0) : routeFor(ti, m[0]).stops.reduce(function (a, s) { return a + (s.mins || 0); }, 0);
+        return '<button type="button" data-act="metro-mode" data-m="' + m[0] + '" aria-pressed="' + (mode === m[0]) + '">' + m[1] + ' <span class="segn">' + mins + "′</span></button>";
+      }).join("") + "</div></div>";
+    if (!stops.length) {
+      return '<section class="tstrip" aria-labelledby="ts-h">' + head + '<p class="ts-note" style="margin-top:16px">今天没有排课。讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送。</p></section>";
+    }
+    var route = stops.map(function (s) {
+      var c = LINE_COLOR[s.subj] || "--ln-rev";
+      return '<div class="stp' + (s.extra ? " extra" : "") + '" style="--c:var(' + c + ');flex-grow:' + (s.mins || 20) + '"><span class="stp-dot" aria-hidden="true"></span><span class="stp-bar" aria-hidden="true"></span>' +
+        '<div class="stp-tx"><span class="stp-tag"><b class="lbadge' + (DARK_INK[s.subj] ? " dk" : "") + '">' + esc(subjName(s.subj)) + (s.extra ? " · 加开" : "") + '</b><span class="stp-min">' + (s.mins || "") + "′</span></span>" +
+        '<span class="stp-title">' + esc(s.title || "") + '</span><span class="stp-seq">' + esc(stopSeq(s)) + "</span></div></div>";
+    }).join("") + '<div class="stp end"><span class="stp-dot" aria-hidden="true"></span><div class="stp-tx"><span class="stp-min">' + PLAN.checkin + '</span><span class="stp-title">终点 · 报站</span></div></div>';
+    var note = mode === "min" ? "时间不够或状态不好就选它，走一站就算没停运。其余几站下次接着走，不会堆成欠账。"
+      : mode === "plus" ? (r.catchUp ? subjName(r.catchUp.subj) + "线晚点 " + r.catchUp.d + " 站，多走这一站正好补上。" : "多走一站。早到不改时刻表，下次从再下一站开始。")
+      : "按时刻表走。哪一站没走完，下次从这一站接着走。";
+    var btn = rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">打开今天的讲义</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>";
+    var y = addDaysBJ(t, -1), yr = curStudy().days[y], warn = "";
+    if (yr && !checkedIn(yr)) warn = '<p class="ts-warn"><b>' + cnDate(y) + "还没报站。</b>按没学处理，那几站下次接着走；其实学了的话，晚上报站时一起说，位置就会更新。</p>";
+    return '<section class="tstrip" aria-labelledby="ts-h">' + head + '<div class="ts-route">' + route + "</div>" +
+      '<div class="ts-foot">' + btn + '<p class="ts-note">全程 ' + total + " 分钟。" + note + "</p></div>" + warn + "</section>";
+  }
+
+  function metroSVG(ti) {
+    var todaySub = {}; ti.slots.forEach(function (s) { todaySub[s.subj] = s; });
+    var h = ['<svg class="metro' + (S.metroToday ? " today-only" : "") + '" viewBox="0 0 ' + M.w + " " + M.h + '" role="group" aria-label="线网图：学习线路、换乘站和地标">'];
+    function tx(x, y, b, t, cls, anchor) {
+      return '<text x="' + x + '" y="' + y + '"' + (cls ? ' class="' + cls + '"' : "") + (anchor ? ' text-anchor="' + anchor + '"' : "") + ">" + (b ? '<tspan font-weight="700">' + esc(b) + "</tspan>" : "") + esc(t || "") + "</text>";
+    }
+    function textW(s) { var w = 0; for (var i = 0; i < s.length; i++) w += s.charCodeAt(i) > 255 ? 12.5 : 7.4; return Math.round(w); }
+    M.zones.forEach(function (z) {
+      h.push('<rect x="' + z.x + '" y="' + z.y + '" width="' + z.w + '" height="' + z.h + '" rx="14" style="' + (z.dashed ? "fill:none;stroke:var(--rule-strong);stroke-width:2;stroke-dasharray:7 6" : "fill:var(" + z.fill + ")") + '"/>');
+      if (!z.name) return;
+      var lab = '<text x="' + z.lx + '" y="' + z.ly + '" class="mzl" style="fill:var(' + z.ink + ')">' + esc(z.name) + "</text>";
+      h.push(z.track && TRACK[z.track] ? '<a href="#t-' + z.track + '" class="mzone">' + lab + "</a>" : lab);
+    });
+    /* 图例 */
+    h.push('<g class="mlg"><rect x="40" y="40" width="470" height="236" rx="14" style="fill:var(--map-bg);stroke:var(--rule)"/>' +
+      '<text x="58" y="70" class="h">图例</text>' +
+      '<path d="M58 100 L98 100" style="stroke:var(--ln-sql);stroke-width:6;stroke-linecap:round"/><circle cx="72" cy="100" r="4.6" style="fill:var(--map-bg);stroke:var(--ln-sql);stroke-width:2.4"/><circle cx="88" cy="100" r="4.6" style="fill:var(--ln-sql);stroke:var(--map-bg);stroke-width:1.6"/>' +
+      '<text x="112" y="104">一条线是一门课或一本书；空心站未到，实心站已学完</text>' +
+      '<circle cx="78" cy="130" r="9" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4"/><text x="112" y="134">黑圈是每条线的下一站；标“今天”的是今天要走的站</text>' +
+      '<circle cx="78" cy="160" r="9" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3.5"/><path d="M58 160 L69 160 M87 160 L98 160" style="stroke:var(--ln-py);stroke-width:5"/><text x="112" y="164">换乘站：两条线在这里用到同一块知识</text>' +
+      '<rect x="70" y="182" width="16" height="16" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3"/><text x="112" y="194">地标：讨论和查到的资料，随时去看，不算进度</text>' +
+      '<path d="M58 220 L98 220" style="stroke:var(--ln-cfa);stroke-width:5;stroke-dasharray:9 6"/><text x="112" y="224">虚线：规划中的线路</text>' +
+      '<rect x="58" y="242" width="40" height="18" rx="4" style="fill:var(--z-data)"/><text x="112" y="256">底色区域是学习方向，点区域名进入</text></g>');
+    /* 线路与站 */
+    var overlay = [];
+    M.lines.forEach(function (ln) {
+      var col = "var(" + ln.color + ")", w = (ln.r || 4) * 2, isToday = ln.id === "en" || !!todaySub[ln.subj];
+      h.push('<g class="mline' + (isToday ? " is-today" : "") + '" data-l="' + ln.id + '">');
+      h.push('<path d="' + linePath(ln.pts, 16) + '" style="fill:none;stroke:' + col + ";stroke-width:" + w + ";stroke-linejoin:round;stroke-linecap:" + (ln.dash ? "butt;stroke-dasharray:10 7" : "round") + '"/>');
+      if (ln.dash) h.push('<circle cx="' + ln.pts[ln.pts.length - 1][0] + '" cy="' + ln.pts[ln.pts.length - 1][1] + '" r="7" style="fill:var(--map-bg);stroke:' + col + ';stroke-width:2.5;stroke-dasharray:3 3"/>');
+      var stops = lineStops(ln), xy = stationXY(ln), hubs = ln.hubs || [];
+      stops.forEach(function (s, i) {
+        var p = xy[i]; if (!p) return;
+        var x = p[0], y = p[1], end = i === 0 || i === stops.length - 1;
+        var r = ln.small && !end ? 3.4 : end ? 6 : 4.6, label = ln.name + " 第 " + (i + 1) + " 站：" + s.title;
+        if (s.state === "cur" || s.state === "week" || s.state === "free") overlay.push({ ln: ln, i: i, x: x, y: y, s: s, label: label });
+        if (hubs.indexOf(i) >= 0) return;
+        var dot = s.state === "done" ? '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" style="fill:' + col + ';stroke:var(--map-bg);stroke-width:1.6"/>'
+          : '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" style="fill:var(--map-bg);stroke:' + col + ";stroke-width:" + (end ? 3.5 : 2.4) + '"/>';
+        h.push('<g class="mst" data-act="mst" data-l="' + ln.id + '" data-i="' + i + '" tabindex="-1" aria-label="' + esc(label) + '"><title>' + esc(label) + '</title><circle class="hit" cx="' + x + '" cy="' + y + '" r="' + (ln.small ? 8 : 11) + '"/>' + dot + "</g>");
+      });
+      h.push("</g>");
+    });
+    /* 换乘站 */
+    M.hubs.forEach(function (hb, k) {
+      var shape = hb.cap ? '<rect x="' + (hb.x - 11) + '" y="' + (hb.y - 21) + '" width="22" height="42" rx="11" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4"/>'
+        : '<circle cx="' + hb.x + '" cy="' + hb.y + '" r="10" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4"/>';
+      h.push('<g class="mst" data-act="mhub" data-h="' + k + '" tabindex="0" role="button" aria-label="换乘站：' + esc(hb.name) + '"><title>换乘站：' + esc(hb.name) + "</title>" + shape + "</g>");
+    });
+    /* 地标 */
+    M.landmarks.forEach(function (lm) {
+      var rp = REPORTS.filter(function (x) { return x.id === lm.report; })[0]; if (!rp) return;
+      if (lm.walk) h.push('<path d="M' + lm.walk[0][0] + " " + lm.walk[0][1] + " L" + lm.walk[1][0] + " " + lm.walk[1][1] + '" style="stroke:var(--ink);stroke-width:2;stroke-dasharray:2 4;stroke-linecap:round"/>');
+      h.push('<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener" class="mlm" aria-label="地标：' + esc(rp.title) + '（新标签页打开）"><rect x="' + (lm.x - 8) + '" y="' + (lm.y - 8) + '" width="16" height="16" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3"/>' +
+        tx(lm.lx, lm.ly, rp.title, "") + (lm.sub ? tx(lm.lx, lm.ly + 17, "", lm.sub, "mut") : "") + "</a>");
+    });
+    /* 文字与线名牌 */
+    M.labels.forEach(function (l) { h.push(tx(l.x, l.y, l.b, l.t, l.muted ? "mut" : "", l.anchor)); });
+    M.badges.forEach(function (b) {
+      var ln = lineById(b.line), w = textW(b.t) + 14;
+      h.push('<g class="mbdg"><rect x="' + b.x + '" y="' + b.y + '" width="' + w + '" height="19" rx="4" style="fill:var(' + ln.color + ')"/><text x="' + (b.x + 7) + '" y="' + (b.y + 14) + '" style="fill:var(' + (b.dark ? "--bdg-on-dk" : "--bdg-on") + ')">' + esc(b.t) + "</text></g>");
+    });
+    /* 下一站、本周、今天 */
+    overlay.forEach(function (o) {
+      var col = "var(" + o.ln.color + ")", x = o.x, y = o.y, ring;
+      if (o.s.state === "cur") ring = '<circle class="mhalo" cx="' + x + '" cy="' + y + '" r="13" style="stroke:' + col + '"/><circle cx="' + x + '" cy="' + y + '" r="9" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4.5"/>';
+      else if (o.s.state === "week") ring = '<circle cx="' + x + '" cy="' + y + '" r="8" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3.2"/>';
+      else ring = '<circle cx="' + x + '" cy="' + y + '" r="7.5" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:2.4;stroke-dasharray:3.5 2.5"/>';
+      var tag = "", sl = todaySub[o.ln.subj];
+      if (o.s.state === "cur" && sl && sl.index === o.i) tag = "今天";
+      else if (o.s.state === "week") tag = "本周";
+      var tagSvg = tag ? '<g class="mtag" aria-hidden="true"><rect x="' + (x + 9) + '" y="' + (y - 31) + '" width="34" height="18" rx="3" style="fill:' + (tag === "今天" ? "var(--ink)" : "var(--map-bg)") + ';stroke:var(--ink);stroke-width:1.5"/><text x="' + (x + 26) + '" y="' + (y - 17.5) + '" text-anchor="middle" style="fill:' + (tag === "今天" ? "var(--map-bg)" : "var(--ink)") + ';stroke:none;font-size:12px;font-weight:700">' + tag + "</text></g>" : "";
+      h.push('<g class="mst mline' + (o.ln.id === "en" || todaySub[o.ln.subj] ? " is-today" : "") + '" data-act="mst" data-l="' + o.ln.id + '" data-i="' + o.i + '" tabindex="0" role="button" aria-label="' + esc(o.label) + "（" + ({ cur: "下一站", week: "本周", free: "下一章" })[o.s.state] + (tag === "今天" ? "，今天要走" : "") + '）"><title>' + esc(o.label) + '</title><circle class="hit" cx="' + x + '" cy="' + y + '" r="14"/>' + ring + tagSvg + "</g>");
+    });
+    h.push("</svg>");
+    return h.join("");
+  }
+
+  function boardHTML(ti) {
+    var STUDY = curStudy(), rows = [];
+    function row(id, name, color, dark, next, when, pill) {
+      return '<div class="brow"><span class="bline"><b class="lbadge' + (dark ? " dk" : "") + '" style="--c:var(' + color + ')">' + esc(name) + '</b></span><span class="bnext">' + esc(next) + '</span><span class="bwhen">' + esc(when) + "</span>" + pill + "</div>";
+    }
+    var en = ti.slots.filter(function (s) { return s.subj === "en"; })[0];
+    rows.push(row("en", "英语", "--ln-en", true, en ? en.title : "每天跟着当天的 CFA 主题", "每天", '<span class="pill free">每天</span>'));
+    var late = [];
+    ["sql", "py", "cfa", "geo", "rev"].forEach(function (s) {
+      if (!PLAN.lessons[s]) return;
+      var list = lessonList(s), nx = STUDY.next[s] || 0, d = lineDelay(s);
+      if (d > 0) late.push({ s: s, d: d });
+      var pill = d > 0 ? '<span class="pill late">晚点 ' + d + " 站</span>" : d < 0 ? '<span class="pill early">早到 ' + -d + " 站</span>" : '<span class="pill">正点</span>';
+      rows.push(row(s, subjName(s), LINE_COLOR[s], false, nx < list.length ? "第 " + (nx + 1) + " 站 · " + list[nx].title : "本阶段已走完", nextWhen(s), pill));
+    });
+    var wk = mmWeek();
+    rows.push(row("mm", "做市商研习", "--ln-mm", true, "第 " + (wk + 1) + " 周 · " + M.mmWeeks[wk], "本周", '<span class="pill free">按周走</span>'));
+    var zb = LIB.books.zhoulu, fc = zb ? zb.chapters.filter(function (c) { return !isDone(chId("zhoulu", c.n)); })[0] : null;
+    if (zb) rows.push(row("tao", "涛动周期录", "--ln-tao", false, fc ? "第" + CN[fc.n] + "章 " + fc.title : "已读完", "随时", '<span class="pill free">自由线</span>'));
+    var adv = [];
+    var y = addDaysBJ(ti.t, -1), yr = STUDY.days[y];
+    if (late.length) {
+      var max = Math.max.apply(null, late.map(function (x) { return x.d; }));
+      adv.push(late.map(function (x) { return subjName(x.s); }).join("、") + "晚点" + (late.length === 1 ? " " + late[0].d + " 站" : "") + "。" + (max >= 3 ? "晚点 3 站以上的线，周日复盘时选一种调度：坐快车、顺延终点或暂停一条线。" : "找一天选“加开”就能补上。"));
+      if (yr && !checkedIn(yr)) adv.push(cnDate(y) + "还没报站，所以先按没学算。");
+    } else adv.push("各条线都正点。");
+    return '<section class="panel" aria-labelledby="bd-h"><h2 id="bd-h">各线到站</h2>' + rows.join("") + '<p class="badvice">' + esc(adv.join("")) + "</p></section>";
+  }
+  function landmarkPanel() {
+    var lineReports = M.lines.map(function (l) { return l.report; }).filter(Boolean);
+    var list = REPORTS.filter(function (rp) { return lineReports.indexOf(rp.id) < 0; });
+    return '<section class="panel" aria-labelledby="lm-h"><h2 id="lm-h">地标</h2><p class="meta" style="margin-top:6px">讨论和查到的资料，随时去看，不算进度。以后讨论完说一句“放进研习录”，就多一个地标。</p><div class="lmk-list">' +
+      list.map(function (rp) { return '<a class="lmk" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span class="lmk-sq" aria-hidden="true"></span><span class="lmk-t">' + esc(rp.title) + ' <span aria-hidden="true">↗</span></span><span class="lmk-d">' + esc(rp.desc) + "</span></a>"; }).join("") + "</div></section>";
+  }
+  function homeHTML() {
+    if (!M || !PLAN) return shelfHTML();
+    var ti = todayInfo();
+    var nLines = M.lines.filter(function (l) { return l.src || l.id === "en"; }).length;
+    return '<div class="view home">' + bannerHTML() + todayStripHTML(ti) +
+      '<section class="mwrap" aria-labelledby="mw-h"><div class="mhead"><div><h2 id="mw-h">线网图</h2><p class="meta">' + esc(PLAN.phase) + " · " + nLines + " 条线 · " + M.hubs.length + " 个换乘站 · " + M.landmarks.length + ' 个地标</p></div>' +
+      '<button type="button" class="chipbtn" data-act="metro-today" aria-pressed="' + !!S.metroToday + '">只看今天的线</button></div>' +
+      '<div class="mscroll"><div class="minner" id="minner">' + metroSVG(ti) + '<div class="mpop" id="mpop" role="dialog" aria-label="站点详情" hidden></div></div></div>' +
+      '<p class="meta mhint">点任意一站看详情和讲义；屏幕窄时可以左右拖动地图。</p></section>' +
+      '<div class="hgrid">' + boardHTML(ti) + landmarkPanel() + "</div>" +
+      '<details class="rules"><summary>运行规则</summary><ol>' +
+      "<li>位置只看“学完”，不看日期。哪一站没走完，下次接着走，不会堆成欠账。</li>" +
+      "<li>每天出发前选今天坐多远：保底只走英语一站，标准按时刻表走，加开多走一站。</li>" +
+      "<li>每条线跟时刻表比，显示正点、晚点或早到。晚点 1–2 站，找一天加开补上。</li>" +
+      "<li>晚点 3 站以上，周日复盘时三选一：坐快车（只走每课的必经部分），顺延这条线的终点，或者暂停一条线一周。</li>" +
+      "<li>早到了，可以接着往前，也可以换乘自由线去读书。时刻表不变。</li>" +
+      "<li>晚上 9 点报站。没报站，位置原地不动，不算失败。</li></ol></details></div>";
+  }
+  /* 站点详情 */
+  function latestLesson(subj, i) {
+    var STUDY = curStudy(), best = "";
+    Object.keys(STUDY.days).forEach(function (d) { var r = STUDY.days[d]; if (r.file && (r.planned || []).some(function (p) { return p.subj === subj && p.index === i; }) && d > best) best = d; });
+    return best;
+  }
+  function stationPopHTML(lid, i) {
+    var ln = lineById(lid), stops = lineStops(ln), s = stops[i]; if (!s) return "";
+    var stTxt = { done: "已学完", cur: "下一站", todo: "还没到", free: "下一章 · 自由线，想读就读", week: "本周这一站" }[s.state];
+    var sl = todayInfo().slots.filter(function (x) { return x.subj === ln.subj; })[0];
+    if (s.state === "cur" && sl && sl.index === i) stTxt += " · 今天要走";
+    var links = [];
+    if (ln.subj && PLAN.lessons[ln.subj]) {
+      var d = latestLesson(ln.subj, i);
+      if (d) links.push('<a class="btn small" href="#l-' + d + '">打开讲义（' + cnDate(d) + "）</a>");
+      links.push('<a class="btn small ghost" href="#plan">在课表里看</a>');
+    }
+    if (ln.id === "geo" && i < 20) {
+      var ch = Math.floor(i / 2) + 1, tb = LIB.books.tragedy;
+      links.push(tb.deep && tb.deep[ch] ? '<a class="btn small ghost" href="#r-tragedy-' + ch + '">第' + CN[ch] + "章精读稿</a>" : '<button type="button" class="btn small ghost" data-act="open-ch" data-book="tragedy" data-n="' + ch + '">第' + CN[ch] + "章导读</button>");
+    }
+    if (ln.src && ln.src.indexOf("book:") === 0) {
+      var bid = ln.src.slice(5), bk = LIB.books[bid];
+      if (bk.deep && bk.deep[s.n]) links.push('<a class="btn small" href="#r-' + bid + "-" + s.n + '">精读稿</a>');
+      links.push('<button type="button" class="btn small ghost" data-act="open-ch" data-book="' + bid + '" data-n="' + s.n + '">本章导读</button>');
+    }
+    if (ln.report) { var rp = REPORTS.filter(function (x) { return x.id === ln.report; })[0]; if (rp) links.push('<a class="btn small ghost" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开研习计划 ↗</a>'); }
+    return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b class="lbadge' + (DARK_INK[ln.id] ? " dk" : "") + '" style="--c:var(' + ln.color + ')">' + esc(ln.name) + '</b><span class="mp-pos">第 ' + (i + 1) + " / " + stops.length + ' 站</span></div>' +
+      '<p class="mp-t">' + esc(s.title) + '</p><p class="mp-s">' + esc(stTxt) + "</p>" + (links.length ? '<div class="btns">' + links.join("") + "</div>" : "");
+  }
+  function hubPopHTML(k) {
+    var hb = M.hubs[k];
+    return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b>换乘站 · ' + esc(hb.name) + '</b></div><p class="mp-s" style="margin-top:6px">' + esc(hb.sub) + "</p><ul>" +
+      hb.at.map(function (a) { var ln = lineById(a[0]), s = lineStops(ln)[a[1]]; return '<li><button type="button" class="linkrow" data-act="mst" data-l="' + a[0] + '" data-i="' + a[1] + '"><b class="lbadge' + (DARK_INK[a[0]] ? " dk" : "") + '" style="--c:var(' + ln.color + ')">' + esc(ln.name) + "</b> " + esc(s ? s.title : "") + "</button></li>"; }).join("") + "</ul>";
+  }
+  function openPop(html, x, y) {
+    var inner = document.getElementById("minner"), pop = document.getElementById("mpop");
+    if (!inner || !pop) return;
+    var sc = inner.clientWidth / M.w;
+    pop.innerHTML = html; pop.hidden = false;
+    var px = x * sc, py = y * sc, pw = pop.offsetWidth, ph = pop.offsetHeight;
+    var left = Math.min(Math.max(8, px - pw / 2), inner.clientWidth - pw - 8), top = py + 18;
+    if (top + ph > inner.clientHeight - 8) top = py - ph - 18;
+    pop.style.left = left + "px"; pop.style.top = Math.max(8, top) + "px";
+    var f = pop.querySelector("a,button:not(.mp-x)") || pop.querySelector(".mp-x"); if (f) f.focus({ preventScroll: true });
+  }
+  function closePop() { var pop = document.getElementById("mpop"); if (pop && !pop.hidden) { pop.hidden = true; pop.innerHTML = ""; } }
+  function openStation(lid, i) { var ln = lineById(lid), p = ln && stationXY(ln)[i]; if (p) openPop(stationPopHTML(lid, i), p[0], p[1]); }
+  function openHub(k) { var hb = M.hubs[k]; if (hb) openPop(hubPopHTML(k), hb.x, hb.y); }
+
   /* ---------- 主渲染 ---------- */
-  var ROUTES = { home: 1, journal: 1, review: 1 };
+  var ROUTES = { home: 1, shelf: 1, journal: 1, review: 1 };
   if (PLAN) ROUTES.plan = 1;
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
   Object.keys(LIB.books).forEach(function (b) {
@@ -3080,6 +3621,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     else if (r === "plan") html = planHTML();
     else if (/^l-\d{4}-\d{2}-\d{2}$/.test(r)) html = lessonHTML(r.slice(2));
     else if (r === "review") html = reviewHTML();
+    else if (r === "shelf") html = shelfHTML();
     else html = homeHTML();
     $("#main").innerHTML = html;
     if (scrollTop) window.scrollTo(0, 0);
@@ -3121,8 +3663,15 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
 
   document.addEventListener("click", function (e) {
+    var pop = document.getElementById("mpop");
+    if (pop && !pop.hidden && !e.target.closest("#mpop") && !e.target.closest('[data-act="mst"],[data-act="mhub"]')) closePop();
     var t = e.target.closest("[data-act]"); if (!t) return;
     var act = t.getAttribute("data-act");
+    if (act === "mst") { openStation(t.getAttribute("data-l"), +t.getAttribute("data-i")); return; }
+    if (act === "mhub") { openHub(+t.getAttribute("data-h")); return; }
+    if (act === "mpop-close") { closePop(); return; }
+    if (act === "metro-mode") { S.metroMode = t.getAttribute("data-m"); try { localStorage.setItem("yanxilu-route-" + bjToday(), S.metroMode); } catch (e2) {} render(); return; }
+    if (act === "metro-today") { S.metroToday = !S.metroToday; render(); return; }
     if (act === "status") return;
     if (act === "tab") { S.bookTab = t.getAttribute("data-tab"); render(); return; }
     if (act === "open-ch") { e.preventDefault(); openChapter(t.getAttribute("data-book"), +t.getAttribute("data-n")); return; }
@@ -3154,6 +3703,15 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "j-del") { S.confirmDel = t.getAttribute("data-id"); render(); return; }
     if (act === "j-del-no") { S.confirmDel = null; render(); return; }
     if (act === "j-del-yes") { var jid = t.getAttribute("data-id"); S.confirmDel = null; del("journal", jid); toast("已删除"); render(); return; }
+  });
+  /* 线网：用键盘打开站点详情，Esc 关闭 */
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { var pop = document.getElementById("mpop"); if (pop && !pop.hidden) { closePop(); return; } }
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var g = e.target && e.target.closest ? e.target.closest('.metro [data-act="mst"], .metro [data-act="mhub"]') : null;
+    if (!g) return;
+    e.preventDefault();
+    if (g.getAttribute("data-act") === "mhub") openHub(+g.getAttribute("data-h")); else openStation(g.getAttribute("data-l"), +g.getAttribute("data-i"));
   });
   document.addEventListener("change", function (e) {
     var t = e.target;

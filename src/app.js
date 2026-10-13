@@ -230,32 +230,23 @@
     }).join("") + "</ul>";
   }
 
-  /* ---------- 侧栏 ---------- */
+  /* ---------- 顶部导航（手机上是底部标签栏） ---------- */
+  var ICON = {
+    home: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="7" r="2.2"></circle><circle cx="19" cy="17" r="2.2"></circle><path d="M7.2 7H13a3 3 0 0 1 3 3v4.8"></path><path d="M3 17h6M12 3v4"></path></svg>',
+    plan: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M4 9.5h16M9 3v4M15 3v4"></path></svg>',
+    shelf: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4v16H5zM10 4h4v16h-4zM15.5 5l3.6-1 2.4 15.4-3.6 1z"></path></svg>',
+    review: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 1 0 2.4-5.7"></path><path d="M4 4v4h4"></path></svg>',
+    journal: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20c-1.5-2-1.5-5 0-7s1.5-5 0-7M17 18c-1.5-2-1.5-5 0-7s1.5-5 0-7"></path></svg>'
+  };
   function railHTML() {
-    var r = /^l-/.test(S.route) ? "plan" : S.route;
-    function cur(h) { return r === h ? ' aria-current="page"' : ""; }
-    var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录 · 可编辑"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接记录"];
-    var h = '<a class="brand" href="#home"><span class="seal" aria-hidden="true">研习</span><span class="bt"><b>研习录</b><small>从对话到体系</small></span></a>' +
-      '<div class="mode ' + mode[0] + '"><i></i>' + mode[1] + "</div>" +
-      '<nav class="nav" aria-label="目录"><a href="#home"' + cur("home") + "><span>总览</span></a>" +
-      (PLAN ? '<a href="#plan"' + cur("plan") + "><span>每日课表</span>" + planBadge() + "</a>" : "") +
-      '<div class="lab">学习方向</div>';
-    LIB.tracks.forEach(function (t) { var p = trackProg(t); h += '<a href="#t-' + t.id + '"' + cur("t-" + t.id) + "><span>" + esc(t.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>"; });
-    h += '<div class="lab">精读</div>';
-    Object.keys(LIB.books).forEach(function (id) {
-      var b = LIB.books[id], p = bookProg(id), here = r === "b-" + id || r.indexOf("r-" + id + "-") === 0;
-      h += '<a href="#b-' + id + '"' + (here ? ' aria-current="page"' : "") + "><span>" + esc(b.short) + '</span><span class="n">' + p.done + "/" + p.total + "</span></a>";
-    });
+    var r = S.route, sec = r === "plan" || /^l-/.test(r) ? "plan" : r === "shelf" || /^[tbr]-/.test(r) ? "shelf" : r;
     var due = dueCards().length;
-    RGROUPS.forEach(function (g) {
-      var rs = reportsIn(g.id);
-      if (!rs.length) return;
-      h += '<div class="lab">' + esc(g.name) + '</div>';
-      rs.forEach(function (rp) { h += '<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span>' + esc(rp.title) + '</span><span class="n" aria-hidden="true">↗</span></a>'; });
-    });
-    h += '<div class="lab">记录</div><a href="#journal"' + cur("journal") + '><span>学习足迹</span><span class="n">' + Object.keys(S.data.journal).length + "</span></a>" +
-      '<a href="#review"' + cur("review") + "><span>复习</span>" + (due ? '<span class="n due">' + due + "</span>" : "") + "</a></nav>";
-    return h;
+    function it(id, label, extra) { return '<a href="#' + id + '"' + (sec === id ? ' aria-current="page"' : "") + ">" + ICON[id] + "<span>" + label + "</span>" + (extra || "") + "</a>"; }
+    var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接"];
+    return '<div class="tb-in"><a class="brand" href="#home" aria-label="研习录，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>研习录</b></a>' +
+      '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + (PLAN ? it("plan", "课表") : "") + it("shelf", "书架") +
+      it("review", "复习", due ? '<span class="nb">' + due + "</span>" : "") + it("journal", "足迹") + "</nav>" +
+      '<span class="mode ' + mode[0] + '"><i></i>' + mode[1] + "</span></div>";
   }
 
   /* ---------- 专题（独立页面，新标签页打开；按 reportGroups 分组） ---------- */
@@ -281,7 +272,7 @@
       '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + fid + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章 " + esc(next.title) + "</button>" +
       Object.keys(f.deep || {}).map(function (k) { return '<a class="btn ghost" href="#r-' + fid + "-" + k + '">第' + CN[+k] + "章精读稿</a>"; }).join("") + "</div></div>";
   }
-  function homeHTML() {
+  function shelfHTML() {
     var items = allItems(), doneN = items.filter(isDone).length;
     var js = journalEntries(), mins = js.reduce(function (a, e) { return a + (Number(e.minutes) || 0); }, 0);
     var due = dueCards().length;
@@ -291,10 +282,9 @@
         '<span class="tprog"><span class="bar"><span style="width:' + pct + '%"></span></span><span>' + p.done + " / " + p.total + " 项" + (p.doing ? " · " + p.doing + " 项进行中" : "") + "</span></span></a>";
     }).join("");
     return '<div class="view">' + bannerHTML() +
-      '<header><p class="eyebrow">个人知识库 · 始于 2026 年 10 月</p><h1>研习录</h1>' +
-      '<p class="lede">学习计划、读书精读和复习都留在这里：给自己复盘，也留给后来的人。</p>' +
+      '<header><p class="eyebrow">研习录 · 始于 2026 年 10 月</p><h1>书架</h1>' +
+      '<p class="lede">正在精读的书、五个学习方向和全部专题都在这里。每天学什么，回到首页的线网看。</p>' +
       '<div class="stats"><span><b>' + doneN + "</b>/ " + items.length + ' 项已完成</span><span><b>' + js.length + '</b>条学习足迹</span><span><b>' + (Math.round(mins / 6) / 10) + '</b>小时累计</span><span><b>' + due + "</b>张概念卡待复习</span></div></header>" +
-      todayBlockHTML() +
       '<section class="focus" aria-label="正在精读"><div class="focus-top"><p class="eyebrow">正在精读</p><a class="btn small ghost" href="#review">复习概念卡</a></div>' +
       FOCUS.map(focusBlock).join("") + "</section>" +
       '<section><h2>五个学习方向</h2><div class="tracks">' + rows + "</div></section>" +
@@ -926,8 +916,330 @@
     rv.tally[g]++; rv.i++; rv.show = false; render();
   }
 
+  /* ---------- 线网（首页） ---------- */
+  var M = window.YXL_METRO || null;
+  var LINE_COLOR = { en: "--ln-en", sql: "--ln-sql", py: "--ln-py", cfa: "--ln-cfa", geo: "--ln-geo", rev: "--ln-rev", prep: "--ln-rev", tao: "--ln-tao", mm: "--ln-mm" };
+  var DARK_INK = { en: 1, mm: 1 };
+  var MCACHE = {};
+  function subjName(s) { return s === "prep" ? "准备日" : ((PLAN && PLAN.subjects[s]) || {}).name || s; }
+  function lineById(id) { return M.lines.filter(function (l) { return l.id === id; })[0]; }
+  function lineOfSubj(subj) { return M.lines.filter(function (l) { return l.subj === subj && l.src; })[0]; }
+  function addDaysBJ(d, n) { return new Date(utcDay(d) + n * 86400000).toISOString().slice(0, 10); }
+  function wdOf(d) { return new Date(utcDay(d)).getUTCDay(); }
+  function cnDate(d) { return +d.slice(5, 7) + "月" + +d.slice(8, 10) + "日"; }
+  function onDay(subj, d) { return (PLAN.week[wdOf(d)] || []).some(function (x) { return x[0] === subj; }); }
+  function plannedBy(subj, d) { var n = 0, k = dayDiff(PLAN.start, d); for (var i = 0; i < k; i++) if (onDay(subj, addDaysBJ(PLAN.start, i))) n++; return n; }
+  function checkedIn(rec) { return !!(rec && rec.status && rec.status !== "pushed"); }
+  /* 晚点（正数）/ 早到（负数）几站：按时刻表到今天该走完几站，减去实际走完几站 */
+  function lineDelay(subj) {
+    var t = bjToday(), STUDY = curStudy(), list = lessonList(subj);
+    var plan = plannedBy(subj, t) + (checkedIn(STUDY.days[t]) && onDay(subj, t) ? 1 : 0);
+    return Math.min(plan, list.length) - Math.min(STUDY.next[subj] || 0, list.length);
+  }
+  function nextWhen(subj) {
+    var t = bjToday();
+    for (var k = 0; k < 8; k++) { var d = addDaysBJ(t, k); if (onDay(subj, d)) return k === 0 ? "今天" : k === 1 ? "明天" : WD[wdOf(d)]; }
+    return "";
+  }
+  function mmWeek() { return Math.max(0, Math.min(11, Math.floor(dayDiff(PLAN.start, bjToday()) / 7))); }
+  function stationXY(ln) {
+    if (MCACHE[ln.id]) return MCACHE[ln.id];
+    var p = ln.pts, cum = [0], out = [], A = ln.anchors || [];
+    for (var k = 1; k < p.length; k++) cum[k] = cum[k - 1] + Math.abs(p[k][0] - p[k - 1][0]) + Math.abs(p[k][1] - p[k - 1][1]);
+    function at(d) {
+      for (var k = 1; k < p.length; k++) if (d <= cum[k] + 0.001) { var f = (d - cum[k - 1]) / ((cum[k] - cum[k - 1]) || 1); return [p[k - 1][0] + (p[k][0] - p[k - 1][0]) * f, p[k - 1][1] + (p[k][1] - p[k - 1][1]) * f]; }
+      return p[p.length - 1];
+    }
+    for (var a = 0; a < A.length - 1; a++) {
+      var i0 = A[a][0], p0 = A[a][1], i1 = A[a + 1][0], p1 = A[a + 1][1], last = a === A.length - 2;
+      for (var i = i0; i < (last ? i1 + 1 : i1); i++) { var xy = at(cum[p0] + (cum[p1] - cum[p0]) * (i - i0) / (i1 - i0)); out.push([Math.round(xy[0] * 10) / 10, Math.round(xy[1] * 10) / 10]); }
+    }
+    return (MCACHE[ln.id] = out);
+  }
+  function linePath(pts, rad) {
+    var d = "M" + pts[0][0] + " " + pts[0][1];
+    for (var i = 1; i < pts.length; i++) {
+      var p = pts[i];
+      if (i < pts.length - 1) {
+        var a = pts[i - 1], b = pts[i + 1];
+        var straight = (a[0] === p[0] && p[0] === b[0]) || (a[1] === p[1] && p[1] === b[1]);
+        if (!straight) {
+          var r = Math.min(rad, (Math.abs(p[0] - a[0]) + Math.abs(p[1] - a[1])) / 2, (Math.abs(b[0] - p[0]) + Math.abs(b[1] - p[1])) / 2);
+          var ux = Math.sign(p[0] - a[0]), uy = Math.sign(p[1] - a[1]), vx = Math.sign(b[0] - p[0]), vy = Math.sign(b[1] - p[1]);
+          d += " L" + (p[0] - ux * r) + " " + (p[1] - uy * r) + " Q" + p[0] + " " + p[1] + " " + (p[0] + vx * r) + " " + (p[1] + vy * r);
+          continue;
+        }
+      }
+      d += " L" + p[0] + " " + p[1];
+    }
+    return d;
+  }
+  /* 一条线上每一站的内容和状态：done 学完 / cur 下一站 / todo 未到 / free 自由线的下一章 / week 本周 */
+  function lineStops(ln) {
+    var STUDY = curStudy(), out = [];
+    if (!ln.src) return out;
+    if (ln.src.indexOf("plan:") === 0) {
+      var subj = ln.src.slice(5), list = lessonList(subj), nx = STUDY.next[subj] || 0;
+      list.forEach(function (x, i) { out.push({ title: x.title, state: i < nx ? "done" : i === nx ? "cur" : "todo" }); });
+    } else if (ln.src.indexOf("book:") === 0) {
+      var bid = ln.src.slice(5), b = LIB.books[bid], first = -1;
+      b.chapters.forEach(function (c, i) { var dn = isDone(chId(bid, c.n)); if (!dn && first < 0) first = i; out.push({ title: "第" + CN[c.n] + "章 " + c.title, n: c.n, state: dn ? "done" : "todo" }); });
+      if (first >= 0) out[first].state = "free";
+    } else if (ln.src === "mm") {
+      var wk = mmWeek();
+      M.mmWeeks.forEach(function (t, i) { out.push({ title: "第 " + (i + 1) + " 周 · " + t, state: i === wk ? "week" : "todo" }); });
+    }
+    return out;
+  }
+  function todayInfo() {
+    var STUDY = curStudy(), t = bjToday(), rec = STUDY.days[t], day = dayPlan(t), slots;
+    if (rec && rec.planned && rec.planned.length) {
+      slots = rec.planned.map(function (p) {
+        var o = { subj: p.subj, mins: p.mins, title: p.title, index: p.index };
+        if (PLAN.lessons[p.subj]) o.total = lessonList(p.subj).length;
+        return o;
+      });
+    } else slots = day.slots || [];
+    return { t: t, rec: rec, day: day, slots: slots };
+  }
+  function metroMode() {
+    if (!S.metroMode) { try { S.metroMode = localStorage.getItem("yanxilu-route-" + bjToday()) || "std"; } catch (e) { S.metroMode = "std"; } }
+    return S.metroMode;
+  }
+  /* 保底：只走英语一站；标准：时刻表；加开：再多走一站，优先补晚点最多的线 */
+  function routeFor(ti, mode) {
+    var slots = ti.slots;
+    if (mode === "min") { var en = slots.filter(function (s) { return s.subj === "en"; }); return { stops: en.length ? en : slots.slice(0, 1) }; }
+    if (mode !== "plus") return { stops: slots };
+    function mk(subj, ahead) {
+      var list = lessonList(subj), i = (curStudy().next[subj] || 0) + ahead;
+      if (i >= list.length) return null;
+      return { subj: subj, mins: subj === "cfa" ? 35 : subj === "geo" ? 30 : 45, title: list[i].title, index: i, total: list.length, extra: true };
+    }
+    var late = ["sql", "py", "cfa", "geo"].map(function (s) { return { s: s, d: lineDelay(s) }; }).filter(function (x) { return x.d > 0; }).sort(function (a, b) { return b.d - a.d; });
+    for (var k = 0; k < late.length; k++) {
+      var s = late[k].s, inToday = slots.some(function (x) { return x.subj === s; });
+      var ex = mk(s, inToday ? 1 : 0);
+      if (ex && (!inToday || late[k].d > 1)) return { stops: slots.concat([ex]), catchUp: { subj: s, d: late[k].d } };
+    }
+    var base = slots.filter(function (x) { return x.subj !== "en" && PLAN.lessons[x.subj]; })[0], ex2 = base ? mk(base.subj, 1) : null;
+    return { stops: ex2 ? slots.concat([ex2]) : slots };
+  }
+
+  function stopSeq(s) {
+    if (s.subj === "en") return "跟着 CFA 主题";
+    if (!PLAN.lessons[s.subj]) return "";
+    return "第 " + ((s.index || 0) + 1) + " / " + (s.total || lessonList(s.subj).length) + " 站";
+  }
+  function todayStripHTML(ti) {
+    var mode = metroMode(), r = routeFor(ti, mode), stops = r.stops, t = ti.t, rec = ti.rec, day = ti.day;
+    var total = stops.reduce(function (a, s) { return a + (s.mins || 0); }, 0);
+    var head = '<div class="ts-top"><div><p class="eyebrow">今天 · ' + cnDate(t) + " " + WD[day.wd] + (day.prep ? " · 准备日" : day.before ? "" : " · 第 " + weekNo(t) + " 周第 " + (dayDiff(PLAN.start, t) % 7 + 1) + " 天") + '</p><h1 id="ts-h">今日路线</h1></div>' +
+      '<div class="seg" role="group" aria-label="今天坐多远">' + [["min", "保底"], ["std", "标准"], ["plus", "加开"]].map(function (m) {
+        var mins = m[0] === "std" ? ti.slots.reduce(function (a, s) { return a + (s.mins || 0); }, 0) : routeFor(ti, m[0]).stops.reduce(function (a, s) { return a + (s.mins || 0); }, 0);
+        return '<button type="button" data-act="metro-mode" data-m="' + m[0] + '" aria-pressed="' + (mode === m[0]) + '">' + m[1] + ' <span class="segn">' + mins + "′</span></button>";
+      }).join("") + "</div></div>";
+    if (!stops.length) {
+      return '<section class="tstrip" aria-labelledby="ts-h">' + head + '<p class="ts-note" style="margin-top:16px">今天没有排课。讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送。</p></section>";
+    }
+    var route = stops.map(function (s) {
+      var c = LINE_COLOR[s.subj] || "--ln-rev";
+      return '<div class="stp' + (s.extra ? " extra" : "") + '" style="--c:var(' + c + ');flex-grow:' + (s.mins || 20) + '"><span class="stp-dot" aria-hidden="true"></span><span class="stp-bar" aria-hidden="true"></span>' +
+        '<div class="stp-tx"><span class="stp-tag"><b class="lbadge' + (DARK_INK[s.subj] ? " dk" : "") + '">' + esc(subjName(s.subj)) + (s.extra ? " · 加开" : "") + '</b><span class="stp-min">' + (s.mins || "") + "′</span></span>" +
+        '<span class="stp-title">' + esc(s.title || "") + '</span><span class="stp-seq">' + esc(stopSeq(s)) + "</span></div></div>";
+    }).join("") + '<div class="stp end"><span class="stp-dot" aria-hidden="true"></span><div class="stp-tx"><span class="stp-min">' + PLAN.checkin + '</span><span class="stp-title">终点 · 报站</span></div></div>';
+    var note = mode === "min" ? "时间不够或状态不好就选它，走一站就算没停运。其余几站下次接着走，不会堆成欠账。"
+      : mode === "plus" ? (r.catchUp ? subjName(r.catchUp.subj) + "线晚点 " + r.catchUp.d + " 站，多走这一站正好补上。" : "多走一站。早到不改时刻表，下次从再下一站开始。")
+      : "按时刻表走。哪一站没走完，下次从这一站接着走。";
+    var btn = rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">打开今天的讲义</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>";
+    var y = addDaysBJ(t, -1), yr = curStudy().days[y], warn = "";
+    if (yr && !checkedIn(yr)) warn = '<p class="ts-warn"><b>' + cnDate(y) + "还没报站。</b>按没学处理，那几站下次接着走；其实学了的话，晚上报站时一起说，位置就会更新。</p>";
+    return '<section class="tstrip" aria-labelledby="ts-h">' + head + '<div class="ts-route">' + route + "</div>" +
+      '<div class="ts-foot">' + btn + '<p class="ts-note">全程 ' + total + " 分钟。" + note + "</p></div>" + warn + "</section>";
+  }
+
+  function metroSVG(ti) {
+    var todaySub = {}; ti.slots.forEach(function (s) { todaySub[s.subj] = s; });
+    var h = ['<svg class="metro' + (S.metroToday ? " today-only" : "") + '" viewBox="0 0 ' + M.w + " " + M.h + '" role="group" aria-label="线网图：学习线路、换乘站和地标">'];
+    function tx(x, y, b, t, cls, anchor) {
+      return '<text x="' + x + '" y="' + y + '"' + (cls ? ' class="' + cls + '"' : "") + (anchor ? ' text-anchor="' + anchor + '"' : "") + ">" + (b ? '<tspan font-weight="700">' + esc(b) + "</tspan>" : "") + esc(t || "") + "</text>";
+    }
+    function textW(s) { var w = 0; for (var i = 0; i < s.length; i++) w += s.charCodeAt(i) > 255 ? 12.5 : 7.4; return Math.round(w); }
+    M.zones.forEach(function (z) {
+      h.push('<rect x="' + z.x + '" y="' + z.y + '" width="' + z.w + '" height="' + z.h + '" rx="14" style="' + (z.dashed ? "fill:none;stroke:var(--rule-strong);stroke-width:2;stroke-dasharray:7 6" : "fill:var(" + z.fill + ")") + '"/>');
+      if (!z.name) return;
+      var lab = '<text x="' + z.lx + '" y="' + z.ly + '" class="mzl" style="fill:var(' + z.ink + ')">' + esc(z.name) + "</text>";
+      h.push(z.track && TRACK[z.track] ? '<a href="#t-' + z.track + '" class="mzone">' + lab + "</a>" : lab);
+    });
+    /* 图例 */
+    h.push('<g class="mlg"><rect x="40" y="40" width="470" height="236" rx="14" style="fill:var(--map-bg);stroke:var(--rule)"/>' +
+      '<text x="58" y="70" class="h">图例</text>' +
+      '<path d="M58 100 L98 100" style="stroke:var(--ln-sql);stroke-width:6;stroke-linecap:round"/><circle cx="72" cy="100" r="4.6" style="fill:var(--map-bg);stroke:var(--ln-sql);stroke-width:2.4"/><circle cx="88" cy="100" r="4.6" style="fill:var(--ln-sql);stroke:var(--map-bg);stroke-width:1.6"/>' +
+      '<text x="112" y="104">一条线是一门课或一本书；空心站未到，实心站已学完</text>' +
+      '<circle cx="78" cy="130" r="9" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4"/><text x="112" y="134">黑圈是每条线的下一站；标“今天”的是今天要走的站</text>' +
+      '<circle cx="78" cy="160" r="9" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3.5"/><path d="M58 160 L69 160 M87 160 L98 160" style="stroke:var(--ln-py);stroke-width:5"/><text x="112" y="164">换乘站：两条线在这里用到同一块知识</text>' +
+      '<rect x="70" y="182" width="16" height="16" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3"/><text x="112" y="194">地标：讨论和查到的资料，随时去看，不算进度</text>' +
+      '<path d="M58 220 L98 220" style="stroke:var(--ln-cfa);stroke-width:5;stroke-dasharray:9 6"/><text x="112" y="224">虚线：规划中的线路</text>' +
+      '<rect x="58" y="242" width="40" height="18" rx="4" style="fill:var(--z-data)"/><text x="112" y="256">底色区域是学习方向，点区域名进入</text></g>');
+    /* 线路与站 */
+    var overlay = [];
+    M.lines.forEach(function (ln) {
+      var col = "var(" + ln.color + ")", w = (ln.r || 4) * 2, isToday = ln.id === "en" || !!todaySub[ln.subj];
+      h.push('<g class="mline' + (isToday ? " is-today" : "") + '" data-l="' + ln.id + '">');
+      h.push('<path d="' + linePath(ln.pts, 16) + '" style="fill:none;stroke:' + col + ";stroke-width:" + w + ";stroke-linejoin:round;stroke-linecap:" + (ln.dash ? "butt;stroke-dasharray:10 7" : "round") + '"/>');
+      if (ln.dash) h.push('<circle cx="' + ln.pts[ln.pts.length - 1][0] + '" cy="' + ln.pts[ln.pts.length - 1][1] + '" r="7" style="fill:var(--map-bg);stroke:' + col + ';stroke-width:2.5;stroke-dasharray:3 3"/>');
+      var stops = lineStops(ln), xy = stationXY(ln), hubs = ln.hubs || [];
+      stops.forEach(function (s, i) {
+        var p = xy[i]; if (!p) return;
+        var x = p[0], y = p[1], end = i === 0 || i === stops.length - 1;
+        var r = ln.small && !end ? 3.4 : end ? 6 : 4.6, label = ln.name + " 第 " + (i + 1) + " 站：" + s.title;
+        if (s.state === "cur" || s.state === "week" || s.state === "free") overlay.push({ ln: ln, i: i, x: x, y: y, s: s, label: label });
+        if (hubs.indexOf(i) >= 0) return;
+        var dot = s.state === "done" ? '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" style="fill:' + col + ';stroke:var(--map-bg);stroke-width:1.6"/>'
+          : '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" style="fill:var(--map-bg);stroke:' + col + ";stroke-width:" + (end ? 3.5 : 2.4) + '"/>';
+        h.push('<g class="mst" data-act="mst" data-l="' + ln.id + '" data-i="' + i + '" tabindex="-1" aria-label="' + esc(label) + '"><title>' + esc(label) + '</title><circle class="hit" cx="' + x + '" cy="' + y + '" r="' + (ln.small ? 8 : 11) + '"/>' + dot + "</g>");
+      });
+      h.push("</g>");
+    });
+    /* 换乘站 */
+    M.hubs.forEach(function (hb, k) {
+      var shape = hb.cap ? '<rect x="' + (hb.x - 11) + '" y="' + (hb.y - 21) + '" width="22" height="42" rx="11" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4"/>'
+        : '<circle cx="' + hb.x + '" cy="' + hb.y + '" r="10" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4"/>';
+      h.push('<g class="mst" data-act="mhub" data-h="' + k + '" tabindex="0" role="button" aria-label="换乘站：' + esc(hb.name) + '"><title>换乘站：' + esc(hb.name) + "</title>" + shape + "</g>");
+    });
+    /* 地标 */
+    M.landmarks.forEach(function (lm) {
+      var rp = REPORTS.filter(function (x) { return x.id === lm.report; })[0]; if (!rp) return;
+      if (lm.walk) h.push('<path d="M' + lm.walk[0][0] + " " + lm.walk[0][1] + " L" + lm.walk[1][0] + " " + lm.walk[1][1] + '" style="stroke:var(--ink);stroke-width:2;stroke-dasharray:2 4;stroke-linecap:round"/>');
+      h.push('<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener" class="mlm" aria-label="地标：' + esc(rp.title) + '（新标签页打开）"><rect x="' + (lm.x - 8) + '" y="' + (lm.y - 8) + '" width="16" height="16" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3"/>' +
+        tx(lm.lx, lm.ly, rp.title, "") + (lm.sub ? tx(lm.lx, lm.ly + 17, "", lm.sub, "mut") : "") + "</a>");
+    });
+    /* 文字与线名牌 */
+    M.labels.forEach(function (l) { h.push(tx(l.x, l.y, l.b, l.t, l.muted ? "mut" : "", l.anchor)); });
+    M.badges.forEach(function (b) {
+      var ln = lineById(b.line), w = textW(b.t) + 14;
+      h.push('<g class="mbdg"><rect x="' + b.x + '" y="' + b.y + '" width="' + w + '" height="19" rx="4" style="fill:var(' + ln.color + ')"/><text x="' + (b.x + 7) + '" y="' + (b.y + 14) + '" style="fill:var(' + (b.dark ? "--bdg-on-dk" : "--bdg-on") + ')">' + esc(b.t) + "</text></g>");
+    });
+    /* 下一站、本周、今天 */
+    overlay.forEach(function (o) {
+      var col = "var(" + o.ln.color + ")", x = o.x, y = o.y, ring;
+      if (o.s.state === "cur") ring = '<circle class="mhalo" cx="' + x + '" cy="' + y + '" r="13" style="stroke:' + col + '"/><circle cx="' + x + '" cy="' + y + '" r="9" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4.5"/>';
+      else if (o.s.state === "week") ring = '<circle cx="' + x + '" cy="' + y + '" r="8" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3.2"/>';
+      else ring = '<circle cx="' + x + '" cy="' + y + '" r="7.5" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:2.4;stroke-dasharray:3.5 2.5"/>';
+      var tag = "", sl = todaySub[o.ln.subj];
+      if (o.s.state === "cur" && sl && sl.index === o.i) tag = "今天";
+      else if (o.s.state === "week") tag = "本周";
+      var tagSvg = tag ? '<g class="mtag" aria-hidden="true"><rect x="' + (x + 9) + '" y="' + (y - 31) + '" width="34" height="18" rx="3" style="fill:' + (tag === "今天" ? "var(--ink)" : "var(--map-bg)") + ';stroke:var(--ink);stroke-width:1.5"/><text x="' + (x + 26) + '" y="' + (y - 17.5) + '" text-anchor="middle" style="fill:' + (tag === "今天" ? "var(--map-bg)" : "var(--ink)") + ';stroke:none;font-size:12px;font-weight:700">' + tag + "</text></g>" : "";
+      h.push('<g class="mst mline' + (o.ln.id === "en" || todaySub[o.ln.subj] ? " is-today" : "") + '" data-act="mst" data-l="' + o.ln.id + '" data-i="' + o.i + '" tabindex="0" role="button" aria-label="' + esc(o.label) + "（" + ({ cur: "下一站", week: "本周", free: "下一章" })[o.s.state] + (tag === "今天" ? "，今天要走" : "") + '）"><title>' + esc(o.label) + '</title><circle class="hit" cx="' + x + '" cy="' + y + '" r="14"/>' + ring + tagSvg + "</g>");
+    });
+    h.push("</svg>");
+    return h.join("");
+  }
+
+  function boardHTML(ti) {
+    var STUDY = curStudy(), rows = [];
+    function row(id, name, color, dark, next, when, pill) {
+      return '<div class="brow"><span class="bline"><b class="lbadge' + (dark ? " dk" : "") + '" style="--c:var(' + color + ')">' + esc(name) + '</b></span><span class="bnext">' + esc(next) + '</span><span class="bwhen">' + esc(when) + "</span>" + pill + "</div>";
+    }
+    var en = ti.slots.filter(function (s) { return s.subj === "en"; })[0];
+    rows.push(row("en", "英语", "--ln-en", true, en ? en.title : "每天跟着当天的 CFA 主题", "每天", '<span class="pill free">每天</span>'));
+    var late = [];
+    ["sql", "py", "cfa", "geo", "rev"].forEach(function (s) {
+      if (!PLAN.lessons[s]) return;
+      var list = lessonList(s), nx = STUDY.next[s] || 0, d = lineDelay(s);
+      if (d > 0) late.push({ s: s, d: d });
+      var pill = d > 0 ? '<span class="pill late">晚点 ' + d + " 站</span>" : d < 0 ? '<span class="pill early">早到 ' + -d + " 站</span>" : '<span class="pill">正点</span>';
+      rows.push(row(s, subjName(s), LINE_COLOR[s], false, nx < list.length ? "第 " + (nx + 1) + " 站 · " + list[nx].title : "本阶段已走完", nextWhen(s), pill));
+    });
+    var wk = mmWeek();
+    rows.push(row("mm", "做市商研习", "--ln-mm", true, "第 " + (wk + 1) + " 周 · " + M.mmWeeks[wk], "本周", '<span class="pill free">按周走</span>'));
+    var zb = LIB.books.zhoulu, fc = zb ? zb.chapters.filter(function (c) { return !isDone(chId("zhoulu", c.n)); })[0] : null;
+    if (zb) rows.push(row("tao", "涛动周期录", "--ln-tao", false, fc ? "第" + CN[fc.n] + "章 " + fc.title : "已读完", "随时", '<span class="pill free">自由线</span>'));
+    var adv = [];
+    var y = addDaysBJ(ti.t, -1), yr = STUDY.days[y];
+    if (late.length) {
+      var max = Math.max.apply(null, late.map(function (x) { return x.d; }));
+      adv.push(late.map(function (x) { return subjName(x.s); }).join("、") + "晚点" + (late.length === 1 ? " " + late[0].d + " 站" : "") + "。" + (max >= 3 ? "晚点 3 站以上的线，周日复盘时选一种调度：坐快车、顺延终点或暂停一条线。" : "找一天选“加开”就能补上。"));
+      if (yr && !checkedIn(yr)) adv.push(cnDate(y) + "还没报站，所以先按没学算。");
+    } else adv.push("各条线都正点。");
+    return '<section class="panel" aria-labelledby="bd-h"><h2 id="bd-h">各线到站</h2>' + rows.join("") + '<p class="badvice">' + esc(adv.join("")) + "</p></section>";
+  }
+  function landmarkPanel() {
+    var lineReports = M.lines.map(function (l) { return l.report; }).filter(Boolean);
+    var list = REPORTS.filter(function (rp) { return lineReports.indexOf(rp.id) < 0; });
+    return '<section class="panel" aria-labelledby="lm-h"><h2 id="lm-h">地标</h2><p class="meta" style="margin-top:6px">讨论和查到的资料，随时去看，不算进度。以后讨论完说一句“放进研习录”，就多一个地标。</p><div class="lmk-list">' +
+      list.map(function (rp) { return '<a class="lmk" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span class="lmk-sq" aria-hidden="true"></span><span class="lmk-t">' + esc(rp.title) + ' <span aria-hidden="true">↗</span></span><span class="lmk-d">' + esc(rp.desc) + "</span></a>"; }).join("") + "</div></section>";
+  }
+  function homeHTML() {
+    if (!M || !PLAN) return shelfHTML();
+    var ti = todayInfo();
+    var nLines = M.lines.filter(function (l) { return l.src || l.id === "en"; }).length;
+    return '<div class="view home">' + bannerHTML() + todayStripHTML(ti) +
+      '<section class="mwrap" aria-labelledby="mw-h"><div class="mhead"><div><h2 id="mw-h">线网图</h2><p class="meta">' + esc(PLAN.phase) + " · " + nLines + " 条线 · " + M.hubs.length + " 个换乘站 · " + M.landmarks.length + ' 个地标</p></div>' +
+      '<button type="button" class="chipbtn" data-act="metro-today" aria-pressed="' + !!S.metroToday + '">只看今天的线</button></div>' +
+      '<div class="mscroll"><div class="minner" id="minner">' + metroSVG(ti) + '<div class="mpop" id="mpop" role="dialog" aria-label="站点详情" hidden></div></div></div>' +
+      '<p class="meta mhint">点任意一站看详情和讲义；屏幕窄时可以左右拖动地图。</p></section>' +
+      '<div class="hgrid">' + boardHTML(ti) + landmarkPanel() + "</div>" +
+      '<details class="rules"><summary>运行规则</summary><ol>' +
+      "<li>位置只看“学完”，不看日期。哪一站没走完，下次接着走，不会堆成欠账。</li>" +
+      "<li>每天出发前选今天坐多远：保底只走英语一站，标准按时刻表走，加开多走一站。</li>" +
+      "<li>每条线跟时刻表比，显示正点、晚点或早到。晚点 1–2 站，找一天加开补上。</li>" +
+      "<li>晚点 3 站以上，周日复盘时三选一：坐快车（只走每课的必经部分），顺延这条线的终点，或者暂停一条线一周。</li>" +
+      "<li>早到了，可以接着往前，也可以换乘自由线去读书。时刻表不变。</li>" +
+      "<li>晚上 9 点报站。没报站，位置原地不动，不算失败。</li></ol></details></div>";
+  }
+  /* 站点详情 */
+  function latestLesson(subj, i) {
+    var STUDY = curStudy(), best = "";
+    Object.keys(STUDY.days).forEach(function (d) { var r = STUDY.days[d]; if (r.file && (r.planned || []).some(function (p) { return p.subj === subj && p.index === i; }) && d > best) best = d; });
+    return best;
+  }
+  function stationPopHTML(lid, i) {
+    var ln = lineById(lid), stops = lineStops(ln), s = stops[i]; if (!s) return "";
+    var stTxt = { done: "已学完", cur: "下一站", todo: "还没到", free: "下一章 · 自由线，想读就读", week: "本周这一站" }[s.state];
+    var sl = todayInfo().slots.filter(function (x) { return x.subj === ln.subj; })[0];
+    if (s.state === "cur" && sl && sl.index === i) stTxt += " · 今天要走";
+    var links = [];
+    if (ln.subj && PLAN.lessons[ln.subj]) {
+      var d = latestLesson(ln.subj, i);
+      if (d) links.push('<a class="btn small" href="#l-' + d + '">打开讲义（' + cnDate(d) + "）</a>");
+      links.push('<a class="btn small ghost" href="#plan">在课表里看</a>');
+    }
+    if (ln.id === "geo" && i < 20) {
+      var ch = Math.floor(i / 2) + 1, tb = LIB.books.tragedy;
+      links.push(tb.deep && tb.deep[ch] ? '<a class="btn small ghost" href="#r-tragedy-' + ch + '">第' + CN[ch] + "章精读稿</a>" : '<button type="button" class="btn small ghost" data-act="open-ch" data-book="tragedy" data-n="' + ch + '">第' + CN[ch] + "章导读</button>");
+    }
+    if (ln.src && ln.src.indexOf("book:") === 0) {
+      var bid = ln.src.slice(5), bk = LIB.books[bid];
+      if (bk.deep && bk.deep[s.n]) links.push('<a class="btn small" href="#r-' + bid + "-" + s.n + '">精读稿</a>');
+      links.push('<button type="button" class="btn small ghost" data-act="open-ch" data-book="' + bid + '" data-n="' + s.n + '">本章导读</button>');
+    }
+    if (ln.report) { var rp = REPORTS.filter(function (x) { return x.id === ln.report; })[0]; if (rp) links.push('<a class="btn small ghost" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开研习计划 ↗</a>'); }
+    return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b class="lbadge' + (DARK_INK[ln.id] ? " dk" : "") + '" style="--c:var(' + ln.color + ')">' + esc(ln.name) + '</b><span class="mp-pos">第 ' + (i + 1) + " / " + stops.length + ' 站</span></div>' +
+      '<p class="mp-t">' + esc(s.title) + '</p><p class="mp-s">' + esc(stTxt) + "</p>" + (links.length ? '<div class="btns">' + links.join("") + "</div>" : "");
+  }
+  function hubPopHTML(k) {
+    var hb = M.hubs[k];
+    return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b>换乘站 · ' + esc(hb.name) + '</b></div><p class="mp-s" style="margin-top:6px">' + esc(hb.sub) + "</p><ul>" +
+      hb.at.map(function (a) { var ln = lineById(a[0]), s = lineStops(ln)[a[1]]; return '<li><button type="button" class="linkrow" data-act="mst" data-l="' + a[0] + '" data-i="' + a[1] + '"><b class="lbadge' + (DARK_INK[a[0]] ? " dk" : "") + '" style="--c:var(' + ln.color + ')">' + esc(ln.name) + "</b> " + esc(s ? s.title : "") + "</button></li>"; }).join("") + "</ul>";
+  }
+  function openPop(html, x, y) {
+    var inner = document.getElementById("minner"), pop = document.getElementById("mpop");
+    if (!inner || !pop) return;
+    var sc = inner.clientWidth / M.w;
+    pop.innerHTML = html; pop.hidden = false;
+    var px = x * sc, py = y * sc, pw = pop.offsetWidth, ph = pop.offsetHeight;
+    var left = Math.min(Math.max(8, px - pw / 2), inner.clientWidth - pw - 8), top = py + 18;
+    if (top + ph > inner.clientHeight - 8) top = py - ph - 18;
+    pop.style.left = left + "px"; pop.style.top = Math.max(8, top) + "px";
+    var f = pop.querySelector("a,button:not(.mp-x)") || pop.querySelector(".mp-x"); if (f) f.focus({ preventScroll: true });
+  }
+  function closePop() { var pop = document.getElementById("mpop"); if (pop && !pop.hidden) { pop.hidden = true; pop.innerHTML = ""; } }
+  function openStation(lid, i) { var ln = lineById(lid), p = ln && stationXY(ln)[i]; if (p) openPop(stationPopHTML(lid, i), p[0], p[1]); }
+  function openHub(k) { var hb = M.hubs[k]; if (hb) openPop(hubPopHTML(k), hb.x, hb.y); }
+
   /* ---------- 主渲染 ---------- */
-  var ROUTES = { home: 1, journal: 1, review: 1 };
+  var ROUTES = { home: 1, shelf: 1, journal: 1, review: 1 };
   if (PLAN) ROUTES.plan = 1;
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
   Object.keys(LIB.books).forEach(function (b) {
@@ -946,6 +1258,7 @@
     else if (r === "plan") html = planHTML();
     else if (/^l-\d{4}-\d{2}-\d{2}$/.test(r)) html = lessonHTML(r.slice(2));
     else if (r === "review") html = reviewHTML();
+    else if (r === "shelf") html = shelfHTML();
     else html = homeHTML();
     $("#main").innerHTML = html;
     if (scrollTop) window.scrollTo(0, 0);
@@ -987,8 +1300,15 @@
   }
 
   document.addEventListener("click", function (e) {
+    var pop = document.getElementById("mpop");
+    if (pop && !pop.hidden && !e.target.closest("#mpop") && !e.target.closest('[data-act="mst"],[data-act="mhub"]')) closePop();
     var t = e.target.closest("[data-act]"); if (!t) return;
     var act = t.getAttribute("data-act");
+    if (act === "mst") { openStation(t.getAttribute("data-l"), +t.getAttribute("data-i")); return; }
+    if (act === "mhub") { openHub(+t.getAttribute("data-h")); return; }
+    if (act === "mpop-close") { closePop(); return; }
+    if (act === "metro-mode") { S.metroMode = t.getAttribute("data-m"); try { localStorage.setItem("yanxilu-route-" + bjToday(), S.metroMode); } catch (e2) {} render(); return; }
+    if (act === "metro-today") { S.metroToday = !S.metroToday; render(); return; }
     if (act === "status") return;
     if (act === "tab") { S.bookTab = t.getAttribute("data-tab"); render(); return; }
     if (act === "open-ch") { e.preventDefault(); openChapter(t.getAttribute("data-book"), +t.getAttribute("data-n")); return; }
@@ -1020,6 +1340,15 @@
     if (act === "j-del") { S.confirmDel = t.getAttribute("data-id"); render(); return; }
     if (act === "j-del-no") { S.confirmDel = null; render(); return; }
     if (act === "j-del-yes") { var jid = t.getAttribute("data-id"); S.confirmDel = null; del("journal", jid); toast("已删除"); render(); return; }
+  });
+  /* 线网：用键盘打开站点详情，Esc 关闭 */
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape") { var pop = document.getElementById("mpop"); if (pop && !pop.hidden) { closePop(); return; } }
+    if (e.key !== "Enter" && e.key !== " ") return;
+    var g = e.target && e.target.closest ? e.target.closest('.metro [data-act="mst"], .metro [data-act="mhub"]') : null;
+    if (!g) return;
+    e.preventDefault();
+    if (g.getAttribute("data-act") === "mhub") openHub(+g.getAttribute("data-h")); else openStation(g.getAttribute("data-l"), +g.getAttribute("data-i"));
   });
   document.addEventListener("change", function (e) {
     var t = e.target;
