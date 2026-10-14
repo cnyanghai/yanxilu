@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-14",
+  "updated": "2026-10-15",
   "next": {
     "sql": 0,
     "py": 0,
@@ -99,6 +99,34 @@
         }
       ],
       "file": "study/daily/2026-10-14.md",
+      "status": "pushed"
+    },
+    "2026-10-15": {
+      "planned": [
+        {
+          "subj": "film",
+          "mins": 90,
+          "title": "第 1 段",
+          "index": 0
+        },
+        {
+          "subj": "py",
+          "mins": 45,
+          "title": "环境：Anaconda 与 Jupyter，第一个程序",
+          "index": 0,
+          "lesson": "py-01",
+          "file": "study/lessons/py/01.md"
+        },
+        {
+          "subj": "cfa",
+          "mins": 35,
+          "title": "Q1 收益率与回报（1/4）",
+          "index": 0,
+          "lesson": "cfa-01",
+          "file": "study/lessons/cfa/01.md"
+        }
+      ],
+      "file": "study/daily/2026-10-15.md",
       "status": "pushed"
     }
   },
