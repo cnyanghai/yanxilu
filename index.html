@@ -18,8 +18,8 @@
   --indigo:#1F5FAE; --indigo-wash:#E4EDF8; --seal:#D4402F; --seal-wash:#FBE9E6; --seal-ink:#FFFFFF;
   --map-bg:#FFFFFF;
   --ln-en:#E09A1E; --ln-cfa:#8A3A8E; --ln-sql:#00897B; --ln-py:#2B5FAE; --ln-geo:#D4402F; --ln-tao:#9A5B2E; --ln-mm:#7C9A1E; --ln-rev:#727775;
-  --z-cycle:#FBF1E6; --z-geo:#FBEBE8; --z-fin:#F5EEF6; --z-data:#E7F3F1; --z-fut:#F1F4E2;
-  --zi-cycle:#8A5A2B; --zi-geo:#A8352A; --zi-fin:#6E3A73; --zi-data:#00695C; --zi-fut:#556E12; --zi-co:#686D6A;
+  --z-en:#FDF4E1; --z-cycle:#FBF1E6; --z-geo:#FBEBE8; --z-fin:#F5EEF6; --z-data:#E7F3F1; --z-fut:#F1F4E2;
+  --zi-en:#94600C; --zi-cycle:#8A5A2B; --zi-geo:#A8352A; --zi-fin:#6E3A73; --zi-data:#00695C; --zi-fut:#556E12; --zi-co:#686D6A;
   --bdg-on:#FFFFFF; --bdg-on-dk:#1A1A1A; --late:#F2B23E; --early:#7FD1E3; --on-signal:#1A1A1A;
   --f-display:"Barlow","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
   --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
@@ -34,8 +34,8 @@
     --indigo:#8FB4E6; --indigo-wash:#1D2735; --seal:#F06A57; --seal-wash:#3A221E; --seal-ink:#121313;
     --map-bg:#161717;
     --ln-en:#F2B23E; --ln-cfa:#C688CB; --ln-sql:#2DB4A4; --ln-py:#6F9DE2; --ln-geo:#F06A57; --ln-tao:#CF925F; --ln-mm:#A9C443; --ln-rev:#A3A8A5;
-    --z-cycle:#2A231B; --z-geo:#2D1F1C; --z-fin:#271F29; --z-data:#152826; --z-fut:#222716;
-    --zi-cycle:#E2B486; --zi-geo:#F29A8C; --zi-fin:#D9A6DD; --zi-data:#6FD3C4; --zi-fut:#C3DA6E; --zi-co:#9DA19E;
+    --z-en:#29230F; --z-cycle:#2A231B; --z-geo:#2D1F1C; --z-fin:#271F29; --z-data:#152826; --z-fut:#222716;
+    --zi-en:#F2C46E; --zi-cycle:#E2B486; --zi-geo:#F29A8C; --zi-fin:#D9A6DD; --zi-data:#6FD3C4; --zi-fut:#C3DA6E; --zi-co:#9DA19E;
     --bdg-on:#121313; --bdg-on-dk:#121313; --late:#F2B23E; --early:#7FD1E3; --on-signal:#121313;
     color-scheme:dark;
   }
@@ -45,8 +45,8 @@
   --indigo:#8FB4E6; --indigo-wash:#1D2735; --seal:#F06A57; --seal-wash:#3A221E; --seal-ink:#121313;
   --map-bg:#161717;
   --ln-en:#F2B23E; --ln-cfa:#C688CB; --ln-sql:#2DB4A4; --ln-py:#6F9DE2; --ln-geo:#F06A57; --ln-tao:#CF925F; --ln-mm:#A9C443; --ln-rev:#A3A8A5;
-  --z-cycle:#2A231B; --z-geo:#2D1F1C; --z-fin:#271F29; --z-data:#152826; --z-fut:#222716;
-  --zi-cycle:#E2B486; --zi-geo:#F29A8C; --zi-fin:#D9A6DD; --zi-data:#6FD3C4; --zi-fut:#C3DA6E; --zi-co:#9DA19E;
+  --z-en:#29230F; --z-cycle:#2A231B; --z-geo:#2D1F1C; --z-fin:#271F29; --z-data:#152826; --z-fut:#222716;
+  --zi-en:#F2C46E; --zi-cycle:#E2B486; --zi-geo:#F29A8C; --zi-fin:#D9A6DD; --zi-data:#6FD3C4; --zi-fut:#C3DA6E; --zi-co:#9DA19E;
   --bdg-on:#121313; --bdg-on-dk:#121313; --late:#F2B23E; --early:#7FD1E3; --on-signal:#121313;
   color-scheme:dark;
 }
@@ -696,6 +696,148 @@ svg.metro{display:block;width:100%;height:auto;font-family:var(--f-ui)}
 .rules summary{cursor:pointer;font-family:var(--f-ui);font-size:16px;font-weight:700;padding:6px 0}
 .rules ol{margin:8px 0 0;padding-left:1.4em;display:grid;gap:6px;font-size:15px;line-height:1.75;max-width:52em}
 
+/* 今日路线的站可以点；各线到站一行可以点 */
+a.stp{color:inherit;text-decoration:none}
+a.stp:hover .stp-title{text-decoration:underline;text-underline-offset:3px}
+a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-radius:8px}
+.brow-a{display:block;color:inherit;text-decoration:none}
+.brow-a:hover .bnext{color:var(--indigo)}
+.slot-a{color:inherit;text-decoration:none}
+.slot-a:hover b{color:var(--indigo)}
+.metro .mtick{font-size:11.5px}
+.metro .mbdg-a{cursor:pointer}
+.metro .mbdg-a:hover rect{filter:brightness(.92)}
+.mpop .mp-uses{margin-top:10px}
+.mpop .mp-uses a{color:var(--ink);text-decoration:none;font-weight:600}
+.mpop .mp-uses a b{font-family:var(--f-ui);font-size:12px;color:var(--ink-3);margin-right:6px}
+.mpop .mp-uses .meta{display:block;font-size:13px}
+.mpop .mp-rel{display:grid;gap:3px;margin-top:8px}
+
+/* 研究档案：问题、出处、用途、更新 */
+.rrel{grid-column:1;display:block;font-family:var(--f-ui);font-size:13px;line-height:1.6;color:var(--ink-2)}
+.rrel b{display:inline-block;min-width:3.4em;margin-right:6px;font-size:12px;color:var(--ink-3);font-weight:600}
+.rrel a{color:inherit}
+.lmk .rrel{grid-column:2}
+.arch-h{font-size:15px;font-family:var(--f-ui);color:var(--ink-3);margin:22px 0 8px;letter-spacing:.04em}
+
+/* 讲义页 */
+.lst{display:inline-block;font-family:var(--f-ui);font-size:12px;font-weight:700;line-height:1.5;border-radius:10px;padding:0 8px;border:1.5px solid var(--rule-strong);color:var(--ink-2);margin-left:6px}
+.lst.done{border-color:var(--ln-sql);color:var(--ln-sql)}
+.lst.cur{border-color:var(--ink);color:var(--ink)}
+.lesson .eyebrow a{text-decoration:none}
+.lcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;margin:6px 0 22px}
+.lcard{display:flex;flex-direction:column;gap:6px;padding:14px 16px;background:var(--leaf);border:1px solid var(--rule);border-top:6px solid var(--c);border-radius:12px;color:var(--ink);text-decoration:none}
+.lcard:hover{border-color:var(--ink-3);border-top-color:var(--c)}
+.lcard.ok{opacity:.7}
+.lc-top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.lc-min{font-family:var(--f-num);font-size:17px;font-weight:600}
+.lc-t{font-size:15px;font-weight:600;line-height:1.5}
+.lc-go{font-family:var(--f-ui);font-size:13px;color:var(--ink-3);margin-top:auto}
+
+/* 课程页 */
+.view.wide{max-width:1180px}
+.ctitle{display:flex;align-items:center;gap:14px}
+.cbar{flex:none;width:14px;align-self:stretch;min-height:36px;border-radius:7px;background:var(--c)}
+.course .stats{align-items:center}
+.cnow{margin-top:28px;background:var(--leaf);border:1px solid var(--rule);border-left:8px solid var(--c);border-radius:14px;padding:18px 20px}
+.cnow h2{margin:4px 0 10px;font-size:22px}
+.cnow .eyebrow{margin:0}
+.clist{list-style:none;margin:10px 0 0;padding:0;border-top:2px solid var(--ink)}
+.crow{display:grid;grid-template-columns:34px minmax(0,1fr) auto;gap:4px 12px;align-items:baseline;padding:10px 0;border-bottom:1px solid var(--rule);font-size:15px}
+.crow .cnum{font-family:var(--f-num);font-size:15px;color:var(--ink-3)}
+.crow .ct{color:var(--ink);text-decoration:none;line-height:1.55}
+.crow a.ct{font-weight:600}
+.crow a.ct:hover{color:var(--indigo);text-decoration:underline;text-underline-offset:3px}
+.crow.done .ct{color:var(--ink-3)}
+.crow.cur{background:var(--leaf)}
+.crow .cs{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:4px 6px}
+.ctag{font-family:var(--f-ui);font-size:12px;color:var(--ink-2);border:1px dashed var(--rule-strong);border-radius:10px;padding:0 8px;white-space:nowrap}
+.cmod{padding:16px 0 6px;font-family:var(--f-ui);font-size:13px;font-weight:700;color:var(--ink-2);border-bottom:1px solid var(--rule)}
+.cmod .meta{margin-left:8px;font-weight:400}
+.clinks{list-style:none;margin:8px 0 0;padding:0;display:grid;gap:10px;font-size:14.5px;line-height:1.7}
+.clinks b{margin-right:8px}
+.clinks a{color:var(--ink);text-decoration:none}
+
+/* 电影跟读播放器 */
+.fp{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:22px;margin-top:26px;align-items:start}
+.fp-main{position:sticky;top:76px;display:grid;gap:12px}
+.fp-screen{position:relative;background:#000;border-radius:14px;overflow:hidden;aspect-ratio:16/9;max-height:44vh}
+.fp-screen video{display:block;width:100%;height:100%;object-fit:contain}
+.fp-screen.nomedia,.fp-screen.audio{background:var(--leaf);border:1px dashed var(--rule-strong);aspect-ratio:auto;min-height:150px}
+.fp-screen.nomedia video,.fp-screen.audio video{position:absolute;width:1px;height:1px;opacity:0}
+.fp-ph{display:none}
+.fp-screen.nomedia .fp-ph,.fp-screen.audio .fp-ph{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-height:96px;padding:16px 16px 56px;font-family:var(--f-ui);color:var(--ink-3);text-align:center}
+.fp-ph b{color:var(--ink-2)}
+.fp-sub{position:absolute;left:4%;right:4%;bottom:6%;text-align:center;font-size:clamp(16px,2.1vw,24px);line-height:1.45;font-weight:600;color:#fff;text-shadow:0 1px 3px #000,0 0 8px rgba(0,0,0,.8);pointer-events:none}
+.fp-screen.nomedia .fp-sub,.fp-screen.audio .fp-sub{color:var(--ink);text-shadow:none;bottom:14px}
+.fp-sub .fh{opacity:.6}
+.fp-load{background:var(--leaf);border:1px solid var(--rule);border-radius:14px;padding:16px 18px;display:grid;gap:10px;justify-items:start}
+.fp-load .meta{margin:0;line-height:1.7}
+.fp-pick{position:relative;overflow:hidden;cursor:pointer}
+.fp-pick input{position:absolute;inset:0;opacity:0;cursor:pointer;font-size:0}
+.fp-pick:focus-within{outline:2px solid var(--indigo);outline-offset:2px}
+.fp-err{display:block;margin:6px 0 0;font-family:var(--f-ui);font-size:13.5px;line-height:1.6;color:var(--seal)}
+.fp-seg{display:flex;align-items:center;gap:10px}
+.fp-nav{flex:none;width:40px;height:40px;border:1.5px solid var(--rule-strong);border-radius:20px;background:var(--leaf);color:var(--ink);font-size:22px;line-height:1;cursor:pointer}
+.fp-nav:disabled{opacity:.35;cursor:default}
+.fp-segt{flex:1;min-width:0;display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 8px}
+.fp-segt b{font-size:20px}
+.fp-segt .meta{flex-basis:100%;margin:0}
+.fp-play{display:flex;flex-wrap:wrap;gap:8px}
+.fp-ctls{display:grid;gap:8px}
+.fp-ctl{display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px}
+.fp-lab{width:4.6em;font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
+.fp-ctl .seg button{padding:5px 12px}
+.fp-keys{margin:0;font-size:12.5px}
+.fsteps{background:var(--leaf);border:1px solid var(--rule);border-radius:14px;padding:14px 16px}
+.fsteps .eyebrow{margin:0 0 6px}
+.fsteps ol{list-style:none;margin:0;padding:0;display:grid}
+.fsteps li{display:grid;grid-template-columns:118px minmax(0,1fr);gap:2px 12px;padding:8px 0;border-top:1px solid var(--rule)}
+.fs-b{display:flex;justify-content:space-between;align-items:baseline;gap:6px;background:none;border:0;padding:0;font:inherit;color:var(--ink);text-align:left;cursor:pointer}
+.fs-b b{font-size:15px}
+.fs-b:hover b{color:var(--indigo);text-decoration:underline}
+.fs-m{font-family:var(--f-num);font-size:15px;color:var(--ink-3)}
+.fs-d{font-size:13.5px;line-height:1.65;color:var(--ink-2)}
+.fs-x{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.fcues{list-style:none;margin:14px 0 0;padding:0;border-top:2px solid var(--ink)}
+.fc{display:grid;grid-template-columns:26px minmax(0,1fr);gap:2px 8px;padding:8px 6px;border-bottom:1px solid var(--rule);scroll-margin:90px}
+.fc.on{background:var(--leaf);box-shadow:inset 4px 0 0 var(--ln-en)}
+.fc-n{font-family:var(--f-num);font-size:14px;color:var(--ink-3);padding-top:3px}
+.fc.kn .fc-n{color:var(--ln-sql);font-weight:700}
+.fc-tx{background:none;border:0;padding:0;text-align:left;font:inherit;font-size:16px;line-height:1.55;color:var(--ink);cursor:pointer}
+.fc-tx .fz{color:var(--ink-2);font-size:15px}
+.fc-tx .fh{color:var(--ink-3);letter-spacing:.2em}
+.fc-b{grid-column:2;display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.fc-b button{min-width:40px;height:30px;border:1px solid var(--rule-strong);border-radius:15px;background:transparent;color:var(--ink-2);font-family:var(--f-ui);font-size:13px;cursor:pointer;padding:0 10px}
+.fc-b button:hover{border-color:var(--ink);color:var(--ink)}
+.fc-b button[aria-pressed="true"]{background:var(--ln-sql);border-color:var(--ln-sql);color:#fff;font-weight:700}
+.fc-b button.rec{background:var(--seal);border-color:var(--seal);color:#fff}
+.fc-ex{grid-column:2;margin-top:6px;padding:10px 12px;background:var(--paper);border-left:3px solid var(--ln-en);border-radius:0 8px 8px 0;font-size:14px;line-height:1.75;white-space:pre-wrap}
+.fsegs{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:10px 24px;margin-top:12px}
+.fwk{display:flex;align-items:center;gap:8px}
+.fwk-b{display:flex;gap:6px}
+.fseg{width:46px;height:46px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;border:1.5px solid var(--ln-en);border-radius:10px;background:var(--leaf);color:var(--ink);font-family:var(--f-num);font-size:16px;cursor:pointer}
+.fseg.done{background:var(--ln-en);color:var(--bdg-on-dk)}
+.fseg.cur{border:3px solid var(--ink)}
+.fseg-bar{display:block;width:28px;height:4px;border-radius:2px;background:var(--rule)}
+.fseg-bar i{display:block;height:100%;border-radius:2px;background:var(--ln-sql)}
+.fseg-wk{flex:none;width:3.4em;font-family:var(--f-ui);font-size:12px;color:var(--ink-3)}
+@media (max-width:980px){
+  .fp{grid-template-columns:minmax(0,1fr)}
+  .fp-main{top:0;z-index:5;background:var(--paper);padding-bottom:8px}
+  .fp-screen:not(.nomedia):not(.audio){max-height:34vh}
+}
+@media (max-width:640px){
+  .fsteps li{grid-template-columns:minmax(0,1fr)}
+  .fs-x{grid-column:1}
+  .crow{grid-template-columns:30px minmax(0,1fr)}
+  .crow .cs{grid-column:2;justify-content:flex-start}
+  .fp-main{position:static}
+  .fsegs{grid-template-columns:minmax(0,1fr)}
+  .fwk-b{gap:5px}
+  .fseg{width:40px;height:42px}
+}
+
 @media (max-width:980px){.hgrid{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:720px){
   .topbar{position:static;border-bottom-width:2px}
@@ -742,7 +884,12 @@ window.YXL_LIB = {
   kinds: { book: "书", topic: "科目", practice: "实践", concept: "专题" },
 
   /* 专题：独立页面。href 是 GitHub 版的相对路径，artifact 是 claude.ai 上的版本。
-   * group 决定归到哪一组（见 reportGroups），不写就是数据专题。 */
+   * group 决定归到哪一组（见 reportGroups），不写就是数据专题。
+   * 研究档案的三种关系分开写：
+   *   origin 出处：从哪儿来（读哪本书、哪次讨论时做的）
+   *   tracks 归属：属于哪个学习方向（决定它在线网图上放在哪个区域）
+   *   uses   用途：还能拿来做什么，[科目, 第几课(从 0 起), 说明]，显示在那一课的站点详情和课程页里
+   * question 是当时要回答的问题，refresh 写以后要不要更新。 */
   reportGroups: [
     { id: "data", name: "数据专题", trackHead: "用数据看这个方向" },
     { id: "note", name: "知识专题", trackHead: "专题笔记" }
@@ -750,15 +897,23 @@ window.YXL_LIB = {
   reports: [
     { id: "futures-market-making", group: "note", title: "期货做市商", date: "2026-10", tracks: ["fut"],
       desc: "做市商靠什么赚、在哪里亏：准入条件、盈亏方程、七块核心知识、可以动手调的报价模型、跨期对冲、常见亏法、学习路线和自测题。",
+      origin: "关于期货做市商的一次讨论，后来展开成“做市商研习”这条线",
+      question: "做市商靠什么赚钱、在哪里亏钱？",
       href: "reports/market-making.html", artifact: "https://claude.ai/artifact/Dnfuoje3rEV1HL39iURdtc" },
     { id: "futures-mm-plan", group: "note", title: "做市商研习计划", date: "2026-10", tracks: ["fut"],
       desc: "12 周，书和模型同步：每周一读一做，跟着每日课表的 SQL、Python 进度加深；附一天的模拟 tick 练习数据、纸上做市、SQL 与 Python 习题和参考答案。",
       href: "reports/market-making-plan.html", artifact: "https://claude.ai/artifact/Vr3cJGdvYnTA8xiR4m9qFZ" },
     { id: "cn-us-consumption", title: "中美消费与人口", date: "2026-10", tracks: ["cycle"],
       desc: "2000 年以来中美居民消费率、消费结构对比，以及中国人口年龄结构（含每五年节点和五岁组人口金字塔）；附数据表、口径和长表 CSV。",
+      origin: "读周金涛《涛动周期论》时做的辅助研究：看人口结构和居民消费怎样影响周期",
+      question: "中美居民消费差在哪里？中国的人口年龄结构在怎样变化？",
+      uses: [["sql", 30, "附长表 CSV，可以拿来练导入和查询"], ["py", 12, "同一份 CSV，可以拿来练 pandas 读表"]],
+      refresh: "每年国家统计局公布上一年数据后更新一次",
       href: "reports/consumption-population.html", artifact: "https://claude.ai/artifact/LC5DxsG2pE1kCeXXf5p3xE" },
     { id: "cn-us-jp-wealth", title: "中美日财富存量", date: "2026-10", tracks: ["cycle", "fin"],
       desc: "居民存款、股票、债券、期货、黄金储备、住房市值，以及住房和汽车保有量，中美日三国按 2025 年末同一口径对比，附人均值和占 GDP 比重。",
+      question: "中美日三国家庭的财富放在哪里，各有多少？",
+      refresh: "年末存量，每年更新一次",
       href: "reports/wealth.html", artifact: "https://claude.ai/artifact/5MuCSXkBfQqhubibfhAA4f" }
   ],
 
@@ -2031,8 +2186,9 @@ window.YXL_RECORD = {
 
 /* 研习录 · 每日课表（第一阶段）
  * 课程按顺序推进，不和日期绑死：哪天没学完，下次就接着学这一课。
- * 每天早上 7 点（北京时间）由定时任务按“周几的时段安排 + 各科下一课”生成当天讲义，
- * 写到 study/daily/<日期>.md；晚上 9 点打卡后更新 study/progress.json。
+ * 讲义按课存：一课一个文件 study/lessons/<科目>/<两位序号>.md，第一次排到这一课的那天早上写好，以后不重写。
+ * 每天早上 7 点（北京时间）由定时任务按“周几的时段安排 + 各科下一课”写当天的路线单 study/daily/<日期>.md；
+ * 晚上 9 点打卡后更新 study/progress.json。
  */
 window.YXL_PLAN = {
   phase: "第一阶段",
@@ -2045,7 +2201,9 @@ window.YXL_PLAN = {
   repo: "https://github.com/cnyanghai/yanxilu/blob/main/",
 
   subjects: {
-    en:  { name: "英语", color: "seal", why: "为 CFA 英文教材和考试打底。每天跟着当天的 CFA 主题学 10 个术语、读一篇短文，并复习 1、3、7 天前的词。" },
+    film: { name: "英语·电影", film: "当幸福来敲门", filmEn: "The Pursuit of Happyness", year: 2006, player: true,
+      why: "先把一部电影学透：《当幸福来敲门》分成 36 段，每天一段，盲听、精听、跟读、背诵，周日把本周 6 段连起来复习。片源和英文字幕用你自己的，在研习录的跟读播放器里打开，不上传。背完再转 CFA 英文阅读。" },
+    en:  { name: "英语（CFA 术语）", why: "10 月 12—14 日的英语时段：跟着 CFA 主题学术语、读短文。从 10 月 15 日起英语改为电影跟读，CFA 术语并进每节 CFA 课的讲义末尾。" },
     sql: { name: "SQL", why: "工作和大数据局都直接用得上：从零学到能独立写交叉比对查询。工具先用 SQLite（DB Browser for SQLite），后期加 DuckDB 直接查 Excel。" },
     py:  { name: "Python", why: "用 pandas 批量清洗、拆分、比对 Excel，为大数据局的数据处理和 AI 应用打底。电脑上已有 Anaconda，直接用 Jupyter。" },
     cfa: { name: "CFA 一级", why: "第一阶段学数量方法和经济学：前者是所有科目的计算工具，后者连着“经济周期”方向。讲义中文讲解、保留英文术语，附练习题。" },
@@ -2053,16 +2211,22 @@ window.YXL_PLAN = {
     rev: { name: "周复盘", why: "本周 SQL、Python、CFA 小测各 5 题，错题回炉，再用本周学的东西处理一份模拟数据。" }
   },
 
-  /* 周几的时段安排：0 = 周日 … 6 = 周六。[科目, 分钟] */
+  /* 周几的时段安排：0 = 周日 … 6 = 周六。[科目, 分钟, "review"]；标 review 的时段是复习，不推进进度 */
   week: {
-    1: [["en", 20], ["sql", 45], ["cfa", 35]],
-    2: [["en", 20], ["py", 45], ["cfa", 35]],
-    3: [["en", 20], ["sql", 45], ["cfa", 35]],
-    4: [["en", 20], ["py", 45], ["cfa", 35]],
-    5: [["en", 20], ["sql", 45], ["cfa", 35]],
-    6: [["en", 20], ["geo", 60], ["cfa", 35]],
-    0: [["en", 20], ["geo", 30], ["rev", 50]]
+    1: [["film", 90], ["sql", 45], ["cfa", 35]],
+    2: [["film", 90], ["py", 45], ["cfa", 35]],
+    3: [["film", 90], ["sql", 45], ["cfa", 35]],
+    4: [["film", 90], ["py", 45], ["cfa", 35]],
+    5: [["film", 90], ["sql", 45], ["cfa", 35]],
+    6: [["film", 90], ["geo", 60], ["cfa", 35]],
+    0: [["film", 90, "review"], ["geo", 30], ["rev", 50]]
   },
+
+  /* 某一科从哪天起排课（之前的日子不算这一科晚点） */
+  since: { film: "2026-10-15" },
+
+  /* 有讲义文件的科目；电影线没有讲义，用跟读播放器 */
+  written: ["sql", "py", "cfa", "geo", "rev"],
 
   prepDay: [
     "装好 DB Browser for SQLite（免费，sqlitebrowser.org），打开能新建一个空数据库即可",
@@ -2072,8 +2236,12 @@ window.YXL_PLAN = {
     "通读这一页课表，有想调整的地方今晚打卡时说"
   ],
 
-  /* 各科课程顺序。英语不单列：每天跟着当天 CFA 课的主题走。 */
+  /* 各科课程顺序 */
   lessons: {
+    /* 电影按字幕分成 36 段，每段约 3 分钟；播放器读你的字幕文件，按同样的规则切段 */
+    film: ["第 1 段", "第 2 段", "第 3 段", "第 4 段", "第 5 段", "第 6 段", "第 7 段", "第 8 段", "第 9 段", "第 10 段", "第 11 段", "第 12 段",
+      "第 13 段", "第 14 段", "第 15 段", "第 16 段", "第 17 段", "第 18 段", "第 19 段", "第 20 段", "第 21 段", "第 22 段", "第 23 段", "第 24 段",
+      "第 25 段", "第 26 段", "第 27 段", "第 28 段", "第 29 段", "第 30 段", "第 31 段", "第 32 段", "第 33 段", "第 34 段", "第 35 段", "第 36 段"],
     sql: [
       "数据库、表、行和列：装好 DB Browser，建第一张表",
       "SELECT 与 FROM：取列、起别名、算新列",
@@ -2199,83 +2367,90 @@ window.YXL_PLAN = {
  * 坐标系 1360 × 900（SVG viewBox）。线路只走横竖两个方向，拐角由页面画成圆角。
  * 一条线上的站点均匀排在相邻两个“锚点”之间：anchors 里的 [站序号, pts 下标] 把某一站钉在某个拐点或换乘点上。
  * 站点内容不写在这里，由页面从课表（src/plan.js）、书（data.js）和下面的 mmWeeks 读取。
- * 新增地标：在 data.js 的 reports 里加专题，再在下面 landmarks 里给它一个位置；没给位置的专题也会出现在首页“地标”列表里。
+ * 新增地标：在 data.js 的 reports 里加专题（写清出处 origin、用途 uses），再在下面 landmarks 里给它一个位置。
+ * 地标放在它所属的方向区域里；“可以拿来做练习数据”这类用途不画线，显示在对应那一站的详情里。
+ * 没给位置的专题也会出现在首页“地标”列表里。
  */
 window.YXL_METRO = {
   w: 1360,
-  h: 900,
+  h: 1030,
 
   /* 区域 = 学习方向（track 对应 data.js 里 tracks 的 id；点区域名进入该方向） */
   zones: [
-    { track: "cycle", name: "经济周期", x: 540, y: 70, w: 340, h: 225, fill: "--z-cycle", ink: "--zi-cycle", lx: 554, ly: 92 },
-    { track: "geo", name: "地缘与战争", x: 920, y: 56, w: 400, h: 238, fill: "--z-geo", ink: "--zi-geo", lx: 934, ly: 78 },
-    { track: "fin", name: "", x: 150, y: 300, w: 1070, h: 80, fill: "--z-fin", ink: "--zi-fin" },
-    { track: "", name: "数据技能 · SQL 与 Python", x: 60, y: 404, w: 960, h: 400, fill: "--z-data", ink: "--zi-data", lx: 74, ly: 792 },
-    { track: "fut", name: "期货与商品", x: 1040, y: 700, w: 290, h: 186, fill: "--z-fut", ink: "--zi-fut", lx: 1054, ly: 722 },
-    { track: "co", name: "公司与行业 · 第二阶段", x: 1060, y: 420, w: 270, h: 240, dashed: true, ink: "--zi-co", lx: 1074, ly: 442 }
+    { track: "", name: "", x: 40, y: 24, w: 1280, h: 120, fill: "--z-en", ink: "--zi-en" },
+    { track: "cycle", name: "经济周期", x: 540, y: 200, w: 340, h: 225, fill: "--z-cycle", ink: "--zi-cycle", lx: 554, ly: 222 },
+    { track: "geo", name: "地缘与战争", x: 920, y: 186, w: 400, h: 238, fill: "--z-geo", ink: "--zi-geo", lx: 934, ly: 208 },
+    { track: "fin", name: "", x: 150, y: 430, w: 1070, h: 80, fill: "--z-fin", ink: "--zi-fin" },
+    { track: "", name: "数据技能 · SQL 与 Python", x: 60, y: 534, w: 960, h: 400, fill: "--z-data", ink: "--zi-data", lx: 74, ly: 922 },
+    { track: "fut", name: "期货与商品", x: 1040, y: 830, w: 290, h: 186, fill: "--z-fut", ink: "--zi-fut", lx: 1054, ly: 852 },
+    { track: "co", name: "公司与行业 · 第二阶段", x: 1060, y: 550, w: 270, h: 240, dashed: true, ink: "--zi-co", lx: 1074, ly: 572 }
   ],
 
   /* 线路。src：plan:<科目> 读课表，book:<书 id> 读章节，mm 读下面的 mmWeeks；没有 src 的只画线 */
   lines: [
-    { id: "en", subj: "en", name: "英语", color: "--ln-en", r: 3, pts: [[180, 348], [1180, 348]] },
-    { id: "cfa", subj: "cfa", name: "CFA 一级", color: "--ln-cfa", src: "plan:cfa", pts: [[180, 330], [820, 330], [980, 330], [1180, 330]], anchors: [[0, 0], [40, 1], [51, 2], [63, 3]], hubs: [40, 51], small: true },
-    { id: "p2", name: "第二阶段（规划中）", color: "--ln-cfa", dash: true, r: 3, pts: [[1180, 330], [1290, 330], [1290, 560]] },
-    { id: "tao", book: "zhoulu", name: "涛动周期录", color: "--ln-tao", src: "book:zhoulu", free: true, pts: [[600, 160], [820, 160], [820, 330]], anchors: [[0, 0], [6, 2]], hubs: [6] },
-    { id: "geo", subj: "geo", book: "tragedy", name: "地缘 · 大国政治的悲剧", color: "--ln-geo", src: "plan:geo", pts: [[980, 330], [980, 110], [1290, 110]], anchors: [[0, 0], [23, 2]], hubs: [0] },
-    { id: "sql", subj: "sql", name: "SQL", color: "--ln-sql", src: "plan:sql", pts: [[120, 620], [302, 620], [380, 620], [960, 620]], anchors: [[0, 0], [7, 1], [10, 2], [35, 3]], hubs: [7, 10] },
-    { id: "py", subj: "py", name: "Python", color: "--ln-py", src: "plan:py", pts: [[120, 450], [380, 450], [380, 520], [380, 620], [380, 760], [700, 760]], anchors: [[0, 0], [12, 2], [16, 3], [23, 5]], hubs: [12, 16] },
-    { id: "mm", report: "futures-mm-plan", name: "做市商研习", color: "--ln-mm", src: "mm", pts: [[1220, 840], [302, 840], [302, 620], [302, 520], [380, 520], [700, 520]], anchors: [[0, 0], [4, 2], [7, 4], [11, 5]], hubs: [4, 7] }
+    { id: "film", subj: "film", name: "英语·电影", color: "--ln-en", src: "plan:film", pts: [[110, 88], [1170, 88]], anchors: [[0, 0], [35, 1]], small: true,
+      ticks: [[0, "第 1 周"], [6, "第 2 周"], [12, "第 3 周"], [18, "第 4 周"], [24, "第 5 周"], [30, "第 6 周"]] },
+    { id: "enx", name: "之后：CFA 英文阅读（规划中）", color: "--ln-en", dash: true, r: 3, pts: [[1170, 88], [1296, 88]] },
+    { id: "cfa", subj: "cfa", name: "CFA 一级", color: "--ln-cfa", src: "plan:cfa", pts: [[180, 460], [820, 460], [980, 460], [1180, 460]], anchors: [[0, 0], [40, 1], [51, 2], [63, 3]], hubs: [40, 51], small: true },
+    { id: "p2", name: "第二阶段（规划中）", color: "--ln-cfa", dash: true, r: 3, pts: [[1180, 460], [1290, 460], [1290, 690]] },
+    { id: "tao", book: "zhoulu", name: "涛动周期录", color: "--ln-tao", src: "book:zhoulu", free: true, pts: [[600, 290], [820, 290], [820, 460]], anchors: [[0, 0], [6, 2]], hubs: [6] },
+    { id: "geo", subj: "geo", book: "tragedy", name: "地缘 · 大国政治的悲剧", color: "--ln-geo", src: "plan:geo", pts: [[980, 460], [980, 240], [1290, 240]], anchors: [[0, 0], [23, 2]], hubs: [0] },
+    { id: "sql", subj: "sql", name: "SQL", color: "--ln-sql", src: "plan:sql", pts: [[120, 750], [302, 750], [380, 750], [960, 750]], anchors: [[0, 0], [7, 1], [10, 2], [35, 3]], hubs: [7, 10] },
+    { id: "py", subj: "py", name: "Python", color: "--ln-py", src: "plan:py", pts: [[120, 580], [380, 580], [380, 650], [380, 750], [380, 890], [700, 890]], anchors: [[0, 0], [12, 2], [16, 3], [23, 5]], hubs: [12, 16] },
+    { id: "mm", report: "futures-mm-plan", name: "做市商研习", color: "--ln-mm", src: "mm", pts: [[1220, 970], [302, 970], [302, 750], [302, 650], [380, 650], [700, 650]], anchors: [[0, 0], [4, 2], [7, 4], [11, 5]], hubs: [4, 7] }
   ],
 
   /* 换乘站：两条线在这里用到同一块知识。at = [线 id, 站序号] */
   hubs: [
-    { x: 820, y: 339, cap: true, name: "经济周期", sub: "CFA E2「理解经济周期」和《涛动周期录》第七章「周期真实义」都在讲经济周期怎样运行，可以对照着读。", at: [["cfa", 40], ["tao", 6]] },
-    { x: 980, y: 339, cap: true, name: "地缘政治", sub: "CFA E5「地缘政治入门」与地缘线的起点《大国政治的悲剧》第一章相互补充。", at: [["cfa", 51], ["geo", 0]] },
-    { x: 302, y: 620, name: "GROUP BY", sub: "做市商第 5 周用 SQL 统计盘口数据，前置是 SQL 第 8 课 GROUP BY。", at: [["sql", 7], ["mm", 4]] },
-    { x: 380, y: 620, name: "表比对", sub: "SQL 第 11 课 INNER JOIN 和 Python 第 17 课 merge 是同一种操作：两张表按关键字对上。", at: [["sql", 10], ["py", 16]] },
-    { x: 380, y: 520, name: "pandas 入门", sub: "做市商第 8 周用 pandas 重做分析，前置是 Python 第 13 课 pandas 入门。", at: [["py", 12], ["mm", 7]] }
+    { x: 820, y: 469, cap: true, name: "经济周期", sub: "CFA E2「理解经济周期」和《涛动周期录》第七章「周期真实义」都在讲经济周期怎样运行，可以对照着读。", at: [["cfa", 40], ["tao", 6]] },
+    { x: 980, y: 469, cap: true, name: "地缘政治", sub: "CFA E5「地缘政治入门」与地缘线的起点《大国政治的悲剧》第一章相互补充。", at: [["cfa", 51], ["geo", 0]] },
+    { x: 302, y: 750, name: "GROUP BY", sub: "做市商第 5 周用 SQL 统计盘口数据，前置是 SQL 第 8 课 GROUP BY。", at: [["sql", 7], ["mm", 4]] },
+    { x: 380, y: 750, name: "表比对", sub: "SQL 第 11 课 INNER JOIN 和 Python 第 17 课 merge 是同一种操作：两张表按关键字对上。", at: [["sql", 10], ["py", 16]] },
+    { x: 380, y: 650, name: "pandas 入门", sub: "做市商第 8 周用 pandas 重做分析，前置是 Python 第 13 课 pandas 入门。", at: [["py", 12], ["mm", 7]] }
   ],
 
   /* 线名牌 */
   badges: [
-    { line: "cfa", x: 70, y: 304, t: "CFA 一级" },
-    { line: "en", x: 40, y: 354, t: "英语 · 跟着 CFA 主题", dark: true },
-    { line: "sql", x: 40, y: 611, t: "SQL" },
-    { line: "py", x: 40, y: 441, t: "Python" },
-    { line: "tao", x: 600, y: 126, t: "涛动周期录 · 自由线" },
-    { line: "geo", x: 996, y: 222, t: "地缘 · 大国政治的悲剧" },
-    { line: "mm", x: 1100, y: 860, t: "做市商研习 · 12 周", dark: true }
+    { line: "cfa", x: 70, y: 434, t: "CFA 一级" },
+    { line: "film", x: 56, y: 40, t: "英语 · 电影跟读《当幸福来敲门》· 36 段", dark: true },
+    { line: "sql", x: 40, y: 741, t: "SQL" },
+    { line: "py", x: 40, y: 571, t: "Python" },
+    { line: "tao", x: 600, y: 256, t: "涛动周期录 · 自由线" },
+    { line: "geo", x: 996, y: 352, t: "地缘 · 大国政治的悲剧" },
+    { line: "mm", x: 1100, y: 990, t: "做市商研习 · 12 周", dark: true }
   ],
 
   /* 固定文字。b 粗体在前，t 常规在后；anchor: "end" 右对齐 */
   labels: [
-    { x: 460, y: 318, b: "", t: "数量方法 · 36 讲", anchor: "middle", muted: true },
-    { x: 1080, y: 318, b: "", t: "经济学 · 28 讲", anchor: "middle", muted: true },
-    { x: 776, y: 377, b: "经济周期", t: " E2 与第七章" },
-    { x: 958, y: 377, b: "地缘政治", t: " E5 与第一章" },
-    { x: 1150, y: 318, b: "", t: "ER 总复习" },
-    { x: 1074, y: 588, b: "", t: "规划中：第二阶段", muted: true },
-    { x: 1074, y: 606, b: "", t: "财务报表分析、公司估值", muted: true },
-    { x: 580, y: 187, b: "", t: "第一章 走向成熟" },
-    { x: 966, y: 288, b: "", t: "第二章 · 已有精读稿", anchor: "end" },
-    { x: 1300, y: 94, b: "", t: "实战：两种理论各写一页", anchor: "end" },
-    { x: 392, y: 504, b: "pandas 入门", t: " 做市商第 8 周" },
-    { x: 714, y: 765, b: "", t: "小项目：清洗加比对" },
-    { x: 714, y: 525, b: "", t: "第 12 周 · 一页总结" },
-    { x: 288, y: 586, b: "GROUP BY", t: "", anchor: "end" },
-    { x: 288, y: 603, b: "", t: "做市商第 5 周", anchor: "end" },
-    { x: 392, y: 650, b: "表比对", t: " SQL JOIN 与 Python merge" },
-    { x: 446, y: 606, b: "", t: "实战一：名单比对" },
-    { x: 650, y: 606, b: "", t: "实战二：清洗后比对" },
-    { x: 816, y: 606, b: "", t: "导入 CSV" },
-    { x: 974, y: 624, b: "", t: "综合项目" }
+    { x: 1300, y: 52, b: "", t: "每天一段，周日复习本周 6 段", anchor: "end", muted: true },
+    { x: 1300, y: 70, b: "", t: "之后：CFA 英文阅读", anchor: "end", muted: true },
+    { x: 460, y: 448, b: "", t: "数量方法 · 36 讲", anchor: "middle", muted: true },
+    { x: 1080, y: 448, b: "", t: "经济学 · 28 讲", anchor: "middle", muted: true },
+    { x: 776, y: 507, b: "经济周期", t: " E2 与第七章" },
+    { x: 958, y: 507, b: "地缘政治", t: " E5 与第一章" },
+    { x: 1150, y: 448, b: "", t: "ER 总复习" },
+    { x: 1074, y: 718, b: "", t: "规划中：第二阶段", muted: true },
+    { x: 1074, y: 736, b: "", t: "财务报表分析、公司估值", muted: true },
+    { x: 580, y: 317, b: "", t: "第一章 走向成熟" },
+    { x: 966, y: 418, b: "", t: "第二章 · 已有精读稿", anchor: "end" },
+    { x: 1300, y: 224, b: "", t: "实战：两种理论各写一页", anchor: "end" },
+    { x: 392, y: 634, b: "pandas 入门", t: " 做市商第 8 周" },
+    { x: 714, y: 895, b: "", t: "小项目：清洗加比对" },
+    { x: 714, y: 655, b: "", t: "第 12 周 · 一页总结" },
+    { x: 288, y: 716, b: "GROUP BY", t: "", anchor: "end" },
+    { x: 288, y: 733, b: "", t: "做市商第 5 周", anchor: "end" },
+    { x: 392, y: 780, b: "表比对", t: " SQL JOIN 与 Python merge" },
+    { x: 446, y: 736, b: "", t: "实战一：名单比对" },
+    { x: 650, y: 736, b: "", t: "实战二：清洗后比对" },
+    { x: 816, y: 736, b: "", t: "导入 CSV" },
+    { x: 974, y: 754, b: "", t: "综合项目" }
   ],
 
   /* 地标：讨论和查到的资料，不在任何线上，不算进度。report = data.js 里专题的 id */
   landmarks: [
-    { report: "futures-market-making", x: 1290, y: 840, walk: [[1232, 840], [1282, 840]], lx: 1250, ly: 874, sub: "" },
-    { report: "cn-us-consumption", x: 844, y: 700, walk: [[844, 628], [844, 692]], lx: 860, ly: 704, sub: "CSV 可直接导入练 SQL" },
-    { report: "cn-us-jp-wealth", x: 690, y: 245, lx: 706, ly: 250, sub: "" }
+    { report: "futures-market-making", x: 1290, y: 970, walk: [[1232, 970], [1282, 970]], lx: 1250, ly: 1004, sub: "" },
+    { report: "cn-us-jp-wealth", x: 600, y: 362, lx: 616, ly: 367, sub: "" },
+    { report: "cn-us-consumption", x: 600, y: 398, lx: 616, ly: 403, sub: "" }
   ],
 
   /* 做市商研习计划：12 周，每周一站（详见专题页“十二周安排”） */
@@ -2328,13 +2503,17 @@ window.YXL_STUDY = {
           "subj": "sql",
           "mins": 45,
           "index": 0,
-          "title": "数据库、表、行和列：装好 DB Browser，建第一张表"
+          "title": "数据库、表、行和列：装好 DB Browser，建第一张表",
+          "lesson": "sql-01",
+          "file": "study/lessons/sql/01.md"
         },
         {
           "subj": "cfa",
           "mins": 35,
           "index": 0,
-          "title": "Q1 收益率与回报（1/4）"
+          "title": "Q1 收益率与回报（1/4）",
+          "lesson": "cfa-01",
+          "file": "study/lessons/cfa/01.md"
         }
       ],
       "file": "study/daily/2026-10-12.md",
@@ -2351,13 +2530,17 @@ window.YXL_STUDY = {
           "subj": "py",
           "mins": 45,
           "index": 0,
-          "title": "环境：Anaconda 与 Jupyter，第一个程序"
+          "title": "环境：Anaconda 与 Jupyter，第一个程序",
+          "lesson": "py-01",
+          "file": "study/lessons/py/01.md"
         },
         {
           "subj": "cfa",
           "mins": 35,
           "index": 0,
-          "title": "Q1 收益率与回报（1/4）"
+          "title": "Q1 收益率与回报（1/4）",
+          "lesson": "cfa-01",
+          "file": "study/lessons/cfa/01.md"
         }
       ],
       "file": "study/daily/2026-10-13.md",
@@ -2374,22 +2557,31 @@ window.YXL_STUDY = {
           "subj": "sql",
           "mins": 45,
           "index": 0,
-          "title": "数据库、表、行和列：装好 DB Browser，建第一张表"
+          "title": "数据库、表、行和列：装好 DB Browser，建第一张表",
+          "lesson": "sql-01",
+          "file": "study/lessons/sql/01.md"
         },
         {
           "subj": "cfa",
           "mins": 35,
           "index": 0,
-          "title": "Q1 收益率与回报（1/4）"
+          "title": "Q1 收益率与回报（1/4）",
+          "lesson": "cfa-01",
+          "file": "study/lessons/cfa/01.md"
         }
       ],
       "file": "study/daily/2026-10-14.md",
       "status": "pushed"
     }
+  },
+  "issued": {
+    "sql": 1,
+    "py": 1,
+    "cfa": 1
   }
 };
 
-window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第一阶段明天（10 月 12 日，周一）正式开课。今天只做一件事：把工具和材料备齐，明天打开讲义就能直接学。\n\n## 今天的安排\n\n| 时段 | 科目 | 分钟 | 内容 |\n|---|---|---|---|\n| 1 | 准备日 | 60 | 装好工具、备好书、建生词本、看一遍课表 |\n\n建议分配：DB Browser 15 分钟 → Jupyter 15 分钟 → 书 15 分钟 → 生词本 5 分钟 → 课表 10 分钟。哪一步卡住了就先跳过，晚上打卡时告诉我卡在哪。\n\n---\n\n## 一、装好 DB Browser for SQLite（约 15 分钟）\n\nSQL 课前半程都用它。它是一个免费的图形界面小软件，数据库就是电脑上的一个 `.db` 文件，不需要装服务器、不需要联网。\n\n**安装步骤**\n\n1. 打开 sqlitebrowser.org → Download，Windows 选 *Standard installer for 64-bit Windows*（Mac 选 .dmg）。\n2. 一路“下一步”安装。安装界面里如果有勾选项，勾上 *DB Browser (SQLite)* 的桌面快捷方式即可，SQLCipher 版本不用。\n3. 打开软件 → 左上角 **New Database（新建数据库）** → 存到一个固定文件夹，例如 `D:\\研习录\\sql\\practice.db`。\n4. 弹出“编辑表定义”窗口时直接点 **Cancel（取消）**，我们用 SQL 语句建表。\n\n**验收：跑通下面这段脚本**\n\n切到 **Execute SQL（执行 SQL）** 标签页，把下面整段粘进去，按 `Ctrl + Enter`（或点三角形“执行全部”）：\n\n```sql\n-- 准备日验收脚本：建一张小表，插入 3 行虚构数据，再查出来\nDROP TABLE IF EXISTS test_people;\n\nCREATE TABLE test_people (\n    id      INTEGER PRIMARY KEY,\n    name    TEXT,\n    city    TEXT,\n    amount  REAL\n);\n\nINSERT INTO test_people (id, name, city, amount) VALUES\n    (1, '甲某一', '虚构市', 1200.5),\n    (2, '乙某二', '样例县', 800),\n    (3, '丙某三', '虚构市', 1500);\n\nSELECT name, city, amount\nFROM test_people\nWHERE city = '虚构市';\n```\n\n下方结果区应该出现 2 行：甲某一、丙某三。看到了就算装好了。最后点 **Write Changes（写入更改）** 保存。\n\n**常见问题**\n\n- 结果区什么都没有：确认是在 *Execute SQL* 页执行的，而不是 *Browse Data* 页。\n- 报 `near \"，\": syntax error`：SQL 里的逗号、括号、引号必须是英文半角。中文输入法下打的 `，` `（` `‘` 都会报错——这是以后最常见的错误之一，今天先记住。\n- 关软件时提示“是否保存”：选保存。\n\n---\n\n## 二、打开 Jupyter Notebook（约 15 分钟）\n\n**步骤**\n\n1. 开始菜单搜 **Anaconda Navigator** 打开（第一次启动慢，等一两分钟）。\n2. 在 Jupyter Notebook 那一格点 **Launch**，浏览器会打开一个文件列表页。\n3. 进到你想放练习的文件夹（建议 `D:\\研习录\\python`，没有就先在资源管理器里建好）。\n4. 右上角 **New → Python 3 (ipykernel)**，新建笔记本，点左上角标题改名为 `00_准备日`。\n\n**验收：依次运行下面三个单元格**（光标放在单元格里，按 `Shift + Enter` 运行并跳到下一格）\n\n单元格 1——最简单的一行：\n\n```python\nprint(\"hello\")\n```\n\n单元格 2——看看 Python 和 pandas 的版本，确认环境齐全：\n\n```python\nimport sys\nimport pandas as pd\nimport openpyxl\n\nprint(\"Python 版本：\", sys.version.split()[0])\nprint(\"pandas 版本：\", pd.__version__)\nprint(\"openpyxl 版本：\", openpyxl.__version__)\n```\n\n单元格 3——用代码现场生成一个 Excel 再读回来（以后的 Python 课都这样，不依赖外部文件）：\n\n```python\nimport pandas as pd\n\ndf = pd.DataFrame({\n    \"姓名\": [\"甲某一\", \"乙某二\", \"丙某三\"],\n    \"城市\": [\"虚构市\", \"样例县\", \"虚构市\"],\n    \"金额\": [1200.5, 800, 1500],\n})\ndf.to_excel(\"准备日_测试.xlsx\", index=False)\n\nback = pd.read_excel(\"准备日_测试.xlsx\")\nprint(back)\nprint(\"虚构市合计金额：\", back.loc[back[\"城市\"] == \"虚构市\", \"金额\"].sum())\n```\n\n最后一行应输出 `虚构市合计金额： 2700.5`。回到 Jupyter 的文件列表页，能看到多出一个 `准备日_测试.xlsx`。\n\n**常见问题**\n\n- `ModuleNotFoundError: No module named 'openpyxl'`：在一个新单元格里运行 `%pip install openpyxl`，装完后点菜单 *Kernel → Restart*，再从头运行。\n- 浏览器没自动打开：Navigator 的黑色窗口里会有一行 `http://localhost:8888/...` 开头的地址，复制到浏览器打开。\n- 单元格左边一直是 `[*]`：表示还在运行，等几秒；一直不动就 *Kernel → Restart*。\n\n---\n\n## 三、备好《大国政治的悲剧》（约 15 分钟）\n\n地缘政治这门课第一阶段精读米尔斯海默的《大国政治的悲剧》（*The Tragedy of Great Power Politics*）。纸质、电子版都行，修订版（有讨论中国崛起的一章）更好。\n\n**今天读什么**：只读**目录**和**第一章的开头几页**，不求读懂，先建立一个地图。\n\n**读之前先知道这本书在吵什么**（下面是我的概括，不是原文）：\n\n- 国际关系里有一派叫**现实主义**（realism），认为国家之间没有“世界政府”管着，所以每个国家最终只能靠自己保证安全。\n- 现实主义内部又分两种看法：一种认为国家只要“够安全”就满足了（防御性现实主义）；作者主张另一种——**进攻性现实主义**（offensive realism）：在这种环境里，大国会不断寻找机会扩大自己相对于别国的实力，最理想的状态是成为所在地区的霸主。\n- 书名里的“悲剧”指的是：没有哪个大国是天生的恶棍，但结构逼着它们互相防范、互相竞争，冲突因此反复出现。\n\n**带着三个问题翻目录**（不用写答案，脑子里过一遍即可，下周六读第一章时会正式展开）：\n\n1. 全书大致分成哪几块？哪些章讲理论，哪些章讲历史案例？\n2. 有没有专门讨论中美关系或“中国能否和平崛起”的章节？在第几章？\n3. 第一章开头，作者用什么来解释“大国为什么会互相竞争”——是领导人的性格、国家的制度，还是别的东西？\n\n精读页入口：研习录 → 地缘政治 → 《大国政治的悲剧》（https://claude.ai/artifact/LpwLZchfacKZAnJs577MvM ）。\n\n---\n\n## 四、建一个英语生词本（约 5 分钟）\n\n以后每天英语时段会给 10 个 CFA 术语，并在 1、3、7 天后让你回想。生词本用什么形式都行，关键是**每天固定写在同一个地方**。\n\n如果想用 Excel，可以在刚才的 Jupyter 里多运行一个单元格，直接生成一个带好表头的生词本：\n\n```python\nimport pandas as pd\n\ncolumns = [\"日期\", \"英文\", \"音标\", \"中文\", \"例句\", \"第1天复习\", \"第3天复习\", \"第7天复习\"]\nsample = pd.DataFrame([{\n    \"日期\": \"2026-10-11\",\n    \"英文\": \"return\",\n    \"音标\": \"/rɪˈtɜːrn/\",\n    \"中文\": \"回报；收益\",\n    \"例句\": \"The fund earned a return of 8% last year.\",\n    \"第1天复习\": \"\", \"第3天复习\": \"\", \"第7天复习\": \"\",\n}], columns=columns)\n\nsample.to_excel(\"英语生词本.xlsx\", index=False)\nprint(\"已生成：英语生词本.xlsx\")\n```\n\n第一行 `return` 就是明天 CFA 第一课（Rates and Returns）会用到的词，算提前热身。\n\n---\n\n## 五、通读课表（约 10 分钟）\n\n第一阶段 12 周，每天 1.5–2 小时，课程按顺序推进，哪天没学完下次接着学。\n\n| 星期 | 时段安排 |\n|---|---|\n| 周一、三、五 | 英语 20 + SQL 45 + CFA 35 = 100 分钟 |\n| 周二、四 | 英语 20 + Python 45 + CFA 35 = 100 分钟 |\n| 周六 | 英语 20 + 地缘政治 60（读一章）+ CFA 35 = 115 分钟 |\n| 周日 | 英语词汇小测 20 + 地缘政治 30（时事分析）+ 周复盘 50 = 100 分钟 |\n\n各科进度：SQL 36 课、Python 24 课、CFA 一级第一阶段 64 课（数量方法 + 经济学）。\n\n**明天（周一）的课**\n\n- 英语 20 分钟：CFA 术语与短文——Rates and Returns\n- SQL 45 分钟：数据库、表、行和列，建第一张表（今天装好软件，明天直接用）\n- CFA 35 分钟：Q1 收益率与回报（1/4）\n\n看完如果觉得哪天量太大、时间段不合适、或者想换顺序，今晚打卡时直接说，我来调。\n\n---\n\n## 六、热身小练习（可选，5 分钟）\n\n不算正式内容，装好软件后有余力就做。\n\n1. 在 DB Browser 里，把验收脚本最后的查询改成只查金额大于 1000 的人，应该出来几行？\n2. 在 Jupyter 里，把单元格 3 的最后一行改成计算**所有人**的金额合计，结果是多少？\n3. 假设年初存入 10,000 元，年末变成 10,800 元，这一年的收益率（return）是多少？\n\n<details>\n<summary>答案<\/summary>\n\n1. 把 `WHERE city = '虚构市'` 改成 `WHERE amount > 1000`，出来 2 行：甲某一（1200.5）、丙某三（1500）。\n2. `print(back[\"金额\"].sum())`，结果 `3500.5`。\n3. 收益率 = (期末 − 期初) ÷ 期初 = (10,800 − 10,000) ÷ 10,000 = 8%。这就是明天 CFA 第一课的起点——holding period return（持有期收益率）。\n\n<\/details>\n\n---\n\n## 今晚 9 点打卡要回答的三个问题\n\n1. 五件事完成了哪几件？（DB Browser、Jupyter、书、生词本、课表）\n2. 大概用了多久？哪一步卡住了，报错信息是什么？\n3. 看完课表，有没有想调整的地方（每天的量、时段、顺序）？\n", "2026-10-12": "# 2026-10-12（周一）第 1 周 · 第一天\n\n> 第一阶段正式开课。今天三个时段共 100 分钟：英语 → SQL → CFA。按顺序学，哪段卡住了先跳过，晚上打卡时说。\n\n## 今天的安排\n\n| 时段 | 科目 | 分钟 | 课题 |\n|---|---|---|---|\n| 1 | 英语 | 20 | CFA 术语与短文：Rates and Returns |\n| 2 | SQL | 45 | 第 1/36 课 · 数据库、表、行和列：装好 DB Browser，建第一张表 |\n| 3 | CFA 一级 | 35 | 第 1/64 课 · Q1 收益率与回报（1/4）：利率的含义与构成、持有期收益率 |\n\n**关于昨天**：昨天的准备日没有打卡。如果 DB Browser、Jupyter 还没装好，今天 SQL 时段先花 10 分钟装 DB Browser（步骤见 [昨天的讲义](2026-10-11.md) 第一节），Jupyter 明天 Python 课前装好即可。如果昨天其实都弄好了，回复一句，我来补记。\n\n---\n\n## 时段 1 · 英语（20 分钟）\n\n### 今日 10 个术语\n\n| # | 英文 | 音标 | 中文 |\n|---|---|---|---|\n| 1 | interest rate | /ˈɪntrəst reɪt/ | 利率 |\n| 2 | required rate of return | /rɪˈkwaɪərd reɪt əv rɪˈtɜːrn/ | 要求回报率 |\n| 3 | discount rate | /ˈdɪskaʊnt reɪt/ | 折现率 |\n| 4 | opportunity cost | /ˌɑːpərˈtuːnəti kɔːst/ | 机会成本 |\n| 5 | real risk-free interest rate | /ˈriːəl ˌrɪsk ˈfriː/ | 实际无风险利率 |\n| 6 | inflation premium | /ɪnˈfleɪʃn ˈpriːmiəm/ | 通胀溢价 |\n| 7 | default risk premium | /dɪˈfɔːlt rɪsk ˈpriːmiəm/ | 违约风险溢价 |\n| 8 | liquidity premium | /lɪˈkwɪdəti ˈpriːmiəm/ | 流动性溢价 |\n| 9 | maturity premium | /məˈtʃʊrəti ˈpriːmiəm/ | 期限溢价 |\n| 10 | holding period return (HPR) | /ˈhoʊldɪŋ ˈpɪriəd rɪˈtɜːrn/ | 持有期收益率 |\n\n**例句**\n\n1. The central bank raised the **interest rate** by 0.25%. —— 央行把利率上调了 0.25 个百分点。\n2. Investors set a **required rate of return** of 9% for this project. —— 投资者对这个项目设定了 9% 的要求回报率。\n3. A higher **discount rate** makes future cash flows worth less today. —— 折现率越高，未来现金流的现值越低。\n4. The **opportunity cost** of holding cash is the interest you give up. —— 持有现金的机会成本就是放弃的利息。\n5. The **real risk-free interest rate** is the return for pure waiting, with no inflation. —— 实际无风险利率是在没有通胀时单纯“等待”所得的回报。\n6. When prices rise faster, lenders demand a larger **inflation premium**. —— 物价涨得越快，出借人要求的通胀溢价越高。\n7. Bonds from weaker companies carry a higher **default risk premium**. —— 实力较弱公司的债券违约风险溢价更高。\n8. Thinly traded bonds must offer a **liquidity premium**. —— 交易清淡的债券必须提供流动性溢价。\n9. A 30-year bond usually includes a bigger **maturity premium** than a 2-year bond. —— 30 年期债券的期限溢价通常比 2 年期大。\n10. The stock's **holding period return** was 11% including dividends. —— 算上分红，这只股票的持有期收益率是 11%。\n\n### 短文阅读（158 词）\n\n**What Is an Interest Rate?**\n\nAn interest rate can be read in three ways. First, it is a required rate of return: the minimum return an investor needs before agreeing to lend money. Second, it is a discount rate, which tells us how much a payment in the future is worth today. Third, it is an opportunity cost, because money spent today gives up the interest it could have earned.\n\nInterest rates are also built from several parts. The real risk-free interest rate rewards investors simply for waiting. An inflation premium protects them against rising prices. Riskier securities add more premiums: a default risk premium if the borrower might not pay, a liquidity premium if the security is hard to sell quickly at a fair price, and a maturity premium if the money is tied up for many years.\n\nAfter an investment is made, we measure the result with the holding period return, which counts both the price change and any income received.\n\n**理解题**\n\n1. According to the passage, what are the three ways to read an interest rate?\n2. Which premium is added when a security is hard to sell quickly at a fair price?\n3. What two things does the holding period return count?\n\n<details>\n<summary>答案<\/summary>\n\n1. A required rate of return, a discount rate, and an opportunity cost.（要求回报率、折现率、机会成本）\n2. The liquidity premium.（流动性溢价）\n3. The price change and any income received (e.g., dividends or interest).（价格变动和期间收到的收入）\n\n<\/details>\n\n### 间隔回想\n\n- 1 天前（10/11 准备日）：return\n- 3 天前、7 天前：还没开课，暂无。\n\n先遮住中文自己说一遍，再把今天 10 个词抄进生词本。\n\n---\n\n## 时段 2 · SQL（45 分钟）\n\n### 本课目标\n\n1. 说清楚数据库、表、行、列分别是什么。\n2. 会用 `CREATE TABLE` 建表，知道 SQLite 常用的三种类型 `INTEGER`、`REAL`、`TEXT`。\n3. 会用 `INSERT INTO` 插入数据，用 `SELECT * FROM` 把表查出来。\n\n### 讲解：用 Excel 来类比\n\n设想你手上有一份《补贴发放名单》Excel，要和另一份《在职人员名单》核对，看有没有人“既领补贴又在编”。\n\n| Excel 里 | 数据库里 | 说明 |\n|---|---|---|\n| 整个工作簿（.xlsx 文件） | **数据库**（database，SQLite 里就是一个 `.db` 文件） | 装很多张表 |\n| 一个工作表（sheet） | **表**（table） | 一类事物一张表：补贴名单一张、在职名单一张 |\n| 一行 | **行**（row / record，记录） | 一个人、一笔发放 |\n| 一列 + 列标题 | **列**（column / field，字段） | 姓名、证件号、金额…… |\n\n和 Excel 最大的区别：**数据库的每一列在建表时就规定好类型**。“金额”列规定是数字，就不会混进“一千二”这样的文字；“证件号”规定是文本，开头的 0 不会被吃掉——这两件事在 Excel 里都是核查时的常见坑。\n\nSQLite 最常用三种类型：\n\n- `INTEGER`：整数（序号、人数）\n- `REAL`：小数（金额）\n- `TEXT`：文本（姓名、证件号、日期——SQLite 的日期统一写成 `'2026-03-05'` 这种文本）\n\n**主键**（`PRIMARY KEY`）：每张表挑一列当“身份证”，每行的值都不同、不能重复。今天用一个简单的序号 `id` 当主键。\n\n### 建表加数据脚本\n\n打开 DB Browser → 打开昨天建的 `practice.db`（没有就 *New Database* 新建一个）→ 切到 **Execute SQL** → 粘贴整段 → `Ctrl + Enter`。\n\n```sql\n-- 第 1 课：补贴发放名单（数据全部虚构）\nDROP TABLE IF EXISTS subsidy_list;\n\nCREATE TABLE subsidy_list (\n    id        INTEGER PRIMARY KEY,   -- 序号，主键\n    name      TEXT,                  -- 姓名\n    id_no     TEXT,                  -- 证件号（虚构格式）\n    town      TEXT,                  -- 乡镇\n    amount    REAL,                  -- 发放金额（元）\n    pay_date  TEXT                   -- 发放日期\n);\n\nINSERT INTO subsidy_list (id, name, id_no, town, amount, pay_date) VALUES\n    (1, '赵小一', 'XN-0000-0001', '青石镇', 1200,  '2026-03-05'),\n    (2, '钱小二', 'XN-0000-0002', '青石镇', 800,   '2026-03-05'),\n    (3, '孙小三', 'XN-0000-0003', '白沙乡', 1500,  '2026-03-06'),\n    (4, '李小四', 'XN-0000-0004', '白沙乡', 600.5, '2026-03-06'),\n    (5, '周小五', 'XN-0000-0005', '红柳镇', 1200,  '2026-03-07'),\n    (6, '吴小六', 'XN-0000-0006', '红柳镇', 950,   '2026-03-07');\n```\n\n执行后点 **Write Changes** 保存。切到 **Browse Data** 页，选 `subsidy_list`，能看到 6 行，像一张 Excel 表。\n\n逐句看：\n\n- `DROP TABLE IF EXISTS subsidy_list;`——如果已有同名表就先删掉。这样脚本可以反复运行，不会报“表已存在”。\n- `CREATE TABLE 表名 ( 列名 类型, ... );`——建表。列之间用逗号隔开，**最后一列后面不加逗号**。\n- `INSERT INTO 表名 (列1, 列2, ...) VALUES (值1, 值2, ...), (...);`——插入数据。值的顺序和前面列的顺序一一对应；文本用**单引号**，数字不加引号；多行之间用逗号，整句最后一个分号。\n- `--` 后面是注释，SQL 不执行，用来写说明。\n\n### 示例查询\n\n在 Execute SQL 页，**选中某一句再按 `Ctrl + Enter`**，就只执行选中的那句。\n\n**查询 1：看整张表**\n\n```sql\nSELECT * FROM subsidy_list;\n```\n\n`SELECT` 表示“我要取数据”，`*` 表示“所有列”，`FROM subsidy_list` 表示“从这张表取”。结果：6 行 6 列。\n\n**查询 2：只看几列**\n\n```sql\nSELECT name, town, amount FROM subsidy_list;\n```\n\n把 `*` 换成列名，列名之间逗号隔开。结果只有姓名、乡镇、金额三列，顺序就按你写的顺序。（下一课专门讲 SELECT。）\n\n**查询 3：数一数有几行**\n\n```sql\nSELECT COUNT(*) FROM subsidy_list;\n```\n\n`COUNT(*)` 数行数，结果是 `6`。拿到一份新名单，先数行数是核查的第一步——和对方说的人数对不上，后面就不用往下做了。\n\n**查询 4：看表结构**\n\n```sql\nPRAGMA table_info(subsidy_list);\n```\n\n`PRAGMA` 是 SQLite 特有的命令，列出每一列的名字和类型（`pk` 为 1 的那列是主键）。忘了列名叫什么时用它查。\n\n### 练习（由易到难）\n\n1. 查出 `subsidy_list` 的全部内容。\n2. 只查姓名和证件号两列。\n3. 青石镇新增一人：序号 7，郑小七，证件号 `XN-0000-0007`，金额 700，发放日期 2026-03-08。写 `INSERT` 插进去，再查姓名和金额，确认一共 7 行。\n4. 新建一张 `staff_list`（在职人员名单），四列：`staff_no`（整数，主键）、`name`（文本）、`id_no`（文本）、`dept`（文本），插入下面 3 行：\n   - 101，冯甲，`XN-0000-0101`，虚构局办公室\n   - 102，孙小三，`XN-0000-0003`，虚构局财务科\n   - 103，陈乙，`XN-0000-0103`，虚构局综合科\n5. 贴近实际：现在库里有两张表——补贴名单和在职名单。分别查出两张表的姓名和证件号，**用眼睛比对**：谁既在补贴名单上、又在在职名单上？想一想：为什么要用证件号比，而不是用姓名比？（几十行可以用眼睛，几万行就得靠 SQL——第 15 课左右的 JOIN 会教一句话搞定。）\n\n### 常见错误\n\n- **中文标点**：`，` `（` `‘` 会报 `syntax error`。SQL 符号一律英文半角，文本内容里的中文没关系。\n- **最后一列后面多了逗号**：`pay_date TEXT,)` 会报错。\n- **文本忘了加引号**：`VALUES (7, 郑小七, ...)` 会报 `no such column: 郑小七`——SQL 把没加引号的字当成了列名。\n- **用了双引号包文本**：SQLite 有时能容忍，但标准写法是单引号，养成习惯。\n- **主键重复**：再插一次 `id = 1` 会报 `UNIQUE constraint failed`。这正是主键的作用。\n- **忘了 Write Changes**：关掉软件后数据没了。\n\n<details>\n<summary>SQL 练习答案<\/summary>\n\n1.\n```sql\nSELECT * FROM subsidy_list;\n```\n\n2.\n```sql\nSELECT name, id_no FROM subsidy_list;\n```\n\n3.\n```sql\nINSERT INTO subsidy_list (id, name, id_no, town, amount, pay_date) VALUES\n    (7, '郑小七', 'XN-0000-0007', '青石镇', 700, '2026-03-08');\n\nSELECT name, amount FROM subsidy_list;\n```\n结果 7 行，最后一行是 郑小七 700.0。\n\n4.\n```sql\nDROP TABLE IF EXISTS staff_list;\n\nCREATE TABLE staff_list (\n    staff_no  INTEGER PRIMARY KEY,\n    name      TEXT,\n    id_no     TEXT,\n    dept      TEXT\n);\n\nINSERT INTO staff_list (staff_no, name, id_no, dept) VALUES\n    (101, '冯甲',   'XN-0000-0101', '虚构局办公室'),\n    (102, '孙小三', 'XN-0000-0003', '虚构局财务科'),\n    (103, '陈乙',   'XN-0000-0103', '虚构局综合科');\n```\n\n5.\n```sql\nSELECT name, id_no FROM subsidy_list;\nSELECT name, id_no FROM staff_list;\n```\n**孙小三**（`XN-0000-0003`）两边都有：在白沙乡领了 1500 元补贴，同时在虚构局财务科在职。\n用证件号比，是因为**姓名会重名、也会写错字**，而证件号对每个人唯一。实际工作中两份名单的姓名往往一样、证件号却不同（重名的两个人），或者姓名有出入、证件号相同（同一人录入时写错了字）——只看姓名两种情况都会判错。\n\n预告：以后一句话就能直接筛出来——\n\n```sql\nSELECT name FROM subsidy_list\nWHERE id_no IN (SELECT id_no FROM staff_list);\n```\n\n今天不要求看懂。\n\n<\/details>\n\n---\n\n## 时段 3 · CFA 一级（35 分钟）\n\n**模块**：Quantitative Methods → Rates and Returns（共 4 次课，今天第 1 次）\n\n### 学习目标\n\n- 从三个角度解释利率：要求回报率、折现率、机会成本。\n- 把利率拆成实际无风险利率加各项溢价。\n- 计算单期和多期的持有期收益率（HPR）。\n\n### 讲解一：利率的三种解读\n\n同一个利率数字，比如 5%，可以从三个角度看：\n\n1. **Required rate of return（要求回报率）**：投资者愿意把钱借出去或投进去，最低要拿到的回报。\n2. **Discount rate（折现率）**：把未来的钱换算成今天价值时用的比率。一年后的 105 元，按 5% 折现，今天值 100 元。\n3. **Opportunity cost（机会成本）**：选择把钱花掉或闲着，就放弃了本可以赚到的 5%。\n\n考试常考“某句话对应哪种解读”，记住关键词：*minimum / required* → 要求回报率；*today's value / present value* → 折现率；*forgo / give up* → 机会成本。\n\n### 讲解二：利率的构成\n\n$$\nr = \\text{实际无风险利率} + \\text{通胀溢价} + \\text{违约风险溢价} + \\text{流动性溢价} + \\text{期限溢价}\n$$\n\n| 组成部分 | 补偿什么 |\n|---|---|\n| Real risk-free interest rate | 单纯“等待”：没有通胀、没有任何风险时，推迟消费应得的回报 |\n| Inflation premium | 预期通胀让钱贬值 |\n| Default risk premium | 借款人可能不按时足额还钱 |\n| Liquidity premium | 想卖的时候难以按公允价格快速卖出 |\n| Maturity premium | 期限越长，利率变动对价格影响越大 |\n\n两个常用组合：\n\n- **Nominal risk-free rate（名义无风险利率）** = 实际无风险利率 + 通胀溢价。短期国库券（T-bill）收益率就近似它——国库券几乎没有违约风险、流动性极好、期限很短，后三项溢价约等于零。\n- 严格地说两者是相乘关系：(1 + 名义) = (1 + 实际)(1 + 通胀)。一级考试里通常直接相加近似即可，题目会说明。\n\n**例题 1**：实际无风险利率 2%，通胀溢价 3%，某公司债违约风险溢价 1.5%，流动性溢价 0.5%，期限溢价 1%。求名义无风险利率和该公司债的要求回报率。\n\n- 名义无风险利率 ≈ 2% + 3% = **5%**（严格算：1.02 × 1.03 − 1 = 5.06%）\n- 公司债要求回报率 = 5% + 1.5% + 0.5% + 1% = **8%**\n\n**例题 2**：3 个月期国库券收益率 4.0%，通胀溢价 2.5%，实际无风险利率约为多少？\n\n- 4.0% − 2.5% = **1.5%**\n\n### 讲解三：持有期收益率（HPR）\n\n**单期**：\n\n$$\nHPR = \\frac{P_1 - P_0 + D_1}{P_0}\n$$\n\n$P_0$ 期初价格，$P_1$ 期末价格，$D_1$ 期间收到的现金（股息、利息）。分子 = 价格变动（capital gain）+ 收入（income），所以 HPR = 资本利得率 + 收益率（dividend yield）。\n\n**例题 3**：以 50 元买入一只股票，持有期间收到股息 1.5 元，期末以 54 元卖出。\n\nHPR = (54 − 50 + 1.5) ÷ 50 = 5.5 ÷ 50 = **11%**（其中资本利得 8%，股息收益 3%）\n\n计算器（BA II Plus）：`54 − 50 + 1.5 = ` → `÷ 50 =` → 显示 `0.11`\n\n**多期**：把每一期“1 + 收益率”连乘，再减 1。\n\n$$\nHPR = (1 + R_1)(1 + R_2)\\cdots(1 + R_n) - 1\n$$\n\n**例题 4**：某基金连续三年收益率为 10%、−5%、8%，三年的持有期收益率是多少？\n\n(1.10)(0.95)(1.08) − 1 = 1.1286 − 1 = **12.86%**\n\n计算器：`1.1 × 0.95 × 1.08 − 1 =` → 显示 `0.1286`\n\n注意：**不能**直接相加（10 − 5 + 8 = 13%），那样忽略了复利。\n\n### 练习：仿一级考试三选一\n\n**1.** An analyst states: \"The 6% rate is the minimum return investors require before they agree to lend.\" This statement best describes the interest rate as a:\n\nA. discount rate.\nB. required rate of return.\nC. opportunity cost.\n\n**2.** Which component of an interest rate compensates investors for the risk that a security cannot be sold quickly at close to its fair value?\n\nA. Maturity premium\nB. Default risk premium\nC. Liquidity premium\n\n**3.** Given: real risk-free rate 1.5%, inflation premium 2.5%, default risk premium 2.0%, liquidity premium 0.8%, maturity premium 1.2%. The required return on the bond is closest to:\n\nA. 6.0%\nB. 7.2%\nC. 8.0%\n\n**4.** An investor buys a share at $40, receives a dividend of $0.80, and sells the share at $37. The holding period return is closest to:\n\nA. −7.5%\nB. −5.5%\nC. −2.0%\n\n**5.** A portfolio returns 12%, −8%, and 5% in three consecutive years. The three-year holding period return is closest to:\n\nA. 9.00%\nB. 8.19%\nC. 2.73%\n\n<details>\n<summary>CFA 答案与解析<\/summary>\n\n1. **B**。关键词 *minimum return investors require*。折现率强调把未来价值换算到今天；机会成本强调放弃的收益。\n2. **C**。流动性溢价补偿“难以快速按公允价卖出”。期限溢价补偿长期限下的利率风险；违约风险溢价补偿可能不还钱。\n3. **C**。1.5 + 2.5 + 2.0 + 0.8 + 1.2 = 8.0%。A 只加了前三项，漏了流动性和期限溢价（1.5 + 2.5 + 2.0 = 6.0%）。\n4. **B**。(37 − 40 + 0.80) ÷ 40 = −2.20 ÷ 40 = −5.5%。A 漏掉了股息（−3 ÷ 40 = −7.5%）。\n5. **B**。1.12 × 0.92 × 1.05 − 1 = 1.08192 − 1 = 8.19%。A 是直接相加的错误做法；C 是 8.19% 除以 3 的错误“年均”做法（年均收益率要开三次方，第 2 次课讲几何平均）。\n\n<\/details>\n\n---\n\n## 今晚 9 点打卡要回答的三个问题\n\n1. 三个时段完成了哪几个？（英语、SQL、CFA）大概用了多久？\n2. SQL：五道练习做到第几道？有没有报错，报错信息是什么？\n3. CFA：利率构成的五项、持有期收益率的单期和多期公式，哪里还模糊？\n", "2026-10-13": "# 2026-10-13（周二）第 1 周 · 第二天\n\n> 今天三个时段共 100 分钟：英语 → Python → CFA。按顺序学，哪段卡住了先跳过，晚上打卡时说。\n\n## 今天的安排\n\n| 时段 | 科目 | 分钟 | 课题 |\n|---|---|---|---|\n| 1 | 英语 | 20 | CFA 术语与短文：Rates and Returns（续） |\n| 2 | Python | 45 | 第 1/24 课 · 环境：Anaconda 与 Jupyter，第一个程序 |\n| 3 | CFA 一级 | 35 | 第 1/64 课 · Q1 收益率与回报（1/4）：利率的含义与构成、持有期收益率 |\n\n**关于昨天**：昨天（10/12）没有打卡，按没学处理——今天 CFA 接着学同一课（换了一套新例题和新练习，没看过昨天讲义也能直接学）；昨天的 SQL 第 1 课留到下一个 SQL 日（周三）接着学。如果其实学完了，回复一句，我来补记。\n\n前天的准备日和昨天都没打卡。刚开头节奏还没找到很正常；如果是每天 100 分钟排不开，晚上直接说，可以把每天的量调小，不用硬撑。\n\n---\n\n## 时段 1 · 英语（20 分钟）\n\n### 今日 10 个术语\n\n| # | 英文 | 音标 | 中文 |\n|---|---|---|---|\n| 1 | nominal risk-free rate | /ˈnɑːmɪnl ˌrɪsk ˈfriː reɪt/ | 名义无风险利率 |\n| 2 | Treasury bill (T-bill) | /ˈtreʒəri bɪl/ | 短期国库券 |\n| 3 | premium | /ˈpriːmiəm/ | 溢价；额外补偿 |\n| 4 | creditworthiness | /ˈkredɪtwɜːrðinəs/ | 信用状况、偿债能力 |\n| 5 | capital gain | /ˈkæpɪtl ɡeɪn/ | 资本利得（价差收益） |\n| 6 | dividend yield | /ˈdɪvɪdend jiːld/ | 股息收益率 |\n| 7 | coupon | /ˈkuːpɑːn/ | （债券）票息 |\n| 8 | compounding | /kəmˈpaʊndɪŋ/ | 复利、复合计算 |\n| 9 | present value | /ˈpreznt ˈvæljuː/ | 现值 |\n| 10 | fair value | /fer ˈvæljuː/ | 公允价值 |\n\n**例句**\n\n1. The yield on a 3-month T-bill is a good proxy for the **nominal risk-free rate**. —— 3 个月期国库券的收益率可以很好地近似名义无风险利率。\n2. A **Treasury bill** matures in one year or less. —— 短期国库券的期限不超过一年。\n3. Investors demand a **premium** for every extra risk they take. —— 每多承担一种风险，投资者就要求多一份溢价。\n4. Rating agencies assess the **creditworthiness** of bond issuers. —— 评级机构评估债券发行人的信用状况。\n5. She sold the shares at a higher price and realized a **capital gain**. —— 她以更高的价格卖出股票，实现了资本利得。\n6. A stock priced at 50 that pays 2 a year has a **dividend yield** of 4%. —— 股价 50、每年分红 2 的股票，股息收益率是 4%。\n7. The bond pays a **coupon** of 5% once a year. —— 这只债券每年付一次 5% 的票息。\n8. Because of **compounding**, returns earned each year also earn returns later. —— 由于复利，每年赚到的收益之后还会继续生息。\n9. The **present value** of 110 received next year at 10% is 100. —— 按 10% 折算，明年收到的 110 的现值是 100。\n10. In an illiquid market, you may have to sell well below **fair value**. —— 在流动性差的市场里，你可能得远低于公允价值卖出。\n\n### 短文阅读（150 词）\n\n**Two Bonds, One Lesson**\n\nImagine two bonds. The first is a 3-month Treasury bill. It is issued by the government, so default is very unlikely; it trades every day, so it is easy to sell; and it matures soon, so price changes are small. Its yield is close to the nominal risk-free rate: the real risk-free rate plus an inflation premium.\n\nThe second is a 10-year bond from a small company. Its yield is much higher. Why? Investors worry about the company's creditworthiness, so they add a default risk premium. Few people trade it, so selling it at fair value may take time; that adds a liquidity premium. Ten years is a long time, so a maturity premium is added too.\n\nWhen we measure the result of owning either bond, we add the coupon received to the capital gain or loss, then divide by the price we paid. That is the holding period return.\n\n**理解题**\n\n1. Why is the T-bill's yield close to the nominal risk-free rate? Give two reasons from the passage.\n2. Name the three premiums the company bond has that the T-bill almost does not.\n3. How is the holding period return calculated, according to the last paragraph?\n\n<details>\n<summary>答案<\/summary>\n\n1. Any two of: default is very unlikely (issued by the government); it is easy to sell (trades every day); it matures soon (small price changes).（政府发行几乎不违约；天天有交易、好卖；期限短、价格波动小。）\n2. Default risk premium, liquidity premium, maturity premium.（违约风险溢价、流动性溢价、期限溢价）\n3. Add the coupon received to the capital gain or loss, then divide by the purchase price.（票息加上资本利得或损失，再除以买入价。）\n\n<\/details>\n\n### 间隔回想\n\n遮住中文，自己说出意思：\n\n- 1 天前（10/12）：interest rate, required rate of return, discount rate, opportunity cost, real risk-free interest rate, inflation premium, default risk premium, liquidity premium, maturity premium, holding period return\n- 3 天前（10/10）、7 天前（10/6）：还没开课，暂无。\n\n昨天的 10 个词今天第一次复习；想不起来的，去 [昨天的讲义](2026-10-12.md) 英语部分对一下，再和今天的 10 个词一起抄进生词本。\n\n---\n\n## 时段 2 · Python（45 分钟）\n\n### 本课目标\n\n1. 会从 Anaconda 打开 Jupyter Notebook，新建、改名、保存一个笔记本。\n2. 分清两种单元格：**Code**（代码）和 **Markdown**（文字说明），会用快捷键运行。\n3. 会用 `print()` 输出、用 `#` 写注释、把 Python 当计算器用。\n4. 看得懂最常见的报错，知道从哪一行找问题。\n\n### 讲解一：Anaconda、Jupyter、Python 是什么关系\n\n- **Python**：编程语言本身。\n- **Anaconda**：一个“工具大礼包”，装好了 Python 和几百个常用库（pandas 处理表格、openpyxl 读写 Excel 等），省得一个个装。\n- **Jupyter Notebook**：在浏览器里写 Python 的“笔记本”。一份笔记本（`.ipynb` 文件）由很多**单元格**组成，每格可以单独运行、马上看到结果——很适合边学边试，也适合一步步处理一份 Excel：读进来 → 看一眼 → 清洗 → 再看一眼 → 导出。\n\n可以这样类比：Python 是发动机，Anaconda 是整辆车，Jupyter 是驾驶座。\n\n### 讲解二：打开并建好今天的笔记本（约 8 分钟）\n\n1. 开始菜单搜 **Anaconda Navigator** → 在 Jupyter Notebook 那格点 **Launch**（也可以开始菜单直接搜 *Jupyter Notebook*）。浏览器会打开一个文件列表页，背后还有一个黑色窗口——**别关它**，关了 Jupyter 就停了。\n2. 进到练习文件夹（建议 `D:\\研习录\\python`）。\n3. 右上角 **New → Python 3 (ipykernel)**，点左上角的 *Untitled*，改名为 `01_第一个程序`。\n4. 保存：`Ctrl + S`。Jupyter 也会每隔几分钟自动保存。\n\n**两种模式**（Jupyter 最容易困惑的地方）：\n\n| 模式 | 怎么进入 | 单元格左边框 | 这时按键的作用 |\n|---|---|---|---|\n| 编辑模式 | 在单元格里点一下，或按 `Enter` | 绿色（新版为蓝色、有光标） | 打字 |\n| 命令模式 | 按 `Esc` | 蓝色、没有光标 | 按单个字母操作整个单元格 |\n\n**常用快捷键**（先记前四个）：\n\n| 快捷键 | 作用 |\n|---|---|\n| `Shift + Enter` | 运行当前格，跳到下一格（最常用） |\n| `Ctrl + Enter` | 运行当前格，停在原地 |\n| `Esc` 然后 `B` | 在下方插入新单元格（Below） |\n| `Esc` 然后 `M` / `Y` | 把单元格切换成 Markdown / Code |\n| `Esc` 然后 `D D` | 删除单元格（按两次 D） |\n| `Esc` 然后 `Z` | 撤销删除 |\n\n单元格左边的 `In [3]:` 表示这是第 3 个被运行的格；正在运行时显示 `In [*]:`。\n\n### 讲解三：第一个程序\n\n依次把下面每段放进一个单独的单元格，`Shift + Enter` 运行。\n\n**单元格 1：输出一句话**\n\n```python\nprint(\"hello, 研习录\")\n```\n\n- `print()` 是一个**函数**：括号里放什么，就把什么显示出来。\n- 文字要用**英文引号**包起来，单引号 `'...'` 和双引号 `\"...\"` 都行，前后要一致。被引号包起来的文字叫**字符串**（string）。\n\n**单元格 2：注释和多行输出**\n\n```python\n# 井号后面是注释，Python 不执行，用来写说明\nprint(\"第一行\")\nprint(\"第二行\")   # 注释也可以写在代码后面\nprint(\"姓名：\", \"赵小一\", \"金额：\", 1200)\n```\n\n输出：\n\n```\n第一行\n第二行\n姓名： 赵小一 金额： 1200\n```\n\n`print()` 里可以放好几样东西，用逗号隔开，输出时自动用空格连起来。注意 `1200` 没加引号——它是数字，不是文字。\n\n**单元格 3：把 Python 当计算器**\n\n```python\nprint(1200 + 800)        # 加\nprint(1500 - 600.5)      # 减\nprint(950 * 12)          # 乘：用 * 不是 ×\nprint(6250.5 / 6)        # 除：用 / 不是 ÷，结果总是小数\nprint(17 // 5, 17 % 5)   # 整除取商、取余数\nprint(1.05 ** 3)         # 乘方：1.05 的 3 次方\n```\n\n输出：\n\n```\n2000\n899.5\n11400\n1041.75\n3 2\n1.157625\n```\n\n**单元格 4：单元格最后一行的值会自动显示**\n\n```python\n1.10 * 0.95 * 1.08 - 1\n```\n\n不写 `print`，Jupyter 也会显示 `0.12860000000000005`。末尾那串 `0000000005` 是计算机存小数的正常误差，不是算错了。想要整齐，用 `round(数字, 位数)`：\n\n```python\nround(1.10 * 0.95 * 1.08 - 1, 4)\n```\n\n结果 `0.1286`——正好是今天 CFA 课里多期持有期收益率的算法，以后算 CFA 题可以直接用 Jupyter 验算。\n\n**单元格 5：Markdown 单元格写笔记**\n\n新建一格，按 `Esc` 再按 `M` 切成 Markdown，输入：\n\n```markdown\n# 第 1 课：第一个程序\n- `print()` 输出\n- `#` 写注释\n- **Shift + Enter** 运行\n```\n\n运行后变成排好版的标题和列表。双击可以再改。养成习惯：每个笔记本开头写一格 Markdown，说明这个笔记本是干什么的。\n\n**单元格 6：先尝一口——三行代码生成并读回一个 Excel**\n\n```python\nimport pandas as pd\n\ndf = pd.DataFrame({\"姓名\": [\"赵小一\", \"钱小二\", \"孙小三\"], \"金额\": [1200, 800, 1500]})\ndf.to_excel(\"01_试一试.xlsx\", index=False)\npd.read_excel(\"01_试一试.xlsx\")\n```\n\n运行后显示一张三行的小表，文件列表页里多了 `01_试一试.xlsx`，可以用 Excel 打开看看。今天**不要求看懂**这几行——第 13 课左右学 pandas 时会逐行讲。先知道：以后成千上万行的 Excel 清洗、比对，就是这样几行代码完成的。\n\n（如果报 `No module named 'openpyxl'`：新建一格运行 `%pip install openpyxl`，然后菜单 *Kernel → Restart*，再从单元格 6 重新运行。）\n\n### 讲解四：看懂报错\n\n故意运行下面这格：\n\n```python\nprint(\"hello)\n```\n\n会看到类似：\n\n```\n  Cell In[7], line 1\n    print(\"hello)\n          ^\nSyntaxError: unterminated string literal (detected at line 1)\n```\n\n读报错的顺序：**先看最后一行**（错误类型 + 说明），**再看 line 几和 `^` 指的位置**。`SyntaxError` 是语法错误，`unterminated string literal` 的意思是“字符串没有结束”——少了后半个引号。\n\n最常见的三种：\n\n| 报错 | 原因 | 例子 |\n|---|---|---|\n| `SyntaxError` | 语法写错：少引号、少括号、用了中文标点 | `print（\"hi\"）` |\n| `NameError: name 'xxx' is not defined` | 用了一个 Python 不认识的名字：拼错、大小写错、文字忘加引号 | `Print(\"hi\")`、`print(hello)` |\n| `TypeError` | 类型不对，比如文字和数字直接相加 | `\"金额\" + 1200` |\n\nPython **区分大小写**：`print` 对，`Print` 错。\n\n### 练习（由易到难）\n\n1. 新建一格，输出两行：第一行是你的名字（随便写个昵称也行），第二行是 `今天开始学 Python`。\n2. 一份虚构补贴名单的 6 笔金额是 1200、800、1500、600.5、1200、950。用一个单元格算出**合计**和**平均**（平均 = 合计 ÷ 6），分别输出。\n3. 在笔记本最上方插入一个 Markdown 单元格，写一个一级标题“第 1 课练习”，下面用列表写出今天学到的三个快捷键。（提示：先点第一格，`Esc` 后按 `A` 是在**上方**插入。）\n4. 下面三格各有一个错误，先运行看报错，说出错误类型，再改对：\n   ```python\n   print（\"第一题\"）\n   ```\n   ```python\n   Print(\"第二题\")\n   ```\n   ```python\n   print(\"合计：\" + 6250.5)\n   ```\n5. 贴近实际：某项补贴按人头发放，每人每月 450 元。青石镇 36 人发 12 个月，白沙乡 28 人发 10 个月。用一个单元格分别算出两个乡镇的发放总额和两地合计，输出成这样的三行（数字自己算出来，不要手打）：\n   ```\n   青石镇： ……\n   白沙乡： ……\n   合计： ……\n   ```\n   再想一想：如果有 300 个乡镇，这样一行行写还行得通吗？（后面学列表、循环和 pandas 就是为了解决这个。）\n\n### 常见错误\n\n- **关掉了黑色窗口**：Jupyter 停止运行，网页上出现 *Kernel 连接断开*。重新从 Anaconda 打开即可，笔记本已保存的内容还在。\n- **中文标点**：`（）`、`“”`、`，` 都会导致 `SyntaxError`。代码里的符号一律英文半角，引号**里面**的中文没关系。\n- **在命令模式下打字**：按了一串字母却没输入进去，反而插入、删除了单元格。先 `Esc` 再按 `Z` 撤销，然后点进单元格再打字。\n- **单元格停在 `In [*]` 不动**：上一格还没跑完或卡住。点工具栏的 ■（Interrupt），不行就 *Kernel → Restart*。\n- **重启后报 `NameError`**：重启会清空内存，前面单元格定义过的东西没了。从上往下重新运行一遍（菜单 *Run → Run All Cells*，旧版是 *Cell → Run All*）。\n\n<details>\n<summary>Python 练习答案<\/summary>\n\n1.\n```python\nprint(\"小明\")   # 换成你自己的名字或昵称\nprint(\"今天开始学 Python\")\n```\n\n2.\n```python\nprint(\"合计：\", 1200 + 800 + 1500 + 600.5 + 1200 + 950)\nprint(\"平均：\", (1200 + 800 + 1500 + 600.5 + 1200 + 950) / 6)\n```\n输出 `合计： 6250.5`、`平均： 1041.75`。注意第二行要加括号：先加再除。不加括号写成 `1200 + 800 + ... + 950 / 6`，只有最后的 950 被除以 6。\n\n3. Markdown 单元格内容示例：\n```markdown\n# 第 1 课练习\n- Shift + Enter：运行并跳到下一格\n- Esc 然后 B：在下方插入单元格\n- Esc 然后 M：切换成 Markdown\n```\n\n4.\n- 第一格：`SyntaxError`（中文括号）。改为 `print(\"第一题\")`。\n- 第二格：`NameError: name 'Print' is not defined`（大小写）。改为 `print(\"第二题\")`。\n- 第三格：`TypeError: can only concatenate str (not \"float\") to str`（文字和数字不能用 `+` 拼）。改为 `print(\"合计：\", 6250.5)`，用逗号隔开。\n\n5.\n```python\nprint(\"青石镇：\", 450 * 36 * 12)\nprint(\"白沙乡：\", 450 * 28 * 10)\nprint(\"合计：\", 450 * 36 * 12 + 450 * 28 * 10)\n```\n输出：\n```\n青石镇： 194400\n白沙乡： 126000\n合计： 320400\n```\n300 个乡镇一行行写，既费时又容易抄错数字。下一课（周四）学**变量**，可以先把 450 存成 `per_month = 450`，标准一改，所有结果跟着变；再往后用列表和循环，300 行也只要几行代码。\n\n<\/details>\n\n---\n\n## 时段 3 · CFA 一级（35 分钟）\n\n**模块**：Quantitative Methods → Rates and Returns（共 4 次课，今天第 1 次）\n\n### 学习目标\n\n- 从三个角度解释利率：要求回报率、折现率、机会成本。\n- 把利率拆成实际无风险利率加各项溢价，并说出每项补偿什么。\n- 计算单期和多期的持有期收益率（HPR）。\n\n### 讲解一：利率的三种解读\n\n同一个 6% 的利率，可以有三种读法：\n\n| 读法 | 意思 | 题干里的关键词 |\n|---|---|---|\n| Required rate of return（要求回报率） | 投资者肯出钱的**最低**回报 | minimum, require, demand |\n| Discount rate（折现率） | 把未来的钱折算成**今天**的价值 | today, present value, worth now |\n| Opportunity cost（机会成本） | 选了这条路，**放弃**的另一条路的收益 | forgo, give up, sacrifice |\n\n例：一年后收到 106 元，按 6% 折现今天值 100 元——这是“折现率”的读法。把 100 元放在抽屉里一年不动，就放弃了 6 元利息——这是“机会成本”的读法。\n\n### 讲解二：利率的构成\n\n$$\nr = \\underbrace{\\text{实际无风险利率} + \\text{通胀溢价}}_{\\text{名义无风险利率}} + \\text{违约风险溢价} + \\text{流动性溢价} + \\text{期限溢价}\n$$\n\n| 组成部分 | 补偿什么 | 什么时候大 |\n|---|---|---|\n| Real risk-free rate | 推迟消费、单纯等待 | 与具体证券无关，全市场一样 |\n| Inflation premium | 预期通胀让钱贬值 | 预期物价涨得快 |\n| Default risk premium | 借款人可能不还 | 发行人信用差 |\n| Liquidity premium | 难以按公允价快速卖出 | 交易清淡、规模小 |\n| Maturity premium | 期限长，利率一变价格波动大 | 期限长 |\n\n**名义无风险利率 ≈ 实际无风险利率 + 通胀溢价**，通常用短期国库券（T-bill）收益率代表——它几乎没有违约风险、流动性极好、期限很短，后三项溢价近似为零。严格关系是相乘：$(1+r_{名义}) = (1+r_{实际})(1+\\pi)$，一级考题一般用相加近似，除非题目说明。\n\n**例题 1**：实际无风险利率 1.8%，通胀溢价 2.7%。某公司 8 年期债券：违约风险溢价 2.2%、流动性溢价 0.6%、期限溢价 0.9%。求名义无风险利率和该债券的要求回报率。\n\n- 名义无风险利率 ≈ 1.8% + 2.7% = **4.5%**（严格：1.018 × 1.027 − 1 = 4.55%）\n- 债券要求回报率 = 4.5% + 2.2% + 0.6% + 0.9% = **8.2%**\n\n**例题 2（反推单项溢价）**：同一家公司发行的两只债券，期限、票息都相同。A 债交易活跃，收益率 5.1%；B 债几乎没人交易，收益率 5.6%。两者差在哪一项？差多少？\n\n- 发行人相同 → 违约风险一样；期限相同 → 期限溢价一样；同一时间 → 实际利率和通胀溢价一样。唯一不同的是流动性。\n- 流动性溢价之差 = 5.6% − 5.1% = **0.5%**\n\n这类“控制变量”的题很常见：两只证券其他条件都一样，收益率差就是那一项不同的溢价。\n\n### 讲解三：持有期收益率（HPR）\n\n**单期**：\n\n$$\nHPR = \\frac{P_1 - P_0 + I_1}{P_0} = \\underbrace{\\frac{P_1 - P_0}{P_0}}_{\\text{资本利得率}} + \\underbrace{\\frac{I_1}{P_0}}_{\\text{收益率（股息/票息）}}\n$$\n\n$P_0$ 买入价，$P_1$ 卖出价（或期末价），$I_1$ 期间收到的现金（股息 dividend 或票息 coupon）。**分母永远是期初价格**。\n\n**例题 3**：以 98 元买入一只债券，持有一年收到票息 4 元，年末以 100 元卖出。\n\nHPR = (100 − 98 + 4) ÷ 98 = 6 ÷ 98 = **6.12%**（资本利得 2.04% + 票息收益 4.08%）\n\n计算器（BA II Plus）：`100 − 98 + 4 =` → `÷ 98 =` → 显示 `0.0612`\n\n**多期**：每期的 (1 + 收益率) 连乘，再减 1。\n\n$$\nHPR = (1+R_1)(1+R_2)\\cdots(1+R_n) - 1\n$$\n\n**例题 4**：某基金四个季度的收益率分别为 3%、−2%、4%、1.5%，全年持有期收益率是多少？\n\n1.03 × 0.98 × 1.04 × 1.015 − 1 = 1.0655 − 1 = **6.55%**\n\n计算器：`1.03 × 0.98 × 1.04 × 1.015 − 1 =` → 显示 `0.0655`\n\n直接相加得 6.5%，差得不多，是因为每期收益率都小；收益率越大、期数越多，相加的误差越大。考试选项里常把“直接相加”的结果放作干扰项。\n\n（顺手用 Jupyter 验算：`round(1.03 * 0.98 * 1.04 * 1.015 - 1, 4)`。）\n\n### 练习：仿一级考试三选一\n\n**1.** \"By keeping $10,000 in a non-interest-bearing account, Wen gives up the 3% she could earn on a one-year deposit.\" The 3% is best described as a(n):\n\nA. discount rate.\nB. opportunity cost.\nC. required rate of return.\n\n**2.** The nominal risk-free interest rate is best approximated by the sum of the:\n\nA. real risk-free rate and the inflation premium.\nB. real risk-free rate and the default risk premium.\nC. inflation premium and the maturity premium.\n\n**3.** A 3-month Treasury bill yields 4.6%, and the real risk-free rate is 1.9%. The inflation premium is closest to:\n\nA. 1.9%\nB. 2.7%\nC. 6.5%\n\n**4.** An investor buys a share for $25.00, receives a dividend of $0.50, and sells the share for $27.50 one year later. The holding period return is closest to:\n\nA. 2.0%\nB. 10.0%\nC. 12.0%\n\n**5.** A fund returns 6%, 9%, and −4% in three consecutive years. The three-year holding period return is closest to:\n\nA. 3.64%\nB. 10.92%\nC. 11.00%\n\n<details>\n<summary>CFA 答案与解析<\/summary>\n\n1. **B**。关键词 *gives up*：放弃了本可以赚到的 3%，是机会成本。没有“最低要求”的意思（排除 C），也没有把未来价值折到今天（排除 A）。\n2. **A**。名义无风险利率 = 实际无风险利率 + 通胀溢价。违约、流动性、期限溢价是具体证券才有的风险补偿，无风险利率里不含。\n3. **B**。T-bill 收益率近似名义无风险利率：4.6% − 1.9% = 2.7%。C 是错误地把两者相加。\n4. **C**。(27.50 − 25.00 + 0.50) ÷ 25.00 = 3.00 ÷ 25.00 = 12.0%。B 漏掉了股息（2.50 ÷ 25 = 10%）；A 只算了股息收益率（0.50 ÷ 25 = 2%）。\n5. **B**。1.06 × 1.09 × 0.96 − 1 = 1.1092 − 1 = 10.92%。C 是直接相加（6 + 9 − 4 = 11%）；A 是把 10.92% 除以 3 的错误“年均”算法——年均收益率要用几何平均开三次方，第 2 次课讲。\n\n<\/details>\n\n---\n\n## 今晚 9 点打卡要回答的三个问题\n\n1. 三个时段完成了哪几个？（英语、Python、CFA）大概用了多久？昨天的课有没有其实学过？\n2. Python：Jupyter 打开了吗？五道练习做到第几道，遇到的报错是什么？\n3. CFA：利率的五个组成部分、单期和多期 HPR 公式，哪里还模糊？\n", "2026-10-14": "# 2026-10-14（周三）第 1 周 · 第三天\n\n> 今天三个时段共 100 分钟：英语 → SQL → CFA。按顺序学，哪段卡住了先跳过，晚上打卡时说。\n\n## 今天的安排\n\n| 时段 | 科目 | 分钟 | 课题 |\n|---|---|---|---|\n| 1 | 英语 | 20 | CFA 术语与短文：Rates and Returns（第三篇） |\n| 2 | SQL | 45 | 第 1/36 课 · 数据库、表、行和列：装好 DB Browser，建第一张表 |\n| 3 | CFA 一级 | 35 | 第 1/64 课 · Q1 收益率与回报（1/4）：利率的含义与构成、持有期收益率 |\n\n**关于昨天**：昨天（10/13）没有打卡，按没学处理——Python 第 1 课留到下一个 Python 日接着学；CFA 今天还是同一课，但换了全新的例题和练习，前两天的讲义没看过也能直接从这里学。SQL 第 1 课也是新场景、新练习。如果其实学完了，回复一句，我来补记。\n\n已经连续三天没打卡了。开头几天找不到节奏很常见，不用有负担。如果是每天 100 分钟排不开，今晚说一声，我把每天的量调小。今天时间实在紧，就做**最低版本（约 40 分钟）**：英语只看 10 个术语，SQL 跑通建表脚本和示例查询 1–3，CFA 看讲义三并做第 4、5 题——打卡时说“做了最低版本”即可。\n\n---\n\n## 时段 1 · 英语（20 分钟）\n\n### 今日 10 个术语\n\n| # | 英文 | 音标 | 中文 |\n|---|---|---|---|\n| 1 | lender | /ˈlendər/ | 出借人、贷款方 |\n| 2 | borrower | /ˈbɑːroʊər/ | 借款人 |\n| 3 | purchasing power | /ˈpɜːrtʃəsɪŋ ˈpaʊər/ | 购买力 |\n| 4 | nominal return | /ˈnɑːmɪnl rɪˈtɜːrn/ | 名义回报 |\n| 5 | real return | /ˈriːəl rɪˈtɜːrn/ | 实际回报（扣除通胀后） |\n| 6 | yield | /jiːld/ | 收益率 |\n| 7 | maturity | /məˈtʃʊrəti/ | 到期日；期限 |\n| 8 | credit risk | /ˈkredɪt rɪsk/ | 信用风险 |\n| 9 | marketable | /ˈmɑːrkɪtəbl/ | 可在市场上交易的 |\n| 10 | income return | /ˈɪnkʌm rɪˈtɜːrn/ | 收入回报（利息、股息部分） |\n\n**例句**\n\n1. The **lender** expects to be paid back with interest. —— 出借人期望连本带息收回。\n2. A **borrower** with a weak balance sheet pays a higher rate. —— 资产负债表较弱的借款人要付更高的利率。\n3. Inflation reduces the **purchasing power** of money. —— 通胀会削弱货币的购买力。\n4. The fund's **nominal return** was 7% last year. —— 这只基金去年的名义回报是 7%。\n5. With 3% inflation, the **real return** was only about 4%. —— 扣除 3% 的通胀后，实际回报只有约 4%。\n6. The **yield** on the 10-year bond rose to 4.5%. —— 10 年期债券的收益率升到了 4.5%。\n7. The bond reaches **maturity** in 2036. —— 这只债券在 2036 年到期。\n8. Rating agencies try to measure **credit risk**. —— 评级机构试图衡量信用风险。\n9. Government bonds are highly **marketable**. —— 国债非常容易在市场上买卖。\n10. The coupon you receive is the **income return** of a bond. —— 收到的票息就是债券的收入回报。\n\n### 短文阅读（154 词）\n\n**Why Lenders Ask for More**\n\nWhen a lender gives money to a borrower, the lender waits. Waiting has a cost, so even a perfectly safe loan pays a small real return. But money also loses purchasing power when prices rise. If inflation is expected to be 3%, the lender adds about 3% to the rate. The result is the nominal return that we see quoted in the market.\n\nNot every borrower is equally safe. A company with heavy debt carries more credit risk than a government, so its bonds must pay a higher yield. Some bonds are hardly marketable: there are few buyers, and a quick sale means a lower price. Investors want extra pay for that problem. Finally, a bond with a distant maturity is exposed to interest rate changes for longer.\n\nAt the end of the year, the investor checks two parts of the result: the income return from coupons and the change in the bond's price.\n\n**理解题**\n\n1. Why does even a perfectly safe loan pay a small real return?\n2. Why must a heavily indebted company pay a higher yield than a government?\n3. What two parts of the result does the investor check at the end of the year?\n\n<details>\n<summary>答案<\/summary>\n\n1. Because the lender has to wait, and waiting has a cost.（出借人要等待，等待本身有成本——这就是实际无风险利率。）\n2. Because it carries more credit risk.（信用风险更高，要加违约风险溢价。）\n3. The income return from coupons and the change in the bond's price.（票息带来的收入回报，和债券价格的变动。）\n\n<\/details>\n\n### 间隔回想\n\n遮住中文，自己说出意思：\n\n- 1 天前（10/13）：nominal risk-free rate, Treasury bill, premium, creditworthiness, capital gain, dividend yield, coupon, compounding, present value, fair value\n- 3 天前（10/11 准备日）：return\n- 7 天前（10/7）：还没开课，暂无。\n\n再加一组 2 天前（10/12）的：interest rate, required rate of return, discount rate, opportunity cost, liquidity premium, maturity premium, holding period return。\n\n---\n\n## 时段 2 · SQL（45 分钟）\n\n> 还没装 DB Browser 的话，先花 10 分钟按 [准备日讲义](2026-10-11.md) 第一节装好，建一个 `practice.db`。\n\n### 本课目标\n\n1. 说清楚数据库、表、行、列分别是什么。\n2. 会用 `CREATE TABLE` 建表，知道 SQLite 常用的三种类型 `INTEGER`、`REAL`、`TEXT`，知道主键是干什么的。\n3. 会用 `INSERT INTO` 插入数据，用 `SELECT ... FROM` 把表查出来。\n\n### 讲解：一张报销台账就是一张表\n\n设想你在核查一个虚构单位的《差旅报销台账》，要和《请假登记表》对照，看有没有人“请假那天却报了出差”。\n\n| Excel 里 | 数据库里 | 说明 |\n|---|---|---|\n| 整个工作簿 | **数据库**（database，SQLite 里就是一个 `.db` 文件） | 装很多张表 |\n| 一个工作表 | **表**（table） | 一类事物一张：报销一张，请假一张 |\n| 一行 | **行**（row / record） | 一笔报销、一次请假 |\n| 一列 + 列标题 | **列**（column / field） | 姓名、工号、金额、日期…… |\n\n和 Excel 的关键区别：**每一列在建表时就定好类型**。\n\n- `INTEGER`：整数（编号、天数）\n- `REAL`：小数（金额）\n- `TEXT`：文本（姓名、工号、日期。SQLite 的日期统一写成 `'2026-04-08'` 这样的文本，按这个格式排序、比较都不会乱）\n\n**主键**（`PRIMARY KEY`）是每一行的“身份证”，不能重复。台账里的报销单号天然适合当主键：同一张单子不可能登两次——如果真登了两次，数据库会直接报错，这本身就是一道核查关口。\n\n### 建表加数据脚本\n\n打开 DB Browser → 打开 `practice.db` → **Execute SQL** → 粘贴整段 → `Ctrl + Enter` → 点 **Write Changes** 保存。\n\n```sql\n-- 第 1 课：差旅报销台账（数据全部虚构）\nDROP TABLE IF EXISTS travel_claims;\n\nCREATE TABLE travel_claims (\n    claim_no   INTEGER PRIMARY KEY,   -- 报销单号，主键\n    name       TEXT,                  -- 姓名\n    emp_no     TEXT,                  -- 工号（虚构格式）\n    dept       TEXT,                  -- 科室\n    trip_date  TEXT,                  -- 出差日期\n    city       TEXT,                  -- 出差地（虚构地名）\n    amount     REAL                   -- 报销金额（元）\n);\n\nINSERT INTO travel_claims (claim_no, name, emp_no, dept, trip_date, city, amount) VALUES\n    (2001, '甲一明', 'E-0101', '综合科', '2026-04-08', '云溪市', 1320.0),\n    (2002, '乙二红', 'E-0102', '财务科', '2026-04-08', '云溪市', 980.5),\n    (2003, '丙三华', 'E-0103', '项目科', '2026-04-10', '石桥县', 2150.0),\n    (2004, '丁四强', 'E-0104', '项目科', '2026-04-15', '北岭市', 760.0),\n    (2005, '戊五芳', 'E-0105', '综合科', '2026-04-15', '北岭市', 1890.0),\n    (2006, '丙三华', 'E-0103', '项目科', '2026-04-22', '云溪市', 1405.0),\n    (2007, '己六军', 'E-0106', '财务科', '2026-04-23', '石桥县', 640.0);\n```\n\n切到 **Browse Data**，选 `travel_claims`，能看到 7 行。\n\n逐句看：\n\n- `DROP TABLE IF EXISTS ...;`——有同名表先删掉，脚本可以反复跑，不会报“表已存在”。\n- `CREATE TABLE 表名 ( 列名 类型, ... );`——列之间逗号隔开，**最后一列后面不加逗号**。`--` 后面是注释，不执行。\n- `INSERT INTO 表名 (列1, 列2, ...) VALUES (...), (...);`——值和列一一对应；文本用**单引号**，数字不加引号；多行之间逗号，整句末尾分号。\n\n### 示例查询\n\n选中某一句再按 `Ctrl + Enter`，就只执行那一句。\n\n**查询 1：看整张表**\n\n```sql\nSELECT * FROM travel_claims;\n```\n\n`SELECT` = 取数据；`*` = 所有列；`FROM travel_claims` = 从这张表取。结果 7 行 7 列。\n\n**查询 2：只看需要的列，并按自己想要的顺序排列**\n\n```sql\nSELECT trip_date, name, amount FROM travel_claims;\n```\n\n列的顺序就是你写的顺序。核查时常把日期放最前，方便和别的表对日期。\n\n**查询 3：数行数**\n\n```sql\nSELECT COUNT(*) FROM travel_claims;\n```\n\n结果 `7`。拿到台账先数笔数，和对方报的“共 7 笔”对得上，再往下做。\n\n**查询 4：给结果列起个中文名**\n\n```sql\nSELECT name AS 姓名, amount AS 金额 FROM travel_claims;\n```\n\n`AS` 只改结果里显示的列名，不改表本身。导出给别人看时很方便。\n\n**查询 5：看表结构**\n\n```sql\nPRAGMA table_info(travel_claims);\n```\n\n列出每一列的名字和类型，`pk = 1` 的是主键。忘了列名时用它查。\n\n### 练习（由易到难）\n\n1. 查出 `travel_claims` 的全部内容。\n2. 只查报销单号、姓名、金额三列，并把这三列显示为“单号”“姓名”“金额”。\n3. 补登一笔：单号 2008，庚七兰，工号 `E-0107`，综合科，2026-04-28，北岭市，1120 元。插入后数一数，应为 8 笔。\n4. 再执行一次第 3 题的 `INSERT`，会发生什么？读一读报错信息，用一句话说明它为什么是“好事”。\n5. 贴近实际：新建 `leave_records`（请假登记表），四列：`leave_id`（整数，主键）、`emp_no`（文本）、`name`（文本）、`leave_date`（文本），插入下面 3 行：\n   - 1，`E-0102`，乙二红，2026-04-08\n   - 2，`E-0104`，丁四强，2026-04-16\n   - 3，`E-0103`，丙三华，2026-04-22\n\n   然后分别查出报销台账的 `emp_no, name, trip_date` 和请假表的 `emp_no, name, leave_date`，**用眼睛比对**：谁在请假当天报了出差？丁四强算不算？为什么比对时要“工号 + 日期”两样都对上？\n\n### 常见错误\n\n- **中文标点**：`，` `（` `‘` 会报 `syntax error`。SQL 里的符号一律英文半角，引号里面的中文内容没关系。\n- **最后一列后面多逗号**：`amount REAL,)` 报错。\n- **文本没加引号**：`VALUES (2008, 庚七兰, ...)` 会报 `no such column: 庚七兰`——没加引号的字被当成了列名。\n- **列数和值数对不上**：7 个列名配 6 个值，报 `7 columns but 6 values were supplied`，数一数逗号。\n- **主键重复**：报 `UNIQUE constraint failed`。\n- **忘了 Write Changes**：关掉软件，数据就没了。\n\n<details>\n<summary>SQL 练习答案<\/summary>\n\n1.\n```sql\nSELECT * FROM travel_claims;\n```\n\n2.\n```sql\nSELECT claim_no AS 单号, name AS 姓名, amount AS 金额 FROM travel_claims;\n```\n\n3.\n```sql\nINSERT INTO travel_claims (claim_no, name, emp_no, dept, trip_date, city, amount) VALUES\n    (2008, '庚七兰', 'E-0107', '综合科', '2026-04-28', '北岭市', 1120);\n\nSELECT COUNT(*) FROM travel_claims;   -- 结果 8\n```\n\n4. 报错 `UNIQUE constraint failed: travel_claims.claim_no`。单号是主键，不允许重复，所以同一张单子登两次会被直接挡住。手工 Excel 台账里“一单两报”要靠人眼去发现，数据库在录入时就拦住了。\n\n5.\n```sql\nDROP TABLE IF EXISTS leave_records;\n\nCREATE TABLE leave_records (\n    leave_id    INTEGER PRIMARY KEY,\n    emp_no      TEXT,\n    name        TEXT,\n    leave_date  TEXT\n);\n\nINSERT INTO leave_records (leave_id, emp_no, name, leave_date) VALUES\n    (1, 'E-0102', '乙二红', '2026-04-08'),\n    (2, 'E-0104', '丁四强', '2026-04-16'),\n    (3, 'E-0103', '丙三华', '2026-04-22');\n\nSELECT emp_no, name, trip_date FROM travel_claims;\nSELECT emp_no, name, leave_date FROM leave_records;\n```\n\n比对结果：\n\n- **乙二红**（E-0102）：4 月 8 日请假，同一天报了云溪市出差 980.5 元（单号 2002）——疑点。\n- **丙三华**（E-0103）：4 月 22 日请假，同一天报了云溪市出差 1405 元（单号 2006）——疑点。注意他 4 月 10 日那笔没问题，所以不能只看“名字出现在两张表里”。\n- **丁四强**（E-0104）：出差 4 月 15 日，请假 4 月 16 日，日期不同，**不算**。\n\n为什么要“工号 + 日期”：只比工号，丙三华的两笔会被一起标出来，误伤正常的那笔，丁四强也会被误标；只比日期，会把同一天请假和出差的不同人凑到一起。两样都对上才是同一个人、同一天。\n\n预告：以后一句话就能筛出来（今天不要求看懂）：\n\n```sql\nSELECT t.name, t.trip_date, t.amount\nFROM travel_claims t\nJOIN leave_records l\n  ON t.emp_no = l.emp_no AND t.trip_date = l.leave_date;\n```\n\n<\/details>\n\n---\n\n## 时段 3 · CFA 一级（35 分钟）\n\n**模块**：Quantitative Methods → Rates and Returns（共 4 次课，今天第 1 次）\n\n### 学习目标\n\n- 从三个角度解释利率：要求回报率、折现率、机会成本。\n- 把利率拆成实际无风险利率加各项溢价。\n- 计算单期和多期的持有期收益率（HPR）。\n\n### 讲解一：利率的三种解读\n\n假设一年期定期存款利率是 4%：\n\n1. **Required rate of return（要求回报率）**：你把 1 万元存一年，至少要 4% 才愿意——这是你“要求”的最低回报。\n2. **Discount rate（折现率）**：一年后到手的 10,400 元，按 4% 折回今天，值 10,000 元。把“未来的钱”换算成“今天的钱”。\n3. **Opportunity cost（机会成本）**：如果你把这 1 万元放在不计息的活期里，就放弃了 4%——这就是你为“随时能用钱”付出的代价。\n\n做题看关键词：*minimum / require* → 要求回报率；*worth today / present value* → 折现率；*forgo / give up / sacrifice* → 机会成本。\n\n### 讲解二：利率的构成\n\n$$\nr = \\underbrace{\\text{实际无风险利率} + \\text{通胀溢价}}_{\\text{名义无风险利率}} + \\text{违约风险溢价} + \\text{流动性溢价} + \\text{期限溢价}\n$$\n\n一个记法：出借人问自己五个问题——\n\n| 问题 | 对应部分 |\n|---|---|\n| 我得等多久才能花这笔钱？（纯等待） | Real risk-free interest rate |\n| 等的这段时间，钱会不会贬值？ | Inflation premium |\n| 对方会不会不还？ | Default risk premium |\n| 我想提前卖掉时，能不能按公道价卖出去？ | Liquidity premium |\n| 期限越长，利率一变价格晃得越厉害，我愿不愿扛？ | Maturity premium |\n\n短期国库券（T-bill）只回答了前两个问题（后三项接近 0），所以它的收益率近似**名义无风险利率**。严格关系是 (1 + 名义) = (1 + 实际)(1 + 通胀)，一级题目一般直接相加近似。\n\n**例题 1**：实际无风险利率 2.5%，预期通胀 3%。某 15 年期公司债：违约风险溢价 1.8%，流动性溢价 0.7%，期限溢价 1.2%。\n\n- 名义无风险利率 ≈ 2.5% + 3% = **5.5%**（严格：1.025 × 1.03 − 1 = 5.575%）\n- 公司债要求回报率 ≈ 5.5% + 1.8% + 0.7% + 1.2% = **9.2%**\n\n**例题 2**：同一家公司又发了一只 15 年期债券，条款一样，但交易非常活跃，要求回报率是 8.7%。哪一项溢价不同？差多少？\n\n- 发行人、期限都一样，违约和期限溢价相同；差别只能来自流动性：9.2% − 8.7% = **0.5%**，活跃债券的流动性溢价只有 0.2%。\n\n### 讲解三：持有期收益率（HPR）\n\n**单期**：\n\n$$\nHPR = \\frac{P_1 - P_0 + D_1}{P_0} = \\underbrace{\\frac{P_1 - P_0}{P_0}}_{\\text{资本利得率}} + \\underbrace{\\frac{D_1}{P_0}}_{\\text{收入回报率}}\n$$\n\n**例题 3（股票）**：60 元买入，持有期间分红 1.8 元，以 63.2 元卖出。\n\nHPR = (63.2 − 60 + 1.8) ÷ 60 = 5 ÷ 60 = **8.33%**（资本利得 5.33% + 股息收益 3%）\n\n计算器（BA II Plus）：`63.2 − 60 + 1.8 =` → `÷ 60 =` → 显示 `0.0833`\n\n**例题 4（债券）**：面值 100 的债券按 100 买入，一年收到票息 4，年末以 106.5 卖出。\n\nHPR = (106.5 − 100 + 4) ÷ 100 = **10.5%**——票息只有 4%，另外 6.5% 来自价格上涨（比如期间市场利率下降）。\n\n**多期**：每期“1 + 收益率”连乘，再减 1。\n\n$$\nHPR = (1 + R_1)(1 + R_2)\\cdots(1 + R_n) - 1\n$$\n\n**例题 5**：某基金三年收益率 15%、−12%、6%。\n\n(1.15)(0.88)(1.06) − 1 = 1.07272 − 1 = **7.27%**\n\n计算器：`1.15 × 0.88 × 1.06 − 1 =` → 显示 `0.0727`\n\n直觉检查：只看前两年，涨 15% 再跌 12%，1.15 × 0.88 = 1.012，只赚了 1.2%，不是 3%。跌的那 12% 是从更高的基数上跌的——这就是不能直接相加的原因。\n\n### 练习：仿一级考试三选一\n\n**1.** \"To find what a payment of $1,000 due in two years is worth today, the analyst uses a rate of 7%.\" The 7% is best described as a:\n\nA. discount rate.\nB. required rate of return.\nC. opportunity cost.\n\n**2.** Which premium compensates investors for the increased sensitivity of a bond's market value to changes in interest rates as its time to repayment is extended?\n\nA. Liquidity premium\nB. Maturity premium\nC. Inflation premium\n\n**3.** The nominal risk-free rate is 5.2%, and the real risk-free rate is 2.0%. Using the additive approximation, the inflation premium is closest to:\n\nA. 2.0%\nB. 3.2%\nC. 7.2%\n\n**4.** An investor buys a share at $20.00, receives a dividend of $0.60, and sells the share at $18.40. The holding period return is closest to:\n\nA. −8.0%\nB. −5.0%\nC. 3.0%\n\n**5.** A portfolio earns 7%, 12%, −5%, and 4% in four consecutive years. The four-year holding period return is closest to:\n\nA. 18.00%\nB. 18.40%\nC. 4.60%\n\n<details>\n<summary>CFA 答案与解析<\/summary>\n\n1. **A**。关键词 *worth today*——把未来的钱换算到今天，这是折现率的角度。\n2. **B**。期限越长，利率变动对价格的影响越大，补偿这一点的是期限溢价。流动性溢价补偿“不好卖”，通胀溢价补偿购买力下降。\n3. **B**。5.2% − 2.0% = 3.2%。C 是把两者相加的错误。\n4. **B**。(18.40 − 20.00 + 0.60) ÷ 20.00 = −1.00 ÷ 20 = −5.0%。A 漏了股息（−1.60 ÷ 20 = −8%）；C 只算了股息收益率（0.60 ÷ 20 = 3%）。\n5. **B**。1.07 × 1.12 × 0.95 × 1.04 − 1 = 1.18402 − 1 = 18.40%。A 是直接相加；C 是把 18.40% 除以 4——年均收益率要用几何平均（开四次方），第 2 次课讲。\n\n<\/details>\n\n---\n\n## 今晚 9 点打卡要回答的三个问题\n\n1. 三个时段完成了哪几个（英语、SQL、CFA）？做的是完整版还是最低版本？大概用了多久？\n2. SQL：DB Browser 装好了吗？练习做到第几道，有没有报错，报错信息是什么？\n3. 这几天每天 100 分钟排得开吗？需不需要把每天的量调小？\n"};
+window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第一阶段明天（10 月 12 日，周一）正式开课。今天只做一件事：把工具和材料备齐，明天打开讲义就能直接学。\n\n## 今天的安排\n\n| 时段 | 科目 | 分钟 | 内容 |\n|---|---|---|---|\n| 1 | 准备日 | 60 | 装好工具、备好书、建生词本、看一遍课表 |\n\n建议分配：DB Browser 15 分钟 → Jupyter 15 分钟 → 书 15 分钟 → 生词本 5 分钟 → 课表 10 分钟。哪一步卡住了就先跳过，晚上打卡时告诉我卡在哪。\n\n---\n\n## 一、装好 DB Browser for SQLite（约 15 分钟）\n\nSQL 课前半程都用它。它是一个免费的图形界面小软件，数据库就是电脑上的一个 `.db` 文件，不需要装服务器、不需要联网。\n\n**安装步骤**\n\n1. 打开 sqlitebrowser.org → Download，Windows 选 *Standard installer for 64-bit Windows*（Mac 选 .dmg）。\n2. 一路“下一步”安装。安装界面里如果有勾选项，勾上 *DB Browser (SQLite)* 的桌面快捷方式即可，SQLCipher 版本不用。\n3. 打开软件 → 左上角 **New Database（新建数据库）** → 存到一个固定文件夹，例如 `D:\\研习录\\sql\\practice.db`。\n4. 弹出“编辑表定义”窗口时直接点 **Cancel（取消）**，我们用 SQL 语句建表。\n\n**验收：跑通下面这段脚本**\n\n切到 **Execute SQL（执行 SQL）** 标签页，把下面整段粘进去，按 `Ctrl + Enter`（或点三角形“执行全部”）：\n\n```sql\n-- 准备日验收脚本：建一张小表，插入 3 行虚构数据，再查出来\nDROP TABLE IF EXISTS test_people;\n\nCREATE TABLE test_people (\n    id      INTEGER PRIMARY KEY,\n    name    TEXT,\n    city    TEXT,\n    amount  REAL\n);\n\nINSERT INTO test_people (id, name, city, amount) VALUES\n    (1, '甲某一', '虚构市', 1200.5),\n    (2, '乙某二', '样例县', 800),\n    (3, '丙某三', '虚构市', 1500);\n\nSELECT name, city, amount\nFROM test_people\nWHERE city = '虚构市';\n```\n\n下方结果区应该出现 2 行：甲某一、丙某三。看到了就算装好了。最后点 **Write Changes（写入更改）** 保存。\n\n**常见问题**\n\n- 结果区什么都没有：确认是在 *Execute SQL* 页执行的，而不是 *Browse Data* 页。\n- 报 `near \"，\": syntax error`：SQL 里的逗号、括号、引号必须是英文半角。中文输入法下打的 `，` `（` `‘` 都会报错——这是以后最常见的错误之一，今天先记住。\n- 关软件时提示“是否保存”：选保存。\n\n---\n\n## 二、打开 Jupyter Notebook（约 15 分钟）\n\n**步骤**\n\n1. 开始菜单搜 **Anaconda Navigator** 打开（第一次启动慢，等一两分钟）。\n2. 在 Jupyter Notebook 那一格点 **Launch**，浏览器会打开一个文件列表页。\n3. 进到你想放练习的文件夹（建议 `D:\\研习录\\python`，没有就先在资源管理器里建好）。\n4. 右上角 **New → Python 3 (ipykernel)**，新建笔记本，点左上角标题改名为 `00_准备日`。\n\n**验收：依次运行下面三个单元格**（光标放在单元格里，按 `Shift + Enter` 运行并跳到下一格）\n\n单元格 1——最简单的一行：\n\n```python\nprint(\"hello\")\n```\n\n单元格 2——看看 Python 和 pandas 的版本，确认环境齐全：\n\n```python\nimport sys\nimport pandas as pd\nimport openpyxl\n\nprint(\"Python 版本：\", sys.version.split()[0])\nprint(\"pandas 版本：\", pd.__version__)\nprint(\"openpyxl 版本：\", openpyxl.__version__)\n```\n\n单元格 3——用代码现场生成一个 Excel 再读回来（以后的 Python 课都这样，不依赖外部文件）：\n\n```python\nimport pandas as pd\n\ndf = pd.DataFrame({\n    \"姓名\": [\"甲某一\", \"乙某二\", \"丙某三\"],\n    \"城市\": [\"虚构市\", \"样例县\", \"虚构市\"],\n    \"金额\": [1200.5, 800, 1500],\n})\ndf.to_excel(\"准备日_测试.xlsx\", index=False)\n\nback = pd.read_excel(\"准备日_测试.xlsx\")\nprint(back)\nprint(\"虚构市合计金额：\", back.loc[back[\"城市\"] == \"虚构市\", \"金额\"].sum())\n```\n\n最后一行应输出 `虚构市合计金额： 2700.5`。回到 Jupyter 的文件列表页，能看到多出一个 `准备日_测试.xlsx`。\n\n**常见问题**\n\n- `ModuleNotFoundError: No module named 'openpyxl'`：在一个新单元格里运行 `%pip install openpyxl`，装完后点菜单 *Kernel → Restart*，再从头运行。\n- 浏览器没自动打开：Navigator 的黑色窗口里会有一行 `http://localhost:8888/...` 开头的地址，复制到浏览器打开。\n- 单元格左边一直是 `[*]`：表示还在运行，等几秒；一直不动就 *Kernel → Restart*。\n\n---\n\n## 三、备好《大国政治的悲剧》（约 15 分钟）\n\n地缘政治这门课第一阶段精读米尔斯海默的《大国政治的悲剧》（*The Tragedy of Great Power Politics*）。纸质、电子版都行，修订版（有讨论中国崛起的一章）更好。\n\n**今天读什么**：只读**目录**和**第一章的开头几页**，不求读懂，先建立一个地图。\n\n**读之前先知道这本书在吵什么**（下面是我的概括，不是原文）：\n\n- 国际关系里有一派叫**现实主义**（realism），认为国家之间没有“世界政府”管着，所以每个国家最终只能靠自己保证安全。\n- 现实主义内部又分两种看法：一种认为国家只要“够安全”就满足了（防御性现实主义）；作者主张另一种——**进攻性现实主义**（offensive realism）：在这种环境里，大国会不断寻找机会扩大自己相对于别国的实力，最理想的状态是成为所在地区的霸主。\n- 书名里的“悲剧”指的是：没有哪个大国是天生的恶棍，但结构逼着它们互相防范、互相竞争，冲突因此反复出现。\n\n**带着三个问题翻目录**（不用写答案，脑子里过一遍即可，下周六读第一章时会正式展开）：\n\n1. 全书大致分成哪几块？哪些章讲理论，哪些章讲历史案例？\n2. 有没有专门讨论中美关系或“中国能否和平崛起”的章节？在第几章？\n3. 第一章开头，作者用什么来解释“大国为什么会互相竞争”——是领导人的性格、国家的制度，还是别的东西？\n\n精读页入口：研习录 → 地缘政治 → 《大国政治的悲剧》（https://claude.ai/artifact/LpwLZchfacKZAnJs577MvM ）。\n\n---\n\n## 四、建一个英语生词本（约 5 分钟）\n\n以后每天英语时段会给 10 个 CFA 术语，并在 1、3、7 天后让你回想。生词本用什么形式都行，关键是**每天固定写在同一个地方**。\n\n如果想用 Excel，可以在刚才的 Jupyter 里多运行一个单元格，直接生成一个带好表头的生词本：\n\n```python\nimport pandas as pd\n\ncolumns = [\"日期\", \"英文\", \"音标\", \"中文\", \"例句\", \"第1天复习\", \"第3天复习\", \"第7天复习\"]\nsample = pd.DataFrame([{\n    \"日期\": \"2026-10-11\",\n    \"英文\": \"return\",\n    \"音标\": \"/rɪˈtɜːrn/\",\n    \"中文\": \"回报；收益\",\n    \"例句\": \"The fund earned a return of 8% last year.\",\n    \"第1天复习\": \"\", \"第3天复习\": \"\", \"第7天复习\": \"\",\n}], columns=columns)\n\nsample.to_excel(\"英语生词本.xlsx\", index=False)\nprint(\"已生成：英语生词本.xlsx\")\n```\n\n第一行 `return` 就是明天 CFA 第一课（Rates and Returns）会用到的词，算提前热身。\n\n---\n\n## 五、通读课表（约 10 分钟）\n\n第一阶段 12 周，每天 1.5–2 小时，课程按顺序推进，哪天没学完下次接着学。\n\n| 星期 | 时段安排 |\n|---|---|\n| 周一、三、五 | 英语 20 + SQL 45 + CFA 35 = 100 分钟 |\n| 周二、四 | 英语 20 + Python 45 + CFA 35 = 100 分钟 |\n| 周六 | 英语 20 + 地缘政治 60（读一章）+ CFA 35 = 115 分钟 |\n| 周日 | 英语词汇小测 20 + 地缘政治 30（时事分析）+ 周复盘 50 = 100 分钟 |\n\n各科进度：SQL 36 课、Python 24 课、CFA 一级第一阶段 64 课（数量方法 + 经济学）。\n\n**明天（周一）的课**\n\n- 英语 20 分钟：CFA 术语与短文——Rates and Returns\n- SQL 45 分钟：数据库、表、行和列，建第一张表（今天装好软件，明天直接用）\n- CFA 35 分钟：Q1 收益率与回报（1/4）\n\n看完如果觉得哪天量太大、时间段不合适、或者想换顺序，今晚打卡时直接说，我来调。\n\n---\n\n## 六、热身小练习（可选，5 分钟）\n\n不算正式内容，装好软件后有余力就做。\n\n1. 在 DB Browser 里，把验收脚本最后的查询改成只查金额大于 1000 的人，应该出来几行？\n2. 在 Jupyter 里，把单元格 3 的最后一行改成计算**所有人**的金额合计，结果是多少？\n3. 假设年初存入 10,000 元，年末变成 10,800 元，这一年的收益率（return）是多少？\n\n<details>\n<summary>答案<\/summary>\n\n1. 把 `WHERE city = '虚构市'` 改成 `WHERE amount > 1000`，出来 2 行：甲某一（1200.5）、丙某三（1500）。\n2. `print(back[\"金额\"].sum())`，结果 `3500.5`。\n3. 收益率 = (期末 − 期初) ÷ 期初 = (10,800 − 10,000) ÷ 10,000 = 8%。这就是明天 CFA 第一课的起点——holding period return（持有期收益率）。\n\n<\/details>\n\n---\n\n## 今晚 9 点打卡要回答的三个问题\n\n1. 五件事完成了哪几件？（DB Browser、Jupyter、书、生词本、课表）\n2. 大概用了多久？哪一步卡住了，报错信息是什么？\n3. 看完课表，有没有想调整的地方（每天的量、时段、顺序）？\n", "2026-10-12": "# 2026-10-12（周一）第 1 周 · 第一天\n\n> 第一阶段正式开课。今天三个时段共 100 分钟：英语 → SQL → CFA。按顺序学，哪段卡住了先跳过，晚上打卡时说。\n\n## 今天的路线\n\n| 时段 | 科目 | 分钟 | 课 |\n|---|---|---|---|\n| 1 | 英语 | 20 | [CFA 术语与短文：Rates and Returns（见 CFA 第 1 课末尾“英文术语”）](../lessons/cfa/01.md) |\n| 2 | SQL | 45 | [第 1/36 课 · 数据库、表、行和列：装好 DB Browser，建第一张表](../lessons/sql/01.md) |\n| 3 | CFA 一级 | 35 | [第 1/64 课 · Q1 收益率与回报（1/4）：利率的含义与构成、持有期收益率](../lessons/cfa/01.md) |\n\n**关于昨天**：昨天的准备日没有打卡。如果 DB Browser、Jupyter 还没装好，今天 SQL 时段先花 10 分钟装 DB Browser（步骤见 [昨天的讲义](2026-10-11.md) 第一节），Jupyter 明天 Python 课前装好即可。如果昨天其实都弄好了，回复一句，我来补记。\n\n> 讲义已按课拆开：每一课一个文件，点上表里的课名打开。没学完的课，下次排到这一科时接着学同一个文件。\n\n---\n\n## 今晚 9 点打卡要回答的三个问题\n\n1. 三个时段完成了哪几个？（英语、SQL、CFA）大概用了多久？\n2. SQL：五道练习做到第几道？有没有报错，报错信息是什么？\n3. CFA：利率构成的五项、持有期收益率的单期和多期公式，哪里还模糊？\n", "2026-10-13": "# 2026-10-13（周二）第 1 周 · 第二天\n\n> 今天三个时段共 100 分钟：英语 → Python → CFA。按顺序学，哪段卡住了先跳过，晚上打卡时说。\n\n## 今天的路线\n\n| 时段 | 科目 | 分钟 | 课 |\n|---|---|---|---|\n| 1 | 英语 | 20 | [CFA 术语与短文：Rates and Returns（续）（见 CFA 第 1 课末尾“英文术语”）](../lessons/cfa/01.md) |\n| 2 | Python | 45 | [第 1/24 课 · 环境：Anaconda 与 Jupyter，第一个程序](../lessons/py/01.md) |\n| 3 | CFA 一级 | 35 | [第 1/64 课 · Q1 收益率与回报（1/4）：利率的含义与构成、持有期收益率](../lessons/cfa/01.md) |\n\n**关于昨天**：昨天（10/12）没有打卡，按没学处理——今天 CFA 接着学同一课（换了一套新例题和新练习，没看过昨天讲义也能直接学）；昨天的 SQL 第 1 课留到下一个 SQL 日（周三）接着学。如果其实学完了，回复一句，我来补记。\n\n前天的准备日和昨天都没打卡。刚开头节奏还没找到很正常；如果是每天 100 分钟排不开，晚上直接说，可以把每天的量调小，不用硬撑。\n\n> 讲义已按课拆开：每一课一个文件，点上表里的课名打开。没学完的课，下次排到这一科时接着学同一个文件。\n\n---\n\n## 今晚 9 点打卡要回答的三个问题\n\n1. 三个时段完成了哪几个？（英语、Python、CFA）大概用了多久？昨天的课有没有其实学过？\n2. Python：Jupyter 打开了吗？五道练习做到第几道，遇到的报错是什么？\n3. CFA：利率的五个组成部分、单期和多期 HPR 公式，哪里还模糊？\n", "2026-10-14": "# 2026-10-14（周三）第 1 周 · 第三天\n\n> 今天三个时段共 100 分钟：英语 → SQL → CFA。按顺序学，哪段卡住了先跳过，晚上打卡时说。\n\n## 今天的路线\n\n| 时段 | 科目 | 分钟 | 课 |\n|---|---|---|---|\n| 1 | 英语 | 20 | [CFA 术语与短文：Rates and Returns（第三篇）（见 CFA 第 1 课末尾“英文术语”）](../lessons/cfa/01.md) |\n| 2 | SQL | 45 | [第 1/36 课 · 数据库、表、行和列：装好 DB Browser，建第一张表](../lessons/sql/01.md) |\n| 3 | CFA 一级 | 35 | [第 1/64 课 · Q1 收益率与回报（1/4）：利率的含义与构成、持有期收益率](../lessons/cfa/01.md) |\n\n**关于昨天**：昨天（10/13）没有打卡，按没学处理——Python 第 1 课留到下一个 Python 日接着学；CFA 今天还是同一课，但换了全新的例题和练习，前两天的讲义没看过也能直接从这里学。SQL 第 1 课也是新场景、新练习。如果其实学完了，回复一句，我来补记。\n\n已经连续三天没打卡了。开头几天找不到节奏很常见，不用有负担。如果是每天 100 分钟排不开，今晚说一声，我把每天的量调小。今天时间实在紧，就做**最低版本（约 40 分钟）**：英语只看 10 个术语，SQL 跑通建表脚本和示例查询 1–3，CFA 看讲义三并做第 4、5 题——打卡时说“做了最低版本”即可。\n\n> 讲义已按课拆开：每一课一个文件，点上表里的课名打开。没学完的课，下次排到这一科时接着学同一个文件。\n\n---\n\n## 今晚 9 点打卡要回答的三个问题\n\n1. 三个时段完成了哪几个（英语、SQL、CFA）？做的是完整版还是最低版本？大概用了多久？\n2. SQL：DB Browser 装好了吗？练习做到第几道，有没有报错，报错信息是什么？\n3. 这几天每天 100 分钟排得开吗？需不需要把每天的量调小？\n", "cfa-01": "# CFA 第 1 课 · Q1 收益率与回报（1/4）\n\n> 35 分钟 · CFA 一级第 1 / 64 课 · Rates and Returns\n\n**模块**：Quantitative Methods → Rates and Returns（共 4 次课，今天第 1 次）\n\n## 学习目标\n\n- 从三个角度解释利率：要求回报率、折现率、机会成本。\n- 把利率拆成实际无风险利率加各项溢价。\n- 计算单期和多期的持有期收益率（HPR）。\n\n## 讲解一：利率的三种解读\n\n假设一年期定期存款利率是 4%：\n\n1. **Required rate of return（要求回报率）**：你把 1 万元存一年，至少要 4% 才愿意——这是你“要求”的最低回报。\n2. **Discount rate（折现率）**：一年后到手的 10,400 元，按 4% 折回今天，值 10,000 元。把“未来的钱”换算成“今天的钱”。\n3. **Opportunity cost（机会成本）**：如果你把这 1 万元放在不计息的活期里，就放弃了 4%——这就是你为“随时能用钱”付出的代价。\n\n做题看关键词：*minimum / require* → 要求回报率；*worth today / present value* → 折现率；*forgo / give up / sacrifice* → 机会成本。\n\n## 讲解二：利率的构成\n\n$$\nr = \\underbrace{\\text{实际无风险利率} + \\text{通胀溢价}}_{\\text{名义无风险利率}} + \\text{违约风险溢价} + \\text{流动性溢价} + \\text{期限溢价}\n$$\n\n一个记法：出借人问自己五个问题——\n\n| 问题 | 对应部分 |\n|---|---|\n| 我得等多久才能花这笔钱？（纯等待） | Real risk-free interest rate |\n| 等的这段时间，钱会不会贬值？ | Inflation premium |\n| 对方会不会不还？ | Default risk premium |\n| 我想提前卖掉时，能不能按公道价卖出去？ | Liquidity premium |\n| 期限越长，利率一变价格晃得越厉害，我愿不愿扛？ | Maturity premium |\n\n短期国库券（T-bill）只回答了前两个问题（后三项接近 0），所以它的收益率近似**名义无风险利率**。严格关系是 (1 + 名义) = (1 + 实际)(1 + 通胀)，一级题目一般直接相加近似。\n\n**例题 1**：实际无风险利率 2.5%，预期通胀 3%。某 15 年期公司债：违约风险溢价 1.8%，流动性溢价 0.7%，期限溢价 1.2%。\n\n- 名义无风险利率 ≈ 2.5% + 3% = **5.5%**（严格：1.025 × 1.03 − 1 = 5.575%）\n- 公司债要求回报率 ≈ 5.5% + 1.8% + 0.7% + 1.2% = **9.2%**\n\n**例题 2**：同一家公司又发了一只 15 年期债券，条款一样，但交易非常活跃，要求回报率是 8.7%。哪一项溢价不同？差多少？\n\n- 发行人、期限都一样，违约和期限溢价相同；差别只能来自流动性：9.2% − 8.7% = **0.5%**，活跃债券的流动性溢价只有 0.2%。\n\n## 讲解三：持有期收益率（HPR）\n\n**单期**：\n\n$$\nHPR = \\frac{P_1 - P_0 + D_1}{P_0} = \\underbrace{\\frac{P_1 - P_0}{P_0}}_{\\text{资本利得率}} + \\underbrace{\\frac{D_1}{P_0}}_{\\text{收入回报率}}\n$$\n\n**例题 3（股票）**：60 元买入，持有期间分红 1.8 元，以 63.2 元卖出。\n\nHPR = (63.2 − 60 + 1.8) ÷ 60 = 5 ÷ 60 = **8.33%**（资本利得 5.33% + 股息收益 3%）\n\n计算器（BA II Plus）：`63.2 − 60 + 1.8 =` → `÷ 60 =` → 显示 `0.0833`\n\n**例题 4（债券）**：面值 100 的债券按 100 买入，一年收到票息 4，年末以 106.5 卖出。\n\nHPR = (106.5 − 100 + 4) ÷ 100 = **10.5%**——票息只有 4%，另外 6.5% 来自价格上涨（比如期间市场利率下降）。\n\n**多期**：每期“1 + 收益率”连乘，再减 1。\n\n$$\nHPR = (1 + R_1)(1 + R_2)\\cdots(1 + R_n) - 1\n$$\n\n**例题 5**：某基金三年收益率 15%、−12%、6%。\n\n(1.15)(0.88)(1.06) − 1 = 1.07272 − 1 = **7.27%**\n\n计算器：`1.15 × 0.88 × 1.06 − 1 =` → 显示 `0.0727`\n\n直觉检查：只看前两年，涨 15% 再跌 12%，1.15 × 0.88 = 1.012，只赚了 1.2%，不是 3%。跌的那 12% 是从更高的基数上跌的——这就是不能直接相加的原因。\n\n## 练习：仿一级考试三选一\n\n**1.** \"To find what a payment of $1,000 due in two years is worth today, the analyst uses a rate of 7%.\" The 7% is best described as a:\n\nA. discount rate.\nB. required rate of return.\nC. opportunity cost.\n\n**2.** Which premium compensates investors for the increased sensitivity of a bond's market value to changes in interest rates as its time to repayment is extended?\n\nA. Liquidity premium\nB. Maturity premium\nC. Inflation premium\n\n**3.** The nominal risk-free rate is 5.2%, and the real risk-free rate is 2.0%. Using the additive approximation, the inflation premium is closest to:\n\nA. 2.0%\nB. 3.2%\nC. 7.2%\n\n**4.** An investor buys a share at $20.00, receives a dividend of $0.60, and sells the share at $18.40. The holding period return is closest to:\n\nA. −8.0%\nB. −5.0%\nC. 3.0%\n\n**5.** A portfolio earns 7%, 12%, −5%, and 4% in four consecutive years. The four-year holding period return is closest to:\n\nA. 18.00%\nB. 18.40%\nC. 4.60%\n\n<details>\n<summary>CFA 答案与解析<\/summary>\n\n1. **A**。关键词 *worth today*——把未来的钱换算到今天，这是折现率的角度。\n2. **B**。期限越长，利率变动对价格的影响越大，补偿这一点的是期限溢价。流动性溢价补偿“不好卖”，通胀溢价补偿购买力下降。\n3. **B**。5.2% − 2.0% = 3.2%。C 是把两者相加的错误。\n4. **B**。(18.40 − 20.00 + 0.60) ÷ 20.00 = −1.00 ÷ 20 = −5.0%。A 漏了股息（−1.60 ÷ 20 = −8%）；C 只算了股息收益率（0.60 ÷ 20 = 3%）。\n5. **B**。1.07 × 1.12 × 0.95 × 1.04 − 1 = 1.18402 − 1 = 18.40%。A 是直接相加；C 是把 18.40% 除以 4——年均收益率要用几何平均（开四次方），第 2 次课讲。\n\n<\/details>\n\n---\n\n## 加练一\n\n> 同一课另一套仿真题，正课的练习做完还有余力再做。\n\n**1.** An analyst states: \"The 6% rate is the minimum return investors require before they agree to lend.\" This statement best describes the interest rate as a:\n\nA. discount rate.\nB. required rate of return.\nC. opportunity cost.\n\n**2.** Which component of an interest rate compensates investors for the risk that a security cannot be sold quickly at close to its fair value?\n\nA. Maturity premium\nB. Default risk premium\nC. Liquidity premium\n\n**3.** Given: real risk-free rate 1.5%, inflation premium 2.5%, default risk premium 2.0%, liquidity premium 0.8%, maturity premium 1.2%. The required return on the bond is closest to:\n\nA. 6.0%\nB. 7.2%\nC. 8.0%\n\n**4.** An investor buys a share at $40, receives a dividend of $0.80, and sells the share at $37. The holding period return is closest to:\n\nA. −7.5%\nB. −5.5%\nC. −2.0%\n\n**5.** A portfolio returns 12%, −8%, and 5% in three consecutive years. The three-year holding period return is closest to:\n\nA. 9.00%\nB. 8.19%\nC. 2.73%\n\n<details>\n<summary>CFA 答案与解析<\/summary>\n\n1. **B**。关键词 *minimum return investors require*。折现率强调把未来价值换算到今天；机会成本强调放弃的收益。\n2. **C**。流动性溢价补偿“难以快速按公允价卖出”。期限溢价补偿长期限下的利率风险；违约风险溢价补偿可能不还钱。\n3. **C**。1.5 + 2.5 + 2.0 + 0.8 + 1.2 = 8.0%。A 只加了前三项，漏了流动性和期限溢价（1.5 + 2.5 + 2.0 = 6.0%）。\n4. **B**。(37 − 40 + 0.80) ÷ 40 = −2.20 ÷ 40 = −5.5%。A 漏掉了股息（−3 ÷ 40 = −7.5%）。\n5. **B**。1.12 × 0.92 × 1.05 − 1 = 1.08192 − 1 = 8.19%。A 是直接相加的错误做法；C 是 8.19% 除以 3 的错误“年均”做法（年均收益率要开三次方，第 2 次课讲几何平均）。\n\n<\/details>\n\n---\n\n## 加练二\n\n> 同一课另一套仿真题，正课的练习做完还有余力再做。\n\n**1.** \"By keeping $10,000 in a non-interest-bearing account, Wen gives up the 3% she could earn on a one-year deposit.\" The 3% is best described as a(n):\n\nA. discount rate.\nB. opportunity cost.\nC. required rate of return.\n\n**2.** The nominal risk-free interest rate is best approximated by the sum of the:\n\nA. real risk-free rate and the inflation premium.\nB. real risk-free rate and the default risk premium.\nC. inflation premium and the maturity premium.\n\n**3.** A 3-month Treasury bill yields 4.6%, and the real risk-free rate is 1.9%. The inflation premium is closest to:\n\nA. 1.9%\nB. 2.7%\nC. 6.5%\n\n**4.** An investor buys a share for $25.00, receives a dividend of $0.50, and sells the share for $27.50 one year later. The holding period return is closest to:\n\nA. 2.0%\nB. 10.0%\nC. 12.0%\n\n**5.** A fund returns 6%, 9%, and −4% in three consecutive years. The three-year holding period return is closest to:\n\nA. 3.64%\nB. 10.92%\nC. 11.00%\n\n<details>\n<summary>CFA 答案与解析<\/summary>\n\n1. **B**。关键词 *gives up*：放弃了本可以赚到的 3%，是机会成本。没有“最低要求”的意思（排除 C），也没有把未来价值折到今天（排除 A）。\n2. **A**。名义无风险利率 = 实际无风险利率 + 通胀溢价。违约、流动性、期限溢价是具体证券才有的风险补偿，无风险利率里不含。\n3. **B**。T-bill 收益率近似名义无风险利率：4.6% − 1.9% = 2.7%。C 是错误地把两者相加。\n4. **C**。(27.50 − 25.00 + 0.50) ÷ 25.00 = 3.00 ÷ 25.00 = 12.0%。B 漏掉了股息（2.50 ÷ 25 = 10%）；A 只算了股息收益率（0.50 ÷ 25 = 2%）。\n5. **B**。1.06 × 1.09 × 0.96 − 1 = 1.1092 − 1 = 10.92%。C 是直接相加（6 + 9 − 4 = 11%）；A 是把 10.92% 除以 3 的错误“年均”算法——年均收益率要用几何平均开三次方，第 2 次课讲。\n\n<\/details>\n\n---\n\n## 英文术语\n\n> 这一课相关的 30 个 CFA 英文术语，分三组。先遮住中文说一遍，再抄进生词本；它们会进复习卡。\n\n### 第一组\n\n| # | 英文 | 音标 | 中文 |\n|---|---|---|---|\n| 1 | interest rate | /ˈɪntrəst reɪt/ | 利率 |\n| 2 | required rate of return | /rɪˈkwaɪərd reɪt əv rɪˈtɜːrn/ | 要求回报率 |\n| 3 | discount rate | /ˈdɪskaʊnt reɪt/ | 折现率 |\n| 4 | opportunity cost | /ˌɑːpərˈtuːnəti kɔːst/ | 机会成本 |\n| 5 | real risk-free interest rate | /ˈriːəl ˌrɪsk ˈfriː/ | 实际无风险利率 |\n| 6 | inflation premium | /ɪnˈfleɪʃn ˈpriːmiəm/ | 通胀溢价 |\n| 7 | default risk premium | /dɪˈfɔːlt rɪsk ˈpriːmiəm/ | 违约风险溢价 |\n| 8 | liquidity premium | /lɪˈkwɪdəti ˈpriːmiəm/ | 流动性溢价 |\n| 9 | maturity premium | /məˈtʃʊrəti ˈpriːmiəm/ | 期限溢价 |\n| 10 | holding period return (HPR) | /ˈhoʊldɪŋ ˈpɪriəd rɪˈtɜːrn/ | 持有期收益率 |\n\n**例句**\n\n1. The central bank raised the **interest rate** by 0.25%. —— 央行把利率上调了 0.25 个百分点。\n2. Investors set a **required rate of return** of 9% for this project. —— 投资者对这个项目设定了 9% 的要求回报率。\n3. A higher **discount rate** makes future cash flows worth less today. —— 折现率越高，未来现金流的现值越低。\n4. The **opportunity cost** of holding cash is the interest you give up. —— 持有现金的机会成本就是放弃的利息。\n5. The **real risk-free interest rate** is the return for pure waiting, with no inflation. —— 实际无风险利率是在没有通胀时单纯“等待”所得的回报。\n6. When prices rise faster, lenders demand a larger **inflation premium**. —— 物价涨得越快，出借人要求的通胀溢价越高。\n7. Bonds from weaker companies carry a higher **default risk premium**. —— 实力较弱公司的债券违约风险溢价更高。\n8. Thinly traded bonds must offer a **liquidity premium**. —— 交易清淡的债券必须提供流动性溢价。\n9. A 30-year bond usually includes a bigger **maturity premium** than a 2-year bond. —— 30 年期债券的期限溢价通常比 2 年期大。\n10. The stock's **holding period return** was 11% including dividends. —— 算上分红，这只股票的持有期收益率是 11%。\n\n### 第二组\n\n| # | 英文 | 音标 | 中文 |\n|---|---|---|---|\n| 1 | nominal risk-free rate | /ˈnɑːmɪnl ˌrɪsk ˈfriː reɪt/ | 名义无风险利率 |\n| 2 | Treasury bill (T-bill) | /ˈtreʒəri bɪl/ | 短期国库券 |\n| 3 | premium | /ˈpriːmiəm/ | 溢价；额外补偿 |\n| 4 | creditworthiness | /ˈkredɪtwɜːrðinəs/ | 信用状况、偿债能力 |\n| 5 | capital gain | /ˈkæpɪtl ɡeɪn/ | 资本利得（价差收益） |\n| 6 | dividend yield | /ˈdɪvɪdend jiːld/ | 股息收益率 |\n| 7 | coupon | /ˈkuːpɑːn/ | （债券）票息 |\n| 8 | compounding | /kəmˈpaʊndɪŋ/ | 复利、复合计算 |\n| 9 | present value | /ˈpreznt ˈvæljuː/ | 现值 |\n| 10 | fair value | /fer ˈvæljuː/ | 公允价值 |\n\n**例句**\n\n1. The yield on a 3-month T-bill is a good proxy for the **nominal risk-free rate**. —— 3 个月期国库券的收益率可以很好地近似名义无风险利率。\n2. A **Treasury bill** matures in one year or less. —— 短期国库券的期限不超过一年。\n3. Investors demand a **premium** for every extra risk they take. —— 每多承担一种风险，投资者就要求多一份溢价。\n4. Rating agencies assess the **creditworthiness** of bond issuers. —— 评级机构评估债券发行人的信用状况。\n5. She sold the shares at a higher price and realized a **capital gain**. —— 她以更高的价格卖出股票，实现了资本利得。\n6. A stock priced at 50 that pays 2 a year has a **dividend yield** of 4%. —— 股价 50、每年分红 2 的股票，股息收益率是 4%。\n7. The bond pays a **coupon** of 5% once a year. —— 这只债券每年付一次 5% 的票息。\n8. Because of **compounding**, returns earned each year also earn returns later. —— 由于复利，每年赚到的收益之后还会继续生息。\n9. The **present value** of 110 received next year at 10% is 100. —— 按 10% 折算，明年收到的 110 的现值是 100。\n10. In an illiquid market, you may have to sell well below **fair value**. —— 在流动性差的市场里，你可能得远低于公允价值卖出。\n\n### 第三组\n\n| # | 英文 | 音标 | 中文 |\n|---|---|---|---|\n| 1 | lender | /ˈlendər/ | 出借人、贷款方 |\n| 2 | borrower | /ˈbɑːroʊər/ | 借款人 |\n| 3 | purchasing power | /ˈpɜːrtʃəsɪŋ ˈpaʊər/ | 购买力 |\n| 4 | nominal return | /ˈnɑːmɪnl rɪˈtɜːrn/ | 名义回报 |\n| 5 | real return | /ˈriːəl rɪˈtɜːrn/ | 实际回报（扣除通胀后） |\n| 6 | yield | /jiːld/ | 收益率 |\n| 7 | maturity | /məˈtʃʊrəti/ | 到期日；期限 |\n| 8 | credit risk | /ˈkredɪt rɪsk/ | 信用风险 |\n| 9 | marketable | /ˈmɑːrkɪtəbl/ | 可在市场上交易的 |\n| 10 | income return | /ˈɪnkʌm rɪˈtɜːrn/ | 收入回报（利息、股息部分） |\n\n**例句**\n\n1. The **lender** expects to be paid back with interest. —— 出借人期望连本带息收回。\n2. A **borrower** with a weak balance sheet pays a higher rate. —— 资产负债表较弱的借款人要付更高的利率。\n3. Inflation reduces the **purchasing power** of money. —— 通胀会削弱货币的购买力。\n4. The fund's **nominal return** was 7% last year. —— 这只基金去年的名义回报是 7%。\n5. With 3% inflation, the **real return** was only about 4%. —— 扣除 3% 的通胀后，实际回报只有约 4%。\n6. The **yield** on the 10-year bond rose to 4.5%. —— 10 年期债券的收益率升到了 4.5%。\n7. The bond reaches **maturity** in 2036. —— 这只债券在 2036 年到期。\n8. Rating agencies try to measure **credit risk**. —— 评级机构试图衡量信用风险。\n9. Government bonds are highly **marketable**. —— 国债非常容易在市场上买卖。\n10. The coupon you receive is the **income return** of a bond. —— 收到的票息就是债券的收入回报。\n\n### 短文阅读\n\n**What Is an Interest Rate?**\n\nAn interest rate can be read in three ways. First, it is a required rate of return: the minimum return an investor needs before agreeing to lend money. Second, it is a discount rate, which tells us how much a payment in the future is worth today. Third, it is an opportunity cost, because money spent today gives up the interest it could have earned.\n\nInterest rates are also built from several parts. The real risk-free interest rate rewards investors simply for waiting. An inflation premium protects them against rising prices. Riskier securities add more premiums: a default risk premium if the borrower might not pay, a liquidity premium if the security is hard to sell quickly at a fair price, and a maturity premium if the money is tied up for many years.\n\nAfter an investment is made, we measure the result with the holding period return, which counts both the price change and any income received.\n\n**理解题**\n\n1. According to the passage, what are the three ways to read an interest rate?\n2. Which premium is added when a security is hard to sell quickly at a fair price?\n3. What two things does the holding period return count?\n\n<details>\n<summary>答案<\/summary>\n\n1. A required rate of return, a discount rate, and an opportunity cost.（要求回报率、折现率、机会成本）\n2. The liquidity premium.（流动性溢价）\n3. The price change and any income received (e.g., dividends or interest).（价格变动和期间收到的收入）\n\n<\/details>\n", "py-01": "# Python 第 1 课 · 环境：Anaconda 与 Jupyter，第一个程序\n\n> 45 分钟 · Python 第 1 / 24 课\n\n## 本课目标\n\n1. 会从 Anaconda 打开 Jupyter Notebook，新建、改名、保存一个笔记本。\n2. 分清两种单元格：**Code**（代码）和 **Markdown**（文字说明），会用快捷键运行。\n3. 会用 `print()` 输出、用 `#` 写注释、把 Python 当计算器用。\n4. 看得懂最常见的报错，知道从哪一行找问题。\n\n## 讲解一：Anaconda、Jupyter、Python 是什么关系\n\n- **Python**：编程语言本身。\n- **Anaconda**：一个“工具大礼包”，装好了 Python 和几百个常用库（pandas 处理表格、openpyxl 读写 Excel 等），省得一个个装。\n- **Jupyter Notebook**：在浏览器里写 Python 的“笔记本”。一份笔记本（`.ipynb` 文件）由很多**单元格**组成，每格可以单独运行、马上看到结果——很适合边学边试，也适合一步步处理一份 Excel：读进来 → 看一眼 → 清洗 → 再看一眼 → 导出。\n\n可以这样类比：Python 是发动机，Anaconda 是整辆车，Jupyter 是驾驶座。\n\n## 讲解二：打开并建好今天的笔记本（约 8 分钟）\n\n1. 开始菜单搜 **Anaconda Navigator** → 在 Jupyter Notebook 那格点 **Launch**（也可以开始菜单直接搜 *Jupyter Notebook*）。浏览器会打开一个文件列表页，背后还有一个黑色窗口——**别关它**，关了 Jupyter 就停了。\n2. 进到练习文件夹（建议 `D:\\研习录\\python`）。\n3. 右上角 **New → Python 3 (ipykernel)**，点左上角的 *Untitled*，改名为 `01_第一个程序`。\n4. 保存：`Ctrl + S`。Jupyter 也会每隔几分钟自动保存。\n\n**两种模式**（Jupyter 最容易困惑的地方）：\n\n| 模式 | 怎么进入 | 单元格左边框 | 这时按键的作用 |\n|---|---|---|---|\n| 编辑模式 | 在单元格里点一下，或按 `Enter` | 绿色（新版为蓝色、有光标） | 打字 |\n| 命令模式 | 按 `Esc` | 蓝色、没有光标 | 按单个字母操作整个单元格 |\n\n**常用快捷键**（先记前四个）：\n\n| 快捷键 | 作用 |\n|---|---|\n| `Shift + Enter` | 运行当前格，跳到下一格（最常用） |\n| `Ctrl + Enter` | 运行当前格，停在原地 |\n| `Esc` 然后 `B` | 在下方插入新单元格（Below） |\n| `Esc` 然后 `M` / `Y` | 把单元格切换成 Markdown / Code |\n| `Esc` 然后 `D D` | 删除单元格（按两次 D） |\n| `Esc` 然后 `Z` | 撤销删除 |\n\n单元格左边的 `In [3]:` 表示这是第 3 个被运行的格；正在运行时显示 `In [*]:`。\n\n## 讲解三：第一个程序\n\n依次把下面每段放进一个单独的单元格，`Shift + Enter` 运行。\n\n**单元格 1：输出一句话**\n\n```python\nprint(\"hello, 研习录\")\n```\n\n- `print()` 是一个**函数**：括号里放什么，就把什么显示出来。\n- 文字要用**英文引号**包起来，单引号 `'...'` 和双引号 `\"...\"` 都行，前后要一致。被引号包起来的文字叫**字符串**（string）。\n\n**单元格 2：注释和多行输出**\n\n```python\n# 井号后面是注释，Python 不执行，用来写说明\nprint(\"第一行\")\nprint(\"第二行\")   # 注释也可以写在代码后面\nprint(\"姓名：\", \"赵小一\", \"金额：\", 1200)\n```\n\n输出：\n\n```\n第一行\n第二行\n姓名： 赵小一 金额： 1200\n```\n\n`print()` 里可以放好几样东西，用逗号隔开，输出时自动用空格连起来。注意 `1200` 没加引号——它是数字，不是文字。\n\n**单元格 3：把 Python 当计算器**\n\n```python\nprint(1200 + 800)        # 加\nprint(1500 - 600.5)      # 减\nprint(950 * 12)          # 乘：用 * 不是 ×\nprint(6250.5 / 6)        # 除：用 / 不是 ÷，结果总是小数\nprint(17 // 5, 17 % 5)   # 整除取商、取余数\nprint(1.05 ** 3)         # 乘方：1.05 的 3 次方\n```\n\n输出：\n\n```\n2000\n899.5\n11400\n1041.75\n3 2\n1.157625\n```\n\n**单元格 4：单元格最后一行的值会自动显示**\n\n```python\n1.10 * 0.95 * 1.08 - 1\n```\n\n不写 `print`，Jupyter 也会显示 `0.12860000000000005`。末尾那串 `0000000005` 是计算机存小数的正常误差，不是算错了。想要整齐，用 `round(数字, 位数)`：\n\n```python\nround(1.10 * 0.95 * 1.08 - 1, 4)\n```\n\n结果 `0.1286`——正好是今天 CFA 课里多期持有期收益率的算法，以后算 CFA 题可以直接用 Jupyter 验算。\n\n**单元格 5：Markdown 单元格写笔记**\n\n新建一格，按 `Esc` 再按 `M` 切成 Markdown，输入：\n\n```markdown\n# 第 1 课：第一个程序\n- `print()` 输出\n- `#` 写注释\n- **Shift + Enter** 运行\n```\n\n运行后变成排好版的标题和列表。双击可以再改。养成习惯：每个笔记本开头写一格 Markdown，说明这个笔记本是干什么的。\n\n**单元格 6：先尝一口——三行代码生成并读回一个 Excel**\n\n```python\nimport pandas as pd\n\ndf = pd.DataFrame({\"姓名\": [\"赵小一\", \"钱小二\", \"孙小三\"], \"金额\": [1200, 800, 1500]})\ndf.to_excel(\"01_试一试.xlsx\", index=False)\npd.read_excel(\"01_试一试.xlsx\")\n```\n\n运行后显示一张三行的小表，文件列表页里多了 `01_试一试.xlsx`，可以用 Excel 打开看看。今天**不要求看懂**这几行——第 13 课左右学 pandas 时会逐行讲。先知道：以后成千上万行的 Excel 清洗、比对，就是这样几行代码完成的。\n\n（如果报 `No module named 'openpyxl'`：新建一格运行 `%pip install openpyxl`，然后菜单 *Kernel → Restart*，再从单元格 6 重新运行。）\n\n## 讲解四：看懂报错\n\n故意运行下面这格：\n\n```python\nprint(\"hello)\n```\n\n会看到类似：\n\n```\n  Cell In[7], line 1\n    print(\"hello)\n          ^\nSyntaxError: unterminated string literal (detected at line 1)\n```\n\n读报错的顺序：**先看最后一行**（错误类型 + 说明），**再看 line 几和 `^` 指的位置**。`SyntaxError` 是语法错误，`unterminated string literal` 的意思是“字符串没有结束”——少了后半个引号。\n\n最常见的三种：\n\n| 报错 | 原因 | 例子 |\n|---|---|---|\n| `SyntaxError` | 语法写错：少引号、少括号、用了中文标点 | `print（\"hi\"）` |\n| `NameError: name 'xxx' is not defined` | 用了一个 Python 不认识的名字：拼错、大小写错、文字忘加引号 | `Print(\"hi\")`、`print(hello)` |\n| `TypeError` | 类型不对，比如文字和数字直接相加 | `\"金额\" + 1200` |\n\nPython **区分大小写**：`print` 对，`Print` 错。\n\n## 练习（由易到难）\n\n1. 新建一格，输出两行：第一行是你的名字（随便写个昵称也行），第二行是 `今天开始学 Python`。\n2. 一份虚构补贴名单的 6 笔金额是 1200、800、1500、600.5、1200、950。用一个单元格算出**合计**和**平均**（平均 = 合计 ÷ 6），分别输出。\n3. 在笔记本最上方插入一个 Markdown 单元格，写一个一级标题“第 1 课练习”，下面用列表写出今天学到的三个快捷键。（提示：先点第一格，`Esc` 后按 `A` 是在**上方**插入。）\n4. 下面三格各有一个错误，先运行看报错，说出错误类型，再改对：\n   ```python\n   print（\"第一题\"）\n   ```\n   ```python\n   Print(\"第二题\")\n   ```\n   ```python\n   print(\"合计：\" + 6250.5)\n   ```\n5. 贴近实际：某项补贴按人头发放，每人每月 450 元。青石镇 36 人发 12 个月，白沙乡 28 人发 10 个月。用一个单元格分别算出两个乡镇的发放总额和两地合计，输出成这样的三行（数字自己算出来，不要手打）：\n   ```\n   青石镇： ……\n   白沙乡： ……\n   合计： ……\n   ```\n   再想一想：如果有 300 个乡镇，这样一行行写还行得通吗？（后面学列表、循环和 pandas 就是为了解决这个。）\n\n## 常见错误\n\n- **关掉了黑色窗口**：Jupyter 停止运行，网页上出现 *Kernel 连接断开*。重新从 Anaconda 打开即可，笔记本已保存的内容还在。\n- **中文标点**：`（）`、`“”`、`，` 都会导致 `SyntaxError`。代码里的符号一律英文半角，引号**里面**的中文没关系。\n- **在命令模式下打字**：按了一串字母却没输入进去，反而插入、删除了单元格。先 `Esc` 再按 `Z` 撤销，然后点进单元格再打字。\n- **单元格停在 `In [*]` 不动**：上一格还没跑完或卡住。点工具栏的 ■（Interrupt），不行就 *Kernel → Restart*。\n- **重启后报 `NameError`**：重启会清空内存，前面单元格定义过的东西没了。从上往下重新运行一遍（菜单 *Run → Run All Cells*，旧版是 *Cell → Run All*）。\n\n<details>\n<summary>Python 练习答案<\/summary>\n\n1.\n```python\nprint(\"小明\")   # 换成你自己的名字或昵称\nprint(\"今天开始学 Python\")\n```\n\n2.\n```python\nprint(\"合计：\", 1200 + 800 + 1500 + 600.5 + 1200 + 950)\nprint(\"平均：\", (1200 + 800 + 1500 + 600.5 + 1200 + 950) / 6)\n```\n输出 `合计： 6250.5`、`平均： 1041.75`。注意第二行要加括号：先加再除。不加括号写成 `1200 + 800 + ... + 950 / 6`，只有最后的 950 被除以 6。\n\n3. Markdown 单元格内容示例：\n```markdown\n# 第 1 课练习\n- Shift + Enter：运行并跳到下一格\n- Esc 然后 B：在下方插入单元格\n- Esc 然后 M：切换成 Markdown\n```\n\n4.\n- 第一格：`SyntaxError`（中文括号）。改为 `print(\"第一题\")`。\n- 第二格：`NameError: name 'Print' is not defined`（大小写）。改为 `print(\"第二题\")`。\n- 第三格：`TypeError: can only concatenate str (not \"float\") to str`（文字和数字不能用 `+` 拼）。改为 `print(\"合计：\", 6250.5)`，用逗号隔开。\n\n5.\n```python\nprint(\"青石镇：\", 450 * 36 * 12)\nprint(\"白沙乡：\", 450 * 28 * 10)\nprint(\"合计：\", 450 * 36 * 12 + 450 * 28 * 10)\n```\n输出：\n```\n青石镇： 194400\n白沙乡： 126000\n合计： 320400\n```\n300 个乡镇一行行写，既费时又容易抄错数字。下一课（周四）学**变量**，可以先把 450 存成 `per_month = 450`，标准一改，所有结果跟着变；再往后用列表和循环，300 行也只要几行代码。\n\n<\/details>\n", "sql-01": "# SQL 第 1 课 · 数据库、表、行和列：装好 DB Browser，建第一张表\n\n> 45 分钟 · SQL 第 1 / 36 课\n\n> 还没装 DB Browser 的话，先花 10 分钟按 [准备日讲义](../../daily/2026-10-11.md) 第一节装好，建一个 `practice.db`。\n\n## 本课目标\n\n1. 说清楚数据库、表、行、列分别是什么。\n2. 会用 `CREATE TABLE` 建表，知道 SQLite 常用的三种类型 `INTEGER`、`REAL`、`TEXT`，知道主键是干什么的。\n3. 会用 `INSERT INTO` 插入数据，用 `SELECT ... FROM` 把表查出来。\n\n## 讲解：一张报销台账就是一张表\n\n设想你在核查一个虚构单位的《差旅报销台账》，要和《请假登记表》对照，看有没有人“请假那天却报了出差”。\n\n| Excel 里 | 数据库里 | 说明 |\n|---|---|---|\n| 整个工作簿 | **数据库**（database，SQLite 里就是一个 `.db` 文件） | 装很多张表 |\n| 一个工作表 | **表**（table） | 一类事物一张：报销一张，请假一张 |\n| 一行 | **行**（row / record） | 一笔报销、一次请假 |\n| 一列 + 列标题 | **列**（column / field） | 姓名、工号、金额、日期…… |\n\n和 Excel 的关键区别：**每一列在建表时就定好类型**。\n\n- `INTEGER`：整数（编号、天数）\n- `REAL`：小数（金额）\n- `TEXT`：文本（姓名、工号、日期。SQLite 的日期统一写成 `'2026-04-08'` 这样的文本，按这个格式排序、比较都不会乱）\n\n**主键**（`PRIMARY KEY`）是每一行的“身份证”，不能重复。台账里的报销单号天然适合当主键：同一张单子不可能登两次——如果真登了两次，数据库会直接报错，这本身就是一道核查关口。\n\n## 建表加数据脚本\n\n打开 DB Browser → 打开 `practice.db` → **Execute SQL** → 粘贴整段 → `Ctrl + Enter` → 点 **Write Changes** 保存。\n\n```sql\n-- 第 1 课：差旅报销台账（数据全部虚构）\nDROP TABLE IF EXISTS travel_claims;\n\nCREATE TABLE travel_claims (\n    claim_no   INTEGER PRIMARY KEY,   -- 报销单号，主键\n    name       TEXT,                  -- 姓名\n    emp_no     TEXT,                  -- 工号（虚构格式）\n    dept       TEXT,                  -- 科室\n    trip_date  TEXT,                  -- 出差日期\n    city       TEXT,                  -- 出差地（虚构地名）\n    amount     REAL                   -- 报销金额（元）\n);\n\nINSERT INTO travel_claims (claim_no, name, emp_no, dept, trip_date, city, amount) VALUES\n    (2001, '甲一明', 'E-0101', '综合科', '2026-04-08', '云溪市', 1320.0),\n    (2002, '乙二红', 'E-0102', '财务科', '2026-04-08', '云溪市', 980.5),\n    (2003, '丙三华', 'E-0103', '项目科', '2026-04-10', '石桥县', 2150.0),\n    (2004, '丁四强', 'E-0104', '项目科', '2026-04-15', '北岭市', 760.0),\n    (2005, '戊五芳', 'E-0105', '综合科', '2026-04-15', '北岭市', 1890.0),\n    (2006, '丙三华', 'E-0103', '项目科', '2026-04-22', '云溪市', 1405.0),\n    (2007, '己六军', 'E-0106', '财务科', '2026-04-23', '石桥县', 640.0);\n```\n\n切到 **Browse Data**，选 `travel_claims`，能看到 7 行。\n\n逐句看：\n\n- `DROP TABLE IF EXISTS ...;`——有同名表先删掉，脚本可以反复跑，不会报“表已存在”。\n- `CREATE TABLE 表名 ( 列名 类型, ... );`——列之间逗号隔开，**最后一列后面不加逗号**。`--` 后面是注释，不执行。\n- `INSERT INTO 表名 (列1, 列2, ...) VALUES (...), (...);`——值和列一一对应；文本用**单引号**，数字不加引号；多行之间逗号，整句末尾分号。\n\n## 示例查询\n\n选中某一句再按 `Ctrl + Enter`，就只执行那一句。\n\n**查询 1：看整张表**\n\n```sql\nSELECT * FROM travel_claims;\n```\n\n`SELECT` = 取数据；`*` = 所有列；`FROM travel_claims` = 从这张表取。结果 7 行 7 列。\n\n**查询 2：只看需要的列，并按自己想要的顺序排列**\n\n```sql\nSELECT trip_date, name, amount FROM travel_claims;\n```\n\n列的顺序就是你写的顺序。核查时常把日期放最前，方便和别的表对日期。\n\n**查询 3：数行数**\n\n```sql\nSELECT COUNT(*) FROM travel_claims;\n```\n\n结果 `7`。拿到台账先数笔数，和对方报的“共 7 笔”对得上，再往下做。\n\n**查询 4：给结果列起个中文名**\n\n```sql\nSELECT name AS 姓名, amount AS 金额 FROM travel_claims;\n```\n\n`AS` 只改结果里显示的列名，不改表本身。导出给别人看时很方便。\n\n**查询 5：看表结构**\n\n```sql\nPRAGMA table_info(travel_claims);\n```\n\n列出每一列的名字和类型，`pk = 1` 的是主键。忘了列名时用它查。\n\n## 练习（由易到难）\n\n1. 查出 `travel_claims` 的全部内容。\n2. 只查报销单号、姓名、金额三列，并把这三列显示为“单号”“姓名”“金额”。\n3. 补登一笔：单号 2008，庚七兰，工号 `E-0107`，综合科，2026-04-28，北岭市，1120 元。插入后数一数，应为 8 笔。\n4. 再执行一次第 3 题的 `INSERT`，会发生什么？读一读报错信息，用一句话说明它为什么是“好事”。\n5. 贴近实际：新建 `leave_records`（请假登记表），四列：`leave_id`（整数，主键）、`emp_no`（文本）、`name`（文本）、`leave_date`（文本），插入下面 3 行：\n   - 1，`E-0102`，乙二红，2026-04-08\n   - 2，`E-0104`，丁四强，2026-04-16\n   - 3，`E-0103`，丙三华，2026-04-22\n\n   然后分别查出报销台账的 `emp_no, name, trip_date` 和请假表的 `emp_no, name, leave_date`，**用眼睛比对**：谁在请假当天报了出差？丁四强算不算？为什么比对时要“工号 + 日期”两样都对上？\n\n## 常见错误\n\n- **中文标点**：`，` `（` `‘` 会报 `syntax error`。SQL 里的符号一律英文半角，引号里面的中文内容没关系。\n- **最后一列后面多逗号**：`amount REAL,)` 报错。\n- **文本没加引号**：`VALUES (2008, 庚七兰, ...)` 会报 `no such column: 庚七兰`——没加引号的字被当成了列名。\n- **列数和值数对不上**：7 个列名配 6 个值，报 `7 columns but 6 values were supplied`，数一数逗号。\n- **主键重复**：报 `UNIQUE constraint failed`。\n- **忘了 Write Changes**：关掉软件，数据就没了。\n\n<details>\n<summary>SQL 练习答案<\/summary>\n\n1.\n```sql\nSELECT * FROM travel_claims;\n```\n\n2.\n```sql\nSELECT claim_no AS 单号, name AS 姓名, amount AS 金额 FROM travel_claims;\n```\n\n3.\n```sql\nINSERT INTO travel_claims (claim_no, name, emp_no, dept, trip_date, city, amount) VALUES\n    (2008, '庚七兰', 'E-0107', '综合科', '2026-04-28', '北岭市', 1120);\n\nSELECT COUNT(*) FROM travel_claims;   -- 结果 8\n```\n\n4. 报错 `UNIQUE constraint failed: travel_claims.claim_no`。单号是主键，不允许重复，所以同一张单子登两次会被直接挡住。手工 Excel 台账里“一单两报”要靠人眼去发现，数据库在录入时就拦住了。\n\n5.\n```sql\nDROP TABLE IF EXISTS leave_records;\n\nCREATE TABLE leave_records (\n    leave_id    INTEGER PRIMARY KEY,\n    emp_no      TEXT,\n    name        TEXT,\n    leave_date  TEXT\n);\n\nINSERT INTO leave_records (leave_id, emp_no, name, leave_date) VALUES\n    (1, 'E-0102', '乙二红', '2026-04-08'),\n    (2, 'E-0104', '丁四强', '2026-04-16'),\n    (3, 'E-0103', '丙三华', '2026-04-22');\n\nSELECT emp_no, name, trip_date FROM travel_claims;\nSELECT emp_no, name, leave_date FROM leave_records;\n```\n\n比对结果：\n\n- **乙二红**（E-0102）：4 月 8 日请假，同一天报了云溪市出差 980.5 元（单号 2002）——疑点。\n- **丙三华**（E-0103）：4 月 22 日请假，同一天报了云溪市出差 1405 元（单号 2006）——疑点。注意他 4 月 10 日那笔没问题，所以不能只看“名字出现在两张表里”。\n- **丁四强**（E-0104）：出差 4 月 15 日，请假 4 月 16 日，日期不同，**不算**。\n\n为什么要“工号 + 日期”：只比工号，丙三华的两笔会被一起标出来，误伤正常的那笔，丁四强也会被误标；只比日期，会把同一天请假和出差的不同人凑到一起。两样都对上才是同一个人、同一天。\n\n预告：以后一句话就能筛出来（今天不要求看懂）：\n\n```sql\nSELECT t.name, t.trip_date, t.amount\nFROM travel_claims t\nJOIN leave_records l\n  ON t.emp_no = l.emp_no AND t.trip_date = l.leave_date;\n```\n\n<\/details>\n\n---\n\n## 加练：换一个场景再做一遍（补贴名单比对）\n\n> 同一课的另一套讲解和练习，场景是补贴发放名单和在职人员名单。正课学完还有余力再做。\n\n### 本课目标\n\n1. 说清楚数据库、表、行、列分别是什么。\n2. 会用 `CREATE TABLE` 建表，知道 SQLite 常用的三种类型 `INTEGER`、`REAL`、`TEXT`。\n3. 会用 `INSERT INTO` 插入数据，用 `SELECT * FROM` 把表查出来。\n\n### 讲解：用 Excel 来类比\n\n设想你手上有一份《补贴发放名单》Excel，要和另一份《在职人员名单》核对，看有没有人“既领补贴又在编”。\n\n| Excel 里 | 数据库里 | 说明 |\n|---|---|---|\n| 整个工作簿（.xlsx 文件） | **数据库**（database，SQLite 里就是一个 `.db` 文件） | 装很多张表 |\n| 一个工作表（sheet） | **表**（table） | 一类事物一张表：补贴名单一张、在职名单一张 |\n| 一行 | **行**（row / record，记录） | 一个人、一笔发放 |\n| 一列 + 列标题 | **列**（column / field，字段） | 姓名、证件号、金额…… |\n\n和 Excel 最大的区别：**数据库的每一列在建表时就规定好类型**。“金额”列规定是数字，就不会混进“一千二”这样的文字；“证件号”规定是文本，开头的 0 不会被吃掉——这两件事在 Excel 里都是核查时的常见坑。\n\nSQLite 最常用三种类型：\n\n- `INTEGER`：整数（序号、人数）\n- `REAL`：小数（金额）\n- `TEXT`：文本（姓名、证件号、日期——SQLite 的日期统一写成 `'2026-03-05'` 这种文本）\n\n**主键**（`PRIMARY KEY`）：每张表挑一列当“身份证”，每行的值都不同、不能重复。今天用一个简单的序号 `id` 当主键。\n\n### 建表加数据脚本\n\n打开 DB Browser → 打开昨天建的 `practice.db`（没有就 *New Database* 新建一个）→ 切到 **Execute SQL** → 粘贴整段 → `Ctrl + Enter`。\n\n```sql\n-- 第 1 课：补贴发放名单（数据全部虚构）\nDROP TABLE IF EXISTS subsidy_list;\n\nCREATE TABLE subsidy_list (\n    id        INTEGER PRIMARY KEY,   -- 序号，主键\n    name      TEXT,                  -- 姓名\n    id_no     TEXT,                  -- 证件号（虚构格式）\n    town      TEXT,                  -- 乡镇\n    amount    REAL,                  -- 发放金额（元）\n    pay_date  TEXT                   -- 发放日期\n);\n\nINSERT INTO subsidy_list (id, name, id_no, town, amount, pay_date) VALUES\n    (1, '赵小一', 'XN-0000-0001', '青石镇', 1200,  '2026-03-05'),\n    (2, '钱小二', 'XN-0000-0002', '青石镇', 800,   '2026-03-05'),\n    (3, '孙小三', 'XN-0000-0003', '白沙乡', 1500,  '2026-03-06'),\n    (4, '李小四', 'XN-0000-0004', '白沙乡', 600.5, '2026-03-06'),\n    (5, '周小五', 'XN-0000-0005', '红柳镇', 1200,  '2026-03-07'),\n    (6, '吴小六', 'XN-0000-0006', '红柳镇', 950,   '2026-03-07');\n```\n\n执行后点 **Write Changes** 保存。切到 **Browse Data** 页，选 `subsidy_list`，能看到 6 行，像一张 Excel 表。\n\n逐句看：\n\n- `DROP TABLE IF EXISTS subsidy_list;`——如果已有同名表就先删掉。这样脚本可以反复运行，不会报“表已存在”。\n- `CREATE TABLE 表名 ( 列名 类型, ... );`——建表。列之间用逗号隔开，**最后一列后面不加逗号**。\n- `INSERT INTO 表名 (列1, 列2, ...) VALUES (值1, 值2, ...), (...);`——插入数据。值的顺序和前面列的顺序一一对应；文本用**单引号**，数字不加引号；多行之间用逗号，整句最后一个分号。\n- `--` 后面是注释，SQL 不执行，用来写说明。\n\n### 示例查询\n\n在 Execute SQL 页，**选中某一句再按 `Ctrl + Enter`**，就只执行选中的那句。\n\n**查询 1：看整张表**\n\n```sql\nSELECT * FROM subsidy_list;\n```\n\n`SELECT` 表示“我要取数据”，`*` 表示“所有列”，`FROM subsidy_list` 表示“从这张表取”。结果：6 行 6 列。\n\n**查询 2：只看几列**\n\n```sql\nSELECT name, town, amount FROM subsidy_list;\n```\n\n把 `*` 换成列名，列名之间逗号隔开。结果只有姓名、乡镇、金额三列，顺序就按你写的顺序。（下一课专门讲 SELECT。）\n\n**查询 3：数一数有几行**\n\n```sql\nSELECT COUNT(*) FROM subsidy_list;\n```\n\n`COUNT(*)` 数行数，结果是 `6`。拿到一份新名单，先数行数是核查的第一步——和对方说的人数对不上，后面就不用往下做了。\n\n**查询 4：看表结构**\n\n```sql\nPRAGMA table_info(subsidy_list);\n```\n\n`PRAGMA` 是 SQLite 特有的命令，列出每一列的名字和类型（`pk` 为 1 的那列是主键）。忘了列名叫什么时用它查。\n\n### 练习（由易到难）\n\n1. 查出 `subsidy_list` 的全部内容。\n2. 只查姓名和证件号两列。\n3. 青石镇新增一人：序号 7，郑小七，证件号 `XN-0000-0007`，金额 700，发放日期 2026-03-08。写 `INSERT` 插进去，再查姓名和金额，确认一共 7 行。\n4. 新建一张 `staff_list`（在职人员名单），四列：`staff_no`（整数，主键）、`name`（文本）、`id_no`（文本）、`dept`（文本），插入下面 3 行：\n   - 101，冯甲，`XN-0000-0101`，虚构局办公室\n   - 102，孙小三，`XN-0000-0003`，虚构局财务科\n   - 103，陈乙，`XN-0000-0103`，虚构局综合科\n5. 贴近实际：现在库里有两张表——补贴名单和在职名单。分别查出两张表的姓名和证件号，**用眼睛比对**：谁既在补贴名单上、又在在职名单上？想一想：为什么要用证件号比，而不是用姓名比？（几十行可以用眼睛，几万行就得靠 SQL——第 15 课左右的 JOIN 会教一句话搞定。）\n\n### 常见错误\n\n- **中文标点**：`，` `（` `‘` 会报 `syntax error`。SQL 符号一律英文半角，文本内容里的中文没关系。\n- **最后一列后面多了逗号**：`pay_date TEXT,)` 会报错。\n- **文本忘了加引号**：`VALUES (7, 郑小七, ...)` 会报 `no such column: 郑小七`——SQL 把没加引号的字当成了列名。\n- **用了双引号包文本**：SQLite 有时能容忍，但标准写法是单引号，养成习惯。\n- **主键重复**：再插一次 `id = 1` 会报 `UNIQUE constraint failed`。这正是主键的作用。\n- **忘了 Write Changes**：关掉软件后数据没了。\n\n<details>\n<summary>SQL 练习答案<\/summary>\n\n1.\n```sql\nSELECT * FROM subsidy_list;\n```\n\n2.\n```sql\nSELECT name, id_no FROM subsidy_list;\n```\n\n3.\n```sql\nINSERT INTO subsidy_list (id, name, id_no, town, amount, pay_date) VALUES\n    (7, '郑小七', 'XN-0000-0007', '青石镇', 700, '2026-03-08');\n\nSELECT name, amount FROM subsidy_list;\n```\n结果 7 行，最后一行是 郑小七 700.0。\n\n4.\n```sql\nDROP TABLE IF EXISTS staff_list;\n\nCREATE TABLE staff_list (\n    staff_no  INTEGER PRIMARY KEY,\n    name      TEXT,\n    id_no     TEXT,\n    dept      TEXT\n);\n\nINSERT INTO staff_list (staff_no, name, id_no, dept) VALUES\n    (101, '冯甲',   'XN-0000-0101', '虚构局办公室'),\n    (102, '孙小三', 'XN-0000-0003', '虚构局财务科'),\n    (103, '陈乙',   'XN-0000-0103', '虚构局综合科');\n```\n\n5.\n```sql\nSELECT name, id_no FROM subsidy_list;\nSELECT name, id_no FROM staff_list;\n```\n**孙小三**（`XN-0000-0003`）两边都有：在白沙乡领了 1500 元补贴，同时在虚构局财务科在职。\n用证件号比，是因为**姓名会重名、也会写错字**，而证件号对每个人唯一。实际工作中两份名单的姓名往往一样、证件号却不同（重名的两个人），或者姓名有出入、证件号相同（同一人录入时写错了字）——只看姓名两种情况都会判错。\n\n预告：以后一句话就能直接筛出来——\n\n```sql\nSELECT name FROM subsidy_list\nWHERE id_no IN (SELECT id_no FROM staff_list);\n```\n\n今天不要求看懂。\n\n<\/details>\n"};
 </script>
 <script>
 (function () {
@@ -2399,7 +2591,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   var LIB = window.YXL_LIB, REC = window.YXL_RECORD || { data: {} };
   var PLAN = window.YXL_PLAN || null, STUDY_SNAP = window.YXL_STUDY || { next: {}, days: {}, streak: 0 };
   var LESSON_SNAP = window.YXL_LESSONS || {};
-  var COLLS = ["progress", "notes", "journal", "cards", "study"];
+  /* 有课程页的线：电影、SQL、Python、CFA、地缘、周复盘 */
+  var COURSES = PLAN ? ["film", "sql", "py", "cfa", "geo", "rev"].filter(function (k) { return PLAN.lessons[k]; }) : [];
+  var COLLS = ["progress", "notes", "journal", "cards", "study", "film"];
   var STATUS = [["todo", "未开始"], ["doing", "进行中"], ["done", "已完成"], ["review", "已内化"]];
   var STATUS_LABEL = {}; STATUS.forEach(function (s) { STATUS_LABEL[s[0]] = s[1]; });
   var MARK = { done: "阅", review: "熟" };
@@ -2415,7 +2609,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function today() { return ymd(new Date()); }
   function addDays(s, n) { var p = s.split("-").map(Number); return ymd(new Date(p[0], p[1] - 1, p[2] + n)); }
   function hhmm() { var d = new Date(); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
-  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {}, study: {} }; }
+  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {}, study: {}, film: {} }; }
 
   /* ---------- 索引 ---------- */
   var ITEMS = {};
@@ -2633,7 +2827,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     journal: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20c-1.5-2-1.5-5 0-7s1.5-5 0-7M17 18c-1.5-2-1.5-5 0-7s1.5-5 0-7"></path></svg>'
   };
   function railHTML() {
-    var r = S.route, sec = r === "plan" || /^l-/.test(r) ? "plan" : r === "shelf" || /^[tbr]-/.test(r) ? "shelf" : r;
+    var r = S.route, sec = r === "plan" || /^[lc]-/.test(r) ? "plan" : r === "shelf" || /^[tbr]-/.test(r) ? "shelf" : r;
     var due = dueCards().length;
     function it(id, label, extra) { return '<a href="#' + id + '"' + (sec === id ? ' aria-current="page"' : "") + ">" + ICON[id] + "<span>" + label + "</span>" + (extra || "") + "</a>"; }
     var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接"];
@@ -2649,11 +2843,25 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   var RGROUPS = LIB.reportGroups || [{ id: "data", name: "数据专题", trackHead: "用数据看这个方向" }];
   function reportsIn(gid, list) { return (list || REPORTS).filter(function (rp) { return (rp.group || "data") === gid; }); }
   function reportHref(rp) { return IN_ARTIFACT && rp.artifact ? rp.artifact : rp.href; }
-  function reportRows(list) {
+  /* 用途：[科目, 第几课(从 0 起), 说明] → “SQL 第 31 课 导入 Excel / CSV” */
+  function useLabel(u) {
+    if (!PLAN || !PLAN.lessons[u[0]]) return u[2] || "";
+    var it = lessonList(u[0])[u[1]];
+    return subjName(u[0]) + " 第 " + (u[1] + 1) + " 课" + (it ? "「" + it.title.split("：")[0] + "」" : "");
+  }
+  function reportRel(rp, withQ) {
+    var out = [];
+    if (withQ && rp.question) out.push('<span class="rrel"><b>问题</b>' + esc(rp.question) + "</span>");
+    if (rp.origin) out.push('<span class="rrel"><b>出处</b>' + esc(rp.origin) + "</span>");
+    (rp.uses || []).forEach(function (u) { out.push('<span class="rrel"><b>可用于</b>' + esc(useLabel(u)) + (u[2] ? "：" + esc(u[2]) : "") + "</span>"); });
+    if (rp.refresh) out.push('<span class="rrel"><b>更新</b>' + esc(rp.refresh) + "</span>");
+    return out.join("");
+  }
+  function reportRows(list, rel) {
     return list.map(function (rp) {
       var tr = (rp.tracks || []).map(function (x) { return TRACK[x] ? TRACK[x].short : ""; }).filter(Boolean).join("、");
       return '<a class="rrow" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span class="rname">' + esc(rp.title) + '<span class="ext" aria-hidden="true">↗</span></span>' +
-        '<span class="rdesc">' + esc(rp.desc) + '</span><span class="rmeta">' + esc(rp.date.replace("-", " 年 ") + " 月") + (tr ? " · " + esc(tr) : "") + "</span></a>";
+        '<span class="rdesc">' + esc(rp.desc) + '</span><span class="rmeta">' + esc(rp.date.replace("-", " 年 ") + " 月") + (tr ? " · " + esc(tr) : "") + "</span>" + (rel ? reportRel(rp, true) : "") + "</a>";
     }).join("");
   }
 
@@ -2677,13 +2885,14 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }).join("");
     return '<div class="view">' + bannerHTML() +
       '<header><p class="eyebrow">研习录 · 始于 2026 年 10 月</p><h1>书架</h1>' +
-      '<p class="lede">正在精读的书、五个学习方向和全部专题都在这里。每天学什么，回到首页的线网看。</p>' +
+      '<p class="lede">正在精读的书、五个学习方向和研究档案都在这里。每天学什么，回到首页的线网看。</p>' +
       '<div class="stats"><span><b>' + doneN + "</b>/ " + items.length + ' 项已完成</span><span><b>' + js.length + '</b>条学习足迹</span><span><b>' + (Math.round(mins / 6) / 10) + '</b>小时累计</span><span><b>' + due + "</b>张概念卡待复习</span></div></header>" +
       '<section class="focus" aria-label="正在精读"><div class="focus-top"><p class="eyebrow">正在精读</p><a class="btn small ghost" href="#review">复习概念卡</a></div>' +
       FOCUS.map(focusBlock).join("") + "</section>" +
       '<section><h2>五个学习方向</h2><div class="tracks">' + rows + "</div></section>" +
+      '<section id="archive"><h2>研究档案</h2><p class="meta">讨论和查资料留下的成果。它们不在任何一条线上，不算进度；每份写清当时要回答的问题、从哪儿来、还能拿来做什么。</p>' +
       RGROUPS.map(function (g) { var rs = reportsIn(g.id);
-        return rs.length ? '<section><h2>' + esc(g.name) + '</h2><div class="reports">' + reportRows(rs) + "</div></section>" : ""; }).join("") +
+        return rs.length ? '<h3 class="arch-h">' + esc(g.name) + '</h3><div class="reports">' + reportRows(rs, true) + "</div>" : ""; }).join("") + "</section>" +
       '<section class="pair"><div class="col"><h2>最近的学习足迹</h2>' + journalList(js.slice(0, 4), false) + '<p class="more"><a href="#journal">全部足迹</a></p></div>' +
       '<div class="col"><h2>怎么用</h2><ol class="steps">' +
       "<li><span><b>读与问</b>按路线图读书；有疑问就在对话里和 Claude 讨论。</span></li>" +
@@ -3084,6 +3293,16 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     return out;
   }
   function weekNo(date) { var d = dayDiff(PLAN.start, date); return d >= 0 ? Math.floor(d / 7) + 1 : 0; }
+  function pad2(n) { return (n < 10 ? "0" : "") + n; }
+  function lessonKey(subj, i) { return subj + "-" + pad2(i + 1); }
+  function isWritten(subj) { return (PLAN.written || []).indexOf(subj) >= 0; }
+  function sinceOk(subj, date) { var s = (PLAN.since || {})[subj]; return !s || date >= s; }
+  /* 某科已经写好讲义的课数：早上定时任务记在 progress.issued，构建时嵌进来的讲义也算 */
+  function issuedN(subj) {
+    var n = ((curStudy().issued || {})[subj]) || 0;
+    while (LESSON_SNAP[lessonKey(subj, n)]) n++;
+    return n;
+  }
   function dayPlan(date) {
     var STUDY = curStudy();
     var wd = new Date(utcDay(date)).getUTCDay(), res = { date: date, wd: wd, slots: [] };
@@ -3091,11 +3310,15 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (dayDiff(PLAN.start, date) < 0) { res.before = true; return res; }
     var cfa = null;
     PLAN.week[wd].forEach(function (x) {
-      var s = { subj: x[0], mins: x[1] };
-      if (x[0] !== "en") {
-        var list = lessonList(x[0]), i = STUDY.next[x[0]] || 0;
+      if (!sinceOk(x[0], date)) return;
+      var s = { subj: x[0], mins: x[1] }, list = lessonList(x[0]), i = STUDY.next[x[0]] || 0;
+      if (x[2] === "review") {
+        s.review = true;
+        s.title = i > 0 ? "本周复习：第 " + (Math.max(0, i - 6) + 1) + "—" + i + " 段连起来过一遍" : "本周复习：还没有学过的段落，今天可以先看一遍全片";
+      } else if (x[0] !== "en") {
         s.index = i; s.total = list.length;
         s.title = i < list.length ? list[i].title : "这一科本阶段已学完";
+        if (i < list.length && isWritten(x[0])) s.lesson = lessonKey(x[0], i);
         if (x[0] === "cfa") cfa = list[i];
       }
       res.slots.push(s);
@@ -3103,12 +3326,27 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     res.slots.forEach(function (s) { if (s.subj === "en") s.title = wd === 0 ? "本周 CFA 词汇小测 + 1、3、7 天前的词复习" : "CFA 术语与短文" + (cfa ? "：" + cfa.en : ""); });
     return res;
   }
-  function lessonDate(file) { var m = /(\d{4}-\d{2}-\d{2})\.md$/.exec(file || ""); return m ? m[1] : ""; }
-  function lessonHref(file) { var d = lessonDate(file); return d ? "#l-" + d : PLAN.repo + file; }
+  /* 讲义链接：study/daily/<日期>.md → #l-<日期>；study/lessons/sql/01.md → #l-sql-01 */
+  function lessonHref(file) {
+    var m = /(\d{4}-\d{2}-\d{2})\.md$/.exec(file || "");
+    if (m) return "#l-" + m[1];
+    m = /lessons\/([a-z]+)\/(\d+)\.md$/.exec(file || "");
+    if (m) return "#l-" + m[1] + "-" + m[2];
+    return PLAN.repo + file;
+  }
+  /* 一个时段点进去去哪：有讲义的去讲义，电影去跟读播放器，英语（旧）去 CFA 课末尾的术语 */
+  function slotHref(s) {
+    if (s.subj === "film") return "#c-film";
+    if (s.lesson) return "#l-" + s.lesson;
+    if (s.subj === "en") { var c = (curStudy().next.cfa || 0); return "#l-" + lessonKey("cfa", c); }
+    if (PLAN.lessons[s.subj] && typeof s.index === "number" && isWritten(s.subj)) return "#l-" + lessonKey(s.subj, s.index);
+    return "#c-" + s.subj;
+  }
 
   /* ---------- 讲义阅读 ---------- */
-  /* 讲义正文：云端版按需读 lessons/<日期> 文档（早上定时任务写入），读不到就用构建时嵌入的快照 */
-  var LESSON = {};   // 日期 -> { md } | { loading: true } | { missing: true }
+  /* 讲义正文：云端版按需读 lessons/<键> 文档（早上定时任务写入），读不到就用构建时嵌入的快照。
+   * 键是日期（每日路线单）或 科目-序号（按课的讲义，如 sql-01） */
+  var LESSON = {};   // 键 -> { md } | { loading: true } | { missing: true }
   function lessonMd(date) {
     var c = LESSON[date];
     if (c && c.md) return c.md;
@@ -3128,8 +3366,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     t = t.replace(/`([^`]+)`/g, function (_, c) { codes.push(c); return "\u0000" + (codes.length - 1) + "\u0000"; });
     t = esc(t);
     t = t.replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, function (_, txt, url) {
-      var m = /^(\d{4}-\d{2}-\d{2})\.md$/.exec(url);
+      var m = /^(?:[.\/a-z]*\/)?(\d{4}-\d{2}-\d{2})\.md$/.exec(url);
       if (m) return '<a href="#l-' + m[1] + '">' + txt + "</a>";
+      m = /(?:^|\/)lessons\/([a-z]+)\/(\d+)\.md$/.exec(url);
+      if (m) return '<a href="#l-' + m[1] + "-" + m[2] + '">' + txt + "</a>";
       if (!/^https?:/.test(url)) url = PLAN.repo + "study/daily/" + url;
       return '<a href="' + url + '" target="_blank" rel="noopener">' + txt + "</a>";
     });
@@ -3198,17 +3438,42 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     closeList();
     return out.join("\n");
   }
-  function lessonHTML(date) {
-    var md = lessonMd(date), c = LESSON[date] || {}, STUDY = curStudy(), days = Object.keys(STUDY.days).filter(function (d) { return STUDY.days[d].file; }).sort();
+  function lessonHTML(key) {
+    var md = lessonMd(key), c = LESSON[key] || {}, STUDY = curStudy();
+    var cm = /^([a-z]+)-(\d+)$/.exec(key);
+    if (cm) {
+      /* 按课的讲义：上一课、下一课、课程页 */
+      var subj = cm[1], i = +cm[2] - 1, list = lessonList(subj), nx = STUDY.next[subj] || 0, iss = issuedN(subj);
+      var stt = i < nx ? ["done", "已学完"] : i === nx ? ["cur", "下一课"] : ["todo", "还没到"];
+      var ln = M && lineOfSubj(subj), col = ln ? ln.color : LINE_COLOR[subj] || "--ln-rev";
+      var lnav = '<nav class="lnav">' + (i > 0 ? '<a class="btn ghost small" href="#l-' + lessonKey(subj, i - 1) + '">← 第 ' + i + " 课</a>" : "<span></span>") +
+        '<a class="btn ghost small" href="#c-' + subj + '">' + esc(subjName(subj)) + " 全部课程</a>" +
+        (i + 1 < iss ? '<a class="btn ghost small" href="#l-' + lessonKey(subj, i + 1) + '">第 ' + (i + 2) + " 课 →</a>" : "<span></span>") + "</nav>";
+      var file = "study/lessons/" + subj + "/" + pad2(i + 1) + ".md", gh = PLAN.repo + file;
+      var body0 = md ? '<article class="md">' + mdHTML(md) + "</article>"
+        : c.loading ? '<p class="empty-line">讲义加载中……</p>'
+        : '<p class="empty-line">这一课的讲义还没写。排到这一课的那天早上 ' + PLAN.push + "（" + PLAN.tz + "）会写好。</p>";
+      return '<div class="view lesson"><p class="eyebrow"><a href="#c-' + subj + '"><b class="lbadge" style="--c:var(' + col + ')">' + esc(subjName(subj)) + "</b></a> · 第 " + (i + 1) + " / " + list.length + ' 课 · <span class="lst ' + stt[0] + '">' + stt[1] + "</span></p>" +
+        lnav + body0 + lnav + (md ? '<p class="meta src">原文件：<a href="' + gh + '" target="_blank" rel="noopener">' + file + "</a></p>" : "") + "</div>";
+    }
+    var date = key, days = Object.keys(STUDY.days).filter(function (d) { return STUDY.days[d].file; }).sort();
     var k = days.indexOf(date), prev = k > 0 ? days[k - 1] : "", next = k >= 0 && k < days.length - 1 ? days[k + 1] : "";
     var nav = '<nav class="lnav">' + (prev ? '<a class="btn ghost small" href="#l-' + prev + '">← ' + prev + "</a>" : "<span></span>") +
       '<a class="btn ghost small" href="#plan">课表</a>' + (next ? '<a class="btn ghost small" href="#l-' + next + '">' + next + " →</a>" : "<span></span>") + "</nav>";
-    var gh = PLAN.repo + "study/daily/" + date + ".md";
+    var gh2 = PLAN.repo + "study/daily/" + date + ".md";
+    var rec = STUDY.days[date], cards = "";
+    if (rec && rec.planned && rec.planned.length && date !== PLAN.prep) {
+      cards = '<div class="lcards">' + rec.planned.map(function (s) {
+        var ok = (rec.done || []).indexOf(s.subj) >= 0, col2 = LINE_COLOR[s.subj] || "--ln-rev";
+        return '<a class="lcard' + (ok ? " ok" : "") + '" href="' + slotHref(s) + '" style="--c:var(' + col2 + ')"><span class="lc-top"><b class="lbadge' + (DARK_INK[s.subj] ? " dk" : "") + '">' + esc(subjName(s.subj)) + '</b><span class="lc-min">' + (ok ? "✓ " : "") + s.mins + "′</span></span>" +
+          '<span class="lc-t">' + esc(s.title || "") + '</span><span class="lc-go">' + (s.subj === "film" ? "打开跟读播放器" : s.review ? "本周复习" : "打开讲义") + " →</span></a>";
+      }).join("") + "</div>";
+    }
     var body = md ? '<article class="md">' + mdHTML(md) + "</article>"
-      : c.loading ? '<p class="empty-line">讲义加载中……</p>'
-      : '<p class="empty-line">研习录里还没有这天的讲义。可以先看 <a href="' + gh + '" target="_blank" rel="noopener">GitHub 上的版本</a>。</p>';
-    return '<div class="view lesson"><p class="eyebrow"><a href="#plan">每日课表</a> · 讲义</p>' + nav + body + nav +
-      '<p class="meta src">原文件：<a href="' + gh + '" target="_blank" rel="noopener">study/daily/' + date + ".md</a></p></div>";
+      : c.loading ? '<p class="empty-line">路线单加载中……</p>'
+      : '<p class="empty-line">研习录里还没有这天的路线单。可以先看 <a href="' + gh2 + '" target="_blank" rel="noopener">GitHub 上的版本</a>。</p>';
+    return '<div class="view lesson"><p class="eyebrow"><a href="#plan">每日课表</a> · ' + (date === PLAN.prep ? "讲义" : "路线单") + "</p>" + nav + cards + body + nav +
+      '<p class="meta src">原文件：<a href="' + gh2 + '" target="_blank" rel="noopener">study/daily/' + date + ".md</a></p></div>";
   }
   function planBadge() {
     var t = bjToday(), w = weekNo(t);
@@ -3221,7 +3486,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var planned = rec && rec.planned ? rec.planned : day.slots, done = (rec && rec.done) || [];
     return '<ul class="slots">' + planned.map(function (s) {
       var ok = done.indexOf(s.subj) >= 0;
-      return '<li class="' + (ok ? "ok" : "") + '"><span class="subj">' + esc((PLAN.subjects[s.subj] || {}).name || s.subj) + "</span><div><b>" + esc(s.title || "") + "</b></div>" +
+      return '<li class="' + (ok ? "ok" : "") + '"><span class="subj">' + esc((PLAN.subjects[s.subj] || {}).name || s.subj) + '</span><div><a class="slot-a" href="' + slotHref(s) + '"><b>' + esc(s.title || "") + "</b></a></div>" +
         '<span class="mins">' + (ok ? "✓ " : "") + s.mins + " 分钟</span></li>";
     }).join("") + "</ul>";
   }
@@ -3233,7 +3498,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var total = day.prep ? 60 : day.slots.reduce(function (a, s) { return a + s.mins; }, 0);
     return '<section class="today" aria-labelledby="today-h"><p class="eyebrow">今天 · ' + t + " " + WD[day.wd] + (day.prep ? " · 准备日" : " · 第" + weekNo(t) + "周") + "</p>" +
       '<h2 id="today-h"><a href="#plan">今天的课</a><span class="tot">' + total + " 分钟</span></h2>" + slotRows(day, rec) +
-      '<div class="btns">' + (rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">打开今天的讲义</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>") +
+      '<div class="btns">' + (rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">今天的路线单</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>") +
       '<a class="btn ghost" href="#plan">看整张课表</a></div></section>';
   }
   function planHTML() {
@@ -3241,15 +3506,15 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var t = bjToday(), days = Object.keys(STUDY.days).sort().reverse();
     var learned = days.filter(function (d) { var s = STUDY.days[d].status; return s === "done" || s === "partial"; });
     var mins = learned.reduce(function (a, d) { return a + (Number(STUDY.days[d].minutes) || 0); }, 0);
-    var subjOrder = ["sql", "py", "cfa", "geo", "rev"];
+    var subjOrder = COURSES;
     var prog = subjOrder.map(function (k) {
-      var list = lessonList(k), i = Math.min(STUDY.next[k] || 0, list.length), pct = list.length ? Math.round(i / list.length * 100) : 0;
-      return '<a class="trow" href="#ls-' + k + '"><span class="tname">' + esc(PLAN.subjects[k].name) + '</span><span class="tgoal">' + (i < list.length ? "下一课：" + esc(list[i].title) : "本阶段已学完") + "</span>" +
-        '<span class="tprog"><span class="bar"><span style="width:' + pct + '%"></span></span><span>' + i + " / " + list.length + " 课</span></span></a>";
+      var list = lessonList(k), i = Math.min(STUDY.next[k] || 0, list.length), pct = list.length ? Math.round(i / list.length * 100) : 0, unit = k === "film" ? " 段" : " 课";
+      return '<a class="trow" href="#c-' + k + '"><span class="tname">' + esc(PLAN.subjects[k].name) + '</span><span class="tgoal">' + (i < list.length ? (k === "film" ? "下一段：" : "下一课：") + esc(list[i].title) + (!sinceOk(k, t) ? "（" + cnDate(PLAN.since[k]) + "开始）" : "") : "本阶段已学完") + "</span>" +
+        '<span class="tprog"><span class="bar"><span style="width:' + pct + '%"></span></span><span>' + i + " / " + list.length + unit + "</span></span></a>";
     }).join("");
     var wk = [1, 2, 3, 4, 5, 6, 0].map(function (wd) {
       var sl = PLAN.week[wd], tot = sl.reduce(function (a, x) { return a + x[1]; }, 0);
-      return "<tr><th scope=\"row\">" + WD[wd] + "</th><td>" + sl.map(function (x) { return esc(PLAN.subjects[x[0]].name) + " " + x[1]; }).join(" · ") + '</td><td class="num">' + tot + "</td></tr>";
+      return "<tr><th scope=\"row\">" + WD[wd] + "</th><td>" + sl.map(function (x) { return esc(PLAN.subjects[x[0]].name) + " " + x[1] + (x[2] === "review" ? "（复习）" : ""); }).join(" · ") + '</td><td class="num">' + tot + "</td></tr>";
     }).join("");
     var log = days.length ? '<ul class="jlist">' + days.map(function (d) {
       var r = STUDY.days[d], st = r.status || "pushed";
@@ -3258,19 +3523,13 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
         (r.minutes ? '<span class="jmin">' + esc(r.minutes) + " 分钟</span>" : "") + (r.file ? '<a href="' + esc(lessonHref(r.file)) + '">讲义</a>' : "") + "</div>" +
         (names.length ? '<p class="jtext">完成：' + esc(names.join("、")) + "</p>" : "") + (r.note ? '<p class="jtext">' + esc(r.note) + "</p>" : "") + "</div></li>";
     }).join("") + "</ul>" : '<p class="empty-line">还没有打卡记录。第一份讲义 ' + PLAN.prep + " 早上推送。</p>";
-    var seq = subjOrder.map(function (k) {
-      var list = lessonList(k), i = STUDY.next[k] || 0;
-      return '<details class="lsq" id="ls-' + k + '"><summary><b>' + esc(PLAN.subjects[k].name) + '</b><span class="meta">' + list.length + " 课 · 已学 " + Math.min(i, list.length) + "</span></summary>" +
-        '<p class="why">' + esc(PLAN.subjects[k].why) + "</p><ol>" + list.map(function (x, j) { return '<li class="' + (j < i ? "ok" : j === i ? "cur" : "") + '">' + esc(x.title) + "</li>"; }).join("") + "</ol></details>";
-    }).join("") + '<details class="lsq"><summary><b>英语</b><span class="meta">每天 20 分钟</span></summary><p class="why">' + esc(PLAN.subjects.en.why) + "</p></details>";
     return '<div class="view">' + '<header><p class="eyebrow">每日 · ' + esc(PLAN.phase) + "</p><h1>每日课表</h1>" +
-      '<p class="lede">' + PLAN.weeks + " 周，" + PLAN.start + " 开课，每天 1.5–2 小时。每天早上 " + PLAN.push + "（" + PLAN.tz + "）推送当天讲义，晚上 " + PLAN.checkin + " 打卡。没学完的课下次接着学，不跳过。</p>" +
+      '<p class="lede">' + PLAN.weeks + " 周，" + PLAN.start + " 开课。每天先走电影线（90 分钟），再学两门课。讲义一课一个文件，每天早上 " + PLAN.push + "（" + PLAN.tz + "）推送当天的路线单，晚上 " + PLAN.checkin + " 打卡。没学完的课下次接着学，不跳过。</p>" +
       '<div class="stats"><span><b>' + (weekNo(t) || 0) + "</b>/ " + PLAN.weeks + ' 周</span><span><b>' + learned.length + '</b>天已打卡</span><span><b>' + (STUDY.streak || 0) + '</b>天连续</span><span><b>' + (Math.round(mins / 6) / 10) + "</b>小时累计</span></div></header>" +
       todayBlockHTML() +
       '<section><h2>各科进度</h2><div class="tracks">' + prog + "</div></section>" +
       '<section><h2>一周安排</h2><table class="wk"><thead><tr><th scope="col">星期</th><th scope="col">时段（分钟）</th><th scope="col" class="num">合计</th></tr></thead><tbody>' + wk + "</tbody></table></section>" +
-      '<section><h2>打卡记录</h2>' + log + "</section>" +
-      '<section><h2>课程顺序</h2>' + seq + "</section></div>";
+      '<section><h2>打卡记录</h2>' + log + "</section></div>";
   }
 
   /* ---------- 复习 ---------- */
@@ -3312,8 +3571,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
 
   /* ---------- 线网（首页） ---------- */
   var M = window.YXL_METRO || null;
-  var LINE_COLOR = { en: "--ln-en", sql: "--ln-sql", py: "--ln-py", cfa: "--ln-cfa", geo: "--ln-geo", rev: "--ln-rev", prep: "--ln-rev", tao: "--ln-tao", mm: "--ln-mm" };
-  var DARK_INK = { en: 1, mm: 1 };
+  var LINE_COLOR = { film: "--ln-en", en: "--ln-en", sql: "--ln-sql", py: "--ln-py", cfa: "--ln-cfa", geo: "--ln-geo", rev: "--ln-rev", prep: "--ln-rev", tao: "--ln-tao", mm: "--ln-mm" };
+  var DARK_INK = { film: 1, en: 1, mm: 1 };
   var MCACHE = {};
   function subjName(s) { return s === "prep" ? "准备日" : ((PLAN && PLAN.subjects[s]) || {}).name || s; }
   function lineById(id) { return M.lines.filter(function (l) { return l.id === id; })[0]; }
@@ -3321,7 +3580,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function addDaysBJ(d, n) { return new Date(utcDay(d) + n * 86400000).toISOString().slice(0, 10); }
   function wdOf(d) { return new Date(utcDay(d)).getUTCDay(); }
   function cnDate(d) { return +d.slice(5, 7) + "月" + +d.slice(8, 10) + "日"; }
-  function onDay(subj, d) { return (PLAN.week[wdOf(d)] || []).some(function (x) { return x[0] === subj; }); }
+  /* 这一天这一科要不要往前走一站（复习时段、还没开始的科目都不算） */
+  function onDay(subj, d) { return sinceOk(subj, d) && (PLAN.week[wdOf(d)] || []).some(function (x) { return x[0] === subj && x[2] !== "review"; }); }
   function plannedBy(subj, d) { var n = 0, k = dayDiff(PLAN.start, d); for (var i = 0; i < k; i++) if (onDay(subj, addDaysBJ(PLAN.start, i))) n++; return n; }
   function checkedIn(rec) { return !!(rec && rec.status && rec.status !== "pushed"); }
   /* 晚点（正数）/ 早到（负数）几站：按时刻表到今天该走完几站，减去实际走完几站 */
@@ -3400,10 +3660,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (!S.metroMode) { try { S.metroMode = localStorage.getItem("yanxilu-route-" + bjToday()) || "std"; } catch (e) { S.metroMode = "std"; } }
     return S.metroMode;
   }
-  /* 保底：只走英语一站；标准：时刻表；加开：再多走一站，优先补晚点最多的线 */
+  /* 保底：只走电影一站；标准：时刻表；加开：再多走一站，优先补晚点最多的线 */
   function routeFor(ti, mode) {
     var slots = ti.slots;
-    if (mode === "min") { var en = slots.filter(function (s) { return s.subj === "en"; }); return { stops: en.length ? en : slots.slice(0, 1) }; }
+    if (mode === "min") { var fm = slots.filter(function (s) { return s.subj === "film" || s.subj === "en"; }); return { stops: fm.length ? fm : slots.slice(0, 1) }; }
     if (mode !== "plus") return { stops: slots };
     function mk(subj, ahead) {
       var list = lessonList(subj), i = (curStudy().next[subj] || 0) + ahead;
@@ -3416,14 +3676,15 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       var ex = mk(s, inToday ? 1 : 0);
       if (ex && (!inToday || late[k].d > 1)) return { stops: slots.concat([ex]), catchUp: { subj: s, d: late[k].d } };
     }
-    var base = slots.filter(function (x) { return x.subj !== "en" && PLAN.lessons[x.subj]; })[0], ex2 = base ? mk(base.subj, 1) : null;
+    var base = slots.filter(function (x) { return x.subj !== "en" && x.subj !== "film" && PLAN.lessons[x.subj]; })[0], ex2 = base ? mk(base.subj, 1) : null;
     return { stops: ex2 ? slots.concat([ex2]) : slots };
   }
 
   function stopSeq(s) {
     if (s.subj === "en") return "跟着 CFA 主题";
+    if (s.review) return "复习，不推进";
     if (!PLAN.lessons[s.subj]) return "";
-    return "第 " + ((s.index || 0) + 1) + " / " + (s.total || lessonList(s.subj).length) + " 站";
+    return "第 " + ((s.index || 0) + 1) + " / " + (s.total || lessonList(s.subj).length) + (s.subj === "film" ? " 段" : " 站");
   }
   function todayStripHTML(ti) {
     var mode = metroMode(), r = routeFor(ti, mode), stops = r.stops, t = ti.t, rec = ti.rec, day = ti.day;
@@ -3438,14 +3699,14 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     var route = stops.map(function (s) {
       var c = LINE_COLOR[s.subj] || "--ln-rev";
-      return '<div class="stp' + (s.extra ? " extra" : "") + '" style="--c:var(' + c + ');flex-grow:' + (s.mins || 20) + '"><span class="stp-dot" aria-hidden="true"></span><span class="stp-bar" aria-hidden="true"></span>' +
-        '<div class="stp-tx"><span class="stp-tag"><b class="lbadge' + (DARK_INK[s.subj] ? " dk" : "") + '">' + esc(subjName(s.subj)) + (s.extra ? " · 加开" : "") + '</b><span class="stp-min">' + (s.mins || "") + "′</span></span>" +
-        '<span class="stp-title">' + esc(s.title || "") + '</span><span class="stp-seq">' + esc(stopSeq(s)) + "</span></div></div>";
+      return '<a class="stp' + (s.extra ? " extra" : "") + '" href="' + slotHref(s) + '" style="--c:var(' + c + ');flex-grow:' + (s.mins || 20) + '"><span class="stp-dot" aria-hidden="true"></span><span class="stp-bar" aria-hidden="true"></span>' +
+        '<span class="stp-tx"><span class="stp-tag"><b class="lbadge' + (DARK_INK[s.subj] ? " dk" : "") + '">' + esc(subjName(s.subj)) + (s.extra ? " · 加开" : "") + '</b><span class="stp-min">' + (s.mins || "") + "′</span></span>" +
+        '<span class="stp-title">' + esc(s.title || "") + '</span><span class="stp-seq">' + esc(stopSeq(s)) + (s.subj === "film" ? " · 跟读播放器" : s.lesson || (PLAN.lessons[s.subj] && isWritten(s.subj)) ? " · 讲义" : "") + "</span></span></a>";
     }).join("") + '<div class="stp end"><span class="stp-dot" aria-hidden="true"></span><div class="stp-tx"><span class="stp-min">' + PLAN.checkin + '</span><span class="stp-title">终点 · 报站</span></div></div>';
-    var note = mode === "min" ? "时间不够或状态不好就选它，走一站就算没停运。其余几站下次接着走，不会堆成欠账。"
+    var note = mode === "min" ? "时间不够就只走电影这一站，走一站就算没停运。其余几站下次接着走，不会堆成欠账。"
       : mode === "plus" ? (r.catchUp ? subjName(r.catchUp.subj) + "线晚点 " + r.catchUp.d + " 站，多走这一站正好补上。" : "多走一站。早到不改时刻表，下次从再下一站开始。")
       : "按时刻表走。哪一站没走完，下次从这一站接着走。";
-    var btn = rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">打开今天的讲义</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>";
+    var btn = rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">今天的路线单</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>";
     var y = addDaysBJ(t, -1), yr = curStudy().days[y], warn = "";
     if (yr && !checkedIn(yr)) warn = '<p class="ts-warn"><b>' + cnDate(y) + "还没报站。</b>按没学处理，那几站下次接着走；其实学了的话，晚上报站时一起说，位置就会更新。</p>";
     return '<section class="tstrip" aria-labelledby="ts-h">' + head + '<div class="ts-route">' + route + "</div>" +
@@ -3466,7 +3727,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       h.push(z.track && TRACK[z.track] ? '<a href="#t-' + z.track + '" class="mzone">' + lab + "</a>" : lab);
     });
     /* 图例 */
-    h.push('<g class="mlg"><rect x="40" y="40" width="470" height="236" rx="14" style="fill:var(--map-bg);stroke:var(--rule)"/>' +
+    h.push('<g class="mlg" transform="translate(0 130)"><rect x="40" y="40" width="470" height="236" rx="14" style="fill:var(--map-bg);stroke:var(--rule)"/>' +
       '<text x="58" y="70" class="h">图例</text>' +
       '<path d="M58 100 L98 100" style="stroke:var(--ln-sql);stroke-width:6;stroke-linecap:round"/><circle cx="72" cy="100" r="4.6" style="fill:var(--map-bg);stroke:var(--ln-sql);stroke-width:2.4"/><circle cx="88" cy="100" r="4.6" style="fill:var(--ln-sql);stroke:var(--map-bg);stroke-width:1.6"/>' +
       '<text x="112" y="104">一条线是一门课或一本书；空心站未到，实心站已学完</text>' +
@@ -3478,11 +3739,12 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     /* 线路与站 */
     var overlay = [];
     M.lines.forEach(function (ln) {
-      var col = "var(" + ln.color + ")", w = (ln.r || 4) * 2, isToday = ln.id === "en" || !!todaySub[ln.subj];
+      var col = "var(" + ln.color + ")", w = (ln.r || 4) * 2, isToday = !!todaySub[ln.subj];
       h.push('<g class="mline' + (isToday ? " is-today" : "") + '" data-l="' + ln.id + '">');
       h.push('<path d="' + linePath(ln.pts, 16) + '" style="fill:none;stroke:' + col + ";stroke-width:" + w + ";stroke-linejoin:round;stroke-linecap:" + (ln.dash ? "butt;stroke-dasharray:10 7" : "round") + '"/>');
       if (ln.dash) h.push('<circle cx="' + ln.pts[ln.pts.length - 1][0] + '" cy="' + ln.pts[ln.pts.length - 1][1] + '" r="7" style="fill:var(--map-bg);stroke:' + col + ';stroke-width:2.5;stroke-dasharray:3 3"/>');
       var stops = lineStops(ln), xy = stationXY(ln), hubs = ln.hubs || [];
+      (ln.ticks || []).forEach(function (tk) { var p0 = xy[tk[0]]; if (p0) h.push('<text x="' + (p0[0] - 4) + '" y="' + (p0[1] + 30) + '" class="mut mtick">' + esc(tk[1]) + "</text>"); });
       stops.forEach(function (s, i) {
         var p = xy[i]; if (!p) return;
         var x = p[0], y = p[1], end = i === 0 || i === stops.length - 1;
@@ -3505,14 +3767,15 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     M.landmarks.forEach(function (lm) {
       var rp = REPORTS.filter(function (x) { return x.id === lm.report; })[0]; if (!rp) return;
       if (lm.walk) h.push('<path d="M' + lm.walk[0][0] + " " + lm.walk[0][1] + " L" + lm.walk[1][0] + " " + lm.walk[1][1] + '" style="stroke:var(--ink);stroke-width:2;stroke-dasharray:2 4;stroke-linecap:round"/>');
-      h.push('<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener" class="mlm" aria-label="地标：' + esc(rp.title) + '（新标签页打开）"><rect x="' + (lm.x - 8) + '" y="' + (lm.y - 8) + '" width="16" height="16" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3"/>' +
-        tx(lm.lx, lm.ly, rp.title, "") + (lm.sub ? tx(lm.lx, lm.ly + 17, "", lm.sub, "mut") : "") + "</a>");
+      h.push('<g class="mlm mst" data-act="mlm" data-r="' + esc(rp.id) + '" tabindex="0" role="button" aria-label="地标：' + esc(rp.title) + '"><title>地标：' + esc(rp.title) + '</title><rect class="hit" x="' + (lm.x - 12) + '" y="' + (lm.y - 12) + '" width="' + (24 + textW(rp.title) + 8) + '" height="24" style="fill:transparent;stroke:none"/><rect x="' + (lm.x - 8) + '" y="' + (lm.y - 8) + '" width="16" height="16" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3"/>' +
+        tx(lm.lx, lm.ly, rp.title, "") + (lm.sub ? tx(lm.lx, lm.ly + 17, "", lm.sub, "mut") : "") + "</g>");
     });
     /* 文字与线名牌 */
     M.labels.forEach(function (l) { h.push(tx(l.x, l.y, l.b, l.t, l.muted ? "mut" : "", l.anchor)); });
     M.badges.forEach(function (b) {
       var ln = lineById(b.line), w = textW(b.t) + 14;
-      h.push('<g class="mbdg"><rect x="' + b.x + '" y="' + b.y + '" width="' + w + '" height="19" rx="4" style="fill:var(' + ln.color + ')"/><text x="' + (b.x + 7) + '" y="' + (b.y + 14) + '" style="fill:var(' + (b.dark ? "--bdg-on-dk" : "--bdg-on") + ')">' + esc(b.t) + "</text></g>");
+      var g = '<g class="mbdg"><rect x="' + b.x + '" y="' + b.y + '" width="' + w + '" height="19" rx="4" style="fill:var(' + ln.color + ')"/><text x="' + (b.x + 7) + '" y="' + (b.y + 14) + '" style="fill:var(' + (b.dark ? "--bdg-on-dk" : "--bdg-on") + ')">' + esc(b.t) + "</text></g>";
+      h.push(ln.subj && COURSES.indexOf(ln.subj) >= 0 ? '<a href="#c-' + ln.subj + '" class="mbdg-a" aria-label="' + esc(ln.name) + ' 课程页">' + g + "</a>" : g);
     });
     /* 下一站、本周、今天 */
     overlay.forEach(function (o) {
@@ -3524,7 +3787,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       if (o.s.state === "cur" && sl && sl.index === o.i) tag = "今天";
       else if (o.s.state === "week") tag = "本周";
       var tagSvg = tag ? '<g class="mtag" aria-hidden="true"><rect x="' + (x + 9) + '" y="' + (y - 31) + '" width="34" height="18" rx="3" style="fill:' + (tag === "今天" ? "var(--ink)" : "var(--map-bg)") + ';stroke:var(--ink);stroke-width:1.5"/><text x="' + (x + 26) + '" y="' + (y - 17.5) + '" text-anchor="middle" style="fill:' + (tag === "今天" ? "var(--map-bg)" : "var(--ink)") + ';stroke:none;font-size:12px;font-weight:700">' + tag + "</text></g>" : "";
-      h.push('<g class="mst mline' + (o.ln.id === "en" || todaySub[o.ln.subj] ? " is-today" : "") + '" data-act="mst" data-l="' + o.ln.id + '" data-i="' + o.i + '" tabindex="0" role="button" aria-label="' + esc(o.label) + "（" + ({ cur: "下一站", week: "本周", free: "下一章" })[o.s.state] + (tag === "今天" ? "，今天要走" : "") + '）"><title>' + esc(o.label) + '</title><circle class="hit" cx="' + x + '" cy="' + y + '" r="14"/>' + ring + tagSvg + "</g>");
+      h.push('<g class="mst mline' + (todaySub[o.ln.subj] ? " is-today" : "") + '" data-act="mst" data-l="' + o.ln.id + '" data-i="' + o.i + '" tabindex="0" role="button" aria-label="' + esc(o.label) + "（" + ({ cur: "下一站", week: "本周", free: "下一章" })[o.s.state] + (tag === "今天" ? "，今天要走" : "") + '）"><title>' + esc(o.label) + '</title><circle class="hit" cx="' + x + '" cy="' + y + '" r="14"/>' + ring + tagSvg + "</g>");
     });
     h.push("</svg>");
     return h.join("");
@@ -3535,15 +3798,13 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     function row(id, name, color, dark, next, when, pill) {
       return '<div class="brow"><span class="bline"><b class="lbadge' + (dark ? " dk" : "") + '" style="--c:var(' + color + ')">' + esc(name) + '</b></span><span class="bnext">' + esc(next) + '</span><span class="bwhen">' + esc(when) + "</span>" + pill + "</div>";
     }
-    var en = ti.slots.filter(function (s) { return s.subj === "en"; })[0];
-    rows.push(row("en", "英语", "--ln-en", true, en ? en.title : "每天跟着当天的 CFA 主题", "每天", '<span class="pill free">每天</span>'));
     var late = [];
-    ["sql", "py", "cfa", "geo", "rev"].forEach(function (s) {
-      if (!PLAN.lessons[s]) return;
-      var list = lessonList(s), nx = STUDY.next[s] || 0, d = lineDelay(s);
+    COURSES.forEach(function (s) {
+      var list = lessonList(s), nx = STUDY.next[s] || 0, d = lineDelay(s), fresh = !sinceOk(s, ti.t);
       if (d > 0) late.push({ s: s, d: d });
-      var pill = d > 0 ? '<span class="pill late">晚点 ' + d + " 站</span>" : d < 0 ? '<span class="pill early">早到 ' + -d + " 站</span>" : '<span class="pill">正点</span>';
-      rows.push(row(s, subjName(s), LINE_COLOR[s], false, nx < list.length ? "第 " + (nx + 1) + " 站 · " + list[nx].title : "本阶段已走完", nextWhen(s), pill));
+      var pill = fresh ? '<span class="pill free">' + cnDate(PLAN.since[s]) + "开始</span>" : d > 0 ? '<span class="pill late">晚点 ' + d + " 站</span>" : d < 0 ? '<span class="pill early">早到 ' + -d + " 站</span>" : '<span class="pill">正点</span>';
+      var unit = s === "film" ? " 段" : " 站";
+      rows.push('<a class="brow-a" href="#c-' + s + '">' + row(s, subjName(s), LINE_COLOR[s], !!DARK_INK[s], nx < list.length ? (s === "film" ? list[nx].title + " · 跟读" : "第 " + (nx + 1) + unit + " · " + list[nx].title) : "本阶段已走完", fresh ? "" : nextWhen(s), pill) + "</a>");
     });
     var wk = mmWeek();
     rows.push(row("mm", "做市商研习", "--ln-mm", true, "第 " + (wk + 1) + " 周 · " + M.mmWeeks[wk], "本周", '<span class="pill free">按周走</span>'));
@@ -3561,13 +3822,13 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function landmarkPanel() {
     var lineReports = M.lines.map(function (l) { return l.report; }).filter(Boolean);
     var list = REPORTS.filter(function (rp) { return lineReports.indexOf(rp.id) < 0; });
-    return '<section class="panel" aria-labelledby="lm-h"><h2 id="lm-h">地标</h2><p class="meta" style="margin-top:6px">讨论和查到的资料，随时去看，不算进度。以后讨论完说一句“放进研习录”，就多一个地标。</p><div class="lmk-list">' +
-      list.map(function (rp) { return '<a class="lmk" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span class="lmk-sq" aria-hidden="true"></span><span class="lmk-t">' + esc(rp.title) + ' <span aria-hidden="true">↗</span></span><span class="lmk-d">' + esc(rp.desc) + "</span></a>"; }).join("") + "</div></section>";
+    return '<section class="panel" aria-labelledby="lm-h"><h2 id="lm-h">地标</h2><p class="meta" style="margin-top:6px">讨论和查到的资料，放在它所属的方向里，不算进度。以后讨论完说一句“放进研习录”，就多一个地标。全部见<a href="#shelf">书架 · 研究档案</a>。</p><div class="lmk-list">' +
+      list.map(function (rp) { return '<a class="lmk" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span class="lmk-sq" aria-hidden="true"></span><span class="lmk-t">' + esc(rp.title) + ' <span aria-hidden="true">↗</span></span><span class="lmk-d">' + esc(rp.desc) + "</span>" + reportRel(rp, false) + "</a>"; }).join("") + "</div></section>";
   }
   function homeHTML() {
     if (!M || !PLAN) return shelfHTML();
     var ti = todayInfo();
-    var nLines = M.lines.filter(function (l) { return l.src || l.id === "en"; }).length;
+    var nLines = M.lines.filter(function (l) { return l.src; }).length;
     return '<div class="view home">' + bannerHTML() + todayStripHTML(ti) +
       '<section class="mwrap" aria-labelledby="mw-h"><div class="mhead"><div><h2 id="mw-h">线网图</h2><p class="meta">' + esc(PLAN.phase) + " · " + nLines + " 条线 · " + M.hubs.length + " 个换乘站 · " + M.landmarks.length + ' 个地标</p></div>' +
       '<button type="button" class="chipbtn" data-act="metro-today" aria-pressed="' + !!S.metroToday + '">只看今天的线</button></div>' +
@@ -3576,29 +3837,29 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<div class="hgrid">' + boardHTML(ti) + landmarkPanel() + "</div>" +
       '<details class="rules"><summary>运行规则</summary><ol>' +
       "<li>位置只看“学完”，不看日期。哪一站没走完，下次接着走，不会堆成欠账。</li>" +
-      "<li>每天出发前选今天坐多远：保底只走英语一站，标准按时刻表走，加开多走一站。</li>" +
+      "<li>每天出发前选今天坐多远：保底只走电影一站，标准按时刻表走，加开多走一站。</li>" +
+      "<li>电影线每天一段，周日把本周 6 段连起来复习，不往前走。</li>" +
       "<li>每条线跟时刻表比，显示正点、晚点或早到。晚点 1–2 站，找一天加开补上。</li>" +
       "<li>晚点 3 站以上，周日复盘时三选一：坐快车（只走每课的必经部分），顺延这条线的终点，或者暂停一条线一周。</li>" +
       "<li>早到了，可以接着往前，也可以换乘自由线去读书。时刻表不变。</li>" +
       "<li>晚上 9 点报站。没报站，位置原地不动，不算失败。</li></ol></details></div>";
   }
   /* 站点详情 */
-  function latestLesson(subj, i) {
-    var STUDY = curStudy(), best = "";
-    Object.keys(STUDY.days).forEach(function (d) { var r = STUDY.days[d]; if (r.file && (r.planned || []).some(function (p) { return p.subj === subj && p.index === i; }) && d > best) best = d; });
-    return best;
-  }
   function stationPopHTML(lid, i) {
     var ln = lineById(lid), stops = lineStops(ln), s = stops[i]; if (!s) return "";
     var stTxt = { done: "已学完", cur: "下一站", todo: "还没到", free: "下一章 · 自由线，想读就读", week: "本周这一站" }[s.state];
     var sl = todayInfo().slots.filter(function (x) { return x.subj === ln.subj; })[0];
     if (s.state === "cur" && sl && sl.index === i) stTxt += " · 今天要走";
-    var links = [];
-    if (ln.subj && PLAN.lessons[ln.subj]) {
-      var d = latestLesson(ln.subj, i);
-      if (d) links.push('<a class="btn small" href="#l-' + d + '">打开讲义（' + cnDate(d) + "）</a>");
-      links.push('<a class="btn small ghost" href="#plan">在课表里看</a>');
+    var links = [], extra = "";
+    if (ln.subj === "film") {
+      links.push('<a class="btn small" href="#c-film" data-act="film-go" data-seg="' + i + '">在跟读播放器里打开</a>');
+    } else if (ln.subj && PLAN.lessons[ln.subj]) {
+      if (isWritten(ln.subj) && i < issuedN(ln.subj)) links.push('<a class="btn small" href="#l-' + lessonKey(ln.subj, i) + '">打开讲义</a>');
+      else if (isWritten(ln.subj)) extra = '<p class="mp-s">讲义在排到这一课的那天早上写好。</p>';
+      links.push('<a class="btn small ghost" href="#c-' + ln.subj + '">' + esc(subjName(ln.subj)) + " 全部课程</a>");
     }
+    var uses = usesAt(ln.subj, i);
+    if (uses.length) extra += '<ul class="mp-uses">' + uses.map(function (x) { return '<li><a href="' + esc(reportHref(x.rp)) + '" target="_blank" rel="noopener"><b>可用资料</b>' + esc(x.rp.title) + " ↗</a>" + (x.u[2] ? '<span class="meta">' + esc(x.u[2]) + "</span>" : "") + "</li>"; }).join("") + "</ul>";
     if (ln.id === "geo" && i < 20) {
       var ch = Math.floor(i / 2) + 1, tb = LIB.books.tragedy;
       links.push(tb.deep && tb.deep[ch] ? '<a class="btn small ghost" href="#r-tragedy-' + ch + '">第' + CN[ch] + "章精读稿</a>" : '<button type="button" class="btn small ghost" data-act="open-ch" data-book="tragedy" data-n="' + ch + '">第' + CN[ch] + "章导读</button>");
@@ -3610,7 +3871,21 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     if (ln.report) { var rp = REPORTS.filter(function (x) { return x.id === ln.report; })[0]; if (rp) links.push('<a class="btn small ghost" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开研习计划 ↗</a>'); }
     return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b class="lbadge' + (DARK_INK[ln.id] ? " dk" : "") + '" style="--c:var(' + ln.color + ')">' + esc(ln.name) + '</b><span class="mp-pos">第 ' + (i + 1) + " / " + stops.length + ' 站</span></div>' +
-      '<p class="mp-t">' + esc(s.title) + '</p><p class="mp-s">' + esc(stTxt) + "</p>" + (links.length ? '<div class="btns">' + links.join("") + "</div>" : "");
+      '<p class="mp-t">' + esc(s.title) + '</p><p class="mp-s">' + esc(stTxt) + "</p>" + extra + (links.length ? '<div class="btns">' + links.join("") + "</div>" : "");
+  }
+  /* 哪些研究资料能用在某一课上 */
+  function usesAt(subj, i) {
+    var out = [];
+    REPORTS.forEach(function (rp) { (rp.uses || []).forEach(function (u) { if (u[0] === subj && u[1] === i) out.push({ rp: rp, u: u }); }); });
+    return out;
+  }
+  function landmarkPopHTML(rid) {
+    var rp = REPORTS.filter(function (x) { return x.id === rid; })[0]; if (!rp) return "";
+    var tr = (rp.tracks || []).map(function (x) { return TRACK[x] ? '<a href="#t-' + x + '">' + esc(TRACK[x].short) + "</a>" : ""; }).filter(Boolean).join("、");
+    return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b>地标 · ' + esc(rp.title) + '</b></div>' +
+      (rp.question ? '<p class="mp-t" style="font-size:15px">' + esc(rp.question) + "</p>" : "") + '<p class="mp-s">' + esc(rp.desc) + "</p>" +
+      '<div class="mp-rel">' + (tr ? '<span class="rrel"><b>归属</b>' + tr + "</span>" : "") + reportRel(rp, false) + "</div>" +
+      '<div class="btns"><a class="btn small" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开专题 ↗</a></div>';
   }
   function hubPopHTML(k) {
     var hb = M.hubs[k];
@@ -3631,16 +3906,374 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function closePop() { var pop = document.getElementById("mpop"); if (pop && !pop.hidden) { pop.hidden = true; pop.innerHTML = ""; } }
   function openStation(lid, i) { var ln = lineById(lid), p = ln && stationXY(ln)[i]; if (p) openPop(stationPopHTML(lid, i), p[0], p[1]); }
   function openHub(k) { var hb = M.hubs[k]; if (hb) openPop(hubPopHTML(k), hb.x, hb.y); }
+  function openLandmark(rid) { var lm = M.landmarks.filter(function (x) { return x.report === rid; })[0]; if (lm) openPop(landmarkPopHTML(rid), lm.x, lm.y); }
+
+  /* ---------- 课程页：一条线一个页面 ---------- */
+  function courseHTML(subj) {
+    var STUDY = curStudy(), list = lessonList(subj), nx = Math.min(STUDY.next[subj] || 0, list.length), t = bjToday();
+    var ln = M && lineOfSubj(subj), col = ln ? ln.color : LINE_COLOR[subj] || "--ln-rev", info = PLAN.subjects[subj] || {};
+    var d = lineDelay(subj), fresh = !sinceOk(subj, t), film = subj === "film";
+    var pill = fresh ? '<span class="pill free">' + cnDate(PLAN.since[subj]) + "开始</span>" : d > 0 ? '<span class="pill late">晚点 ' + d + " 站</span>" : d < 0 ? '<span class="pill early">早到 ' + -d + " 站</span>" : '<span class="pill">正点</span>';
+    var unit = film ? "段" : "课";
+    var head = '<header><p class="eyebrow"><a href="#plan">每日课表</a> · 课程</p><h1 class="ctitle"><span class="cbar" style="--c:var(' + col + ')" aria-hidden="true"></span>' + esc(info.name || subj) + (film ? "《" + esc(info.film) + "》" : "") + "</h1>" +
+      '<p class="lede">' + esc(info.why || "") + "</p>" +
+      '<div class="stats"><span><b>' + nx + "</b>/ " + list.length + " " + unit + "已学</span>" + pill + (fresh ? "" : '<span>下次：' + esc(nextWhen(subj) || "—") + "</span>") + "</div></header>";
+    if (film) return '<div class="view wide course">' + bannerHTML() + head + '<div id="film-slot"></div>' + filmSegsHTML() + filmNotesHTML() + "</div>";
+    var iss = issuedN(subj), cur = nx < list.length ? list[nx] : null;
+    var now = cur ? '<section class="cnow" style="--c:var(' + col + ')"><p class="eyebrow">下一课 · 第 ' + (nx + 1) + " / " + list.length + " 课</p><h2>" + esc(cur.title) + "</h2>" +
+      (isWritten(subj) && nx < iss ? '<div class="btns"><a class="btn" href="#l-' + lessonKey(subj, nx) + '">打开讲义</a></div>' : '<p class="meta">讲义在排到这一课的那天早上 ' + PLAN.push + " 写好。下次上这门课：" + esc(nextWhen(subj) || "—") + "。</p>") + "</section>"
+      : '<section class="cnow"><h2>本阶段已学完</h2></section>';
+    var rows = [], lastCode = "";
+    list.forEach(function (x, i) {
+      if (x.code && x.code !== lastCode) { lastCode = x.code; rows.push('<li class="cmod">' + esc(x.code) + " · " + esc(x.title.replace(/^\S+\s/, "").replace(/（\d+\/\d+）$/, "")) + (x.en ? '<span class="meta">' + esc(x.en) + "</span>" : "") + "</li>"); }
+      var stt = i < nx ? ["done", "学完"] : i === nx ? ["cur", "下一课"] : ["todo", ""];
+      var open = isWritten(subj) && i < iss, uses = usesAt(subj, i);
+      var hubs = (M ? M.hubs : []).filter(function (hb) { return hb.at.some(function (a) { return ln && a[0] === ln.id && a[1] === i; }); });
+      rows.push('<li class="crow ' + stt[0] + '"><span class="cnum">' + pad2(i + 1) + "</span>" + (open ? '<a class="ct" href="#l-' + lessonKey(subj, i) + '">' + esc(x.title) + "</a>" : '<span class="ct">' + esc(x.title) + "</span>") +
+        '<span class="cs">' + (stt[1] ? '<span class="lst ' + stt[0] + '">' + stt[1] + "</span>" : "") + (hubs.length ? '<span class="ctag">换乘 · ' + esc(hubs.map(function (h) { return h.name; }).join("、")) + "</span>" : "") +
+        (uses.length ? '<span class="ctag">资料 · ' + esc(uses.map(function (u) { return u.rp.title; }).join("、")) + "</span>" : "") + "</span></li>");
+    });
+    var hubList = (M && ln ? M.hubs : []).filter(function (hb) { return hb.at.some(function (a) { return a[0] === ln.id; }); });
+    var hubSec = hubList.length ? '<section><h2>换乘站</h2><ul class="clinks">' + hubList.map(function (hb) { return "<li><b>" + esc(hb.name) + "</b>" + esc(hb.sub) + "</li>"; }).join("") + "</ul></section>" : "";
+    var useSec = [];
+    REPORTS.forEach(function (rp) { (rp.uses || []).forEach(function (u) { if (u[0] === subj) useSec.push('<li><a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><b>' + esc(rp.title) + " ↗</b></a>第 " + (u[1] + 1) + " 课用得上：" + esc(u[2] || "") + "</li>"); }); });
+    return '<div class="view course">' + bannerHTML() + head + now +
+      '<section><h2>全部课程</h2><p class="meta">讲义一课一个文件。点亮的课可以打开；没写的课，排到那天早上写好。</p><ol class="clist">' + rows.join("") + "</ol></section>" +
+      hubSec + (useSec.length ? '<section><h2>可用资料</h2><ul class="clinks">' + useSec.join("") + "</ul></section>" : "") + "</div>";
+  }
+
+  /* ---------- 电影跟读播放器 ----------
+   * 片源和字幕都是你自己的文件，只在浏览器里打开，不上传；页面只记“第几段、第几句已背熟”（序号，不存台词）。
+   * 字幕按台词数分成 36 段，切点落在附近最长的停顿上，所以每段大致是一场戏。 */
+  var FILM_SEGS = 36;
+  var FILM = { root: null, video: null, seg: null, cur: -1, shown: -2, mode: "show", speed: 1, rep: 1, gap: false,
+    cues: null, segs: null, subName: "", mediaName: "", mediaUrl: "", isAudio: false, err: "",
+    raf: 0, timer: 0, stopAt: null, left: 0, chain: false, after: null, peek: {}, explain: {}, recUrl: {}, recording: -1, noMic: false, sample: undefined };
+  var FILM_STEPS = [
+    { t: "复习旧段", m: 10, d: "前一段、三天前、七天前的那段各放一遍，不开字幕，跟着小声说。", mode: "hide", rep: 1, gap: false, old: true },
+    { t: "盲听", m: 10, d: "不开字幕把今天这段完整看两遍，只抓大意：谁、在哪、为了什么。", mode: "hide", rep: 1, gap: false, whole: true },
+    { t: "精听", m: 25, d: "开字幕逐句听。听不出的句子放慢到 0.75、每句重复 3 遍；生词和连读记下来，看不懂的点“讲”。", mode: "show", rep: 3, gap: false },
+    { t: "跟读", m: 20, d: "打开“跟读停顿”，每句播完停一下，跟着说；点“录”把自己的声音和原声对比。", mode: "show", rep: 1, gap: true },
+    { t: "背诵", m: 20, d: "字幕换成中文提示（没有中文就用首字母），再全部遮住，逐句说出来。说得出的句子点“熟”。", mode: "zh", rep: 1, gap: true },
+    { t: "回放", m: 5, d: "不开字幕把整段再看一遍，影子跟读：比原声慢半拍，一直跟着说。", mode: "hide", rep: 1, gap: false, whole: true }
+  ];
+  var FILM_REVIEW = [
+    { t: "连看", m: 30, d: "不开字幕，把本周学过的几段连起来看两遍。", mode: "hide", rep: 1, gap: false, week: true },
+    { t: "补背", m: 40, d: "逐段翻一遍，挑还没点“熟”的句子，先首字母、再遮住，说到能脱口而出。", mode: "initials", rep: 1, gap: true },
+    { t: "复述", m: 20, d: "不看画面，用英文把本周的情节讲一遍；说不出的地方用中文补上，记下来周一再练。", mode: "hide", rep: 1, gap: false }
+  ];
+  var FILM_MODES = [["show", "原文"], ["zh", "中文提示"], ["initials", "首字母"], ["hide", "遮住"]];
+
+  function tsec(x) { var p = x.replace(",", ".").split(":").map(Number); return p.length === 3 ? p[0] * 3600 + p[1] * 60 + p[2] : p[0] * 60 + p[1]; }
+  function mmss(x) { x = Math.max(0, Math.floor(x)); var h = Math.floor(x / 3600), m = Math.floor(x % 3600 / 60), s2 = x % 60; return (h ? h + ":" + pad2(m) : m) + ":" + pad2(s2); }
+  function filmParse(text) {
+    text = String(text || "").replace(/\r/g, "").replace(/^﻿/, "");
+    var re = /((?:\d+:)?\d{1,2}:\d{2}[.,]\d{1,3})\s*-->\s*((?:\d+:)?\d{1,2}:\d{2}[.,]\d{1,3})/, out = [];
+    text.split(/\n[ \t]*\n/).forEach(function (b) {
+      var lines = b.split("\n"), k = -1;
+      for (var i = 0; i < lines.length; i++) if (re.test(lines[i])) { k = i; break; }
+      if (k < 0) return;
+      var m = re.exec(lines[k]), en = [], zh = [];
+      lines.slice(k + 1).forEach(function (l) {
+        l = l.replace(/<[^>]+>/g, "").replace(/\{[^}]*\}/g, "").replace(/\\N/g, " ").trim();
+        if (l) (/[㐀-鿿]/.test(l) ? zh : en).push(l);
+      });
+      var e = en.join(" ").replace(/\[[^\]]*\]/g, "").replace(/\s+/g, " ").trim();
+      if (!/[A-Za-z]/.test(e.replace(/\([^)]*\)|♪|#/g, ""))) return;
+      out.push({ s: tsec(m[1]), e: tsec(m[2]), en: e, zh: zh.join(" ") });
+    });
+    out.sort(function (a, b) { return a.s - b.s; });
+    return out;
+  }
+  function filmSegments(cues) {
+    var n = cues.length, per = n / FILM_SEGS, w = Math.max(1, Math.floor(per * 0.3)), b = [0], k;
+    for (k = 1; k < FILM_SEGS; k++) {
+      var t = Math.round(k * per), best = Math.max(t, b[k - 1] + 1), gap = -1;
+      for (var j = Math.max(b[k - 1] + 1, t - w); j <= Math.min(n - 1, t + w); j++) { var g = cues[j].s - cues[j - 1].e; if (g > gap) { gap = g; best = j; } }
+      b.push(Math.min(best, n));
+    }
+    b.push(n);
+    var segs = [];
+    for (k = 0; k < FILM_SEGS; k++) segs.push({ a: b[k], z: Math.max(b[k], b[k + 1]) });
+    return segs;
+  }
+  function filmSetSubs(txt, name, restoring) {
+    var cues = filmParse(txt);
+    if (cues.length < FILM_SEGS * 3) { FILM.err = "字幕「" + name + "」里只读到 " + cues.length + " 句英文台词。请换一个英文字幕或中英双语字幕（.srt 或 .vtt）。"; filmPaint(); return; }
+    FILM.cues = cues; FILM.segs = filmSegments(cues); FILM.subName = name; FILM.err = ""; FILM.cur = -1; FILM.explain = {}; FILM.peek = {};
+    if (!restoring) { try { localStorage.setItem("yanxilu-film-subs", JSON.stringify({ name: name, txt: txt })); } catch (e) { /* 存不下就每次重新选 */ } }
+    filmPaint();
+  }
+  function filmLoad(files) {
+    [].forEach.call(files || [], function (f) {
+      var nm = f.name.toLowerCase();
+      if (/\.(srt|vtt|txt)$/.test(nm)) {
+        var rd = new FileReader();
+        rd.onload = function () {
+          var txt = String(rd.result);
+          if ((txt.match(/\uFFFD/g) || []).length > 20) { var r2 = new FileReader(); r2.onload = function () { filmSetSubs(String(r2.result), f.name); }; r2.readAsText(f, "gb18030"); return; }
+          filmSetSubs(txt, f.name);
+        };
+        rd.readAsText(f, "utf-8");
+      } else if (/^(video|audio)\//.test(f.type) || /\.(mp4|m4v|mov|webm|mkv|mp3|m4a|aac|wav|ogg)$/.test(nm)) {
+        if (FILM.mediaUrl) URL.revokeObjectURL(FILM.mediaUrl);
+        FILM.mediaUrl = URL.createObjectURL(f); FILM.mediaName = f.name; FILM.err = "";
+        FILM.isAudio = /^audio\//.test(f.type) || /\.(mp3|m4a|aac|wav|ogg)$/.test(nm);
+        var v = filmVideo(); v.src = FILM.mediaUrl; v.load();
+        filmPaint();
+      } else toast("认不出「" + f.name + "」：片源用 MP4 等视频或 MP3 等音频，字幕用 .srt 或 .vtt");
+    });
+  }
+  function filmVideo() {
+    if (FILM.video) return FILM.video;
+    var v = document.createElement("video");
+    v.setAttribute("playsinline", ""); v.preload = "auto";
+    v.addEventListener("error", function () { if (!FILM.mediaUrl) return; FILM.err = "这个文件播放不了。常见原因：格式浏览器不支持（MKV、AVI 先转成 MP4），或者当前页面不允许播放本地文件（换到 GitHub 公开版打开：cnyanghai.github.io/yanxilu/#c-film）。"; filmPaint(); });
+    v.addEventListener("play", function () { filmTick(); filmPlayBtn(); });
+    v.addEventListener("pause", filmPlayBtn);
+    FILM.video = v;
+    return v;
+  }
+  function filmBuild() {
+    var r = document.createElement("div");
+    r.className = "fp";
+    r.innerHTML = '<div class="fp-main"><div class="fp-screen" id="fp-screen"><div class="fp-ph" id="fp-ph"></div><div class="fp-sub" id="fp-sub"></div></div><div id="fp-panel"></div></div><div class="fp-side" id="fp-body"></div>';
+    r.querySelector("#fp-screen").insertBefore(filmVideo(), r.querySelector("#fp-sub"));
+    FILM.root = r;
+    try { var c = JSON.parse(localStorage.getItem("yanxilu-film-subs") || "null"); if (c && c.txt) filmSetSubs(c.txt, c.name, true); } catch (e) { /* 没有缓存 */ }
+  }
+  function filmMount() {
+    var slot = document.getElementById("film-slot");
+    if (!slot) { if (FILM.video && !FILM.video.paused) FILM.video.pause(); return; }
+    if (!FILM.root) filmBuild();
+    slot.appendChild(FILM.root);
+    filmPaint();
+  }
+  function filmToday() {
+    var STUDY = curStudy(), ti = PLAN ? todayInfo() : { slots: [] }, sl = ti.slots.filter(function (s) { return s.subj === "film"; })[0];
+    return { next: Math.min(STUDY.next.film || 0, FILM_SEGS - 1), review: !!(sl && sl.review), today: !!sl };
+  }
+  function filmSeg() { if (FILM.seg == null) { var td = filmToday(); FILM.seg = td.review ? Math.max(0, td.next - 1) : td.next; } return FILM.seg; }
+  function filmKnown(k) { var d2 = S.data.film && S.data.film["seg-" + pad2(k + 1)]; return (d2 && d2.known) || []; }
+  function filmText(c, mode, i) {
+    if (mode === "show" || FILM.peek[i]) return esc(c.en);
+    if (mode === "zh") return c.zh ? '<span class="fz">' + esc(c.zh) + "</span>" : filmInitials(c.en);
+    if (mode === "initials") return filmInitials(c.en);
+    return '<span class="fh">· · ·</span>';
+  }
+  function filmInitials(x) { return esc(x.replace(/[A-Za-z][A-Za-z']*/g, function (w) { return w[0] + w.slice(1).replace(/[A-Za-z']/g, "_"); })); }
+
+  function filmPaint() {
+    if (!FILM.root || !FILM.root.parentNode) return;
+    var panel = FILM.root.querySelector("#fp-panel"), body = FILM.root.querySelector("#fp-body"), screen = FILM.root.querySelector("#fp-screen"), ph = FILM.root.querySelector("#fp-ph");
+    screen.className = "fp-screen" + (!FILM.mediaUrl ? " nomedia" : FILM.isAudio ? " audio" : "");
+    ph.innerHTML = !FILM.mediaUrl ? "<b>选好片源，画面在这里</b><span>只有字幕也能先读台词</span>" : FILM.isAudio ? "<b>" + esc(FILM.mediaName) + "</b><span>音频</span>" : "";
+    var picker = '<label class="btn' + (FILM.cues && FILM.mediaUrl ? " ghost small" : "") + ' fp-pick"><input type="file" id="fp-file" multiple accept="video/*,audio/*,.srt,.vtt,.mkv,.m4v,.mov">' + (FILM.cues && FILM.mediaUrl ? "换文件" : "选择片源和字幕") + "</label>";
+    var err = FILM.err ? '<p class="fp-err" role="alert">' + esc(FILM.err) + "</p>" : "";
+    if (!FILM.cues) {
+      panel.innerHTML = '<div class="fp-load">' + picker + '<p class="meta">一次选两个文件：电影的视频（或音频）和英文字幕（.srt / .vtt；中英双语字幕更好，背诵时能看中文提示）。' +
+        (FILM.mediaUrl ? "已选片源：" + esc(FILM.mediaName) + "，还差字幕。" : "") + "文件只在你的浏览器里打开，不上传，也不会进公开仓库。</p>" + err + "</div>";
+      body.innerHTML = filmStepsHTML();
+      return;
+    }
+    var k = filmSeg(), sg = FILM.segs[k], cues = FILM.cues, td = filmToday(), known = filmKnown(k);
+    var t0 = sg.z > sg.a ? cues[sg.a].s : 0, t1 = sg.z > sg.a ? cues[sg.z - 1].e : 0;
+    var seg = '<div class="fp-seg"><button type="button" class="fp-nav" data-act="fp-seg" data-d="-1" aria-label="上一段"' + (k === 0 ? " disabled" : "") + '>‹</button>' +
+      '<div class="fp-segt"><b>第 ' + (k + 1) + " 段</b>" + (k === td.next && td.today && !td.review ? '<span class="lst cur">今天</span>' : k < (curStudy().next.film || 0) ? '<span class="lst done">学完</span>' : "") +
+      '<span class="meta">' + mmss(t0) + "–" + mmss(t1) + " · " + (sg.z - sg.a) + " 句 · 熟 " + known.length + "</span></div>" +
+      '<button type="button" class="fp-nav" data-act="fp-seg" data-d="1" aria-label="下一段"' + (k === FILM_SEGS - 1 ? " disabled" : "") + ">›</button></div>";
+    function seg2(name, label, opts, val) {
+      return '<div class="fp-ctl"><span class="fp-lab">' + label + '</span><div class="seg" role="group" aria-label="' + label + '">' + opts.map(function (o) {
+        return '<button type="button" data-act="fp-set" data-k="' + name + '" data-v="' + o[0] + '" aria-pressed="' + (String(val) === String(o[0])) + '">' + o[1] + "</button>";
+      }).join("") + "</div></div>";
+    }
+    panel.innerHTML = seg +
+      '<div class="fp-play"><button type="button" class="btn" id="fp-pp" data-act="fp-whole">' + (FILM.video && !FILM.video.paused ? "暂停" : "▶ 播放这一段") + "</button>" + picker + "</div>" + err +
+      '<div class="fp-ctls">' + seg2("mode", "字幕", FILM_MODES, FILM.mode) + seg2("speed", "速度", [[0.75, "0.75"], [0.9, "0.9"], [1, "1.0"]], FILM.speed) +
+      seg2("rep", "每句", [[1, "1 遍"], [3, "3 遍"], [5, "5 遍"]], FILM.rep) + seg2("gap", "跟读停顿", [["0", "关"], ["1", "开"]], FILM.gap ? "1" : "0") + "</div>" +
+      '<p class="meta fp-keys">空格 播放 / 暂停 · ← → 上一句 / 下一句 · R 重听 · H 换字幕 · K 标“熟”' + (FILM.subName ? " · 字幕：" + esc(FILM.subName) : "") + "</p>";
+    var rows = [];
+    for (var i = sg.a; i < sg.z; i++) {
+      var c = cues[i], kn = known.indexOf(i - sg.a) >= 0, ex = FILM.explain[i];
+      rows.push('<li class="fc' + (i === FILM.shown ? " on" : "") + (kn ? " kn" : "") + '" id="fc-' + i + '"><span class="fc-n">' + (i - sg.a + 1) + "</span>" +
+        '<button type="button" class="fc-tx" data-act="fp-peek" data-i="' + i + '" title="点一下看原文">' + filmText(c, FILM.mode, i) + "</button>" +
+        '<span class="fc-b"><button type="button" data-act="fp-cue" data-i="' + i + '" aria-label="听这一句">听</button>' +
+        (FILM.noMic ? "" : '<button type="button" data-act="fp-rec" data-i="' + i + '"' + (FILM.recording === i ? ' class="rec"' : "") + ' aria-label="录音跟读这一句">' + (FILM.recording === i ? "录音中" : "录") + "</button>") +
+        (FILM.recUrl[i] ? '<button type="button" data-act="fp-mine" data-i="' + i + '" aria-label="放我的录音">我的</button>' : "") +
+        '<button type="button" data-act="fp-known" data-i="' + i + '" aria-pressed="' + kn + '" aria-label="标记这一句背熟了">熟</button>' +
+        '<button type="button" data-act="fp-ex" data-i="' + i + '" aria-label="讲解这一句">讲</button></span>' +
+        (ex ? '<div class="fc-ex" id="fx-' + i + '">' + esc(ex.text || (ex.busy ? "Claude 正在看这句……" : "")) + (ex.err ? '<span class="fp-err">' + esc(ex.err) + "</span>" : "") + "</div>" : "") + "</li>");
+    }
+    body.innerHTML = filmStepsHTML() + '<ol class="fcues" aria-label="第 ' + (k + 1) + ' 段台词">' + rows.join("") + "</ol>";
+    filmShowCue(FILM.shown, true);
+  }
+  function filmStepsHTML() {
+    var td = filmToday(), steps = td.review ? FILM_REVIEW : FILM_STEPS, nx = td.next;
+    var old = [1, 3, 7].map(function (b) { return nx - b; }).filter(function (x, i, a) { return x >= 0 && a.indexOf(x) === i; });
+    return '<div class="fsteps"><p class="eyebrow">' + (td.review ? "周日 · 本周复习，90 分钟" : "每天一段 · 90 分钟") + '</p><ol>' + steps.map(function (st, i) {
+      var extra = "";
+      if (st.old && FILM.cues) extra = old.length ? '<span class="fs-x">' + old.map(function (x) { return '<button type="button" class="btn small ghost" data-act="fp-play-seg" data-k="' + x + '">第 ' + (x + 1) + " 段</button>"; }).join("") + "</span>" : '<span class="fs-x meta">还没有学过的段落，今天跳过这一步。</span>';
+      if (st.week && FILM.cues && nx > 0) extra = '<span class="fs-x"><button type="button" class="btn small ghost" data-act="fp-play-week">连播第 ' + (Math.max(0, nx - 6) + 1) + "—" + nx + " 段</button></span>";
+      return '<li><button type="button" class="fs-b" data-act="fp-step" data-s="' + i + '"><b>' + esc(st.t) + '</b><span class="fs-m">' + st.m + "′</span></button><span class=\"fs-d\">" + esc(st.d) + "</span>" + extra + "</li>";
+    }).join("") + "</ol></div>";
+  }
+  function filmPlayBtn() { var b = FILM.root && FILM.root.querySelector("#fp-pp"); if (b) b.textContent = FILM.video && !FILM.video.paused ? "暂停" : "▶ 播放这一段"; }
+  function filmCueAt(tm) {
+    var cues = FILM.cues; if (!cues) return -1;
+    var lo = 0, hi = cues.length - 1, ans = -1;
+    while (lo <= hi) { var mid = (lo + hi) >> 1; if (cues[mid].s <= tm) { ans = mid; lo = mid + 1; } else hi = mid - 1; }
+    return ans >= 0 && tm <= cues[ans].e + 0.25 ? ans : -1;
+  }
+  function filmShowCue(i, quiet) {
+    FILM.shown = i;
+    if (!FILM.root) return;
+    var sub = FILM.root.querySelector("#fp-sub"), c = FILM.cues && FILM.cues[i];
+    sub.innerHTML = c ? filmText(c, FILM.mode, i) : "";
+    var prev = FILM.root.querySelector(".fc.on"); if (prev && prev.id !== "fc-" + i) prev.classList.remove("on");
+    var row = FILM.root.querySelector("#fc-" + i);
+    if (row) { row.classList.add("on"); if (!quiet && row.scrollIntoView) row.scrollIntoView({ block: "nearest" }); }
+  }
+  function filmClear() { clearTimeout(FILM.timer); FILM.timer = 0; FILM.stopAt = null; FILM.left = 0; FILM.chain = false; FILM.after = null; }
+  function filmGapMs(i) { var c = FILM.cues[i]; return c ? Math.min(9000, ((c.e - c.s) / FILM.speed * 1.2 + 0.6) * 1000) : 800; }
+  function filmPlayCue(i, opt) {
+    opt = opt || {};
+    var c = FILM.cues && FILM.cues[i], v = filmVideo();
+    if (!c) return;
+    if (!FILM.mediaUrl) { filmShowCue(i); toast("还没选片源：先读台词，选好片源就能听"); return; }
+    clearTimeout(FILM.timer);
+    FILM.cur = i; FILM.left = (opt.rep || FILM.rep) - 1; FILM.chain = !!opt.chain; FILM.after = opt.after || null;
+    FILM.stopAt = c.e + 0.12;
+    v.playbackRate = FILM.speed;
+    v.currentTime = Math.max(0, c.s - 0.08);
+    filmShowCue(i);
+    var pr = v.play(); if (pr && pr.catch) pr.catch(function () { /* 被浏览器拦下时等用户再点 */ });
+  }
+  function filmPlayRange(a, z) {
+    var v = filmVideo(); if (!FILM.mediaUrl) { toast("还没选片源"); return; }
+    filmClear(); FILM.cur = -1; FILM.stopAt = z + 0.2; v.playbackRate = FILM.speed; v.currentTime = Math.max(0, a - 0.1);
+    var pr = v.play(); if (pr && pr.catch) pr.catch(function () {});
+  }
+  function filmPlaySeg(k) { var sg = FILM.segs && FILM.segs[k]; if (sg && sg.z > sg.a) filmPlayRange(FILM.cues[sg.a].s, FILM.cues[sg.z - 1].e); }
+  function filmWhole() {
+    var v = filmVideo();
+    if (!v.paused) { filmClear(); v.pause(); return; }
+    var sg = FILM.segs[filmSeg()]; if (!sg || sg.z <= sg.a) return;
+    if (FILM.gap || FILM.rep > 1) filmPlayCue(sg.a, { chain: true });
+    else filmPlayRange(FILM.cues[sg.a].s, FILM.cues[sg.z - 1].e);
+  }
+  function filmTick() {
+    cancelAnimationFrame(FILM.raf);
+    var v = FILM.video;
+    (function loop() {
+      if (!v || v.paused) return;
+      var tm = v.currentTime, i = filmCueAt(tm);
+      if (i !== FILM.shown && (i >= 0 || FILM.stopAt == null || FILM.cur < 0)) filmShowCue(i);
+      if (FILM.stopAt != null && tm >= FILM.stopAt) {
+        v.pause();
+        var cur = FILM.cur, sg = FILM.segs && FILM.segs[filmSeg()];
+        if (cur >= 0 && FILM.left > 0) { FILM.left--; FILM.timer = setTimeout(function () { v.currentTime = Math.max(0, FILM.cues[cur].s - 0.08); v.play(); }, FILM.gap ? filmGapMs(cur) : 300); return; }
+        if (cur >= 0 && FILM.chain && sg && cur + 1 < sg.z) { FILM.timer = setTimeout(function () { filmPlayCue(cur + 1, { chain: true }); }, FILM.gap ? filmGapMs(cur) : 0); return; }
+        var after = FILM.after; filmClear();
+        if (after) after();
+        return;
+      }
+      FILM.raf = requestAnimationFrame(loop);
+    })();
+  }
+  function filmToggleKnown(i) {
+    var k = filmSeg(), sg = FILM.segs[k], arr = filmKnown(k).slice(), off = i - sg.a, p = arr.indexOf(off);
+    if (p >= 0) arr.splice(p, 1); else arr.push(off);
+    arr.sort(function (a, b) { return a - b; });
+    var key = "seg-" + pad2(k + 1), val = { known: arr, n: sg.z - sg.a, t: new Date().toISOString() };
+    if (S.mode === "db" && !S.canEdit) { S.data.film = Object.assign({}, S.data.film); S.data.film[key] = val; toast("只读浏览，标记不会保存"); }
+    else put("film", key, val);
+    filmPaint();
+  }
+  function filmRecord(i) {
+    var c = FILM.cues[i];
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia || !window.MediaRecorder) { FILM.noMic = true; toast("这里用不了麦克风。录音跟读请在 GitHub 公开版里用。"); filmPaint(); return; }
+    if (FILM.recording >= 0) return;
+    navigator.mediaDevices.getUserMedia({ audio: true }).then(function (stream) {
+      var rec = new MediaRecorder(stream), chunks = [];
+      FILM.recording = i; filmPaint();
+      rec.ondataavailable = function (e) { if (e.data && e.data.size) chunks.push(e.data); };
+      rec.onstop = function () {
+        stream.getTracks().forEach(function (tr) { tr.stop(); });
+        if (FILM.recUrl[i]) URL.revokeObjectURL(FILM.recUrl[i]);
+        FILM.recUrl[i] = URL.createObjectURL(new Blob(chunks, { type: rec.mimeType || "audio/webm" }));
+        FILM.recording = -1; filmPaint();
+        filmPlayCue(i, { rep: 1, after: function () { filmMine(i); } });
+      };
+      rec.start();
+      setTimeout(function () { if (rec.state !== "inactive") rec.stop(); }, ((c.e - c.s) / FILM.speed * 1.4 + 1.2) * 1000);
+    }, function () { FILM.noMic = true; FILM.recording = -1; toast("没拿到麦克风权限。可以在浏览器设置里允许，或换到 GitHub 公开版录音。"); filmPaint(); });
+  }
+  function filmMine(i) { if (FILM.recUrl[i]) { var a = new Audio(FILM.recUrl[i]); var pr = a.play(); if (pr && pr.catch) pr.catch(function () {}); } }
+  var SAMPLE_ERR = { rate_limited: "问得太频繁了，过一会儿再点。", session_expired: "登录过期了，刷新页面再试。", upstream_error: "没连上，稍后再点一次。", refused: "这句没能讲解。", empty_completion: "没有得到回答，稍后再试。" };
+  function filmExplain(i) {
+    var c = FILM.cues[i], pv = FILM.cues[i - 1], nx = FILM.cues[i + 1];
+    var prompt = "我在用电影《当幸福来敲门》（The Pursuit of Happyness，2006）练英语跟读。请用简体中文讲解“这句”台词，分四点，每点一两句，不用客套：\n" +
+      "1. 意思：自然的中文翻译，必要时说明说话的场景和语气\n2. 词和短语：值得记的生词、短语、俚语\n3. 用法：语法或口语里省略、倒装等特别的地方\n4. 发音：连读、弱读、吞音和重音提示\n\n" +
+      (pv ? "上一句：" + pv.en + "\n" : "") + "这句：" + c.en + "\n" + (nx ? "下一句：" + nx.en + "\n" : "");
+    function fallback() { copyText(prompt, "已复制这句和讲解要求，粘贴到和 Claude 的对话里就能问"); }
+    function paintEx() {
+      var el = FILM.root && FILM.root.querySelector("#fx-" + i), ex = FILM.explain[i];
+      if (!el) { filmPaint(); return; }
+      el.innerHTML = esc(ex.text || (ex.busy ? "Claude 正在看这句……" : "")) + (ex.err ? '<span class="fp-err">' + esc(ex.err) + "</span>" : "");
+    }
+    function go(sample) {
+      if (!sample) { fallback(); return; }
+      FILM.explain[i] = { text: "", busy: true }; filmPaint();
+      sample(prompt, { modelTier: "quick", onText: function (u) { FILM.explain[i] = { text: u.text, busy: true }; paintEx(); } }).then(function (r) {
+        FILM.explain[i] = { text: r.text }; paintEx();
+      }, function (e) {
+        var code = e && e.code;
+        if (["not_granted", "sampling_disabled", "not_declared", "capability_disabled", "capability_removed"].indexOf(code) >= 0) { FILM.sample = null; delete FILM.explain[i]; filmPaint(); fallback(); return; }
+        FILM.explain[i] = { text: code === "refused" ? "" : (e && e.text) || "", err: code === "cancelled" ? "" : SAMPLE_ERR[code] || SAMPLE_ERR.upstream_error }; paintEx();
+      });
+    }
+    if (!IN_ARTIFACT || FILM.sample === null) { fallback(); return; }
+    if (FILM.sample) { go(FILM.sample); return; }
+    window.claude.use("sample").then(function (sm) { FILM.sample = sm || null; go(FILM.sample); }, function () { FILM.sample = null; fallback(); });
+  }
+  function filmApplyStep(st) {
+    FILM.mode = st.mode; FILM.rep = st.rep; FILM.gap = !!st.gap;
+    if (st.mode === "zh" && FILM.cues && !FILM.cues.some(function (c) { return c.zh; })) FILM.mode = "initials";
+    if (st.whole) { filmPaint(); filmWhole(); return; }
+    if (st.week) { filmPaint(); return; }
+    filmPaint();
+  }
+  function filmSegsHTML() {
+    var nx = curStudy().next.film || 0, out = [];
+    for (var k = 0; k < FILM_SEGS; k++) {
+      var kn = filmKnown(k).length, d2 = S.data.film && S.data.film["seg-" + pad2(k + 1)], n = d2 && d2.n;
+      if (k % 6 === 0) out.push('<div class="fwk"><span class="fseg-wk">第 ' + (k / 6 + 1) + ' 周</span><div class="fwk-b">');
+      out.push('<button type="button" class="fseg' + (k < nx ? " done" : k === nx ? " cur" : "") + '" data-act="film-go" data-seg="' + k + '" title="第 ' + (k + 1) + " 段" + (n ? " · 熟 " + kn + " / " + n : "") + '"><b>' + (k + 1) + "</b>" +
+        (n ? '<span class="fseg-bar"><i style="width:' + Math.round(kn / n * 100) + '%"></i></span>' : "") + "</button>");
+      if (k % 6 === 5) out.push("</div></div>");
+    }
+    return '<section><h2>36 段</h2><p class="meta">每天一段，6 天一周，周日复习。实心是学完的段，黑框是下一段；条是这一段背熟的句数。</p><div class="fsegs">' + out.join("") + "</div></section>";
+  }
+  function filmNotesHTML() {
+    return '<section><h2>怎么准备</h2><ul class="plain">' +
+      "<li>片源：用你自己合法获得的《当幸福来敲门》视频文件，MP4 最稳；只有音频（MP3）也能练听和跟读。</li>" +
+      "<li>字幕：英文字幕或中英双语字幕，.srt 或 .vtt。双语字幕的中文会用在“背诵”这一步当提示。</li>" +
+      "<li>两个文件一起选。字幕会记在这个浏览器里，下次只要重新选片源；片源每次都要重新选，这是浏览器的安全限制。</li>" +
+      "<li>文件只在你的浏览器里打开，不会上传。研习录只记“第几段第几句背熟了”，不存台词。</li>" +
+      "<li>如果在这里播放不了本地视频，换到 GitHub 公开版的同一页面：cnyanghai.github.io/yanxilu/#c-film（录音跟读也只在那里能用）。</li>" +
+      "<li>晚上打卡时说一句“电影第几段学完了”，地图上的电影线就往前走一站。</li></ul></section>";
+  }
 
   /* ---------- 主渲染 ---------- */
   var ROUTES = { home: 1, shelf: 1, journal: 1, review: 1 };
   if (PLAN) ROUTES.plan = 1;
+  COURSES.forEach(function (k) { ROUTES["c-" + k] = 1; });
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
   Object.keys(LIB.books).forEach(function (b) {
     ROUTES["b-" + b] = 1;
     Object.keys(LIB.books[b].deep || {}).forEach(function (n) { ROUTES["r-" + b + "-" + n] = 1; });
   });
-  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] || (PLAN && /^l-\d{4}-\d{2}-\d{2}$/.test(h)) ? h : "home"; }
+  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] || (PLAN && /^l-(\d{4}-\d{2}-\d{2}|[a-z]+-\d{2})$/.test(h)) ? h : "home"; }
 
   function render(scrollTop) {
     $("#rail").innerHTML = railHTML();
@@ -3650,11 +4283,14 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     else if (r.indexOf("b-") === 0) html = bookHTML(r.slice(2));
     else if (r === "journal") html = journalHTML();
     else if (r === "plan") html = planHTML();
-    else if (/^l-\d{4}-\d{2}-\d{2}$/.test(r)) html = lessonHTML(r.slice(2));
+    else if (/^l-/.test(r)) html = lessonHTML(r.slice(2));
+    else if (/^c-/.test(r)) html = courseHTML(r.slice(2));
     else if (r === "review") html = reviewHTML();
     else if (r === "shelf") html = shelfHTML();
     else html = homeHTML();
+    if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     $("#main").innerHTML = html;
+    filmMount();
     if (scrollTop) window.scrollTo(0, 0);
     if (S.pendingSec) {
       var sid = S.pendingSec; S.pendingSec = null;
@@ -3678,13 +4314,13 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var el = $("#toast"); el.textContent = msg; el.hidden = false;
     clearTimeout(toastTimer); toastTimer = setTimeout(function () { el.hidden = true; }, 2800);
   }
-  function copyText(text) {
+  function copyText(text, msg) {
     function fallback() {
       var ta = document.createElement("textarea"); ta.value = text; ta.setAttribute("readonly", ""); ta.style.position = "fixed"; ta.style.opacity = "0";
       document.body.appendChild(ta); ta.select(); var ok = false; try { ok = document.execCommand("copy"); } catch (e) {} ta.remove();
-      toast(ok ? "已复制" : "浏览器阻止了复制，请手动选择文字复制");
+      toast(ok ? msg || "已复制" : "浏览器阻止了复制，请手动选择文字复制");
     }
-    try { navigator.clipboard.writeText(text).then(function () { toast("已复制"); }, fallback); } catch (e) { fallback(); }
+    try { navigator.clipboard.writeText(text).then(function () { toast(msg || "已复制"); }, fallback); } catch (e) { fallback(); }
   }
   function openChapter(bid, n) {
     var id = chId(bid, n); S.openCh[id] = true; S.bookTab = "chapters";
@@ -3695,11 +4331,36 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
 
   document.addEventListener("click", function (e) {
     var pop = document.getElementById("mpop");
-    if (pop && !pop.hidden && !e.target.closest("#mpop") && !e.target.closest('[data-act="mst"],[data-act="mhub"]')) closePop();
+    if (pop && !pop.hidden && !e.target.closest("#mpop") && !e.target.closest('[data-act="mst"],[data-act="mhub"],[data-act="mlm"]')) closePop();
     var t = e.target.closest("[data-act]"); if (!t) return;
     var act = t.getAttribute("data-act");
     if (act === "mst") { openStation(t.getAttribute("data-l"), +t.getAttribute("data-i")); return; }
     if (act === "mhub") { openHub(+t.getAttribute("data-h")); return; }
+    if (act === "mlm") { openLandmark(t.getAttribute("data-r")); return; }
+    if (act === "film-go") {
+      FILM.seg = +t.getAttribute("data-seg"); filmClear(); if (FILM.video) FILM.video.pause(); FILM.cur = -1; FILM.shown = -2;
+      if (S.route === "c-film") { render(); var fs = document.getElementById("film-slot"); if (fs) fs.scrollIntoView({ block: "start", behavior: "smooth" }); }
+      return;
+    }
+    if (act === "fp-seg") { FILM.seg = Math.max(0, Math.min(FILM_SEGS - 1, filmSeg() + +t.getAttribute("data-d"))); filmClear(); if (FILM.video) FILM.video.pause(); FILM.cur = -1; FILM.shown = -2; filmPaint(); return; }
+    if (act === "fp-set") {
+      var fk = t.getAttribute("data-k"), fv = t.getAttribute("data-v");
+      if (fk === "mode") FILM.mode = fv; else if (fk === "speed") { FILM.speed = +fv; if (FILM.video) FILM.video.playbackRate = FILM.speed; } else if (fk === "rep") FILM.rep = +fv; else if (fk === "gap") FILM.gap = fv === "1";
+      filmPaint(); return;
+    }
+    if (act === "fp-whole") { filmWhole(); return; }
+    if (act === "fp-cue") { filmPlayCue(+t.getAttribute("data-i")); return; }
+    if (act === "fp-peek") { var pi = +t.getAttribute("data-i"); FILM.peek[pi] = !FILM.peek[pi]; t.innerHTML = filmText(FILM.cues[pi], FILM.mode, pi); if (FILM.shown === pi) filmShowCue(pi, true); return; }
+    if (act === "fp-rec") { filmRecord(+t.getAttribute("data-i")); return; }
+    if (act === "fp-mine") { filmMine(+t.getAttribute("data-i")); return; }
+    if (act === "fp-known") { filmToggleKnown(+t.getAttribute("data-i")); return; }
+    if (act === "fp-ex") { filmExplain(+t.getAttribute("data-i")); return; }
+    if (act === "fp-step") { filmApplyStep((filmToday().review ? FILM_REVIEW : FILM_STEPS)[+t.getAttribute("data-s")]); return; }
+    if (act === "fp-play-seg") { filmPlaySeg(+t.getAttribute("data-k")); return; }
+    if (act === "fp-play-week") {
+      var fnx = curStudy().next.film || 0, fa = FILM.segs[Math.max(0, fnx - 6)], fz = FILM.segs[Math.max(0, fnx - 1)];
+      if (fa && fz && fz.z > fa.a) filmPlayRange(FILM.cues[fa.a].s, FILM.cues[fz.z - 1].e); return;
+    }
     if (act === "mpop-close") { closePop(); return; }
     if (act === "metro-mode") { S.metroMode = t.getAttribute("data-m"); try { localStorage.setItem("yanxilu-route-" + bjToday(), S.metroMode); } catch (e2) {} render(); return; }
     if (act === "metro-today") { S.metroToday = !S.metroToday; render(); return; }
@@ -3739,13 +4400,30 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") { var pop = document.getElementById("mpop"); if (pop && !pop.hidden) { closePop(); return; } }
     if (e.key !== "Enter" && e.key !== " ") return;
-    var g = e.target && e.target.closest ? e.target.closest('.metro [data-act="mst"], .metro [data-act="mhub"]') : null;
+    var g = e.target && e.target.closest ? e.target.closest('.metro [data-act="mst"], .metro [data-act="mhub"], .metro [data-act="mlm"]') : null;
     if (!g) return;
     e.preventDefault();
-    if (g.getAttribute("data-act") === "mhub") openHub(+g.getAttribute("data-h")); else openStation(g.getAttribute("data-l"), +g.getAttribute("data-i"));
+    var ga = g.getAttribute("data-act");
+    if (ga === "mhub") openHub(+g.getAttribute("data-h")); else if (ga === "mlm") openLandmark(g.getAttribute("data-r")); else openStation(g.getAttribute("data-l"), +g.getAttribute("data-i"));
+  });
+  /* 跟读播放器的快捷键 */
+  document.addEventListener("keydown", function (e) {
+    if (S.route !== "c-film" || !FILM.cues || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tg = e.target, tag = tg && tg.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT") return;
+    var sg = FILM.segs[filmSeg()], k = e.key;
+    if (!sg || sg.z <= sg.a) return;
+    var cur = FILM.cur >= sg.a && FILM.cur < sg.z ? FILM.cur : FILM.shown >= sg.a && FILM.shown < sg.z ? FILM.shown : sg.a;
+    if (k === " " && tag !== "BUTTON" && tag !== "A") { e.preventDefault(); var v = filmVideo(); if (!v.paused) { filmClear(); v.pause(); } else filmPlayCue(cur); }
+    else if (k === "ArrowRight") { e.preventDefault(); filmPlayCue(Math.min(sg.z - 1, cur + 1)); }
+    else if (k === "ArrowLeft") { e.preventDefault(); filmPlayCue(Math.max(sg.a, cur - 1)); }
+    else if (k === "r" || k === "R") filmPlayCue(cur);
+    else if (k === "h" || k === "H") { var ms = FILM_MODES.map(function (m) { return m[0]; }); FILM.mode = ms[(ms.indexOf(FILM.mode) + 1) % ms.length]; filmPaint(); }
+    else if (k === "k" || k === "K") filmToggleKnown(cur);
   });
   document.addEventListener("change", function (e) {
     var t = e.target;
+    if (t.id === "fp-file") { filmLoad(t.files); t.value = ""; return; }
     if (t.matches && t.matches('select[data-act="status"]')) {
       var id = t.getAttribute("data-id"), v = t.value;
       if (v === "todo") del("progress", id); else put("progress", id, { s: v, t: new Date().toISOString() });

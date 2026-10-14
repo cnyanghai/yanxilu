@@ -31,13 +31,17 @@
           "subj": "sql",
           "mins": 45,
           "index": 0,
-          "title": "数据库、表、行和列：装好 DB Browser，建第一张表"
+          "title": "数据库、表、行和列：装好 DB Browser，建第一张表",
+          "lesson": "sql-01",
+          "file": "study/lessons/sql/01.md"
         },
         {
           "subj": "cfa",
           "mins": 35,
           "index": 0,
-          "title": "Q1 收益率与回报（1/4）"
+          "title": "Q1 收益率与回报（1/4）",
+          "lesson": "cfa-01",
+          "file": "study/lessons/cfa/01.md"
         }
       ],
       "file": "study/daily/2026-10-12.md",
@@ -54,13 +58,17 @@
           "subj": "py",
           "mins": 45,
           "index": 0,
-          "title": "环境：Anaconda 与 Jupyter，第一个程序"
+          "title": "环境：Anaconda 与 Jupyter，第一个程序",
+          "lesson": "py-01",
+          "file": "study/lessons/py/01.md"
         },
         {
           "subj": "cfa",
           "mins": 35,
           "index": 0,
-          "title": "Q1 收益率与回报（1/4）"
+          "title": "Q1 收益率与回报（1/4）",
+          "lesson": "cfa-01",
+          "file": "study/lessons/cfa/01.md"
         }
       ],
       "file": "study/daily/2026-10-13.md",
@@ -77,17 +85,26 @@
           "subj": "sql",
           "mins": 45,
           "index": 0,
-          "title": "数据库、表、行和列：装好 DB Browser，建第一张表"
+          "title": "数据库、表、行和列：装好 DB Browser，建第一张表",
+          "lesson": "sql-01",
+          "file": "study/lessons/sql/01.md"
         },
         {
           "subj": "cfa",
           "mins": 35,
           "index": 0,
-          "title": "Q1 收益率与回报（1/4）"
+          "title": "Q1 收益率与回报（1/4）",
+          "lesson": "cfa-01",
+          "file": "study/lessons/cfa/01.md"
         }
       ],
       "file": "study/daily/2026-10-14.md",
       "status": "pushed"
     }
+  },
+  "issued": {
+    "sql": 1,
+    "py": 1,
+    "cfa": 1
   }
 }

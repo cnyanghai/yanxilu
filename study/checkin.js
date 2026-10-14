@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /* 晚上打卡：记下完成了哪些科目，并把这些科目的进度指针往前推一课。
  * 用法：
- *   node study/checkin.js YYYY-MM-DD --done sql,cfa,en --minutes 95 --note "回归那节没太懂"
+ *   node study/checkin.js YYYY-MM-DD --done film,sql,cfa --minutes 160 --note "回归那节没太懂"
  *   --done all     当天全部完成
  *   --done none    当天没学（记为未完成，进度不动）
  * 同一天重复打卡会覆盖当天记录，进度指针只会前进、不会重复前进。
@@ -16,7 +16,7 @@ const progress = L.loadProgress();
 const day = progress.days[date] || {};
 if (!day.planned) {
   const d = L.dayPlan(plan, progress, date);
-  day.planned = d.slots.map((s) => ({ subj: s.subj, mins: s.mins, index: s.index, title: s.title }));
+  day.planned = d.slots.map(L.slotRecord);
   day.file = day.file || `study/daily/${date}.md`;
 }
 
@@ -26,7 +26,7 @@ const done = doneArg === "all" ? subjs : doneArg === "none" ? [] : doneArg.split
 
 done.forEach((subj) => {
   const slot = day.planned.find((s) => s.subj === subj);
-  if (slot && typeof slot.index === "number") progress.next[subj] = Math.max(progress.next[subj] || 0, slot.index + 1);
+  if (slot && !slot.review && typeof slot.index === "number") progress.next[subj] = Math.max(progress.next[subj] || 0, slot.index + 1);
 });
 
 day.done = done;

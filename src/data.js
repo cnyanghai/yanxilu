@@ -7,7 +7,12 @@ window.YXL_LIB = {
   kinds: { book: "书", topic: "科目", practice: "实践", concept: "专题" },
 
   /* 专题：独立页面。href 是 GitHub 版的相对路径，artifact 是 claude.ai 上的版本。
-   * group 决定归到哪一组（见 reportGroups），不写就是数据专题。 */
+   * group 决定归到哪一组（见 reportGroups），不写就是数据专题。
+   * 研究档案的三种关系分开写：
+   *   origin 出处：从哪儿来（读哪本书、哪次讨论时做的）
+   *   tracks 归属：属于哪个学习方向（决定它在线网图上放在哪个区域）
+   *   uses   用途：还能拿来做什么，[科目, 第几课(从 0 起), 说明]，显示在那一课的站点详情和课程页里
+   * question 是当时要回答的问题，refresh 写以后要不要更新。 */
   reportGroups: [
     { id: "data", name: "数据专题", trackHead: "用数据看这个方向" },
     { id: "note", name: "知识专题", trackHead: "专题笔记" }
@@ -15,15 +20,23 @@ window.YXL_LIB = {
   reports: [
     { id: "futures-market-making", group: "note", title: "期货做市商", date: "2026-10", tracks: ["fut"],
       desc: "做市商靠什么赚、在哪里亏：准入条件、盈亏方程、七块核心知识、可以动手调的报价模型、跨期对冲、常见亏法、学习路线和自测题。",
+      origin: "关于期货做市商的一次讨论，后来展开成“做市商研习”这条线",
+      question: "做市商靠什么赚钱、在哪里亏钱？",
       href: "reports/market-making.html", artifact: "https://claude.ai/artifact/Dnfuoje3rEV1HL39iURdtc" },
     { id: "futures-mm-plan", group: "note", title: "做市商研习计划", date: "2026-10", tracks: ["fut"],
       desc: "12 周，书和模型同步：每周一读一做，跟着每日课表的 SQL、Python 进度加深；附一天的模拟 tick 练习数据、纸上做市、SQL 与 Python 习题和参考答案。",
       href: "reports/market-making-plan.html", artifact: "https://claude.ai/artifact/Vr3cJGdvYnTA8xiR4m9qFZ" },
     { id: "cn-us-consumption", title: "中美消费与人口", date: "2026-10", tracks: ["cycle"],
       desc: "2000 年以来中美居民消费率、消费结构对比，以及中国人口年龄结构（含每五年节点和五岁组人口金字塔）；附数据表、口径和长表 CSV。",
+      origin: "读周金涛《涛动周期论》时做的辅助研究：看人口结构和居民消费怎样影响周期",
+      question: "中美居民消费差在哪里？中国的人口年龄结构在怎样变化？",
+      uses: [["sql", 30, "附长表 CSV，可以拿来练导入和查询"], ["py", 12, "同一份 CSV，可以拿来练 pandas 读表"]],
+      refresh: "每年国家统计局公布上一年数据后更新一次",
       href: "reports/consumption-population.html", artifact: "https://claude.ai/artifact/LC5DxsG2pE1kCeXXf5p3xE" },
     { id: "cn-us-jp-wealth", title: "中美日财富存量", date: "2026-10", tracks: ["cycle", "fin"],
       desc: "居民存款、股票、债券、期货、黄金储备、住房市值，以及住房和汽车保有量，中美日三国按 2025 年末同一口径对比，附人均值和占 GDP 比重。",
+      question: "中美日三国家庭的财富放在哪里，各有多少？",
+      refresh: "年末存量，每年更新一次",
       href: "reports/wealth.html", artifact: "https://claude.ai/artifact/5MuCSXkBfQqhubibfhAA4f" }
   ],
 

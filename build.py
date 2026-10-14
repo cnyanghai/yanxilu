@@ -14,9 +14,12 @@ data += "\n" + (root / "src/plan.js").read_text(encoding="utf-8")
 # 线网图布局
 data += "\n" + (root / "src/metro.js").read_text(encoding="utf-8")
 data += "\nwindow.YXL_STUDY = " + (root / "study/progress.json").read_text(encoding="utf-8").strip() + ";\n"
-# 每日讲义快照：GitHub 版直接读它；云端版优先读数据库 lessons/<日期>，读不到再用它
+# 讲义快照：每日路线单（键为日期）和按课的讲义（键为 科目-序号，如 sql-01）。
+# GitHub 版直接读它；云端版优先读数据库 lessons/<键>，读不到再用它
 import json
 lessons = {f.stem: f.read_text(encoding="utf-8") for f in sorted((root / "study/daily").glob("*.md"))}
+for f in sorted((root / "study/lessons").glob("*/*.md")):
+    lessons[f.parent.name + "-" + f.stem] = f.read_text(encoding="utf-8")
 data += "\nwindow.YXL_LESSONS = " + json.dumps(lessons, ensure_ascii=False).replace("</", "<\\/") + ";\n"
 app = (root / "src/app.js").read_text(encoding="utf-8")
 
