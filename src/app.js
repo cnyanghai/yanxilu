@@ -28,7 +28,7 @@
   /* ---------- 索引 ---------- */
   var ITEMS = {};
   LIB.tracks.forEach(function (t) {
-    t.stages.forEach(function (s) { s.items.forEach(function (it) { if (typeof it === "object") ITEMS[it.id] = Object.assign({ tracks: [] }, it); }); });
+    t.stages.forEach(function (s) { s.items.forEach(function (it) { if (typeof it === "object") ITEMS[it.id] = Object.assign({ tracks: [], home: t.id }, it); }); });
   });
   LIB.tracks.forEach(function (t) {
     t.stages.forEach(function (s) {
@@ -84,7 +84,7 @@
   }
   function refLabel(ref) {
     if (!ref) return "";
-    if (ref === "plan") return "每日课表";
+    if (ref === "plan") return "路线单";
     if (ITEMS[ref]) return ITEMS[ref].kind === "book" ? "《" + ITEMS[ref].title + "》" : ITEMS[ref].title;
     var m = /^(.+)-ch(\d+)$/.exec(ref);
     if (m && LIB.books[m[1]]) return "《" + LIB.books[m[1]].title + "》第" + CN[+m[2]] + "章";
@@ -92,7 +92,7 @@
   }
   function refHref(ref) {
     if (!ref) return "";
-    if (ref === "plan") return "#plan";
+    if (ref === "plan") return "#journal";
     var m = /^(.+)-ch(\d+)$/.exec(ref);
     if (m && LIB.books[m[1]]) return "#b-" + m[1];
     var it = ITEMS[ref]; if (!it) return "";
@@ -241,13 +241,11 @@
     journal: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20c-1.5-2-1.5-5 0-7s1.5-5 0-7M17 18c-1.5-2-1.5-5 0-7s1.5-5 0-7"></path></svg>'
   };
   function railHTML() {
-    var r = S.route, sec = r === "plan" || /^[lc]-/.test(r) ? "plan" : r === "shelf" || /^[tbr]-/.test(r) ? "shelf" : r;
-    var due = dueCards().length;
+    var r = S.route, sec = /^[lc]-/.test(r) ? "home" : r === "shelf" || /^[tbr]-/.test(r) ? "shelf" : r;
     function it(id, label, extra) { return '<a href="#' + id + '"' + (sec === id ? ' aria-current="page"' : "") + ">" + ICON[id] + "<span>" + label + "</span>" + (extra || "") + "</a>"; }
     var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接"];
     return '<div class="tb-in"><a class="brand" href="#home" aria-label="研习录，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>研习录</b></a>' +
-      '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + (PLAN ? it("plan", "课表") : "") + it("shelf", "书架") +
-      it("review", "复习", due ? '<span class="nb">' + due + "</span>" : "") + it("journal", "足迹") + "</nav>" +
+      '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + it("shelf", "书架") + it("journal", "足迹") + "</nav>" +
       '<span class="mode ' + mode[0] + '"><i></i>' + mode[1] + "</span></div>";
   }
 
@@ -279,42 +277,174 @@
     }).join("");
   }
 
-  /* ---------- 总览 ---------- */
-  function focusBlock(fid) {
-    var f = LIB.books[fid], bp = bookProg(fid);
-    var next = f.chapters.filter(function (c) { return !isDone(chId(fid, c.n)); })[0] || f.chapters[0];
-    return '<div class="fb"><h2><a href="#b-' + fid + '">' + esc(f.title) + '</a></h2><p class="meta">' + esc(f.author) + " · 已读完 " + bp.done + " / " + bp.total + " 章</p>" +
-      stripHTML(fid) +
-      '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + fid + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章 " + esc(next.title) + "</button>" +
-      Object.keys(f.deep || {}).map(function (k) { return '<a class="btn ghost" href="#r-' + fid + "-" + k + '">第' + CN[+k] + "章精读稿</a>"; }).join("") + "</div></div>";
+  /* ---------- 书架：博古架 ----------
+   * 一个方向一格，书多的格子宽；三层装下五个方向。每本书是一条竖起来的线，书脊上一章一站。
+   * 只勾了线 = 还没读；抽出半截、颜色染到读到的地方 = 在读；整本上色、盖“阅”字章 = 读完。 */
+  var SHELF_ROWS = [[["geo", 806], ["+", 101]], [["fin", 548], ["co", 359]], [["cycle", 486], ["fut", 421]]];
+  var SHELF_CLS = { geo: "D8", fin: "F830", co: "F27", cycle: "F0", fut: "F724" };
+  var SHELF_COL = { geo: "--ln-geo", fin: "--ln-cfa", co: "--ln-rev", cycle: "--ln-tao", fut: "--ln-mm" };
+  function hashN(s) { var x = 7; for (var i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) % 100003; return x; }
+  function isLatin(t) { return /^[\x00-\xff]*$/.test(t); }
+  /* 一本书读到哪：精读模块按章节，《大国政治的悲剧》再参考课表里地缘线学到第几课 */
+  function bookState(id) {
+    var s = st(id), b = LIB.books[id], r = { s: s, pct: 0, done: 0, total: 0 };
+    if (b) {
+      r.total = b.chapters.length;
+      r.done = b.chapters.filter(function (c) { return isDone(chId(id, c.n)); }).length;
+      if (id === "tragedy" && PLAN) r.done = Math.max(r.done, Math.min(r.total, Math.floor((curStudy().next.geo || 0) / 2)));
+      r.pct = r.total ? r.done / r.total : 0;
+      if (s === "todo" && r.done > 0) r.s = "doing";
+      if (r.done === r.total && r.total && s !== "review") r.s = "done";
+    } else if (s === "doing") r.pct = 0;
+    if (id === "cfa-quant" || id === "cfa-econ") {
+      var nx = PLAN ? curStudy().next.cfa || 0 : 0, p = id === "cfa-quant" ? Math.min(1, nx / 36) : Math.max(0, Math.min(1, (nx - 36) / 28));
+      if (p > 0 && s === "todo") r.s = p >= 1 ? "done" : "doing";
+      r.pct = p;
+    }
+    return r;
+  }
+  function shelfMatch(s) { var f = S.shelfF || "all"; return f === "all" || (f === "doing" ? s === "doing" : f === "done" ? s === "done" || s === "review" : s === "todo"); }
+  /* 书名分成一列或两列：有副标题的按“：”分；长英文书名在中间的空格处断开；太长的中文书名对半分 */
+  function titleCols(t, split) {
+    if (t.indexOf("：") > 0) return t.split("：");
+    if (isLatin(t) && t.length > 16) { var sp = [], i; for (i = 0; i < t.length; i++) if (t[i] === " ") sp.push(i); var k = sp.sort(function (a, b) { return Math.abs(a - t.length / 2) - Math.abs(b - t.length / 2); })[0]; return [t.slice(0, k), t.slice(k + 1)]; }
+    if (split && t.length >= 8) { var m = Math.ceil(t.length / 2), r = [t.slice(0, m), t.slice(m)]; r.even = true; return r; }
+    return [t];
+  }
+  function colEm(parts, lat) {
+    return Math.max.apply(null, parts.map(function (x, i) { return x.length * (lat ? 0.6 : 1.12) * (i && !parts.even ? 0.74 : 1); }));
+  }
+  /* 书脊上排得下多大的字：可用高度 = 书高 − 顶部、编号牌和间距 */
+  function fitSpine(it, h) {
+    var lat = isLatin(it.title), avail = h - 72, parts = titleCols(it.title), size = Math.min(14, avail / colEm(parts, lat));
+    if (size < 11 && parts.length === 1 && !lat) { parts = titleCols(it.title, true); size = Math.min(14, avail / colEm(parts, lat)); }
+    size = Math.max(9, Math.floor(size * 2) / 2);
+    var by = it.by || "", showBy = !!by && colEm(parts, lat) * size + by.length * 11.2 + 8 <= avail;
+    return { parts: parts, size: size, showBy: showBy, two: parts.length > 1 };
+  }
+  function spineTitle(t, size, cls, parts) {
+    parts = parts || titleCols(t);
+    return '<span class="sp-t' + (isLatin(t) ? " lat" : "") + (cls ? " " + cls : "") + '" style="font-size:' + size + 'px">' + esc(parts[0]) + (parts[1] ? (parts.even ? "<br>" + esc(parts[1]) : '<br><small>' + esc(parts[1]) + "</small>") : "") + "</span>";
+  }
+  function spineH(it) { return Math.round((206 + hashN(it.id) % 56) * 0.86); }
+  function spineW(it) { return 34 + (hashN(it.id + "w") % 10) * 2 + (bookState(it.id).s === "doing" ? 6 : 0); }
+  function spineHTML(it, tid, idx, sc) {
+    var bs = bookState(it.id), h = spineH(it), f = fitSpine(it, h), size = f.size, showBy = f.showBy;
+    var w = Math.max(f.two ? 36 : 28, Math.round((34 + (hashN(it.id + "w") % 10) * 2) * (sc || 1)));
+    var cls = SHELF_CLS[tid] + "<br>" + pad2(idx);
+    var dim = shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim", pick = S.shelfPick === it.id ? " picked" : "";
+    var common = 'type="button" data-act="pick" data-id="' + esc(it.id) + '" title="《' + esc(it.title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + '"';
+    if (bs.s === "done" || bs.s === "review") {
+      return "<button " + common + ' class="spine done' + dim + pick + '" style="height:' + h + "px;width:" + w + 'px">' + spineTitle(it.title, Math.min(size, 13.5), "", f.parts) + '<i class="sp-seal" aria-hidden="true">' + (MARK[bs.s] || "阅") + "</i></button>";
+    }
+    if (bs.s === "doing") {
+      var chs = LIB.books[it.id] ? LIB.books[it.id].chapters : null, dots = "";
+      if (chs) dots = '<span class="sp-line" aria-hidden="true">' + chs.map(function (c, i) { return '<i class="' + (i < bs.done ? "d" : i === bs.done ? "c" : "") + '"></i>'; }).join("") + "</span>";
+      return "<button " + common + ' class="spine doing' + dim + pick + '" style="height:' + h + "px;width:" + (w + 6) + "px;--p:" + Math.round(bs.pct * 100) + '%"><span class="sp-label">' + spineTitle(it.title, 12, "tight") + "</span>" + dots + '<i class="sp-rib" aria-hidden="true"></i></button>';
+    }
+    return "<button " + common + ' class="spine' + dim + pick + '" style="height:' + h + "px;width:" + w + 'px">' + spineTitle(it.title, size, "", f.parts) +
+      (showBy ? '<span class="sp-by">' + esc(it.by) + "</span>" : '<span class="sp-by"></span>') + '<span class="sp-no">' + cls + "</span></button>";
+  }
+  function cfaCaseHTML(items) {
+    var vols = items.map(function (it) {
+      var bs = bookState(it.id), name = it.title.replace(/（.*）$/, ""), code = { "cfa-ethics": "ETH", "cfa-quant": "QM", "cfa-econ": "EC", "cfa-fsa": "FSA", "cfa-corp": "CI", "cfa-equity": "EQ", "cfa-fi": "FI", "cfa-deriv": "DER", "cfa-alt": "ALT", "cfa-pm": "PM" }[it.id] || "";
+      var cls = bs.s === "done" || bs.s === "review" ? " done" : bs.s === "doing" ? " doing" : "";
+      var dim = shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim";
+      return '<button type="button" class="vol' + cls + dim + (S.shelfPick === it.id ? " picked" : "") + '" data-act="pick" data-id="' + esc(it.id) + '" style="--p:' + Math.round(bs.pct * 100) + '%" title="CFA 一级 · ' + esc(it.title) + '"><span class="sp-t" style="font-size:12px">' + esc(name) + '</span><span class="vol-c">' + code + "</span>" + (bs.s === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
+    }).join("");
+    var g = GOAL.cfa;
+    return '<div class="case"><div class="case-h"><span>CFA 一级 · 十册函套</span>' + (g ? '<a class="case-tag" href="#g-cfa">目标线 · ' + hrs(goalMin(g)) + " / " + goalTotal(g) + " h</a>" : "") + '</div><div class="case-box"><div class="case-in">' + vols + '</div><i class="clasp" aria-hidden="true"></i><i class="clasp b" aria-hidden="true"></i></div></div>';
+  }
+  function compartmentHTML(tid, w) {
+    var t = TRACK[tid], col = SHELF_COL[tid] || "--ln-rev";
+    var all = []; t.stages.forEach(function (s) { s.items.forEach(function (it) { if (it.home === tid && all.indexOf(it) < 0) all.push(it); }); });
+    var books = all.filter(function (it) { return it.kind === "book"; });
+    var cfa = tid === "fin" ? t.stages[0].items.filter(function (it) { return /^cfa-/.test(it.id) && it.kind === "topic"; }) : [];
+    var other = all.filter(function (it) { return it.kind !== "book" && cfa.indexOf(it) < 0; });
+    var nRead = books.filter(function (it) { return bookState(it.id).s === "doing"; }).length, nDone = books.filter(function (it) { var s = bookState(it.id).s; return s === "done" || s === "review"; }).length;
+    var meta = books.length + " 本" + (cfa.length ? " + 十册" : "") + (nRead ? " · 在读 " + nRead : "") + (nDone ? " · 读完 " + nDone : "");
+    /* 书多的格子把书脊按比例压窄，保证放得下 */
+    var nKids = books.length + (cfa.length ? 1 : 0) + (other.length ? 1 : 0) + 1;
+    var fixed = (cfa.length ? cfa.length * 26 + (cfa.length - 1) * 3 + 36 + 22 + 4 : 0) + (other.length ? 68 : 0) + 19 + 4 * (nKids - 1);
+    var room = w - 32 - fixed - 4, natural = books.reduce(function (a, it) { return a + spineW(it); }, 0), sc = natural ? Math.min(1, room / natural) : 1;
+    for (var pass = 0; pass < 4 && sc < 1; pass++) {
+      var used = books.reduce(function (a, it) { var f = fitSpine(it, spineH(it)); return a + Math.max(f.two ? 36 : 28, Math.round((spineW(it) - (bookState(it.id).s === "doing" ? 6 : 0)) * sc)) + (bookState(it.id).s === "doing" ? 6 : 0); }, 0);
+      if (used <= room) break;
+      sc *= 1 - (used - room) / used - 0.01;
+    }
+    var row = (cfa.length ? cfaCaseHTML(cfa) : "") + books.map(function (it, i) { return spineHTML(it, tid, i + 1, sc); }).join("") +
+      (other.length ? '<a class="pbox" href="#t-' + tid + '" title="' + esc(other.map(function (x) { return x.title; }).join("、")) + '"><b>' + other.length + "</b><span>练习与专题</span></a>" : "") +
+      '<span class="bookend" aria-hidden="true"></span>';
+    return '<div class="bay" style="--c:var(' + col + ');--w:' + w + 'px"><div class="bay-row">' + row + '</div><div class="lip"><a class="plate" href="#t-' + tid + '"><b class="cls">' + SHELF_CLS[tid] + "</b><b>" + esc(t.short) + "</b><span>" + esc(meta) + "</span></a></div></div>";
+  }
+  function pulledHTML() {
+    var id = S.shelfPick, it = ITEMS[id];
+    if (!it) { id = S.shelfPick = FOCUS.filter(function (b) { return bookState(b).s === "doing"; })[0] || FOCUS[0]; it = ITEMS[id]; }
+    if (!it) return "";
+    var b = LIB.books[id], bs = bookState(id), t = TRACK[it.home] || {}, col = SHELF_COL[it.home] || "--ln-rev";
+    var lineName = id === "tragedy" ? "自选线 · 地缘" : id === "zhoulu" ? "自选线 · 随时读" : /^cfa-/.test(id) ? "目标线上的一站" : "";
+    var head = '<p class="eyebrow">抽出来的书</p><div class="pb-h" style="--c:var(' + col + ')"><span class="pb-bar" aria-hidden="true"></span><div><h2 id="pulled-h">' + esc(it.title.replace(/（.*）$/, "")) + "</h2>" +
+      '<p class="meta">' + esc([it.by, t.short, lineName].filter(Boolean).join(" · ")) + "</p></div></div>";
+    if (!b) {
+      var cnt = /^cfa-q|^cfa-e/.test(id) && bs.pct ? '<p class="meta">课表里学到 ' + Math.round(bs.pct * 100) + "%</p>" : "";
+      return '<aside class="pulled" aria-labelledby="pulled-h">' + head + (it.why ? '<p class="pb-why">' + esc(it.why) + "</p>" : "") + cnt +
+        '<div class="pb-st">' + statusCtl(id, it.title) + "</div>" + noteBlock(id, "我的批注", "读到哪、想到什么，写在这里") +
+        '<div class="btns"><a class="btn ghost small" href="#t-' + it.home + '">' + esc(t.short || "") + " 方向全部内容</a></div></aside>";
+    }
+    var segs = b.chapters.map(function (c, i) { return '<span class="fe-s' + (i < bs.done ? " r" : "") + '"></span>'; }).join("");
+    var nums = b.chapters.map(function (c, i) { return '<span class="' + (i === bs.done ? "cur" : i < bs.done ? "r" : "") + '">' + CN[c.n] + "</span>"; }).join("");
+    var next = b.chapters[Math.min(bs.done, b.chapters.length - 1)];
+    var mins = id === "tragedy" ? subjMin("geo") : id === "zhoulu" ? (minutesBy().tao || 0) : 0;
+    var nNotes = Object.keys(S.data.notes).filter(function (k) { return k === id || k.indexOf(id + "-") === 0; }).length;
+    var chs = b.chapters.map(function (c, i) {
+      var k = i < bs.done ? "d" : i === bs.done ? "c" : "";
+      return '<li class="' + k + '"><i aria-hidden="true"></i><button type="button" class="linkrow" data-act="open-ch" data-book="' + id + '" data-n="' + c.n + '"><span class="pb-cn">第' + CN[c.n] + "章</span>" + esc(c.title) + "</button></li>";
+    }).join("");
+    var lastNote = Object.keys(S.data.notes).filter(function (k) { return k.indexOf(id + "-ch") === 0 && S.data.notes[k].text; }).sort(function (a, c) { return String(S.data.notes[c].t || "").localeCompare(String(S.data.notes[a].t || "")); })[0];
+    var noteFig = lastNote ? '<figure class="pb-note"><figcaption>我的批注 · ' + esc(refLabel(lastNote).replace(/^《.*》/, "")) + "</figcaption><p>" + esc(S.data.notes[lastNote].text.slice(0, 120)) + "</p></figure>" : "";
+    var deepN = Object.keys(b.deep || {});
+    return '<aside class="pulled" aria-labelledby="pulled-h" style="--c:var(' + col + ')">' + head +
+      '<div class="fe"><div class="fe-top"><span>书口 · 读过的部分翻旧了</span><span>' + Math.round(bs.pct * 100) + '%</span></div><div class="fe-wrap"><div class="fe-block" aria-hidden="true">' + segs + '</div><i class="fe-rib" style="left:' + (bs.done / b.chapters.length * 100) + '%" aria-hidden="true"></i></div><div class="fe-n" aria-hidden="true">' + nums + "</div></div>" +
+      '<div class="pb-stats"><div><b>' + bs.done + "<small> / " + bs.total + "</small></b><span>章读完</span></div><div><b>" + nNotes + "</b><span>条批注</span></div><div><b>" + hrs(mins) + "</b><span>小时</span></div></div>" +
+      '<ol class="pb-chs">' + chs + "</ol>" + noteFig +
+      '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + id + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章</button>" +
+      (deepN.length ? '<a class="btn ghost" href="#r-' + id + "-" + deepN[0] + '">精读稿</a>' : "") + '<a class="btn ghost" href="#b-' + id + '">整本书</a></div></aside>';
+  }
+  function drawerHTML() {
+    var list = REPORTS.slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
+    var cards = list.map(function (rp, i) {
+      var tr = (rp.tracks || []).map(function (x) { return TRACK[x] ? TRACK[x].short : ""; }).filter(Boolean).join(" · ");
+      var rows = [];
+      if (rp.origin) rows.push(["出处", rp.origin]);
+      (rp.uses || []).forEach(function (u) { rows.push(["用途", useLabel(u) + (u[2] ? "：" + u[2] : "")]); });
+      if (rp.refresh) rows.push(["更新", rp.refresh]);
+      return '<article class="ccard" style="--tab:' + [6, 38, 64, 20][i % 4] + '%"><span class="cc-tab">' + esc(tr || "研究") + '</span><div class="cc-no"><span>研-' + ("00" + (i + 1)).slice(-3) + "</span><span>" + esc(String(rp.date || "").replace("-", ".")) + "</span></div>" +
+        '<h3>' + esc(rp.title) + "</h3><p>" + esc(rp.question ? "问：" + rp.question : rp.desc) + "</p>" +
+        (rows.length ? "<dl>" + rows.map(function (r) { return "<dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("") + "</dl>" : "") +
+        '<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开专题 ↗</a><i class="cc-hole" aria-hidden="true"></i></article>';
+    }).join("");
+    return '<section class="drawer" id="archive" aria-labelledby="arch-h"><div class="dr-front"><div class="dr-label"><h2 id="arch-h">研究档案</h2><span>研 001—' + ("00" + list.length).slice(-3) + '</span></div><i class="dr-pull" aria-hidden="true"></i><span class="dr-note">书架下面的抽屉 · 一份讨论或资料一张卡</span></div>' +
+      '<div class="dr-in"><div class="cc-grid">' + cards + '<div class="ccard next"><b>下一张卡</b><span>讨论完一个问题、查完一份资料，说一句“放进研习录”，抽屉里就多一张卡，线网图上也多一个地标。</span></div></div></div></section>';
   }
   function shelfHTML() {
-    var items = allItems(), doneN = items.filter(isDone).length;
-    var js = journalEntries(), mins = js.reduce(function (a, e) { return a + (Number(e.minutes) || 0); }, 0);
-    var due = dueCards().length;
-    var rows = LIB.tracks.map(function (t) {
-      var p = trackProg(t), pct = p.total ? Math.round(p.done / p.total * 100) : 0;
-      return '<a class="trow" href="#t-' + t.id + '"><span class="tname">' + esc(t.name) + '</span><span class="tgoal">' + esc(t.goal) + '</span>' +
-        '<span class="tprog"><span class="bar"><span style="width:' + pct + '%"></span></span><span>' + p.done + " / " + p.total + " 项" + (p.doing ? " · " + p.doing + " 项进行中" : "") + "</span></span></a>";
+    var books = allItems().filter(function (id) { return ITEMS[id].kind === "book"; });
+    var cnt = { doing: 0, done: 0, todo: 0 };
+    books.forEach(function (id) { var s = bookState(id).s; cnt[s === "review" ? "done" : s] = (cnt[s === "review" ? "done" : s] || 0) + 1; });
+    var f = S.shelfF || "all";
+    function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="shelf-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
+    var cab = SHELF_ROWS.map(function (row) {
+      return '<div class="tier">' + row.map(function (c) {
+        if (c[0] === "+") return '<div class="bay niche" style="--w:' + c[1] + 'px"><button type="button" class="addbook" data-act="add-book">＋加一本</button><span class="meta">说书名<br>就行</span><div class="lip"></div></div>';
+        return TRACK[c[0]] ? compartmentHTML(c[0], c[1]) : "";
+      }).join("") + "</div>";
     }).join("");
-    return '<div class="view">' + bannerHTML() +
-      '<header><p class="eyebrow">研习录 · 始于 2026 年 10 月</p><h1>书架</h1>' +
-      '<p class="lede">正在精读的书、五个学习方向和研究档案都在这里。每天学什么，回到首页的线网看。</p>' +
-      '<div class="stats"><span><b>' + doneN + "</b>/ " + items.length + ' 项已完成</span><span><b>' + js.length + '</b>条学习足迹</span><span><b>' + (Math.round(mins / 6) / 10) + '</b>小时累计</span><span><b>' + due + "</b>张概念卡待复习</span></div></header>" +
-      '<section class="focus" aria-label="正在精读"><div class="focus-top"><p class="eyebrow">正在精读</p><a class="btn small ghost" href="#review">复习概念卡</a></div>' +
-      FOCUS.map(focusBlock).join("") + "</section>" +
-      '<section><h2>五个学习方向</h2><div class="tracks">' + rows + "</div></section>" +
-      '<section id="archive"><h2>研究档案</h2><p class="meta">讨论和查资料留下的成果。它们不在任何一条线上，不算进度；每份写清当时要回答的问题、从哪儿来、还能拿来做什么。</p>' +
-      RGROUPS.map(function (g) { var rs = reportsIn(g.id);
-        return rs.length ? '<h3 class="arch-h">' + esc(g.name) + '</h3><div class="reports">' + reportRows(rs, true) + "</div>" : ""; }).join("") + "</section>" +
-      '<section class="pair"><div class="col"><h2>最近的学习足迹</h2>' + journalList(js.slice(0, 4), false) + '<p class="more"><a href="#journal">全部足迹</a></p></div>' +
-      '<div class="col"><h2>怎么用</h2><ol class="steps">' +
-      "<li><span><b>读与问</b>按路线图读书；有疑问就在对话里和 Claude 讨论。</span></li>" +
-      "<li><span><b>留痕</b>在这里标进度、写批注、记一笔学习足迹。</span></li>" +
-      "<li><span><b>整理入库</b>讨论完说一句“更新研习录”，讨论成果会写进对应模块。</span></li>" +
-      "<li><span><b>同步</b>每次更新都推送到 GitHub，保留完整的版本历史。</span></li>" +
-      "<li><span><b>复习</b>概念卡按 1、3、7、16、35 天的间隔安排复习。</span></li>" +
-      "</ol></div></section></div>";
+    return '<div class="view shelf">' + bannerHTML() +
+      '<header class="phead"><div><p class="eyebrow">五个方向 · ' + books.length + ' 本书 + CFA 十册</p><h1>书架<span class="h1-sub">博古架</span></h1>' +
+      '<p class="lede">一个方向一格，三层装下。每本书是一条竖起来的线，书脊上一章一站；点一本书，把它抽出来看。</p>' +
+      '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", books.length) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></div>" +
+      '<div class="sp-legend" aria-hidden="true"><span><i class="lg-s"></i>只勾了线：还没读</span><span><i class="lg-s doing"></i>抽出半截、颜色染到读到的地方：在读</span><span><i class="lg-s done"></i>整本上色、盖章：读完</span></div></header>' +
+      '<div class="shelf-main"><section class="cabinet" aria-label="博古架"><div class="cab-top"><span>研习书架</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + pulledHTML() + "</div>" +
+      drawerHTML() + "</div>";
   }
 
   /* ---------- 方向页 ---------- */
@@ -466,7 +596,7 @@
   function cardsTab(bid) {
     var b = LIB.books[bid], due = dueCards().filter(function (c) { return c.book === bid; }).length;
     var nPrompt = b.cards.filter(function (c) { return c.prompt; }).length;
-    return '<div class="cards-head"><p>点卡片翻面。复习时按记忆程度分盒，记得越牢，下次复习隔得越久。' + (nPrompt ? "精读稿里另有 " + nPrompt + " 道嵌入自测题，读到并自评之后才进入复习。" : "") + '</p><a class="btn" href="#review">' + (due ? "开始复习（" + due + " 张到期）" : "今天没有到期的卡片") + "</a></div>" +
+    return '<div class="cards-head"><p>点卡片翻面，先自己说出答案再看背面。' + (nPrompt ? "精读稿里另有 " + nPrompt + " 道嵌入自测题。" : "") + "</p></div>" +
       '<div class="cards">' + b.cards.filter(function (c) { return !c.prompt; }).map(function (c) {
         var fl = !!S.flipped[c.id];
         return '<button type="button" class="card' + (fl ? " flipped" : "") + (S.hl === c.id ? " hl" : "") + '" id="card-' + c.id + '" data-act="flip" data-card="' + c.id + '" aria-pressed="' + fl + '">' +
@@ -667,24 +797,213 @@
     });
     return h;
   }
+  /* ---------- 足迹：经折集章册 ----------
+   * 折起来一页一周，整本拉开是一幅长卷。一条线占一行，哪天学了就在那一格盖它的章，章上是课号。
+   * 数据：打卡记录（study/progress.json 的 days：planned、done、minutes、note）和随手记（journal）。 */
+  var STAMP_TOP = { film: "电影", sql: "SQL", py: "PY", cfa: "CFA", en: "EN", geo: "地缘", tao: "周期" };
+  function polyPts(n, r, start) {
+    var o = [];
+    for (var k = 0; k < n; k++) { var a = (start + 360 * k / n) * Math.PI / 180; o.push(r1(r * Math.cos(a)) + "," + r1(-r * Math.sin(a))); }
+    return o.join(" ");
+  }
+  function stampSVG(kind, label, x, y, rot, sc) {
+    var c = "var(" + (kind === "en" ? "--ln-cfa" : LINE_COLOR[kind] || "--ln-rev") + ")", bg = "var(--stamp-bg)", fr, tc = c;
+    var o = 'style="fill:' + bg + ";stroke:" + c + ';stroke-width:2.6"', i = 'style="fill:none;stroke:' + c + ';stroke-width:1"';
+    if (kind === "film") fr = '<circle r="21.5" ' + o + '/><circle r="17.5" ' + i + "/>";
+    else if (kind === "sql") fr = '<rect x="-20" y="-20" width="40" height="40" rx="7" ' + o + '/><rect x="-16.5" y="-16.5" width="33" height="33" rx="4" ' + i + "/>";
+    else if (kind === "py") fr = '<polygon points="' + polyPts(6, 23, 90) + '" ' + o + '/><polygon points="' + polyPts(6, 19, 90) + '" ' + i + "/>";
+    else if (kind === "cfa") { fr = '<rect x="-19.5" y="-19.5" width="39" height="39" rx="2" style="fill:' + c + '"/><rect x="-16" y="-16" width="32" height="32" style="fill:none;stroke:' + bg + ';stroke-width:.9"/>'; tc = bg; }
+    else if (kind === "en") fr = '<rect x="-19.5" y="-19.5" width="39" height="39" rx="2" ' + o + '/><rect x="-16" y="-16" width="32" height="32" ' + i + "/>";
+    else if (kind === "geo") fr = '<ellipse rx="25" ry="18.5" ' + o + '/><ellipse rx="21" ry="14.8" ' + i + "/>";
+    else fr = '<polygon points="' + polyPts(8, 21, 112.5) + '" ' + o + '/><polygon points="' + polyPts(8, 17, 112.5) + '" ' + i + "/>";
+    var s = String(label), big = /^\d+$/.test(s) ? (s.length <= 2 ? 18 : 14) : s.length <= 2 ? 13 : 11;
+    return '<g class="stamp" transform="translate(' + r1(x) + " " + r1(y) + ") rotate(" + r1(rot) + ") scale(" + (sc || 1) + ')"><g filter="url(#inkLite)">' + fr + "</g>" +
+      '<text y="-6.5" class="st-top" style="fill:' + tc + '">' + esc(STAMP_TOP[kind] || "") + '</text><text y="11.5" class="st-num" style="fill:' + tc + ";font-size:" + big + 'px">' + esc(s) + "</text></g>";
+  }
+  function foldLanes() {
+    var lanes = GOALS.map(function (g) { return { id: g.id, name: g.name, sub: g.end, kind: "目标线", subjs: g.subjs, col: g.color, est: goalTotal(g), min: goalMin(g) }; });
+    lanes.push({ id: "film", name: "英语·电影跟读", sub: PLAN.subjects.film ? "《" + PLAN.subjects.film.film + "》" : "", kind: "自选线", subjs: ["film"], col: "--ln-en", est: subjEstMin("film") / 60, min: subjMin("film") });
+    lanes.push({ id: "geo", name: LIB.books.tragedy ? LIB.books.tragedy.title : subjName("geo"), sub: "精读", kind: "自选线", subjs: ["geo"], col: "--ln-geo", est: subjEstMin("geo") / 60, min: subjMin("geo") });
+    if (journalEntries().some(function (e) { return String(e.ref || "").indexOf("zhoulu") === 0; })) lanes.push({ id: "tao", name: "涛动周期录", sub: "随时读", kind: "自选线", subjs: ["tao"], col: "--ln-tao", est: 0, min: minutesBy().tao || 0 });
+    return lanes;
+  }
+  function jByDate() {
+    var o = {}; journalEntries().forEach(function (e) { (o[e.date] = o[e.date] || []).push(e); }); return o;
+  }
+  /* 某一天：盖了哪些章、学了多少分钟、打卡状态 */
+  function dayInfo(d, JD) {
+    var rec = curStudy().days[d], out = { d: d, rec: rec, stamps: [], min: 0, status: "" };
+    if (rec && rec.planned) {
+      var done = rec.done || [];
+      rec.planned.forEach(function (s) {
+        if (done.indexOf(s.subj) < 0 || s.subj === "prep") return;
+        out.stamps.push({ subj: s.subj, label: s.review ? "回看" : s.subj === "en" ? "术语" : s.index != null ? s.index + 1 : "学" });
+      });
+      if (checkedIn(rec)) out.min += Number(rec.minutes) || rec.planned.filter(function (s) { return done.indexOf(s.subj) >= 0; }).reduce(function (a, s) { return a + (s.mins || 0); }, 0);
+      out.status = rec.status || "";
+    }
+    (JD[d] || []).forEach(function (e) {
+      out.min += Number(e.minutes) || 0;
+      var m = /^zhoulu(?:-ch(\d+))?/.exec(String(e.ref || ""));
+      if (m) out.stamps.push({ subj: "tao", label: m[1] || "读" });
+    });
+    return out;
+  }
+  function milestones(JD) {
+    var t = bjToday(), out = {}, cum = 0, streak = 0, first = true, hrsMarks = [10, 25, 50, 100, 200, 300, 500, 750, 1000], hi = 0, stMarks = [7, 14, 21, 30, 50, 100];
+    var start = addDaysBJ(PLAN.start, -1);
+    for (var d = start; d <= t; d = addDaysBJ(d, 1)) {
+      var di = dayInfo(d, JD), studied = di.stamps.length > 0 || di.min > 0;
+      if (studied && first) { out[d] = { t: "开通", ring: "第一次盖章", col: "--seal" }; first = false; }
+      streak = studied ? streak + 1 : d === t ? streak : 0;
+      if (studied && stMarks.indexOf(streak) >= 0) out[d] = { t: streak + "天", ring: "连续打卡", col: "--seal" };
+      cum += di.min;
+      while (hi < hrsMarks.length && cum / 60 >= hrsMarks[hi]) { out[d] = { t: hrsMarks[hi] + "时", ring: "累计学习", col: "--seal" }; hi++; }
+    }
+    var ck = curStudy().checks || {};
+    Object.keys(ck).forEach(function (k) {
+      var m = /^([a-z]+)-(\d+)$/.exec(k), g = m && GOAL[m[1]];
+      if (g && g.stations[+m[2]]) out[ck[k]] = { t: "过站", ring: g.stations[+m[2]].name, col: g.color };
+    });
+    return out;
+  }
+  function foldSVG(lanes, ws, JD, MS) {
+    var W = 1344, HDR = 176, PAST0 = 182, P0 = 226, NP = 3, PW = 354, COLW = 47, PADL = (PW - 7 * COLW) / 2, FUT0 = P0 + NP * PW + 6;
+    var RH = 76, Y_TOP = 34, Y_DAY = 66, Y_ROW = 112, Y_SEAL = Y_ROW + lanes.length * RH + 4, SEALH = 86, Y_BAR = Y_SEAL + SEALH + 4, BARH = 66, Y_FOOT = Y_BAR + BARH + 6, Y_BOT = Y_FOOT + 30, H = Y_BOT + 12;
+    var t = bjToday(), weeks = PLAN.weeks || 12, NW = "一二三四五六七八九十";
+    function wname(k) { k += 1; return k <= 10 ? NW[k - 1] : k < 20 ? "十" + NW[k - 11] : String(k); }
+    var o = ['<svg class="fold" viewBox="0 0 ' + W + " " + H + '" role="group" aria-label="经折集章册：第' + wname(ws) + "到第" + wname(ws + NP - 1) + '周">'];
+    o.push('<defs><filter id="inkLite" x="-15%" y="-15%" width="130%" height="130%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="7" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 -1.6 1.75" result="m"/><feComposite in="SourceGraphic" in2="m" operator="in" result="t"/><feTurbulence type="fractalNoise" baseFrequency="0.06" numOctaves="2" seed="3" result="w"/><feDisplacementMap in="t" in2="w" scale="1.4" xChannelSelector="R" yChannelSelector="G"/></filter>' +
+      '<filter id="wash" x="-20%" y="-5%" width="140%" height="110%"><feTurbulence type="fractalNoise" baseFrequency="0.09" numOctaves="2" seed="4" result="w"/><feDisplacementMap in="SourceGraphic" in2="w" scale="2.2" xChannelSelector="R" yChannelSelector="G"/></filter>' +
+      '<linearGradient id="foldA" x1="0" x2="1"><stop offset="0" stop-color="#5A4520" stop-opacity="0"/><stop offset=".75" stop-color="#5A4520" stop-opacity=".02"/><stop offset="1" stop-color="#5A4520" stop-opacity=".16"/></linearGradient>' +
+      '<linearGradient id="foldB" x1="0" x2="1"><stop offset="0" stop-color="#5A4520" stop-opacity=".16"/><stop offset=".25" stop-color="#5A4520" stop-opacity=".02"/><stop offset="1" stop-color="#5A4520" stop-opacity="0"/></linearGradient></defs>');
+    lanes.forEach(function (ln, i) {
+      var yc = Y_ROW + i * RH + RH / 2, goal = ln.kind === "目标线", hv = hrs(ln.min);
+      o.push(tx(0, yc - 16, ln.name, "fd-ln") + tx(0, yc + 1, ln.sub, "fd-sub"));
+      o.push('<rect x="0" y="' + (yc + 8) + '" width="44" height="17" rx="8.5" style="' + (goal ? "fill:var(" + ln.col + ");stroke:var(" + ln.col + ")" : "fill:none;stroke:var(" + ln.col + ")") + '"/><text x="22" y="' + (yc + 20.5) + '" text-anchor="middle" class="fd-k" style="fill:' + (goal ? "var(--bdg-on)" : "var(" + ln.col + ")") + '">' + ln.kind + "</text>");
+      o.push(tx(52, yc + 21, hv + (ln.est ? "/" + Math.round(ln.est) : "") + " h", "fd-h"));
+      if (ln.est) o.push('<rect x="0" y="' + (yc + 30) + '" width="160" height="4" rx="2" class="fd-trk"/><rect x="0" y="' + (yc + 30) + '" width="' + Math.max(2, Math.min(160, 160 * hv / ln.est)) + '" height="4" rx="2" style="fill:var(' + ln.col + ')"/>');
+    });
+    o.push(tx(0, Y_SEAL + 38, "纪念章", "fd-ln") + tx(0, Y_SEAL + 56, "开通、累计、连续打卡", "fd-sub"));
+    o.push(tx(0, Y_BAR + 34, "每天学了多久", "fd-ln") + tx(0, Y_BAR + 52, "墨条越高学得越久", "fd-sub"));
+    o.push('<rect x="' + (PAST0 - 8) + '" y="' + (Y_TOP - 8) + '" width="' + (FUT0 + 52 - PAST0 + 8) + '" height="' + (Y_BOT - Y_TOP + 16) + '" rx="6" class="fd-cover"/>');
+    var leftTxt = ws > 0 ? "第一" + (ws > 1 ? "至" + wname(ws - 1) : "") + "周已合上" : "从" + (+PLAN.start.slice(5, 7)) + "月" + (+PLAN.start.slice(8, 10)) + "日开始";
+    var rightTxt = ws + NP < weeks ? "第" + wname(ws + NP) + "周起还没翻开" : "第一阶段到这里";
+    [[PAST0, 38, leftTxt, ws > 0 ? -1 : 0], [FUT0, 44, rightTxt, ws + NP < weeks ? 1 : 0]].forEach(function (sk) {
+      var g = '<g class="fd-stack' + (sk[3] ? " act" : "") + '"' + (sk[3] ? ' data-act="fold-nav" data-d="' + sk[3] + '" role="button" tabindex="0" aria-label="' + (sk[3] < 0 ? "往前翻一周" : "往后翻一周") + '"' : "") + ">";
+      for (var k = 0; k < 7; k++) g += '<rect x="' + (sk[0] + k * 5) + '" y="' + (Y_TOP + 2) + '" width="' + (sk[1] - k * 5) + '" height="' + (Y_BOT - Y_TOP - 4) + '" class="fd-pg' + (k % 2 ? " b" : "") + '"/>';
+      sk[2].split("").forEach(function (ch, i) { g += tx(sk[0] + (sk[1] === 38 ? 20 : 26), Y_TOP + 60 + i * 16, ch, "fd-st", "middle"); });
+      o.push(g + "</g>");
+    });
+    var late = [];
+    for (var w = 0; w < NP; w++) {
+      var x0 = P0 + w * PW, wk = ws + w, d0 = addDaysBJ(PLAN.start, wk * 7), d6 = addDaysBJ(d0, 6);
+      o.push('<rect x="' + x0 + '" y="' + Y_TOP + '" width="' + PW + '" height="' + (Y_BOT - Y_TOP) + '" class="fd-paper"/><rect x="' + x0 + '" y="' + Y_TOP + '" width="' + PW + '" height="' + (Y_BOT - Y_TOP) + '" fill="url(#' + (w % 2 ? "foldB" : "foldA") + ')"/>');
+      if (w) o.push('<line x1="' + x0 + '" y1="' + Y_TOP + '" x2="' + x0 + '" y2="' + Y_BOT + '" class="fd-crease"/>');
+      var curW = t >= d0 && t <= d6;
+      o.push(tx(x0 + PADL, Y_TOP + 22, "第" + wname(wk) + "周", "fd-wk" + (curW ? " cur" : "")) + tx(x0 + PW - PADL, Y_TOP + 22, (+d0.slice(5, 7)) + "/" + (+d0.slice(8, 10)) + "—" + (+d6.slice(5, 7)) + "/" + (+d6.slice(8, 10)), "fd-rng", "end"));
+      o.push('<line x1="' + (x0 + PADL) + '" y1="' + (Y_TOP + 31) + '" x2="' + (x0 + PW - PADL) + '" y2="' + (Y_TOP + 31) + '" class="fd-rule"/><line x1="' + (x0 + PADL) + '" y1="' + (Y_TOP + 34) + '" x2="' + (x0 + PW - PADL) + '" y2="' + (Y_TOP + 34) + '" class="fd-rule"/>');
+      lanes.forEach(function (ln, i) {
+        var yc = Y_ROW + i * RH + RH / 2;
+        o.push('<line x1="' + x0 + '" y1="' + yc + '" x2="' + (x0 + PW) + '" y2="' + yc + '" class="fd-thread' + (ln.kind === "目标线" ? " goal" : "") + '" style="stroke:var(' + ln.col + ')"/>');
+        if (i) o.push('<line x1="' + (x0 + PADL) + '" y1="' + (Y_ROW + i * RH) + '" x2="' + (x0 + PW - PADL) + '" y2="' + (Y_ROW + i * RH) + '" class="fd-row"/>');
+      });
+      o.push('<line x1="' + (x0 + PADL) + '" y1="' + Y_SEAL + '" x2="' + (x0 + PW - PADL) + '" y2="' + Y_SEAL + '" class="fd-rule dash"/><line x1="' + (x0 + PADL) + '" y1="' + (Y_BAR + BARH) + '" x2="' + (x0 + PW - PADL) + '" y2="' + (Y_BAR + BARH) + '" class="fd-base"/>');
+      var wkMin = 0;
+      for (var c = 0; c < 7; c++) {
+        var d = addDaysBJ(d0, c), cx = x0 + PADL + c * COLW + COLW / 2, fut = d > t, isT = d === t, di = dayInfo(d, JD), sel = S.foldDay === d;
+        o.push('<g class="fd-day' + (sel ? " sel" : "") + '" data-act="fold-day" data-d="' + d + '" role="button" tabindex="' + (fut ? -1 : 0) + '" aria-label="' + cnDate(d) + (di.stamps.length ? "，盖了 " + di.stamps.length + " 枚章" : "") + '"><rect x="' + (cx - COLW / 2 + 1) + '" y="' + (Y_DAY - 2) + '" width="' + (COLW - 2) + '" height="' + (Y_BAR + BARH - Y_DAY + 4) + '" rx="4" class="fd-hit"/></g>');
+        o.push(tx(cx, Y_DAY + 14, "一二三四五六日"[c], "fd-wd" + (c >= 5 ? " we" : "")) + tx(cx, Y_DAY + 33, String(+d.slice(8, 10)), "fd-dn" + (isT ? " today" : fut ? " fut" : "")));
+        if (+d.slice(8, 10) === 1) o.push(tx(cx, Y_TOP - 10, (+d.slice(5, 7)) + " 月", "fd-mo", "middle") + '<line x1="' + cx + '" y1="' + (Y_TOP - 6) + '" x2="' + cx + '" y2="' + Y_TOP + '" class="fd-base"/>');
+        if (isT) o.push('<rect x="' + (cx - COLW / 2 + 1) + '" y="' + (Y_DAY - 2) + '" width="' + (COLW - 2) + '" height="' + (Y_BAR + BARH - Y_DAY + 4) + '" rx="4" class="fd-today"/>' + tx(cx, Y_BAR + BARH + 20, "今日", "fd-tl", "middle"));
+        if (fut) continue;
+        if (di.rec && (di.rec.done || []).indexOf("rev") >= 0) o.push('<g transform="translate(' + (cx + 15) + " " + (Y_DAY + 28.5) + ')" class="fd-chk"><circle r="7"/><text y="3.5" text-anchor="middle">检</text></g>');
+        lanes.forEach(function (ln, i) {
+          var ss = di.stamps.filter(function (s) { return ln.subjs.indexOf(s.subj) >= 0; });
+          ss.forEach(function (s, j) {
+            var off = ss.length > 1 ? (j - (ss.length - 1) / 2) * 18 : 0;
+            o.push(stampSVG(s.subj, s.label, cx + off, Y_ROW + i * RH + RH / 2, (hashN(d + s.subj) % 11) - 5, ss.length > 1 ? 0.72 : 0.98));
+          });
+        });
+        wkMin += di.min;
+        if (di.min) { var bh = Math.min(BARH - 8, di.min / 220 * (BARH - 8)); o.push('<rect x="' + (cx - 9) + '" y="' + r1(Y_BAR + BARH - bh) + '" width="18" height="' + r1(bh) + '" rx="2" class="fd-bar"/>' + tx(cx, Y_BAR + BARH - bh - 5, String(Math.round(di.min)), "fd-bn", "middle")); }
+        else if (!isT && di.rec && di.rec.planned && d !== PLAN.prep) o.push(tx(cx, Y_BAR + BARH - 8, di.status === "missed" ? "没学" : checkedIn(di.rec) ? "" : "未打卡", "fd-miss", "middle"));
+        if (MS[d]) {
+          var ms = MS[d], sx = cx + (c === 0 ? 16 : c === 6 ? -16 : 0);
+          late.push('<g class="fd-seal" transform="translate(' + sx + " " + (Y_SEAL + SEALH / 2 + 2) + ") rotate(" + ((hashN(d) % 14) - 8) + ')" style="--sc:var(' + ms.col + ')"><g filter="url(#inkLite)"><circle r="34" class="o"/><circle r="29" class="i"/></g>' +
+            tx(0, -9, ms.ring, "s1", "middle") + tx(0, 11, ms.t, "s2", "middle") + tx(0, 23, (+d.slice(5, 7)) + "·" + (+d.slice(8, 10)), "s3", "middle") + "</g>");
+        }
+      }
+      o.push(tx(x0 + PADL, Y_FOOT + 16, "本周 " + hrs(wkMin) + " 小时", "fd-wt"));
+    }
+    o.push(late.join(""), "</svg>");
+    return o.join("");
+  }
+  function foldMiniHTML(ws, JD) {
+    var weeks = PLAN.weeks || 12, t = bjToday(), W = 1344, HDR = 176, cw = (W - HDR) / weeks;
+    var o = ['<svg class="fold-mini" viewBox="0 0 ' + W + ' 66" role="group" aria-label="全卷缩略：' + weeks + ' 周">' + tx(0, 26, "全卷", "fd-ln") + tx(0, 44, PLAN.phase + " · " + weeks + " 周", "fd-sub")];
+    for (var w = 0; w < weeks; w++) {
+      var x0 = HDR + w * cw, inWin = w >= ws && w < ws + 3;
+      o.push('<g class="fm-w" data-act="fold-go" data-w="' + w + '" role="button" tabindex="0" aria-label="翻到第 ' + (w + 1) + ' 周"><rect x="' + r1(x0 + 2) + '" y="10" width="' + r1(cw - 4) + '" height="38" rx="3" class="fm-pg"/>');
+      for (var c = 0; c < 7; c++) {
+        var d = addDaysBJ(PLAN.start, w * 7 + c); if (d > t) continue;
+        var mn = dayInfo(d, JD).min; if (!mn) continue;
+        var bh = Math.min(28, mn / 220 * 28);
+        o.push('<rect x="' + r1(x0 + 8 + c * (cw - 16) / 7) + '" y="' + r1(44 - bh) + '" width="' + r1((cw - 16) / 7 - 3) + '" height="' + r1(bh) + '" class="fd-bar"/>');
+      }
+      o.push(tx(x0 + cw / 2, 64, String(w + 1), "fm-n" + (t >= addDaysBJ(PLAN.start, w * 7) && t <= addDaysBJ(PLAN.start, w * 7 + 6) ? " cur" : ""), "middle") + "</g>");
+    }
+    o.push('<rect x="' + r1(HDR + ws * cw) + '" y="4" width="' + r1(3 * cw) + '" height="50" rx="5" class="fm-win"/></svg>');
+    return o.join("");
+  }
+  function foldDayHTML(d, JD) {
+    var di = dayInfo(d, JD), rec = di.rec, je = JD[d] || [];
+    var head = '<div class="fdc-h"><h2 id="fdc-h">' + cnDate(d) + " · " + WD[wdOf(d)] + '</h2><span class="meta">' + (d === PLAN.prep ? "准备日" : rec ? (DAY_STATUS[rec.status] || "") : "") + (di.min ? " · " + Math.round(di.min) + " 分钟" : "") + "</span></div>";
+    var big = di.stamps.map(function (s) { return '<svg viewBox="-30 -30 60 60" width="64" height="64" aria-hidden="true">' + stampSVG(s.subj, s.label, 0, 0, 0, 1.1) + "</svg>"; }).join("");
+    var rows = rec && rec.planned ? rec.planned.map(function (s) {
+      var ok = (rec.done || []).indexOf(s.subj) >= 0, g = GOAL[GOAL_OF[s.subj]];
+      return '<li class="' + (ok ? "ok" : checkedIn(rec) ? "no" : "") + '"><i style="--c:var(' + (LINE_COLOR[s.subj] || "--ln-rev") + ')" aria-hidden="true"></i><a href="' + slotHref(s) + '"><b>' + esc(subjName(s.subj)) + (s.index != null && s.subj !== "film" ? " · 第 " + (s.index + 1) + " 课" : "") + "</b>" + (g ? '<span class="meta">' + esc(g.name) + "</span>" : "") + "<span>" + esc(s.title || "") + "</span></a><span class=\"fdc-m\">" + (ok ? s.mins + "′" : checkedIn(rec) ? "没学" : s.mins + "′") + "</span></li>";
+    }).join("") : "";
+    var notes = (rec && rec.note ? '<blockquote class="fdc-note">“' + esc(rec.note) + '”<span>晚上打卡时写的一句</span></blockquote>' : "") +
+      je.map(function (e) { return '<blockquote class="fdc-note j">' + esc(e.text) + "<span>随手记" + (e.minutes ? " · " + esc(e.minutes) + " 分钟" : "") + (e.ref ? " · " + esc(refLabel(e.ref)) : "") + "</span></blockquote>"; }).join("");
+    var empty = !rows && !notes ? '<p class="empty-line">这一天没有记录。</p>' : rec && !checkedIn(rec) && d < bjToday() ? '<p class="meta">这天还没打卡：学了的话，晚上打卡时一起说，章就补上。</p>' : "";
+    return '<section class="fdc" aria-labelledby="fdc-h">' + head + (big ? '<div class="fdc-st">' + big + "</div>" : "") + (rows ? '<ul class="fdc-l">' + rows + "</ul>" : "") + notes + empty +
+      (rec && rec.file ? '<div class="btns"><a class="btn ghost small" href="' + esc(lessonHref(rec.file)) + '">当天路线单</a></div>' : "") + "</section>";
+  }
+  function foldWS() {
+    var weeks = PLAN.weeks || 12, cw = Math.max(0, Math.min(weeks - 1, Math.floor(dayDiff(PLAN.start, bjToday()) / 7)));
+    var ws = S.foldStart != null ? S.foldStart : Math.max(0, cw - 2);
+    return Math.max(0, Math.min(weeks - 3, ws));
+  }
   function journalHTML() {
-    var js = journalEntries(), mins = js.reduce(function (a, e) { return a + (Number(e.minutes) || 0); }, 0);
-    var days = {}; js.forEach(function (e) { days[e.date] = 1; });
-    var form = S.canEdit ? '<form class="jform" id="j-form" autocomplete="off"><h2>记一笔</h2><div class="row">' +
+    if (!PLAN) return '<div class="view"><h1>足迹</h1></div>';
+    var JD = jByDate(), lanes = foldLanes(), t = bjToday(), weeks = PLAN.weeks || 12;
+    var cw = Math.max(0, Math.min(weeks - 1, Math.floor(dayDiff(PLAN.start, t) / 7))), ws = foldWS();
+    if (!S.foldDay) S.foldDay = curStudy().days[t] ? t : Object.keys(curStudy().days).filter(function (d) { return d <= t; }).sort().pop() || t;
+    var MS = milestones(JD), days = 0, stamps = 0, mins = 0;
+    for (var d = addDaysBJ(PLAN.start, -1); d <= t; d = addDaysBJ(d, 1)) { var di = dayInfo(d, JD); if (di.stamps.length || di.min) days++; stamps += di.stamps.length; mins += di.min; }
+    var js = journalEntries();
+    var stats = [[days, "天有章", "从 " + cnDate(PLAN.start) + " 起"], [stamps, "枚站章", "一行一条线"], [hrs(mins), "小时", "累计"], [curStudy().streak || 0, "天连续", "打卡"]];
+    var legend = ["sql", "py", "cfa", "film", "geo"].map(function (k) { return '<span><svg viewBox="-26 -26 52 52" width="38" height="38" aria-hidden="true">' + stampSVG(k, k === "film" ? 22 : 9, 0, 0, 0, 0.9) + "</svg>" + { sql: "SQL 课", py: "Python 课", cfa: "CFA 课", film: "电影段落", geo: "精读章节" }[k] + "</span>"; }).join("");
+    var form = S.canEdit ? '<form class="jform" id="j-form" autocomplete="off"><h3>记一笔</h3><div class="row">' +
       '<label class="field"><span>日期</span><input type="date" id="j-date" value="' + today() + '"></label>' +
       '<label class="field"><span>用时（分钟）</span><input type="number" id="j-min" min="0" step="5" inputmode="numeric" placeholder="例如 45"></label>' +
       '<label class="field ref"><span>关联内容</span><select id="j-ref">' + refOptions() + "</select></label></div>" +
       '<label class="field"><span>这次学了什么、想明白了什么</span><textarea id="j-text" rows="3" placeholder="例如：读完第二章。五个假设里，我最怀疑“理性行为体”这一条，因为……"></textarea></label>' +
-      '<div><button class="btn" type="submit">保存这条足迹</button></div></form>' : "";
-    var groups = {}, order = [];
-    js.forEach(function (e) { var m = String(e.date).slice(0, 7); if (!groups[m]) { groups[m] = []; order.push(m); } groups[m].push(e); });
-    var out = order.map(function (m) {
-      return '<section class="month"><h2>' + m.replace("-", " 年 ") + " 月</h2>" + journalList(groups[m], true) + "</section>";
-    }).join("");
-    return '<div class="view">' + bannerHTML() + '<header><p class="eyebrow">记录</p><h1>学习足迹</h1>' +
-      '<p class="lede">每次学习留一笔：读了什么、用了多久、想明白了什么。日积月累，就是一份可以回看的学习史。</p>' +
-      '<div class="stats"><span><b>' + js.length + '</b>条足迹</span><span><b>' + Object.keys(days).length + '</b>个学习日</span><span><b>' + (Math.round(mins / 6) / 10) + "</b>小时累计</span></div></header>" +
-      form + (out || '<p class="empty-line">还没有学习足迹。</p>') + "</div>";
+      '<div><button class="btn" type="submit">保存</button></div></form>' : "";
+    return '<div class="view fold-v">' + bannerHTML() +
+      '<header class="phead"><div><p class="eyebrow">' + esc(PLAN.phase) + '</p><h1>足迹<span class="h1-sub">经折集章册</span></h1>' +
+      '<p class="lede">折起来一页一周，整本拉开是一幅长卷。一条线占一行，哪天学了就在那一格盖它的章，章上是课号。晚上打卡后自动盖章。</p></div>' +
+      '<div class="pstats">' + stats.map(function (s) { return "<div><b>" + s[0] + "<span>" + s[1] + "</span></b><small>" + esc(s[2]) + "</small></div>"; }).join("") + "</div></header>" +
+      '<div class="fd-bar-top"><div class="fd-legend" aria-hidden="true">' + legend + '<span class="meta">章上的数字是课号</span></div><div class="fd-nav">' +
+      '<button type="button" class="chipbtn" data-act="fold-nav" data-d="-1"' + (ws <= 0 ? " disabled" : "") + ">‹ 往前翻</button>" +
+      (ws !== Math.max(0, Math.min(weeks - 3, cw - 2)) ? '<button type="button" class="chipbtn" data-act="fold-go" data-w="' + cw + '">回到本周</button>' : "") +
+      '<button type="button" class="chipbtn" data-act="fold-nav" data-d="1"' + (ws >= weeks - 3 ? " disabled" : "") + ">往后翻 ›</button></div></div>" +
+      '<section class="fold-w" aria-label="经折集章册"><div class="fold-scroll">' + foldSVG(lanes, ws, JD, MS) + "</div></section>" +
+      '<section class="fold-mini-w" aria-label="全卷缩略"><div class="fold-scroll">' + foldMiniHTML(ws, JD) + "</div></section>" +
+      '<div class="fd-grid">' + foldDayHTML(S.foldDay, JD) +
+      '<section class="panel" aria-labelledby="jr-h"><h2 id="jr-h">随手记</h2><p class="meta">课表之外读的书、查的资料、想明白的事，在这里记一笔；关联到《涛动周期录》的会盖在它那一行。</p>' + form +
+      journalList(js.slice(0, 8), true) + "</section></div></div>";
   }
 
   /* ---------- 每日课表 ---------- */
@@ -859,7 +1178,7 @@
       /* 按课的讲义：上一课、下一课、课程页 */
       var subj = cm[1], i = +cm[2] - 1, list = lessonList(subj), nx = STUDY.next[subj] || 0, iss = issuedN(subj);
       var stt = i < nx ? ["done", "已学完"] : i === nx ? ["cur", "下一课"] : ["todo", "还没到"];
-      var ln = M && lineOfSubj(subj), col = ln ? ln.color : LINE_COLOR[subj] || "--ln-rev";
+      var col = LINE_COLOR[subj] || "--ln-rev";
       var lnav = '<nav class="lnav">' + (i > 0 ? '<a class="btn ghost small" href="#l-' + lessonKey(subj, i - 1) + '">← 第 ' + i + " 课</a>" : "<span></span>") +
         '<a class="btn ghost small" href="#c-' + subj + '">' + esc(subjName(subj)) + " 全部课程</a>" +
         (i + 1 < iss ? '<a class="btn ghost small" href="#l-' + lessonKey(subj, i + 1) + '">第 ' + (i + 2) + " 课 →</a>" : "<span></span>") + "</nav>";
@@ -873,7 +1192,7 @@
     var date = key, days = Object.keys(STUDY.days).filter(function (d) { return STUDY.days[d].file; }).sort();
     var k = days.indexOf(date), prev = k > 0 ? days[k - 1] : "", next = k >= 0 && k < days.length - 1 ? days[k + 1] : "";
     var nav = '<nav class="lnav">' + (prev ? '<a class="btn ghost small" href="#l-' + prev + '">← ' + prev + "</a>" : "<span></span>") +
-      '<a class="btn ghost small" href="#plan">课表</a>' + (next ? '<a class="btn ghost small" href="#l-' + next + '">' + next + " →</a>" : "<span></span>") + "</nav>";
+      '<a class="btn ghost small" href="#journal">足迹</a>' + (next ? '<a class="btn ghost small" href="#l-' + next + '">' + next + " →</a>" : "<span></span>") + "</nav>";
     var gh2 = PLAN.repo + "study/daily/" + date + ".md";
     var rec = STUDY.days[date], cards = "";
     if (rec && rec.planned && rec.planned.length && date !== PLAN.prep) {
@@ -886,184 +1205,129 @@
     var body = md ? '<article class="md">' + mdHTML(md) + "</article>"
       : c.loading ? '<p class="empty-line">路线单加载中……</p>'
       : '<p class="empty-line">研习录里还没有这天的路线单。可以先看 <a href="' + gh2 + '" target="_blank" rel="noopener">GitHub 上的版本</a>。</p>';
-    return '<div class="view lesson"><p class="eyebrow"><a href="#plan">每日课表</a> · ' + (date === PLAN.prep ? "讲义" : "路线单") + "</p>" + nav + cards + body + nav +
+    return '<div class="view lesson"><p class="eyebrow"><a href="#journal">足迹</a> · ' + (date === PLAN.prep ? "讲义" : "路线单") + "</p>" + nav + cards + body + nav +
       '<p class="meta src">原文件：<a href="' + gh2 + '" target="_blank" rel="noopener">study/daily/' + date + ".md</a></p></div>";
   }
-  function planBadge() {
-    var t = bjToday(), w = weekNo(t);
-    if (t === PLAN.prep) return '<span class="n due">今天准备</span>';
-    return w ? '<span class="n">第' + w + "周</span>" : "";
-  }
-  function slotRows(day, rec) {
-    if (day.prep) return '<ul class="slots"><li><span class="subj">准备日</span><div><b>装好工具、备好书</b><ol class="check">' +
-      PLAN.prepDay.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol></div><span class=\"mins\">约 60 分钟</span></li></ul>";
-    var planned = rec && rec.planned ? rec.planned : day.slots, done = (rec && rec.done) || [];
-    return '<ul class="slots">' + planned.map(function (s) {
-      var ok = done.indexOf(s.subj) >= 0;
-      return '<li class="' + (ok ? "ok" : "") + '"><span class="subj">' + esc((PLAN.subjects[s.subj] || {}).name || s.subj) + '</span><div><a class="slot-a" href="' + slotHref(s) + '"><b>' + esc(s.title || "") + "</b></a></div>" +
-        '<span class="mins">' + (ok ? "✓ " : "") + s.mins + " 分钟</span></li>";
-    }).join("") + "</ul>";
-  }
-  function todayBlockHTML() {
-    var STUDY = curStudy();
-    if (!PLAN) return "";
-    var t = bjToday(), day = dayPlan(t), rec = STUDY.days[t];
-    if (day.before) return "";
-    var total = day.prep ? 60 : day.slots.reduce(function (a, s) { return a + s.mins; }, 0);
-    return '<section class="today" aria-labelledby="today-h"><p class="eyebrow">今天 · ' + t + " " + WD[day.wd] + (day.prep ? " · 准备日" : " · 第" + weekNo(t) + "周") + "</p>" +
-      '<h2 id="today-h"><a href="#plan">今天的课</a><span class="tot">' + total + " 分钟</span></h2>" + slotRows(day, rec) +
-      '<div class="btns">' + (rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">今天的路线单</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>") +
-      '<a class="btn ghost" href="#plan">看整张课表</a></div></section>';
-  }
-  function planHTML() {
-    var STUDY = curStudy();
-    var t = bjToday(), days = Object.keys(STUDY.days).sort().reverse();
-    var learned = days.filter(function (d) { var s = STUDY.days[d].status; return s === "done" || s === "partial"; });
-    var mins = learned.reduce(function (a, d) { return a + (Number(STUDY.days[d].minutes) || 0); }, 0);
-    var subjOrder = COURSES;
-    var prog = subjOrder.map(function (k) {
-      var list = lessonList(k), i = Math.min(STUDY.next[k] || 0, list.length), pct = list.length ? Math.round(i / list.length * 100) : 0, unit = k === "film" ? " 段" : " 课";
-      return '<a class="trow" href="#c-' + k + '"><span class="tname">' + esc(PLAN.subjects[k].name) + '</span><span class="tgoal">' + (i < list.length ? (k === "film" ? "下一段：" : "下一课：") + esc(list[i].title) + (!sinceOk(k, t) ? "（" + cnDate(PLAN.since[k]) + "开始）" : "") : "本阶段已学完") + "</span>" +
-        '<span class="tprog"><span class="bar"><span style="width:' + pct + '%"></span></span><span>' + i + " / " + list.length + unit + "</span></span></a>";
-    }).join("");
-    var wk = [1, 2, 3, 4, 5, 6, 0].map(function (wd) {
-      var sl = PLAN.week[wd], tot = sl.reduce(function (a, x) { return a + x[1]; }, 0);
-      return "<tr><th scope=\"row\">" + WD[wd] + "</th><td>" + sl.map(function (x) { return esc(PLAN.subjects[x[0]].name) + " " + x[1] + (x[2] === "review" ? "（复习）" : ""); }).join(" · ") + '</td><td class="num">' + tot + "</td></tr>";
-    }).join("");
-    var log = days.length ? '<ul class="jlist">' + days.map(function (d) {
-      var r = STUDY.days[d], st = r.status || "pushed";
-      var names = (r.done || []).map(function (k) { return (PLAN.subjects[k] || {}).name || (k === "prep" ? "准备日" : k); });
-      return '<li><span class="jdate">' + esc(d) + '</span><div class="jbody"><div class="jmeta"><span class="dst ' + st + '">' + esc(DAY_STATUS[st] || st) + "</span>" +
-        (r.minutes ? '<span class="jmin">' + esc(r.minutes) + " 分钟</span>" : "") + (r.file ? '<a href="' + esc(lessonHref(r.file)) + '">讲义</a>' : "") + "</div>" +
-        (names.length ? '<p class="jtext">完成：' + esc(names.join("、")) + "</p>" : "") + (r.note ? '<p class="jtext">' + esc(r.note) + "</p>" : "") + "</div></li>";
-    }).join("") + "</ul>" : '<p class="empty-line">还没有打卡记录。第一份讲义 ' + PLAN.prep + " 早上推送。</p>";
-    return '<div class="view">' + '<header><p class="eyebrow">每日 · ' + esc(PLAN.phase) + "</p><h1>每日课表</h1>" +
-      '<p class="lede">' + PLAN.weeks + " 周，" + PLAN.start + " 开课。每天先走电影线（90 分钟），再学两门课。讲义一课一个文件，每天早上 " + PLAN.push + "（" + PLAN.tz + "）推送当天的路线单，晚上 " + PLAN.checkin + " 打卡。没学完的课下次接着学，不跳过。</p>" +
-      '<div class="stats"><span><b>' + (weekNo(t) || 0) + "</b>/ " + PLAN.weeks + ' 周</span><span><b>' + learned.length + '</b>天已打卡</span><span><b>' + (STUDY.streak || 0) + '</b>天连续</span><span><b>' + (Math.round(mins / 6) / 10) + "</b>小时累计</span></div></header>" +
-      todayBlockHTML() +
-      '<section><h2>各科进度</h2><div class="tracks">' + prog + "</div></section>" +
-      '<section><h2>一周安排</h2><table class="wk"><thead><tr><th scope="col">星期</th><th scope="col">时段（分钟）</th><th scope="col" class="num">合计</th></tr></thead><tbody>' + wk + "</tbody></table></section>" +
-      '<section><h2>打卡记录</h2>' + log + "</section></div>";
-  }
-
-  /* ---------- 复习 ---------- */
-  function startReview() {
-    var q = dueCards().sort(function (a, b) { return boxOf(a.id) - boxOf(b.id) || a.id.localeCompare(b.id); }).slice(0, 15).map(function (c) { return c.id; });
-    S.rv = { q: q, i: 0, show: false, tally: { again: 0, hard: 0, good: 0 } };
-  }
-  function nextDue() {
-    var ds = CARDS.map(function (c) { var s = S.data.cards[c.id]; return s && s.due; }).filter(Boolean).sort();
-    return ds[0] || "";
-  }
-  function reviewHTML() {
-    if (!S.rv) startReview();
-    var rv = S.rv, head = '<header><p class="eyebrow">记录</p><h1>复习</h1><p class="lede">间隔重复：记住了的卡片升一盒，下次隔得更久；没记住的回到第一盒。各盒间隔依次为 1、3、7、16、35 天。</p></header>';
-    var boxes = [0, 0, 0, 0, 0, 0]; CARDS.forEach(function (c) { if (c.prompt && !S.data.cards[c.id]) return; boxes[boxOf(c.id)]++; });
-    var boxLine = '<div class="boxes" aria-label="各盒卡片数">' + boxes.map(function (n, i) { return '<span class="bx"><b>' + n + "</b>" + (i ? "第" + i + "盒" : "新卡") + "</span>"; }).join("") + "</div>";
-    if (!rv.q.length || rv.i >= rv.q.length) {
-      var done = rv.q.length && rv.i >= rv.q.length;
-      var nd = nextDue();
-      return '<div class="view">' + bannerHTML() + head + boxLine + '<div class="rv rest"><p class="front">' + (done ? "这一轮复习完成" : "今天没有到期的卡片") + "</p>" +
-        (done ? "<p>记住 " + rv.tally.good + " 张，模糊 " + rv.tally.hard + " 张，没记住 " + rv.tally.again + " 张。</p>" : "") +
-        (nd ? '<p class="meta">下一张到期：' + esc(nd) + "</p>" : "") +
-        '<div class="acts"><a class="btn ghost" href="#b-' + FOCUS[0] + '">回到精读</a>' + (dueCards().length ? '<button type="button" class="btn" data-act="rv-restart">再来一轮</button>' : "") + "</div></div></div>";
-    }
-    var c = CARD[rv.q[rv.i]], b = LIB.books[c.book];
-    var acts;
-    if (!rv.show) acts = '<div class="acts"><button type="button" class="btn" data-act="reveal">显示解释</button></div>';
-    else if (S.canEdit) acts = '<div class="acts"><button type="button" class="btn again" data-act="grade" data-g="again">没记住</button><button type="button" class="btn hard" data-act="grade" data-g="hard">模糊</button><button type="button" class="btn good" data-act="grade" data-g="good">记住了</button></div>';
-    else acts = '<div class="acts"><button type="button" class="btn" data-act="rv-skip">下一张</button><span class="meta">只读浏览，复习结果不会保存。</span></div>';
-    return '<div class="view">' + bannerHTML() + head + boxLine +
-      '<div class="rv"><div class="rv-top"><span class="meta">' + (rv.i + 1) + " / " + rv.q.length + "</span><span class=\"meta\">《" + esc(b.title) + "》第" + CN[c.ch] + "章 · " + esc(cardMeta(c.id)) + "</span></div>" +
-      '<p class="front">' + esc(c.f) + "</p>" + (rv.show ? '<p class="back">' + esc(c.b) + "</p>" : "") + acts + "</div></div>";
-  }
-  function grade(g) {
-    var rv = S.rv, id = rv.q[rv.i];
-    gradeCard(id, g);
-    rv.tally[g]++; rv.i++; rv.show = false; render();
-  }
-
-  /* ---------- 线网（首页） ---------- */
+  /* ---------- 首页：线网图 ----------
+   * 两种线：目标线（plan.js 的 goals）按估算小时排站，进度看学了多少小时、过了几站检验；
+   * 自选线（metro.js 的 free）一课一站。没有晚点：路线单只是建议，没学完下次接着学。 */
   var M = window.YXL_METRO || null;
   var LINE_COLOR = { film: "--ln-en", en: "--ln-en", sql: "--ln-sql", py: "--ln-py", cfa: "--ln-cfa", geo: "--ln-geo", rev: "--ln-rev", prep: "--ln-rev", tao: "--ln-tao", mm: "--ln-mm" };
   var DARK_INK = { film: 1, en: 1, mm: 1 };
-  var MCACHE = {};
+  var GOALS = (PLAN && PLAN.goals) || [];
+  var GOAL = {}, GOAL_OF = {};
+  GOALS.forEach(function (g) { GOAL[g.id] = g; g.subjs.forEach(function (s) { GOAL_OF[s] = g.id; }); });
+  var POS = {};
   function subjName(s) { return s === "prep" ? "准备日" : ((PLAN && PLAN.subjects[s]) || {}).name || s; }
-  function lineById(id) { return M.lines.filter(function (l) { return l.id === id; })[0]; }
-  function lineOfSubj(subj) { return M.lines.filter(function (l) { return l.subj === subj && l.src; })[0]; }
   function addDaysBJ(d, n) { return new Date(utcDay(d) + n * 86400000).toISOString().slice(0, 10); }
   function wdOf(d) { return new Date(utcDay(d)).getUTCDay(); }
   function cnDate(d) { return +d.slice(5, 7) + "月" + +d.slice(8, 10) + "日"; }
-  /* 这一天这一科要不要往前走一站（复习时段、还没开始的科目都不算） */
+  /* 这一天这一科要不要往前走一课（复习时段、还没开始的科目都不算） */
   function onDay(subj, d) { return sinceOk(subj, d) && (PLAN.week[wdOf(d)] || []).some(function (x) { return x[0] === subj && x[2] !== "review"; }); }
-  function plannedBy(subj, d) { var n = 0, k = dayDiff(PLAN.start, d); for (var i = 0; i < k; i++) if (onDay(subj, addDaysBJ(PLAN.start, i))) n++; return n; }
   function checkedIn(rec) { return !!(rec && rec.status && rec.status !== "pushed"); }
-  /* 晚点（正数）/ 早到（负数）几站：按时刻表到今天该走完几站，减去实际走完几站 */
-  function lineDelay(subj) {
-    var t = bjToday(), STUDY = curStudy(), list = lessonList(subj);
-    var plan = plannedBy(subj, t) + (checkedIn(STUDY.days[t]) && onDay(subj, t) ? 1 : 0);
-    return Math.min(plan, list.length) - Math.min(STUDY.next[subj] || 0, list.length);
-  }
   function nextWhen(subj) {
     var t = bjToday();
     for (var k = 0; k < 8; k++) { var d = addDaysBJ(t, k); if (onDay(subj, d)) return k === 0 ? "今天" : k === 1 ? "明天" : WD[wdOf(d)]; }
     return "";
   }
-  function mmWeek() { return Math.max(0, Math.min(11, Math.floor(dayDiff(PLAN.start, bjToday()) / 7))); }
-  function stationXY(ln) {
-    if (MCACHE[ln.id]) return MCACHE[ln.id];
-    var p = ln.pts, cum = [0], out = [], A = ln.anchors || [];
-    for (var k = 1; k < p.length; k++) cum[k] = cum[k - 1] + Math.abs(p[k][0] - p[k - 1][0]) + Math.abs(p[k][1] - p[k - 1][1]);
-    function at(d) {
-      for (var k = 1; k < p.length; k++) if (d <= cum[k] + 0.001) { var f = (d - cum[k - 1]) / ((cum[k] - cum[k - 1]) || 1); return [p[k - 1][0] + (p[k][0] - p[k - 1][0]) * f, p[k - 1][1] + (p[k][1] - p[k - 1][1]) * f]; }
-      return p[p.length - 1];
-    }
-    for (var a = 0; a < A.length - 1; a++) {
-      var i0 = A[a][0], p0 = A[a][1], i1 = A[a + 1][0], p1 = A[a + 1][1], last = a === A.length - 2;
-      for (var i = i0; i < (last ? i1 + 1 : i1); i++) { var xy = at(cum[p0] + (cum[p1] - cum[p0]) * (i - i0) / (i1 - i0)); out.push([Math.round(xy[0] * 10) / 10, Math.round(xy[1] * 10) / 10]); }
-    }
-    return (MCACHE[ln.id] = out);
+  /* 学习时间：打卡记录里完成的时段按排课分钟算（报了当天总分钟就按比例折算），再加上随手记里关联到书的分钟 */
+  function minutesBy() {
+    var STUDY = curStudy(), m = {};
+    Object.keys(STUDY.days || {}).forEach(function (d) {
+      var r = STUDY.days[d], done = r.done || [];
+      if (!done.length || !r.planned) return;
+      var slots = r.planned.filter(function (s) { return done.indexOf(s.subj) >= 0; });
+      var sum = slots.reduce(function (a, s) { return a + (s.mins || 0); }, 0), f = r.minutes && sum ? r.minutes / sum : 1;
+      slots.forEach(function (s) { m[s.subj] = (m[s.subj] || 0) + (s.mins || 0) * f; });
+    });
+    journalEntries().forEach(function (e) {
+      var b = String(e.ref || "").split("-ch")[0], k = b === "zhoulu" ? "tao" : b === "tragedy" ? "geo" : "";
+      if (k && e.minutes) m[k] = (m[k] || 0) + Number(e.minutes);
+    });
+    return m;
   }
-  function linePath(pts, rad) {
-    var d = "M" + pts[0][0] + " " + pts[0][1];
-    for (var i = 1; i < pts.length; i++) {
-      var p = pts[i];
-      if (i < pts.length - 1) {
-        var a = pts[i - 1], b = pts[i + 1];
-        var straight = (a[0] === p[0] && p[0] === b[0]) || (a[1] === p[1] && p[1] === b[1]);
-        if (!straight) {
-          var r = Math.min(rad, (Math.abs(p[0] - a[0]) + Math.abs(p[1] - a[1])) / 2, (Math.abs(b[0] - p[0]) + Math.abs(b[1] - p[1])) / 2);
-          var ux = Math.sign(p[0] - a[0]), uy = Math.sign(p[1] - a[1]), vx = Math.sign(b[0] - p[0]), vy = Math.sign(b[1] - p[1]);
-          d += " L" + (p[0] - ux * r) + " " + (p[1] - uy * r) + " Q" + p[0] + " " + p[1] + " " + (p[0] + vx * r) + " " + (p[1] + vy * r);
-          continue;
-        }
-      }
-      d += " L" + p[0] + " " + p[1];
-    }
-    return d;
+  function hrs(min) { return Math.round(min / 6) / 10; }
+  function subjMin(s) { return minutesBy()[s] || 0; }
+  function goalMin(g) { var m = minutesBy(); return g.subjs.reduce(function (a, s) { return a + (m[s] || 0); }, 0); }
+  function goalTotal(g) { return g.stations.reduce(function (a, s) { return a + s.hours; }, 0); }
+  /* 目标线每一站：已学小时、状态（passed 过了检验 / ready 学够了等检验 / on 在学 / todo 还没到） */
+  function goalStations(g) {
+    var ck = curStudy().checks || {}, par = g.parallel || 0, m = minutesBy();
+    var parDone = 0, out = [];
+    g.stations.slice(0, par).forEach(function (st) { parDone += Math.min(st.hours, (m[st.subj] || 0) / 60); });
+    var rest = Math.max(0, goalMin(g) / 60 - parDone), firstOpen = -1;
+    g.stations.forEach(function (st, i) {
+      var done = i < par ? Math.min(st.hours, (m[st.subj] || 0) / 60) : Math.min(st.hours, rest);
+      if (i >= par) rest = Math.max(0, rest - done);
+      var passed = ck[g.id + "-" + i];
+      var state = passed ? "passed" : done >= st.hours ? "ready" : done > 0 ? "on" : "todo";
+      if (!passed && firstOpen < 0 && i >= par) firstOpen = i;
+      out.push({ st: st, i: i, done: done, state: state, passed: passed || "" });
+    });
+    if (firstOpen >= 0 && out[firstOpen].state === "todo" && out.slice(0, par).every(function (x) { return x.state === "passed"; })) out[firstOpen].state = "on";
+    out.slice(0, par).forEach(function (x) { if (x.state === "todo") x.state = "on"; });
+    return out;
   }
-  /* 一条线上每一站的内容和状态：done 学完 / cur 下一站 / todo 未到 / free 自由线的下一章 / week 本周 */
-  function lineStops(ln) {
+  function stateText(s) { return { passed: "已过检验", ready: "学够了，等检验", on: "在学", todo: "还没到" }[s]; }
+
+  /* ---------- 折线工具 ---------- */
+  function segLen(a, b) { return Math.abs(b[0] - a[0]) + Math.abs(b[1] - a[1]); }
+  function polyLen(p) { var L = 0; for (var k = 1; k < p.length; k++) L += segLen(p[k - 1], p[k]); return L; }
+  function polyAt(p, d) {
+    for (var k = 1; k < p.length; k++) {
+      var sl = segLen(p[k - 1], p[k]);
+      if (d <= sl || k === p.length - 1) { var f = sl ? Math.max(0, Math.min(1, d / sl)) : 0; return [p[k - 1][0] + (p[k][0] - p[k - 1][0]) * f, p[k - 1][1] + (p[k][1] - p[k - 1][1]) * f]; }
+      d -= sl;
+    }
+    return p[p.length - 1];
+  }
+  function polySub(p, d0, d1) {
+    var out = [polyAt(p, d0)], acc = 0;
+    for (var k = 1; k < p.length - 1; k++) { acc += segLen(p[k - 1], p[k]); if (acc > d0 && acc < d1) out.push(p[k]); }
+    out.push(polyAt(p, d1));
+    return out;
+  }
+  function ptsPath(pts) { return "M" + pts.map(function (q) { return r1(q[0]) + " " + r1(q[1]); }).join(" L"); }
+  function r1(v) { return Math.round(v * 10) / 10; }
+  function isVert(p, d) { var a = polyAt(p, Math.max(0, d - 1)), b = polyAt(p, d + 1); return Math.abs(b[0] - a[0]) < 0.5; }
+
+  /* ---------- 自选线 ---------- */
+  function freeName(f) {
+    if (f.name) return f.name;
+    if (f.book && LIB.books[f.book]) return LIB.books[f.book].title;
+    return subjName(f.subj);
+  }
+  function freeStops(f) {
     var STUDY = curStudy(), out = [];
-    if (!ln.src) return out;
-    if (ln.src.indexOf("plan:") === 0) {
-      var subj = ln.src.slice(5), list = lessonList(subj), nx = STUDY.next[subj] || 0;
+    if (f.subj && PLAN.lessons[f.subj]) {
+      var list = lessonList(f.subj), nx = STUDY.next[f.subj] || 0;
       list.forEach(function (x, i) { out.push({ title: x.title, state: i < nx ? "done" : i === nx ? "cur" : "todo" }); });
-    } else if (ln.src.indexOf("book:") === 0) {
-      var bid = ln.src.slice(5), b = LIB.books[bid], first = -1;
-      b.chapters.forEach(function (c, i) { var dn = isDone(chId(bid, c.n)); if (!dn && first < 0) first = i; out.push({ title: "第" + CN[c.n] + "章 " + c.title, n: c.n, state: dn ? "done" : "todo" }); });
-      if (first >= 0) out[first].state = "free";
-    } else if (ln.src === "mm") {
-      var wk = mmWeek();
-      M.mmWeeks.forEach(function (t, i) { out.push({ title: "第 " + (i + 1) + " 周 · " + t, state: i === wk ? "week" : "todo" }); });
+    } else if (f.book && LIB.books[f.book]) {
+      var b = LIB.books[f.book], first = -1;
+      b.chapters.forEach(function (c, i) { var dn = isDone(chId(f.book, c.n)); if (!dn && first < 0) first = i; out.push({ title: "第" + CN[c.n] + "章 " + c.title, n: c.n, state: dn ? "done" : "todo" }); });
+      if (first >= 0) out[first].state = "cur";
+    } else if (f.id === "mm") {
+      M.mmWeeks.forEach(function (t, i) { out.push({ title: "第 " + (i + 1) + " 周 · " + t, state: "todo" }); });
     }
     return out;
   }
+  function freeMin(f) { var m = minutesBy(); return m[f.subj || f.id] || 0; }
+  /* 估算总时长：按课表每周排几次、每次多久推算（电影 36 段 6 周，每周 7 次 90 分钟） */
+  function subjEstMin(subj) {
+    if (!PLAN.lessons[subj]) return 0;
+    var adv = 0, all = 0;
+    Object.keys(PLAN.week).forEach(function (wd) { PLAN.week[wd].forEach(function (x) { if (x[0] !== subj) return; all += x[1]; if (x[2] !== "review") adv++; }); });
+    return adv ? Math.ceil(lessonList(subj).length / adv) * all : 0;
+  }
+  function freeLine(id) { return (M.free || []).filter(function (f) { return f.id === id; })[0]; }
+  function freeHref(f) { return f.subj && COURSES.indexOf(f.subj) >= 0 ? "#c-" + f.subj : f.book ? "#b-" + f.book : ""; }
+
+  /* ---------- 今日路线 ---------- */
   function todayInfo() {
     var STUDY = curStudy(), t = bjToday(), rec = STUDY.days[t], day = dayPlan(t), slots;
     if (rec && rec.planned && rec.planned.length) {
       slots = rec.planned.map(function (p) {
-        var o = { subj: p.subj, mins: p.mins, title: p.title, index: p.index };
+        var o = { subj: p.subj, mins: p.mins, title: p.title, index: p.index, review: p.review };
         if (PLAN.lessons[p.subj]) o.total = lessonList(p.subj).length;
         return o;
       });
@@ -1074,220 +1338,313 @@
     if (!S.metroMode) { try { S.metroMode = localStorage.getItem("yanxilu-route-" + bjToday()) || "std"; } catch (e) { S.metroMode = "std"; } }
     return S.metroMode;
   }
-  /* 保底：只走电影一站；标准：时刻表；加开：再多走一站，优先补晚点最多的线 */
+  /* 保底：只学电影一段；标准：路线单；多学：目标线上再多学一课 */
   function routeFor(ti, mode) {
     var slots = ti.slots;
     if (mode === "min") { var fm = slots.filter(function (s) { return s.subj === "film" || s.subj === "en"; }); return { stops: fm.length ? fm : slots.slice(0, 1) }; }
     if (mode !== "plus") return { stops: slots };
-    function mk(subj, ahead) {
-      var list = lessonList(subj), i = (curStudy().next[subj] || 0) + ahead;
-      if (i >= list.length) return null;
-      return { subj: subj, mins: subj === "cfa" ? 35 : subj === "geo" ? 30 : 45, title: list[i].title, index: i, total: list.length, extra: true };
-    }
-    var late = ["sql", "py", "cfa", "geo"].map(function (s) { return { s: s, d: lineDelay(s) }; }).filter(function (x) { return x.d > 0; }).sort(function (a, b) { return b.d - a.d; });
-    for (var k = 0; k < late.length; k++) {
-      var s = late[k].s, inToday = slots.some(function (x) { return x.subj === s; });
-      var ex = mk(s, inToday ? 1 : 0);
-      if (ex && (!inToday || late[k].d > 1)) return { stops: slots.concat([ex]), catchUp: { subj: s, d: late[k].d } };
-    }
-    var base = slots.filter(function (x) { return x.subj !== "en" && x.subj !== "film" && PLAN.lessons[x.subj]; })[0], ex2 = base ? mk(base.subj, 1) : null;
-    return { stops: ex2 ? slots.concat([ex2]) : slots };
+    var base = slots.filter(function (x) { return GOAL_OF[x.subj] && PLAN.lessons[x.subj]; })[0];
+    if (!base) return { stops: slots };
+    var list = lessonList(base.subj), i = (curStudy().next[base.subj] || 0) + 1;
+    if (i >= list.length) return { stops: slots };
+    return { stops: slots.concat([{ subj: base.subj, mins: base.mins, title: list[i].title, index: i, total: list.length, extra: true }]) };
   }
-
   function stopSeq(s) {
     if (s.subj === "en") return "跟着 CFA 主题";
-    if (s.review) return "复习，不推进";
+    if (s.review) return "复习，不往前走";
     if (!PLAN.lessons[s.subj]) return "";
-    return "第 " + ((s.index || 0) + 1) + " / " + (s.total || lessonList(s.subj).length) + (s.subj === "film" ? " 段" : " 站");
+    return "第 " + ((s.index || 0) + 1) + " / " + (s.total || lessonList(s.subj).length) + (s.subj === "film" ? " 段" : " 课");
+  }
+  function stopLine(s) {
+    var g = GOAL[GOAL_OF[s.subj]];
+    return g ? g.name + " · " + subjName(s.subj) : subjName(s.subj);
   }
   function todayStripHTML(ti) {
     var mode = metroMode(), r = routeFor(ti, mode), stops = r.stops, t = ti.t, rec = ti.rec, day = ti.day;
     var total = stops.reduce(function (a, s) { return a + (s.mins || 0); }, 0);
-    var head = '<div class="ts-top"><div><p class="eyebrow">今天 · ' + cnDate(t) + " " + WD[day.wd] + (day.prep ? " · 准备日" : day.before ? "" : " · 第 " + weekNo(t) + " 周第 " + (dayDiff(PLAN.start, t) % 7 + 1) + " 天") + '</p><h1 id="ts-h">今日路线</h1></div>' +
-      '<div class="seg" role="group" aria-label="今天坐多远">' + [["min", "保底"], ["std", "标准"], ["plus", "加开"]].map(function (m) {
-        var mins = m[0] === "std" ? ti.slots.reduce(function (a, s) { return a + (s.mins || 0); }, 0) : routeFor(ti, m[0]).stops.reduce(function (a, s) { return a + (s.mins || 0); }, 0);
+    var head = '<div class="ts-top"><div><p class="eyebrow">今天 · ' + cnDate(t) + " " + WD[day.wd] + (day.prep ? " · 准备日" : day.before ? "" : " · 第 " + weekNo(t) + " 周第 " + (dayDiff(PLAN.start, t) % 7 + 1) + " 天") + '</p><h2 id="ts-h">今日路线</h2></div>' +
+      '<div class="seg" role="group" aria-label="今天学多少">' + [["min", "保底"], ["std", "标准"], ["plus", "多学"]].map(function (m) {
+        var mins = routeFor(ti, m[0]).stops.reduce(function (a, s) { return a + (s.mins || 0); }, 0);
         return '<button type="button" data-act="metro-mode" data-m="' + m[0] + '" aria-pressed="' + (mode === m[0]) + '">' + m[1] + ' <span class="segn">' + mins + "′</span></button>";
       }).join("") + "</div></div>";
     if (!stops.length) {
-      return '<section class="tstrip" aria-labelledby="ts-h">' + head + '<p class="ts-note" style="margin-top:16px">今天没有排课。讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送。</p></section>";
+      return '<section class="tstrip" aria-labelledby="ts-h">' + head + '<p class="ts-note" style="margin-top:16px">今天没有排课。路线单每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送。</p></section>";
     }
     var route = stops.map(function (s) {
-      var c = LINE_COLOR[s.subj] || "--ln-rev";
+      var c = LINE_COLOR[s.subj] || "--ln-rev", g = GOAL_OF[s.subj], plus = g && s.mins ? "学完 " + GOAL[g].name + " +" + hrs(s.mins) + " 小时" : "";
       return '<a class="stp' + (s.extra ? " extra" : "") + '" href="' + slotHref(s) + '" style="--c:var(' + c + ');flex-grow:' + (s.mins || 20) + '"><span class="stp-dot" aria-hidden="true"></span><span class="stp-bar" aria-hidden="true"></span>' +
-        '<span class="stp-tx"><span class="stp-tag"><b class="lbadge' + (DARK_INK[s.subj] ? " dk" : "") + '">' + esc(subjName(s.subj)) + (s.extra ? " · 加开" : "") + '</b><span class="stp-min">' + (s.mins || "") + "′</span></span>" +
-        '<span class="stp-title">' + esc(s.title || "") + '</span><span class="stp-seq">' + esc(stopSeq(s)) + (s.subj === "film" ? " · 跟读播放器" : s.lesson || (PLAN.lessons[s.subj] && isWritten(s.subj)) ? " · 讲义" : "") + "</span></span></a>";
-    }).join("") + '<div class="stp end"><span class="stp-dot" aria-hidden="true"></span><div class="stp-tx"><span class="stp-min">' + PLAN.checkin + '</span><span class="stp-title">终点 · 报站</span></div></div>';
-    var note = mode === "min" ? "时间不够就只走电影这一站，走一站就算没停运。其余几站下次接着走，不会堆成欠账。"
-      : mode === "plus" ? (r.catchUp ? subjName(r.catchUp.subj) + "线晚点 " + r.catchUp.d + " 站，多走这一站正好补上。" : "多走一站。早到不改时刻表，下次从再下一站开始。")
-      : "按时刻表走。哪一站没走完，下次从这一站接着走。";
-    var btn = rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">今天的路线单</a>' : '<span class="meta">讲义每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>";
+        '<span class="stp-tx"><span class="stp-tag"><b class="stp-line">' + esc(stopLine(s)) + (s.extra ? " · 多学" : "") + '</b><span class="stp-min">' + (s.mins || "") + "′</span></span>" +
+        '<span class="stp-title">' + esc(s.title || "") + '</span><span class="stp-seq">' + esc([stopSeq(s), plus].filter(Boolean).join(" · ")) + (s.subj === "film" ? " · 跟读播放器" : s.lesson || (PLAN.lessons[s.subj] && isWritten(s.subj)) ? " · 讲义" : "") + "</span></span></a>";
+    }).join("") + '<div class="stp end"><span class="stp-dot" aria-hidden="true"></span><div class="stp-tx"><span class="stp-min">' + PLAN.checkin + '</span><span class="stp-title">打卡 · 盖章</span></div></div>';
+    var note = mode === "min" ? "时间不够就只学电影这一段，学一点也算没断。其余几课下次接着学，不记欠账。"
+      : mode === "plus" ? "目标线上多学一课，小时数多涨一点。"
+      : "按今天的路线单学。哪一课没学完，下次从这一课接着学，不记欠账。";
+    var btn = rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">今天的路线单</a>' : '<span class="meta">路线单每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>";
     var y = addDaysBJ(t, -1), yr = curStudy().days[y], warn = "";
-    if (yr && !checkedIn(yr)) warn = '<p class="ts-warn"><b>' + cnDate(y) + "还没报站。</b>按没学处理，那几站下次接着走；其实学了的话，晚上报站时一起说，位置就会更新。</p>";
+    if (yr && !checkedIn(yr) && y !== PLAN.prep) warn = '<p class="ts-warn"><b>' + cnDate(y) + "还没打卡。</b>先按没学处理，那几课下次接着学；其实学了的话，晚上打卡时一起说，足迹和小时数都会补上。</p>";
     return '<section class="tstrip" aria-labelledby="ts-h">' + head + '<div class="ts-route">' + route + "</div>" +
       '<div class="ts-foot">' + btn + '<p class="ts-note">全程 ' + total + " 分钟。" + note + "</p></div>" + warn + "</section>";
   }
 
-  function metroSVG(ti) {
-    var todaySub = {}; ti.slots.forEach(function (s) { todaySub[s.subj] = s; });
-    var h = ['<svg class="metro' + (S.metroToday ? " today-only" : "") + '" viewBox="0 0 ' + M.w + " " + M.h + '" role="group" aria-label="线网图：学习线路、换乘站和地标">'];
-    function tx(x, y, b, t, cls, anchor) {
-      return '<text x="' + x + '" y="' + y + '"' + (cls ? ' class="' + cls + '"' : "") + (anchor ? ' text-anchor="' + anchor + '"' : "") + ">" + (b ? '<tspan font-weight="700">' + esc(b) + "</tspan>" : "") + esc(t || "") + "</text>";
+  /* ---------- 线网图 ---------- */
+  function tx(x, y, s, cls, anchor, style) {
+    return '<text x="' + r1(x) + '" y="' + r1(y) + '"' + (cls ? ' class="' + cls + '"' : "") + (anchor ? ' text-anchor="' + anchor + '"' : "") + (style ? ' style="' + style + '"' : "") + ">" + esc(s) + "</text>";
+  }
+  function textW(s, size) { var w = 0; for (var i = 0; i < s.length; i++) w += s.charCodeAt(i) > 255 ? size : size * 0.58; return Math.round(w); }
+  function plateSVG(x, y, name, kind, hrsTxt, col, href, w) {
+    w = w || 150;
+    var goal = kind === "目标线";
+    var g = '<g class="mplate"><rect x="' + x + '" y="' + y + '" width="' + w + '" height="46" rx="3" class="mpl-bg"/>' +
+      '<rect x="' + (x + 7) + '" y="' + (y + 8) + '" width="6" height="30" style="fill:var(' + col + ')"/>' + tx(x + 20, y + 20, name, "mpl-n") +
+      '<rect x="' + (x + 20) + '" y="' + (y + 27) + '" width="38" height="14" rx="7" style="' + (goal ? "fill:var(" + col + ");stroke:var(" + col + ")" : "fill:none;stroke:var(" + col + ")") + '"/>' +
+      '<text x="' + (x + 39) + '" y="' + (y + 37.5) + '" text-anchor="middle" class="mpl-k" style="fill:' + (goal ? "var(--bdg-on)" : "var(" + col + ")") + '">' + kind + "</text>" +
+      tx(x + 64, y + 38, hrsTxt, "mpl-h") + "</g>";
+    return href ? '<a href="' + href + '" class="mplate-a" aria-label="' + esc(name) + '">' + g + "</a>" : g;
+  }
+  function todaySeal(x, y, label) {
+    return '<g class="mseal" aria-hidden="true" transform="translate(' + r1(x) + " " + r1(y) + ') rotate(-6)"><rect x="-10" y="-10" width="20" height="20" rx="2"/><rect x="-7.5" y="-7.5" width="15" height="15" class="in"/><text y="4.6" text-anchor="middle">今</text></g>' +
+      (label ? tx(x + 14, y + 4.5, label, "mt-b") : "");
+  }
+  function hereRing(x, y, col) {
+    return '<circle class="mhalo" cx="' + r1(x) + '" cy="' + r1(y) + '" r="12" style="stroke:var(' + col + ')"/><circle cx="' + r1(x) + '" cy="' + r1(y) + '" r="8" class="mhere"/>';
+  }
+  function stopDot(x, y, col, state, r) {
+    if (state === "done") return '<circle cx="' + r1(x) + '" cy="' + r1(y) + '" r="' + (r - 0.5) + '" style="fill:var(' + col + ');stroke:var(--map-bg);stroke-width:1.8"/>';
+    return '<circle cx="' + r1(x) + '" cy="' + r1(y) + '" r="' + r + '" style="fill:var(--map-bg);stroke:var(' + col + ');stroke-width:2.6"/>';
+  }
+  function checkDot(x, y, state) {
+    return state === "passed" ? '<circle cx="' + r1(x) + '" cy="' + r1(y) + '" r="10" class="mchk ok"/><path d="M' + r1(x - 4.5) + " " + r1(y) + " l3 3.2 l6 -6.4" + '" class="mchk-v"/>'
+      : '<circle cx="' + r1(x) + '" cy="' + r1(y) + '" r="10" class="mchk"/><circle cx="' + r1(x) + '" cy="' + r1(y) + '" r="3" class="mchk-c"/>';
+  }
+  /* 目标线：粗线中间一道空心（还要学），学过的一段填实；前几站并行的轨道画在主线两侧 */
+  function goalSVG(gid, today, h) {
+    var g = GOAL[gid], L = M.goals[gid]; if (!g || !L) return;
+    var p = L.pts, len = polyLen(p), tot = goalTotal(g), k = len / tot, par = g.parallel || 0, col = g.color;
+    var sts = goalStations(g), parH = g.stations.slice(0, par).reduce(function (a, s) { return a + s.hours; }, 0);
+    var mergeD = parH * k, seqDone = sts.slice(par).reduce(function (a, x) { return a + x.done; }, 0) * k;
+    var mainPts = par ? polySub(p, mergeD, len) : p;
+    h.push('<g class="mgoal" data-g="' + gid + '">');
+    h.push('<path d="' + ptsPath(mainPts) + '" class="mg-out" style="stroke:var(' + col + ')"/><path d="' + ptsPath(mainPts) + '" class="mg-in"/>');
+    if (seqDone > 0) h.push('<path d="' + ptsPath(polySub(p, mergeD, mergeD + seqDone)) + '" class="mg-done" style="stroke:var(' + col + ')"/>');
+    var labels = [];
+    if (par) {
+      var x0 = p[0][0], y0 = p[0][1], xm = polyAt(p, mergeD)[0], gap = L.gap || 22;
+      sts.slice(0, par).forEach(function (x, j) {
+        var ty = y0 + (j === 0 ? -gap : gap), c2 = LINE_COLOR[x.st.subj] || col, tl = xm - x0 - 24;
+        h.push('<path d="M' + x0 + " " + y0 + " L" + (x0 + 12) + " " + ty + " L" + (xm - 12) + " " + ty + " L" + xm + " " + y0 + '" class="mg-track" style="stroke:var(' + c2 + ')"/>');
+        var gx = Math.max(x0 + 28, x0 + 12 + tl * Math.min(1, x.done / x.st.hours));
+        if (x.done > 0) h.push('<path d="M' + (x0 + 12) + " " + ty + " L" + r1(gx) + " " + ty + '" class="mg-tdone"/>');
+        POS["g:" + gid + ":" + j] = [x0 + 12 + tl / 2, ty];
+        h.push('<g class="mst" data-act="mgs" data-g="' + gid + '" data-i="' + j + '" tabindex="0" role="button" aria-label="' + esc(g.name + "：" + x.st.name + "，" + stateText(x.state)) + '"><title>' + esc(x.st.name) + '</title><rect class="hit" x="' + (x0 + 12) + '" y="' + (ty - 9) + '" width="' + r1(tl) + '" height="18"/></g>');
+        h.push('<g class="mst" data-act="mgs" data-g="' + gid + '" data-i="' + j + '" tabindex="-1">' + hereRing(gx, ty, c2) + "</g>");
+        labels.push(tx(x0 + 44, j === 0 ? ty - 12 : ty + 22, x.st.name + " " + x.st.hours + " h", "mt-gl", "", "fill:var(" + (j === 0 ? "--zi-data" : "--zi-data") + ")"));
+        var sl = today[x.st.subj];
+        if (sl) labels.push(todaySeal(gx, j === 0 ? ty - 40 : ty + 46, subjName(x.st.subj) + " 第 " + ((sl.index || 0) + 1) + " 课"));
+      });
+      ["start", "merge"].forEach(function (w, n) {
+        var xx = n ? xm : x0;
+        h.push('<rect x="' + r1(xx - 11) + '" y="' + (y0 - gap - 11) + '" width="22" height="' + (2 * gap + 22) + '" rx="11" class="mcap"/>');
+      });
+      if (L.joinHub !== false) POS.join = [x0 + 12 + (xm - x0 - 24) * 0.5, y0];
     }
-    function textW(s) { var w = 0; for (var i = 0; i < s.length; i++) w += s.charCodeAt(i) > 255 ? 12.5 : 7.4; return Math.round(w); }
+    var cum = parH;
+    sts.slice(par).forEach(function (x) {
+      var d0 = cum * k; cum += x.st.hours; var d1 = cum * k, last = x.i === g.stations.length - 1;
+      var mid = polyAt(p, (d0 + d1) / 2), q = polyAt(p, d1), vert = isVert(p, (d0 + d1) / 2);
+      if (vert) labels.push(tx(mid[0] + 20, mid[1] + 2, x.st.name, "mt-gl", "", "fill:var(--ink)") + tx(mid[0] + 20, mid[1] + 18, x.st.hours + " h", "mt-h"));
+      else labels.push(tx(mid[0], mid[1] + 34, x.st.name, "mt-gl", "middle", "fill:var(--ink)") + tx(mid[0], mid[1] + 50, x.st.hours + " h", "mt-h", "middle"));
+      POS["g:" + gid + ":" + x.i] = mid;
+      h.push('<g class="mst" data-act="mgs" data-g="' + gid + '" data-i="' + x.i + '" tabindex="0" role="button" aria-label="' + esc(g.name + "：" + x.st.name + "，约 " + x.st.hours + " 小时，" + stateText(x.state)) + '"><title>' + esc(x.st.name + " · 约 " + x.st.hours + " 小时") + "</title>" +
+        '<path d="' + ptsPath(polySub(p, d0 + 6, d1 - 6)) + '" class="hit-line"/>' + (last ? "" : checkDot(q[0], q[1], x.state)) + "</g>");
+      if (x.state === "on" && !par || (x.state === "on" && x.done > 0)) {
+        var hp = polyAt(p, d0 + x.done * k);
+        h.push('<g class="mst" data-act="mgs" data-g="' + gid + '" data-i="' + x.i + '" tabindex="-1">' + hereRing(hp[0], hp[1], col) + "</g>");
+        var subj = x.st.subj || g.subjs[0], sl2 = today[subj] || (gid === "cfa" && today.en);
+        if (sl2 && !par) labels.push(todaySeal(hp[0], hp[1] - 26, subjName(sl2.subj) + (sl2.index != null && sl2.subj !== "en" ? " 第 " + (sl2.index + 1) + " 课" : "")));
+      }
+    });
+    var end = p[p.length - 1];
+    if (L.endBox) {
+      h.push('<rect x="' + end[0] + '" y="' + (end[1] - 19) + '" width="150" height="38" rx="8" class="mend"/>');
+      labels.push(tx(end[0] + 75, end[1] - 3, "终点 · " + g.end, "mt-end", "middle") + tx(end[0] + 75, end[1] + 12, "约 " + tot + " h", "mt-h", "middle"));
+    } else {
+      h.push('<line x1="' + (end[0] + 6) + '" y1="' + end[1] + '" x2="' + (end[0] + 16) + '" y2="' + end[1] + '" class="mend-l"/><rect x="' + (end[0] + 16) + '" y="' + (end[1] - 22) + '" width="86" height="44" rx="8" class="mend"/>');
+      labels.push(tx(end[0] + 59, end[1] - 4, "终点", "mt-end", "middle") + tx(end[0] + 59, end[1] + 12, "约 " + tot + " h", "mt-h", "middle") + tx(end[0] - 14, end[1] + 4, g.end, "mt-end", "end"));
+    }
+    h.push("</g>");
+    h.push(labels.join(""));
+    h.push(plateSVG(L.plate[0], L.plate[1], g.name, "目标线", hrs(goalMin(g)) + "/" + tot + " h", col, "#g-" + gid));
+  }
+  function freeSVG(f, today, h) {
+    var stops = freeStops(f), n = stops.length; if (!n) return;
+    var p = f.pts, len = polyLen(p), col = f.color, name = freeName(f), small = n > 20;
+    if (f.after) {
+      var e0 = p[p.length - 1];
+      h.push('<path d="M' + e0[0] + " " + e0[1] + " L" + f.after.to[0] + " " + f.after.to[1] + '" class="mf-after" style="stroke:var(' + col + ')"/>');
+      h.push(tx(f.after.to[0], f.after.to[1] + 28, f.after.label, "mt-s", "end", "fill:var(--zi-en)"));
+    }
+    h.push('<path d="' + ptsPath(p) + '" class="mf-line" style="stroke:var(' + col + ')"/>');
+    var hubIdx = {}; (M.hubs || []).forEach(function (hb) { hb.at.forEach(function (a) { if (a[0] === f.id) hubIdx[a[1]] = 1; }); });
+    var sl = f.subj ? today[f.subj] : null, overlay = [];
+    stops.forEach(function (s, i) {
+      var q = polyAt(p, n > 1 ? len * i / (n - 1) : 0), x = q[0], y = q[1];
+      POS["f:" + f.id + ":" + i] = q;
+      if (f.ticks && i % f.ticks === 0) h.push(tx(x, y - 14, "第 " + (i / f.ticks + 1) + " 周", "mt-tick", "middle"));
+      var label = name + " 第 " + (i + 1) + " 站：" + s.title;
+      if (s.state === "cur") overlay.push({ i: i, x: x, y: y, s: s, label: label });
+      if (hubIdx[i]) return;
+      h.push('<g class="mst" data-act="mst" data-l="' + f.id + '" data-i="' + i + '" tabindex="-1" aria-label="' + esc(label) + '"><title>' + esc(label) + '</title><circle class="hit" cx="' + r1(x) + '" cy="' + r1(y) + '" r="' + (small ? 8 : 11) + '"/>' + stopDot(x, y, col, s.state, small ? 4.2 : 5) + "</g>");
+    });
+    overlay.forEach(function (o) {
+      h.push('<g class="mst" data-act="mst" data-l="' + f.id + '" data-i="' + o.i + '" tabindex="0" role="button" aria-label="' + esc(o.label + "（下一站）") + '"><title>' + esc(o.label) + "</title>" + '<circle class="hit" cx="' + r1(o.x) + '" cy="' + r1(o.y) + '" r="14"/>' + hereRing(o.x, o.y, col) + "</g>");
+      if (sl && !sl.review && sl.index === o.i) h.push(todaySeal(o.x, o.y + 26, f.subj === "film" ? "第 " + (o.i + 1) + " 段" : "第 " + (o.i + 1) + " 课"));
+    });
+    var est = f.subj ? subjEstMin(f.subj) : 0, mins = freeMin(f), done = stops.filter(function (s) { return s.state === "done"; }).length;
+    var hrsTxt = est ? hrs(mins) + "/" + Math.round(est / 60) + " h" : hrs(mins) + " h";
+    if (f.plate) h.push(plateSVG(f.plate[0], f.plate[1], name, "自选线", hrsTxt, col, freeHref(f)));
+    if (f.title) {
+      var unit = f.book ? " 章" : f.id === "mm" ? " 周" : " 课", t = name + " · 自选线 · " + done + " / " + n + unit + (mins ? " · " + hrs(mins) + " 小时" : "");
+      var href = freeHref(f) || (f.report ? reportHref(REPORTS.filter(function (x) { return x.id === f.report; })[0] || {}) : "");
+      var lab = tx(f.title[0], f.title[1], t, "mt-ft", "", "fill:var(" + col + ")");
+      h.push(href ? '<a href="' + esc(href) + '"' + (f.report ? ' target="_blank" rel="noopener"' : "") + ' class="mlink">' + lab + "</a>" : lab);
+    }
+  }
+  function metroSVG(ti) {
+    POS = {};
+    var today = {}; ti.slots.forEach(function (s) { today[s.subj] = s; });
+    var h = ['<svg class="metro" viewBox="0 0 ' + M.w + " " + M.h + '" role="group" aria-label="线网图：两条目标线、几条自选线、换乘站和地标">'];
     M.zones.forEach(function (z) {
-      h.push('<rect x="' + z.x + '" y="' + z.y + '" width="' + z.w + '" height="' + z.h + '" rx="14" style="' + (z.dashed ? "fill:none;stroke:var(--rule-strong);stroke-width:2;stroke-dasharray:7 6" : "fill:var(" + z.fill + ")") + '"/>');
+      h.push('<rect x="' + z.x + '" y="' + z.y + '" width="' + z.w + '" height="' + z.h + '" rx="16" class="mzone-r' + (z.dashed ? " dashed" : "") + '"' + (z.dashed ? "" : ' style="fill:var(' + z.fill + ')"') + "/>");
       if (!z.name) return;
-      var lab = '<text x="' + z.lx + '" y="' + z.ly + '" class="mzl" style="fill:var(' + z.ink + ')">' + esc(z.name) + "</text>";
+      var lx = z.x + 16, ly = z.bottom ? z.y + z.h - 16 : z.y + 26;
+      var lab = tx(lx, ly, z.name, "mzl", "", "fill:var(" + z.ink + ")") + (z.sub ? tx(lx, ly + 18, z.sub, "mt-s", "", "fill:var(" + z.ink + ")") : "");
       h.push(z.track && TRACK[z.track] ? '<a href="#t-' + z.track + '" class="mzone">' + lab + "</a>" : lab);
     });
-    /* 图例 */
-    h.push('<g class="mlg" transform="translate(0 130)"><rect x="40" y="40" width="470" height="236" rx="14" style="fill:var(--map-bg);stroke:var(--rule)"/>' +
-      '<text x="58" y="70" class="h">图例</text>' +
-      '<path d="M58 100 L98 100" style="stroke:var(--ln-sql);stroke-width:6;stroke-linecap:round"/><circle cx="72" cy="100" r="4.6" style="fill:var(--map-bg);stroke:var(--ln-sql);stroke-width:2.4"/><circle cx="88" cy="100" r="4.6" style="fill:var(--ln-sql);stroke:var(--map-bg);stroke-width:1.6"/>' +
-      '<text x="112" y="104">一条线是一门课或一本书；空心站未到，实心站已学完</text>' +
-      '<circle cx="78" cy="130" r="9" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4"/><text x="112" y="134">黑圈是每条线的下一站；标“今天”的是今天要走的站</text>' +
-      '<circle cx="78" cy="160" r="9" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3.5"/><path d="M58 160 L69 160 M87 160 L98 160" style="stroke:var(--ln-py);stroke-width:5"/><text x="112" y="164">换乘站：两条线在这里用到同一块知识</text>' +
-      '<rect x="70" y="182" width="16" height="16" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3"/><text x="112" y="194">地标：讨论和查到的资料，随时去看，不算进度</text>' +
-      '<path d="M58 220 L98 220" style="stroke:var(--ln-cfa);stroke-width:5;stroke-dasharray:9 6"/><text x="112" y="224">虚线：规划中的线路</text>' +
-      '<rect x="58" y="242" width="40" height="18" rx="4" style="fill:var(--z-data)"/><text x="112" y="256">底色区域是学习方向，点区域名进入</text></g>');
-    /* 线路与站 */
-    var overlay = [];
-    M.lines.forEach(function (ln) {
-      var col = "var(" + ln.color + ")", w = (ln.r || 4) * 2, isToday = !!todaySub[ln.subj];
-      h.push('<g class="mline' + (isToday ? " is-today" : "") + '" data-l="' + ln.id + '">');
-      h.push('<path d="' + linePath(ln.pts, 16) + '" style="fill:none;stroke:' + col + ";stroke-width:" + w + ";stroke-linejoin:round;stroke-linecap:" + (ln.dash ? "butt;stroke-dasharray:10 7" : "round") + '"/>');
-      if (ln.dash) h.push('<circle cx="' + ln.pts[ln.pts.length - 1][0] + '" cy="' + ln.pts[ln.pts.length - 1][1] + '" r="7" style="fill:var(--map-bg);stroke:' + col + ';stroke-width:2.5;stroke-dasharray:3 3"/>');
-      var stops = lineStops(ln), xy = stationXY(ln), hubs = ln.hubs || [];
-      (ln.ticks || []).forEach(function (tk) { var p0 = xy[tk[0]]; if (p0) h.push('<text x="' + (p0[0] - 4) + '" y="' + (p0[1] + 30) + '" class="mut mtick">' + esc(tk[1]) + "</text>"); });
-      stops.forEach(function (s, i) {
-        var p = xy[i]; if (!p) return;
-        var x = p[0], y = p[1], end = i === 0 || i === stops.length - 1;
-        var r = ln.small && !end ? 3.4 : end ? 6 : 4.6, label = ln.name + " 第 " + (i + 1) + " 站：" + s.title;
-        if (s.state === "cur" || s.state === "week" || s.state === "free") overlay.push({ ln: ln, i: i, x: x, y: y, s: s, label: label });
-        if (hubs.indexOf(i) >= 0) return;
-        var dot = s.state === "done" ? '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" style="fill:' + col + ';stroke:var(--map-bg);stroke-width:1.6"/>'
-          : '<circle cx="' + x + '" cy="' + y + '" r="' + r + '" style="fill:var(--map-bg);stroke:' + col + ";stroke-width:" + (end ? 3.5 : 2.4) + '"/>';
-        h.push('<g class="mst" data-act="mst" data-l="' + ln.id + '" data-i="' + i + '" tabindex="-1" aria-label="' + esc(label) + '"><title>' + esc(label) + '</title><circle class="hit" cx="' + x + '" cy="' + y + '" r="' + (ln.small ? 8 : 11) + '"/>' + dot + "</g>");
-      });
-      h.push("</g>");
+    (M.planned || []).forEach(function (pl) {
+      h.push('<path d="' + ptsPath(pl.pts) + '" class="mf-plan"/>');
+      for (var j = 0; j < pl.stops; j++) { var q = polyAt(pl.pts, polyLen(pl.pts) * (j + 0.1) / pl.stops); h.push('<circle cx="' + r1(q[0]) + '" cy="' + r1(q[1]) + '" r="5" class="mf-plan-s"/>'); }
+      h.push(tx(pl.lx, pl.ly, pl.label, "mt-s", "", "fill:var(--ink-3)"));
     });
-    /* 换乘站 */
-    M.hubs.forEach(function (hb, k) {
-      var shape = hb.cap ? '<rect x="' + (hb.x - 11) + '" y="' + (hb.y - 21) + '" width="22" height="42" rx="11" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4"/>'
-        : '<circle cx="' + hb.x + '" cy="' + hb.y + '" r="10" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4"/>';
+    (M.free || []).forEach(function (f) { freeSVG(f, today, h); });
+    Object.keys(M.goals || {}).forEach(function (gid) { goalSVG(gid, today, h); });
+    (M.labels || []).forEach(function (l) { h.push(tx(l.x, l.y, l.t, "mt-b", l.anchor, l.ink ? "fill:var(" + l.ink + ")" : "")); });
+    (M.hubs || []).forEach(function (hb, k) {
+      var xy = hb.ai ? POS.join : [hb.x, hb.y]; if (!xy) return;
+      POS["h:" + k] = xy;
+      var shape = hb.ai ? '<rect x="' + r1(xy[0] - 9) + '" y="' + r1(xy[1] - 31) + '" width="18" height="62" rx="9" class="mhub"/>' : '<circle cx="' + xy[0] + '" cy="' + xy[1] + '" r="10" class="mhub"/>';
       h.push('<g class="mst" data-act="mhub" data-h="' + k + '" tabindex="0" role="button" aria-label="换乘站：' + esc(hb.name) + '"><title>换乘站：' + esc(hb.name) + "</title>" + shape + "</g>");
     });
-    /* 地标 */
-    M.landmarks.forEach(function (lm) {
+    (M.landmarks || []).forEach(function (lm) {
       var rp = REPORTS.filter(function (x) { return x.id === lm.report; })[0]; if (!rp) return;
-      if (lm.walk) h.push('<path d="M' + lm.walk[0][0] + " " + lm.walk[0][1] + " L" + lm.walk[1][0] + " " + lm.walk[1][1] + '" style="stroke:var(--ink);stroke-width:2;stroke-dasharray:2 4;stroke-linecap:round"/>');
-      h.push('<g class="mlm mst" data-act="mlm" data-r="' + esc(rp.id) + '" tabindex="0" role="button" aria-label="地标：' + esc(rp.title) + '"><title>地标：' + esc(rp.title) + '</title><rect class="hit" x="' + (lm.x - 12) + '" y="' + (lm.y - 12) + '" width="' + (24 + textW(rp.title) + 8) + '" height="24" style="fill:transparent;stroke:none"/><rect x="' + (lm.x - 8) + '" y="' + (lm.y - 8) + '" width="16" height="16" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3"/>' +
-        tx(lm.lx, lm.ly, rp.title, "") + (lm.sub ? tx(lm.lx, lm.ly + 17, "", lm.sub, "mut") : "") + "</g>");
+      POS["l:" + rp.id] = [lm.x, lm.y];
+      h.push('<g class="mlm mst" data-act="mlm" data-r="' + esc(rp.id) + '" tabindex="0" role="button" aria-label="地标：' + esc(rp.title) + '"><title>地标：' + esc(rp.title) + '</title><rect class="hit" x="' + (lm.x - 12) + '" y="' + (lm.y - 12) + '" width="' + (30 + textW(rp.title, 13)) + '" height="' + (lm.sub ? 40 : 24) + '"/>' +
+        '<rect x="' + (lm.x - 7) + '" y="' + (lm.y - 7) + '" width="14" height="14" class="mlm-sq"/>' + tx(lm.x + 14, lm.y + 4.5, rp.title, "mt-lm") + (lm.sub ? tx(lm.x + 14, lm.y + 21, lm.sub, "mt-s", "", "fill:var(--ink-3)") : "") + "</g>");
     });
-    /* 文字与线名牌 */
-    M.labels.forEach(function (l) { h.push(tx(l.x, l.y, l.b, l.t, l.muted ? "mut" : "", l.anchor)); });
-    M.badges.forEach(function (b) {
-      var ln = lineById(b.line), w = textW(b.t) + 14;
-      var g = '<g class="mbdg"><rect x="' + b.x + '" y="' + b.y + '" width="' + w + '" height="19" rx="4" style="fill:var(' + ln.color + ')"/><text x="' + (b.x + 7) + '" y="' + (b.y + 14) + '" style="fill:var(' + (b.dark ? "--bdg-on-dk" : "--bdg-on") + ')">' + esc(b.t) + "</text></g>";
-      h.push(ln.subj && COURSES.indexOf(ln.subj) >= 0 ? '<a href="#c-' + ln.subj + '" class="mbdg-a" aria-label="' + esc(ln.name) + ' 课程页">' + g + "</a>" : g);
-    });
-    /* 下一站、本周、今天 */
-    overlay.forEach(function (o) {
-      var col = "var(" + o.ln.color + ")", x = o.x, y = o.y, ring;
-      if (o.s.state === "cur") ring = '<circle class="mhalo" cx="' + x + '" cy="' + y + '" r="13" style="stroke:' + col + '"/><circle cx="' + x + '" cy="' + y + '" r="9" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:4.5"/>';
-      else if (o.s.state === "week") ring = '<circle cx="' + x + '" cy="' + y + '" r="8" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:3.2"/>';
-      else ring = '<circle cx="' + x + '" cy="' + y + '" r="7.5" style="fill:var(--map-bg);stroke:var(--ink);stroke-width:2.4;stroke-dasharray:3.5 2.5"/>';
-      var tag = "", sl = todaySub[o.ln.subj];
-      if (o.s.state === "cur" && sl && sl.index === o.i) tag = "今天";
-      else if (o.s.state === "week") tag = "本周";
-      var tagSvg = tag ? '<g class="mtag" aria-hidden="true"><rect x="' + (x + 9) + '" y="' + (y - 31) + '" width="34" height="18" rx="3" style="fill:' + (tag === "今天" ? "var(--ink)" : "var(--map-bg)") + ';stroke:var(--ink);stroke-width:1.5"/><text x="' + (x + 26) + '" y="' + (y - 17.5) + '" text-anchor="middle" style="fill:' + (tag === "今天" ? "var(--map-bg)" : "var(--ink)") + ';stroke:none;font-size:12px;font-weight:700">' + tag + "</text></g>" : "";
-      h.push('<g class="mst mline' + (todaySub[o.ln.subj] ? " is-today" : "") + '" data-act="mst" data-l="' + o.ln.id + '" data-i="' + o.i + '" tabindex="0" role="button" aria-label="' + esc(o.label) + "（" + ({ cur: "下一站", week: "本周", free: "下一章" })[o.s.state] + (tag === "今天" ? "，今天要走" : "") + '）"><title>' + esc(o.label) + '</title><circle class="hit" cx="' + x + '" cy="' + y + '" r="14"/>' + ring + tagSvg + "</g>");
-    });
+    var lg = M.legend;
+    if (lg) {
+      var X = lg.x, Y = lg.y, gy = Y + 52;
+      h.push('<g class="mlg"><rect x="' + X + '" y="' + Y + '" width="304" height="204" rx="14" class="mlg-bg"/>' + tx(X + 18, Y + 28, "图例", "mt-end") +
+        '<path d="M' + (X + 18) + " " + gy + " L" + (X + 62) + " " + gy + '" class="mg-out" style="stroke:var(--ln-cfa);stroke-width:11"/><path d="M' + (X + 40) + " " + gy + " L" + (X + 62) + " " + gy + '" class="mg-in" style="stroke-width:4"/>' + tx(X + 74, gy + 4.5, "目标线：实心是已学，空心是还要学", "mt-lg") +
+        checkDot(X + 40, gy + 28, "todo") + tx(X + 74, gy + 32.5, "技能站：过了检验才算到站", "mt-lg") +
+        '<path d="M' + (X + 18) + " " + (gy + 56) + " L" + (X + 62) + " " + (gy + 56) + '" class="mf-line" style="stroke:var(--ln-geo)"/>' + stopDot(X + 32, gy + 56, "--ln-geo", "done", 5) + stopDot(X + 50, gy + 56, "--ln-geo", "todo", 5) + tx(X + 74, gy + 60.5, "自选线：一课一站", "mt-lg") +
+        '<circle cx="' + (X + 40) + '" cy="' + (gy + 84) + '" r="10" class="mhub"/>' + tx(X + 74, gy + 88.5, "换乘：两条线讲同一件事", "mt-lg") +
+        '<rect x="' + (X + 33) + '" y="' + (gy + 105) + '" width="14" height="14" class="mlm-sq"/>' + tx(X + 74, gy + 116.5, "地标：查过的资料，不算进度", "mt-lg") +
+        todaySeal(X + 40, gy + 140) + tx(X + 74, gy + 144.5, "今天要学的那一站", "mt-lg") + "</g>");
+    }
     h.push("</svg>");
     return h.join("");
   }
 
-  function boardHTML(ti) {
-    var STUDY = curStudy(), rows = [];
-    function row(id, name, color, dark, next, when, pill) {
-      return '<div class="brow"><span class="bline"><b class="lbadge' + (dark ? " dk" : "") + '" style="--c:var(' + color + ')">' + esc(name) + '</b></span><span class="bnext">' + esc(next) + '</span><span class="bwhen">' + esc(when) + "</span>" + pill + "</div>";
-    }
-    var late = [];
-    COURSES.forEach(function (s) {
-      var list = lessonList(s), nx = STUDY.next[s] || 0, d = lineDelay(s), fresh = !sinceOk(s, ti.t);
-      if (d > 0) late.push({ s: s, d: d });
-      var pill = fresh ? '<span class="pill free">' + cnDate(PLAN.since[s]) + "开始</span>" : d > 0 ? '<span class="pill late">晚点 ' + d + " 站</span>" : d < 0 ? '<span class="pill early">早到 ' + -d + " 站</span>" : '<span class="pill">正点</span>';
-      var unit = s === "film" ? " 段" : " 站";
-      rows.push('<a class="brow-a" href="#c-' + s + '">' + row(s, subjName(s), LINE_COLOR[s], !!DARK_INK[s], nx < list.length ? (s === "film" ? list[nx].title + " · 跟读" : "第 " + (nx + 1) + unit + " · " + list[nx].title) : "本阶段已走完", fresh ? "" : nextWhen(s), pill) + "</a>");
-    });
-    var wk = mmWeek();
-    rows.push(row("mm", "做市商研习", "--ln-mm", true, "第 " + (wk + 1) + " 周 · " + M.mmWeeks[wk], "本周", '<span class="pill free">按周走</span>'));
-    var zb = LIB.books.zhoulu, fc = zb ? zb.chapters.filter(function (c) { return !isDone(chId("zhoulu", c.n)); })[0] : null;
-    if (zb) rows.push(row("tao", "涛动周期录", "--ln-tao", false, fc ? "第" + CN[fc.n] + "章 " + fc.title : "已读完", "随时", '<span class="pill free">自由线</span>'));
-    var adv = [];
-    var y = addDaysBJ(ti.t, -1), yr = STUDY.days[y];
-    if (late.length) {
-      var max = Math.max.apply(null, late.map(function (x) { return x.d; }));
-      adv.push(late.map(function (x) { return subjName(x.s); }).join("、") + "晚点" + (late.length === 1 ? " " + late[0].d + " 站" : "") + "。" + (max >= 3 ? "晚点 3 站以上的线，周日复盘时选一种调度：坐快车、顺延终点或暂停一条线。" : "找一天选“加开”就能补上。"));
-      if (yr && !checkedIn(yr)) adv.push(cnDate(y) + "还没报站，所以先按没学算。");
-    } else adv.push("各条线都正点。");
-    return '<section class="panel" aria-labelledby="bd-h"><h2 id="bd-h">各线到站</h2>' + rows.join("") + '<p class="badvice">' + esc(adv.join("")) + "</p></section>";
+  /* ---------- 线网图下方：目标线明细、地标、规则 ---------- */
+  function goalSecHTML(g) {
+    var sts = goalStations(g), tot = goalTotal(g), done = goalMin(g) / 60;
+    var rows = sts.map(function (x) {
+      var pct = Math.min(100, Math.round(x.done / x.st.hours * 100));
+      var links = [];
+      if (x.st.subj && COURSES.indexOf(x.st.subj) >= 0) links.push('<a href="#c-' + x.st.subj + '">' + esc(subjName(x.st.subj)) + " 课程</a>");
+      if (x.st.item && ITEMS[x.st.item]) links.push('<a href="#t-' + ITEMS[x.st.item].tracks[0] + '">书架</a>');
+      return '<tr class="' + x.state + '"><th scope="row"><button type="button" class="linkbtn gname" data-act="mgs" data-g="' + g.id + '" data-i="' + x.i + '">' + esc(x.st.name) + "</button>" + (links.length ? '<span class="glinks">' + links.join(" · ") + "</span>" : "") + "</th>" +
+        "<td>" + esc(x.st.learn || "") + '</td><td class="gnum">' + x.st.hours + " h</td><td>" + esc(x.st.check || "") + "</td>" +
+        '<td class="gprog"><span class="bar"><span style="width:' + pct + "%;background:var(" + (LINE_COLOR[x.st.subj] || g.color) + ')"></span></span><span class="gp-t">' + (Math.round(x.done * 10) / 10) + " / " + x.st.hours + ' h</span><span class="gst ' + x.state + '">' + stateText(x.state) + (x.passed ? " · " + esc(x.passed) : "") + "</span></td></tr>";
+    }).join("");
+    return '<section class="gsec" id="g-' + g.id + '" style="--c:var(' + g.color + ')"><div class="gsec-h"><h2><span class="gbar" aria-hidden="true"></span>' + esc(g.name) + ' <span class="gk">目标线</span></h2>' +
+      '<p class="meta">终点：' + esc(g.end) + " · 已学 " + (Math.round(done * 10) / 10) + " / 约 " + tot + " 小时 · 还要约 " + Math.max(0, Math.round(tot - done)) + " 小时</p></div>" +
+      '<div class="gtab-w"><table class="gtab"><thead><tr><th scope="col">技能站</th><th scope="col">学什么</th><th scope="col" class="gnum">估算</th><th scope="col">过站检验</th><th scope="col">进度</th></tr></thead><tbody>' + rows + "</tbody></table></div>" +
+      (g.parallel ? '<p class="meta gnote">前 ' + g.parallel + " 站是并行的两条轨道，交替学，都过了检验再并成一条线。小时数是粗估，学到那一站时再细化。</p>" : '<p class="meta gnote">每科先按 30 小时估，学到那一科时再按考纲细化。</p>') + "</section>";
   }
   function landmarkPanel() {
-    var lineReports = M.lines.map(function (l) { return l.report; }).filter(Boolean);
+    var lineReports = (M.free || []).map(function (l) { return l.report; }).filter(Boolean);
     var list = REPORTS.filter(function (rp) { return lineReports.indexOf(rp.id) < 0; });
-    return '<section class="panel" aria-labelledby="lm-h"><h2 id="lm-h">地标</h2><p class="meta" style="margin-top:6px">讨论和查到的资料，放在它所属的方向里，不算进度。以后讨论完说一句“放进研习录”，就多一个地标。全部见<a href="#shelf">书架 · 研究档案</a>。</p><div class="lmk-list">' +
+    return '<section class="panel" aria-labelledby="lm-h"><h2 id="lm-h">地标</h2><p class="meta" style="margin-top:6px">讨论和查到的资料，放在它所属的方向里，不算进度。全部见<a href="#shelf">书架 · 研究档案</a>。</p><div class="lmk-list">' +
       list.map(function (rp) { return '<a class="lmk" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span class="lmk-sq" aria-hidden="true"></span><span class="lmk-t">' + esc(rp.title) + ' <span aria-hidden="true">↗</span></span><span class="lmk-d">' + esc(rp.desc) + "</span>" + reportRel(rp, false) + "</a>"; }).join("") + "</div></section>";
   }
   function homeHTML() {
     if (!M || !PLAN) return shelfHTML();
     var ti = todayInfo();
-    var nLines = M.lines.filter(function (l) { return l.src; }).length;
-    return '<div class="view home">' + bannerHTML() + todayStripHTML(ti) +
-      '<section class="mwrap" aria-labelledby="mw-h"><div class="mhead"><div><h2 id="mw-h">线网图</h2><p class="meta">' + esc(PLAN.phase) + " · " + nLines + " 条线 · " + M.hubs.length + " 个换乘站 · " + M.landmarks.length + ' 个地标</p></div>' +
-      '<button type="button" class="chipbtn" data-act="metro-today" aria-pressed="' + !!S.metroToday + '">只看今天的线</button></div>' +
-      '<div class="mscroll"><div class="minner" id="minner">' + metroSVG(ti) + '<div class="mpop" id="mpop" role="dialog" aria-label="站点详情" hidden></div></div></div>' +
-      '<p class="meta mhint">点任意一站看详情和讲义；屏幕窄时可以左右拖动地图。</p></section>' +
-      '<div class="hgrid">' + boardHTML(ti) + landmarkPanel() + "</div>" +
-      '<details class="rules"><summary>运行规则</summary><ol>' +
-      "<li>位置只看“学完”，不看日期。哪一站没走完，下次接着走，不会堆成欠账。</li>" +
-      "<li>每天出发前选今天坐多远：保底只走电影一站，标准按时刻表走，加开多走一站。</li>" +
-      "<li>电影线每天一段，周日把本周 6 段连起来复习，不往前走。</li>" +
-      "<li>每条线跟时刻表比，显示正点、晚点或早到。晚点 1–2 站，找一天加开补上。</li>" +
-      "<li>晚点 3 站以上，周日复盘时三选一：坐快车（只走每课的必经部分），顺延这条线的终点，或者暂停一条线一周。</li>" +
-      "<li>早到了，可以接着往前，也可以换乘自由线去读书。时刻表不变。</li>" +
-      "<li>晚上 9 点报站。没报站，位置原地不动，不算失败。</li></ol></details></div>";
+    var gDone = GOALS.reduce(function (a, g) { return a + goalMin(g) / 60; }, 0), gTot = GOALS.reduce(function (a, g) { return a + goalTotal(g); }, 0);
+    var stats = [[GOALS.length, "条目标线", GOALS.map(function (g) { return g.name; }).join(" · ")], [(M.free || []).length, "条自选线", "一课一站"],
+      [Math.round(gDone * 10) / 10, "小时", "目标线已学"], [Math.round(gTot - gDone), "小时", "目标线还要学"]];
+    return '<div class="view home">' + bannerHTML() +
+      '<header class="phead"><div><p class="eyebrow">' + esc(PLAN.phase) + " · " + cnDate(PLAN.start) + '起</p><h1>线网图</h1><p class="lede">底色是学习方向。双线是目标线，按估算小时排站，站距越长要学越久；单线是自选线，一课一站。</p></div>' +
+      '<div class="pstats">' + stats.map(function (s) { return '<div><b>' + s[0] + "<span>" + s[1] + "</span></b><small>" + esc(s[2]) + "</small></div>"; }).join("") + "</div></header>" +
+      todayStripHTML(ti) +
+      '<section class="mwrap" aria-label="线网图"><div class="mscroll"><div class="minner" id="minner">' + metroSVG(ti) + '<div class="mpop" id="mpop" role="dialog" aria-label="站点详情" hidden></div></div></div>' +
+      '<p class="meta mhint">点任意一站、线名牌或换乘站看详情；屏幕窄时可以左右拖动地图。</p></section>' +
+      GOALS.map(goalSecHTML).join("") +
+      '<div class="hgrid">' + landmarkPanel() +
+      '<section class="panel rules-p" aria-labelledby="ru-h"><h2 id="ru-h">运行规则</h2><ol class="rules-l">' +
+      "<li>两种线：目标线是自己定的能力目标，按估算小时排站；自选线是单独挑出来学的一门课或一本书，一课一站。</li>" +
+      "<li>进度看小时：每晚打卡说学了哪几课、多少分钟，目标线上的小时数自动累加。</li>" +
+      "<li>到站要检验：学够小时不算到站，过了这一站的检验才算。检验做完告诉我，我记进研习录。</li>" +
+      "<li>没有晚点：路线单只是建议，没学完不记欠账，下次从停下的那一课接着学。</li>" +
+      "<li>出发前选今天学多少：保底只学电影一段，标准按路线单，多学在目标线上再加一课。</li>" +
+      "<li>电影线每天一段，周日回看本周 6 段；周日的周复盘在足迹里记一个“检”。</li>" +
+      "<li>晚上 9 点打卡、盖章。没打卡，位置原地不动。</li></ol></section></div></div>";
   }
-  /* 站点详情 */
-  function stationPopHTML(lid, i) {
-    var ln = lineById(lid), stops = lineStops(ln), s = stops[i]; if (!s) return "";
-    var stTxt = { done: "已学完", cur: "下一站", todo: "还没到", free: "下一章 · 自由线，想读就读", week: "本周这一站" }[s.state];
-    var sl = todayInfo().slots.filter(function (x) { return x.subj === ln.subj; })[0];
-    if (s.state === "cur" && sl && sl.index === i) stTxt += " · 今天要走";
+
+  /* ---------- 站点详情 ---------- */
+  function freeStopPopHTML(lid, i) {
+    var f = freeLine(lid), stops = f ? freeStops(f) : [], s = stops[i]; if (!s) return "";
+    var stTxt = { done: "已学完", cur: "下一站", todo: "还没到" }[s.state];
+    var sl = f.subj ? todayInfo().slots.filter(function (x) { return x.subj === f.subj; })[0] : null;
+    if (s.state === "cur" && sl && sl.index === i) stTxt += " · 今天要学";
     var links = [], extra = "";
-    if (ln.subj === "film") {
-      links.push('<a class="btn small" href="#c-film" data-act="film-go" data-seg="' + i + '">在跟读播放器里打开</a>');
-    } else if (ln.subj && PLAN.lessons[ln.subj]) {
-      if (isWritten(ln.subj) && i < issuedN(ln.subj)) links.push('<a class="btn small" href="#l-' + lessonKey(ln.subj, i) + '">打开讲义</a>');
-      else if (isWritten(ln.subj)) extra = '<p class="mp-s">讲义在排到这一课的那天早上写好。</p>';
-      links.push('<a class="btn small ghost" href="#c-' + ln.subj + '">' + esc(subjName(ln.subj)) + " 全部课程</a>");
+    if (f.subj === "film") links.push('<a class="btn small" href="#c-film" data-act="film-go" data-seg="' + i + '">在跟读播放器里打开</a>');
+    else if (f.subj && PLAN.lessons[f.subj]) {
+      if (isWritten(f.subj) && i < issuedN(f.subj)) links.push('<a class="btn small" href="#l-' + lessonKey(f.subj, i) + '">打开讲义</a>');
+      else if (isWritten(f.subj)) extra = '<p class="mp-s">讲义在排到这一课的那天早上写好。</p>';
+      links.push('<a class="btn small ghost" href="#c-' + f.subj + '">全部课程</a>');
     }
-    var uses = usesAt(ln.subj, i);
-    if (uses.length) extra += '<ul class="mp-uses">' + uses.map(function (x) { return '<li><a href="' + esc(reportHref(x.rp)) + '" target="_blank" rel="noopener"><b>可用资料</b>' + esc(x.rp.title) + " ↗</a>" + (x.u[2] ? '<span class="meta">' + esc(x.u[2]) + "</span>" : "") + "</li>"; }).join("") + "</ul>";
-    if (ln.id === "geo" && i < 20) {
+    if (f.id === "geo" && i < 20) {
       var ch = Math.floor(i / 2) + 1, tb = LIB.books.tragedy;
-      links.push(tb.deep && tb.deep[ch] ? '<a class="btn small ghost" href="#r-tragedy-' + ch + '">第' + CN[ch] + "章精读稿</a>" : '<button type="button" class="btn small ghost" data-act="open-ch" data-book="tragedy" data-n="' + ch + '">第' + CN[ch] + "章导读</button>");
+      if (tb) links.push(tb.deep && tb.deep[ch] ? '<a class="btn small ghost" href="#r-tragedy-' + ch + '">第' + CN[ch] + "章精读稿</a>" : '<button type="button" class="btn small ghost" data-act="open-ch" data-book="tragedy" data-n="' + ch + '">第' + CN[ch] + "章导读</button>");
+    } else if (f.book && !f.subj) {
+      var bk = LIB.books[f.book];
+      if (bk.deep && bk.deep[s.n]) links.push('<a class="btn small" href="#r-' + f.book + "-" + s.n + '">精读稿</a>');
+      links.push('<button type="button" class="btn small ghost" data-act="open-ch" data-book="' + f.book + '" data-n="' + s.n + '">本章导读</button>');
     }
-    if (ln.src && ln.src.indexOf("book:") === 0) {
-      var bid = ln.src.slice(5), bk = LIB.books[bid];
-      if (bk.deep && bk.deep[s.n]) links.push('<a class="btn small" href="#r-' + bid + "-" + s.n + '">精读稿</a>');
-      links.push('<button type="button" class="btn small ghost" data-act="open-ch" data-book="' + bid + '" data-n="' + s.n + '">本章导读</button>');
-    }
-    if (ln.report) { var rp = REPORTS.filter(function (x) { return x.id === ln.report; })[0]; if (rp) links.push('<a class="btn small ghost" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开研习计划 ↗</a>'); }
-    return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b class="lbadge' + (DARK_INK[ln.id] ? " dk" : "") + '" style="--c:var(' + ln.color + ')">' + esc(ln.name) + '</b><span class="mp-pos">第 ' + (i + 1) + " / " + stops.length + ' 站</span></div>' +
+    if (f.report) { var rp = REPORTS.filter(function (x) { return x.id === f.report; })[0]; if (rp) links.push('<a class="btn small ghost" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开研习计划 ↗</a>'); }
+    var uses = f.subj ? usesAt(f.subj, i) : [];
+    if (uses.length) extra += '<ul class="mp-uses">' + uses.map(function (x) { return '<li><a href="' + esc(reportHref(x.rp)) + '" target="_blank" rel="noopener"><b>可用资料</b>' + esc(x.rp.title) + " ↗</a>" + (x.u[2] ? '<span class="meta">' + esc(x.u[2]) + "</span>" : "") + "</li>"; }).join("") + "</ul>";
+    return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b class="lbadge' + (DARK_INK[f.subj || f.id] ? " dk" : "") + '" style="--c:var(' + f.color + ')">' + esc(freeName(f)) + '</b><span class="mp-pos">自选线 · 第 ' + (i + 1) + " / " + stops.length + " 站</span></div>" +
       '<p class="mp-t">' + esc(s.title) + '</p><p class="mp-s">' + esc(stTxt) + "</p>" + extra + (links.length ? '<div class="btns">' + links.join("") + "</div>" : "");
   }
-  /* 哪些研究资料能用在某一课上 */
+  function goalStopPopHTML(gid, i) {
+    var g = GOAL[gid], x = g && goalStations(g)[i]; if (!x) return "";
+    var links = [], st = x.st;
+    if (st.subj && PLAN.lessons[st.subj]) {
+      var nx = curStudy().next[st.subj] || 0, list = lessonList(st.subj);
+      if (st.lessons && (nx < st.lessons[0] || nx >= st.lessons[1])) nx = -1;
+      if (nx >= 0 && nx < list.length && isWritten(st.subj) && nx < issuedN(st.subj)) links.push('<a class="btn small" href="#l-' + lessonKey(st.subj, nx) + '">下一课：第 ' + (nx + 1) + " 课</a>");
+      links.push('<a class="btn small ghost" href="#c-' + st.subj + '">' + esc(subjName(st.subj)) + " 全部课程</a>");
+    }
+    if (st.item && ITEMS[st.item]) links.push('<a class="btn small ghost" href="#t-' + ITEMS[st.item].tracks[0] + '">在书架上看</a>');
+    var lessonNote = st.lessons ? '<p class="mp-s">课表里的第 ' + (st.lessons[0] + 1) + "—" + st.lessons[1] + " 课。</p>" : "";
+    return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b class="lbadge" style="--c:var(' + g.color + ')">' + esc(g.name) + '</b><span class="mp-pos">目标线 · 第 ' + (i + 1) + " / " + g.stations.length + " 站</span></div>" +
+      '<p class="mp-t">' + esc(st.name) + '</p><p class="mp-s">约 ' + st.hours + " 小时 · 已学 " + (Math.round(x.done * 10) / 10) + " 小时 · " + stateText(x.state) + (x.passed ? "（" + esc(x.passed) + "）" : "") + "</p>" +
+      '<dl class="mp-dl"><dt>学什么</dt><dd>' + esc(st.learn || "") + "</dd><dt>过站检验</dt><dd>" + esc(st.check || "") + "</dd></dl>" + lessonNote +
+      (links.length ? '<div class="btns">' + links.join("") + "</div>" : "");
+  }
   function usesAt(subj, i) {
     var out = [];
     REPORTS.forEach(function (rp) { (rp.uses || []).forEach(function (u) { if (u[0] === subj && u[1] === i) out.push({ rp: rp, u: u }); }); });
@@ -1301,14 +1658,24 @@
       '<div class="mp-rel">' + (tr ? '<span class="rrel"><b>归属</b>' + tr + "</span>" : "") + reportRel(rp, false) + "</div>" +
       '<div class="btns"><a class="btn small" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开专题 ↗</a></div>';
   }
+  function hubEndName(a) {
+    if (a[0] === "cfa" || GOAL[a[0]]) { var g = GOAL[a[0]]; return { name: g.name, col: g.color, title: g.stations[a[1]].name, act: 'data-act="mgs" data-g="' + a[0] + '" data-i="' + a[1] + '"' }; }
+    var f = freeLine(a[0]);
+    if (f) { var s = freeStops(f)[a[1]]; return { name: freeName(f), col: f.color, title: s ? s.title : "", act: 'data-act="mst" data-l="' + a[0] + '" data-i="' + a[1] + '"' }; }
+    var list = lessonList(a[0]), x = list[a[1]];
+    return { name: subjName(a[0]), col: LINE_COLOR[a[0]] || "--ln-rev", title: "第 " + (a[1] + 1) + " 课 " + (x ? x.title : ""), href: isWritten(a[0]) && a[1] < issuedN(a[0]) ? "#l-" + lessonKey(a[0], a[1]) : "#c-" + a[0] };
+  }
   function hubPopHTML(k) {
     var hb = M.hubs[k];
     return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b>换乘站 · ' + esc(hb.name) + '</b></div><p class="mp-s" style="margin-top:6px">' + esc(hb.sub) + "</p><ul>" +
-      hb.at.map(function (a) { var ln = lineById(a[0]), s = lineStops(ln)[a[1]]; return '<li><button type="button" class="linkrow" data-act="mst" data-l="' + a[0] + '" data-i="' + a[1] + '"><b class="lbadge' + (DARK_INK[a[0]] ? " dk" : "") + '" style="--c:var(' + ln.color + ')">' + esc(ln.name) + "</b> " + esc(s ? s.title : "") + "</button></li>"; }).join("") + "</ul>";
+      hb.at.map(function (a) {
+        var e = hubEndName(a), inner = '<b class="lbadge" style="--c:var(' + e.col + ')">' + esc(e.name) + "</b> " + esc(e.title);
+        return "<li>" + (e.href ? '<a class="linkrow" href="' + e.href + '">' + inner + "</a>" : '<button type="button" class="linkrow" ' + e.act + ">" + inner + "</button>") + "</li>";
+      }).join("") + "</ul>";
   }
   function openPop(html, x, y) {
     var inner = document.getElementById("minner"), pop = document.getElementById("mpop");
-    if (!inner || !pop) return;
+    if (!inner || !pop || !html) return;
     var sc = inner.clientWidth / M.w;
     pop.innerHTML = html; pop.hidden = false;
     var px = x * sc, py = y * sc, pw = pop.offsetWidth, ph = pop.offsetHeight;
@@ -1318,18 +1685,25 @@
     var f = pop.querySelector("a,button:not(.mp-x)") || pop.querySelector(".mp-x"); if (f) f.focus({ preventScroll: true });
   }
   function closePop() { var pop = document.getElementById("mpop"); if (pop && !pop.hidden) { pop.hidden = true; pop.innerHTML = ""; } }
-  function openStation(lid, i) { var ln = lineById(lid), p = ln && stationXY(ln)[i]; if (p) openPop(stationPopHTML(lid, i), p[0], p[1]); }
-  function openHub(k) { var hb = M.hubs[k]; if (hb) openPop(hubPopHTML(k), hb.x, hb.y); }
-  function openLandmark(rid) { var lm = M.landmarks.filter(function (x) { return x.report === rid; })[0]; if (lm) openPop(landmarkPopHTML(rid), lm.x, lm.y); }
+  function openStation(lid, i) { var p = POS["f:" + lid + ":" + i]; if (p) openPop(freeStopPopHTML(lid, i), p[0], p[1]); }
+  function openGoalStop(gid, i) {
+    var p = POS["g:" + gid + ":" + i];
+    if (p && document.getElementById("minner")) { openPop(goalStopPopHTML(gid, i), p[0], p[1]); var m = document.getElementById("minner"); if (m) m.scrollIntoView({ block: "nearest", behavior: "smooth" }); }
+  }
+  function openHub(k) { var p = POS["h:" + k]; if (p) openPop(hubPopHTML(k), p[0], p[1]); }
+  function openLandmark(rid) { var p = POS["l:" + rid]; if (p) openPop(landmarkPopHTML(rid), p[0], p[1]); }
 
   /* ---------- 课程页：一条线一个页面 ---------- */
   function courseHTML(subj) {
     var STUDY = curStudy(), list = lessonList(subj), nx = Math.min(STUDY.next[subj] || 0, list.length), t = bjToday();
-    var ln = M && lineOfSubj(subj), col = ln ? ln.color : LINE_COLOR[subj] || "--ln-rev", info = PLAN.subjects[subj] || {};
-    var d = lineDelay(subj), fresh = !sinceOk(subj, t), film = subj === "film";
-    var pill = fresh ? '<span class="pill free">' + cnDate(PLAN.since[subj]) + "开始</span>" : d > 0 ? '<span class="pill late">晚点 ' + d + " 站</span>" : d < 0 ? '<span class="pill early">早到 ' + -d + " 站</span>" : '<span class="pill">正点</span>';
+    var col = LINE_COLOR[subj] || "--ln-rev", info = PLAN.subjects[subj] || {};
+    var fresh = !sinceOk(subj, t), film = subj === "film", gl = GOAL[GOAL_OF[subj]];
+    var pill = fresh ? '<span class="pill free">' + cnDate(PLAN.since[subj]) + "开始</span>"
+      : gl ? '<a class="pill" href="#g-' + gl.id + '">' + esc(gl.name) + " · 目标线</a>" : '<span class="pill free">自选线</span>';
+    var est = subjEstMin(subj);
+    pill += '<span><b>' + hrs(subjMin(subj)) + "</b>" + (est && !gl ? "/ 约 " + Math.round(est / 60) + " " : "") + "小时已学</span>";
     var unit = film ? "段" : "课";
-    var head = '<header><p class="eyebrow"><a href="#plan">每日课表</a> · 课程</p><h1 class="ctitle"><span class="cbar" style="--c:var(' + col + ')" aria-hidden="true"></span>' + esc(info.name || subj) + (film ? "《" + esc(info.film) + "》" : "") + "</h1>" +
+    var head = '<header><p class="eyebrow"><a href="#home">线网</a> · ' + (gl ? esc(gl.name) + " · " : "") + '课程</p><h1 class="ctitle"><span class="cbar" style="--c:var(' + col + ')" aria-hidden="true"></span>' + esc(info.name || subj) + (film ? "《" + esc(info.film) + "》" : "") + "</h1>" +
       '<p class="lede">' + esc(info.why || "") + "</p>" +
       '<div class="stats"><span><b>' + nx + "</b>/ " + list.length + " " + unit + "已学</span>" + pill + (fresh ? "" : '<span>下次：' + esc(nextWhen(subj) || "—") + "</span>") + "</div></header>";
     if (film) return '<div class="view wide course">' + bannerHTML() + head + '<div id="film-slot"></div>' + filmSegsHTML() + filmNotesHTML() + "</div>";
@@ -1342,12 +1716,12 @@
       if (x.code && x.code !== lastCode) { lastCode = x.code; rows.push('<li class="cmod">' + esc(x.code) + " · " + esc(x.title.replace(/^\S+\s/, "").replace(/（\d+\/\d+）$/, "")) + (x.en ? '<span class="meta">' + esc(x.en) + "</span>" : "") + "</li>"); }
       var stt = i < nx ? ["done", "学完"] : i === nx ? ["cur", "下一课"] : ["todo", ""];
       var open = isWritten(subj) && i < iss, uses = usesAt(subj, i);
-      var hubs = (M ? M.hubs : []).filter(function (hb) { return hb.at.some(function (a) { return ln && a[0] === ln.id && a[1] === i; }); });
+      var hubs = (M ? M.hubs : []).filter(function (hb) { return hb.at.some(function (a) { return a[0] === subj && a[1] === i; }); });
       rows.push('<li class="crow ' + stt[0] + '"><span class="cnum">' + pad2(i + 1) + "</span>" + (open ? '<a class="ct" href="#l-' + lessonKey(subj, i) + '">' + esc(x.title) + "</a>" : '<span class="ct">' + esc(x.title) + "</span>") +
         '<span class="cs">' + (stt[1] ? '<span class="lst ' + stt[0] + '">' + stt[1] + "</span>" : "") + (hubs.length ? '<span class="ctag">换乘 · ' + esc(hubs.map(function (h) { return h.name; }).join("、")) + "</span>" : "") +
         (uses.length ? '<span class="ctag">资料 · ' + esc(uses.map(function (u) { return u.rp.title; }).join("、")) + "</span>" : "") + "</span></li>");
     });
-    var hubList = (M && ln ? M.hubs : []).filter(function (hb) { return hb.at.some(function (a) { return a[0] === ln.id; }); });
+    var hubList = (M ? M.hubs : []).filter(function (hb) { return hb.at.some(function (a) { return a[0] === subj; }); });
     var hubSec = hubList.length ? '<section><h2>换乘站</h2><ul class="clinks">' + hubList.map(function (hb) { return "<li><b>" + esc(hb.name) + "</b>" + esc(hb.sub) + "</li>"; }).join("") + "</ul></section>" : "";
     var useSec = [];
     REPORTS.forEach(function (rp) { (rp.uses || []).forEach(function (u) { if (u[0] === subj) useSec.push('<li><a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><b>' + esc(rp.title) + " ↗</b></a>第 " + (u[1] + 1) + " 课用得上：" + esc(u[2] || "") + "</li>"); }); });
@@ -1679,8 +2053,7 @@
   }
 
   /* ---------- 主渲染 ---------- */
-  var ROUTES = { home: 1, shelf: 1, journal: 1, review: 1 };
-  if (PLAN) ROUTES.plan = 1;
+  var ROUTES = { home: 1, shelf: 1, journal: 1 };
   COURSES.forEach(function (k) { ROUTES["c-" + k] = 1; });
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
   Object.keys(LIB.books).forEach(function (b) {
@@ -1696,10 +2069,8 @@
     else if (r.indexOf("t-") === 0) html = trackHTML(r.slice(2));
     else if (r.indexOf("b-") === 0) html = bookHTML(r.slice(2));
     else if (r === "journal") html = journalHTML();
-    else if (r === "plan") html = planHTML();
     else if (/^l-/.test(r)) html = lessonHTML(r.slice(2));
     else if (/^c-/.test(r)) html = courseHTML(r.slice(2));
-    else if (r === "review") html = reviewHTML();
     else if (r === "shelf") html = shelfHTML();
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
@@ -1745,10 +2116,17 @@
 
   document.addEventListener("click", function (e) {
     var pop = document.getElementById("mpop");
-    if (pop && !pop.hidden && !e.target.closest("#mpop") && !e.target.closest('[data-act="mst"],[data-act="mhub"],[data-act="mlm"]')) closePop();
+    if (pop && !pop.hidden && !e.target.closest("#mpop") && !e.target.closest('[data-act="mst"],[data-act="mgs"],[data-act="mhub"],[data-act="mlm"]')) closePop();
     var t = e.target.closest("[data-act]"); if (!t) return;
     var act = t.getAttribute("data-act");
     if (act === "mst") { openStation(t.getAttribute("data-l"), +t.getAttribute("data-i")); return; }
+    if (act === "mgs") { openGoalStop(t.getAttribute("data-g"), +t.getAttribute("data-i")); return; }
+    if (act === "pick") { S.shelfPick = t.getAttribute("data-id"); render(); var pa = document.querySelector(".pulled"); if (pa && window.innerWidth < 1100) pa.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
+    if (act === "add-book") { toast("在对话里说书名和放进哪个方向，我加到书架上"); return; }
+    if (act === "fold-day") { S.foldDay = t.getAttribute("data-d"); render(); return; }
+    if (act === "fold-nav") { S.foldStart = foldWS() + +t.getAttribute("data-d"); S.foldDay = null; render(); return; }
+    if (act === "fold-go") { var fw = +t.getAttribute("data-w"); S.foldStart = Math.max(0, fw - 1); S.foldDay = null; render(); return; }
     if (act === "mhub") { openHub(+t.getAttribute("data-h")); return; }
     if (act === "mlm") { openLandmark(t.getAttribute("data-r")); return; }
     if (act === "film-go") {
@@ -1777,7 +2155,6 @@
     }
     if (act === "mpop-close") { closePop(); return; }
     if (act === "metro-mode") { S.metroMode = t.getAttribute("data-m"); try { localStorage.setItem("yanxilu-route-" + bjToday(), S.metroMode); } catch (e2) {} render(); return; }
-    if (act === "metro-today") { S.metroToday = !S.metroToday; render(); return; }
     if (act === "status") return;
     if (act === "tab") { S.bookTab = t.getAttribute("data-tab"); render(); return; }
     if (act === "open-ch") { e.preventDefault(); openChapter(t.getAttribute("data-book"), +t.getAttribute("data-n")); return; }
@@ -1799,10 +2176,6 @@
       var k = t.getAttribute("data-card"); S.bookTab = "practice"; S.practice = "cards"; S.flipped[k] = true; S.hl = k; render();
       setTimeout(function () { var el = document.getElementById("card-" + k); if (el) el.scrollIntoView({ block: "center", behavior: "smooth" }); }, 60); return;
     }
-    if (act === "reveal") { S.rv.show = true; render(); return; }
-    if (act === "grade") { grade(t.getAttribute("data-g")); return; }
-    if (act === "rv-skip") { S.rv.i++; S.rv.show = false; render(); return; }
-    if (act === "rv-restart") { startReview(); render(); return; }
     if (act === "copy-fw") { copyText(frameworkText(t.getAttribute("data-book"))); return; }
     if (act === "copy-code") { var pre = t.parentNode.querySelector("pre"); if (pre) copyText(pre.textContent); return; }
     if (act === "export") { copyText(JSON.stringify(S.data, null, 2)); return; }
@@ -1814,11 +2187,12 @@
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") { var pop = document.getElementById("mpop"); if (pop && !pop.hidden) { closePop(); return; } }
     if (e.key !== "Enter" && e.key !== " ") return;
-    var g = e.target && e.target.closest ? e.target.closest('.metro [data-act="mst"], .metro [data-act="mhub"], .metro [data-act="mlm"]') : null;
+    var g = e.target && e.target.closest ? e.target.closest('.metro [data-act="mst"], .metro [data-act="mgs"], .metro [data-act="mhub"], .metro [data-act="mlm"], .fold [data-act], .fold-mini [data-act]') : null;
     if (!g) return;
     e.preventDefault();
     var ga = g.getAttribute("data-act");
-    if (ga === "mhub") openHub(+g.getAttribute("data-h")); else if (ga === "mlm") openLandmark(g.getAttribute("data-r")); else openStation(g.getAttribute("data-l"), +g.getAttribute("data-i"));
+    if (ga === "fold-day" || ga === "fold-nav" || ga === "fold-go") { g.dispatchEvent(new MouseEvent("click", { bubbles: true })); return; }
+    if (ga === "mhub") openHub(+g.getAttribute("data-h")); else if (ga === "mlm") openLandmark(g.getAttribute("data-r")); else if (ga === "mgs") openGoalStop(g.getAttribute("data-g"), +g.getAttribute("data-i")); else openStation(g.getAttribute("data-l"), +g.getAttribute("data-i"));
   });
   /* 跟读播放器的快捷键 */
   document.addEventListener("keydown", function (e) {
@@ -1872,7 +2246,6 @@
   });
   window.addEventListener("hashchange", function () {
     var r = readHash();
-    if (r === "review" && S.route !== "review") S.rv = null;
     S.route = r; S.confirmDel = null; render(true);
   });
 

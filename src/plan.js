@@ -25,6 +25,41 @@ window.YXL_PLAN = {
     rev: { name: "周复盘", why: "本周 SQL、Python、CFA 小测各 5 题，错题回炉，再用本周学的东西处理一份模拟数据。" }
   },
 
+  /* 两种线：
+   * 目标线 = 自己定的能力目标，按估算小时排站；每站写清学什么、怎么检验，过了检验才算到站（检验记录写在 progress.json 的 checks 里，如 "ai-0": "2026-12-01"）。
+   *   subjs：哪些科目的学习时间算在这条线上；parallel：前几站是并行的几条轨道（交替学，都过检验后并成一条线）。
+   *   station.subj：这一站对应的课表科目；station.lessons：[从第几课, 到第几课之前]（从 0 起）。
+   * 自选线 = 单独挑出来学的一门课或一本书（电影、地缘、涛动周期录、做市商研习），一课一站，不算晚点。
+   * 小时数是粗估，开线学到那一站时再细化。 */
+  goals: [
+    { id: "ai", name: "AI 研发", end: "能训练、研究模型", color: "--ln-py", subjs: ["py", "sql"], parallel: 2,
+      stations: [
+        { name: "Python", hours: 100, subj: "py", learn: "语法、函数、文件、pandas", check: "不查资料写出批量清洗 Excel 的脚本" },
+        { name: "SQL 与 pandas", hours: 60, subj: "sql", learn: "查询、连接、窗口函数、清洗", check: "两份名单交叉比对，SQL 和 pandas 各做一遍" },
+        { name: "线性代数", hours: 80, learn: "向量、矩阵、特征值、SVD", check: "手推 PCA，并用 numpy 实现" },
+        { name: "概率统计", hours: 80, learn: "分布、估计、假设检验、贝叶斯", check: "从零实现朴素贝叶斯和一次 A/B 检验" },
+        { name: "微积分与优化", hours: 60, learn: "导数、链式法则、梯度下降", check: "手推一层网络的反向传播" },
+        { name: "机器学习", hours: 120, learn: "经典算法、特征、模型评估", check: "用真实数据做分类模型，讲清评估指标" },
+        { name: "深度学习", hours: 150, learn: "神经网络、PyTorch、CNN 与 RNN", check: "从零训练一个图像分类网络" },
+        { name: "大模型原理", hours: 100, learn: "注意力、Transformer、预训练与微调", check: "从零写一个小 GPT 并训练出能读的文字" },
+        { name: "读论文与复现", hours: 150, learn: "精读经典论文，复现关键实验", check: "独立复现一篇论文的主要结果" },
+        { name: "训练、改进模型", hours: 120, learn: "设计实验、评测、改进", check: "提出一个改进并用实验证明有效" }
+      ] },
+    { id: "cfa", name: "CFA 级金融", end: "一级水平", color: "--ln-cfa", subjs: ["cfa", "en"],
+      stations: [
+        { name: "数量方法", item: "cfa-quant", hours: 30, subj: "cfa", lessons: [0, 36], learn: "收益率、时间价值、统计、回归", check: "做完这一科的模拟题，正确率 70% 以上" },
+        { name: "经济学", item: "cfa-econ", hours: 30, subj: "cfa", lessons: [36, 64], learn: "市场结构、经济周期、货币与财政、汇率", check: "做完这一科的模拟题，正确率 70% 以上" },
+        { name: "财务报表", item: "cfa-fsa", hours: 30, learn: "三张表、收入确认、存货、长期资产", check: "读懂一份上市公司年报的三张表" },
+        { name: "公司发行人", item: "cfa-corp", hours: 30, learn: "公司治理、资本结构、资本预算", check: "做完这一科的模拟题，正确率 70% 以上" },
+        { name: "权益投资", item: "cfa-equity", hours: 30, learn: "市场组织、指数、估值模型", check: "用两种模型给一只股票估值" },
+        { name: "固定收益", item: "cfa-fi", hours: 30, learn: "债券定价、收益率、久期与凸性", check: "手算一只债券的久期" },
+        { name: "衍生品", item: "cfa-deriv", hours: 30, learn: "远期、期货、期权、互换的定价", check: "做完这一科的模拟题，正确率 70% 以上" },
+        { name: "另类投资", item: "cfa-alt", hours: 30, learn: "私募、对冲基金、房地产、大宗", check: "做完这一科的模拟题，正确率 70% 以上" },
+        { name: "组合管理", item: "cfa-pm", hours: 30, learn: "风险与收益、资本市场线、组合构建", check: "做完这一科的模拟题，正确率 70% 以上" },
+        { name: "道德标准", item: "cfa-ethics", hours: 30, learn: "职业行为准则与标准", check: "做完这一科的模拟题，正确率 70% 以上" }
+      ] }
+  ],
+
   /* 周几的时段安排：0 = 周日 … 6 = 周六。[科目, 分钟, "review"]；标 review 的时段是复习，不推进进度 */
   week: {
     1: [["film", 90], ["sql", 45], ["cfa", 35]],
