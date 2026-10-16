@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-16",
+  "updated": "2026-10-17",
   "next": {
     "sql": 0,
     "py": 0,
@@ -156,11 +156,40 @@
       ],
       "file": "study/daily/2026-10-16.md",
       "status": "pushed"
+    },
+    "2026-10-17": {
+      "planned": [
+        {
+          "subj": "film",
+          "mins": 90,
+          "title": "第 1 段",
+          "index": 0
+        },
+        {
+          "subj": "geo",
+          "mins": 60,
+          "title": "第一章 导论：读原书与精读页",
+          "index": 0,
+          "lesson": "geo-01",
+          "file": "study/lessons/geo/01.md"
+        },
+        {
+          "subj": "cfa",
+          "mins": 35,
+          "title": "Q1 收益率与回报（1/4）",
+          "index": 0,
+          "lesson": "cfa-01",
+          "file": "study/lessons/cfa/01.md"
+        }
+      ],
+      "file": "study/daily/2026-10-17.md",
+      "status": "pushed"
     }
   },
   "issued": {
     "sql": 1,
     "py": 1,
-    "cfa": 1
+    "cfa": 1,
+    "geo": 1
   }
 }
