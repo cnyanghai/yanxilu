@@ -12,32 +12,55 @@ window.YXL_LIB = {
    *   origin 出处：从哪儿来（读哪本书、哪次讨论时做的）
    *   tracks 归属：属于哪个学习方向（决定它在线网图上放在哪个区域）
    *   uses   用途：还能拿来做什么，[科目, 第几课(从 0 起), 说明]，显示在那一课的站点详情和课程页里
-   * question 是当时要回答的问题，refresh 写以后要不要更新。 */
+   * question 是当时要回答的问题，refresh 写以后要不要更新。
+   * 归档：topic 写它属于哪个研究课题（见下面 topics），kind 写它是哪一种：档案、数据、计划、纪要。
+   *   没写 topic 的放在档案架的收件匣里，攒到两件讲同一件事，再立一个课题装盒。 */
   reportGroups: [
     { id: "data", name: "数据专题", trackHead: "用数据看这个方向" },
     { id: "note", name: "知识专题", trackHead: "专题笔记" }
   ],
   reports: [
-    { id: "futures-market-making", group: "note", title: "期货做市商", date: "2026-10", tracks: ["fut"],
+    { id: "futures-market-making", group: "note", topic: "mm", kind: "档案", title: "期货做市商", date: "2026-10", tracks: ["fut"],
       desc: "做市商靠什么赚、在哪里亏：准入条件、盈亏方程、七块核心知识、可以动手调的报价模型、跨期对冲、常见亏法、学习路线和自测题。",
       origin: "关于期货做市商的一次讨论，后来展开成“做市商研习”这条线",
       question: "做市商靠什么赚钱、在哪里亏钱？",
       href: "reports/market-making.html", artifact: "https://claude.ai/artifact/Dnfuoje3rEV1HL39iURdtc" },
-    { id: "futures-mm-plan", group: "note", title: "做市商研习计划", date: "2026-10", tracks: ["fut"],
+    { id: "futures-mm-plan", group: "note", topic: "mm", kind: "计划", title: "做市商研习计划", date: "2026-10", tracks: ["fut"],
       desc: "12 周，书和模型同步：每周一读一做，跟着每日课表的 SQL、Python 进度加深；附一天的模拟 tick 练习数据、纸上做市、SQL 与 Python 习题和参考答案。",
       href: "reports/market-making-plan.html", artifact: "https://claude.ai/artifact/Vr3cJGdvYnTA8xiR4m9qFZ" },
-    { id: "cn-us-consumption", title: "中美消费与人口", date: "2026-10", tracks: ["cycle"],
+    { id: "cn-us-consumption", topic: "household", kind: "数据", title: "中美消费与人口", date: "2026-10", tracks: ["cycle"],
       desc: "2000 年以来中美居民消费率、消费结构对比，以及中国人口年龄结构（含每五年节点和五岁组人口金字塔）；附数据表、口径和长表 CSV。",
       origin: "读周金涛《涛动周期论》时做的辅助研究：看人口结构和居民消费怎样影响周期",
       question: "中美居民消费差在哪里？中国的人口年龄结构在怎样变化？",
       uses: [["sql", 30, "附长表 CSV，可以拿来练导入和查询"], ["py", 12, "同一份 CSV，可以拿来练 pandas 读表"]],
       refresh: "每年国家统计局公布上一年数据后更新一次",
       href: "reports/consumption-population.html", artifact: "https://claude.ai/artifact/LC5DxsG2pE1kCeXXf5p3xE" },
-    { id: "cn-us-jp-wealth", title: "中美日财富存量", date: "2026-10", tracks: ["cycle", "fin"],
+    { id: "cn-us-jp-wealth", topic: "household", kind: "数据", title: "中美日财富存量", date: "2026-10", tracks: ["cycle", "fin"],
       desc: "居民存款、股票、债券、期货、黄金储备、住房市值，以及住房和汽车保有量，中美日三国按 2025 年末同一口径对比，附人均值和占 GDP 比重。",
       question: "中美日三国家庭的财富放在哪里，各有多少？",
       refresh: "年末存量，每年更新一次",
       href: "reports/wealth.html", artifact: "https://claude.ai/artifact/5MuCSXkBfQqhubibfhAA4f" }
+  ],
+
+  /* 研究课题：一个课题装一个档案盒，放在书架页的档案架上（#archive）。
+   *   track 放在哪个方向的格子里；no 是这一格里的第几盒，卷号 = 方向索书号 · 序号（如 F724 · 01）
+   *   question 这个课题要回答的问题；answer 现在的答案，每装进一件资料就改一次
+   *   status：doing 在做（盒子抽出半截、挂丝带），yearly 要年更（挂小牌），closed 已结卷（盖“结”字章），不写就是平常
+   *   origin 从哪来；books 用到的书（书架上的 id）；line 长出来的自选线（metro.js 里 free 的 id）；note 备考
+   * 线网图上一个课题一个地标（metro.js 的 landmarks）。 */
+  topics: [
+    { id: "mm", track: "fut", no: 1, title: "做市商靠什么赚钱", since: "2026-10", status: "doing",
+      question: "做市商靠什么赚钱、在哪里亏钱？",
+      answer: "赚的是买卖价差和交易所给的激励；亏在被消息更灵、速度更快的人吃单，和单边行情里越积越多的库存。国内扣掉对冲成本后价差所剩不多，激励往往是主要利润。",
+      origin: "关于期货做市商的一次讨论",
+      books: ["mm-harris", "mm-ohara", "mm-cartea"], line: "mm",
+      note: "跟着十二周研习计划走：每周做完的练习、回测作为新的一件装进来，第 12 周写完总结后结卷。" },
+    { id: "household", track: "cycle", no: 1, title: "居民部门：消费、人口与财富", since: "2026-10", status: "yearly",
+      question: "中国家庭的钱花在哪、存在哪？和美国、日本差在哪里？",
+      answer: "中国居民消费只占 GDP 的四成，比美国低约 28 个百分点；钱更多存成存款（GDP 的 1.2 倍）和房子，美国家庭的钱主要在股票和养老金。人口老龄化在加快，2025 年 65 岁以上人口首次多于 0—14 岁。",
+      origin: "读周金涛《涛动周期论》时做的辅助研究",
+      books: ["zhou"],
+      note: "两件都是年度数据：国家统计局和各国央行公布上一年数据后，各更新一次。" }
   ],
 
   tracks: [

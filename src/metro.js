@@ -4,7 +4,7 @@
  *   目标线（goals）：自己定的能力目标，站点和小时数在 plan.js 的 goals 里；这里只给走向。按估算小时排站，站距越长要学越久。
  *   自选线（free）：一门课或一本书，一课一站，站点从课表（subj）、书的章节（book）或 mmWeeks 读取。
  * 底色区域是学习方向（track 对应 data.js 里 tracks 的 id，点区域名进入该方向）。
- * 新增地标：在 data.js 的 reports 里加专题，再在下面 landmarks 里给它一个位置。
+ * 新增地标：在 data.js 的 topics 里立一个研究课题，再在下面 landmarks 里给它一个位置。
  */
 window.YXL_METRO = {
   w: 1344,
@@ -48,11 +48,11 @@ window.YXL_METRO = {
     { x: 369, y: 418, t: "第一章 · 换乘 CFA 经济学", ink: "--zi-geo" }
   ],
 
-  /* 地标：讨论和查到的资料，不在任何线上，不算进度。report = data.js 里专题的 id */
+  /* 地标：研究课题，一个课题一个（data.js 的 topics）。topic = 课题 id，地标下面自动写件数和状态。
+   * 还没立课题的单件资料也可以用 report = 专题 id 单独放一个地标。 */
   landmarks: [
-    { report: "cn-us-consumption", x: 58, y: 318, sub: "读《涛动周期论》时查的" },
-    { report: "cn-us-jp-wealth", x: 58, y: 372, sub: "长表 CSV，可以练 SQL" },
-    { report: "futures-market-making", x: 1110, y: 380, sub: "研究档案" }
+    { topic: "household", x: 58, y: 318 },
+    { topic: "mm", x: 1110, y: 380 }
   ],
 
   /* 规划中的线 */

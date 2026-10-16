@@ -241,7 +241,7 @@
     journal: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20c-1.5-2-1.5-5 0-7s1.5-5 0-7M17 18c-1.5-2-1.5-5 0-7s1.5-5 0-7"></path></svg>'
   };
   function railHTML() {
-    var r = S.route, sec = /^[lc]-/.test(r) ? "home" : r === "shelf" || /^[tbr]-/.test(r) ? "shelf" : r;
+    var r = S.route, sec = /^[lc]-/.test(r) ? "home" : r === "shelf" || r === "archive" || /^[tbr]-/.test(r) ? "shelf" : r;
     function it(id, label, extra) { return '<a href="#' + id + '"' + (sec === id ? ' aria-current="page"' : "") + ">" + ICON[id] + "<span>" + label + "</span>" + (extra || "") + "</a>"; }
     var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接"];
     return '<div class="tb-in"><a class="brand" href="#home" aria-label="研习录，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>研习录</b></a>' +
@@ -410,21 +410,135 @@
       '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + id + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章</button>" +
       (deepN.length ? '<a class="btn ghost" href="#r-' + id + "-" + deepN[0] + '">精读稿</a>' : "") + '<a class="btn ghost" href="#b-' + id + '">整本书</a></div></aside>';
   }
-  function drawerHTML() {
-    var list = REPORTS.slice().sort(function (a, b) { return String(a.date).localeCompare(String(b.date)); });
-    var cards = list.map(function (rp, i) {
-      var tr = (rp.tracks || []).map(function (x) { return TRACK[x] ? TRACK[x].short : ""; }).filter(Boolean).join(" · ");
-      var rows = [];
-      if (rp.origin) rows.push(["出处", rp.origin]);
-      (rp.uses || []).forEach(function (u) { rows.push(["用途", useLabel(u) + (u[2] ? "：" + u[2] : "")]); });
-      if (rp.refresh) rows.push(["更新", rp.refresh]);
-      return '<article class="ccard" style="--tab:' + [6, 38, 64, 20][i % 4] + '%"><span class="cc-tab">' + esc(tr || "研究") + '</span><div class="cc-no"><span>研-' + ("00" + (i + 1)).slice(-3) + "</span><span>" + esc(String(rp.date || "").replace("-", ".")) + "</span></div>" +
-        '<h3>' + esc(rp.title) + "</h3><p>" + esc(rp.question ? "问：" + rp.question : rp.desc) + "</p>" +
-        (rows.length ? "<dl>" + rows.map(function (r) { return "<dt>" + r[0] + "</dt><dd>" + esc(r[1]) + "</dd>"; }).join("") + "</dl>" : "") +
-        '<a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">打开专题 ↗</a><i class="cc-hole" aria-hidden="true"></i></article>';
+  /* ---------- 书架：档案架（研究课题一盒一盒放） ----------
+   * 一个课题一个档案盒，盒里按件编号；件越多盒越厚，盒顶露出每件的色签（档案、数据、计划、纪要）。
+   * 在做的盒子抽出半截、挂丝带；要年更的挂小牌；结卷的盖“结”字章。没立课题的单件放收件匣。 */
+  var TOPICS = LIB.topics || [], TOPIC = {};
+  TOPICS.forEach(function (tp) { TOPIC[tp.id] = tp; });
+  var KINDS = { "档案": "--k-doc", "数据": "--k-data", "计划": "--k-plan", "纪要": "--k-note" };
+  var TP_STATUS = { doing: "在做", yearly: "要年更", closed: "已结卷" };
+  var ARCH_ROWS = [[["geo", 332], ["fin", 260], ["co", 256]], [["cycle", 300], ["fut", 380], ["+", 168]]];
+  function reportKind(rp) { return KINDS[rp.kind] ? rp.kind : (rp.group === "note" ? "档案" : "数据"); }
+  function topicItems(tp) {
+    return REPORTS.map(function (rp, i) { return { rp: rp, i: i }; }).filter(function (x) { return x.rp.topic === tp.id; })
+      .sort(function (a, b) { return String(a.rp.date).localeCompare(String(b.rp.date)) || a.i - b.i; }).map(function (x) { return x.rp; });
+  }
+  function inboxItems() { return REPORTS.filter(function (rp) { return !rp.topic || !TOPIC[rp.topic]; }); }
+  function topicNo(tp) { return (SHELF_CLS[tp.track] || "研") + " · " + pad2(tp.no || 1); }
+  function topicText(tp) {
+    return [tp.title, tp.question, tp.answer, tp.origin, (TRACK[tp.track] || {}).short].concat(topicItems(tp).map(function (rp) { return rp.title + " " + (rp.desc || "") + " " + (rp.question || ""); })).join(" ").toLowerCase();
+  }
+  function archMatch(tp) {
+    var f = S.archF || "all", q = S.archQ || "";
+    return (f === "all" || tp.status === f) && (!q || topicText(tp).indexOf(q) >= 0);
+  }
+  function vcol(t, size, cls) { return "<span" + (cls ? ' class="' + cls + '"' : "") + ' style="font-size:' + size + 'px">' + esc(t) + "</span>"; }
+  function fitSz(room, n, per, max) { return Math.min(max, Math.floor(room / (Math.max(1, n) * per) * 2) / 2); }
+  /* 盒脊上的题名：有“：”就分成正副两列；太长对半分成两列 */
+  function boxTitle(tp) {
+    var t = tp.title, room = tp.status === "closed" ? 104 : 128, i = t.indexOf("：");
+    if (i > 0) { var a = t.slice(0, i), b = t.slice(i + 1); return vcol(a, fitSz(room, a.length, 1.14, 14)) + vcol(b, fitSz(room, b.length, 1.1, 11.5), "sub"); }
+    if (t.length * 15 * 1.14 <= room) return vcol(t, 15);
+    var m = Math.ceil(t.length / 2), sz = fitSz(room, m, 1.14, 14);
+    return vcol(t.slice(0, m), sz) + vcol(t.slice(m), sz);
+  }
+  function boxHTML(tp) {
+    var items = topicItems(tp), n = items.length, w = Math.min(150, 54 + 9 * Math.max(1, n)), col = SHELF_COL[tp.track] || "--ln-rev";
+    var shown = items.slice(0, 10), step = (w - 22) / Math.max(1, shown.length);
+    var slips = shown.map(function (rp, i) {
+      var h = 12 + (i * 5) % 9;
+      return '<i style="left:' + Math.round(11 + i * step + (step - 9) / 2) + "px;top:-" + h + "px;height:" + (h + 6) + "px;--k:var(" + KINDS[reportKind(rp)] + ')"></i>';
     }).join("");
-    return '<section class="drawer" id="archive" aria-labelledby="arch-h"><div class="dr-front"><div class="dr-label"><h2 id="arch-h">研究档案</h2><span>研 001—' + ("00" + list.length).slice(-3) + '</span></div><i class="dr-pull" aria-hidden="true"></i><span class="dr-note">书架下面的抽屉 · 一份讨论或资料一张卡</span></div>' +
-      '<div class="dr-in"><div class="cc-grid">' + cards + '<div class="ccard next"><b>下一张卡</b><span>讨论完一个问题、查完一份资料，说一句“放进研习录”，抽屉里就多一张卡，线网图上也多一个地标。</span></div></div></div></section>';
+    var on = S.archPick === tp.id;
+    var cls = "abox" + (tp.status ? " " + tp.status : "") + (on ? " picked" : "") + (archMatch(tp) ? "" : " dim");
+    return '<button type="button" class="' + cls + '" data-act="abox" data-t="' + esc(tp.id) + '" style="--c:var(' + col + ");width:" + w + 'px" title="' + esc(tp.title + (tp.question ? "：" + tp.question : "")) + '" aria-pressed="' + on + '">' +
+      '<span class="ab-slips" aria-hidden="true">' + slips + '</span><span class="ab-band" aria-hidden="true"></span>' +
+      '<span class="ab-label"><span class="ab-no">' + esc(SHELF_CLS[tp.track] || "") + "<b>" + pad2(tp.no || 1) + '</b></span><span class="ab-t">' + boxTitle(tp) + "</span>" +
+      '<span class="ab-foot">' + (tp.status === "closed" ? '<i class="ab-seal" aria-hidden="true">结</i>' : "") + "<span>" + n + " 件</span></span></span>" +
+      '<i class="ab-hole" aria-hidden="true"></i>' + (tp.status === "yearly" ? '<span class="ab-tag">年更</span>' : "") + (tp.status === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
+  }
+  function archBayHTML(tid, w) {
+    var t = TRACK[tid], col = SHELF_COL[tid] || "--ln-rev";
+    var tps = TOPICS.filter(function (tp) { return tp.track === tid; }).sort(function (a, b) { return (a.no || 0) - (b.no || 0); });
+    var n = tps.reduce(function (a, tp) { return a + topicItems(tp).length; }, 0);
+    var row = tps.length ? tps.map(boxHTML).join("") : '<span class="bay-empty">还没有课题</span>';
+    return '<div class="bay" style="--c:var(' + col + ");--w:" + w + 'px"><div class="bay-row">' + row + '<span class="bookend" aria-hidden="true"></span></div>' +
+      '<div class="lip"><a class="plate" href="#t-' + tid + '"><b class="cls">' + SHELF_CLS[tid] + "</b><b>" + esc(t.short) + "</b><span>" + tps.length + " 卷 · " + n + " 件</span></a></div></div>";
+  }
+  function trayHTML(w) {
+    var list = inboxItems(), q = S.archQ || "";
+    var sheets = list.slice(-3).map(function (rp, i, arr) {
+      var k = arr.length - 1 - i, text = (rp.title + " " + (rp.desc || "")).toLowerCase();
+      return '<a class="asheet' + (q && text.indexOf(q) < 0 ? " dim" : "") + '" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener" data-q="' + esc(text) + '" style="--k:var(' + KINDS[reportKind(rp)] + ");bottom:" + (16 + k * 40) + "px;transform:rotate(" + (k % 2 ? -3 : 2) + 'deg)">' +
+        '<i aria-hidden="true"></i><b>' + esc(rp.title) + "</b><span>" + esc(reportKind(rp)) + " · " + esc(rp.date || "") + "</span></a>";
+    }).join("");
+    return '<div class="bay atray" style="--w:' + w + 'px"><div class="atray-h"><b>收件匣</b><span>零散的小分析先放这里；攒到两件讲同一件事，再立卷装盒。</span></div>' +
+      '<div class="atray-pile">' + (sheets || '<span class="atray-empty">空</span>') + '<i class="atray-base" aria-hidden="true"></i></div>' +
+      '<div class="lip"><span class="plate"><span>' + (list.length ? list.length + " 件待归卷" : "没有待归卷的") + "</span></span></div></div>";
+  }
+  function archPanelHTML() {
+    var tp = TOPIC[S.archPick]; if (!tp) return "";
+    var items = topicItems(tp), col = SHELF_COL[tp.track] || "--ln-rev", t = TRACK[tp.track] || {};
+    var meta = [t.short, tp.since ? "立卷 " + tp.since : "", TP_STATUS[tp.status], items.length + " 件"].filter(Boolean).join(" · ");
+    var rows = items.map(function (rp, i) {
+      var k = reportKind(rp);
+      return '<tr><td class="n">' + pad2(i + 1) + '</td><td><a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">' + esc(rp.title) + ' <span aria-hidden="true">↗</span></a><span class="d">' + esc(rp.question && rp.question !== tp.question ? rp.question : rp.desc || "") + "</span></td>" +
+        '<td class="k" style="--k:var(' + KINDS[k] + ')"><i aria-hidden="true"></i>' + k + '</td><td class="dt">' + esc(rp.date || "") + "</td></tr>";
+    }).join("");
+    var books = (tp.books || []).filter(function (b) { return ITEMS[b]; });
+    var spines = books.map(function (b, i) {
+      var it = ITEMS[b], c2 = SHELF_COL[it.home] || col;
+      return '<button type="button" class="ms" data-act="pick-go" data-id="' + esc(b) + '" title="《' + esc(it.title) + "》" + esc(it.by || "") + '" aria-label="在博古架上看《' + esc(it.title) + '》" style="--c:var(' + c2 + ");height:" + (40 + (hashN(b) % 12)) + 'px"></button>';
+    }).join("");
+    var uses = [];
+    items.forEach(function (rp) { (rp.uses || []).forEach(function (u) { uses.push(useLabel(u)); }); });
+    var line = tp.line && typeof freeLine === "function" ? freeLine(tp.line) : null, grown = "";
+    if (line) grown += '<span class="ln" style="--c2:var(' + line.color + ')"></span>自选线「' + esc(freeName(line)) + "」" + freeStops(line).length + " 站";
+    if (uses.length) grown += (grown ? "<br>" : "") + uses.map(esc).join("<br>");
+    var rel = '<div class="arel"><div><b>从哪来</b>' + esc(tp.origin || "—") + "</div>" +
+      "<div><b>用到的书</b>" + (books.length ? '<span class="ms-row">' + spines + "</span>书架上 " + books.length + " 本" : "—") + "</div>" +
+      "<div><b>" + (line ? "长出来的" : "用得上") + "</b>" + (grown || "—") + "</div></div>";
+    return '<aside class="pulled apanel" aria-labelledby="ap-h" style="--c:var(' + col + ')"><p class="eyebrow">打开的档案盒 · 卷内目录</p>' +
+      '<div class="pb-h"><span class="pb-bar" aria-hidden="true"></span><div><span class="ap-no">研 · ' + esc(topicNo(tp)) + '</span><h2 id="ap-h">' + esc(tp.title) + '</h2><p class="meta">' + esc(meta) + "</p></div></div>" +
+      '<div class="ap-q"><small>课题问题</small><p class="q">' + esc(tp.question || "") + "</p>" + (tp.answer ? "<small>现在的答案（每装进一件就改一次）</small><p class=\"a\">" + esc(tp.answer) + "</p>" : "") + "</div>" +
+      '<table class="aitems"><thead><tr><th scope="col">件</th><th scope="col">题名</th><th scope="col">类型</th><th scope="col" class="dt">日期</th></tr></thead><tbody>' + rows + "</tbody></table>" +
+      '<div><p class="meta ap-rel-h">来龙去脉</p>' + rel + "</div>" +
+      (tp.note ? '<p class="ap-note"><b>备考</b>' + esc(tp.note) + "</p>" : "") + "</aside>";
+  }
+  function shelfSeg(cur) {
+    var nBooks = allItems().filter(function (id) { return ITEMS[id].kind === "book"; }).length;
+    return '<nav class="seg shelf-seg" aria-label="书架里的两件家具"><a href="#shelf"' + (cur === "shelf" ? ' aria-current="page"' : "") + ">博古架 · " + nBooks + " 本</a>" +
+      '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件</a></nav>";
+  }
+  function archiveHTML() {
+    if (!TOPIC[S.archPick]) S.archPick = (TOPICS.filter(function (tp) { return tp.status === "doing"; })[0] || TOPICS[0] || {}).id;
+    var f = S.archF || "all";
+    function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="arch-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
+    function cnt(s) { return TOPICS.filter(function (tp) { return tp.status === s; }).length; }
+    var cab = ARCH_ROWS.map(function (row) {
+      var empty = row.every(function (c) { return c[0] === "+" ? !inboxItems().length : !TOPICS.some(function (tp) { return tp.track === c[0]; }); });
+      return '<div class="tier' + (empty ? " empty" : "") + '">' + row.map(function (c) { return c[0] === "+" ? trayHTML(c[1]) : TRACK[c[0]] ? archBayHTML(c[0], c[1]) : ""; }).join("") + "</div>";
+    }).join("");
+    var legend = Object.keys(KINDS).map(function (k) { return '<span style="--k:var(' + KINDS[k] + ')"><i aria-hidden="true"></i>' + k + "</span>"; }).join("");
+    var rules = [["一", "一个问题一盒", "新资料先问：它在回答哪个问题？已经有这个问题，就装进那一盒；是新问题才立新卷。卷号跟书架用同一套索书号。"],
+      ["二", "盒里按件编号", "每件是档案、数据、计划、纪要四种之一，色签露在盒顶。件越多盒越厚，一眼看出这一盒是查资料多，还是做数据多。"],
+      ["三", "零散的先进收件匣", "一次性的小分析不急着立卷。攒到两件讲同一件事，再一起装盒。"],
+      ["四", "线网上一盒一个地标", "地图上只画课题，不画单件，地标下面写着件数。资料再多，地标也只随课题增长。"]];
+    return '<div class="view shelf archive-v">' + bannerHTML() +
+      '<header class="phead"><div><p class="eyebrow">五个方向 · ' + TOPICS.length + " 个课题 · " + REPORTS.length + ' 件资料</p><h1>书架<span class="h1-sub">档案架</span></h1>' +
+      '<p class="lede">书放博古架；自己做的研究按课题装进档案盒，放在档案架上。一个课题一盒，盒里按件编号，资料再多也只是盒子变厚、盒子变多。</p>' + shelfSeg("archive") +
+      '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", TOPICS.length) + chip("doing", "在做", cnt("doing")) + chip("yearly", "要年更", cnt("yearly")) + chip("closed", "已结卷", cnt("closed")) + "</div></div>" +
+      '<div class="arch-side"><div class="k-legend"><span class="kl-h">盒顶的色签</span>' + legend + "</div>" +
+      '<label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
+      '<div class="arch-main"><section class="cabinet archive" aria-label="档案架"><div class="cab-top"><span>研究档案</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + archPanelHTML() + "</div>" +
+      '<section class="arules" aria-labelledby="ar-h"><h2 id="ar-h">怎样归档</h2><div class="ar-grid">' + rules.map(function (r) { return '<div class="arule"><p><b class="ar-n">' + r[0] + "</b><b>" + r[1] + "</b></p><p>" + r[2] + "</p></div>"; }).join("") + "</div>" +
+      '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进研习录”，我按这四条归档。</p></section></div>';
+  }
+  /* 搜索框：不重画页面，只把不相关的盒子调暗 */
+  function applyArchFilter() {
+    var q = S.archQ || "";
+    document.querySelectorAll(".archive .abox").forEach(function (b) { var tp = TOPIC[b.getAttribute("data-t")]; if (tp) b.classList.toggle("dim", !archMatch(tp)); });
+    document.querySelectorAll(".archive .asheet").forEach(function (a) { a.classList.toggle("dim", !!q && (a.getAttribute("data-q") || "").indexOf(q) < 0); });
   }
   function shelfHTML() {
     var books = allItems().filter(function (id) { return ITEMS[id].kind === "book"; });
@@ -440,11 +554,10 @@
     }).join("");
     return '<div class="view shelf">' + bannerHTML() +
       '<header class="phead"><div><p class="eyebrow">五个方向 · ' + books.length + ' 本书 + CFA 十册</p><h1>书架<span class="h1-sub">博古架</span></h1>' +
-      '<p class="lede">一个方向一格，三层装下。每本书是一条竖起来的线，书脊上一章一站；点一本书，把它抽出来看。</p>' +
+      '<p class="lede">一个方向一格，三层装下。每本书是一条竖起来的线，书脊上一章一站；点一本书，把它抽出来看。</p>' + shelfSeg("shelf") +
       '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", books.length) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></div>" +
       '<div class="sp-legend" aria-hidden="true"><span><i class="lg-s"></i>只勾了线：还没读</span><span><i class="lg-s doing"></i>抽出半截、颜色染到读到的地方：在读</span><span><i class="lg-s done"></i>整本上色、盖章：读完</span></div></header>' +
-      '<div class="shelf-main"><section class="cabinet" aria-label="博古架"><div class="cab-top"><span>研习书架</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + pulledHTML() + "</div>" +
-      drawerHTML() + "</div>";
+      '<div class="shelf-main"><section class="cabinet" aria-label="博古架"><div class="cab-top"><span>研习书架</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + pulledHTML() + "</div></div>";
   }
 
   /* ---------- 方向页 ---------- */
@@ -1535,10 +1648,13 @@
       h.push('<g class="mst" data-act="mhub" data-h="' + k + '" tabindex="0" role="button" aria-label="换乘站：' + esc(hb.name) + '"><title>换乘站：' + esc(hb.name) + "</title>" + shape + "</g>");
     });
     (M.landmarks || []).forEach(function (lm) {
-      var rp = REPORTS.filter(function (x) { return x.id === lm.report; })[0]; if (!rp) return;
-      POS["l:" + rp.id] = [lm.x, lm.y];
-      h.push('<g class="mlm mst" data-act="mlm" data-r="' + esc(rp.id) + '" tabindex="0" role="button" aria-label="地标：' + esc(rp.title) + '"><title>地标：' + esc(rp.title) + '</title><rect class="hit" x="' + (lm.x - 12) + '" y="' + (lm.y - 12) + '" width="' + (30 + textW(rp.title, 13)) + '" height="' + (lm.sub ? 40 : 24) + '"/>' +
-        '<rect x="' + (lm.x - 7) + '" y="' + (lm.y - 7) + '" width="14" height="14" class="mlm-sq"/>' + tx(lm.x + 14, lm.y + 4.5, rp.title, "mt-lm") + (lm.sub ? tx(lm.x + 14, lm.y + 21, lm.sub, "mt-s", "", "fill:var(--ink-3)") : "") + "</g>");
+      var tp = lm.topic ? TOPIC[lm.topic] : null, rp = !tp && lm.report ? REPORTS.filter(function (x) { return x.id === lm.report; })[0] : null;
+      if (!tp && !rp) return;
+      var key = tp ? "t:" + tp.id : rp.id, title = tp ? tp.title : rp.title;
+      var sub = tp ? topicItems(tp).length + " 件" + (TP_STATUS[tp.status] ? " · " + TP_STATUS[tp.status] : "") : lm.sub;
+      POS["l:" + key] = [lm.x, lm.y];
+      h.push('<g class="mlm mst" data-act="mlm" data-r="' + esc(key) + '" tabindex="0" role="button" aria-label="' + (tp ? "研究课题：" : "地标：") + esc(title) + '"><title>' + (tp ? "研究课题：" : "地标：") + esc(title) + '</title><rect class="hit" x="' + (lm.x - 12) + '" y="' + (lm.y - 12) + '" width="' + (30 + textW(title, 13)) + '" height="' + (sub ? 40 : 24) + '"/>' +
+        '<rect x="' + (lm.x - 7) + '" y="' + (lm.y - 7) + '" width="14" height="14" class="mlm-sq"/>' + tx(lm.x + 14, lm.y + 4.5, title, "mt-lm") + (sub ? tx(lm.x + 14, lm.y + 21, sub, "mt-s", "", "fill:var(--ink-3)") : "") + "</g>");
     });
     var lg = M.legend;
     if (lg) {
@@ -1548,7 +1664,7 @@
         checkDot(X + 40, gy + 28, "todo") + tx(X + 74, gy + 32.5, "技能站：过了检验才算到站", "mt-lg") +
         '<path d="M' + (X + 18) + " " + (gy + 56) + " L" + (X + 62) + " " + (gy + 56) + '" class="mf-line" style="stroke:var(--ln-geo)"/>' + stopDot(X + 32, gy + 56, "--ln-geo", "done", 5) + stopDot(X + 50, gy + 56, "--ln-geo", "todo", 5) + tx(X + 74, gy + 60.5, "自选线：一课一站", "mt-lg") +
         '<circle cx="' + (X + 40) + '" cy="' + (gy + 84) + '" r="10" class="mhub"/>' + tx(X + 74, gy + 88.5, "换乘：两条线讲同一件事", "mt-lg") +
-        '<rect x="' + (X + 33) + '" y="' + (gy + 105) + '" width="14" height="14" class="mlm-sq"/>' + tx(X + 74, gy + 116.5, "地标：查过的资料，不算进度", "mt-lg") +
+        '<rect x="' + (X + 33) + '" y="' + (gy + 105) + '" width="14" height="14" class="mlm-sq"/>' + tx(X + 74, gy + 116.5, "地标：研究课题，一盒一个", "mt-lg") +
         todaySeal(X + 40, gy + 140) + tx(X + 74, gy + 144.5, "今天要学的那一站", "mt-lg") + "</g>");
     }
     h.push("</svg>");
@@ -1573,10 +1689,14 @@
       (g.parallel ? '<p class="meta gnote">前 ' + g.parallel + " 站是并行的两条轨道，交替学，都过了检验再并成一条线。小时数是粗估，学到那一站时再细化。</p>" : '<p class="meta gnote">每科先按 30 小时估，学到那一科时再按考纲细化。</p>') + "</section>";
   }
   function landmarkPanel() {
-    var lineReports = (M.free || []).map(function (l) { return l.report; }).filter(Boolean);
-    var list = REPORTS.filter(function (rp) { return lineReports.indexOf(rp.id) < 0; });
-    return '<section class="panel" aria-labelledby="lm-h"><h2 id="lm-h">地标</h2><p class="meta" style="margin-top:6px">讨论和查到的资料，放在它所属的方向里，不算进度。全部见<a href="#shelf">书架 · 研究档案</a>。</p><div class="lmk-list">' +
-      list.map(function (rp) { return '<a class="lmk" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span class="lmk-sq" aria-hidden="true"></span><span class="lmk-t">' + esc(rp.title) + ' <span aria-hidden="true">↗</span></span><span class="lmk-d">' + esc(rp.desc) + "</span>" + reportRel(rp, false) + "</a>"; }).join("") + "</div></section>";
+    var inbox = inboxItems();
+    return '<section class="panel" aria-labelledby="lm-h"><h2 id="lm-h">研究课题</h2><p class="meta" style="margin-top:6px">讨论和查到的资料按课题装进档案盒，放在<a href="#archive">书架 · 档案架</a>上；地图上一个课题一个地标，不算进度。</p><div class="lmk-list">' +
+      TOPICS.map(function (tp) {
+        var n = topicItems(tp).length;
+        return '<button type="button" class="lmk" data-act="abox-go" data-t="' + esc(tp.id) + '"><span class="lmk-sq" aria-hidden="true"></span><span class="lmk-t">' + esc(tp.title) + ' <span class="lmk-n">' + esc(topicNo(tp)) + " · " + n + " 件" + (TP_STATUS[tp.status] ? " · " + TP_STATUS[tp.status] : "") + "</span></span>" +
+          '<span class="lmk-d">' + esc(tp.question || "") + "</span>" + (tp.answer ? '<span class="lmk-a">' + esc(tp.answer) + "</span>" : "") + "</button>";
+      }).join("") +
+      inbox.map(function (rp) { return '<a class="lmk" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><span class="lmk-sq" aria-hidden="true"></span><span class="lmk-t">' + esc(rp.title) + ' <span class="lmk-n">收件匣</span> <span aria-hidden="true">↗</span></span><span class="lmk-d">' + esc(rp.desc) + "</span></a>"; }).join("") + "</div></section>";
   }
   function homeHTML() {
     if (!M || !PLAN) return shelfHTML();
@@ -1651,6 +1771,13 @@
     return out;
   }
   function landmarkPopHTML(rid) {
+    if (/^t:/.test(rid)) {
+      var tp = TOPIC[rid.slice(2)]; if (!tp) return "";
+      return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b>研究课题 · ' + esc(tp.title) + '</b><span class="mp-pos">' + esc(topicNo(tp)) + (TP_STATUS[tp.status] ? " · " + TP_STATUS[tp.status] : "") + "</span></div>" +
+        (tp.question ? '<p class="mp-t" style="font-size:15px">' + esc(tp.question) + "</p>" : "") + (tp.answer ? '<p class="mp-s">' + esc(tp.answer) + "</p>" : "") +
+        "<ul>" + topicItems(tp).map(function (rp, i) { return '<li><a class="linkrow" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><b class="lbadge" style="--c:var(' + KINDS[reportKind(rp)] + ')">' + pad2(i + 1) + " " + reportKind(rp) + "</b> " + esc(rp.title) + " ↗</a></li>"; }).join("") + "</ul>" +
+        '<div class="btns"><button type="button" class="btn small" data-act="abox-go" data-t="' + esc(tp.id) + '">打开档案盒</button></div>';
+    }
     var rp = REPORTS.filter(function (x) { return x.id === rid; })[0]; if (!rp) return "";
     var tr = (rp.tracks || []).map(function (x) { return TRACK[x] ? '<a href="#t-' + x + '">' + esc(TRACK[x].short) + "</a>" : ""; }).filter(Boolean).join("、");
     return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b>地标 · ' + esc(rp.title) + '</b></div>' +
@@ -2053,7 +2180,7 @@
   }
 
   /* ---------- 主渲染 ---------- */
-  var ROUTES = { home: 1, shelf: 1, journal: 1 };
+  var ROUTES = { home: 1, shelf: 1, archive: 1, journal: 1 };
   COURSES.forEach(function (k) { ROUTES["c-" + k] = 1; });
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
   Object.keys(LIB.books).forEach(function (b) {
@@ -2072,6 +2199,7 @@
     else if (/^l-/.test(r)) html = lessonHTML(r.slice(2));
     else if (/^c-/.test(r)) html = courseHTML(r.slice(2));
     else if (r === "shelf") html = shelfHTML();
+    else if (r === "archive") html = archiveHTML();
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     $("#main").innerHTML = html;
@@ -2123,6 +2251,10 @@
     if (act === "mgs") { openGoalStop(t.getAttribute("data-g"), +t.getAttribute("data-i")); return; }
     if (act === "pick") { S.shelfPick = t.getAttribute("data-id"); render(); var pa = document.querySelector(".pulled"); if (pa && window.innerWidth < 1100) pa.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
+    if (act === "abox") { S.archPick = t.getAttribute("data-t"); render(); var ap = document.querySelector(".apanel"); if (ap && window.innerWidth < 1100) ap.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    if (act === "arch-f") { S.archF = t.getAttribute("data-f"); render(); return; }
+    if (act === "abox-go") { S.archPick = t.getAttribute("data-t"); S.archF = "all"; closePop(); if (S.route === "archive") render(); else location.hash = "#archive"; return; }
+    if (act === "pick-go") { S.shelfPick = t.getAttribute("data-id"); S.shelfF = "all"; location.hash = "#shelf"; return; }
     if (act === "add-book") { toast("在对话里说书名和放进哪个方向，我加到书架上"); return; }
     if (act === "fold-day") { S.foldDay = t.getAttribute("data-d"); render(); return; }
     if (act === "fold-nav") { S.foldStart = foldWS() + +t.getAttribute("data-d"); S.foldDay = null; render(); return; }
@@ -2224,7 +2356,9 @@
   }, true);
   var noteTimers = {};
   document.addEventListener("input", function (e) {
-    var t = e.target; if (!t.hasAttribute || !t.hasAttribute("data-note")) return;
+    var t = e.target;
+    if (t.id === "arch-q") { S.archQ = t.value.trim().toLowerCase(); applyArchFilter(); return; }
+    if (!t.hasAttribute || !t.hasAttribute("data-note")) return;
     var id = t.getAttribute("data-note"), ind = document.getElementById("ns-" + id);
     if (ind) ind.textContent = "编辑中";
     clearTimeout(noteTimers[id]);
