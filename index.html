@@ -1112,6 +1112,19 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 .eb-empty p{flex:1 1 220px;margin:0;font-size:13.5px;line-height:1.65;color:var(--ink-2)}
 .eb-empty p b{margin-right:8px;font-family:var(--f-display);color:var(--ink)}
 .spine.has-eb::after,.vol.has-eb::after{content:"";position:absolute;right:3px;top:8px;width:7px;height:11px;background:var(--k-doc);clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%)}
+/* ===== EPUB 阅读器 ===== */
+body.rd-on{overflow:hidden}
+.rd{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;background:var(--paper)}
+.rd-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 18px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--leaf);border-bottom:3px solid var(--ink)}
+.rd-t{font-family:var(--f-display);font-size:18px;font-weight:900;letter-spacing:.04em;margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-toc{max-width:min(360px,60vw);font-family:var(--f-ui);font-size:13.5px;padding:6px 10px;border:1px solid var(--rule-strong);border-radius:8px;background:var(--paper);color:var(--ink)}
+.rd-pos{font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.rd-main{flex:1;min-height:0;display:flex}
+.rd-view{flex:1;min-width:0;display:flex}
+.rd-frame{flex:1;width:100%;height:100%;border:0;background:var(--leaf)}
+.rd-msg{margin:auto;padding:24px;max-width:30em;text-align:center;font-size:15px;line-height:1.8;color:var(--ink-2)}
+.rd-foot{display:flex;justify-content:space-between;gap:12px;padding:10px 18px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));background:var(--leaf);border-top:1px solid var(--rule)}
+.rd-foot .btn[disabled]{opacity:.35;cursor:default}
 /* ===== 书架：档案架 ===== */
 .shelf-seg{margin-top:16px}
 .shelf-seg a{display:inline-block;font-family:var(--f-ui);font-size:14px;padding:6px 16px;border-radius:999px;color:var(--ink-3);text-decoration:none}
@@ -3556,13 +3569,21 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<span class="bookend" aria-hidden="true"></span>';
     return '<div class="bay" style="--c:var(' + col + ');--w:' + w + 'px"><div class="bay-row">' + row + '</div><div class="lip"><a class="plate" href="#t-' + tid + '"><b class="cls">' + SHELF_CLS[tid] + "</b><b>" + esc(t.short) + "</b><span>" + esc(meta) + "</span></a></div></div>";
   }
-  /* ---------- 电子书：给书架上的书挂一个 PDF ----------
+  /* ---------- 电子书：给书架上的书挂一个 PDF 或 EPUB ----------
    * claude.ai 版：文件用 assets 能力存在这个研习录自己的存储里（只有你能打开，换设备也在）。
-   *   记录在 ebooks 集合：文档 id = 书的 id，内容 { asset, name, size, t }；打开地址是 "/_blob/" + asset。
+   *   PDF 原样存；EPUB 不在存储接受的格式里，按接口文档的建议包成 base64 文本（text/plain）存，打开时再还原（enc: "b64"）。
+   *   记录在 ebooks 集合：文档 id = 书的 id，内容 { asset, kind, enc, name, size, t }；PDF 的打开地址是 "/_blob/" + asset。
    * GitHub 公开版：文件只存在当前浏览器的 IndexedDB 里（库 yanxilu-ebooks，键 = 书的 id），不会传到网上；
-   *   本地记录 ebooks[书的 id] = { local: true, name, size, t }，跟公开版的其他本地记录一样存在 localStorage。 */
-  var EB_MAX = 20 * 1024 * 1024;
-  var EB_ERR = { too_large: "文件超过 20 MB，压缩一下再传。", unsupported_type: "只能上传 PDF 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
+   *   本地记录 ebooks[书的 id] = { local: true, kind, name, size, t }，跟公开版的其他本地记录一样存在 localStorage。
+   * PDF 在新标签页打开；EPUB 在页面里的阅读器打开（见下面的 EPUB 阅读器）。 */
+  var EB_MAX = 20 * 1024 * 1024, EPUB_MAX = 15 * 1024 * 1024;
+  function ebKind(file) {
+    var n = file.name || "";
+    if (/\.epub$/i.test(n) || file.type === "application/epub+zip") return "epub";
+    if (/\.pdf$/i.test(n) || file.type === "application/pdf") return "pdf";
+    return "";
+  }
+  var EB_ERR = { too_large: "文件太大了：PDF 最多 20 MB，EPUB 最多 15 MB。", unsupported_type: "只能上传 PDF 或 EPUB 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
     rate_limited: "传得太频繁了，过一会儿再试。", upstream_auth: "登录状态过期了，刷新页面后再试。", capability_disabled: "这个页面现在不能上传文件。", not_granted: "这个页面现在不能上传文件。", capability_removed: "这个页面现在不能上传文件。" };
   function ebookOf(id) {
     var e = S.data.ebooks ? S.data.ebooks[id] || null : null;
@@ -3628,45 +3649,55 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var local = S.mode === "local";
     var eb = ebookOf(id), up = local ? true : !!(S.assets && S.canEdit), busy = S.ebBusy === id;
     if (!eb && !up) return "";
-    var input = up ? '<label class="btn ghost small eb-up' + (busy ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : eb ? "换一个文件" : "上传 PDF") + "</label>" : "";
+    var input = up ? '<label class="btn ghost small eb-up' + (busy ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : eb ? "换一个文件" : "上传 PDF / EPUB") + "</label>" : "";
     if (!eb) return '<div class="eb eb-empty"><p><b>电子书</b>' + (local
-      ? "还没有放文件。上传一个 PDF，文件只存在这个浏览器里，不会传到网上；换电脑、换浏览器或清除网站数据后要重新上传。"
-      : "还没有放文件。上传一个 PDF（20 MB 以内），以后抽出这本书就能直接打开。") + "</p>" + input + "</div>";
+      ? "还没有放文件。上传一本 PDF 或 EPUB，文件只存在这个浏览器里，不会传到网上；换电脑、换浏览器或清除网站数据后要重新上传。"
+      : "还没有放文件。上传一本 PDF（20 MB 以内）或 EPUB（15 MB 以内），以后抽出这本书就能直接打开。") + "</p>" + input + "</div>";
     var tools = "";
     if (up) tools = '<span class="eb-tools">' + input + (S.ebConfirm === id
       ? '<span class="eb-conf">文件会删掉，确定？<button type="button" class="linkbtn danger" data-act="eb-del-yes" data-id="' + esc(id) + '">移除</button><button type="button" class="linkbtn" data-act="eb-del-no">取消</button></span>'
       : '<button type="button" class="linkbtn" data-act="eb-del" data-id="' + esc(id) + '">移除</button>') + "</span>";
-    var lu = local && S.ebUrls[id];
-    var open = local ? '<a class="btn eb-open" data-act="eb-open-local" data-id="' + esc(id) + '" href="' + (lu ? lu : "#") + '" target="_blank" rel="noopener">打开电子书 ↗</a>'
+    var lu = local && S.ebUrls[id], epub = (eb.kind || "pdf") === "epub";
+    var open = epub ? '<button type="button" class="btn eb-open" data-act="eb-read" data-id="' + esc(id) + '">打开电子书</button>' : local ? '<a class="btn eb-open" data-act="eb-open-local" data-id="' + esc(id) + '" href="' + (lu ? lu : "#") + '" target="_blank" rel="noopener">打开电子书 ↗</a>'
       : '<a class="btn eb-open" href="/_blob/' + esc(eb.asset) + '" target="_blank" rel="noopener">打开电子书 ↗</a>';
-    return '<div class="eb">' + open + '<span class="eb-meta">' + esc(eb.name || "PDF") + (eb.size ? " · " + fmtSize(eb.size) : "") + (local ? " · 存在这个浏览器里" : "") + "</span>" + tools + "</div>";
+    return '<div class="eb">' + open + '<span class="eb-meta">' + esc(eb.name || "PDF") + (eb.size ? " · " + fmtSize(eb.size) : "") + (epub ? " · 在页面里读" : "") + (local ? " · 存在这个浏览器里" : "") + "</span>" + tools + "</div>";
   }
   function ebUpload(id, file) {
     if (!file) return;
-    if (!/\.pdf$/i.test(file.name) && file.type !== "application/pdf") { toast("只能上传 PDF 文件。"); return; }
+    var kind = ebKind(file);
+    if (!kind) { toast("只能上传 PDF 或 EPUB 文件。"); return; }
     if (S.mode === "local") {
       S.ebBusy = id; render();
       if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
-      var blob = new Blob([file], { type: "application/pdf" });
-      ebTx("readwrite", function (st) { return st.put({ blob: blob, name: file.name, size: file.size, t: new Date().toISOString() }, id); }).then(function () {
+      var blob = new Blob([file], { type: kind === "epub" ? "application/epub+zip" : "application/pdf" });
+      ebTx("readwrite", function (st) { return st.put({ blob: blob, kind: kind, name: file.name, size: file.size, t: new Date().toISOString() }, id); }).then(function () {
         ebForget(id);
-        return put("ebooks", id, { local: true, name: file.name, size: file.size, t: new Date().toISOString() });
+        return put("ebooks", id, { local: true, kind: kind, name: file.name, size: file.size, t: new Date().toISOString() });
       }).then(function () { S.ebBusy = null; render(); toast("已放上书架，点「打开电子书」就能看。"); },
         function (e) { S.ebBusy = null; render(); toast(ebLocalErr(e)); });
       return;
     }
-    if (file.size > EB_MAX) { toast("文件超过 20 MB，压缩一下再传。"); return; }
+    if (kind === "pdf" && file.size > EB_MAX) { toast("PDF 超过 20 MB，压缩一下再传。"); return; }
+    if (kind === "epub" && file.size > EPUB_MAX) { toast("EPUB 超过 15 MB，传不上去。可以在公开版里放（只存在那个浏览器）。"); return; }
     if (!S.assets) { toast("这个页面现在不能上传文件。"); return; }
     var old = S.data.ebooks[id];
     S.ebBusy = id; render();
+    var body = kind === "pdf" ? Promise.resolve(file) : new Promise(function (res, rej) {
+      var fr = new FileReader();
+      fr.onload = function () { var s2 = String(fr.result), k = s2.indexOf(","); res(new Blob([s2.slice(k + 1)], { type: "text/plain" })); };
+      fr.onerror = function () { rej(epErr("read")); };
+      fr.readAsDataURL(file);
+    });
     function tryUp(again) {
-      return S.assets.upload(file, { type: "application/pdf" }).catch(function (e) {
+      return body.then(function (b) { return S.assets.upload(b, { type: kind === "pdf" ? "application/pdf" : "text/plain" }); }).catch(function (e) {
         if (!again && e && e.code === "store_unavailable") return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return tryUp(true); });
         throw e;
       });
     }
     tryUp(false).then(function (r) {
-      return put("ebooks", id, { asset: r.id, name: file.name, size: r.sizeBytes || file.size, t: new Date().toISOString() }).then(function () {
+      var rec = { asset: r.id, kind: kind, name: file.name, size: file.size, t: new Date().toISOString() };
+      if (kind === "epub") rec.enc = "b64";
+      return put("ebooks", id, rec).then(function () {
         if (old && old.asset && old.asset !== r.id) S.assets.delete(old.asset).catch(function () {});
         S.ebBusy = null; render(); toast("已放上书架，点「打开电子书」就能看。");
       });
@@ -3682,6 +3713,254 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     del("ebooks", id).then(function () { if (S.assets && eb.asset) return S.assets.delete(eb.asset).catch(function () {}); }).then(function () { toast("电子书已移除。"); });
     render();
+  }
+  /* ---------- EPUB 阅读器 ----------
+   * 不依赖外部库：用浏览器自带的 DecompressionStream 解 zip，按 OPF 的阅读顺序一章一章显示。
+   * 每章放进一个不允许运行脚本的 iframe；图片、样式、字体都换成 data: 地址内嵌。
+   * 读到第几章、章内位置记在这个浏览器里（localStorage：yanxilu-epub-<书的 id>）。 */
+  var EP_MIME = { jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif", webp: "image/webp", svg: "image/svg+xml", css: "text/css",
+    ttf: "font/ttf", otf: "font/otf", woff: "font/woff", woff2: "font/woff2", xhtml: "application/xhtml+xml", html: "text/html", htm: "text/html" };
+  function epErr(code) { return { code: code }; }
+  function unzip(buf) {
+    var u8 = new Uint8Array(buf), dv = new DataView(buf), n = u8.length, e = -1, i;
+    for (i = n - 22; i >= Math.max(0, n - 65558); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+    if (e < 0) throw epErr("bad_epub");
+    var cnt = dv.getUint16(e + 10, true), off = dv.getUint32(e + 16, true), files = {}, td = new TextDecoder("utf-8");
+    for (var k = 0; k < cnt; k++) {
+      if (off + 46 > n || dv.getUint32(off, true) !== 0x02014b50) throw epErr("bad_epub");
+      var nlen = dv.getUint16(off + 28, true), xlen = dv.getUint16(off + 30, true), clen = dv.getUint16(off + 32, true);
+      var name = td.decode(u8.subarray(off + 46, off + 46 + nlen));
+      files[name] = { method: dv.getUint16(off + 10, true), csize: dv.getUint32(off + 20, true), loff: dv.getUint32(off + 42, true) };
+      off += 46 + nlen + xlen + clen;
+    }
+    function data(name) {
+      var f = files[name] || files[decodeURIComponent(name)];
+      if (!f) return Promise.resolve(null);
+      var lo = f.loff, start = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true), raw = u8.subarray(start, start + f.csize);
+      if (f.method === 0) return Promise.resolve(raw.slice());
+      if (f.method !== 8 || typeof DecompressionStream === "undefined") return Promise.reject(epErr(f.method === 8 ? "old_browser" : "bad_epub"));
+      return new Response(new Blob([raw]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer().then(function (b) { return new Uint8Array(b); });
+    }
+    return { data: data, text: function (name) { return data(name).then(function (b) { return b ? new TextDecoder("utf-8").decode(b) : null; }); } };
+  }
+  function epDir(p) { var i = p.lastIndexOf("/"); return i < 0 ? "" : p.slice(0, i + 1); }
+  function epResolve(base, rel) {
+    rel = String(rel || "").split("#")[0].split("?")[0];
+    if (!rel) return "";
+    try { rel = decodeURIComponent(rel); } catch (e) { /* 保持原样 */ }
+    var parts = (rel.charAt(0) === "/" ? rel.slice(1) : base + rel).split("/"), out = [];
+    parts.forEach(function (s) { if (s === "..") out.pop(); else if (s && s !== ".") out.push(s); });
+    return out.join("/");
+  }
+  function epXml(txt, type) {
+    var d = new DOMParser().parseFromString(txt, type || "application/xml");
+    if (d.getElementsByTagName("parsererror").length && type !== "text/html") d = new DOMParser().parseFromString(txt, "text/html");
+    return d;
+  }
+  function epTags(doc, name) { return Array.prototype.slice.call(doc.getElementsByTagNameNS("*", name)); }
+  function u8ToB64(u8) { var s = "", C = 0x8000; for (var i = 0; i < u8.length; i += C) s += String.fromCharCode.apply(null, u8.subarray(i, i + C)); return btoa(s); }
+  function epOpen(buf) {
+    var z = unzip(buf);
+    return z.text("META-INF/container.xml").then(function (cx) {
+      var rf = cx && epTags(epXml(cx), "rootfile")[0];
+      if (!rf) throw epErr("bad_epub");
+      var opfPath = rf.getAttribute("full-path");
+      return z.text(opfPath).then(function (ot) {
+        if (!ot) throw epErr("bad_epub");
+        var opf = epXml(ot), base = epDir(opfPath), man = {}, byPath = {};
+        epTags(opf, "item").forEach(function (it) {
+          var m = { id: it.getAttribute("id"), path: epResolve(base, it.getAttribute("href")), type: it.getAttribute("media-type") || "", props: it.getAttribute("properties") || "" };
+          man[m.id] = m; byPath[m.path] = m;
+        });
+        var spine = epTags(opf, "itemref").map(function (r) { return man[r.getAttribute("idref")]; }).filter(function (m) { return m && /html|xml/.test(m.type); });
+        if (!spine.length) throw epErr("bad_epub");
+        var tEl = epTags(opf, "title")[0], ep = { z: z, spine: spine, byPath: byPath, title: tEl ? tEl.textContent.trim() : "", toc: [] };
+        var nav = Object.keys(man).map(function (k) { return man[k]; }).filter(function (m) { return /(^|\s)nav(\s|$)/.test(m.props); })[0];
+        var spEl = epTags(opf, "spine")[0], ncx = man[spEl && spEl.getAttribute("toc")] || Object.keys(man).map(function (k) { return man[k]; }).filter(function (m) { return /ncx/.test(m.type); })[0];
+        function add(label, href, from, depth) {
+          var path = epResolve(epDir(from), href), frag = (String(href).split("#")[1] || "");
+          var idx = spine.findIndex(function (m) { return m.path === path; });
+          if (idx >= 0 && label) ep.toc.push({ label: label.replace(/\s+/g, " ").trim(), i: idx, frag: frag, depth: depth });
+        }
+        if (nav) return z.text(nav.path).then(function (nt) {
+          if (nt) {
+            var nd = epXml(nt, "application/xhtml+xml"), navs = epTags(nd, "nav"), tocNav = navs.filter(function (x) { return /toc/.test(x.getAttribute("epub:type") || x.getAttributeNS("http://www.idpf.org/2007/ops", "type") || ""); })[0] || navs[0];
+            if (tocNav) epTags(tocNav, "a").forEach(function (a) { var d = 0, p = a.parentNode; while (p && p !== tocNav) { if (/^(ol|ul)$/i.test(p.localName)) d++; p = p.parentNode; } add(a.textContent, a.getAttribute("href"), nav.path, Math.max(0, d - 1)); });
+          }
+          return ep;
+        });
+        if (ncx) return z.text(ncx.path).then(function (xt) {
+          if (xt) epTags(epXml(xt), "navPoint").forEach(function (np) {
+            var lab = epTags(np, "text")[0], ct = epTags(np, "content")[0], d = 0, p = np.parentNode;
+            while (p && p.localName === "navPoint") { d++; p = p.parentNode; }
+            if (lab && ct) add(lab.textContent, ct.getAttribute("src"), ncx.path, d);
+          });
+          return ep;
+        });
+        return ep;
+      });
+    });
+  }
+  function epDataUrl(ep, path) {
+    return ep.z.data(path).then(function (b) {
+      if (!b) return "";
+      var m = ep.byPath[path], ext = (path.split(".").pop() || "").toLowerCase();
+      return "data:" + ((m && m.type) || EP_MIME[ext] || "application/octet-stream") + ";base64," + u8ToB64(b);
+    });
+  }
+  function epCss(ep, path, txt) {
+    var dir = epDir(path), urls = {}, re = /url\(\s*(['"]?)([^'")]+)\1\s*\)/g, mm;
+    txt = txt.replace(/@import[^;]+;/g, "");
+    while ((mm = re.exec(txt))) if (!/^(data:|https?:|#)/.test(mm[2])) urls[mm[2]] = epResolve(dir, mm[2]);
+    var keys = Object.keys(urls);
+    return Promise.all(keys.map(function (k) { return epDataUrl(ep, urls[k]); })).then(function (du) {
+      var map = {}; keys.forEach(function (k, i) { map[k] = du[i]; });
+      return txt.replace(re, function (all, q, u) { return map[u] ? "url(" + map[u] + ")" : all; });
+    });
+  }
+  function epChapter(ep, i, theme) {
+    var it = ep.spine[i];
+    return ep.z.text(it.path).then(function (src) {
+      if (src == null) throw epErr("bad_epub");
+      var doc = epXml(src, /xhtml|xml/.test(it.type) ? "application/xhtml+xml" : "text/html"), dir = epDir(it.path), jobs = [];
+      epTags(doc, "script").forEach(function (s) { s.parentNode.removeChild(s); });
+      Array.prototype.slice.call(doc.getElementsByTagName("*")).forEach(function (el) {
+        Array.prototype.slice.call(el.attributes).forEach(function (a) { if (/^on/i.test(a.name)) el.removeAttribute(a.name); });
+      });
+      epTags(doc, "img").forEach(function (im) {
+        var p = epResolve(dir, im.getAttribute("src")); if (!p) return;
+        jobs.push(epDataUrl(ep, p).then(function (d) { if (d) im.setAttribute("src", d); }));
+      });
+      epTags(doc, "image").forEach(function (im) {
+        var h = im.getAttributeNS("http://www.w3.org/1999/xlink", "href") || im.getAttribute("href"), p = epResolve(dir, h); if (!p) return;
+        jobs.push(epDataUrl(ep, p).then(function (d) { if (!d) return; im.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", d); im.setAttribute("href", d); }));
+      });
+      var styles = [];
+      epTags(doc, "link").forEach(function (l) {
+        if (!/stylesheet/i.test(l.getAttribute("rel") || "")) return;
+        var p = epResolve(dir, l.getAttribute("href")); l.parentNode.removeChild(l); if (!p) return;
+        jobs.push(ep.z.text(p).then(function (t) { return t ? epCss(ep, p, t) : ""; }).then(function (c) { styles.push(c); }));
+      });
+      epTags(doc, "style").forEach(function (s) { jobs.push(epCss(ep, it.path, s.textContent).then(function (c) { s.textContent = c; })); });
+      epTags(doc, "a").forEach(function (a) {
+        var h = a.getAttribute("href"); if (!h) return;
+        if (/^(https?:|mailto:)/i.test(h)) { a.setAttribute("target", "_blank"); a.setAttribute("rel", "noopener"); return; }
+        if (/^javascript:/i.test(h)) { a.removeAttribute("href"); return; }
+        var p = h.charAt(0) === "#" ? it.path : epResolve(dir, h);
+        a.setAttribute("data-ep", p + "#" + (h.split("#")[1] || ""));
+      });
+      return Promise.all(jobs).then(function () {
+        var body = epTags(doc, "body")[0], head = epTags(doc, "head")[0];
+        var inner = body ? new XMLSerializer().serializeToString(body).replace(/^<body[^>]*>|<\/body>$/g, "") : new XMLSerializer().serializeToString(doc.documentElement);
+        var headStyles = head ? epTags(head, "style").map(function (s) { return s.textContent; }).join("\n") : "";
+        var bodyCls = body ? (body.getAttribute("class") || "") : "";
+        return '<!doctype html><html><head><meta charset="utf-8"><style>' + styles.join("\n") + "\n" + headStyles + "</style><style>" +
+          "html{background:" + theme.bg + "}body{max-width:40em;margin:0 auto!important;padding:28px 22px 80px!important;color:" + theme.ink + "!important;background:" + theme.bg + "!important;" +
+          "font-family:\"Noto Serif SC\",\"Songti SC\",\"STSong\",\"SimSun\",serif;font-size:19px;line-height:1.9;word-break:break-word}" +
+          "img,svg,video{max-width:100%!important;height:auto!important}a{color:" + theme.link + "}p{text-align:justify}" +
+          "</style></head><body class=\"" + bodyCls.replace(/"/g, "") + "\">" + inner + "</body></html>";
+      });
+    });
+  }
+
+  var RD = null;
+  function rdTheme() {
+    var cs = getComputedStyle(document.documentElement);
+    return { bg: cs.getPropertyValue("--leaf").trim() || "#FBF9F4", ink: cs.getPropertyValue("--ink").trim() || "#24211E", link: cs.getPropertyValue("--indigo").trim() || "#1F5FAE" };
+  }
+  function rdKey(id) { return "yanxilu-epub-" + id; }
+  function rdSave() {
+    if (!RD || !RD.ep) return;
+    var f = RD.el.querySelector(".rd-frame"), y = 0;
+    try { var se = f.contentDocument.scrollingElement; y = se.scrollHeight > se.clientHeight ? se.scrollTop / (se.scrollHeight - se.clientHeight) : 0; } catch (e) { /* 忽略 */ }
+    try { localStorage.setItem(rdKey(RD.id), JSON.stringify({ i: RD.i, y: Math.round(y * 1000) / 1000 })); } catch (e) { /* 忽略 */ }
+  }
+  function rdShow(i, opt) {
+    if (!RD || !RD.ep) return;
+    i = Math.max(0, Math.min(RD.ep.spine.length - 1, i));
+    var seq = ++RD.seq, view = RD.el.querySelector(".rd-view");
+    RD.el.querySelector(".rd-pos").textContent = "正在翻到这一部分……";
+    epChapter(RD.ep, i, rdTheme()).then(function (html) {
+      if (!RD || RD.seq !== seq) return;
+      RD.i = i;
+      view.innerHTML = '<iframe class="rd-frame" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox" title="正文"></iframe>';
+      var f = view.querySelector(".rd-frame");
+      f.addEventListener("load", function () {
+        var d = f.contentDocument; if (!d) return;
+        var se = d.scrollingElement || d.documentElement;
+        if (opt && opt.frag) { var t = d.getElementById(opt.frag); if (t) t.scrollIntoView(); }
+        else if (opt && opt.y) se.scrollTop = opt.y * (se.scrollHeight - se.clientHeight);
+        else if (opt && opt.end) se.scrollTop = se.scrollHeight;
+        d.addEventListener("click", function (e) {
+          var a = e.target.closest && e.target.closest("a[data-ep]"); if (!a) return;
+          e.preventDefault();
+          var v = a.getAttribute("data-ep").split("#"), j = RD.ep.spine.findIndex(function (m) { return m.path === v[0]; });
+          if (j === RD.i && v[1]) { var t2 = d.getElementById(v[1]); if (t2) t2.scrollIntoView(); }
+          else if (j >= 0) rdShow(j, { frag: v[1] });
+        });
+        d.addEventListener("keydown", rdKeys);
+        var timer = 0;
+        d.addEventListener("scroll", function () { clearTimeout(timer); timer = setTimeout(rdSave, 400); });
+        rdSave();
+      });
+      f.srcdoc = html;
+      var n = RD.ep.spine.length;
+      RD.el.querySelector(".rd-pos").textContent = "第 " + (i + 1) + " / " + n + " 部分";
+      RD.el.querySelector('[data-act="rd-prev"]').disabled = i === 0;
+      RD.el.querySelector('[data-act="rd-next"]').disabled = i === n - 1;
+      var sel = RD.el.querySelector(".rd-toc"), cur = -1;
+      RD.ep.toc.forEach(function (t, k) { if (t.i <= i) cur = k; });
+      if (sel && cur >= 0) sel.value = String(cur);
+    }, function (e) { if (RD && RD.seq === seq) rdFail(e); });
+  }
+  function rdFail(e) {
+    var c = e && e.code, msg = c === "missing" ? "这个浏览器里找不到文件了，重新上传一次。" : c === "old_browser" ? "这个浏览器太旧，打不开 EPUB，换新版 Chrome、Edge 或 Safari 试试。" : "这本 EPUB 打不开，可能文件有问题，或者带了加密（DRM）。";
+    if (RD) { RD.el.querySelector(".rd-view").innerHTML = '<p class="rd-msg">' + msg + "</p>"; RD.el.querySelector(".rd-pos").textContent = ""; }
+  }
+  function rdKeys(e) {
+    if (!RD) return;
+    if (e.key === "Escape") { e.preventDefault(); readerClose(); return; }
+    if ((e.altKey || e.ctrlKey) && e.key === "ArrowRight") { e.preventDefault(); rdShow(RD.i + 1); }
+    else if ((e.altKey || e.ctrlKey) && e.key === "ArrowLeft") { e.preventDefault(); rdShow(RD.i - 1); }
+  }
+  function ebBytes(id) {
+    var eb = ebookOf(id);
+    if (!eb) return Promise.reject(epErr("missing"));
+    if (eb.local) return ebTx("readonly", function (st) { return st.get(id); }).then(function (rec) { if (!rec || !rec.blob) throw epErr("missing"); return rec.blob.arrayBuffer(); });
+    return fetch("/_blob/" + eb.asset).then(function (r) {
+      if (!r.ok) throw epErr("missing");
+      return eb.enc === "b64" ? r.text().then(function (t) { var bin = atob(t.trim()), u = new Uint8Array(bin.length); for (var k = 0; k < bin.length; k++) u[k] = bin.charCodeAt(k); return u.buffer; }) : r.arrayBuffer();
+    });
+  }
+  function readerOpen(id) {
+    readerClose();
+    var it = ITEMS[id] || {}, title = (it.title || "").replace(/（.*）$/, "") || "电子书";
+    var el = document.createElement("div");
+    el.className = "rd"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-label", "阅读《" + title + "》");
+    el.innerHTML = '<div class="rd-bar"><b class="rd-t">' + esc(title) + '</b><select class="rd-toc" aria-label="目录" disabled><option>目录</option></select>' +
+      '<span class="rd-pos" aria-live="polite">正在打开……</span><button type="button" class="btn ghost small" data-act="rd-close">关闭</button></div>' +
+      '<div class="rd-main"><div class="rd-view"><p class="rd-msg">正在打开……</p></div></div>' +
+      '<div class="rd-foot"><button type="button" class="btn ghost small" data-act="rd-prev">‹ 上一部分</button><button type="button" class="btn ghost small" data-act="rd-next">下一部分 ›</button></div>';
+    document.body.appendChild(el); document.body.classList.add("rd-on");
+    RD = { id: id, el: el, seq: 0, i: 0, back: document.activeElement };
+    el.querySelector('[data-act="rd-close"]').focus();
+    ebBytes(id).then(epOpen).then(function (ep) {
+      if (!RD || RD.id !== id) return;
+      RD.ep = ep;
+      var sel = el.querySelector(".rd-toc");
+      if (ep.toc.length) {
+        sel.innerHTML = ep.toc.map(function (t, k) { return '<option value="' + k + '">' + "　".repeat(Math.min(3, t.depth || 0)) + esc(t.label) + "</option>"; }).join("");
+        sel.disabled = false;
+      } else sel.hidden = true;
+      var saved = null; try { saved = JSON.parse(localStorage.getItem(rdKey(id)) || "null"); } catch (e) { /* 忽略 */ }
+      rdShow(saved && saved.i < ep.spine.length ? saved.i : 0, saved ? { y: saved.y } : null);
+    }).catch(rdFail);
+  }
+  function readerClose() {
+    if (!RD) return;
+    rdSave();
+    var back = RD.back; RD.el.parentNode && RD.el.parentNode.removeChild(RD.el); document.body.classList.remove("rd-on"); RD = null;
+    if (back && back.focus) try { back.focus({ preventScroll: true }); } catch (e) { /* 忽略 */ }
   }
   function pulledHTML() {
     var id = S.shelfPick, it = ITEMS[id];
@@ -5564,6 +5843,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "eb-del") { S.ebConfirm = t.getAttribute("data-id"); render(); return; }
     if (act === "eb-del-no") { S.ebConfirm = null; render(); return; }
     if (act === "eb-del-yes") { ebRemove(t.getAttribute("data-id")); return; }
+    if (act === "eb-read") { readerOpen(t.getAttribute("data-id")); return; }
+    if (act === "rd-close") { readerClose(); return; }
+    if (act === "rd-prev") { if (RD) rdShow(RD.i - 1); return; }
+    if (act === "rd-next") { if (RD) rdShow(RD.i + 1); return; }
     if (act === "eb-open-local") { var oid = t.getAttribute("data-id"); if (!S.ebUrls[oid]) { e.preventDefault(); ebOpenLocal(oid); } return; }
     if (act === "pick-go") { S.shelfPick = t.getAttribute("data-id"); S.shelfF = "all"; location.hash = "#shelf"; return; }
     if (act === "add-book") { toast("在对话里说书名和放进哪个方向，我加到书架上"); return; }
@@ -5626,6 +5909,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "j-del-no") { S.confirmDel = null; render(); return; }
     if (act === "j-del-yes") { var jid = t.getAttribute("data-id"); S.confirmDel = null; del("journal", jid); toast("已删除"); render(); return; }
   });
+  document.addEventListener("keydown", function (e) { if (RD) { rdKeys(e); if (e.key === "Escape") e.stopImmediatePropagation(); } }, true);
   /* 线网：用键盘打开站点详情，Esc 关闭 */
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") { var pop = document.getElementById("mpop"); if (pop && !pop.hidden) { closePop(); return; } }
@@ -5655,6 +5939,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "fp-file") { filmLoad(t.files); t.value = ""; return; }
+    if (t.classList && t.classList.contains("rd-toc") && RD && RD.ep) { var te = RD.ep.toc[+t.value]; if (te) rdShow(te.i, { frag: te.frag }); return; }
     if (t.hasAttribute && t.hasAttribute("data-eb")) { var f = t.files && t.files[0]; t.value = ""; ebUpload(t.getAttribute("data-eb"), f); return; }
     if (t.matches && t.matches('select[data-act="status"]')) {
       var id = t.getAttribute("data-id"), v = t.value;

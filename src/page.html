@@ -1104,6 +1104,19 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 .eb-empty p{flex:1 1 220px;margin:0;font-size:13.5px;line-height:1.65;color:var(--ink-2)}
 .eb-empty p b{margin-right:8px;font-family:var(--f-display);color:var(--ink)}
 .spine.has-eb::after,.vol.has-eb::after{content:"";position:absolute;right:3px;top:8px;width:7px;height:11px;background:var(--k-doc);clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%)}
+/* ===== EPUB 阅读器 ===== */
+body.rd-on{overflow:hidden}
+.rd{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;background:var(--paper)}
+.rd-bar{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:10px 18px;padding-top:calc(10px + env(safe-area-inset-top,0px));background:var(--leaf);border-bottom:3px solid var(--ink)}
+.rd-t{font-family:var(--f-display);font-size:18px;font-weight:900;letter-spacing:.04em;margin-right:auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rd-toc{max-width:min(360px,60vw);font-family:var(--f-ui);font-size:13.5px;padding:6px 10px;border:1px solid var(--rule-strong);border-radius:8px;background:var(--paper);color:var(--ink)}
+.rd-pos{font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);white-space:nowrap}
+.rd-main{flex:1;min-height:0;display:flex}
+.rd-view{flex:1;min-width:0;display:flex}
+.rd-frame{flex:1;width:100%;height:100%;border:0;background:var(--leaf)}
+.rd-msg{margin:auto;padding:24px;max-width:30em;text-align:center;font-size:15px;line-height:1.8;color:var(--ink-2)}
+.rd-foot{display:flex;justify-content:space-between;gap:12px;padding:10px 18px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));background:var(--leaf);border-top:1px solid var(--rule)}
+.rd-foot .btn[disabled]{opacity:.35;cursor:default}
 /* ===== 书架：档案架 ===== */
 .shelf-seg{margin-top:16px}
 .shelf-seg a{display:inline-block;font-family:var(--f-ui);font-size:14px;padding:6px 16px;border-radius:999px;color:var(--ink-3);text-decoration:none}
