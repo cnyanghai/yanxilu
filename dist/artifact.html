@@ -17,6 +17,7 @@
   --bdg-on:#FFFFFF; --bdg-on-dk:#1A1A1A; --late:#F2B23E; --early:#7FD1E3; --on-signal:#1A1A1A;
   --spine:#FBF8F1; --plate:#EFE5CA; --plate-line:#A8966A; --plate-ink:#3A332B; --wood:#2E2925; --wood-2:#3A322C; --wood-hi:#6A5B4F;
   --bay-bg:#E7DFCD; --bay-hi:rgba(255,250,236,.95); --stamp-bg:#FFFDF6; --cover:#233046; --fold-paper:#F7F1E3; --fold-pg:#F5EEDD; --fold-pg2:#EFE6D2; --card:#FBF8EE; --card-line:#D9D2BC;
+  --case:#25282D; --case-ink:#F2EAD6; --case-ink-2:rgba(242,234,214,.62); --case-hole:rgba(242,234,214,.26); --pk-cover:#22345A;
   --f-display:"Noto Serif SC","Noto Serif CJK SC","Songti SC","STSong",serif;
   --f-brush:"Ma Shan Zheng","Noto Serif SC","Songti SC",serif;
   --f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;
@@ -36,7 +37,7 @@
     --zi-en:#F2C46E; --zi-cycle:#E2B486; --zi-geo:#F29A8C; --zi-fin:#D9A6DD; --zi-data:#8FB4E6; --zi-fut:#C3DA6E; --zi-co:#A0978A;
     --bdg-on:#171513; --bdg-on-dk:#171513; --late:#F2B23E; --early:#7FD1E3; --on-signal:#171513;
     --spine:#2A2622; --plate:#3A3326; --plate-line:#7A6A48; --plate-ink:#E9DCBD; --wood:#100D0B; --wood-2:#1C1814; --wood-hi:#3A322C;
-    --bay-bg:#26221E; --bay-hi:rgba(255,240,210,.07); --stamp-bg:#25221E; --cover:#0E131C; --fold-paper:#211E1A; --fold-pg:#2A2622; --fold-pg2:#24201C; --card:#25221E; --card-line:#45403A;
+    --bay-bg:#26221E; --bay-hi:rgba(255,240,210,.07); --stamp-bg:#25221E; --cover:#0E131C; --fold-paper:#211E1A; --fold-pg:#2A2622; --fold-pg2:#24201C; --card:#25221E; --card-line:#45403A; --case:#3A3F47; --case-ink:#F2EAD6; --case-ink-2:rgba(242,234,214,.62); --case-hole:rgba(242,234,214,.24); --pk-cover:#2C4170;
     color-scheme:dark;
   }
 }
@@ -50,7 +51,7 @@
   --zi-en:#F2C46E; --zi-cycle:#E2B486; --zi-geo:#F29A8C; --zi-fin:#D9A6DD; --zi-data:#8FB4E6; --zi-fut:#C3DA6E; --zi-co:#A0978A;
   --bdg-on:#171513; --bdg-on-dk:#171513; --late:#F2B23E; --early:#7FD1E3; --on-signal:#171513;
   --spine:#2A2622; --plate:#3A3326; --plate-line:#7A6A48; --plate-ink:#E9DCBD; --wood:#100D0B; --wood-2:#1C1814; --wood-hi:#3A322C;
-  --bay-bg:#26221E; --bay-hi:rgba(255,240,210,.07); --stamp-bg:#25221E; --cover:#0E131C; --fold-paper:#211E1A; --fold-pg:#2A2622; --fold-pg2:#24201C; --card:#25221E; --card-line:#45403A;
+  --bay-bg:#26221E; --bay-hi:rgba(255,240,210,.07); --stamp-bg:#25221E; --cover:#0E131C; --fold-paper:#211E1A; --fold-pg:#2A2622; --fold-pg2:#24201C; --card:#25221E; --card-line:#45403A; --case:#3A3F47; --case-ink:#F2EAD6; --case-ink-2:rgba(242,234,214,.62); --case-hole:rgba(242,234,214,.24); --pk-cover:#2C4170;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -1053,6 +1054,68 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 .addbook{width:40px;height:176px;box-sizing:border-box;border:1.5px dashed var(--ink-3);border-radius:2px 2px 0 0;writing-mode:vertical-rl;display:flex;align-items:center;justify-content:center;background:transparent;font-family:var(--f-display);font-size:14px;font-weight:700;letter-spacing:.3em;color:var(--ink-2);cursor:pointer}
 .addbook:hover{border-color:var(--ink);color:var(--ink)}
 .bay.niche .meta{text-align:center;font-size:11.5px;line-height:1.4}
+/* ===== 书架：英语一层（片盒、绘本、生词本） ===== */
+.en-bay .bay-row{flex:1;gap:6px}
+.fcase{position:relative;flex:none;box-sizing:border-box;width:46px;padding:14px 0 0 7px;border:0;border-radius:3px 3px 0 0;writing-mode:vertical-rl;display:flex;align-items:center;gap:9px;cursor:pointer;font:inherit;
+  background:linear-gradient(90deg,rgba(255,255,255,.12) 0,rgba(255,255,255,0) 28%,rgba(0,0,0,.2) 100%),var(--case);box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),0 10px 14px -10px rgba(36,33,30,.6);transition:transform .15s}
+.fcase::before{content:"";position:absolute;left:3px;top:12px;bottom:10px;width:4px;background:repeating-linear-gradient(to bottom,var(--case-hole) 0 4px,transparent 4px 9px)}
+.fcase::after{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:var(--c);border-radius:3px 3px 0 0}
+.fcase:hover{transform:translateY(-4px)}
+.fcase:focus-visible,.pbook:focus-visible,.vbox:focus-visible{outline:2px solid var(--indigo);outline-offset:3px}
+.fcase.dim,.pbook.dim{opacity:.28}
+.fc-type{writing-mode:horizontal-tb;flex:none;font-family:var(--f-ui);font-size:9.5px;font-weight:700;letter-spacing:.06em;color:var(--c)}
+.fc-t{flex:none;white-space:nowrap;font-family:var(--f-display);font-weight:700;letter-spacing:.14em;line-height:1.2;color:var(--case-ink)}
+.fc-foot{writing-mode:horizontal-tb;margin-top:auto;margin-bottom:9px;flex:none;display:flex;flex-direction:column;align-items:center;gap:5px;font-family:var(--f-mono);font-size:9.5px;color:var(--case-ink-2)}
+.fc-src{padding:1px 3px;border:1px solid currentColor;border-radius:2px;font-family:var(--f-ui);font-size:9px;font-weight:700;letter-spacing:.02em;color:var(--case-ink-2)}
+.fc-src.baba{color:var(--c)}
+.fcase .sp-seal{margin:0 0 2px}
+.fc-prog{position:absolute;right:4px;top:12px;bottom:10px;width:3px;border-radius:2px;background:linear-gradient(to top,var(--c) var(--p),rgba(242,234,214,.16) var(--p))}
+.fcase.doing{transform:translateY(-18px);box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),0 14px 18px -12px rgba(36,33,30,.6)}
+.fcase.doing:hover{transform:translateY(-22px)}
+.fcase.done{box-shadow:inset 0 0 0 2px var(--c),0 10px 14px -10px rgba(36,33,30,.6)}
+.fcase.picked{outline:3px solid var(--ink);outline-offset:3px;transform:translateY(-14px)}
+.fcase.doing.picked{transform:translateY(-24px)}
+.fcase .sp-rib{left:55%;bottom:-30px;height:32px}
+.pbook{position:relative;flex:none;align-self:flex-end;box-sizing:border-box;width:136px;height:172px;padding:16px 12px 11px 20px;border:0;border-radius:2px 6px 6px 2px;display:flex;flex-direction:column;cursor:pointer;font:inherit;text-align:left;color:#FFF6E2;
+  background:linear-gradient(90deg,rgba(0,0,0,.28) 0 7px,rgba(255,255,255,.14) 7px 9px,transparent 9px),radial-gradient(120% 80% at 70% 0%,rgba(255,255,255,.12),transparent 60%),var(--pk-cover);box-shadow:0 14px 18px -12px rgba(36,33,30,.65);transition:transform .15s}
+.pbook:hover{transform:translateY(-4px)}
+.pbook.doing{transform:translateY(-14px)}
+.pbook.picked{outline:3px solid var(--ink);outline-offset:3px;transform:translateY(-12px)}
+.pk-sky{position:absolute;right:12px;top:12px;width:44px;height:30px}
+.pk-sky i{position:absolute;border-radius:50%;background:#F4E3A8}
+.pk-sky i:nth-child(1){right:0;top:0;width:18px;height:18px;box-shadow:inset -6px -2px 0 0 var(--pk-cover)}
+.pk-sky i:nth-child(2){left:6px;top:4px;width:3px;height:3px}
+.pk-sky i:nth-child(3){left:20px;top:20px;width:2px;height:2px}
+.pk-type{font-family:var(--f-ui);font-size:10px;letter-spacing:.1em;opacity:.78}
+.pk-en{margin-top:20px;font-family:var(--f-num);font-size:16px;font-weight:700;line-height:1.15}
+.pk-t{margin-top:7px;font-family:var(--f-display);font-size:13px;font-weight:700;letter-spacing:.08em}
+.pk-foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;font-family:var(--f-mono);font-size:9.5px;color:rgba(255,246,226,.78)}
+.pk-foot .sp-seal{margin:0;width:22px;height:22px;font-size:12px}
+.pbook .fc-src.baba{color:#F2B54A}
+.pbook .sp-rib{left:auto;right:18px;bottom:-30px;height:32px}
+.vbox{position:relative;flex:none;align-self:flex-end;width:96px;height:96px;margin-left:auto;text-decoration:none;color:var(--ink)}
+.vb-cards i{position:absolute;bottom:44px;width:62px;height:40px;background:var(--card);border:1px solid var(--card-line);border-radius:2px;box-shadow:0 2px 3px -2px rgba(0,0,0,.3)}
+.vb-cards i::before{content:"";position:absolute;left:7px;right:14px;top:9px;height:2px;background:var(--c);opacity:.7}
+.vb-cards i:nth-child(1){left:10px;transform:rotate(-7deg)}
+.vb-cards i:nth-child(2){left:20px;bottom:48px;transform:rotate(3deg)}
+.vb-cards i:nth-child(3){left:26px;transform:rotate(9deg)}
+.vb-body{position:absolute;left:0;right:0;bottom:0;height:54px;box-sizing:border-box;padding-top:9px;display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:linear-gradient(90deg,#8D6A42 0,#A88052 50%,#8A6740 100%);border-radius:3px 3px 0 0;box-shadow:inset 0 0 0 1px rgba(60,40,15,.4),0 10px 14px -10px rgba(36,33,30,.6)}
+.vb-body b{padding:1px 8px;background:#F4EAD0;border:1px solid #A8956A;font-family:var(--f-display);font-size:12.5px;letter-spacing:.12em;color:#24211E}
+.vb-body small{font-family:var(--f-ui);font-size:10.5px;font-weight:700;color:#FBE6BC}
+.vbox:hover .vb-cards i:nth-child(2){transform:translateY(-6px) rotate(3deg)}
+.vb-cards i{transition:transform .15s}
+.lg-f{position:relative;display:inline-block;width:18px;height:40px;background:var(--case);border-radius:2px 2px 0 0;box-shadow:inset 0 4px 0 var(--ln-en)}
+.lg-f::before{content:"";position:absolute;left:2px;top:7px;bottom:4px;width:3px;background:repeating-linear-gradient(to bottom,var(--case-hole) 0 3px,transparent 3px 6px)}
+.pb-en{margin:2px 0 0;font-family:var(--f-num);font-size:15px;font-weight:600;color:var(--ink-2)}
+.pb-sub{margin:0 0 6px;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3)}
+.en-eps .linkrow{display:flex;align-items:baseline;gap:0;text-decoration:none}
+.en-eps .pb-cn{font-family:var(--f-mono);font-size:12.5px}
+.en-eps .ep-n{margin-left:10px;font-family:var(--f-mono);font-size:12px;color:var(--ink-3)}
+.en-eps .ext{margin-left:auto;padding-left:10px;color:var(--ink-3)}
+.en-eps .linkrow:hover{color:var(--indigo)}
+.en-sync{margin:0;padding:10px 12px;background:color-mix(in srgb,var(--ln-en) 10%,var(--paper));border-radius:8px;font-size:13px;line-height:1.7;color:var(--ink-2)}
+.en-segs .fe-s + .fe-s{border-left:1px solid rgba(36,33,30,.08)}
 .pulled{flex:1 1 300px;min-width:0;background:var(--leaf);border:1px solid var(--rule);border-radius:16px;padding:24px 24px 22px;display:flex;flex-direction:column;gap:18px;box-shadow:0 24px 40px -30px rgba(36,33,30,.5)}
 .pulled .eyebrow{margin:0}
 .pb-h{display:flex;gap:14px;align-items:stretch;margin-top:-6px}
@@ -1421,6 +1484,32 @@ window.YXL_LIB = {
       books: ["zhou"],
       note: "两件都是年度数据：国家统计局和各国央行公布上一年数据后，各更新一次。" }
   ],
+
+  /* 英语：书架最下面一层。一部电影或一部剧是一个片盒，绘本是一本书，点开抽出来学。
+   * where 写在哪里学：
+   *   "baba"  在 Baba 英语上学（网址 = site + path）：逐句播放、点词查词典、生词本都在那边；
+   *   "local" 用研习录自己的跟读播放器（plan 写课表里的科目代号；片源和字幕用你自己的文件，不上传）。
+   * eps 是 Baba 上已经做好的集：code 是 Baba 里的集代号，lines 是句数（不知道就不写）。
+   * Baba 上的进度和生词暂时不传回研习录，片盒的状态（进行中、已完成）在研习录里手动标；
+   * 以后研习录搬到 Baba 的服务器、用同一个登录，再改成自动读进度和生词。
+   * 这里只写片名、年份和自己写的简介，不写台词、不放海报（版权）。 */
+  english: {
+    site: "https://baba.wogucloud.cn",
+    films: [
+      { id: "en-pursuit", title: "当幸福来敲门", en: "The Pursuit of Happyness", year: 2006, type: "电影", where: "local", plan: "film",
+        why: "课表里的电影线：全片按字幕切成 36 段，每天一段，盲听、精听、跟读、背诵，周日把本周 6 段连起来复习。片源和字幕用你自己的文件，在研习录的跟读播放器里打开。" },
+      { id: "en-friends", title: "老友记", en: "Friends", year: 1994, type: "剧集", where: "baba", path: "/dramas/friends",
+        why: "纽约六个朋友的情景喜剧，台词短、语速快，几乎全是日常口语。在 Baba 上一句一句看：不认识的词点一下查词典、收进生词本，再用生词填空练一遍。",
+        eps: [{ code: "S01E01", title: "第 1 季第 1 集", lines: 471 }] },
+      { id: "en-hp1", title: "哈利·波特与魔法石", en: "Harry Potter and the Sorcerer's Stone", year: 2001, type: "电影", where: "baba", path: "/dramas/hp1-sorcerers-stone",
+        why: "整部电影（加长版），英式发音，故事线清楚。在 Baba 上和老友记一样逐句学，生词收进同一个生词本。",
+        eps: [{ code: "M01", title: "整部电影 · 加长版" }] }
+    ],
+    books: [
+      { id: "en-hp-opening", title: "大难不死的男孩", en: "The Boy Who Lived", type: "绘本", level: "初级 · 10 页", where: "baba", path: "/books/hp-opening",
+        why: "《哈利·波特与魔法石》开篇改写的英语绘本：短句、配中文，十页讲完女贞路的那一夜。可以在看电影之前先读，先认识人物和场景。" }
+    ]
+  },
 
   tracks: [
     {
@@ -3219,6 +3308,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     });
   });
   var TRACK = {}; LIB.tracks.forEach(function (t) { TRACK[t.id] = t; });
+  /* 英语一层：片盒（电影、剧）和英语读物，见 data.js 的 english */
+  var EN = LIB.english || { films: [], books: [] }, EN_ITEM = {}, EN_IDS = [];
+  (EN.films || []).forEach(function (x) { EN_ITEM[x.id] = Object.assign({ kind: "film" }, x); EN_IDS.push(x.id); });
+  (EN.books || []).forEach(function (x) { EN_ITEM[x.id] = Object.assign({ kind: "read" }, x); EN_IDS.push(x.id); });
   /* 正在精读的书：focus 可以是一本书的 id，也可以是几本书的数组 */
   var FOCUS = [].concat(LIB.focus || []).filter(function (id) { return LIB.books[id]; });
   if (!FOCUS.length) FOCUS = Object.keys(LIB.books).slice(0, 1);
@@ -3269,6 +3362,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (!ref) return "";
     if (ref === "plan") return "路线单";
     if (ITEMS[ref]) return ITEMS[ref].kind === "book" ? "《" + ITEMS[ref].title + "》" : ITEMS[ref].title;
+    if (EN_ITEM[ref]) return "《" + EN_ITEM[ref].title + "》";
     var m = /^(.+)-ch(\d+)$/.exec(ref);
     if (m && LIB.books[m[1]]) return "《" + LIB.books[m[1]].title + "》第" + CN[+m[2]] + "章";
     return "";
@@ -3560,6 +3654,84 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       (other.length ? '<a class="pbox" href="#t-' + tid + '" title="' + esc(other.map(function (x) { return x.title; }).join("、")) + '"><b>' + other.length + "</b><span>练习与专题</span></a>" : "") +
       '<span class="bookend" aria-hidden="true"></span>';
     return '<div class="bay" style="--c:var(' + col + ');--w:' + w + 'px"><div class="bay-row">' + row + '</div><div class="lip"><a class="plate" href="#t-' + tid + '"><b class="cls">' + SHELF_CLS[tid] + "</b><b>" + esc(t.short) + "</b><span>" + esc(meta) + "</span></a></div></div>";
+  }
+  /* ---------- 书架：英语一层 ----------
+   * 一部电影或一部剧是一个片盒（像影碟盒，侧边有胶片孔），绘本封面朝外立着，最右边是 Baba 的生词本卡片盒。
+   * 片盒的状态和书一样：在学的抽出半截挂丝带，学完盖“完”字章。
+   * 研习录自己的电影线（《当幸福来敲门》）按课表算学到第几段；Baba 上的片子在面板里手动标。 */
+  var EN_ROW = [["films", 540], ["reads", 258], ["+", 97]];
+  function enHref(path) { return String(EN.site || "").replace(/\/$/, "") + (path || ""); }
+  function enState(id) {
+    var x = EN_ITEM[id], s = st(id), r = { s: s, pct: 0, done: 0, total: 0 };
+    if (x && x.where === "local" && x.plan && PLAN && PLAN.lessons[x.plan]) {
+      r.total = PLAN.lessons[x.plan].length;
+      r.done = Math.min(r.total, curStudy().next[x.plan] || 0);
+      r.pct = r.total ? r.done / r.total : 0;
+      if (s === "todo" && r.done > 0) r.s = "doing";
+      if (r.done >= r.total && r.total && s !== "review") r.s = "done";
+    }
+    return r;
+  }
+  function enFit(t, h) { return Math.max(10.5, Math.min(15, Math.floor((h - 104) / (t.length * 1.16) * 2) / 2)); }
+  function filmCaseHTML(x) {
+    var es = enState(x.id), h = 226, size = enFit(x.title, h);
+    var cls = "fcase" + (es.s === "doing" ? " doing" : es.s === "done" || es.s === "review" ? " done" : "") + (shelfMatch(es.s === "review" ? "done" : es.s) ? "" : " dim") + (S.shelfPick === x.id ? " picked" : "");
+    var src = x.where === "local" ? '<span class="fc-src">本地</span>' : '<span class="fc-src baba">Baba</span>';
+    return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(x.id) + '" style="height:' + h + "px;--p:" + Math.round(es.pct * 100) + '%" title="《' + esc(x.title) + "》" + esc(x.en) + " · " + esc(x.type) + " · " + esc(STATUS_LABEL[es.s] || "") + '">' +
+      '<span class="fc-type">' + esc(x.type) + '</span><span class="fc-t" style="font-size:' + size + 'px">' + esc(x.title) + "</span>" +
+      '<span class="fc-foot">' + src + (es.s === "done" || es.s === "review" ? '<i class="sp-seal" aria-hidden="true">' + (es.s === "review" ? "熟" : "完") + "</i>" : "<span>" + esc(String(x.year || "")) + "</span>") + "</span>" +
+      (es.total ? '<i class="fc-prog" aria-hidden="true"></i>' : "") + (es.s === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
+  }
+  /* 绘本封面朝外立着：封面是自己画的夜空，不用原书插图 */
+  function readCoverHTML(x) {
+    var es = enState(x.id);
+    var cls = "pbook" + (es.s === "doing" ? " doing" : es.s === "done" || es.s === "review" ? " done" : "") + (shelfMatch(es.s === "review" ? "done" : es.s) ? "" : " dim") + (S.shelfPick === x.id ? " picked" : "");
+    return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(x.id) + '" title="《' + esc(x.title) + "》" + esc(x.en) + " · " + esc(x.type) + " · " + esc(STATUS_LABEL[es.s] || "") + '">' +
+      '<span class="pk-sky" aria-hidden="true"><i></i><i></i><i></i></span><span class="pk-type">' + esc(x.type) + " · " + esc((x.level || "").split(" · ")[0]) + '</span><span class="pk-en">' + esc(x.en) + '</span><span class="pk-t">' + esc(x.title) + "</span>" +
+      '<span class="pk-foot"><span class="fc-src baba">Baba</span>' + (es.s === "done" || es.s === "review" ? '<i class="sp-seal" aria-hidden="true">' + (es.s === "review" ? "熟" : "阅") + "</i>" : "<span>" + esc((x.level || "").split(" · ")[1] || "") + "</span>") + "</span>" +
+      (es.s === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
+  }
+  function enTierHTML() {
+    var films = (EN.films || []).map(function (x) { return EN_ITEM[x.id]; }), reads = (EN.books || []).map(function (x) { return EN_ITEM[x.id]; });
+    function cnt(list) { var d = list.filter(function (x) { return enState(x.id).s === "doing"; }).length, f = list.filter(function (x) { var s = enState(x.id).s; return s === "done" || s === "review"; }).length; return (d ? " · 在学 " + d : "") + (f ? " · 学完 " + f : ""); }
+    return '<div class="tier en-tier">' + EN_ROW.map(function (c) {
+      if (c[0] === "+") return '<div class="bay niche" style="--w:' + c[1] + 'px"><button type="button" class="addbook" data-act="add-film">＋加一部</button><span class="meta">说片名<br>就行</span><div class="lip"></div></div>';
+      if (c[0] === "films") {
+        return '<div class="bay en-bay" style="--c:var(--ln-en);--w:' + c[1] + 'px"><div class="bay-row">' + films.map(filmCaseHTML).join("") + '<span class="bookend" aria-hidden="true"></span>' +
+          '<a class="vbox" href="' + esc(enHref("/vocabulary")) + '" target="_blank" rel="noopener" title="Baba 上的生词本（新标签页打开）"><span class="vb-cards" aria-hidden="true"><i></i><i></i><i></i></span><span class="vb-body"><b>生词本</b><small>Baba ↗</small></span></a></div>' +
+          '<div class="lip"><span class="plate"><b class="cls">EN</b><b>英语 · 看片</b><span>' + films.length + " 部" + cnt(films) + "</span></span></div></div>";
+      }
+      return '<div class="bay en-bay reads" style="--c:var(--ln-en);--w:' + c[1] + 'px"><div class="bay-row">' + reads.map(readCoverHTML).join("") + "</div>" +
+        '<div class="lip"><span class="plate"><b class="cls">EN</b><b>英语读物</b><span>' + reads.length + " 本" + cnt(reads) + "</span></span></div></div>";
+    }).join("") + "</div>";
+  }
+  /* 抽出来的片盒 / 英语读物 */
+  function enPulledHTML(id) {
+    var x = EN_ITEM[id], es = enState(id), film = x.kind === "film", local = x.where === "local";
+    var meta = [x.year, x.type, x.level, local ? "研习录跟读播放器" : "在 Baba 英语上学"].filter(Boolean).join(" · ");
+    var head = '<p class="eyebrow">' + (film ? "抽出来的片盒" : "抽出来的书") + '</p><div class="pb-h" style="--c:var(--ln-en)"><span class="pb-bar" aria-hidden="true"></span><div><h2 id="pulled-h">' + esc(x.title) + "</h2>" +
+      '<p class="pb-en">' + esc(x.en) + '</p><p class="meta">' + esc(meta) + "</p></div></div>";
+    var why = x.why ? '<p class="pb-why">' + esc(x.why) + "</p>" : "";
+    if (local) {
+      var next = Math.min(es.done, Math.max(0, es.total - 1)), segs = "";
+      for (var k = 0; k < es.total; k++) segs += '<span class="fe-s' + (k < es.done ? " r" : "") + '"></span>';
+      var mins = x.plan ? subjMin(x.plan) : 0;
+      return '<aside class="pulled" aria-labelledby="pulled-h" style="--c:var(--ln-en)">' + head + why +
+        '<div class="fe"><div class="fe-top"><span>36 段 · 学过的段落染上颜色</span><span>' + Math.round(es.pct * 100) + '%</span></div><div class="fe-wrap"><div class="fe-block en-segs" aria-hidden="true">' + segs + '</div><i class="fe-rib" style="left:' + (es.total ? es.done / es.total * 100 : 0) + '%" aria-hidden="true"></i></div></div>' +
+        '<div class="pb-stats"><div><b>' + es.done + "<small> / " + es.total + "</small></b><span>段学完</span></div><div><b>" + hrs(mins) + "</b><span>小时</span></div><div><b>" + Math.max(0, es.total - es.done) + "</b><span>段没学</span></div></div>" +
+        noteBlock(id, "观影笔记", "哪几句听不出来、记住了哪些说法，写在这里") +
+        '<div class="btns">' + (es.done < es.total ? '<a class="btn" href="#c-' + esc(x.plan) + '" data-act="film-go" data-seg="' + next + '">继续：第 ' + (next + 1) + " 段</a>" : '<a class="btn" href="#c-' + esc(x.plan) + '">打开跟读播放器</a>') +
+        '<a class="btn ghost" href="#c-' + esc(x.plan) + '">全部 ' + es.total + " 段</a></div></aside>";
+    }
+    var eps = (x.eps || []).map(function (e) {
+      return '<li><i aria-hidden="true"></i><a class="linkrow" href="' + esc(enHref(x.path + "/episodes/" + e.code + "/dialogues/0")) + '" target="_blank" rel="noopener"><span class="pb-cn">' + esc(e.code) + "</span>" + esc(e.title) + (e.lines ? '<span class="ep-n">' + e.lines + " 句</span>" : "") + '<span class="ext" aria-hidden="true">↗</span></a></li>';
+    }).join("");
+    return '<aside class="pulled" aria-labelledby="pulled-h" style="--c:var(--ln-en)">' + head + why +
+      (eps ? '<div><p class="pb-sub">' + (x.type === "剧集" ? "Baba 上已有的集" : "Baba 上的这部片") + '（点开从第 1 句学起）</p><ol class="pb-chs en-eps">' + eps + "</ol></div>" : "") +
+      '<p class="en-sync">' + (film ? "“去 Baba 学”打开这部片的页面，那里的“继续学习”接着你上次学到的那一句。" : "") + "学到哪、收了哪些生词，都记在 Baba 上，暂时不传回研习录；学到一半或学完了，在下面标一下。</p>" +
+      '<div class="pb-st">' + statusCtl(id, x.title) + "</div>" + noteBlock(id, film ? "观影笔记" : "我的批注", film ? "哪几句听不出来、记住了哪些说法，写在这里" : "读到哪、想到什么，写在这里") +
+      '<div class="btns"><a class="btn" href="' + esc(enHref(x.path)) + '" target="_blank" rel="noopener">' + (film ? "去 Baba 学" : "去 Baba 读") + ' ↗</a>' +
+      (film ? '<a class="btn ghost" href="' + esc(enHref("/vocabulary")) + '" target="_blank" rel="noopener">生词本 ↗</a>' : "") + "</div></aside>";
   }
   /* ---------- 电子书：给书架上的书挂一个 PDF 或 EPUB ----------
    * claude.ai 版：文件用 assets 能力存在这个研习录自己的存储里（只有你能打开，换设备也在）。
@@ -3956,6 +4128,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
   function pulledHTML() {
     var id = S.shelfPick, it = ITEMS[id];
+    if (EN_ITEM[id]) return enPulledHTML(id);
     if (!it) { id = S.shelfPick = FOCUS.filter(function (b) { return bookState(b).s === "doing"; })[0] || FOCUS[0]; it = ITEMS[id]; }
     if (!it) return "";
     var b = LIB.books[id], bs = bookState(id), t = TRACK[it.home] || {}, col = SHELF_COL[it.home] || "--ln-rev";
@@ -4121,6 +4294,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var books = allItems().filter(function (id) { return ITEMS[id].kind === "book"; });
     var cnt = { doing: 0, done: 0, todo: 0 };
     books.forEach(function (id) { var s = bookState(id).s; cnt[s === "review" ? "done" : s] = (cnt[s === "review" ? "done" : s] || 0) + 1; });
+    EN_IDS.forEach(function (id) { var s = enState(id).s; cnt[s === "review" ? "done" : s] = (cnt[s === "review" ? "done" : s] || 0) + 1; });
+    var nFilm = (EN.films || []).length, nAll = books.length + EN_IDS.length;
     var f = S.shelfF || "all";
     function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="shelf-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
     var cab = SHELF_ROWS.map(function (row) {
@@ -4128,12 +4303,12 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
         if (c[0] === "+") return '<div class="bay niche" style="--w:' + c[1] + 'px"><button type="button" class="addbook" data-act="add-book">＋加一本</button><span class="meta">说书名<br>就行</span><div class="lip"></div></div>';
         return TRACK[c[0]] ? compartmentHTML(c[0], c[1]) : "";
       }).join("") + "</div>";
-    }).join("");
+    }).join("") + (EN_IDS.length ? enTierHTML() : "");
     return '<div class="view shelf">' + bannerHTML() +
-      '<header class="phead"><div><p class="eyebrow">五个方向 · ' + books.length + ' 本书 + CFA 十册</p><h1>书架<span class="h1-sub">博古架</span></h1>' +
-      '<p class="lede">一个方向一格，三层装下。每本书是一条竖起来的线，书脊上一章一站；点一本书，把它抽出来看。</p>' + shelfSeg("shelf") +
-      '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", books.length) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></div>" +
-      '<div class="sp-legend" aria-hidden="true"><span><i class="lg-s"></i>只勾了线：还没读</span><span><i class="lg-s doing"></i>抽出半截、颜色染到读到的地方：在读</span><span><i class="lg-s done"></i>整本上色、盖章：读完</span></div></header>' +
+      '<header class="phead"><div><p class="eyebrow">五个方向 · ' + books.length + " 本书 + CFA 十册" + (nFilm ? " · 英语 " + nFilm + " 部片" : "") + '</p><h1>书架<span class="h1-sub">博古架</span></h1>' +
+      '<p class="lede">一个方向一格，最下面一层是英语。每本书是一条竖起来的线，书脊上一章一站；一部电影或一部剧是一个片盒。点一本书或一个片盒，把它抽出来看。</p>' + shelfSeg("shelf") +
+      '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></div>" +
+      '<div class="sp-legend" aria-hidden="true"><span><i class="lg-s"></i>只勾了线：还没读</span><span><i class="lg-s doing"></i>抽出半截、颜色染到读到的地方：在读</span><span><i class="lg-s done"></i>整本上色、盖章：读完</span><span><i class="lg-f"></i>片盒：一部电影或剧</span></div></header>' +
       '<div class="shelf-main"><section class="cabinet" aria-label="博古架"><div class="cab-top"><span>研习书架</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + pulledHTML() + "</div></div>";
   }
 
@@ -5842,6 +6017,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "eb-open-local") { var oid = t.getAttribute("data-id"); if (!S.ebUrls[oid]) { e.preventDefault(); ebOpenLocal(oid); } return; }
     if (act === "pick-go") { S.shelfPick = t.getAttribute("data-id"); S.shelfF = "all"; location.hash = "#shelf"; return; }
     if (act === "add-book") { toast("在对话里说书名和放进哪个方向，我加到书架上"); return; }
+    if (act === "add-film") { toast("在对话里说片名，我加到英语这一层；Baba 上已有的片子直接链过去"); return; }
     if (act === "fold-day") { S.foldDay = t.getAttribute("data-d"); render(); return; }
     if (act === "fold-nav") { S.foldStart = foldWS() + +t.getAttribute("data-d"); S.foldDay = null; render(); return; }
     if (act === "fold-go") { var fw = +t.getAttribute("data-w"); S.foldStart = Math.max(0, fw - 1); S.foldDay = null; render(); return; }

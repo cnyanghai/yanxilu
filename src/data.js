@@ -65,6 +65,32 @@ window.YXL_LIB = {
       note: "两件都是年度数据：国家统计局和各国央行公布上一年数据后，各更新一次。" }
   ],
 
+  /* 英语：书架最下面一层。一部电影或一部剧是一个片盒，绘本是一本书，点开抽出来学。
+   * where 写在哪里学：
+   *   "baba"  在 Baba 英语上学（网址 = site + path）：逐句播放、点词查词典、生词本都在那边；
+   *   "local" 用研习录自己的跟读播放器（plan 写课表里的科目代号；片源和字幕用你自己的文件，不上传）。
+   * eps 是 Baba 上已经做好的集：code 是 Baba 里的集代号，lines 是句数（不知道就不写）。
+   * Baba 上的进度和生词暂时不传回研习录，片盒的状态（进行中、已完成）在研习录里手动标；
+   * 以后研习录搬到 Baba 的服务器、用同一个登录，再改成自动读进度和生词。
+   * 这里只写片名、年份和自己写的简介，不写台词、不放海报（版权）。 */
+  english: {
+    site: "https://baba.wogucloud.cn",
+    films: [
+      { id: "en-pursuit", title: "当幸福来敲门", en: "The Pursuit of Happyness", year: 2006, type: "电影", where: "local", plan: "film",
+        why: "课表里的电影线：全片按字幕切成 36 段，每天一段，盲听、精听、跟读、背诵，周日把本周 6 段连起来复习。片源和字幕用你自己的文件，在研习录的跟读播放器里打开。" },
+      { id: "en-friends", title: "老友记", en: "Friends", year: 1994, type: "剧集", where: "baba", path: "/dramas/friends",
+        why: "纽约六个朋友的情景喜剧，台词短、语速快，几乎全是日常口语。在 Baba 上一句一句看：不认识的词点一下查词典、收进生词本，再用生词填空练一遍。",
+        eps: [{ code: "S01E01", title: "第 1 季第 1 集", lines: 471 }] },
+      { id: "en-hp1", title: "哈利·波特与魔法石", en: "Harry Potter and the Sorcerer's Stone", year: 2001, type: "电影", where: "baba", path: "/dramas/hp1-sorcerers-stone",
+        why: "整部电影（加长版），英式发音，故事线清楚。在 Baba 上和老友记一样逐句学，生词收进同一个生词本。",
+        eps: [{ code: "M01", title: "整部电影 · 加长版" }] }
+    ],
+    books: [
+      { id: "en-hp-opening", title: "大难不死的男孩", en: "The Boy Who Lived", type: "绘本", level: "初级 · 10 页", where: "baba", path: "/books/hp-opening",
+        why: "《哈利·波特与魔法石》开篇改写的英语绘本：短句、配中文，十页讲完女贞路的那一夜。可以在看电影之前先读，先认识人物和场景。" }
+    ]
+  },
+
   tracks: [
     {
       id: "geo", name: "地缘政治与战争", short: "地缘与战争",

@@ -36,6 +36,10 @@
     });
   });
   var TRACK = {}; LIB.tracks.forEach(function (t) { TRACK[t.id] = t; });
+  /* 英语一层：片盒（电影、剧）和英语读物，见 data.js 的 english */
+  var EN = LIB.english || { films: [], books: [] }, EN_ITEM = {}, EN_IDS = [];
+  (EN.films || []).forEach(function (x) { EN_ITEM[x.id] = Object.assign({ kind: "film" }, x); EN_IDS.push(x.id); });
+  (EN.books || []).forEach(function (x) { EN_ITEM[x.id] = Object.assign({ kind: "read" }, x); EN_IDS.push(x.id); });
   /* 正在精读的书：focus 可以是一本书的 id，也可以是几本书的数组 */
   var FOCUS = [].concat(LIB.focus || []).filter(function (id) { return LIB.books[id]; });
   if (!FOCUS.length) FOCUS = Object.keys(LIB.books).slice(0, 1);
@@ -86,6 +90,7 @@
     if (!ref) return "";
     if (ref === "plan") return "路线单";
     if (ITEMS[ref]) return ITEMS[ref].kind === "book" ? "《" + ITEMS[ref].title + "》" : ITEMS[ref].title;
+    if (EN_ITEM[ref]) return "《" + EN_ITEM[ref].title + "》";
     var m = /^(.+)-ch(\d+)$/.exec(ref);
     if (m && LIB.books[m[1]]) return "《" + LIB.books[m[1]].title + "》第" + CN[+m[2]] + "章";
     return "";
@@ -377,6 +382,84 @@
       (other.length ? '<a class="pbox" href="#t-' + tid + '" title="' + esc(other.map(function (x) { return x.title; }).join("、")) + '"><b>' + other.length + "</b><span>练习与专题</span></a>" : "") +
       '<span class="bookend" aria-hidden="true"></span>';
     return '<div class="bay" style="--c:var(' + col + ');--w:' + w + 'px"><div class="bay-row">' + row + '</div><div class="lip"><a class="plate" href="#t-' + tid + '"><b class="cls">' + SHELF_CLS[tid] + "</b><b>" + esc(t.short) + "</b><span>" + esc(meta) + "</span></a></div></div>";
+  }
+  /* ---------- 书架：英语一层 ----------
+   * 一部电影或一部剧是一个片盒（像影碟盒，侧边有胶片孔），绘本封面朝外立着，最右边是 Baba 的生词本卡片盒。
+   * 片盒的状态和书一样：在学的抽出半截挂丝带，学完盖“完”字章。
+   * 研习录自己的电影线（《当幸福来敲门》）按课表算学到第几段；Baba 上的片子在面板里手动标。 */
+  var EN_ROW = [["films", 540], ["reads", 258], ["+", 97]];
+  function enHref(path) { return String(EN.site || "").replace(/\/$/, "") + (path || ""); }
+  function enState(id) {
+    var x = EN_ITEM[id], s = st(id), r = { s: s, pct: 0, done: 0, total: 0 };
+    if (x && x.where === "local" && x.plan && PLAN && PLAN.lessons[x.plan]) {
+      r.total = PLAN.lessons[x.plan].length;
+      r.done = Math.min(r.total, curStudy().next[x.plan] || 0);
+      r.pct = r.total ? r.done / r.total : 0;
+      if (s === "todo" && r.done > 0) r.s = "doing";
+      if (r.done >= r.total && r.total && s !== "review") r.s = "done";
+    }
+    return r;
+  }
+  function enFit(t, h) { return Math.max(10.5, Math.min(15, Math.floor((h - 104) / (t.length * 1.16) * 2) / 2)); }
+  function filmCaseHTML(x) {
+    var es = enState(x.id), h = 226, size = enFit(x.title, h);
+    var cls = "fcase" + (es.s === "doing" ? " doing" : es.s === "done" || es.s === "review" ? " done" : "") + (shelfMatch(es.s === "review" ? "done" : es.s) ? "" : " dim") + (S.shelfPick === x.id ? " picked" : "");
+    var src = x.where === "local" ? '<span class="fc-src">本地</span>' : '<span class="fc-src baba">Baba</span>';
+    return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(x.id) + '" style="height:' + h + "px;--p:" + Math.round(es.pct * 100) + '%" title="《' + esc(x.title) + "》" + esc(x.en) + " · " + esc(x.type) + " · " + esc(STATUS_LABEL[es.s] || "") + '">' +
+      '<span class="fc-type">' + esc(x.type) + '</span><span class="fc-t" style="font-size:' + size + 'px">' + esc(x.title) + "</span>" +
+      '<span class="fc-foot">' + src + (es.s === "done" || es.s === "review" ? '<i class="sp-seal" aria-hidden="true">' + (es.s === "review" ? "熟" : "完") + "</i>" : "<span>" + esc(String(x.year || "")) + "</span>") + "</span>" +
+      (es.total ? '<i class="fc-prog" aria-hidden="true"></i>' : "") + (es.s === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
+  }
+  /* 绘本封面朝外立着：封面是自己画的夜空，不用原书插图 */
+  function readCoverHTML(x) {
+    var es = enState(x.id);
+    var cls = "pbook" + (es.s === "doing" ? " doing" : es.s === "done" || es.s === "review" ? " done" : "") + (shelfMatch(es.s === "review" ? "done" : es.s) ? "" : " dim") + (S.shelfPick === x.id ? " picked" : "");
+    return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(x.id) + '" title="《' + esc(x.title) + "》" + esc(x.en) + " · " + esc(x.type) + " · " + esc(STATUS_LABEL[es.s] || "") + '">' +
+      '<span class="pk-sky" aria-hidden="true"><i></i><i></i><i></i></span><span class="pk-type">' + esc(x.type) + " · " + esc((x.level || "").split(" · ")[0]) + '</span><span class="pk-en">' + esc(x.en) + '</span><span class="pk-t">' + esc(x.title) + "</span>" +
+      '<span class="pk-foot"><span class="fc-src baba">Baba</span>' + (es.s === "done" || es.s === "review" ? '<i class="sp-seal" aria-hidden="true">' + (es.s === "review" ? "熟" : "阅") + "</i>" : "<span>" + esc((x.level || "").split(" · ")[1] || "") + "</span>") + "</span>" +
+      (es.s === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
+  }
+  function enTierHTML() {
+    var films = (EN.films || []).map(function (x) { return EN_ITEM[x.id]; }), reads = (EN.books || []).map(function (x) { return EN_ITEM[x.id]; });
+    function cnt(list) { var d = list.filter(function (x) { return enState(x.id).s === "doing"; }).length, f = list.filter(function (x) { var s = enState(x.id).s; return s === "done" || s === "review"; }).length; return (d ? " · 在学 " + d : "") + (f ? " · 学完 " + f : ""); }
+    return '<div class="tier en-tier">' + EN_ROW.map(function (c) {
+      if (c[0] === "+") return '<div class="bay niche" style="--w:' + c[1] + 'px"><button type="button" class="addbook" data-act="add-film">＋加一部</button><span class="meta">说片名<br>就行</span><div class="lip"></div></div>';
+      if (c[0] === "films") {
+        return '<div class="bay en-bay" style="--c:var(--ln-en);--w:' + c[1] + 'px"><div class="bay-row">' + films.map(filmCaseHTML).join("") + '<span class="bookend" aria-hidden="true"></span>' +
+          '<a class="vbox" href="' + esc(enHref("/vocabulary")) + '" target="_blank" rel="noopener" title="Baba 上的生词本（新标签页打开）"><span class="vb-cards" aria-hidden="true"><i></i><i></i><i></i></span><span class="vb-body"><b>生词本</b><small>Baba ↗</small></span></a></div>' +
+          '<div class="lip"><span class="plate"><b class="cls">EN</b><b>英语 · 看片</b><span>' + films.length + " 部" + cnt(films) + "</span></span></div></div>";
+      }
+      return '<div class="bay en-bay reads" style="--c:var(--ln-en);--w:' + c[1] + 'px"><div class="bay-row">' + reads.map(readCoverHTML).join("") + "</div>" +
+        '<div class="lip"><span class="plate"><b class="cls">EN</b><b>英语读物</b><span>' + reads.length + " 本" + cnt(reads) + "</span></span></div></div>";
+    }).join("") + "</div>";
+  }
+  /* 抽出来的片盒 / 英语读物 */
+  function enPulledHTML(id) {
+    var x = EN_ITEM[id], es = enState(id), film = x.kind === "film", local = x.where === "local";
+    var meta = [x.year, x.type, x.level, local ? "研习录跟读播放器" : "在 Baba 英语上学"].filter(Boolean).join(" · ");
+    var head = '<p class="eyebrow">' + (film ? "抽出来的片盒" : "抽出来的书") + '</p><div class="pb-h" style="--c:var(--ln-en)"><span class="pb-bar" aria-hidden="true"></span><div><h2 id="pulled-h">' + esc(x.title) + "</h2>" +
+      '<p class="pb-en">' + esc(x.en) + '</p><p class="meta">' + esc(meta) + "</p></div></div>";
+    var why = x.why ? '<p class="pb-why">' + esc(x.why) + "</p>" : "";
+    if (local) {
+      var next = Math.min(es.done, Math.max(0, es.total - 1)), segs = "";
+      for (var k = 0; k < es.total; k++) segs += '<span class="fe-s' + (k < es.done ? " r" : "") + '"></span>';
+      var mins = x.plan ? subjMin(x.plan) : 0;
+      return '<aside class="pulled" aria-labelledby="pulled-h" style="--c:var(--ln-en)">' + head + why +
+        '<div class="fe"><div class="fe-top"><span>36 段 · 学过的段落染上颜色</span><span>' + Math.round(es.pct * 100) + '%</span></div><div class="fe-wrap"><div class="fe-block en-segs" aria-hidden="true">' + segs + '</div><i class="fe-rib" style="left:' + (es.total ? es.done / es.total * 100 : 0) + '%" aria-hidden="true"></i></div></div>' +
+        '<div class="pb-stats"><div><b>' + es.done + "<small> / " + es.total + "</small></b><span>段学完</span></div><div><b>" + hrs(mins) + "</b><span>小时</span></div><div><b>" + Math.max(0, es.total - es.done) + "</b><span>段没学</span></div></div>" +
+        noteBlock(id, "观影笔记", "哪几句听不出来、记住了哪些说法，写在这里") +
+        '<div class="btns">' + (es.done < es.total ? '<a class="btn" href="#c-' + esc(x.plan) + '" data-act="film-go" data-seg="' + next + '">继续：第 ' + (next + 1) + " 段</a>" : '<a class="btn" href="#c-' + esc(x.plan) + '">打开跟读播放器</a>') +
+        '<a class="btn ghost" href="#c-' + esc(x.plan) + '">全部 ' + es.total + " 段</a></div></aside>";
+    }
+    var eps = (x.eps || []).map(function (e) {
+      return '<li><i aria-hidden="true"></i><a class="linkrow" href="' + esc(enHref(x.path + "/episodes/" + e.code + "/dialogues/0")) + '" target="_blank" rel="noopener"><span class="pb-cn">' + esc(e.code) + "</span>" + esc(e.title) + (e.lines ? '<span class="ep-n">' + e.lines + " 句</span>" : "") + '<span class="ext" aria-hidden="true">↗</span></a></li>';
+    }).join("");
+    return '<aside class="pulled" aria-labelledby="pulled-h" style="--c:var(--ln-en)">' + head + why +
+      (eps ? '<div><p class="pb-sub">' + (x.type === "剧集" ? "Baba 上已有的集" : "Baba 上的这部片") + '（点开从第 1 句学起）</p><ol class="pb-chs en-eps">' + eps + "</ol></div>" : "") +
+      '<p class="en-sync">' + (film ? "“去 Baba 学”打开这部片的页面，那里的“继续学习”接着你上次学到的那一句。" : "") + "学到哪、收了哪些生词，都记在 Baba 上，暂时不传回研习录；学到一半或学完了，在下面标一下。</p>" +
+      '<div class="pb-st">' + statusCtl(id, x.title) + "</div>" + noteBlock(id, film ? "观影笔记" : "我的批注", film ? "哪几句听不出来、记住了哪些说法，写在这里" : "读到哪、想到什么，写在这里") +
+      '<div class="btns"><a class="btn" href="' + esc(enHref(x.path)) + '" target="_blank" rel="noopener">' + (film ? "去 Baba 学" : "去 Baba 读") + ' ↗</a>' +
+      (film ? '<a class="btn ghost" href="' + esc(enHref("/vocabulary")) + '" target="_blank" rel="noopener">生词本 ↗</a>' : "") + "</div></aside>";
   }
   /* ---------- 电子书：给书架上的书挂一个 PDF 或 EPUB ----------
    * claude.ai 版：文件用 assets 能力存在这个研习录自己的存储里（只有你能打开，换设备也在）。
@@ -773,6 +856,7 @@
   }
   function pulledHTML() {
     var id = S.shelfPick, it = ITEMS[id];
+    if (EN_ITEM[id]) return enPulledHTML(id);
     if (!it) { id = S.shelfPick = FOCUS.filter(function (b) { return bookState(b).s === "doing"; })[0] || FOCUS[0]; it = ITEMS[id]; }
     if (!it) return "";
     var b = LIB.books[id], bs = bookState(id), t = TRACK[it.home] || {}, col = SHELF_COL[it.home] || "--ln-rev";
@@ -938,6 +1022,8 @@
     var books = allItems().filter(function (id) { return ITEMS[id].kind === "book"; });
     var cnt = { doing: 0, done: 0, todo: 0 };
     books.forEach(function (id) { var s = bookState(id).s; cnt[s === "review" ? "done" : s] = (cnt[s === "review" ? "done" : s] || 0) + 1; });
+    EN_IDS.forEach(function (id) { var s = enState(id).s; cnt[s === "review" ? "done" : s] = (cnt[s === "review" ? "done" : s] || 0) + 1; });
+    var nFilm = (EN.films || []).length, nAll = books.length + EN_IDS.length;
     var f = S.shelfF || "all";
     function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="shelf-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
     var cab = SHELF_ROWS.map(function (row) {
@@ -945,12 +1031,12 @@
         if (c[0] === "+") return '<div class="bay niche" style="--w:' + c[1] + 'px"><button type="button" class="addbook" data-act="add-book">＋加一本</button><span class="meta">说书名<br>就行</span><div class="lip"></div></div>';
         return TRACK[c[0]] ? compartmentHTML(c[0], c[1]) : "";
       }).join("") + "</div>";
-    }).join("");
+    }).join("") + (EN_IDS.length ? enTierHTML() : "");
     return '<div class="view shelf">' + bannerHTML() +
-      '<header class="phead"><div><p class="eyebrow">五个方向 · ' + books.length + ' 本书 + CFA 十册</p><h1>书架<span class="h1-sub">博古架</span></h1>' +
-      '<p class="lede">一个方向一格，三层装下。每本书是一条竖起来的线，书脊上一章一站；点一本书，把它抽出来看。</p>' + shelfSeg("shelf") +
-      '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", books.length) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></div>" +
-      '<div class="sp-legend" aria-hidden="true"><span><i class="lg-s"></i>只勾了线：还没读</span><span><i class="lg-s doing"></i>抽出半截、颜色染到读到的地方：在读</span><span><i class="lg-s done"></i>整本上色、盖章：读完</span></div></header>' +
+      '<header class="phead"><div><p class="eyebrow">五个方向 · ' + books.length + " 本书 + CFA 十册" + (nFilm ? " · 英语 " + nFilm + " 部片" : "") + '</p><h1>书架<span class="h1-sub">博古架</span></h1>' +
+      '<p class="lede">一个方向一格，最下面一层是英语。每本书是一条竖起来的线，书脊上一章一站；一部电影或一部剧是一个片盒。点一本书或一个片盒，把它抽出来看。</p>' + shelfSeg("shelf") +
+      '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></div>" +
+      '<div class="sp-legend" aria-hidden="true"><span><i class="lg-s"></i>只勾了线：还没读</span><span><i class="lg-s doing"></i>抽出半截、颜色染到读到的地方：在读</span><span><i class="lg-s done"></i>整本上色、盖章：读完</span><span><i class="lg-f"></i>片盒：一部电影或剧</span></div></header>' +
       '<div class="shelf-main"><section class="cabinet" aria-label="博古架"><div class="cab-top"><span>研习书架</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + pulledHTML() + "</div></div>";
   }
 
@@ -2659,6 +2745,7 @@
     if (act === "eb-open-local") { var oid = t.getAttribute("data-id"); if (!S.ebUrls[oid]) { e.preventDefault(); ebOpenLocal(oid); } return; }
     if (act === "pick-go") { S.shelfPick = t.getAttribute("data-id"); S.shelfF = "all"; location.hash = "#shelf"; return; }
     if (act === "add-book") { toast("在对话里说书名和放进哪个方向，我加到书架上"); return; }
+    if (act === "add-film") { toast("在对话里说片名，我加到英语这一层；Baba 上已有的片子直接链过去"); return; }
     if (act === "fold-day") { S.foldDay = t.getAttribute("data-d"); render(); return; }
     if (act === "fold-nav") { S.foldStart = foldWS() + +t.getAttribute("data-d"); S.foldDay = null; render(); return; }
     if (act === "fold-go") { var fw = +t.getAttribute("data-w"); S.foldStart = Math.max(0, fw - 1); S.foldDay = null; render(); return; }
