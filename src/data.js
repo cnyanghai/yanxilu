@@ -3,6 +3,8 @@
  * 新增一本书的精读模块：在 books 里加一项，并在对应方向的条目上写 module: "<书的id>"。
  */
 window.YXL_LIB = {
+  /* claude.ai 上的研习录（主用版：打卡、批注、电子书都存在那里，只有自己能打开） */
+  home: "https://claude.ai/artifact/LpwLZchfacKZAnJs577MvM",
   focus: ["zhoulu", "tragedy"],
   kinds: { book: "书", topic: "科目", practice: "实践", concept: "专题" },
 

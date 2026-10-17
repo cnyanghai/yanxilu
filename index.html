@@ -1026,7 +1026,9 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 .spine.done::before{background:rgba(255,255,255,.35)}
 .spine.done .sp-t{color:var(--bdg-on)}
 .sp-seal{writing-mode:horizontal-tb;margin:auto 0 12px;width:25px;height:25px;flex:none;display:grid;place-items:center;background:var(--seal);color:#FFF;border:2px solid #FFF;font-family:var(--f-display);font-style:normal;font-size:13px;font-weight:700;transform:rotate(-8deg)}
-.spine.picked{outline:3px solid var(--ink);outline-offset:3px}
+.spine.picked{outline:3px solid var(--ink);outline-offset:3px;transform:translateY(-14px)}
+.spine.picked:hover{transform:translateY(-18px)}
+.spine.doing.picked{transform:translateY(-24px)}
 .case{flex:none;display:flex;flex-direction:column;gap:8px;margin-right:22px}
 .case-h{display:flex;flex-wrap:wrap;align-items:center;gap:6px 8px;font-family:var(--f-display);font-size:14px;font-weight:700;letter-spacing:.1em;color:var(--ln-cfa)}
 .case-tag{font-family:var(--f-ui);font-size:11.5px;letter-spacing:.04em;font-weight:700;color:var(--bdg-on);background:var(--ln-cfa);border-radius:10px;padding:1px 8px;text-decoration:none}
@@ -1048,7 +1050,8 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 .vol.doing .sp-rib{left:55%;height:26px;bottom:-24px}
 .vol.done{background:var(--ln-cfa)}
 .vol.done .sp-t,.vol.done .vol-c{color:var(--bdg-on)}
-.vol.picked{outline:3px solid var(--ink);outline-offset:2px}
+.vol.picked{outline:3px solid var(--ink);outline-offset:2px;transform:translateY(-10px)}
+.vol.doing.picked{transform:translateY(-20px)}
 .pbox{flex:none;align-self:flex-end;width:58px;height:92px;margin-left:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;background:color-mix(in srgb,var(--c) 10%,var(--spine));border:1.25px solid color-mix(in srgb,var(--c) 70%,transparent);border-radius:3px;text-decoration:none;color:var(--ink);text-align:center;font-family:var(--f-ui);font-size:11px;line-height:1.3}
 .pbox b{font-family:var(--f-display);font-size:22px;font-weight:900;color:var(--c)}
 .pbox:hover{border-color:var(--ink)}
@@ -1164,6 +1167,7 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 .asheet:hover b{text-decoration:underline}
 .atray-base{position:absolute;left:0;right:0;bottom:0;height:30px;background:linear-gradient(#7A6650,#5A4A3B);border-radius:0 0 4px 4px;box-shadow:inset 0 3px 0 rgba(255,255,255,.15)}
 .atray .lip{justify-content:center;padding-left:0}
+.pulled{scroll-margin-top:84px}
 .apanel{gap:16px}
 .ap-no{display:inline-block;font-family:var(--f-mono);font-size:12px;font-weight:600;padding:1px 7px;border:1px solid var(--c);color:var(--c)}
 .apanel .pb-h h2{margin-top:6px;font-size:27px}
@@ -1351,6 +1355,8 @@ svg.fold,svg.fold-mini{display:block;width:100%;min-width:1080px;height:auto;fon
  * 新增一本书的精读模块：在 books 里加一项，并在对应方向的条目上写 module: "<书的id>"。
  */
 window.YXL_LIB = {
+  /* claude.ai 上的研习录（主用版：打卡、批注、电子书都存在那里，只有自己能打开） */
+  home: "https://claude.ai/artifact/LpwLZchfacKZAnJs577MvM",
   focus: ["zhoulu", "tragedy"],
   kinds: { book: "书", topic: "科目", practice: "实践", concept: "专题" },
 
@@ -3559,6 +3565,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function ebookOf(id) { return IN_ARTIFACT && S.mode === "db" && S.data.ebooks ? S.data.ebooks[id] || null : null; }
   function fmtSize(n) { return n >= 1048576 ? Math.round(n / 104857.6) / 10 + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
   function ebookBlock(id) {
+    if (!IN_ARTIFACT) return LIB.home ? '<div class="eb eb-empty"><p><b>电子书</b>这里是 GitHub 上的公开版，不存文件。到 claude.ai 上的研习录里抽出这本书，就能上传 PDF；以后在那边点它就能打开。</p><a class="btn ghost small" href="' + esc(LIB.home) + '" target="_blank" rel="noopener">去 claude.ai 版 ↗</a></div>' : "";
     var eb = ebookOf(id), up = !!(S.assets && S.canEdit), busy = S.ebBusy === id;
     if (!eb && !up) return "";
     var input = up ? '<label class="btn ghost small eb-up' + (busy ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : eb ? "换一个文件" : "上传 PDF") + "</label>" : "";

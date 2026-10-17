@@ -387,6 +387,7 @@
   function ebookOf(id) { return IN_ARTIFACT && S.mode === "db" && S.data.ebooks ? S.data.ebooks[id] || null : null; }
   function fmtSize(n) { return n >= 1048576 ? Math.round(n / 104857.6) / 10 + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
   function ebookBlock(id) {
+    if (!IN_ARTIFACT) return LIB.home ? '<div class="eb eb-empty"><p><b>电子书</b>这里是 GitHub 上的公开版，不存文件。到 claude.ai 上的研习录里抽出这本书，就能上传 PDF；以后在那边点它就能打开。</p><a class="btn ghost small" href="' + esc(LIB.home) + '" target="_blank" rel="noopener">去 claude.ai 版 ↗</a></div>' : "";
     var eb = ebookOf(id), up = !!(S.assets && S.canEdit), busy = S.ebBusy === id;
     if (!eb && !up) return "";
     var input = up ? '<label class="btn ghost small eb-up' + (busy ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : eb ? "换一个文件" : "上传 PDF") + "</label>" : "";
