@@ -1087,6 +1087,20 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 .pb-note figcaption{font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);margin-bottom:4px}
 .pb-note p{margin:0;font-family:var(--f-display);font-size:15px;line-height:1.8}
 .pb-st{display:flex;align-items:center;gap:10px}
+/* ===== 电子书 ===== */
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.eb{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:12px 14px;background:var(--paper);border:1px solid var(--rule);border-radius:10px}
+.eb-open{font-weight:700}
+.eb-meta{flex:1 1 140px;min-width:0;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);overflow-wrap:anywhere}
+.eb-tools{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.eb-conf{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-2)}
+.eb-up{position:relative;cursor:pointer}
+.eb-up:focus-within{outline:2px solid var(--indigo);outline-offset:2px}
+.eb-up.busy{opacity:.6;cursor:progress}
+.eb-empty{border-style:dashed}
+.eb-empty p{flex:1 1 220px;margin:0;font-size:13.5px;line-height:1.65;color:var(--ink-2)}
+.eb-empty p b{margin-right:8px;font-family:var(--f-display);color:var(--ink)}
+.spine.has-eb::after,.vol.has-eb::after{content:"";position:absolute;right:3px;top:8px;width:7px;height:11px;background:var(--k-doc);clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%)}
 /* ===== 书架：档案架 ===== */
 .shelf-seg{margin-top:16px}
 .shelf-seg a{display:inline-block;font-family:var(--f-ui);font-size:14px;padding:6px 16px;border-radius:999px;color:var(--ink-3);text-decoration:none}

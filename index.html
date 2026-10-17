@@ -1095,6 +1095,20 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 .pb-note figcaption{font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);margin-bottom:4px}
 .pb-note p{margin:0;font-family:var(--f-display);font-size:15px;line-height:1.8}
 .pb-st{display:flex;align-items:center;gap:10px}
+/* ===== 电子书 ===== */
+.vh{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+.eb{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;padding:12px 14px;background:var(--paper);border:1px solid var(--rule);border-radius:10px}
+.eb-open{font-weight:700}
+.eb-meta{flex:1 1 140px;min-width:0;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);overflow-wrap:anywhere}
+.eb-tools{display:inline-flex;flex-wrap:wrap;align-items:center;gap:6px 12px}
+.eb-conf{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-2)}
+.eb-up{position:relative;cursor:pointer}
+.eb-up:focus-within{outline:2px solid var(--indigo);outline-offset:2px}
+.eb-up.busy{opacity:.6;cursor:progress}
+.eb-empty{border-style:dashed}
+.eb-empty p{flex:1 1 220px;margin:0;font-size:13.5px;line-height:1.65;color:var(--ink-2)}
+.eb-empty p b{margin-right:8px;font-family:var(--f-display);color:var(--ink)}
+.spine.has-eb::after,.vol.has-eb::after{content:"";position:absolute;right:3px;top:8px;width:7px;height:11px;background:var(--k-doc);clip-path:polygon(0 0,100% 0,100% 100%,50% 74%,0 100%)}
 /* ===== 书架：档案架 ===== */
 .shelf-seg{margin-top:16px}
 .shelf-seg a{display:inline-block;font-family:var(--f-ui);font-size:14px;padding:6px 16px;border-radius:999px;color:var(--ink-3);text-decoration:none}
@@ -3165,7 +3179,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   var LESSON_SNAP = window.YXL_LESSONS || {};
   /* 有课程页的线：电影、SQL、Python、CFA、地缘、周复盘 */
   var COURSES = PLAN ? ["film", "sql", "py", "cfa", "geo", "rev"].filter(function (k) { return PLAN.lessons[k]; }) : [];
-  var COLLS = ["progress", "notes", "journal", "cards", "study", "film"];
+  var COLLS = ["progress", "notes", "journal", "cards", "study", "film", "ebooks"];
   var STATUS = [["todo", "未开始"], ["doing", "进行中"], ["done", "已完成"], ["review", "已内化"]];
   var STATUS_LABEL = {}; STATUS.forEach(function (s) { STATUS_LABEL[s[0]] = s[1]; });
   var MARK = { done: "阅", review: "熟" };
@@ -3181,7 +3195,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function today() { return ymd(new Date()); }
   function addDays(s, n) { var p = s.split("-").map(Number); return ymd(new Date(p[0], p[1] - 1, p[2] + n)); }
   function hhmm() { var d = new Date(); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
-  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {}, study: {}, film: {} }; }
+  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {}, study: {}, film: {}, ebooks: {} }; }
 
   /* ---------- 索引 ---------- */
   var ITEMS = {};
@@ -3311,6 +3325,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       S.db = db; S.mode = "db";
       var owner = user ? user.isOwner() : Promise.resolve(false);
       Promise.resolve(owner).then(function (v) { S.canEdit = !!v; render(); }, function () { S.canEdit = false; render(); });
+      window.claude.use("assets").then(function (a) { S.assets = a || null; render(); }, function () { S.assets = null; });
       COLLS.forEach(function (c) {
         try {
           db.collection(c).onSnapshot(function (snap) {
@@ -3490,7 +3505,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var bs = bookState(it.id), h = spineH(it), f = fitSpine(it, h), size = f.size, showBy = f.showBy;
     var w = Math.max(f.two ? 36 : 28, Math.round((34 + (hashN(it.id + "w") % 10) * 2) * (sc || 1)));
     var cls = SHELF_CLS[tid] + "<br>" + pad2(idx);
-    var dim = shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim", pick = S.shelfPick === it.id ? " picked" : "";
+    var dim = shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim", pick = (S.shelfPick === it.id ? " picked" : "") + (ebookOf(it.id) ? " has-eb" : "");
     var common = 'type="button" data-act="pick" data-id="' + esc(it.id) + '" title="《' + esc(it.title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + '"';
     if (bs.s === "done" || bs.s === "review") {
       return "<button " + common + ' class="spine done' + dim + pick + '" style="height:' + h + "px;width:" + w + 'px">' + spineTitle(it.title, Math.min(size, 13.5), "", f.parts) + '<i class="sp-seal" aria-hidden="true">' + (MARK[bs.s] || "阅") + "</i></button>";
@@ -3508,7 +3523,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       var bs = bookState(it.id), name = it.title.replace(/（.*）$/, ""), code = { "cfa-ethics": "ETH", "cfa-quant": "QM", "cfa-econ": "EC", "cfa-fsa": "FSA", "cfa-corp": "CI", "cfa-equity": "EQ", "cfa-fi": "FI", "cfa-deriv": "DER", "cfa-alt": "ALT", "cfa-pm": "PM" }[it.id] || "";
       var cls = bs.s === "done" || bs.s === "review" ? " done" : bs.s === "doing" ? " doing" : "";
       var dim = shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim";
-      return '<button type="button" class="vol' + cls + dim + (S.shelfPick === it.id ? " picked" : "") + '" data-act="pick" data-id="' + esc(it.id) + '" style="--p:' + Math.round(bs.pct * 100) + '%" title="CFA 一级 · ' + esc(it.title) + '"><span class="sp-t" style="font-size:12px">' + esc(name) + '</span><span class="vol-c">' + code + "</span>" + (bs.s === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
+      return '<button type="button" class="vol' + cls + dim + (S.shelfPick === it.id ? " picked" : "") + (ebookOf(it.id) ? " has-eb" : "") + '" data-act="pick" data-id="' + esc(it.id) + '" style="--p:' + Math.round(bs.pct * 100) + '%" title="CFA 一级 · ' + esc(it.title) + '"><span class="sp-t" style="font-size:12px">' + esc(name) + '</span><span class="vol-c">' + code + "</span>" + (bs.s === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
     }).join("");
     var g = GOAL.cfa;
     return '<div class="case"><div class="case-h"><span>CFA 一级 · 十册函套</span>' + (g ? '<a class="case-tag" href="#g-cfa">目标线 · ' + hrs(goalMin(g)) + " / " + goalTotal(g) + " h</a>" : "") + '</div><div class="case-box"><div class="case-in">' + vols + '</div><i class="clasp" aria-hidden="true"></i><i class="clasp b" aria-hidden="true"></i></div></div>';
@@ -3535,6 +3550,51 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<span class="bookend" aria-hidden="true"></span>';
     return '<div class="bay" style="--c:var(' + col + ');--w:' + w + 'px"><div class="bay-row">' + row + '</div><div class="lip"><a class="plate" href="#t-' + tid + '"><b class="cls">' + SHELF_CLS[tid] + "</b><b>" + esc(t.short) + "</b><span>" + esc(meta) + "</span></a></div></div>";
   }
+  /* ---------- 电子书：给书架上的书挂一个 PDF ----------
+   * 只在 claude.ai 版里有：文件用 assets 能力存在这个研习录自己的存储里（只有你能看到，GitHub 公开版不带文件）。
+   * 记录在 ebooks 集合：文档 id = 书的 id，内容 { asset, name, size, t }；打开地址是 "/_blob/" + asset。 */
+  var EB_MAX = 20 * 1024 * 1024;
+  var EB_ERR = { too_large: "文件超过 20 MB，压缩一下再传。", unsupported_type: "只能上传 PDF 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
+    rate_limited: "传得太频繁了，过一会儿再试。", upstream_auth: "登录状态过期了，刷新页面后再试。", capability_disabled: "这个页面现在不能上传文件。", not_granted: "这个页面现在不能上传文件。", capability_removed: "这个页面现在不能上传文件。" };
+  function ebookOf(id) { return IN_ARTIFACT && S.mode === "db" && S.data.ebooks ? S.data.ebooks[id] || null : null; }
+  function fmtSize(n) { return n >= 1048576 ? Math.round(n / 104857.6) / 10 + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
+  function ebookBlock(id) {
+    var eb = ebookOf(id), up = !!(S.assets && S.canEdit), busy = S.ebBusy === id;
+    if (!eb && !up) return "";
+    var input = up ? '<label class="btn ghost small eb-up' + (busy ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : eb ? "换一个文件" : "上传 PDF") + "</label>" : "";
+    if (!eb) return '<div class="eb eb-empty"><p><b>电子书</b>还没有放文件。上传一个 PDF（20 MB 以内），以后抽出这本书就能直接打开。</p>' + input + "</div>";
+    var tools = "";
+    if (up) tools = '<span class="eb-tools">' + input + (S.ebConfirm === id
+      ? '<span class="eb-conf">文件会删掉，确定？<button type="button" class="linkbtn danger" data-act="eb-del-yes" data-id="' + esc(id) + '">移除</button><button type="button" class="linkbtn" data-act="eb-del-no">取消</button></span>'
+      : '<button type="button" class="linkbtn" data-act="eb-del" data-id="' + esc(id) + '">移除</button>') + "</span>";
+    return '<div class="eb"><a class="btn eb-open" href="/_blob/' + esc(eb.asset) + '" target="_blank" rel="noopener">打开电子书 ↗</a><span class="eb-meta">' + esc(eb.name || "PDF") + (eb.size ? " · " + fmtSize(eb.size) : "") + "</span>" + tools + "</div>";
+  }
+  function ebUpload(id, file) {
+    if (!file) return;
+    if (!/\.pdf$/i.test(file.name) && file.type !== "application/pdf") { toast("只能上传 PDF 文件。"); return; }
+    if (file.size > EB_MAX) { toast("文件超过 20 MB，压缩一下再传。"); return; }
+    if (!S.assets) { toast("这个页面现在不能上传文件。"); return; }
+    var old = S.data.ebooks[id];
+    S.ebBusy = id; render();
+    function tryUp(again) {
+      return S.assets.upload(file, { type: "application/pdf" }).catch(function (e) {
+        if (!again && e && e.code === "store_unavailable") return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return tryUp(true); });
+        throw e;
+      });
+    }
+    tryUp(false).then(function (r) {
+      return put("ebooks", id, { asset: r.id, name: file.name, size: r.sizeBytes || file.size, t: new Date().toISOString() }).then(function () {
+        if (old && old.asset && old.asset !== r.id) S.assets.delete(old.asset).catch(function () {});
+        S.ebBusy = null; render(); toast("已放上书架，点「打开电子书」就能看。");
+      });
+    }, function (e) { S.ebBusy = null; render(); toast(EB_ERR[e && e.code] || "上传没成功，请再试一次。"); });
+  }
+  function ebRemove(id) {
+    var eb = S.data.ebooks[id]; S.ebConfirm = null;
+    if (!eb) { render(); return; }
+    del("ebooks", id).then(function () { if (S.assets && eb.asset) return S.assets.delete(eb.asset).catch(function () {}); }).then(function () { toast("电子书已移除。"); });
+    render();
+  }
   function pulledHTML() {
     var id = S.shelfPick, it = ITEMS[id];
     if (!it) { id = S.shelfPick = FOCUS.filter(function (b) { return bookState(b).s === "doing"; })[0] || FOCUS[0]; it = ITEMS[id]; }
@@ -3545,7 +3605,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<p class="meta">' + esc([it.by, t.short, lineName].filter(Boolean).join(" · ")) + "</p></div></div>";
     if (!b) {
       var cnt = /^cfa-q|^cfa-e/.test(id) && bs.pct ? '<p class="meta">课表里学到 ' + Math.round(bs.pct * 100) + "%</p>" : "";
-      return '<aside class="pulled" aria-labelledby="pulled-h">' + head + (it.why ? '<p class="pb-why">' + esc(it.why) + "</p>" : "") + cnt +
+      return '<aside class="pulled" aria-labelledby="pulled-h">' + head + ebookBlock(id) + (it.why ? '<p class="pb-why">' + esc(it.why) + "</p>" : "") + cnt +
         '<div class="pb-st">' + statusCtl(id, it.title) + "</div>" + noteBlock(id, "我的批注", "读到哪、想到什么，写在这里") +
         '<div class="btns"><a class="btn ghost small" href="#t-' + it.home + '">' + esc(t.short || "") + " 方向全部内容</a></div></aside>";
     }
@@ -3561,7 +3621,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var lastNote = Object.keys(S.data.notes).filter(function (k) { return k.indexOf(id + "-ch") === 0 && S.data.notes[k].text; }).sort(function (a, c) { return String(S.data.notes[c].t || "").localeCompare(String(S.data.notes[a].t || "")); })[0];
     var noteFig = lastNote ? '<figure class="pb-note"><figcaption>我的批注 · ' + esc(refLabel(lastNote).replace(/^《.*》/, "")) + "</figcaption><p>" + esc(S.data.notes[lastNote].text.slice(0, 120)) + "</p></figure>" : "";
     var deepN = Object.keys(b.deep || {});
-    return '<aside class="pulled" aria-labelledby="pulled-h" style="--c:var(' + col + ')">' + head +
+    return '<aside class="pulled" aria-labelledby="pulled-h" style="--c:var(' + col + ')">' + head + ebookBlock(id) +
       '<div class="fe"><div class="fe-top"><span>书口 · 读过的部分翻旧了</span><span>' + Math.round(bs.pct * 100) + '%</span></div><div class="fe-wrap"><div class="fe-block" aria-hidden="true">' + segs + '</div><i class="fe-rib" style="left:' + (bs.done / b.chapters.length * 100) + '%" aria-hidden="true"></i></div><div class="fe-n" aria-hidden="true">' + nums + "</div></div>" +
       '<div class="pb-stats"><div><b>' + bs.done + "<small> / " + bs.total + "</small></b><span>章读完</span></div><div><b>" + nNotes + "</b><span>条批注</span></div><div><b>" + hrs(mins) + "</b><span>小时</span></div></div>" +
       '<ol class="pb-chs">' + chs + "</ol>" + noteFig +
@@ -5407,11 +5467,14 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var act = t.getAttribute("data-act");
     if (act === "mst") { openStation(t.getAttribute("data-l"), +t.getAttribute("data-i")); return; }
     if (act === "mgs") { openGoalStop(t.getAttribute("data-g"), +t.getAttribute("data-i")); return; }
-    if (act === "pick") { S.shelfPick = t.getAttribute("data-id"); render(); var pa = document.querySelector(".pulled"); if (pa && window.innerWidth < 1100) pa.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    if (act === "pick") { S.shelfPick = t.getAttribute("data-id"); render(); var pa = document.querySelector(".pulled"); if (pa) { var pr = pa.getBoundingClientRect(); if (window.innerWidth < 1100 || pr.top < 0 || pr.top > window.innerHeight - 160) pa.scrollIntoView({ block: "start", behavior: "smooth" }); } return; }
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
     if (act === "abox") { S.archPick = t.getAttribute("data-t"); render(); var ap = document.querySelector(".apanel"); if (ap && window.innerWidth < 1100) ap.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
     if (act === "arch-f") { S.archF = t.getAttribute("data-f"); render(); return; }
     if (act === "abox-go") { S.archPick = t.getAttribute("data-t"); S.archF = "all"; closePop(); if (S.route === "archive") render(); else location.hash = "#archive"; return; }
+    if (act === "eb-del") { S.ebConfirm = t.getAttribute("data-id"); render(); return; }
+    if (act === "eb-del-no") { S.ebConfirm = null; render(); return; }
+    if (act === "eb-del-yes") { ebRemove(t.getAttribute("data-id")); return; }
     if (act === "pick-go") { S.shelfPick = t.getAttribute("data-id"); S.shelfF = "all"; location.hash = "#shelf"; return; }
     if (act === "add-book") { toast("在对话里说书名和放进哪个方向，我加到书架上"); return; }
     if (act === "fold-day") { S.foldDay = t.getAttribute("data-d"); render(); return; }
@@ -5502,6 +5565,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "fp-file") { filmLoad(t.files); t.value = ""; return; }
+    if (t.hasAttribute && t.hasAttribute("data-eb")) { var f = t.files && t.files[0]; t.value = ""; ebUpload(t.getAttribute("data-eb"), f); return; }
     if (t.matches && t.matches('select[data-act="status"]')) {
       var id = t.getAttribute("data-id"), v = t.value;
       if (v === "todo") del("progress", id); else put("progress", id, { s: v, t: new Date().toISOString() });
