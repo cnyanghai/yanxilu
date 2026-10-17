@@ -379,28 +379,104 @@
     return '<div class="bay" style="--c:var(' + col + ');--w:' + w + 'px"><div class="bay-row">' + row + '</div><div class="lip"><a class="plate" href="#t-' + tid + '"><b class="cls">' + SHELF_CLS[tid] + "</b><b>" + esc(t.short) + "</b><span>" + esc(meta) + "</span></a></div></div>";
   }
   /* ---------- 电子书：给书架上的书挂一个 PDF ----------
-   * 只在 claude.ai 版里有：文件用 assets 能力存在这个研习录自己的存储里（只有你能看到，GitHub 公开版不带文件）。
-   * 记录在 ebooks 集合：文档 id = 书的 id，内容 { asset, name, size, t }；打开地址是 "/_blob/" + asset。 */
+   * claude.ai 版：文件用 assets 能力存在这个研习录自己的存储里（只有你能打开，换设备也在）。
+   *   记录在 ebooks 集合：文档 id = 书的 id，内容 { asset, name, size, t }；打开地址是 "/_blob/" + asset。
+   * GitHub 公开版：文件只存在当前浏览器的 IndexedDB 里（库 yanxilu-ebooks，键 = 书的 id），不会传到网上；
+   *   本地记录 ebooks[书的 id] = { local: true, name, size, t }，跟公开版的其他本地记录一样存在 localStorage。 */
   var EB_MAX = 20 * 1024 * 1024;
   var EB_ERR = { too_large: "文件超过 20 MB，压缩一下再传。", unsupported_type: "只能上传 PDF 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
     rate_limited: "传得太频繁了，过一会儿再试。", upstream_auth: "登录状态过期了，刷新页面后再试。", capability_disabled: "这个页面现在不能上传文件。", not_granted: "这个页面现在不能上传文件。", capability_removed: "这个页面现在不能上传文件。" };
-  function ebookOf(id) { return IN_ARTIFACT && S.mode === "db" && S.data.ebooks ? S.data.ebooks[id] || null : null; }
+  function ebookOf(id) {
+    var e = S.data.ebooks ? S.data.ebooks[id] || null : null;
+    if (S.mode === "db") return IN_ARTIFACT && e && e.asset ? e : null;
+    if (S.mode === "local") return e && e.local ? e : null;
+    return null;
+  }
+  /* 公开版：浏览器自己的 IndexedDB */
+  var EBDB = null;
+  function ebDb() {
+    if (!EBDB) {
+      EBDB = new Promise(function (res, rej) {
+        if (!window.indexedDB) { rej({ code: "no_idb" }); return; }
+        var rq = indexedDB.open("yanxilu-ebooks", 1);
+        rq.onupgradeneeded = function () { rq.result.createObjectStore("files"); };
+        rq.onsuccess = function () { res(rq.result); };
+        rq.onerror = function () { rej(rq.error || { code: "no_idb" }); };
+        rq.onblocked = function () { rej({ code: "no_idb" }); };
+      });
+      EBDB.catch(function () { EBDB = null; });
+    }
+    return EBDB;
+  }
+  function ebTx(mode, fn) {
+    return ebDb().then(function (db) {
+      return new Promise(function (res, rej) {
+        var tx = db.transaction("files", mode), r = fn(tx.objectStore("files"));
+        tx.oncomplete = function () { res(r && r.result); };
+        tx.onerror = tx.onabort = function () { rej(tx.error || { code: "idb_error" }); };
+      });
+    });
+  }
+  function ebLocalErr(e) {
+    var n = e && (e.name || e.code);
+    if (n === "QuotaExceededError") return "浏览器的存储空间不够了，先移除一些不用的电子书，或清理一下磁盘。";
+    if (n === "no_idb") return "这个浏览器不允许存文件（可能是无痕窗口），换普通窗口再试。";
+    return "没存成功，请再试一次。";
+  }
+  /* 打开：先把文件读成一个本页可用的地址，填进链接，点链接就在新标签页打开（不走弹窗，浏览器不会拦） */
+  S.ebUrls = {};
+  function ebForget(id) { if (S.ebUrls[id]) { URL.revokeObjectURL(S.ebUrls[id]); delete S.ebUrls[id]; } }
+  function ebHydrate() {
+    if (S.mode !== "local") return;
+    document.querySelectorAll('a[data-act="eb-open-local"]').forEach(function (a) {
+      var id = a.getAttribute("data-id"); if (S.ebUrls[id]) { a.href = S.ebUrls[id]; return; }
+      ebTx("readonly", function (st) { return st.get(id); }).then(function (rec) {
+        if (!rec || !rec.blob) return;
+        if (!S.ebUrls[id]) S.ebUrls[id] = URL.createObjectURL(rec.blob);
+        document.querySelectorAll('a[data-act="eb-open-local"][data-id="' + id + '"]').forEach(function (x) { x.href = S.ebUrls[id]; });
+      }, function () {});
+    });
+  }
+  function ebOpenLocal(id) {
+    ebTx("readonly", function (st) { return st.get(id); }).then(function (rec) {
+      if (!rec || !rec.blob) { toast("这个浏览器里找不到文件了，重新上传一次。"); return; }
+      if (!S.ebUrls[id]) S.ebUrls[id] = URL.createObjectURL(rec.blob);
+      var a = document.querySelector('a[data-act="eb-open-local"][data-id="' + id + '"]');
+      if (a) { a.href = S.ebUrls[id]; toast("文件准备好了，再点一次「打开电子书」。"); }
+    }, function (e) { toast(ebLocalErr(e)); });
+  }
   function fmtSize(n) { return n >= 1048576 ? Math.round(n / 104857.6) / 10 + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
   function ebookBlock(id) {
-    if (!IN_ARTIFACT) return LIB.home ? '<div class="eb eb-empty"><p><b>电子书</b>这里是 GitHub 上的公开版，不存文件。到 claude.ai 上的研习录里抽出这本书，就能上传 PDF；以后在那边点它就能打开。</p><a class="btn ghost small" href="' + esc(LIB.home) + '" target="_blank" rel="noopener">去 claude.ai 版 ↗</a></div>' : "";
-    var eb = ebookOf(id), up = !!(S.assets && S.canEdit), busy = S.ebBusy === id;
+    var local = S.mode === "local";
+    var eb = ebookOf(id), up = local ? true : !!(S.assets && S.canEdit), busy = S.ebBusy === id;
     if (!eb && !up) return "";
     var input = up ? '<label class="btn ghost small eb-up' + (busy ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : eb ? "换一个文件" : "上传 PDF") + "</label>" : "";
-    if (!eb) return '<div class="eb eb-empty"><p><b>电子书</b>还没有放文件。上传一个 PDF（20 MB 以内），以后抽出这本书就能直接打开。</p>' + input + "</div>";
+    if (!eb) return '<div class="eb eb-empty"><p><b>电子书</b>' + (local
+      ? "还没有放文件。上传一个 PDF，文件只存在这个浏览器里，不会传到网上；换电脑、换浏览器或清除网站数据后要重新上传。"
+      : "还没有放文件。上传一个 PDF（20 MB 以内），以后抽出这本书就能直接打开。") + "</p>" + input + "</div>";
     var tools = "";
     if (up) tools = '<span class="eb-tools">' + input + (S.ebConfirm === id
       ? '<span class="eb-conf">文件会删掉，确定？<button type="button" class="linkbtn danger" data-act="eb-del-yes" data-id="' + esc(id) + '">移除</button><button type="button" class="linkbtn" data-act="eb-del-no">取消</button></span>'
       : '<button type="button" class="linkbtn" data-act="eb-del" data-id="' + esc(id) + '">移除</button>') + "</span>";
-    return '<div class="eb"><a class="btn eb-open" href="/_blob/' + esc(eb.asset) + '" target="_blank" rel="noopener">打开电子书 ↗</a><span class="eb-meta">' + esc(eb.name || "PDF") + (eb.size ? " · " + fmtSize(eb.size) : "") + "</span>" + tools + "</div>";
+    var lu = local && S.ebUrls[id];
+    var open = local ? '<a class="btn eb-open" data-act="eb-open-local" data-id="' + esc(id) + '" href="' + (lu ? lu : "#") + '" target="_blank" rel="noopener">打开电子书 ↗</a>'
+      : '<a class="btn eb-open" href="/_blob/' + esc(eb.asset) + '" target="_blank" rel="noopener">打开电子书 ↗</a>';
+    return '<div class="eb">' + open + '<span class="eb-meta">' + esc(eb.name || "PDF") + (eb.size ? " · " + fmtSize(eb.size) : "") + (local ? " · 存在这个浏览器里" : "") + "</span>" + tools + "</div>";
   }
   function ebUpload(id, file) {
     if (!file) return;
     if (!/\.pdf$/i.test(file.name) && file.type !== "application/pdf") { toast("只能上传 PDF 文件。"); return; }
+    if (S.mode === "local") {
+      S.ebBusy = id; render();
+      if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () {});
+      var blob = new Blob([file], { type: "application/pdf" });
+      ebTx("readwrite", function (st) { return st.put({ blob: blob, name: file.name, size: file.size, t: new Date().toISOString() }, id); }).then(function () {
+        ebForget(id);
+        return put("ebooks", id, { local: true, name: file.name, size: file.size, t: new Date().toISOString() });
+      }).then(function () { S.ebBusy = null; render(); toast("已放上书架，点「打开电子书」就能看。"); },
+        function (e) { S.ebBusy = null; render(); toast(ebLocalErr(e)); });
+      return;
+    }
     if (file.size > EB_MAX) { toast("文件超过 20 MB，压缩一下再传。"); return; }
     if (!S.assets) { toast("这个页面现在不能上传文件。"); return; }
     var old = S.data.ebooks[id];
@@ -421,6 +497,11 @@
   function ebRemove(id) {
     var eb = S.data.ebooks[id]; S.ebConfirm = null;
     if (!eb) { render(); return; }
+    if (eb.local) {
+      ebForget(id); ebTx("readwrite", function (st) { return st.delete(id); }).catch(function () {});
+      del("ebooks", id).then(function () { toast("电子书已移除。"); });
+      render(); return;
+    }
     del("ebooks", id).then(function () { if (S.assets && eb.asset) return S.assets.delete(eb.asset).catch(function () {}); }).then(function () { toast("电子书已移除。"); });
     render();
   }
@@ -2251,6 +2332,7 @@
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     $("#main").innerHTML = html;
     filmMount();
+    ebHydrate();
     if (scrollTop) window.scrollTo(0, 0);
     if (S.pendingSec) {
       var sid = S.pendingSec; S.pendingSec = null;
@@ -2304,6 +2386,7 @@
     if (act === "eb-del") { S.ebConfirm = t.getAttribute("data-id"); render(); return; }
     if (act === "eb-del-no") { S.ebConfirm = null; render(); return; }
     if (act === "eb-del-yes") { ebRemove(t.getAttribute("data-id")); return; }
+    if (act === "eb-open-local") { var oid = t.getAttribute("data-id"); if (!S.ebUrls[oid]) { e.preventDefault(); ebOpenLocal(oid); } return; }
     if (act === "pick-go") { S.shelfPick = t.getAttribute("data-id"); S.shelfF = "all"; location.hash = "#shelf"; return; }
     if (act === "add-book") { toast("在对话里说书名和放进哪个方向，我加到书架上"); return; }
     if (act === "fold-day") { S.foldDay = t.getAttribute("data-d"); render(); return; }
@@ -2360,7 +2443,7 @@
     }
     if (act === "copy-fw") { copyText(frameworkText(t.getAttribute("data-book"))); return; }
     if (act === "copy-code") { var pre = t.parentNode.querySelector("pre"); if (pre) copyText(pre.textContent); return; }
-    if (act === "export") { copyText(JSON.stringify(S.data, null, 2)); return; }
+    if (act === "export") { copyText(JSON.stringify(Object.assign({}, S.data, { ebooks: undefined }), null, 2)); return; }
     if (act === "j-del") { S.confirmDel = t.getAttribute("data-id"); render(); return; }
     if (act === "j-del-no") { S.confirmDel = null; render(); return; }
     if (act === "j-del-yes") { var jid = t.getAttribute("data-id"); S.confirmDel = null; del("journal", jid); toast("已删除"); render(); return; }
