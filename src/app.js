@@ -585,11 +585,14 @@
   function hangSet(h) { try { window.localStorage.setItem(HANG_KEY, h); } catch (e) { /* 存不了就只在这次生效 */ } }
   /* 书墙的布置：在读的书怎么摆、书要不要立体、摆哪些摆件。和挂法一样记在这台设备的浏览器里（yanxilu-look）。 */
   var READS = [["face", "封面朝外", "在读的书转过来，封面朝外立在这一格最前面"], ["pull", "抽出半截", "在读的书从书列里抽出一截，书签带从底下垂出来"], ["tilt", "往前倾", "在读的书顶部往外倾，露出书顶和夹在里面的书签"]];
+  var FXS = [["turn", "转出封面", "书转过来一点，露出它的封面"], ["pull", "抽出来", "书从书列里朝你抽出来，露出两边的封皮"], ["sheen", "烫金反光", "书浮起一点，一道光扫过书脊"], ["tilt", "往前倾", "书从顶上往外倾，露出书顶"], ["none", "不动", "只稍微浮起一点"]];
+  var COLORS = [["named", "名色", "每个领域一个经典色系：勃艮第红、爱马仕橙、孔雀绿、普鲁士蓝、克莱因蓝……"], ["qinghua", "青花瓷", "钴蓝、霁蓝、天青、瓷白"], ["orange", "橙与驼", "爱马仕橙、驼色、象牙白、墨黑"], ["cloth", "布面", "原来的低饱和布色"]];
   var LOOK_KEY = "yanxilu-look", DECO_DEFAULT = ["globe", "glass", "vase", "succ", "pothos", "candle"];
   function lookGet() {
     var v = {};
     try { v = JSON.parse(window.localStorage.getItem(LOOK_KEY) || "{}") || {}; } catch (e) { v = {}; }
-    return { read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : "face", d3: v.d3 !== false, motion: v.motion !== false,
+    return { read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : "face", motion: v.motion !== false,
+      fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : "turn", color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : "named",
       deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice() };
   }
   function LK() { return S.look || (S.look = lookGet()); }
@@ -597,8 +600,51 @@
     var v = Object.assign({}, LK(), patch); S.look = v;
     try { window.localStorage.setItem(LOOK_KEY, JSON.stringify(v)); } catch (e) { /* 存不了就只在这次生效 */ }
   }
-  function wallClass() { var L = LK(); return "wall hang-" + hangGet() + " read-" + L.read + (L.d3 ? " d3" : "") + (REDUCE || !L.motion ? " still" : ""); }
-  function clothOf(tid, key) { var p = CLOTH[tid] || (tid !== "en" && !domBuiltin(tid) ? domInfo(tid).cloth : null) || CLOTH.co; return p[hashN(key) % p.length]; }
+  function wallClass() { var L = LK(); return "wall hang-" + hangGet() + " read-" + L.read + " fx-" + L.fx + " pal-" + L.color + (REDUCE || !L.motion ? " still" : ""); }
+  /* ---------- 书的颜色 ----------
+   * 名色：每个领域一个经典色系，同一格里相邻两本一定不同色；青花瓷、橙与驼：全墙一套色；布面：原来的低饱和布色（按书名散开）。
+   * 每项 [名字, 颜色, 字色]：字色可空，深色书脊用烫金字、浅色书脊用深字。 */
+  var PAL = {
+    named: {
+      geo: [["朱砂", "#B5412D"], ["勃艮第红", "#6A1C2A"], ["胭脂", "#9A2B3D"], ["赭石", "#8A4A2A"], ["象牙白", "#EDE5D2", "#6A1C2A"], ["枣红", "#7C2A28"], ["绯红", "#A83434"]],
+      cycle: [["爱马仕橙", "#E5661D", "#FFF3E2"], ["藤黄", "#D69E1E"], ["琥珀", "#B5741A"], ["焦糖", "#99591F"], ["麦秆", "#E5CD8C", "#5A3A12"], ["芥末黄", "#BF9C2C"]],
+      fut: [["孔雀绿", "#0E6A65"], ["祖母绿", "#145B45"], ["竹青", "#5B8959"], ["松石绿", "#2C8A82"], ["橄榄", "#5E6A2B"], ["苔绿", "#3E5934"]],
+      co: [["普鲁士蓝", "#1E3656"], ["黛青", "#2C4A58"], ["石青", "#2F6587"], ["月白", "#DCE5E8", "#1E3656"], ["钢青", "#4A6378"], ["炭黑", "#2E3033"]],
+      fin: [["克莱因蓝", "#1B2FA0"], ["青花瓷蓝", "#1D4A96"], ["靛青", "#2B3A80"], ["群青", "#3550A0"]],
+      en: [["午夜蓝", "#1D2B45"], ["群青", "#2C4A8C"], ["墨蓝", "#22324E"]]
+    },
+    dom: {
+      teal: [["松石绿", "#2C8A82"], ["孔雀绿", "#0E6A65"], ["青瓷", "#8DB3A6", "#173F3B"]],
+      indigo: [["克莱因蓝", "#1B2FA0"], ["靛蓝", "#2B3A80"], ["天青", "#7FA7C9", "#10305F"]],
+      rose: [["胭脂", "#9A2B3D"], ["豆沙", "#B57A78"], ["绛紫", "#6B2C45"]],
+      umber: [["赭石", "#8A4A2A"], ["驼色", "#B48A5E"], ["焦糖", "#99591F"]],
+      forest: [["祖母绿", "#145B45"], ["竹青", "#5B8959"], ["苔绿", "#3E5934"]],
+      lilac: [["藕荷", "#8C6F94"], ["丁香", "#A48DB8", "#2E2340"], ["暮紫", "#5D4A72"]]
+    },
+    qinghua: [["青花蓝", "#1D4A96"], ["瓷白", "#F1F3F0", "#1D4A96"], ["钴蓝", "#173E80"], ["天青", "#86ABCB", "#10305F"], ["霁蓝", "#20356E"], ["月白", "#DCE6EC", "#1D4A96"]],
+    orange: [["爱马仕橙", "#E5661D", "#FFF3E2"], ["驼色", "#B48A5E"], ["象牙白", "#EFE8DA", "#3A2A1A"], ["墨黑", "#26221F", "#E9C9A0"], ["焦糖", "#99591F"], ["岩灰", "#8A8278"]]
+  };
+  var BOOK_IX = {};
+  function palList(tid) {
+    var c = LK().color;
+    if (c === "qinghua" || c === "orange") return PAL[c];
+    if (c !== "named") return null;
+    if (PAL.named[tid]) return PAL.named[tid];
+    var d = (S.data.domains || {})[tid]; return PAL.dom[(d && d.color) || "teal"] || PAL.dom.teal;
+  }
+  function palSwatch(c) {
+    if (c === "named") return ["#6A1C2A", "#E5661D", "#0E6A65", "#1E3656", "#1B2FA0"];
+    if (c === "cloth") return [CLOTH.geo[0], CLOTH.cycle[0], CLOTH.fut[0], CLOTH.co[0], CLOTH.fin[0]];
+    return PAL[c].slice(0, 5).map(function (e) { return e[1]; });
+  }
+  function bookPaint(tid, key) {
+    var L = palList(tid);
+    if (!L) { var p = CLOTH[tid] || (tid !== "en" && !domBuiltin(tid) ? domInfo(tid).cloth : null) || CLOTH.co; return { hex: p[hashN(key) % p.length], name: "", ink: "" }; }
+    var e = L[(BOOK_IX[key] != null ? BOOK_IX[key] + hashN(String(tid)) : hashN(key)) % L.length];
+    return { hex: e[1], name: e[0], ink: e[2] || "" };
+  }
+  function cfaPaint(i) { var L = palList("fin"); return L ? L[i % L.length] : ["", CLOTH.fin[i % 3]]; }
+  function clothOf(tid, key) { return bookPaint(tid, key).hex; }
   function lumHex(h) {
     var c = [1, 3, 5].map(function (i) { var x = parseInt(h.substr(i, 2), 16) / 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
     return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
@@ -617,7 +663,7 @@
     return m;
   }
   function clothSpine(it, tid, idx) {
-    var bs = bookState(it.id), title = it.title, h0 = hashN(it.id), base = clothOf(tid, it.id);
+    var bs = bookState(it.id), title = it.title, h0 = hashN(it.id), paint = bookPaint(tid, it.id), base = paint.hex, fx = LK().fx;
     var variant = ["foil", "label", "quarter", "plain"][(Math.floor(h0 / 7) + idx) % 4];
     var h = 206 + h0 % 40, lat = isLatin(title), light = lumHex(base) > 0.2;
     var state = bs.s === "doing" ? "doing" : bs.s === "done" || bs.s === "review" ? "done" : "";
@@ -644,21 +690,25 @@
     else if (withBy) foot = '<span class="cb-by">' + esc(by) + "</span>";
     var rp = state === "doing" ? Math.max(0, Math.min(1, bs.epct || (prog ? prog.done / Math.max(1, prog.total) : bs.pct) || 0)) : 0;
     var rib = state === "doing" ? '<i class="sp-rib" style="left:' + Math.round(14 + 70 * rp) + '%" aria-hidden="true"></i>' : "";
-    var tail = (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "") + '<i class="cb-top" aria-hidden="true"></i>';
+    var tail = (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "");
+    if (fx === "tilt" || (state === "doing" && LK().read === "tilt")) tail += '<i class="cb-top" aria-hidden="true"></i>';
+    if (fx === "sheen") tail += '<i class="cb-gl" aria-hidden="true"></i>';
+    if (fx === "pull") tail += '<i class="cb-sd l" aria-hidden="true"></i><i class="cb-sd r" aria-hidden="true"></i>';
+    if (fx === "turn") tail += '<span class="cb-cv" aria-hidden="true"><i class="sc-rule"></i><b>' + esc(title.replace(/（.*）$/, "").split("：")[0]) + "</b>" + (by ? "<small>" + esc(by) + " 著</small>" : "") + '<i class="sc-rule"></i></span>';
     var dimc = (shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim") + (S.shelfPick === it.id ? " picked" : "") + (ebookOf(it.id) ? " has-eb" : "");
-    var tip = '《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "");
+    var tip = '《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (paint.name ? " · " + esc(paint.name) : "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "");
     if (state === "doing" && LK().read === "face") {
       var tt = title.replace(/（.*）$/, ""), main = tt, sub = "";
       if (tt.indexOf("：") > 0) { main = tt.split("：")[0]; sub = tt.split("：")[1]; }
       var nn = isLatin(main) ? main.length * 0.55 : main.length, fz = nn <= 4 ? 21 : nn <= 6 ? 18 : nn <= 8 ? 16 : nn <= 11 ? 14 : 12.5;
       var ft = prog ? "精读 " + prog.done + " / " + prog.total + " 章" : bs.epct ? "读到 " + Math.round(bs.epct * 100) + "%" : "在读";
-      return '<button type="button" class="cb face' + (light ? " light" : "") + dimc + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + base + '" title="' + tip + '">' +
+      return '<button type="button" class="cb face' + (light ? " light" : "") + dimc + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + base + (paint.ink ? ";--tx:" + paint.ink : "") + '" title="' + tip + '">' +
         '<span class="cf-cv"><i class="sc-rule" aria-hidden="true"></i><span class="cf-t" style="font-size:' + fz + 'px">' + esc(main) + (sub ? "<small>" + esc(sub) + "</small>" : "") + "</span>" +
         (by ? '<span class="cf-by">' + esc(by) + " 著</span>" : "") + '<span class="cf-ft">' + ft + '</span><i class="cf-bar" style="--p:' + Math.round(rp * 100) + '%" aria-hidden="true"></i><i class="sc-rule" aria-hidden="true"></i></span>' +
         '<i class="cf-ed" aria-hidden="true"></i>' + (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "") + "</button>";
     }
     var cls = "cb v-" + variant + (light ? " light" : "") + (state ? " " + state : "") + dimc;
-    return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + base + ";height:" + h + "px;width:" + w + "px" + (state === "doing" ? ";--rp:" + Math.round(14 + 70 * rp) + "%" : "") + '" title="《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "") + '">' +
+    return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + base + ";height:" + h + "px;width:" + w + "px;--dp:" + Math.round(h * 0.64) + "px" + (paint.ink ? ";--tx:" + paint.ink : "") + (state === "doing" ? ";--rp:" + Math.round(14 + 70 * rp) + "%" : "") + '" title="《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (paint.name ? " · " + esc(paint.name) : "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "") + '">' +
       t + foot + rib + tail + "</button>";
   }
   var CFA_CODE = { "cfa-ethics": "ETH", "cfa-quant": "QM", "cfa-econ": "EC", "cfa-fsa": "FSA", "cfa-corp": "CI", "cfa-equity": "EQ", "cfa-fi": "FI", "cfa-deriv": "DER", "cfa-alt": "ALT", "cfa-pm": "PM" };
@@ -667,7 +717,7 @@
       var bs = bookState(it.id), name = it.title.replace(/（.*）$/, ""), size = Math.min(12, Math.floor(150 / (name.length * 1.14) * 2) / 2);
       var stc = bs.s === "done" || bs.s === "review" ? " done" : bs.s === "doing" ? " doing" : "";
       var cls = "cv" + stc + (shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim") + (S.shelfPick === it.id ? " picked" : "") + (ebookOf(it.id) ? " has-eb" : "");
-      return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + CLOTH.fin[i % 3] + '" title="CFA 一级 · ' + esc(it.title) + '">' +
+      return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + cfaPaint(i)[1] + (cfaPaint(i)[2] ? ";--tx:" + cfaPaint(i)[2] : "") + '" title="CFA 一级 · ' + esc(it.title) + (cfaPaint(i)[0] ? " · " + cfaPaint(i)[0] : "") + '">' +
         '<span class="cv-lab"><span style="font-size:' + size + 'px">' + esc(name) + "</span></span>" +
         (stc === " done" ? '<i class="cb-seal sm" aria-hidden="true">' + (MARK[bs.s] || "阅") + "</i>" : '<span class="cv-c">' + (CFA_CODE[it.id] || "") + "</span>") +
         (stc === " doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
@@ -714,7 +764,9 @@
     if (t) t.stages.forEach(function (s) { s.items.forEach(function (it) { if (it.home === tid && all.indexOf(it) < 0) all.push(it); }); });
     var cfa = t && tid === "fin" ? t.stages[0].items.filter(function (it) { return /^cfa-/.test(it.id) && it.kind === "topic"; }) : [];
     var mine = Object.keys(ITEMS).filter(function (id) { return ITEMS[id].mine && ITEMS[id].home === tid; }).sort(function (a, b) { return String((S.data.mybooks[a] || {}).t).localeCompare(String((S.data.mybooks[b] || {}).t)); }).map(function (id) { return ITEMS[id]; });
-    return { books: all.filter(function (it) { return it.kind === "book" && !isHidden(it.id); }).concat(mine), cfa: cfa, other: all.filter(function (it) { return it.kind !== "book" && cfa.indexOf(it) < 0; }) };
+    var books = all.filter(function (it) { return it.kind === "book" && !isHidden(it.id); }).concat(mine);
+    books.forEach(function (it, i) { BOOK_IX[it.id] = i; });
+    return { books: books, cfa: cfa, other: all.filter(function (it) { return it.kind !== "book" && cfa.indexOf(it) < 0; }) };
   }
   function wmHTML(key, col, label, href, inner, cls, cont) {
     var di = key !== "en" && key !== "+" ? domInfo(key) : null;
@@ -860,9 +912,10 @@
   }
   function lookPopHTML() {
     var L = LK(), h = hangGet();
-    function radios(list, cur, act, attr, icon) {
+    function radios(list, cur, act, attr, icon, sw) {
       return '<div class="lk-opts" role="radiogroup">' + list.map(function (x) {
-        return '<button type="button" role="radio" aria-checked="' + (cur === x[0]) + '" class="' + (act === "hang" ? "hang-b " : "") + 'lk-o" data-act="' + act + '" ' + attr + '="' + x[0] + '" title="' + esc(x[2]) + '">' + (icon ? '<i class="hg hg-' + x[0] + '" aria-hidden="true"></i>' : '<i class="lk-rd rd-' + x[0] + '" aria-hidden="true"></i>') + esc(x[1]) + "</button>";
+        var mark = icon ? '<i class="hg hg-' + x[0] + '" aria-hidden="true"></i>' : sw ? '<i class="lk-sws" aria-hidden="true">' + palSwatch(x[0]).map(function (c) { return '<b style="background:' + c + '"></b>'; }).join("") + "</i>" : act === "look-fx" ? "" : '<i class="lk-rd rd-' + x[0] + '" aria-hidden="true"></i>';
+        return '<button type="button" role="radio" aria-checked="' + (cur === x[0]) + '" class="' + (act === "hang" ? "hang-b " : "") + 'lk-o" data-act="' + act + '" ' + attr + '="' + x[0] + '" title="' + esc(x[2]) + '">' + mark + esc(x[1]) + "</button>";
       }).join("") + "</div>";
     }
     var tiles = DECO_LIB.map(function (d) {
@@ -872,7 +925,8 @@
     return '<div class="look-pop" role="dialog" aria-label="书墙的布置">' +
       '<section class="lk-sec"><h3>挂法</h3>' + radios(HANGS, h, "hang", "data-h", true) + "</section>" +
       '<section class="lk-sec"><h3>在读的书</h3>' + radios(READS, L.read, "look-read", "data-v", false) + "</section>" +
-      '<section class="lk-sec lk-row"><h3>书的立体感</h3><button type="button" class="lk-sw" data-act="look-3d" role="switch" aria-checked="' + L.d3 + '"><i aria-hidden="true"></i>' + (L.d3 ? "开" : "关") + '</button><p class="meta">开着时，指到一本书，它会从顶上往外倾一点，露出书顶。</p></section>' +
+      '<section class="lk-sec"><h3>书的颜色</h3>' + radios(COLORS, L.color, "look-color", "data-v", false, true) + "</section>" +
+      '<section class="lk-sec"><h3>指到一本书时</h3>' + radios(FXS, L.fx, "look-fx", "data-v", false) + "</section>" +
       '<section class="lk-sec lk-row"><h3>摆件的动静</h3><button type="button" class="lk-sw" data-act="look-motion" role="switch" aria-checked="' + L.motion + '"' + (REDUCE ? " disabled" : "") + '><i aria-hidden="true"></i>' + (L.motion && !REDUCE ? "开" : "关") + '</button><p class="meta">' + (REDUCE ? "系统设了减少动态效果，摆件都静着。" : "沙在流、烛火跳、热气往上冒、钟在走。") + "</p></section>" +
       '<section class="lk-sec"><h3>摆件 <small>选中的会摆在书墙的空当里，放不下的先不摆</small></h3><div class="lk-tiles">' + tiles + "</div></section>" +
       '<div class="lk-foot"><button type="button" class="linkbtn" data-act="look-reset">恢复默认</button><button type="button" class="btn small" data-act="look">好了</button></div></div>';
@@ -908,8 +962,8 @@
       if (x.kind === "read") return '<div class="stg-cover pic' + flip + '"><span class="pk-sky" aria-hidden="true"><i></i><i></i><i></i></span><span class="sc-kind">' + esc(x.type) + '</span><span class="sc-en">' + esc(x.en) + '</span><span class="sc-t sm">' + esc(x.title) + '</span><span class="sc-foot">Baba · ' + esc(x.level || "") + "</span></div>";
       return '<div class="stg-cover film' + flip + '" style="--cl:' + clothOf("en", x.id) + '"><i class="sc-holes" aria-hidden="true"></i><span class="sc-kind">' + esc(x.type) + " · " + esc(String(x.year || "")) + '</span>' + coverTitle(x.title) + '<span class="sc-en">' + esc(x.en) + '</span><span class="sc-foot">' + (x.where === "local" ? "研习录跟读" : "Baba 英语") + "</span></div>";
     }
-    var it = ITEMS[id], tid = it.home, base = /^cfa-/.test(id) ? CLOTH.fin[0] : clothOf(tid, id), light = lumHex(base) > 0.2, tname = domInfo(tid).name;
-    return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc(tname || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
+    var it = ITEMS[id], tid = it.home, pt = /^cfa-/.test(id) ? { hex: cfaPaint(0)[1], ink: cfaPaint(0)[2] || "" } : bookPaint(tid, id), base = pt.hex, light = lumHex(base) > 0.2, tname = domInfo(tid).name;
+    return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + (pt.ink ? ";--tx:" + pt.ink : "") + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc(tname || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
   }
   /* 展台在书墙右边一栏，滚动时停在屏幕上 */
   function stageHTML() {
@@ -923,6 +977,23 @@
     var top = '<div class="dais"><div class="stg-mid"><div class="stg-scale"><div class="stg-zoom">' + stageCover(id) + '</div></div><i class="stg-stand" aria-hidden="true"></i></div>' + P.head + '<i class="stg-top" aria-hidden="true"></i></div>';
     S.flip = null;
     return '<aside class="dais-col" aria-label="展台" style="--c:' + P.col + '">' + top + '<div class="pulled">' + P.body + "</div></aside>";
+  }
+  /* 点一本书：一本同色的书从墙上飞到展台，落下时转成封面朝外（桌面两栏、动静开着时才有） */
+  function flyToDais(r0, col) {
+    var tg = document.querySelector(".dais .stg-cover, .dais .stg-box"); if (!tg || !tg.animate || !r0.width) return;
+    var r1 = tg.getBoundingClientRect(); if (r1.bottom < 0 || r1.top > window.innerHeight) return;
+    var f = document.createElement("div"); f.className = "fly"; f.setAttribute("aria-hidden", "true");
+    f.style.cssText = "left:" + r0.left + "px;top:" + r0.top + "px;width:" + r0.width + "px;height:" + r0.height + "px;--cl:" + (col || "#8A6A44");
+    document.body.appendChild(f);
+    var dx = r1.left - r0.left, dy = r1.top - r0.top, sx = r1.width / r0.width, sy = r1.height / r0.height, lift = Math.min(90, Math.abs(dy) * 0.3 + 40);
+    tg.style.opacity = "0";
+    var a = f.animate([
+      { transform: "translate(0px,0px) scale(1,1)", boxShadow: "0 4px 8px rgba(0,0,0,.2)" },
+      { transform: "translate(" + dx * 0.5 + "px," + (dy * 0.5 - lift) + "px) scale(" + (1 + (sx - 1) * 0.5) + "," + (1 + (sy - 1) * 0.5) + ") rotate(-4deg)", boxShadow: "0 30px 40px rgba(0,0,0,.3)", offset: 0.55 },
+      { transform: "translate(" + dx + "px," + dy + "px) scale(" + sx + "," + sy + ")", boxShadow: "0 12px 16px rgba(0,0,0,.25)" }
+    ], { duration: 620, easing: "cubic-bezier(.35,.7,.25,1)" });
+    function done() { if (f.parentNode) f.parentNode.removeChild(f); tg.style.opacity = ""; tg.animate && tg.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 180 }); }
+    a.onfinish = done; a.oncancel = done;
   }
   function wallLegend() {
     return '<div class="w-legend" aria-hidden="true"><span><i class="lg-b"></i>立着：还没读</span><span><i class="lg-b doing"></i>抽出半截、夹书签：在读</span>' +
@@ -3622,18 +3693,25 @@
     if (act === "mst") { openStation(t.getAttribute("data-l"), +t.getAttribute("data-i")); return; }
     if (act === "mgs") { openGoalStop(t.getAttribute("data-g"), +t.getAttribute("data-i")); return; }
     if (act === "pick") {
-      var pid = t.getAttribute("data-id"); if (pid !== S.shelfPick) S.flip = pid; S.shelfPick = pid;
+      var pid = t.getAttribute("data-id"), fly = null;
+      if (pid !== S.shelfPick && S.route === "shelf" && !REDUCE && LK().motion && t.closest(".wall")) {
+        var dc = document.querySelector(".dais-col");
+        if (dc && window.getComputedStyle(dc).position === "sticky") fly = { r: t.getBoundingClientRect(), col: window.getComputedStyle(t).getPropertyValue("--cl").trim() };
+      }
+      if (pid !== S.shelfPick && !fly) S.flip = pid; S.shelfPick = pid;
       if (S.route !== "shelf") { location.hash = "#shelf"; return; }
-      render(); var stg = document.querySelector(".dais-col");
+      render(); if (fly) flyToDais(fly.r, fly.col);
+      var stg = document.querySelector(".dais-col");
       if (stg && window.getComputedStyle(stg).position !== "sticky") { var sr = stg.getBoundingClientRect(); if (sr.top < 0 || sr.top > window.innerHeight * 0.4) stg.scrollIntoView({ block: "start", behavior: REDUCE ? "auto" : "smooth" }); }
       return;
     }
     if (act === "look") { S.lookOpen = !S.lookOpen; render(); var lb = document.querySelector(S.lookOpen ? ".look-pop .lk-o[aria-checked=\"true\"]" : ".look-btn"); if (lb) lb.focus(); return; }
     if (act === "look-read") { lookSet({ read: t.getAttribute("data-v") }); render(); return; }
-    if (act === "look-3d") { lookSet({ d3: !LK().d3 }); render(); return; }
+    if (act === "look-fx") { lookSet({ fx: t.getAttribute("data-v") }); render(); return; }
+    if (act === "look-color") { lookSet({ color: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-motion") { lookSet({ motion: !LK().motion }); render(); return; }
     if (act === "look-deco") { var dn = t.getAttribute("data-d"), dl = LK().deco.slice(), di = dl.indexOf(dn); if (di >= 0) dl.splice(di, 1); else dl.push(dn); lookSet({ deco: dl }); render(); return; }
-    if (act === "look-reset") { hangSet("float"); lookSet({ read: "face", d3: true, motion: true, deco: DECO_DEFAULT.slice() }); render(); return; }
+    if (act === "look-reset") { hangSet("float"); lookSet({ read: "face", fx: "turn", color: "named", motion: true, deco: DECO_DEFAULT.slice() }); render(); return; }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = wallClass(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
     if (act === "abox") { S.archPick = t.getAttribute("data-t"); render(); var ap = document.querySelector(".apanel"); if (ap && window.innerWidth < 1100) ap.scrollIntoView({ block: "start", behavior: "smooth" }); return; }

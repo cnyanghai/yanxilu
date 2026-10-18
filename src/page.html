@@ -1181,6 +1181,7 @@ label.linkbtn.eb-up{position:relative}
   background:linear-gradient(90deg,rgba(0,0,0,.28) 0 10px,rgba(255,255,255,.15) 10px 13px,transparent 13px),radial-gradient(90% 60% at 60% 10%,rgba(255,255,255,.18),transparent 70%),var(--cloth-tx),var(--cl);
   box-shadow:0 40px 50px -26px rgba(40,28,14,.6),0 2px 3px rgba(0,0,0,.15);transform:perspective(900px) rotateX(5deg)}
 .stg-cover.light{color:#2B2620}
+.stg-cover[style*="--tx"]{color:var(--tx)}
 .sc-rule{display:block;flex:none;height:4px;border-top:1px solid currentColor;border-bottom:1px solid currentColor;opacity:.55}
 .sc-t{margin-top:16px;font-family:var(--f-display);font-weight:900;letter-spacing:.06em;line-height:1.22;overflow-wrap:anywhere}
 .sc-t small{display:block;margin-top:8px;font-size:14px;font-weight:600;letter-spacing:.04em;line-height:1.4}
@@ -1254,6 +1255,8 @@ a.wm-lab:hover{text-decoration:underline}
 .cb-lab{position:relative;flex:none;padding:8px 3px;background:var(--cloth-tx),var(--plab);border:1px solid var(--plab-line);box-shadow:0 1px 2px rgba(0,0,0,.18)}
 .cb-by{margin-top:auto;margin-bottom:22px;writing-mode:vertical-rl;white-space:nowrap;font-family:var(--f-ui);font-size:10px;letter-spacing:.08em;color:rgba(240,226,190,.82)}
 .cb.light .cb-by,.cb.v-quarter .cb-by{color:#55493D}
+.cb[style*="--tx"]:not(.v-quarter) > .cb-t span{color:var(--tx)}
+.cb[style*="--tx"]:not(.v-quarter) .cb-by{color:var(--tx);opacity:.85}
 .cb.v-quarter .cb-by,.cb.v-quarter .cb-seal{margin-bottom:32px}
 .cb-dots{margin-top:auto;margin-bottom:10px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 0}
 .cb.v-quarter .cb-dots{margin-bottom:28px}
@@ -1674,6 +1677,7 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
   background:linear-gradient(90deg,rgba(0,0,0,.3) 0 6px,rgba(255,255,255,.14) 6px 8px,transparent 8px),radial-gradient(90% 60% at 60% 8%,rgba(255,255,255,.16),transparent 70%),var(--cloth-tx),var(--cl);
   box-shadow:0 22px 24px -14px rgba(40,28,14,.6),0 1px 2px rgba(0,0,0,.2)}
 .cb.face.light .cf-cv{color:#2B2620}
+.cb.face[style*="--tx"] .cf-cv{color:var(--tx)}
 .cf-t{margin-top:4px;font-family:var(--f-display);font-weight:900;letter-spacing:.05em;line-height:1.24;overflow-wrap:anywhere}
 .cf-t small{display:block;margin-top:5px;font-size:10.5px;font-weight:600;letter-spacing:.02em;line-height:1.35}
 .cf-by{font-family:var(--f-ui);font-size:10px;letter-spacing:.06em;opacity:.88}
@@ -1686,12 +1690,12 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .cb.face .cb-eb{right:10px;top:-6px}
 /* 立体：指到一本书，它从顶上往外倾；在读的书（往前倾）一直倾着，书顶露出书签 */
 .cb-top{display:none}
-.wall.d3 .wm-in,.wall.read-tilt .wm-in{perspective:1400px;perspective-origin:50% 10%}
-.wall.d3 .cb:not(.face),.wall.read-tilt .cb:not(.face){transform-style:preserve-3d;transform-origin:50% 100%;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
-.wall.d3 .cb-top,.wall.read-tilt .cb-top{display:block;position:absolute;left:0;right:0;top:0;height:96px;transform-origin:50% 0;transform:rotateX(-90deg);
+.wall.fx-tilt .wm-in,.wall.read-tilt .wm-in{perspective:1400px;perspective-origin:50% 10%}
+.wall.fx-tilt .cb:not(.face),.wall.read-tilt .cb:not(.face){transform-style:preserve-3d;transform-origin:50% 100%;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.wall.fx-tilt .cb-top,.wall.read-tilt .cb-top{display:block;position:absolute;left:0;right:0;top:0;height:96px;transform-origin:50% 0;transform:rotateX(-90deg);
   background:linear-gradient(90deg,var(--cl) 0 2px,transparent 2px calc(100% - 2px),var(--cl) calc(100% - 2px)),repeating-linear-gradient(90deg,#F4EEDF 0 1px,#E3D9C4 1px 2px);box-shadow:inset 0 -30px 30px -10px rgba(40,28,14,.35)}
-.wall.d3 .cb:not(.face):hover{transform:rotateX(-12deg)}
-.wall.d3 .cb.picked:not(.face){transform:translateY(-8px) rotateX(-8deg)}
+.wall.fx-tilt .cb:not(.face):hover{transform:rotateX(-12deg)}
+.wall.fx-tilt .cb.picked:not(.face){transform:translateY(-8px) rotateX(-8deg)}
 .wall.read-tilt .cb.doing{transform:rotateX(-17deg)}
 .wall.read-tilt .cb.doing:hover{transform:rotateX(-22deg)}
 .wall.read-tilt .cb.doing.picked{transform:translateY(-6px) rotateX(-20deg)}
@@ -1723,6 +1727,44 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .wall:not(.still) .ck-m{animation:ckrot 3600s linear infinite}
 .wall:not(.still) .ck-h{animation:ckrot 43200s linear infinite}
 @keyframes ckrot{to{transform:rotate(360deg)}}
+
+/* 点一本书：飞到展台 */
+.fly{position:fixed;z-index:70;transform-origin:0 0;pointer-events:none;border-radius:2px 5px 5px 2px;
+  background:linear-gradient(90deg,rgba(0,0,0,.28) 0 8%,rgba(255,255,255,.14) 8% 10%,transparent 10%),radial-gradient(90% 60% at 60% 10%,rgba(255,255,255,.18),transparent 70%),var(--cl)}
+/* 指到一本书时的几种动效 */
+.cb-gl,.cb-sd,.cb-cv{display:none}
+.lk-sws{display:inline-flex;gap:0;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+.lk-sws b{display:block;width:5px;height:16px}
+/* 烫金反光：浮起一点，一道光扫过书脊 */
+.fx-sheen .cb:not(.face){transition:transform .25s,box-shadow .25s}
+.fx-sheen .cb:not(.face):hover{transform:translateY(-6px);box-shadow:3px 0 6px -2px rgba(45,30,14,.4),0 16px 18px -10px rgba(40,28,14,.55)}
+.fx-sheen .cb-gl{display:block;position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:inherit}
+.fx-sheen .cb-gl::before{content:"";position:absolute;top:-10%;bottom:-10%;left:-80%;width:60%;background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,247,222,.6) 50%,rgba(255,255,255,0));opacity:0;transform:skewX(-14deg)}
+.fx-sheen .cb:hover .cb-gl::before{animation:cbsheen 1.05s cubic-bezier(.3,.6,.3,1)}
+@keyframes cbsheen{0%{opacity:0;transform:translateX(0) skewX(-14deg)}18%{opacity:1}100%{opacity:0;transform:translateX(340%) skewX(-14deg)}}
+/* 抽出来：书朝你抽出来，露出两边的封皮 */
+.fx-pull .wm-in{perspective:900px}
+.fx-pull .cb:not(.face){transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.fx-pull .cb:not(.face):hover{transform:translateZ(54px) translateY(-2px);z-index:6}
+.fx-pull .cb-sd{display:block;position:absolute;top:0;bottom:0;width:var(--dp,130px);pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.38),rgba(0,0,0,.16) 30%,rgba(0,0,0,.3)),var(--cloth-tx),var(--cl)}
+.fx-pull .cb-sd{visibility:hidden;transition:visibility 0s .35s}
+.fx-pull .cb:hover .cb-sd{visibility:visible;transition-delay:0s}
+.fx-pull .cb-sd.l{right:100%;transform-origin:100% 50%;transform:rotateY(-90deg)}
+.fx-pull .cb-sd.r{left:100%;transform-origin:0 50%;transform:rotateY(90deg)}
+/* 转出封面：书转过来一点，露出封面 */
+.fx-turn .wm-in{perspective:1100px}
+.fx-turn .cb:not(.face){transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.fx-turn .cb:not(.face):hover{transform:translateZ(40px) rotateY(-58deg);z-index:6;transition-delay:.05s}
+.fx-turn .cb.picked:not(.face):hover{transform:translateY(-14px) translateZ(40px) rotateY(-58deg)}
+.fx-turn .cb-cv{display:flex;flex-direction:column;gap:7px;position:absolute;top:0;bottom:0;left:100%;width:var(--dp,140px);box-sizing:border-box;padding:16px 12px 12px 15px;pointer-events:none;transform-origin:0 50%;transform:rotateY(90deg);
+  color:var(--tx,var(--foil));text-align:left;font-family:var(--f-display);writing-mode:horizontal-tb;
+  background:linear-gradient(90deg,rgba(0,0,0,.28) 0 5px,rgba(255,255,255,.12) 5px 7px,transparent 7px),radial-gradient(90% 60% at 60% 8%,rgba(255,255,255,.18),transparent 70%),var(--cloth-tx),var(--cl);border-radius:0 4px 4px 0;box-shadow:inset -1px 0 0 rgba(0,0,0,.2)}
+.fx-turn .cb-cv{visibility:hidden;transition:visibility 0s .5s}
+.fx-turn .cb:hover .cb-cv{visibility:visible;transition-delay:0s}
+.fx-turn .cb.light .cb-cv{color:var(--tx,#2B2620)}
+.cb-cv b{margin-top:6px;font-size:15px;font-weight:900;line-height:1.28;letter-spacing:.04em;overflow-wrap:anywhere}
+.cb-cv small{margin-top:auto;font-family:var(--f-ui);font-size:10px;letter-spacing:.06em;opacity:.85}
+@media (prefers-reduced-motion: reduce){.fx-turn .cb,.fx-pull .cb,.fx-sheen .cb{transition:none}.fx-sheen .cb:hover .cb-gl::before{animation:none}}
 
 @media (max-width:1100px){
   .cabinet.archive{width:100%}

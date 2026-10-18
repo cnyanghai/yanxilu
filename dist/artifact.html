@@ -1181,6 +1181,7 @@ label.linkbtn.eb-up{position:relative}
   background:linear-gradient(90deg,rgba(0,0,0,.28) 0 10px,rgba(255,255,255,.15) 10px 13px,transparent 13px),radial-gradient(90% 60% at 60% 10%,rgba(255,255,255,.18),transparent 70%),var(--cloth-tx),var(--cl);
   box-shadow:0 40px 50px -26px rgba(40,28,14,.6),0 2px 3px rgba(0,0,0,.15);transform:perspective(900px) rotateX(5deg)}
 .stg-cover.light{color:#2B2620}
+.stg-cover[style*="--tx"]{color:var(--tx)}
 .sc-rule{display:block;flex:none;height:4px;border-top:1px solid currentColor;border-bottom:1px solid currentColor;opacity:.55}
 .sc-t{margin-top:16px;font-family:var(--f-display);font-weight:900;letter-spacing:.06em;line-height:1.22;overflow-wrap:anywhere}
 .sc-t small{display:block;margin-top:8px;font-size:14px;font-weight:600;letter-spacing:.04em;line-height:1.4}
@@ -1254,6 +1255,8 @@ a.wm-lab:hover{text-decoration:underline}
 .cb-lab{position:relative;flex:none;padding:8px 3px;background:var(--cloth-tx),var(--plab);border:1px solid var(--plab-line);box-shadow:0 1px 2px rgba(0,0,0,.18)}
 .cb-by{margin-top:auto;margin-bottom:22px;writing-mode:vertical-rl;white-space:nowrap;font-family:var(--f-ui);font-size:10px;letter-spacing:.08em;color:rgba(240,226,190,.82)}
 .cb.light .cb-by,.cb.v-quarter .cb-by{color:#55493D}
+.cb[style*="--tx"]:not(.v-quarter) > .cb-t span{color:var(--tx)}
+.cb[style*="--tx"]:not(.v-quarter) .cb-by{color:var(--tx);opacity:.85}
 .cb.v-quarter .cb-by,.cb.v-quarter .cb-seal{margin-bottom:32px}
 .cb-dots{margin-top:auto;margin-bottom:10px;display:flex;flex-direction:column;align-items:center;gap:5px;padding:6px 0}
 .cb.v-quarter .cb-dots{margin-bottom:28px}
@@ -1674,6 +1677,7 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
   background:linear-gradient(90deg,rgba(0,0,0,.3) 0 6px,rgba(255,255,255,.14) 6px 8px,transparent 8px),radial-gradient(90% 60% at 60% 8%,rgba(255,255,255,.16),transparent 70%),var(--cloth-tx),var(--cl);
   box-shadow:0 22px 24px -14px rgba(40,28,14,.6),0 1px 2px rgba(0,0,0,.2)}
 .cb.face.light .cf-cv{color:#2B2620}
+.cb.face[style*="--tx"] .cf-cv{color:var(--tx)}
 .cf-t{margin-top:4px;font-family:var(--f-display);font-weight:900;letter-spacing:.05em;line-height:1.24;overflow-wrap:anywhere}
 .cf-t small{display:block;margin-top:5px;font-size:10.5px;font-weight:600;letter-spacing:.02em;line-height:1.35}
 .cf-by{font-family:var(--f-ui);font-size:10px;letter-spacing:.06em;opacity:.88}
@@ -1686,12 +1690,12 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .cb.face .cb-eb{right:10px;top:-6px}
 /* 立体：指到一本书，它从顶上往外倾；在读的书（往前倾）一直倾着，书顶露出书签 */
 .cb-top{display:none}
-.wall.d3 .wm-in,.wall.read-tilt .wm-in{perspective:1400px;perspective-origin:50% 10%}
-.wall.d3 .cb:not(.face),.wall.read-tilt .cb:not(.face){transform-style:preserve-3d;transform-origin:50% 100%;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
-.wall.d3 .cb-top,.wall.read-tilt .cb-top{display:block;position:absolute;left:0;right:0;top:0;height:96px;transform-origin:50% 0;transform:rotateX(-90deg);
+.wall.fx-tilt .wm-in,.wall.read-tilt .wm-in{perspective:1400px;perspective-origin:50% 10%}
+.wall.fx-tilt .cb:not(.face),.wall.read-tilt .cb:not(.face){transform-style:preserve-3d;transform-origin:50% 100%;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.wall.fx-tilt .cb-top,.wall.read-tilt .cb-top{display:block;position:absolute;left:0;right:0;top:0;height:96px;transform-origin:50% 0;transform:rotateX(-90deg);
   background:linear-gradient(90deg,var(--cl) 0 2px,transparent 2px calc(100% - 2px),var(--cl) calc(100% - 2px)),repeating-linear-gradient(90deg,#F4EEDF 0 1px,#E3D9C4 1px 2px);box-shadow:inset 0 -30px 30px -10px rgba(40,28,14,.35)}
-.wall.d3 .cb:not(.face):hover{transform:rotateX(-12deg)}
-.wall.d3 .cb.picked:not(.face){transform:translateY(-8px) rotateX(-8deg)}
+.wall.fx-tilt .cb:not(.face):hover{transform:rotateX(-12deg)}
+.wall.fx-tilt .cb.picked:not(.face){transform:translateY(-8px) rotateX(-8deg)}
 .wall.read-tilt .cb.doing{transform:rotateX(-17deg)}
 .wall.read-tilt .cb.doing:hover{transform:rotateX(-22deg)}
 .wall.read-tilt .cb.doing.picked{transform:translateY(-6px) rotateX(-20deg)}
@@ -1723,6 +1727,44 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .wall:not(.still) .ck-m{animation:ckrot 3600s linear infinite}
 .wall:not(.still) .ck-h{animation:ckrot 43200s linear infinite}
 @keyframes ckrot{to{transform:rotate(360deg)}}
+
+/* 点一本书：飞到展台 */
+.fly{position:fixed;z-index:70;transform-origin:0 0;pointer-events:none;border-radius:2px 5px 5px 2px;
+  background:linear-gradient(90deg,rgba(0,0,0,.28) 0 8%,rgba(255,255,255,.14) 8% 10%,transparent 10%),radial-gradient(90% 60% at 60% 10%,rgba(255,255,255,.18),transparent 70%),var(--cl)}
+/* 指到一本书时的几种动效 */
+.cb-gl,.cb-sd,.cb-cv{display:none}
+.lk-sws{display:inline-flex;gap:0;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
+.lk-sws b{display:block;width:5px;height:16px}
+/* 烫金反光：浮起一点，一道光扫过书脊 */
+.fx-sheen .cb:not(.face){transition:transform .25s,box-shadow .25s}
+.fx-sheen .cb:not(.face):hover{transform:translateY(-6px);box-shadow:3px 0 6px -2px rgba(45,30,14,.4),0 16px 18px -10px rgba(40,28,14,.55)}
+.fx-sheen .cb-gl{display:block;position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:inherit}
+.fx-sheen .cb-gl::before{content:"";position:absolute;top:-10%;bottom:-10%;left:-80%;width:60%;background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,247,222,.6) 50%,rgba(255,255,255,0));opacity:0;transform:skewX(-14deg)}
+.fx-sheen .cb:hover .cb-gl::before{animation:cbsheen 1.05s cubic-bezier(.3,.6,.3,1)}
+@keyframes cbsheen{0%{opacity:0;transform:translateX(0) skewX(-14deg)}18%{opacity:1}100%{opacity:0;transform:translateX(340%) skewX(-14deg)}}
+/* 抽出来：书朝你抽出来，露出两边的封皮 */
+.fx-pull .wm-in{perspective:900px}
+.fx-pull .cb:not(.face){transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
+.fx-pull .cb:not(.face):hover{transform:translateZ(54px) translateY(-2px);z-index:6}
+.fx-pull .cb-sd{display:block;position:absolute;top:0;bottom:0;width:var(--dp,130px);pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.38),rgba(0,0,0,.16) 30%,rgba(0,0,0,.3)),var(--cloth-tx),var(--cl)}
+.fx-pull .cb-sd{visibility:hidden;transition:visibility 0s .35s}
+.fx-pull .cb:hover .cb-sd{visibility:visible;transition-delay:0s}
+.fx-pull .cb-sd.l{right:100%;transform-origin:100% 50%;transform:rotateY(-90deg)}
+.fx-pull .cb-sd.r{left:100%;transform-origin:0 50%;transform:rotateY(90deg)}
+/* 转出封面：书转过来一点，露出封面 */
+.fx-turn .wm-in{perspective:1100px}
+.fx-turn .cb:not(.face){transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
+.fx-turn .cb:not(.face):hover{transform:translateZ(40px) rotateY(-58deg);z-index:6;transition-delay:.05s}
+.fx-turn .cb.picked:not(.face):hover{transform:translateY(-14px) translateZ(40px) rotateY(-58deg)}
+.fx-turn .cb-cv{display:flex;flex-direction:column;gap:7px;position:absolute;top:0;bottom:0;left:100%;width:var(--dp,140px);box-sizing:border-box;padding:16px 12px 12px 15px;pointer-events:none;transform-origin:0 50%;transform:rotateY(90deg);
+  color:var(--tx,var(--foil));text-align:left;font-family:var(--f-display);writing-mode:horizontal-tb;
+  background:linear-gradient(90deg,rgba(0,0,0,.28) 0 5px,rgba(255,255,255,.12) 5px 7px,transparent 7px),radial-gradient(90% 60% at 60% 8%,rgba(255,255,255,.18),transparent 70%),var(--cloth-tx),var(--cl);border-radius:0 4px 4px 0;box-shadow:inset -1px 0 0 rgba(0,0,0,.2)}
+.fx-turn .cb-cv{visibility:hidden;transition:visibility 0s .5s}
+.fx-turn .cb:hover .cb-cv{visibility:visible;transition-delay:0s}
+.fx-turn .cb.light .cb-cv{color:var(--tx,#2B2620)}
+.cb-cv b{margin-top:6px;font-size:15px;font-weight:900;line-height:1.28;letter-spacing:.04em;overflow-wrap:anywhere}
+.cb-cv small{margin-top:auto;font-family:var(--f-ui);font-size:10px;letter-spacing:.06em;opacity:.85}
+@media (prefers-reduced-motion: reduce){.fx-turn .cb,.fx-pull .cb,.fx-sheen .cb{transition:none}.fx-sheen .cb:hover .cb-gl::before{animation:none}}
 
 @media (max-width:1100px){
   .cabinet.archive{width:100%}
@@ -4352,11 +4394,14 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function hangSet(h) { try { window.localStorage.setItem(HANG_KEY, h); } catch (e) { /* 存不了就只在这次生效 */ } }
   /* 书墙的布置：在读的书怎么摆、书要不要立体、摆哪些摆件。和挂法一样记在这台设备的浏览器里（yanxilu-look）。 */
   var READS = [["face", "封面朝外", "在读的书转过来，封面朝外立在这一格最前面"], ["pull", "抽出半截", "在读的书从书列里抽出一截，书签带从底下垂出来"], ["tilt", "往前倾", "在读的书顶部往外倾，露出书顶和夹在里面的书签"]];
+  var FXS = [["turn", "转出封面", "书转过来一点，露出它的封面"], ["pull", "抽出来", "书从书列里朝你抽出来，露出两边的封皮"], ["sheen", "烫金反光", "书浮起一点，一道光扫过书脊"], ["tilt", "往前倾", "书从顶上往外倾，露出书顶"], ["none", "不动", "只稍微浮起一点"]];
+  var COLORS = [["named", "名色", "每个领域一个经典色系：勃艮第红、爱马仕橙、孔雀绿、普鲁士蓝、克莱因蓝……"], ["qinghua", "青花瓷", "钴蓝、霁蓝、天青、瓷白"], ["orange", "橙与驼", "爱马仕橙、驼色、象牙白、墨黑"], ["cloth", "布面", "原来的低饱和布色"]];
   var LOOK_KEY = "yanxilu-look", DECO_DEFAULT = ["globe", "glass", "vase", "succ", "pothos", "candle"];
   function lookGet() {
     var v = {};
     try { v = JSON.parse(window.localStorage.getItem(LOOK_KEY) || "{}") || {}; } catch (e) { v = {}; }
-    return { read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : "face", d3: v.d3 !== false, motion: v.motion !== false,
+    return { read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : "face", motion: v.motion !== false,
+      fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : "turn", color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : "named",
       deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice() };
   }
   function LK() { return S.look || (S.look = lookGet()); }
@@ -4364,8 +4409,51 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var v = Object.assign({}, LK(), patch); S.look = v;
     try { window.localStorage.setItem(LOOK_KEY, JSON.stringify(v)); } catch (e) { /* 存不了就只在这次生效 */ }
   }
-  function wallClass() { var L = LK(); return "wall hang-" + hangGet() + " read-" + L.read + (L.d3 ? " d3" : "") + (REDUCE || !L.motion ? " still" : ""); }
-  function clothOf(tid, key) { var p = CLOTH[tid] || (tid !== "en" && !domBuiltin(tid) ? domInfo(tid).cloth : null) || CLOTH.co; return p[hashN(key) % p.length]; }
+  function wallClass() { var L = LK(); return "wall hang-" + hangGet() + " read-" + L.read + " fx-" + L.fx + " pal-" + L.color + (REDUCE || !L.motion ? " still" : ""); }
+  /* ---------- 书的颜色 ----------
+   * 名色：每个领域一个经典色系，同一格里相邻两本一定不同色；青花瓷、橙与驼：全墙一套色；布面：原来的低饱和布色（按书名散开）。
+   * 每项 [名字, 颜色, 字色]：字色可空，深色书脊用烫金字、浅色书脊用深字。 */
+  var PAL = {
+    named: {
+      geo: [["朱砂", "#B5412D"], ["勃艮第红", "#6A1C2A"], ["胭脂", "#9A2B3D"], ["赭石", "#8A4A2A"], ["象牙白", "#EDE5D2", "#6A1C2A"], ["枣红", "#7C2A28"], ["绯红", "#A83434"]],
+      cycle: [["爱马仕橙", "#E5661D", "#FFF3E2"], ["藤黄", "#D69E1E"], ["琥珀", "#B5741A"], ["焦糖", "#99591F"], ["麦秆", "#E5CD8C", "#5A3A12"], ["芥末黄", "#BF9C2C"]],
+      fut: [["孔雀绿", "#0E6A65"], ["祖母绿", "#145B45"], ["竹青", "#5B8959"], ["松石绿", "#2C8A82"], ["橄榄", "#5E6A2B"], ["苔绿", "#3E5934"]],
+      co: [["普鲁士蓝", "#1E3656"], ["黛青", "#2C4A58"], ["石青", "#2F6587"], ["月白", "#DCE5E8", "#1E3656"], ["钢青", "#4A6378"], ["炭黑", "#2E3033"]],
+      fin: [["克莱因蓝", "#1B2FA0"], ["青花瓷蓝", "#1D4A96"], ["靛青", "#2B3A80"], ["群青", "#3550A0"]],
+      en: [["午夜蓝", "#1D2B45"], ["群青", "#2C4A8C"], ["墨蓝", "#22324E"]]
+    },
+    dom: {
+      teal: [["松石绿", "#2C8A82"], ["孔雀绿", "#0E6A65"], ["青瓷", "#8DB3A6", "#173F3B"]],
+      indigo: [["克莱因蓝", "#1B2FA0"], ["靛蓝", "#2B3A80"], ["天青", "#7FA7C9", "#10305F"]],
+      rose: [["胭脂", "#9A2B3D"], ["豆沙", "#B57A78"], ["绛紫", "#6B2C45"]],
+      umber: [["赭石", "#8A4A2A"], ["驼色", "#B48A5E"], ["焦糖", "#99591F"]],
+      forest: [["祖母绿", "#145B45"], ["竹青", "#5B8959"], ["苔绿", "#3E5934"]],
+      lilac: [["藕荷", "#8C6F94"], ["丁香", "#A48DB8", "#2E2340"], ["暮紫", "#5D4A72"]]
+    },
+    qinghua: [["青花蓝", "#1D4A96"], ["瓷白", "#F1F3F0", "#1D4A96"], ["钴蓝", "#173E80"], ["天青", "#86ABCB", "#10305F"], ["霁蓝", "#20356E"], ["月白", "#DCE6EC", "#1D4A96"]],
+    orange: [["爱马仕橙", "#E5661D", "#FFF3E2"], ["驼色", "#B48A5E"], ["象牙白", "#EFE8DA", "#3A2A1A"], ["墨黑", "#26221F", "#E9C9A0"], ["焦糖", "#99591F"], ["岩灰", "#8A8278"]]
+  };
+  var BOOK_IX = {};
+  function palList(tid) {
+    var c = LK().color;
+    if (c === "qinghua" || c === "orange") return PAL[c];
+    if (c !== "named") return null;
+    if (PAL.named[tid]) return PAL.named[tid];
+    var d = (S.data.domains || {})[tid]; return PAL.dom[(d && d.color) || "teal"] || PAL.dom.teal;
+  }
+  function palSwatch(c) {
+    if (c === "named") return ["#6A1C2A", "#E5661D", "#0E6A65", "#1E3656", "#1B2FA0"];
+    if (c === "cloth") return [CLOTH.geo[0], CLOTH.cycle[0], CLOTH.fut[0], CLOTH.co[0], CLOTH.fin[0]];
+    return PAL[c].slice(0, 5).map(function (e) { return e[1]; });
+  }
+  function bookPaint(tid, key) {
+    var L = palList(tid);
+    if (!L) { var p = CLOTH[tid] || (tid !== "en" && !domBuiltin(tid) ? domInfo(tid).cloth : null) || CLOTH.co; return { hex: p[hashN(key) % p.length], name: "", ink: "" }; }
+    var e = L[(BOOK_IX[key] != null ? BOOK_IX[key] + hashN(String(tid)) : hashN(key)) % L.length];
+    return { hex: e[1], name: e[0], ink: e[2] || "" };
+  }
+  function cfaPaint(i) { var L = palList("fin"); return L ? L[i % L.length] : ["", CLOTH.fin[i % 3]]; }
+  function clothOf(tid, key) { return bookPaint(tid, key).hex; }
   function lumHex(h) {
     var c = [1, 3, 5].map(function (i) { var x = parseInt(h.substr(i, 2), 16) / 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
     return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
@@ -4384,7 +4472,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     return m;
   }
   function clothSpine(it, tid, idx) {
-    var bs = bookState(it.id), title = it.title, h0 = hashN(it.id), base = clothOf(tid, it.id);
+    var bs = bookState(it.id), title = it.title, h0 = hashN(it.id), paint = bookPaint(tid, it.id), base = paint.hex, fx = LK().fx;
     var variant = ["foil", "label", "quarter", "plain"][(Math.floor(h0 / 7) + idx) % 4];
     var h = 206 + h0 % 40, lat = isLatin(title), light = lumHex(base) > 0.2;
     var state = bs.s === "doing" ? "doing" : bs.s === "done" || bs.s === "review" ? "done" : "";
@@ -4411,21 +4499,25 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     else if (withBy) foot = '<span class="cb-by">' + esc(by) + "</span>";
     var rp = state === "doing" ? Math.max(0, Math.min(1, bs.epct || (prog ? prog.done / Math.max(1, prog.total) : bs.pct) || 0)) : 0;
     var rib = state === "doing" ? '<i class="sp-rib" style="left:' + Math.round(14 + 70 * rp) + '%" aria-hidden="true"></i>' : "";
-    var tail = (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "") + '<i class="cb-top" aria-hidden="true"></i>';
+    var tail = (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "");
+    if (fx === "tilt" || (state === "doing" && LK().read === "tilt")) tail += '<i class="cb-top" aria-hidden="true"></i>';
+    if (fx === "sheen") tail += '<i class="cb-gl" aria-hidden="true"></i>';
+    if (fx === "pull") tail += '<i class="cb-sd l" aria-hidden="true"></i><i class="cb-sd r" aria-hidden="true"></i>';
+    if (fx === "turn") tail += '<span class="cb-cv" aria-hidden="true"><i class="sc-rule"></i><b>' + esc(title.replace(/（.*）$/, "").split("：")[0]) + "</b>" + (by ? "<small>" + esc(by) + " 著</small>" : "") + '<i class="sc-rule"></i></span>';
     var dimc = (shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim") + (S.shelfPick === it.id ? " picked" : "") + (ebookOf(it.id) ? " has-eb" : "");
-    var tip = '《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "");
+    var tip = '《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (paint.name ? " · " + esc(paint.name) : "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "");
     if (state === "doing" && LK().read === "face") {
       var tt = title.replace(/（.*）$/, ""), main = tt, sub = "";
       if (tt.indexOf("：") > 0) { main = tt.split("：")[0]; sub = tt.split("：")[1]; }
       var nn = isLatin(main) ? main.length * 0.55 : main.length, fz = nn <= 4 ? 21 : nn <= 6 ? 18 : nn <= 8 ? 16 : nn <= 11 ? 14 : 12.5;
       var ft = prog ? "精读 " + prog.done + " / " + prog.total + " 章" : bs.epct ? "读到 " + Math.round(bs.epct * 100) + "%" : "在读";
-      return '<button type="button" class="cb face' + (light ? " light" : "") + dimc + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + base + '" title="' + tip + '">' +
+      return '<button type="button" class="cb face' + (light ? " light" : "") + dimc + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + base + (paint.ink ? ";--tx:" + paint.ink : "") + '" title="' + tip + '">' +
         '<span class="cf-cv"><i class="sc-rule" aria-hidden="true"></i><span class="cf-t" style="font-size:' + fz + 'px">' + esc(main) + (sub ? "<small>" + esc(sub) + "</small>" : "") + "</span>" +
         (by ? '<span class="cf-by">' + esc(by) + " 著</span>" : "") + '<span class="cf-ft">' + ft + '</span><i class="cf-bar" style="--p:' + Math.round(rp * 100) + '%" aria-hidden="true"></i><i class="sc-rule" aria-hidden="true"></i></span>' +
         '<i class="cf-ed" aria-hidden="true"></i>' + (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "") + "</button>";
     }
     var cls = "cb v-" + variant + (light ? " light" : "") + (state ? " " + state : "") + dimc;
-    return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + base + ";height:" + h + "px;width:" + w + "px" + (state === "doing" ? ";--rp:" + Math.round(14 + 70 * rp) + "%" : "") + '" title="《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "") + '">' +
+    return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + base + ";height:" + h + "px;width:" + w + "px;--dp:" + Math.round(h * 0.64) + "px" + (paint.ink ? ";--tx:" + paint.ink : "") + (state === "doing" ? ";--rp:" + Math.round(14 + 70 * rp) + "%" : "") + '" title="《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (paint.name ? " · " + esc(paint.name) : "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "") + '">' +
       t + foot + rib + tail + "</button>";
   }
   var CFA_CODE = { "cfa-ethics": "ETH", "cfa-quant": "QM", "cfa-econ": "EC", "cfa-fsa": "FSA", "cfa-corp": "CI", "cfa-equity": "EQ", "cfa-fi": "FI", "cfa-deriv": "DER", "cfa-alt": "ALT", "cfa-pm": "PM" };
@@ -4434,7 +4526,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       var bs = bookState(it.id), name = it.title.replace(/（.*）$/, ""), size = Math.min(12, Math.floor(150 / (name.length * 1.14) * 2) / 2);
       var stc = bs.s === "done" || bs.s === "review" ? " done" : bs.s === "doing" ? " doing" : "";
       var cls = "cv" + stc + (shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim") + (S.shelfPick === it.id ? " picked" : "") + (ebookOf(it.id) ? " has-eb" : "");
-      return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + CLOTH.fin[i % 3] + '" title="CFA 一级 · ' + esc(it.title) + '">' +
+      return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + cfaPaint(i)[1] + (cfaPaint(i)[2] ? ";--tx:" + cfaPaint(i)[2] : "") + '" title="CFA 一级 · ' + esc(it.title) + (cfaPaint(i)[0] ? " · " + cfaPaint(i)[0] : "") + '">' +
         '<span class="cv-lab"><span style="font-size:' + size + 'px">' + esc(name) + "</span></span>" +
         (stc === " done" ? '<i class="cb-seal sm" aria-hidden="true">' + (MARK[bs.s] || "阅") + "</i>" : '<span class="cv-c">' + (CFA_CODE[it.id] || "") + "</span>") +
         (stc === " doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
@@ -4481,7 +4573,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (t) t.stages.forEach(function (s) { s.items.forEach(function (it) { if (it.home === tid && all.indexOf(it) < 0) all.push(it); }); });
     var cfa = t && tid === "fin" ? t.stages[0].items.filter(function (it) { return /^cfa-/.test(it.id) && it.kind === "topic"; }) : [];
     var mine = Object.keys(ITEMS).filter(function (id) { return ITEMS[id].mine && ITEMS[id].home === tid; }).sort(function (a, b) { return String((S.data.mybooks[a] || {}).t).localeCompare(String((S.data.mybooks[b] || {}).t)); }).map(function (id) { return ITEMS[id]; });
-    return { books: all.filter(function (it) { return it.kind === "book" && !isHidden(it.id); }).concat(mine), cfa: cfa, other: all.filter(function (it) { return it.kind !== "book" && cfa.indexOf(it) < 0; }) };
+    var books = all.filter(function (it) { return it.kind === "book" && !isHidden(it.id); }).concat(mine);
+    books.forEach(function (it, i) { BOOK_IX[it.id] = i; });
+    return { books: books, cfa: cfa, other: all.filter(function (it) { return it.kind !== "book" && cfa.indexOf(it) < 0; }) };
   }
   function wmHTML(key, col, label, href, inner, cls, cont) {
     var di = key !== "en" && key !== "+" ? domInfo(key) : null;
@@ -4627,9 +4721,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
   function lookPopHTML() {
     var L = LK(), h = hangGet();
-    function radios(list, cur, act, attr, icon) {
+    function radios(list, cur, act, attr, icon, sw) {
       return '<div class="lk-opts" role="radiogroup">' + list.map(function (x) {
-        return '<button type="button" role="radio" aria-checked="' + (cur === x[0]) + '" class="' + (act === "hang" ? "hang-b " : "") + 'lk-o" data-act="' + act + '" ' + attr + '="' + x[0] + '" title="' + esc(x[2]) + '">' + (icon ? '<i class="hg hg-' + x[0] + '" aria-hidden="true"></i>' : '<i class="lk-rd rd-' + x[0] + '" aria-hidden="true"></i>') + esc(x[1]) + "</button>";
+        var mark = icon ? '<i class="hg hg-' + x[0] + '" aria-hidden="true"></i>' : sw ? '<i class="lk-sws" aria-hidden="true">' + palSwatch(x[0]).map(function (c) { return '<b style="background:' + c + '"></b>'; }).join("") + "</i>" : act === "look-fx" ? "" : '<i class="lk-rd rd-' + x[0] + '" aria-hidden="true"></i>';
+        return '<button type="button" role="radio" aria-checked="' + (cur === x[0]) + '" class="' + (act === "hang" ? "hang-b " : "") + 'lk-o" data-act="' + act + '" ' + attr + '="' + x[0] + '" title="' + esc(x[2]) + '">' + mark + esc(x[1]) + "</button>";
       }).join("") + "</div>";
     }
     var tiles = DECO_LIB.map(function (d) {
@@ -4639,7 +4734,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     return '<div class="look-pop" role="dialog" aria-label="书墙的布置">' +
       '<section class="lk-sec"><h3>挂法</h3>' + radios(HANGS, h, "hang", "data-h", true) + "</section>" +
       '<section class="lk-sec"><h3>在读的书</h3>' + radios(READS, L.read, "look-read", "data-v", false) + "</section>" +
-      '<section class="lk-sec lk-row"><h3>书的立体感</h3><button type="button" class="lk-sw" data-act="look-3d" role="switch" aria-checked="' + L.d3 + '"><i aria-hidden="true"></i>' + (L.d3 ? "开" : "关") + '</button><p class="meta">开着时，指到一本书，它会从顶上往外倾一点，露出书顶。</p></section>' +
+      '<section class="lk-sec"><h3>书的颜色</h3>' + radios(COLORS, L.color, "look-color", "data-v", false, true) + "</section>" +
+      '<section class="lk-sec"><h3>指到一本书时</h3>' + radios(FXS, L.fx, "look-fx", "data-v", false) + "</section>" +
       '<section class="lk-sec lk-row"><h3>摆件的动静</h3><button type="button" class="lk-sw" data-act="look-motion" role="switch" aria-checked="' + L.motion + '"' + (REDUCE ? " disabled" : "") + '><i aria-hidden="true"></i>' + (L.motion && !REDUCE ? "开" : "关") + '</button><p class="meta">' + (REDUCE ? "系统设了减少动态效果，摆件都静着。" : "沙在流、烛火跳、热气往上冒、钟在走。") + "</p></section>" +
       '<section class="lk-sec"><h3>摆件 <small>选中的会摆在书墙的空当里，放不下的先不摆</small></h3><div class="lk-tiles">' + tiles + "</div></section>" +
       '<div class="lk-foot"><button type="button" class="linkbtn" data-act="look-reset">恢复默认</button><button type="button" class="btn small" data-act="look">好了</button></div></div>';
@@ -4675,8 +4771,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       if (x.kind === "read") return '<div class="stg-cover pic' + flip + '"><span class="pk-sky" aria-hidden="true"><i></i><i></i><i></i></span><span class="sc-kind">' + esc(x.type) + '</span><span class="sc-en">' + esc(x.en) + '</span><span class="sc-t sm">' + esc(x.title) + '</span><span class="sc-foot">Baba · ' + esc(x.level || "") + "</span></div>";
       return '<div class="stg-cover film' + flip + '" style="--cl:' + clothOf("en", x.id) + '"><i class="sc-holes" aria-hidden="true"></i><span class="sc-kind">' + esc(x.type) + " · " + esc(String(x.year || "")) + '</span>' + coverTitle(x.title) + '<span class="sc-en">' + esc(x.en) + '</span><span class="sc-foot">' + (x.where === "local" ? "研习录跟读" : "Baba 英语") + "</span></div>";
     }
-    var it = ITEMS[id], tid = it.home, base = /^cfa-/.test(id) ? CLOTH.fin[0] : clothOf(tid, id), light = lumHex(base) > 0.2, tname = domInfo(tid).name;
-    return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc(tname || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
+    var it = ITEMS[id], tid = it.home, pt = /^cfa-/.test(id) ? { hex: cfaPaint(0)[1], ink: cfaPaint(0)[2] || "" } : bookPaint(tid, id), base = pt.hex, light = lumHex(base) > 0.2, tname = domInfo(tid).name;
+    return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + (pt.ink ? ";--tx:" + pt.ink : "") + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc(tname || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
   }
   /* 展台在书墙右边一栏，滚动时停在屏幕上 */
   function stageHTML() {
@@ -4690,6 +4786,23 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var top = '<div class="dais"><div class="stg-mid"><div class="stg-scale"><div class="stg-zoom">' + stageCover(id) + '</div></div><i class="stg-stand" aria-hidden="true"></i></div>' + P.head + '<i class="stg-top" aria-hidden="true"></i></div>';
     S.flip = null;
     return '<aside class="dais-col" aria-label="展台" style="--c:' + P.col + '">' + top + '<div class="pulled">' + P.body + "</div></aside>";
+  }
+  /* 点一本书：一本同色的书从墙上飞到展台，落下时转成封面朝外（桌面两栏、动静开着时才有） */
+  function flyToDais(r0, col) {
+    var tg = document.querySelector(".dais .stg-cover, .dais .stg-box"); if (!tg || !tg.animate || !r0.width) return;
+    var r1 = tg.getBoundingClientRect(); if (r1.bottom < 0 || r1.top > window.innerHeight) return;
+    var f = document.createElement("div"); f.className = "fly"; f.setAttribute("aria-hidden", "true");
+    f.style.cssText = "left:" + r0.left + "px;top:" + r0.top + "px;width:" + r0.width + "px;height:" + r0.height + "px;--cl:" + (col || "#8A6A44");
+    document.body.appendChild(f);
+    var dx = r1.left - r0.left, dy = r1.top - r0.top, sx = r1.width / r0.width, sy = r1.height / r0.height, lift = Math.min(90, Math.abs(dy) * 0.3 + 40);
+    tg.style.opacity = "0";
+    var a = f.animate([
+      { transform: "translate(0px,0px) scale(1,1)", boxShadow: "0 4px 8px rgba(0,0,0,.2)" },
+      { transform: "translate(" + dx * 0.5 + "px," + (dy * 0.5 - lift) + "px) scale(" + (1 + (sx - 1) * 0.5) + "," + (1 + (sy - 1) * 0.5) + ") rotate(-4deg)", boxShadow: "0 30px 40px rgba(0,0,0,.3)", offset: 0.55 },
+      { transform: "translate(" + dx + "px," + dy + "px) scale(" + sx + "," + sy + ")", boxShadow: "0 12px 16px rgba(0,0,0,.25)" }
+    ], { duration: 620, easing: "cubic-bezier(.35,.7,.25,1)" });
+    function done() { if (f.parentNode) f.parentNode.removeChild(f); tg.style.opacity = ""; tg.animate && tg.animate([{ opacity: 0.4 }, { opacity: 1 }], { duration: 180 }); }
+    a.onfinish = done; a.oncancel = done;
   }
   function wallLegend() {
     return '<div class="w-legend" aria-hidden="true"><span><i class="lg-b"></i>立着：还没读</span><span><i class="lg-b doing"></i>抽出半截、夹书签：在读</span>' +
@@ -7389,18 +7502,25 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "mst") { openStation(t.getAttribute("data-l"), +t.getAttribute("data-i")); return; }
     if (act === "mgs") { openGoalStop(t.getAttribute("data-g"), +t.getAttribute("data-i")); return; }
     if (act === "pick") {
-      var pid = t.getAttribute("data-id"); if (pid !== S.shelfPick) S.flip = pid; S.shelfPick = pid;
+      var pid = t.getAttribute("data-id"), fly = null;
+      if (pid !== S.shelfPick && S.route === "shelf" && !REDUCE && LK().motion && t.closest(".wall")) {
+        var dc = document.querySelector(".dais-col");
+        if (dc && window.getComputedStyle(dc).position === "sticky") fly = { r: t.getBoundingClientRect(), col: window.getComputedStyle(t).getPropertyValue("--cl").trim() };
+      }
+      if (pid !== S.shelfPick && !fly) S.flip = pid; S.shelfPick = pid;
       if (S.route !== "shelf") { location.hash = "#shelf"; return; }
-      render(); var stg = document.querySelector(".dais-col");
+      render(); if (fly) flyToDais(fly.r, fly.col);
+      var stg = document.querySelector(".dais-col");
       if (stg && window.getComputedStyle(stg).position !== "sticky") { var sr = stg.getBoundingClientRect(); if (sr.top < 0 || sr.top > window.innerHeight * 0.4) stg.scrollIntoView({ block: "start", behavior: REDUCE ? "auto" : "smooth" }); }
       return;
     }
     if (act === "look") { S.lookOpen = !S.lookOpen; render(); var lb = document.querySelector(S.lookOpen ? ".look-pop .lk-o[aria-checked=\"true\"]" : ".look-btn"); if (lb) lb.focus(); return; }
     if (act === "look-read") { lookSet({ read: t.getAttribute("data-v") }); render(); return; }
-    if (act === "look-3d") { lookSet({ d3: !LK().d3 }); render(); return; }
+    if (act === "look-fx") { lookSet({ fx: t.getAttribute("data-v") }); render(); return; }
+    if (act === "look-color") { lookSet({ color: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-motion") { lookSet({ motion: !LK().motion }); render(); return; }
     if (act === "look-deco") { var dn = t.getAttribute("data-d"), dl = LK().deco.slice(), di = dl.indexOf(dn); if (di >= 0) dl.splice(di, 1); else dl.push(dn); lookSet({ deco: dl }); render(); return; }
-    if (act === "look-reset") { hangSet("float"); lookSet({ read: "face", d3: true, motion: true, deco: DECO_DEFAULT.slice() }); render(); return; }
+    if (act === "look-reset") { hangSet("float"); lookSet({ read: "face", fx: "turn", color: "named", motion: true, deco: DECO_DEFAULT.slice() }); render(); return; }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = wallClass(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
     if (act === "abox") { S.archPick = t.getAttribute("data-t"); render(); var ap = document.querySelector(".apanel"); if (ap && window.innerWidth < 1100) ap.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
