@@ -593,7 +593,8 @@
     try { v = JSON.parse(window.localStorage.getItem(LOOK_KEY) || "{}") || {}; } catch (e) { v = {}; }
     return { read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : "face", motion: v.motion !== false,
       fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : "turn", color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : "named",
-      deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice() };
+      deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice(),
+      place: (function () { var o = {}, p = v.place && typeof v.place === "object" ? v.place : {}; Object.keys(p).forEach(function (k) { if (DECO[k] && typeof p[k] === "string") o[k] = p[k]; }); return o; })() };
   }
   function LK() { return S.look || (S.look = lookGet()); }
   function lookSet(patch) {
@@ -822,6 +823,10 @@
     /* 后选的先摆：墙上空当有限，刚在布置里勾上的那件一定先有位置 */
     var PLAN = LK().deco.slice().reverse().map(function (k) { return DECO_LIB.filter(function (x) { return x[0] === k; })[0]; }).filter(Boolean).map(function (x) { return [x[0], x[2], x[3]]; });
     function outerW(x) { var c = getComputedStyle(x); return x.getBoundingClientRect().width + (parseFloat(c.marginLeft) || 0) + (parseFloat(c.marginRight) || 0); }
+    /* 指定了位置的摆件先放进那一格（算进这一格的宽度里一起排），剩下的再去找空当 */
+    var pinned = {};
+    LK().deco.forEach(function (k) { var tgt = LK().place[k], m = tgt && row0.querySelector('.wm[data-wm="' + tgt + '"]:not(.ghost)'); if (m && DECO[k]) { addDeco(m, k); pinned[k] = 1; } });
+    PLAN = PLAN.filter(function (d) { return !pinned[d[0]]; });
     var narrow = window.matchMedia && window.matchMedia("(max-width:1100px)").matches;
     if (narrow) {
       PLAN.forEach(function (d) { var k = d[0] === "succ" ? "en" : d[1], m = k && row0.querySelector('.wm[data-wm="' + k + '"]'); if (m && d[0] !== "pothos") addDeco(m, d[0]); });
@@ -892,9 +897,8 @@
     rows.forEach(function (row) { var div = document.createElement("div"); div.className = "wall-row"; row.els.forEach(function (x) { div.appendChild(x.el); }); frag.appendChild(div); });
     wall.removeChild(row0); wall.appendChild(frag);
     wall.style.minHeight = "";
-    document.querySelectorAll(".lk-tile").forEach(function (t) {
-      var k = t.getAttribute("data-d"), off = LK().deco.indexOf(k) >= 0 && !wall.querySelector(".d-" + k);
-      t.classList.toggle("off", off); if (off) t.title = "这会儿墙上没有空当放它"; });
+    document.querySelectorAll(".lk-it").forEach(function (t) {
+      var k = t.getAttribute("data-d"); t.classList.toggle("off", LK().deco.indexOf(k) >= 0 && !wall.querySelector(".d-" + k)); });
   }
   /* 黄铜座钟：按现在的时间摆好三根指针，之后由 CSS 动画走（停掉动静时就只摆好位置） */
   function clockSet(dz) {
@@ -918,9 +922,14 @@
         return '<button type="button" role="radio" aria-checked="' + (cur === x[0]) + '" class="' + (act === "hang" ? "hang-b " : "") + 'lk-o" data-act="' + act + '" ' + attr + '="' + x[0] + '" title="' + esc(x[2]) + '">' + mark + esc(x[1]) + "</button>";
       }).join("") + "</div>";
     }
+    /* 每件摆件一行：不摆、自动找空当，或者指定放在哪一格（放在那一格书的后面） */
+    var shelves = domList().map(function (k) { return [k, domInfo(k).name]; }).concat([["en", "英语"]]);
     var tiles = DECO_LIB.map(function (d) {
-      var on = L.deco.indexOf(d[0]) >= 0;
-      return '<button type="button" class="lk-tile" data-act="look-deco" data-d="' + d[0] + '" aria-pressed="' + on + '" title="' + esc(d[4]) + '"><span class="lk-thumb" aria-hidden="true">' + DECO_SVG[d[0]] + "</span><span>" + esc(d[1]) + "</span></button>";
+      var on = L.deco.indexOf(d[0]) >= 0, pin = on ? (L.place[d[0]] && shelves.some(function (x) { return x[0] === L.place[d[0]]; }) ? L.place[d[0]] : "auto") : "";
+      var opts = '<option value=""' + (on ? "" : " selected") + ">不摆</option>" + '<option value="auto"' + (pin === "auto" ? " selected" : "") + ">自动找空当</option>" +
+        '<optgroup label="放在这一格的书后面">' + shelves.map(function (x) { return '<option value="' + esc(x[0]) + '"' + (pin === x[0] ? " selected" : "") + ">" + esc(x[1]) + "</option>"; }).join("") + "</optgroup>";
+      return '<li class="lk-it' + (on ? " on" : "") + '" data-d="' + d[0] + '"><span class="lk-thumb" aria-hidden="true">' + DECO_SVG[d[0]] + '</span><span class="lk-nm"><b>' + esc(d[1]) + "</b><small>" + esc(d[4]) + '</small><em class="lk-off">这会儿墙上没空当，先没摆</em></span>' +
+        '<select class="lk-place" data-d="' + d[0] + '" aria-label="' + esc(d[1]) + '放在哪">' + opts + "</select></li>";
     }).join("");
     return '<div class="look-pop" role="dialog" aria-label="书墙的布置">' +
       '<section class="lk-sec"><h3>挂法</h3>' + radios(HANGS, h, "hang", "data-h", true) + "</section>" +
@@ -928,7 +937,7 @@
       '<section class="lk-sec"><h3>书的颜色</h3>' + radios(COLORS, L.color, "look-color", "data-v", false, true) + "</section>" +
       '<section class="lk-sec"><h3>指到一本书时</h3>' + radios(FXS, L.fx, "look-fx", "data-v", false) + "</section>" +
       '<section class="lk-sec lk-row"><h3>摆件的动静</h3><button type="button" class="lk-sw" data-act="look-motion" role="switch" aria-checked="' + L.motion + '"' + (REDUCE ? " disabled" : "") + '><i aria-hidden="true"></i>' + (L.motion && !REDUCE ? "开" : "关") + '</button><p class="meta">' + (REDUCE ? "系统设了减少动态效果，摆件都静着。" : "沙在流、烛火跳、热气往上冒、钟在走。") + "</p></section>" +
-      '<section class="lk-sec"><h3>摆件 <small>选中的会摆在书墙的空当里，放不下的先不摆</small></h3><div class="lk-tiles">' + tiles + "</div></section>" +
+      '<section class="lk-sec"><h3>摆件 <small>每件可以指定放在哪一格的书后面，也可以让它自己找空当</small></h3><ul class="lk-list">' + tiles + "</ul></section>" +
       '<div class="lk-foot"><button type="button" class="linkbtn" data-act="look-reset">恢复默认</button><button type="button" class="btn small" data-act="look">好了</button></div></div>';
   }
   /* ---------- 展台：一次只请一本上来 ---------- */
@@ -3711,7 +3720,7 @@
     if (act === "look-color") { lookSet({ color: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-motion") { lookSet({ motion: !LK().motion }); render(); return; }
     if (act === "look-deco") { var dn = t.getAttribute("data-d"), dl = LK().deco.slice(), di = dl.indexOf(dn); if (di >= 0) dl.splice(di, 1); else dl.push(dn); lookSet({ deco: dl }); render(); return; }
-    if (act === "look-reset") { hangSet("float"); lookSet({ read: "face", fx: "turn", color: "named", motion: true, deco: DECO_DEFAULT.slice() }); render(); return; }
+    if (act === "look-reset") { hangSet("float"); lookSet({ read: "face", fx: "turn", color: "named", motion: true, deco: DECO_DEFAULT.slice(), place: {} }); render(); return; }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = wallClass(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
     if (act === "abox") { S.archPick = t.getAttribute("data-t"); render(); var ap = document.querySelector(".apanel"); if (ap && window.innerWidth < 1100) ap.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
@@ -3841,6 +3850,13 @@
   document.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "fp-file") { filmLoad(t.files); t.value = ""; return; }
+    if (t.classList && t.classList.contains("lk-place")) {
+      var pk = t.getAttribute("data-d"), pv = t.value, dl2 = LK().deco.filter(function (x) { return x !== pk; }), pl = Object.assign({}, LK().place);
+      delete pl[pk]; if (pv) { dl2.push(pk); if (pv !== "auto") pl[pk] = pv; }
+      lookSet({ deco: dl2, place: pl }); render();
+      var ps = document.querySelector('.lk-place[data-d="' + pk + '"]'); if (ps) ps.focus();
+      return;
+    }
     if (t.classList && t.classList.contains("rs-chsel") && RD) { RD.chPick = +t.value; rdSidePaint(); return; }
     if (t.classList && t.classList.contains("rd-toc") && RD) {
       if (RD.pdf) { var tp = RD.pdf.toc[+t.value]; if (tp) pdfGo(tp.page); }
