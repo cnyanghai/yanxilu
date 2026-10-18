@@ -357,32 +357,23 @@
       (es.s === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
   }
   /* 抽出来的片盒 / 英语读物 */
-  function enPulledHTML(id) {
+  function enDais(id) {
     var x = EN_ITEM[id], es = enState(id), film = x.kind === "film", local = x.where === "local";
-    var meta = [x.year, x.type, x.level, local ? "研习录跟读播放器" : "在 Baba 英语上学"].filter(Boolean).join(" · ");
-    var head = '<p class="eyebrow">' + (film ? "展台上的片盒" : "展台上的书") + '</p><div class="pb-h" style="--c:var(--ln-en)"><span class="pb-bar" aria-hidden="true"></span><div><h2 id="pulled-h">' + esc(x.title) + "</h2>" +
-      '<p class="pb-en">' + esc(x.en) + '</p><p class="meta">' + esc(meta) + "</p></div></div>";
+    var head = daisId(x.title, [x.year, x.type, x.level], x.en, local ? "" : statusCtl(id, x.title));
+    var noteLab = film ? "观影笔记" : "我的批注", notePh = film ? "哪几句听不出来、记住了哪些说法，写在这里" : "读到哪、想到什么，写在这里";
     var why = x.why ? '<p class="pb-why">' + esc(x.why) + "</p>" : "";
     if (local) {
-      var next = Math.min(es.done, Math.max(0, es.total - 1)), segs = "";
+      var next = Math.min(es.done, Math.max(0, es.total - 1)), segs = "", mins = x.plan ? subjMin(x.plan) : 0;
       for (var k = 0; k < es.total; k++) segs += '<span class="fe-s' + (k < es.done ? " r" : "") + '"></span>';
-      var mins = x.plan ? subjMin(x.plan) : 0;
-      return '<aside class="pulled" aria-labelledby="pulled-h" style="--c:var(--ln-en)">' + head + why +
-        '<div class="fe"><div class="fe-top"><span>36 段 · 学过的段落染上颜色</span><span>' + Math.round(es.pct * 100) + '%</span></div><div class="fe-wrap"><div class="fe-block en-segs" aria-hidden="true">' + segs + '</div><i class="fe-rib" style="left:' + (es.total ? es.done / es.total * 100 : 0) + '%" aria-hidden="true"></i></div></div>' +
-        '<div class="pb-stats"><div><b>' + es.done + "<small> / " + es.total + "</small></b><span>段学完</span></div><div><b>" + hrs(mins) + "</b><span>小时</span></div><div><b>" + Math.max(0, es.total - es.done) + "</b><span>段没学</span></div></div>" +
-        noteBlock(id, "观影笔记", "哪几句听不出来、记住了哪些说法，写在这里") +
-        '<div class="btns">' + (es.done < es.total ? '<a class="btn" href="#c-' + esc(x.plan) + '" data-act="film-go" data-seg="' + next + '">继续：第 ' + (next + 1) + " 段</a>" : '<a class="btn" href="#c-' + esc(x.plan) + '">打开跟读播放器</a>') +
-        '<a class="btn ghost" href="#c-' + esc(x.plan) + '">全部 ' + es.total + " 段</a></div></aside>";
+      var prog = '<section class="prog" aria-label="学到哪"><div class="pg-top"><b class="pg-pct">' + Math.round(es.pct * 100) + "<small>%</small></b>" +
+        '<span class="pg-where">' + es.done + " / " + es.total + " 段学完" + (mins ? " · " + hrs(mins) + " 小时" : "") + "</span></div>" +
+        '<div class="fe-wrap"><div class="fe-block en-segs sm" aria-hidden="true">' + segs + '</div><i class="fe-rib sm" style="left:' + (es.total ? es.done / es.total * 100 : 0) + '%" aria-hidden="true"></i></div></section>';
+      var go = es.done < es.total ? '<a class="btn" href="#c-' + esc(x.plan) + '" data-act="film-go" data-seg="' + next + '">继续：第 ' + (next + 1) + " 段</a>" : '<a class="btn" href="#c-' + esc(x.plan) + '">打开跟读播放器</a>';
+      return { col: "var(--ln-en)", head: head, body: prog + '<div class="btns pb-acts">' + go + "</div>" + moreHTML(why + noteBlock(id, noteLab, notePh), "介绍 · " + noteLab) };
     }
-    var eps = (x.eps || []).map(function (e) {
-      return '<li><i aria-hidden="true"></i><a class="linkrow" href="' + esc(enHref(x.path + "/episodes/" + e.code + "/dialogues/0")) + '" target="_blank" rel="noopener"><span class="pb-cn">' + esc(e.code) + "</span>" + esc(e.title) + (e.lines ? '<span class="ep-n">' + e.lines + " 句</span>" : "") + '<span class="ext" aria-hidden="true">↗</span></a></li>';
-    }).join("");
-    return '<aside class="pulled" aria-labelledby="pulled-h" style="--c:var(--ln-en)">' + head + why +
-      (eps ? '<div><p class="pb-sub">' + (x.type === "剧集" ? "Baba 上已有的集" : "Baba 上的这部片") + '（点开从第 1 句学起）</p><ol class="pb-chs en-eps">' + eps + "</ol></div>" : "") +
-      '<p class="en-sync">' + (film ? "“去 Baba 学”打开这部片的页面，那里的“继续学习”接着你上次学到的那一句。" : "") + "学到哪、收了哪些生词，都记在 Baba 上，暂时不传回研习录；学到一半或学完了，在下面标一下。</p>" +
-      '<div class="pb-st">' + statusCtl(id, x.title) + "</div>" + noteBlock(id, film ? "观影笔记" : "我的批注", film ? "哪几句听不出来、记住了哪些说法，写在这里" : "读到哪、想到什么，写在这里") +
-      '<div class="btns"><a class="btn" href="' + esc(enHref(x.path)) + '" target="_blank" rel="noopener">' + (film ? "去 Baba 学" : "去 Baba 读") + ' ↗</a>' +
-      (film ? '<a class="btn ghost" href="' + esc(enHref("/vocabulary")) + '" target="_blank" rel="noopener">生词本 ↗</a>' : "") + "</div></aside>";
+    var go2 = '<a class="btn" href="' + esc(enHref(x.path)) + '" target="_blank" rel="noopener">' + (film ? "去 Baba 学" : "去 Baba 读") + " ↗</a>";
+    var sync = '<p class="meta">学到哪、收了哪些生词都记在 Baba 上，暂时不传回研习录，学到一半或学完了在上面标一下。</p>';
+    return { col: "var(--ln-en)", head: head, body: '<div class="btns pb-acts">' + go2 + "</div>" + moreHTML(why + sync + noteBlock(id, noteLab, notePh), "介绍 · " + noteLab) };
   }
   /* ---------- 自己加的书、从书墙上拿下的书 ----------
    * mybooks：自己加的书，文档 id = "my-" + 时间，内容 { title, by, track, why, t }，和内置的书一样能挂电子书、写批注、标进度。
@@ -535,6 +526,7 @@
     w.at = now;
     if (!S.canEdit) { S.data.reading = Object.assign({}, S.data.reading); S.data.reading[id] = val; return; }
     put("reading", id, val);
+    if (val.pct > 0.004 && st(id) === "todo" && !LIB.books[id]) put("progress", id, { s: "doing", t: val.t });
   }
   function agoText(iso) {
     var t = Date.parse(iso || ""); if (!t) return "";
@@ -544,38 +536,31 @@
     var dd = dayDiff(String(iso).slice(0, 10), today());
     return dd <= 1 ? "昨天" : dd < 30 ? dd + " 天前" : String(iso).slice(0, 10);
   }
-  /* 进度卡：大数字 + 书口（读过的部分翻旧了，书签夹在读到的地方，精读书再画出每一章）+ 近两周读没读 + 照这个速度还要多久 */
+  /* 进度：一行大数字和读到哪，下面一条书口（读过的部分翻旧了，书签夹在读到的地方，精读书画出每一章），再一行近两周读了几天、照这个速度还要几天 */
   function progCardHTML(id) {
-    var b = LIB.books[id], bs = bookState(id), rd = readingOf(id);
-    if (!b && !rd) return ebookOf(id) ? '<p class="pg-hint">打开电子书读，读到哪、哪天读过，会自动记在这里。</p>' : "";
+    var b = LIB.books[id], bs = bookState(id), rd = readingOf(id), pct = rd ? rd.pct : bs.pct;
+    if (!b && !rd && !(bs.pct > 0)) return "";
     var J = S.data.journal || {}, jd = {};
     Object.keys(J).forEach(function (k) { var e = J[k]; if (e && e.date && (e.ref === id || String(e.ref || "").indexOf(id + "-ch") === 0)) jd[e.date] = true; });
     var rdays = (rd && rd.days) || {}, days = [], tdy = today();
     for (var i = 13; i >= 0; i--) days.push(addDays(tdy, -i));
-    var on = days.filter(function (d) { return rdays[d] != null || jd[d]; });
-    var pct = rd ? rd.pct : bs.pct, where = "";
+    var on = days.filter(function (d) { return rdays[d] != null || jd[d]; }).length, where = "";
     if (rd && rd.label) where = rd.label;
     else if (b) where = bs.done >= b.chapters.length ? "全部读完" : "第" + CN[b.chapters[bs.done].n] + "章 · " + b.chapters[bs.done].title.replace(/（.*）$/, "");
     var ticks = b ? b.chapters.map(function (c, k) { return '<i class="pg-ch' + (k < bs.done ? " d" : "") + '" style="left:' + (k / b.chapters.length * 100).toFixed(2) + "%;width:" + (100 / b.chapters.length).toFixed(2) + '%" title="第' + CN[c.n] + "章 " + esc(c.title) + (k < bs.done ? " · 精读完" : "") + '"></i>'; }).join("") : "";
-    var subs = [];
-    if (b) subs.push("精读 " + bs.done + " / " + b.chapters.length + " 章");
-    if (rd && b) subs.push("电子书 " + Math.round(rd.pct * 100) + "%");
-    if (rd && rd.kind === "pdf" && rd.total) subs.push("第 " + rd.loc + " / " + rd.total + " 页");
-    var mins = bookMinutes(id); if (mins) subs.push(hrs(mins) + " 小时");
-    var nMk = marksOf(id).length; if (nMk) subs.push(nMk + " 条划线");
     var eta = "";
     if (rd && pct < 0.995) {
       var ks = Object.keys(rdays).sort().filter(function (d) { return d >= days[0]; });
       if (ks.length >= 2) {
         var span = Math.max(1, dayDiff(ks[0], tdy)), rate = (pct - rdays[ks[0]]) / span;
-        if (rate > 0.0005) { var left = Math.ceil((1 - pct) / rate); if (left <= 365) eta = '<p class="pg-eta">照近两周的速度，大约还要 ' + left + " 天读完</p>"; }
+        if (rate > 0.0005) { var left = Math.ceil((1 - pct) / rate); if (left <= 365) eta = "照这个速度大约还要 " + left + " 天"; }
       }
     }
-    return '<section class="prog" aria-label="阅读进度"><div class="pg-top"><b class="pg-pct">' + Math.round(pct * 100) + "<small>%</small></b><div>" +
-      (where ? '<span class="pg-where">读到 ' + esc(where) + "</span>" : "") + (rd ? '<span class="pg-when">上次读电子书 · ' + esc(agoText(rd.t)) + "</span>" : "") + "</div></div>" +
+    var sub = [on ? "近两周读了 " + on + " 天" : "", eta, rd ? "上次 " + agoText(rd.t) : ""].filter(Boolean).join(" · ");
+    return '<section class="prog" aria-label="阅读进度"><div class="pg-top"><b class="pg-pct">' + Math.round(pct * 100) + "<small>%</small></b>" +
+      (where ? '<span class="pg-where">' + esc(where) + "</span>" : "") + "</div>" +
       '<div class="pg-edge' + (b ? " ch" : "") + '" style="--p:' + (pct * 100).toFixed(1) + '%" role="img" aria-label="读到 ' + Math.round(pct * 100) + '%">' + ticks + '<i class="pg-read"></i><i class="pg-rib"></i></div>' +
-      (subs.length ? '<p class="pg-sub">' + subs.map(esc).join(" · ") + "</p>" : "") +
-      '<div class="pg-days"><span>近两周</span><span class="pg-dots" aria-hidden="true">' + days.map(function (d) { var o = rdays[d] != null || jd[d]; return '<i class="' + (o ? "on" : "") + (d === tdy ? " td" : "") + '" title="' + d + (o ? " 读过" : "") + '"></i>'; }).join("") + "</span><span>" + (on.length ? "读了 " + on.length + " 天" : "还没读过") + "</span></div>" + eta + "</section>";
+      (sub ? '<p class="pg-sub">' + esc(sub) + "</p>" : "") + "</section>";
   }
   /* ---------- 书架：原木书墙 ----------
    * 上面是展台：一次只请一本书（或一部片、一个档案盒）上来，封面朝外，旁边摆着它的道具，右边是展签。
@@ -737,6 +722,7 @@
       return;
     }
     var mods = Array.prototype.slice.call(row0.children), ghost = row0.querySelector(".wm.ghost");
+    wall.style.minHeight = wall.getBoundingClientRect().height + "px";  /* 量的时候整面墙会缩成一排，先撑住高度，免得页面滚动位置被挤掉 */
     wall.classList.add("measuring");
     var cs = getComputedStyle(wall), W = wall.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
     var gap = parseFloat(getComputedStyle(row0).columnGap) || 18, ghostW = ghost ? ghost.getBoundingClientRect().width : 0;
@@ -799,8 +785,9 @@
     var frag = document.createDocumentFragment();
     rows.forEach(function (row) { var div = document.createElement("div"); div.className = "wall-row"; row.els.forEach(function (x) { div.appendChild(x.el); }); frag.appendChild(div); });
     wall.removeChild(row0); wall.appendChild(frag);
+    wall.style.minHeight = "";
   }
-  function wallRefresh() { var w = document.querySelector(".wall"); if (!w) return; w.outerHTML = wallHTML(); wallPack(); }
+  function wallRefresh() { var w = document.querySelector(".wall"); if (!w) return; var sy = window.scrollY; w.outerHTML = wallHTML(); wallPack(); if (window.scrollY !== sy) window.scrollTo(0, sy); }
   function hangPicker() {
     var h = hangGet();
     return '<div class="hang" role="radiogroup" aria-label="书墙的挂法"><span class="hang-h">挂法</span>' + HANGS.map(function (x) {
@@ -841,15 +828,18 @@
     var it = ITEMS[id], tid = it.home, base = /^cfa-/.test(id) ? CLOTH.fin[0] : clothOf(tid, id), light = lumHex(base) > 0.2, tname = domInfo(tid).name;
     return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc(tname || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
   }
-  /* 展台在书墙右边一栏，滚动时停在屏幕上：上面是一小块打着光的展台（封面朝外），下面是展签 */
+  /* 展台在书墙右边一栏，滚动时停在屏幕上 */
   function stageHTML() {
-    var id = stagePick(), panel;
-    if (/^t:/.test(id)) panel = archPanelHTML(TOPIC[id.slice(2)]);
-    else if (EN_ITEM[id]) panel = enPulledHTML(id);
-    else panel = pulledHTML();
-    var mini = '<div class="dais"><p class="stg-cap">展台</p><div class="stg-mid"><div class="stg-scale"><div class="stg-zoom">' + stageCover(id) + '</div></div><i class="stg-stand" aria-hidden="true"></i></div><i class="stg-top" aria-hidden="true"></i></div>';
+    var id = stagePick();
+    if (/^t:/.test(id)) {
+      var mini = '<div class="dais"><div class="stg-mid"><div class="stg-scale"><div class="stg-zoom">' + stageCover(id) + '</div></div><i class="stg-stand" aria-hidden="true"></i></div><i class="stg-top" aria-hidden="true"></i></div>';
+      S.flip = null;
+      return '<aside class="dais-col" aria-label="展台">' + mini + archPanelHTML(TOPIC[id.slice(2)]) + "</aside>";
+    }
+    var P = EN_ITEM[id] ? enDais(id) : bookDais(id);
+    var top = '<div class="dais"><div class="stg-mid"><div class="stg-scale"><div class="stg-zoom">' + stageCover(id) + '</div></div><i class="stg-stand" aria-hidden="true"></i></div>' + P.head + '<i class="stg-top" aria-hidden="true"></i></div>';
     S.flip = null;
-    return '<aside class="dais-col" aria-label="展台">' + mini + panel + "</aside>";
+    return '<aside class="dais-col" aria-label="展台" style="--c:' + P.col + '">' + top + '<div class="pulled">' + P.body + "</div></aside>";
   }
   function wallLegend() {
     return '<div class="w-legend" aria-hidden="true"><span><i class="lg-b"></i>立着：还没读</span><span><i class="lg-b doing"></i>抽出半截、夹书签：在读</span>' +
@@ -931,23 +921,24 @@
     }, function (e) { toast(ebLocalErr(e)); });
   }
   function fmtSize(n) { return n >= 1048576 ? Math.round(n / 104857.6) / 10 + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
-  function ebookBlock(id) {
-    var local = S.mode === "local";
-    var eb = ebookOf(id), up = local ? true : !!(S.assets && S.canEdit), busy = S.ebBusy === id;
-    if (!eb && !up) return "";
-    var input = up ? '<label class="btn ghost small eb-up' + (busy ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : eb ? "换一个文件" : "上传 PDF / EPUB") + "</label>" : "";
-    if (!eb) return '<div class="eb eb-empty"><p><b>电子书</b>' + (local
-      ? "还没有放文件。上传一本 PDF 或 EPUB，文件只存在这个浏览器里，不会传到网上；换电脑、换浏览器或清除网站数据后要重新上传。"
-      : "还没有放文件。上传一本 PDF（20 MB 以内）或 EPUB（15 MB 以内），以后抽出这本书就能直接打开。") + "</p>" + input + "</div>";
-    var tools = "";
-    if (up) tools = '<span class="eb-tools">' + input + (S.ebConfirm === id
-      ? '<span class="eb-conf">文件会删掉，确定？<button type="button" class="linkbtn danger" data-act="eb-del-yes" data-id="' + esc(id) + '">移除</button><button type="button" class="linkbtn" data-act="eb-del-no">取消</button></span>'
-      : '<button type="button" class="linkbtn" data-act="eb-del" data-id="' + esc(id) + '">移除</button>') + "</span>";
-    var lu = local && S.ebUrls[id], epub = (eb.kind || "pdf") === "epub", rdg = readingOf(id);
-    var open = '<button type="button" class="btn eb-open" data-act="eb-read" data-id="' + esc(id) + '">' + (rdg && rdg.pct > 0.004 ? "接着读 · " + Math.round(rdg.pct * 100) + "%" : "打开电子书") + "</button>";
+  function ebCanUpload() { return S.mode === "local" ? true : !!(S.assets && S.canEdit); }
+  function ebUploadBtn(id, label) {
+    if (!ebCanUpload()) return "";
+    var busy = S.ebBusy === id, tip = S.mode === "local" ? "PDF 或 EPUB，只存在这个浏览器里，不会传到网上" : "PDF（20 MB 以内）或 EPUB（15 MB 以内）";
+    return '<label class="btn ghost eb-up' + (busy ? " busy" : "") + '" title="' + tip + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : label) + "</label>";
+  }
+  function ebFileHTML(id) {
+    var eb = ebookOf(id); if (!eb) return "";
+    var local = S.mode === "local", lu = local && S.ebUrls[id], epub = (eb.kind || "pdf") === "epub";
     var tab = epub ? "" : local ? '<a class="linkbtn eb-tab" data-act="eb-open-local" data-id="' + esc(id) + '" href="' + (lu ? lu : "#") + '" target="_blank" rel="noopener">新标签页打开 ↗</a>'
       : '<a class="linkbtn eb-tab" href="/_blob/' + esc(eb.asset) + '" target="_blank" rel="noopener">新标签页打开 ↗</a>';
-    return '<div class="eb">' + open + tab + '<span class="eb-meta">' + esc(eb.name || "PDF") + (eb.size ? " · " + fmtSize(eb.size) : "") + (local ? " · 存在这个浏览器里" : "") + "</span>" + tools + "</div>";
+    var tools = "";
+    if (ebCanUpload()) tools = (S.ebConfirm === id
+      ? '<span class="eb-conf">文件会删掉，确定？<button type="button" class="linkbtn danger" data-act="eb-del-yes" data-id="' + esc(id) + '">移除</button><button type="button" class="linkbtn" data-act="eb-del-no">取消</button></span>'
+      : '<button type="button" class="linkbtn" data-act="eb-del" data-id="' + esc(id) + '">移除</button>');
+    var swap = ebCanUpload() ? '<label class="linkbtn eb-up' + (S.ebBusy === id ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '">' + (S.ebBusy === id ? "上传中……" : "换一个文件") + "</label>" : "";
+    return '<div class="eb-file"><span class="eb-meta">电子书：' + esc(eb.name || "PDF") + (eb.size ? " · " + fmtSize(eb.size) : "") + (local ? " · 存在这个浏览器里" : "") + "</span>" +
+      '<span class="eb-tools">' + tab + swap + tools + "</span></div>";
   }
   function ebUpload(id, file) {
     if (!file) return;
@@ -1199,13 +1190,7 @@
     var full = tqText(root);
     list.forEach(function (m) { var at = tqLocate(full, m); if (at >= 0) tqWrap(root, at, at + m.exact.length, m); });
   }
-  function marksBoxHTML(id) {
-    var list = marksOf(id); if (!list.length) return "";
-    var latest = list.slice().sort(function (a, b) { return String(b.t).localeCompare(String(a.t)); }).slice(0, 3);
-    return '<section class="mkbox" aria-label="划线和批注"><div class="mk-h"><b>划线和批注</b><span>' + list.length + " 条</span>" +
-      (ebookOf(id) ? '<button type="button" class="linkbtn" data-act="eb-read" data-id="' + esc(id) + '" data-notes="1">在书里看全部</button>' : "") + "</div><ul>" +
-      latest.map(function (m) { return '<li class="c-' + esc(m.c || "y") + '"><span class="mk-q">' + esc(m.exact.length > 90 ? m.exact.slice(0, 90) + "……" : m.exact) + "</span>" + (m.note ? '<span class="mk-n">' + esc(m.note.length > 80 ? m.note.slice(0, 80) + "……" : m.note) + "</span>" : "") + "<small>" + esc(m.label || "") + "</small></li>"; }).join("") + "</ul></section>";
-  }
+
 
   /* ---------- 阅读器（EPUB 和 PDF 共用一个窗口） ----------
    * EPUB：上面的解析器一章一章显示；PDF：用随站点一起放的 PDF.js（Mozilla 的开源 PDF 引擎，vendor/pdfjs）一页一页画，文字层可以选中、划线。
@@ -1640,33 +1625,32 @@
       });
     }).catch(function () { /* 没有目录 */ });
   }
-  function pulledHTML() {
-    var id = S.shelfPick, it = ITEMS[id];
-    if (EN_ITEM[id]) return enPulledHTML(id);
-    if (!it) { id = S.shelfPick = FOCUS.filter(function (b) { return bookState(b).s === "doing"; })[0] || FOCUS[0]; it = ITEMS[id]; }
-    if (!it) return "";
-    var b = LIB.books[id], bs = bookState(id), dmi = domInfo(it.home), t = { short: dmi.name }, col = dmi.col;
-    var lineName = id === "tragedy" ? "自选线 · 地缘" : id === "zhoulu" ? "自选线 · 随时读" : /^cfa-/.test(id) ? "目标线上的一站" : "";
-    var head = '<p class="eyebrow">展台上的书</p><div class="pb-h" style="--c:' + col + '"><span class="pb-bar" aria-hidden="true"></span><div><h2 id="pulled-h">' + esc(it.title.replace(/（.*）$/, "")) + "</h2>" +
-      '<p class="meta">' + esc([it.by, t.short, lineName].filter(Boolean).join(" · ")) + "</p></div></div>";
-    if (!b) {
-      var cnt = /^cfa-q|^cfa-e/.test(id) && bs.pct ? '<p class="meta">课表里学到 ' + Math.round(bs.pct * 100) + "%</p>" : "";
-      return '<aside class="pulled" aria-labelledby="pulled-h">' + head + progCardHTML(id) + ebookBlock(id) + (it.why ? '<p class="pb-why">' + esc(it.why) + "</p>" : "") + cnt +
-        '<div class="pb-st">' + statusCtl(id, it.title) + "</div>" + marksBoxHTML(id) + noteBlock(id, "我的批注", "读到哪、想到什么，写在这里") +
-        (dmi.href ? '<div class="btns"><a class="btn ghost small" href="' + dmi.href + '">' + esc(t.short || "") + " 方向全部内容</a></div>" : "") + shelfOpsHTML(id) + "</aside>";
-    }
-    var next = b.chapters[Math.min(bs.done, b.chapters.length - 1)];
-    var chs = b.chapters.map(function (c, i) {
-      var k = i < bs.done ? "d" : i === bs.done ? "c" : "";
-      return '<li class="' + k + '"><i aria-hidden="true"></i><button type="button" class="linkrow" data-act="open-ch" data-book="' + id + '" data-n="' + c.n + '"><span class="pb-cn">第' + CN[c.n] + "章</span>" + esc(c.title) + "</button></li>";
-    }).join("");
-    var lastNote = Object.keys(S.data.notes).filter(function (k) { return k.indexOf(id + "-ch") === 0 && S.data.notes[k].text; }).sort(function (a, c) { return String(S.data.notes[c].t || "").localeCompare(String(S.data.notes[a].t || "")); })[0];
-    var noteFig = lastNote ? '<figure class="pb-note"><figcaption>我的批注 · ' + esc(refLabel(lastNote).replace(/^《.*》/, "")) + "</figcaption><p>" + esc(S.data.notes[lastNote].text.slice(0, 120)) + "</p></figure>" : "";
-    var deepN = Object.keys(b.deep || {});
-    return '<aside class="pulled" aria-labelledby="pulled-h" style="--c:var(' + col + ')">' + head + progCardHTML(id) + ebookBlock(id) +
-      '<ol class="pb-chs">' + chs + "</ol>" + marksBoxHTML(id) + noteFig +
-      '<div class="btns"><button type="button" class="btn" data-act="open-ch" data-book="' + id + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章</button>" +
-      (deepN.length ? '<a class="btn ghost" href="#r-' + id + "-" + deepN[0] + '">精读稿</a>' : "") + '<a class="btn ghost" href="#b-' + id + '">整本书</a></div>' + shelfOpsHTML(id) + "</aside>";
+  /* 展台：上面一小块打着光的台子，封面立在左边，右边是书名、作者、领域和状态；
+   * 下面只放三样：读到哪、下一步（继续读、打开电子书或挂一本电子书）、有几条划线。
+   * 为什么读、批注、电子书文件、方向页和拿下这本书，都收在“更多”里（开合记在这次打开的页面里）。 */
+  function daisId(title, meta, en, status) {
+    return '<div class="dz-id"><h2 id="pulled-h">' + esc(String(title).replace(/（.*）$/, "")) + "</h2>" + (en ? '<p class="pb-en">' + esc(en) + "</p>" : "") +
+      '<p class="meta">' + esc(meta.filter(Boolean).join(" · ")) + "</p>" + (status ? '<div class="pb-st">' + status + "</div>" : "") + "</div>";
+  }
+  function moreHTML(inner, hint) {
+    if (!inner) return "";
+    return '<details class="pb-more" data-more=""' + (S.moreOpen ? " open" : "") + '><summary><b>更多</b><small>' + esc(hint) + '</small></summary><div class="pb-more-in">' + inner + "</div></details>";
+  }
+  function bookDais(id) {
+    var it = ITEMS[id], b = LIB.books[id], bs = bookState(id), dmi = domInfo(it.home), eb = ebookOf(id), rdg = readingOf(id);
+    var pct = rdg && rdg.pct > 0.004 ? Math.round(rdg.pct * 100) : 0, acts = [];
+    if (b) { var next = b.chapters[Math.min(bs.done, b.chapters.length - 1)]; acts.push('<button type="button" class="btn" data-act="open-ch" data-book="' + id + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章</button>"); }
+    if (eb) acts.push('<button type="button" class="btn' + (b ? " ghost" : "") + ' eb-open" data-act="eb-read" data-id="' + esc(id) + '">' + (pct ? (b ? "电子书 · " : "接着读 · ") + pct + "%" : (b ? "读电子书" : "打开电子书")) + "</button>");
+    if (b) acts.push('<a class="btn ghost" href="#b-' + id + '">整本书</a>');
+    if (/^cfa-/.test(id) && ROUTES["c-cfa"]) acts.push('<a class="btn ghost" href="#c-cfa">CFA 课程页</a>');
+    if (!eb && !b) acts.push(ebUploadBtn(id, "＋ 挂一本电子书"));
+    var nMk = marksOf(id).length;
+    var mk = nMk ? '<p class="pb-mk">' + (eb ? '<button type="button" class="linkbtn" data-act="eb-read" data-id="' + esc(id) + '" data-notes="1">' + nMk + " 条划线和批注，在书里看</button>" : nMk + " 条划线和批注") + "</p>" : "";
+    var links = dmi.href ? '<p class="pb-links"><a class="linkbtn" href="' + dmi.href + '">「' + esc(dmi.name) + "」方向的全部内容</a></p>" : "";
+    var more = (it.why ? '<p class="pb-why">' + esc(it.why) + "</p>" : "") + noteBlock(id, "我的批注", "读到哪、想到什么，写在这里") + (eb ? ebFileHTML(id) : b && ebCanUpload() ? '<p class="pb-links">' + ebUploadBtn(id, "＋ 挂一本电子书").replace('class="btn ghost eb-up', 'class="btn ghost small eb-up') + "</p>" : "") + links + shelfOpsHTML(id);
+    var hint = [it.why ? "为什么读" : "", "批注", eb ? "电子书文件" : b && ebCanUpload() ? "挂电子书" : "", S.canEdit && !/^cfa-/.test(id) ? "拿下" : ""].filter(Boolean).join(" · ");
+    return { col: dmi.col, head: daisId(it.title, [it.by || (/^cfa-/.test(id) ? "CFA 一级" : ""), dmi.name], "", b ? "" : statusCtl(id, it.title)),
+      body: progCardHTML(id) + (acts.join("") ? '<div class="btns pb-acts">' + acts.join("") + "</div>" : "") + mk + moreHTML(more, hint) };
   }
   /* ---------- 书架：档案架（研究课题一盒一盒放） ----------
    * 一个课题一个档案盒，盒里按件编号；件越多盒越厚，盒顶露出每件的色签（档案、数据、计划、纪要）。
@@ -3455,8 +3439,10 @@
     else if (r === "archive") html = archiveHTML();
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
+    var sy = window.scrollY;
     $("#main").innerHTML = html;
     wallPack();
+    if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);
     filmMount();
     ebHydrate();
     if (scrollTop) window.scrollTo(0, 0);
@@ -3650,7 +3636,8 @@
     }
   });
   document.addEventListener("toggle", function (e) {
-    var d = e.target; if (!d.matches || !d.matches("details.ch")) return;
+    var d = e.target; if (d.matches && d.matches("details[data-more]")) { S.moreOpen = d.open; return; }
+    if (!d.matches || !d.matches("details.ch")) return;
     S.openCh[d.getAttribute("data-ch")] = d.open;
   }, true);
   var noteTimers = {};
