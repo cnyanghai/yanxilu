@@ -391,7 +391,7 @@
     fut: ["#6F7D4E", "#5B683F", "#849262", "#4E5A37", "#77865A"],
     en: ["#33475F", "#3E5672", "#2B3C51"]
   };
-  var HANGS = [["float", "浮板"], ["peg", "木钉立柱"], ["rope", "麻绳吊板"], ["niche", "拱形书龛"]];
+  var HANGS = [["float", "浮板", "浮板：看不见支架"], ["peg", "木钉", "木钉立柱"], ["rope", "麻绳", "麻绳吊板"], ["niche", "书龛", "拱形书龛"]];
   var HANG_KEY = "yanxilu-hang";
   function hangGet() {
     var h = "float";
@@ -480,17 +480,10 @@
     return '<section class="wm' + (cls ? " " + cls : "") + '" data-wm="' + key + '" style="--c:var(' + col + ')"><div class="wm-in">' + inner + "</div>" +
       '<div class="wm-board">' + (label ? (href ? '<a class="wm-lab" href="' + href + '">' : '<span class="wm-lab">') + '<i class="wm-dot" aria-hidden="true"></i>' + label + (href ? "</a>" : "</span>") : "") + "</div></section>";
   }
-  var WALL_ROWS = [["geo", "co"], ["cycle", "fin", "+"], ["fut", "arch", "en"]];
+  var WALL_ROWS = [["geo", "+"], ["cycle", "fut"], ["co", "fin"], ["en"]];
   var WALL_DECO = { cycle: "glass", co: "vase" };
   function wallModule(key) {
-    if (key === "+") return '<section class="wm ghost" data-wm="+"><div class="wm-in"><button type="button" class="wm-add" data-act="add-book">＋ 加一本书<small>或新开一个方向</small></button></div><div class="wm-board"></div></section>';
-    if (key === "arch") {
-      var tps = TOPICS.slice().sort(function (a, b) { return String(a.track).localeCompare(String(b.track)) || (a.no || 0) - (b.no || 0); }), nIn = inboxItems().length;
-      var inner = tps.map(function (tp) { return boxHTML(tp, true); }).join("") +
-        '<a class="inbox" href="#archive" title="收件匣：还没立课题的单件研究"><i class="ib-p" aria-hidden="true"></i><span class="ib-body"><b>收件匣</b><span>' + nIn + " 件</span></span></a>" +
-        "";
-      return wmHTML("arch", "--k-doc", "<b>档案</b>研究档案 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件", "#archive", inner, "arch");
-    }
+    if (key === "+") return '<section class="wm ghost" data-wm="+"><div class="wm-in"><button type="button" class="wm-add" data-act="add-book">＋ 加一本<small>说书名就行</small></button></div><div class="wm-board"></div></section>';
     if (key === "en") {
       var films = (EN.films || []).map(function (x) { return EN_ITEM[x.id]; }), reads = (EN.books || []).map(function (x) { return EN_ITEM[x.id]; });
       var all = films.concat(reads), d = all.filter(function (x) { return enState(x.id).s === "doing"; }).length;
@@ -512,7 +505,7 @@
   function hangPicker() {
     var h = hangGet();
     return '<div class="hang" role="radiogroup" aria-label="书墙的挂法"><span class="hang-h">挂法</span>' + HANGS.map(function (x) {
-      return '<button type="button" role="radio" aria-checked="' + (h === x[0]) + '" class="hang-b" data-act="hang" data-h="' + x[0] + '"><i class="hg hg-' + x[0] + '" aria-hidden="true"></i>' + x[1] + "</button>";
+      return '<button type="button" role="radio" aria-checked="' + (h === x[0]) + '" class="hang-b" data-act="hang" data-h="' + x[0] + '" title="' + x[2] + '"><i class="hg hg-' + x[0] + '" aria-hidden="true"></i>' + x[1] + "</button>";
     }).join("") + "</div>";
   }
   /* ---------- 展台：一次只请一本上来 ---------- */
@@ -548,35 +541,15 @@
     var it = ITEMS[id], tid = it.home, base = /^cfa-/.test(id) ? CLOTH.fin[0] : clothOf(tid, id), light = lumHex(base) > 0.2;
     return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc((TRACK[tid] || {}).short || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
   }
-  function stageProps(id) {
-    var left = [], right = "";
-    if (/^t:/.test(id)) {
-      var tp = TOPIC[id.slice(2)];
-      (tp.books || []).filter(function (b) { return ITEMS[b]; }).slice(0, 1).forEach(function (b) { left.push('<button type="button" class="stg-card" data-act="pick" data-id="' + esc(b) + '"><small>用到的书</small>《' + esc(ITEMS[b].title) + "》</button>"); });
-    } else if (EN_ITEM[id]) {
-      var es = enState(id);
-      if (es.total) left.push('<a class="stg-card" href="#c-' + esc(EN_ITEM[id].plan) + '" data-act="film-go" data-seg="' + Math.min(es.done, es.total - 1) + '"><small>下一段</small>第 ' + (Math.min(es.done, es.total - 1) + 1) + " 段 / " + es.total + "</a>");
-    } else {
-      var b = LIB.books[id], bs = bookState(id);
-      if (b && bs.done < b.chapters.length) { var nx = b.chapters[bs.done]; left.push('<button type="button" class="stg-card" data-act="open-ch" data-book="' + id + '" data-n="' + nx.n + '"><small>下一章</small>第' + CN[nx.n] + "章<br>" + esc(nx.title.replace(/（.*）$/, "")) + "</button>"); }
-      TOPICS.filter(function (tp) { return (tp.books || []).indexOf(id) >= 0; }).slice(0, 1).forEach(function (tp) {
-        left.push('<button type="button" class="stg-abox" data-act="pick" data-id="t:' + esc(tp.id) + '" style="--c:var(' + (SHELF_COL[tp.track] || "--ln-rev") + ')" title="研究档案：' + esc(tp.title) + '"><b>' + esc(tp.title.split("：")[0]) + "</b><span>" + esc(topicNo(tp)) + "</span></button>");
-      });
-      var nNotes = Object.keys(S.data.notes).filter(function (k) { return (k === id || k.indexOf(id + "-") === 0) && S.data.notes[k].text; }).length;
-      if (nNotes) right = '<span class="stg-note" title="' + nNotes + ' 条批注"><i class="nb-l" aria-hidden="true"></i><i class="nb-r" aria-hidden="true"></i><i class="nb-pen" aria-hidden="true"></i></span>';
-    }
-    return { left: left.join(""), right: right };
-  }
+  /* 展台在书墙右边一栏，滚动时停在屏幕上：上面是一小块打着光的展台（封面朝外），下面是展签 */
   function stageHTML() {
     var id = stagePick(), panel;
     if (/^t:/.test(id)) panel = archPanelHTML(TOPIC[id.slice(2)]);
     else if (EN_ITEM[id]) panel = enPulledHTML(id);
     else panel = pulledHTML();
-    var pr = stageProps(id);
-    var table = '<div class="stg-table"><div class="stg-items"><div class="stg-left">' + pr.left + '</div><div class="stg-mid">' + stageCover(id) + '<i class="stg-stand" aria-hidden="true"></i></div><div class="stg-right">' + pr.right + "</div></div>" +
-      '<i class="stg-top" aria-hidden="true"></i><i class="stg-front" aria-hidden="true"></i></div>';
+    var mini = '<div class="dais"><p class="stg-cap">展台</p><div class="stg-mid"><div class="stg-scale"><div class="stg-zoom">' + stageCover(id) + '</div></div><i class="stg-stand" aria-hidden="true"></i></div><i class="stg-top" aria-hidden="true"></i></div>';
     S.flip = null;
-    return '<section class="dais" aria-label="展台"><p class="stg-cap">展台 · 一次只请一本上来</p>' + table + panel + "</section>";
+    return '<aside class="dais-col" aria-label="展台">' + mini + panel + "</aside>";
   }
   function wallLegend() {
     return '<div class="w-legend" aria-hidden="true"><span><i class="lg-b"></i>立着：还没读</span><span><i class="lg-b doing"></i>抽出半截、夹书签：在读</span>' +
@@ -1149,10 +1122,8 @@
     var f = S.shelfF || "all";
     function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="shelf-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
     return '<div class="view shelf wallv">' + bannerHTML() +
-      '<header class="phead"><div><p class="eyebrow">五个方向 · ' + books.length + " 本书 + CFA 十册" + (nFilm ? " · 英语 " + nFilm + " 部片" : "") + " · 研究档案 " + TOPICS.length + ' 卷</p><h1>书架<span class="h1-sub">书墙</span></h1>' +
-      '<p class="lede">上面是展台，一次只请一本上来；下面是一面亚麻墙，书、研究档案、片子挂在同一套橡木板上。点一本书，它就从墙上抽出来，落到展台上。</p>' + shelfSeg("shelf") + "</div>" +
-      '<div class="w-tools">' + hangPicker() + '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></div></header>" +
-      stageHTML() + wallHTML() + wallLegend() + "</div>";
+      '<header class="w-head"><h1>书架</h1>' + shelfSeg("shelf") + '<div class="w-tools"><div class="chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div>" + hangPicker() + "</div></header>" +
+      '<div class="w-main"><div class="w-left">' + wallHTML() + wallLegend() + "</div>" + stageHTML() + "</div></div>";
   }
 
   /* ---------- 方向页 ---------- */
@@ -2848,8 +2819,8 @@
     if (act === "pick") {
       var pid = t.getAttribute("data-id"); if (pid !== S.shelfPick) S.flip = pid; S.shelfPick = pid;
       if (S.route !== "shelf") { location.hash = "#shelf"; return; }
-      render(); var stg = document.querySelector(".dais");
-      if (stg) { var sr = stg.getBoundingClientRect(); if (sr.top < 0 || sr.top > window.innerHeight * 0.4) stg.scrollIntoView({ block: "start", behavior: REDUCE ? "auto" : "smooth" }); }
+      render(); var stg = document.querySelector(".dais-col");
+      if (stg && window.getComputedStyle(stg).position !== "sticky") { var sr = stg.getBoundingClientRect(); if (sr.top < 0 || sr.top > window.innerHeight * 0.4) stg.scrollIntoView({ block: "start", behavior: REDUCE ? "auto" : "smooth" }); }
       return;
     }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = "wall hang-" + hangGet(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }

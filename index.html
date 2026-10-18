@@ -1135,10 +1135,9 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
   --linen-bg:repeating-linear-gradient(0deg,var(--linen-tx) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,var(--linen-tx) 0 1px,transparent 1px 3px);
   --rattan:repeating-linear-gradient(90deg,rgba(90,60,25,.28) 0 2px,transparent 2px 7px),repeating-linear-gradient(0deg,var(--rattan-1) 0 4px,var(--rattan-2) 4px 8px)}
 .wallv .phead{margin-bottom:22px}
-.w-tools{display:flex;flex-direction:column;align-items:flex-end;gap:12px}
 .hang{display:inline-flex;flex-wrap:wrap;align-items:center;gap:2px;padding:4px;border-radius:24px;background:var(--leaf);border:1px solid var(--rule)}
 .hang-h{padding:0 8px 0 10px;font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
-.hang-b{min-height:36px;display:inline-flex;align-items:center;gap:7px;padding:0 13px;border:0;border-radius:18px;background:transparent;font-family:var(--f-ui);font-size:13.5px;color:var(--ink-2);cursor:pointer}
+.hang-b{min-height:34px;display:inline-flex;align-items:center;gap:6px;padding:0 11px;border:0;border-radius:18px;background:transparent;font-family:var(--f-ui);font-size:13.5px;color:var(--ink-2);cursor:pointer}
 .hang-b:hover{color:var(--ink)}
 .hang-b[aria-checked="true"]{background:var(--ink);color:var(--paper);font-weight:700}
 .hang-b:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
@@ -1147,19 +1146,27 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 .hg-peg{background:linear-gradient(currentColor,currentColor) 1px 0/3px 100% no-repeat,linear-gradient(currentColor,currentColor) 14px 0/3px 100% no-repeat,linear-gradient(currentColor,currentColor) 0 7px/100% 3px no-repeat}
 .hg-rope{background:linear-gradient(currentColor,currentColor) 3px 0/1.5px 9px no-repeat,linear-gradient(currentColor,currentColor) 13px 0/1.5px 9px no-repeat,linear-gradient(currentColor,currentColor) 0 9px/100% 3px no-repeat}
 .hg-niche{border:2px solid currentColor;border-bottom-width:3px;border-radius:9px 9px 1px 1px}
-/* 展台 */
-.dais{position:relative;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:center;gap:24px 64px;padding:60px 36px 0;border-radius:8px 8px 0 0;scroll-margin-top:84px;
-  background:radial-gradient(40% 75% at 34% 0%,var(--dais-light),transparent 72%),var(--linen-bg),var(--dais-bg)}
-.stg-cap{position:absolute;left:32px;top:22px;margin:0;font-family:var(--f-ui);font-size:12px;letter-spacing:.24em;color:var(--ink-3)}
-.stg-table{position:relative;flex:0 1 680px;min-width:0;display:flex;flex-direction:column;align-items:center}
-.stg-items{position:relative;z-index:1;display:flex;align-items:flex-end;justify-content:center;gap:26px;padding:0 20px;margin-bottom:-14px}
-.stg-left{display:flex;flex-direction:column;align-items:center;gap:18px;margin-bottom:24px}
-.stg-mid{display:flex;flex-direction:column;align-items:center}
-.stg-right{margin-bottom:28px}
-.stg-stand{display:block;width:230px;height:14px;margin-top:-6px;background:var(--oak);border-radius:2px}
-.stg-top{display:block;width:100%;height:24px;background:var(--oak);border-radius:3px;box-shadow:0 14px 18px -10px rgba(40,28,14,.55)}
-.stg-front{display:block;width:92%;height:60px;background:var(--oak-v);box-shadow:inset 0 10px 12px -8px rgba(40,28,14,.4)}
-.dais > .pulled{flex:0 1 420px;align-self:center;max-width:100%;margin-bottom:30px}
+/* 书架页：一行工具条 + 书墙 | 展台 */
+.w-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;margin:0 0 20px}
+.w-head h1{margin:0;font-size:34px;letter-spacing:.1em;line-height:1.1}
+.w-head .shelf-seg{margin-top:0}
+.w-tools{margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px 14px}
+.w-tools .chips{margin:0}
+.w-main{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:24px;align-items:start}
+.w-left{min-width:0}
+.wallv .wall{margin-top:0;border-radius:8px}
+/* 展台：书墙右边一栏，滚动时停在屏幕上 */
+.dais-col{position:sticky;top:78px;max-height:calc(100vh - 94px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;
+  background:var(--leaf);border:1px solid var(--rule);border-radius:16px;box-shadow:0 24px 40px -30px rgba(36,33,30,.5)}
+.dais{position:relative;display:flex;flex-direction:column;align-items:center;padding:34px 18px 0;border-radius:15px 15px 0 0;
+  background:radial-gradient(60% 80% at 50% 0%,var(--dais-light),transparent 72%),var(--linen-bg),var(--dais-bg)}
+.stg-cap{position:absolute;left:16px;top:12px;margin:0;font-family:var(--f-ui);font-size:11.5px;letter-spacing:.24em;color:var(--ink-3)}
+.stg-mid{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;margin-bottom:-8px}
+.stg-scale{width:140px;height:196px}
+.stg-zoom{width:250px;height:350px;transform:scale(.56);transform-origin:0 0}
+.stg-stand{display:block;width:150px;height:10px;margin-top:-4px;background:var(--oak);border-radius:2px}
+.stg-top{display:block;align-self:stretch;height:16px;margin:0 -18px;background:var(--oak);box-shadow:0 10px 12px -8px rgba(40,28,14,.5)}
+.dais-col > .pulled{background:transparent;border:0;border-radius:0;box-shadow:none;padding:20px 20px 20px}
 .stg-cover{position:relative;width:250px;height:350px;box-sizing:border-box;padding:28px 22px 22px 32px;border-radius:3px 8px 8px 3px;display:flex;flex-direction:column;gap:10px;color:var(--foil);
   background:linear-gradient(90deg,rgba(0,0,0,.28) 0 10px,rgba(255,255,255,.15) 10px 13px,transparent 13px),radial-gradient(90% 60% at 60% 10%,rgba(255,255,255,.18),transparent 70%),var(--cloth-tx),var(--cl);
   box-shadow:0 40px 50px -26px rgba(40,28,14,.6),0 2px 3px rgba(0,0,0,.15);transform:perspective(900px) rotateX(5deg)}
@@ -1186,19 +1193,8 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 @keyframes daisrise{from{transform:translateY(60px);opacity:.2}to{transform:none;opacity:1}}
 .stg-cover.flip{animation:daisflip .6s cubic-bezier(.2,.8,.2,1)}
 .stg-box.flip{animation:daisrise .5s cubic-bezier(.2,.8,.2,1)}
-.stg-card{display:block;width:150px;box-sizing:border-box;padding:12px 14px;background:#FFFFFF;border:1px solid #D9D4CA;box-shadow:0 10px 14px -10px rgba(40,28,14,.4);transform:rotate(2deg);font:inherit;font-family:var(--f-display);font-size:14px;line-height:1.6;color:#2B2620;text-align:left;text-decoration:none;cursor:pointer;transition:transform .15s}
-.stg-card small{display:block;font-family:var(--f-ui);font-size:11px;letter-spacing:.1em;color:#7B776F}
-.stg-card:hover{transform:rotate(0) translateY(-2px)}
-.stg-abox{position:relative;width:150px;height:46px;box-sizing:border-box;padding:0 10px 0 16px;display:flex;align-items:center;gap:8px;border:0;background:linear-gradient(#D3B077,#B8945A);border-radius:2px;box-shadow:0 12px 14px -10px rgba(40,28,14,.55);cursor:pointer;font:inherit}
-.stg-abox::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--c)}
-.stg-abox b{min-width:0;padding:3px 8px;background:#F7F1E2;border:1px solid #B79A63;font-family:var(--f-display);font-size:12px;color:#24211E;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.stg-abox span{flex:none;font-family:var(--f-mono);font-size:10px;color:#3B2F1C;white-space:nowrap}
-.stg-note{position:relative;display:block;width:180px;height:110px;transform:perspective(600px) rotateX(48deg) rotate(-6deg);transform-origin:bottom}
-.nb-l,.nb-r{position:absolute;top:0;width:50%;height:100px;box-sizing:border-box;background:repeating-linear-gradient(to bottom,transparent 0 14px,rgba(60,50,40,.16) 14px 15px),#FBF8F0;border:1px solid #DCD5C6}
-.nb-l{left:0;border-radius:3px 0 0 3px}.nb-r{right:0;border-radius:0 3px 3px 0}
-.nb-pen{position:absolute;right:-20px;top:30px;width:110px;height:5px;border-radius:3px;background:linear-gradient(90deg,#2B2620 0 10px,#D8B46A 10px 92%,#F0D6B8 92%);transform:rotate(-24deg)}
 /* 书墙 */
-.wall{position:relative;display:flex;flex-direction:column;gap:46px;padding:52px 16px 30px;border-radius:0 0 8px 8px;
+.wall{position:relative;display:flex;flex-direction:column;gap:46px;padding:46px 16px 30px;border-radius:0 0 8px 8px;
   background:radial-gradient(70% 40% at 50% 0%,var(--wall-light),transparent 70%),var(--linen-bg),var(--linen);box-shadow:inset 0 14px 16px -12px rgba(60,40,20,.35)}
 .wall-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:52px 22px}
 .wm{position:relative;flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
@@ -1642,10 +1638,9 @@ svg.fold,svg.fold-mini{display:block;width:100%;min-width:1080px;height:auto;fon
   .fold-scroll{margin-inline:-16px;padding-inline:16px}
 }
 @media (max-width:1100px){
-  .w-tools{align-items:flex-start}
-  .dais{padding:56px 14px 0;gap:18px}
-  .stg-table{flex-basis:100%}
-  .dais > .pulled{flex-basis:100%;margin-bottom:18px}
+  .w-tools{margin-left:0;justify-content:flex-start}
+  .w-main{grid-template-columns:minmax(0,1fr)}
+  .dais-col{position:static;max-height:none;scroll-margin-top:84px}
   .wall{padding:44px 12px 24px;gap:40px}
   .wall-row{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:40px}
   .wm-in{overflow-x:auto;overflow-y:hidden;padding-bottom:34px;scrollbar-width:thin}
@@ -1653,13 +1648,8 @@ svg.fold,svg.fold-mini{display:block;width:100%;min-width:1080px;height:auto;fon
   .hang-peg .wm:not(.ghost) .wm-board,.hang-niche .wm:not(.ghost) .wm-board{margin-top:-34px}
 }
 @media (max-width:640px){
-  .stg-items{gap:12px;padding:0 4px}
-  .stg-right{display:none}
-  .stg-left .stg-abox{display:none}
-  .stg-cover{width:170px;height:240px;padding:20px 16px 16px 26px}
-  .stg-cover .sc-t{font-size:20px!important}
-  .stg-card{width:120px;font-size:13px}
   .hang-h{display:none}
+  .w-head h1{font-size:30px}
 }
 @media (prefers-reduced-motion: reduce){.stg-cover.flip,.stg-box.flip{animation:none}.cb,.cv{transition:none}}
 </style>
@@ -3942,7 +3932,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     fut: ["#6F7D4E", "#5B683F", "#849262", "#4E5A37", "#77865A"],
     en: ["#33475F", "#3E5672", "#2B3C51"]
   };
-  var HANGS = [["float", "浮板"], ["peg", "木钉立柱"], ["rope", "麻绳吊板"], ["niche", "拱形书龛"]];
+  var HANGS = [["float", "浮板", "浮板：看不见支架"], ["peg", "木钉", "木钉立柱"], ["rope", "麻绳", "麻绳吊板"], ["niche", "书龛", "拱形书龛"]];
   var HANG_KEY = "yanxilu-hang";
   function hangGet() {
     var h = "float";
@@ -4031,17 +4021,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     return '<section class="wm' + (cls ? " " + cls : "") + '" data-wm="' + key + '" style="--c:var(' + col + ')"><div class="wm-in">' + inner + "</div>" +
       '<div class="wm-board">' + (label ? (href ? '<a class="wm-lab" href="' + href + '">' : '<span class="wm-lab">') + '<i class="wm-dot" aria-hidden="true"></i>' + label + (href ? "</a>" : "</span>") : "") + "</div></section>";
   }
-  var WALL_ROWS = [["geo", "co"], ["cycle", "fin", "+"], ["fut", "arch", "en"]];
+  var WALL_ROWS = [["geo", "+"], ["cycle", "fut"], ["co", "fin"], ["en"]];
   var WALL_DECO = { cycle: "glass", co: "vase" };
   function wallModule(key) {
-    if (key === "+") return '<section class="wm ghost" data-wm="+"><div class="wm-in"><button type="button" class="wm-add" data-act="add-book">＋ 加一本书<small>或新开一个方向</small></button></div><div class="wm-board"></div></section>';
-    if (key === "arch") {
-      var tps = TOPICS.slice().sort(function (a, b) { return String(a.track).localeCompare(String(b.track)) || (a.no || 0) - (b.no || 0); }), nIn = inboxItems().length;
-      var inner = tps.map(function (tp) { return boxHTML(tp, true); }).join("") +
-        '<a class="inbox" href="#archive" title="收件匣：还没立课题的单件研究"><i class="ib-p" aria-hidden="true"></i><span class="ib-body"><b>收件匣</b><span>' + nIn + " 件</span></span></a>" +
-        "";
-      return wmHTML("arch", "--k-doc", "<b>档案</b>研究档案 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件", "#archive", inner, "arch");
-    }
+    if (key === "+") return '<section class="wm ghost" data-wm="+"><div class="wm-in"><button type="button" class="wm-add" data-act="add-book">＋ 加一本<small>说书名就行</small></button></div><div class="wm-board"></div></section>';
     if (key === "en") {
       var films = (EN.films || []).map(function (x) { return EN_ITEM[x.id]; }), reads = (EN.books || []).map(function (x) { return EN_ITEM[x.id]; });
       var all = films.concat(reads), d = all.filter(function (x) { return enState(x.id).s === "doing"; }).length;
@@ -4063,7 +4046,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function hangPicker() {
     var h = hangGet();
     return '<div class="hang" role="radiogroup" aria-label="书墙的挂法"><span class="hang-h">挂法</span>' + HANGS.map(function (x) {
-      return '<button type="button" role="radio" aria-checked="' + (h === x[0]) + '" class="hang-b" data-act="hang" data-h="' + x[0] + '"><i class="hg hg-' + x[0] + '" aria-hidden="true"></i>' + x[1] + "</button>";
+      return '<button type="button" role="radio" aria-checked="' + (h === x[0]) + '" class="hang-b" data-act="hang" data-h="' + x[0] + '" title="' + x[2] + '"><i class="hg hg-' + x[0] + '" aria-hidden="true"></i>' + x[1] + "</button>";
     }).join("") + "</div>";
   }
   /* ---------- 展台：一次只请一本上来 ---------- */
@@ -4099,35 +4082,15 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var it = ITEMS[id], tid = it.home, base = /^cfa-/.test(id) ? CLOTH.fin[0] : clothOf(tid, id), light = lumHex(base) > 0.2;
     return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc((TRACK[tid] || {}).short || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
   }
-  function stageProps(id) {
-    var left = [], right = "";
-    if (/^t:/.test(id)) {
-      var tp = TOPIC[id.slice(2)];
-      (tp.books || []).filter(function (b) { return ITEMS[b]; }).slice(0, 1).forEach(function (b) { left.push('<button type="button" class="stg-card" data-act="pick" data-id="' + esc(b) + '"><small>用到的书</small>《' + esc(ITEMS[b].title) + "》</button>"); });
-    } else if (EN_ITEM[id]) {
-      var es = enState(id);
-      if (es.total) left.push('<a class="stg-card" href="#c-' + esc(EN_ITEM[id].plan) + '" data-act="film-go" data-seg="' + Math.min(es.done, es.total - 1) + '"><small>下一段</small>第 ' + (Math.min(es.done, es.total - 1) + 1) + " 段 / " + es.total + "</a>");
-    } else {
-      var b = LIB.books[id], bs = bookState(id);
-      if (b && bs.done < b.chapters.length) { var nx = b.chapters[bs.done]; left.push('<button type="button" class="stg-card" data-act="open-ch" data-book="' + id + '" data-n="' + nx.n + '"><small>下一章</small>第' + CN[nx.n] + "章<br>" + esc(nx.title.replace(/（.*）$/, "")) + "</button>"); }
-      TOPICS.filter(function (tp) { return (tp.books || []).indexOf(id) >= 0; }).slice(0, 1).forEach(function (tp) {
-        left.push('<button type="button" class="stg-abox" data-act="pick" data-id="t:' + esc(tp.id) + '" style="--c:var(' + (SHELF_COL[tp.track] || "--ln-rev") + ')" title="研究档案：' + esc(tp.title) + '"><b>' + esc(tp.title.split("：")[0]) + "</b><span>" + esc(topicNo(tp)) + "</span></button>");
-      });
-      var nNotes = Object.keys(S.data.notes).filter(function (k) { return (k === id || k.indexOf(id + "-") === 0) && S.data.notes[k].text; }).length;
-      if (nNotes) right = '<span class="stg-note" title="' + nNotes + ' 条批注"><i class="nb-l" aria-hidden="true"></i><i class="nb-r" aria-hidden="true"></i><i class="nb-pen" aria-hidden="true"></i></span>';
-    }
-    return { left: left.join(""), right: right };
-  }
+  /* 展台在书墙右边一栏，滚动时停在屏幕上：上面是一小块打着光的展台（封面朝外），下面是展签 */
   function stageHTML() {
     var id = stagePick(), panel;
     if (/^t:/.test(id)) panel = archPanelHTML(TOPIC[id.slice(2)]);
     else if (EN_ITEM[id]) panel = enPulledHTML(id);
     else panel = pulledHTML();
-    var pr = stageProps(id);
-    var table = '<div class="stg-table"><div class="stg-items"><div class="stg-left">' + pr.left + '</div><div class="stg-mid">' + stageCover(id) + '<i class="stg-stand" aria-hidden="true"></i></div><div class="stg-right">' + pr.right + "</div></div>" +
-      '<i class="stg-top" aria-hidden="true"></i><i class="stg-front" aria-hidden="true"></i></div>';
+    var mini = '<div class="dais"><p class="stg-cap">展台</p><div class="stg-mid"><div class="stg-scale"><div class="stg-zoom">' + stageCover(id) + '</div></div><i class="stg-stand" aria-hidden="true"></i></div><i class="stg-top" aria-hidden="true"></i></div>';
     S.flip = null;
-    return '<section class="dais" aria-label="展台"><p class="stg-cap">展台 · 一次只请一本上来</p>' + table + panel + "</section>";
+    return '<aside class="dais-col" aria-label="展台">' + mini + panel + "</aside>";
   }
   function wallLegend() {
     return '<div class="w-legend" aria-hidden="true"><span><i class="lg-b"></i>立着：还没读</span><span><i class="lg-b doing"></i>抽出半截、夹书签：在读</span>' +
@@ -4700,10 +4663,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var f = S.shelfF || "all";
     function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="shelf-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
     return '<div class="view shelf wallv">' + bannerHTML() +
-      '<header class="phead"><div><p class="eyebrow">五个方向 · ' + books.length + " 本书 + CFA 十册" + (nFilm ? " · 英语 " + nFilm + " 部片" : "") + " · 研究档案 " + TOPICS.length + ' 卷</p><h1>书架<span class="h1-sub">书墙</span></h1>' +
-      '<p class="lede">上面是展台，一次只请一本上来；下面是一面亚麻墙，书、研究档案、片子挂在同一套橡木板上。点一本书，它就从墙上抽出来，落到展台上。</p>' + shelfSeg("shelf") + "</div>" +
-      '<div class="w-tools">' + hangPicker() + '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></div></header>" +
-      stageHTML() + wallHTML() + wallLegend() + "</div>";
+      '<header class="w-head"><h1>书架</h1>' + shelfSeg("shelf") + '<div class="w-tools"><div class="chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div>" + hangPicker() + "</div></header>" +
+      '<div class="w-main"><div class="w-left">' + wallHTML() + wallLegend() + "</div>" + stageHTML() + "</div></div>";
   }
 
   /* ---------- 方向页 ---------- */
@@ -6399,8 +6360,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "pick") {
       var pid = t.getAttribute("data-id"); if (pid !== S.shelfPick) S.flip = pid; S.shelfPick = pid;
       if (S.route !== "shelf") { location.hash = "#shelf"; return; }
-      render(); var stg = document.querySelector(".dais");
-      if (stg) { var sr = stg.getBoundingClientRect(); if (sr.top < 0 || sr.top > window.innerHeight * 0.4) stg.scrollIntoView({ block: "start", behavior: REDUCE ? "auto" : "smooth" }); }
+      render(); var stg = document.querySelector(".dais-col");
+      if (stg && window.getComputedStyle(stg).position !== "sticky") { var sr = stg.getBoundingClientRect(); if (sr.top < 0 || sr.top > window.innerHeight * 0.4) stg.scrollIntoView({ block: "start", behavior: REDUCE ? "auto" : "smooth" }); }
       return;
     }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = "wall hang-" + hangGet(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }
