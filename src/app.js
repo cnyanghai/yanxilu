@@ -7,7 +7,7 @@
   var LESSON_SNAP = window.YXL_LESSONS || {};
   /* 有课程页的线：电影、SQL、Python、CFA、地缘、周复盘 */
   var COURSES = PLAN ? ["film", "sql", "py", "cfa", "geo", "rev"].filter(function (k) { return PLAN.lessons[k]; }) : [];
-  var COLLS = ["progress", "notes", "journal", "cards", "study", "film", "ebooks", "mybooks", "hidden", "reading", "marks"];
+  var COLLS = ["progress", "notes", "journal", "cards", "study", "film", "ebooks", "mybooks", "hidden", "reading", "marks", "domains"];
   var STATUS = [["todo", "未开始"], ["doing", "进行中"], ["done", "已完成"], ["review", "已内化"]];
   var STATUS_LABEL = {}; STATUS.forEach(function (s) { STATUS_LABEL[s[0]] = s[1]; });
   var MARK = { done: "阅", review: "熟" };
@@ -24,7 +24,7 @@
   function today() { return ymd(new Date()); }
   function addDays(s, n) { var p = s.split("-").map(Number); return ymd(new Date(p[0], p[1] - 1, p[2] + n)); }
   function hhmm() { var d = new Date(); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
-  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {}, study: {}, film: {}, ebooks: {}, mybooks: {}, hidden: {}, reading: {}, marks: {} }; }
+  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {}, study: {}, film: {}, ebooks: {}, mybooks: {}, hidden: {}, reading: {}, marks: {}, domains: {} }; }
 
   /* ---------- 索引 ---------- */
   var ITEMS = {};
@@ -103,7 +103,7 @@
     if (m && LIB.books[m[1]]) return "#b-" + m[1];
     var it = ITEMS[ref]; if (!it) return "";
     if (it.module) return "#b-" + it.module;
-    return "#t-" + it.tracks[0];
+    return TRACK[it.tracks[0]] ? "#t-" + it.tracks[0] : "#shelf";
   }
 
   /* ---------- 读写 ---------- */
@@ -387,12 +387,76 @@
   /* ---------- 自己加的书、从书墙上拿下的书 ----------
    * mybooks：自己加的书，文档 id = "my-" + 时间，内容 { title, by, track, why, t }，和内置的书一样能挂电子书、写批注、标进度。
    * hidden：从书墙上拿下来的内置书，文档 id = 书的 id，内容 { t }；放回去就删掉这一条。 */
-  var DIRS = ["geo", "fin", "co", "cycle", "fut"];
+  var DIRS = ["geo", "cycle", "fut", "co", "fin"];
+  /* ---------- 领域：书墙上的一格 ----------
+   * 内置五个方向（有方向页、进线网图）+ 自己加的领域 + 英语。
+   * domains：自己加的领域，文档 id = "dm-" + 时间，内容 { name 名称, code 分类号（可空）, color 布色（DOM_COLORS 的键）, t }。
+   * 自己加的领域只在书架上，不进线网图；里面没有书了才能删。 */
+  var DOM_COLORS = [
+    ["teal", "青", "#2F7E7A", ["#3E7C78", "#2E6764", "#56918C", "#285957"]],
+    ["indigo", "靛蓝", "#4659A6", ["#47598A", "#3A4975", "#5B6C9E", "#323E64"]],
+    ["rose", "胭脂", "#B4506A", ["#A55468", "#8D4557", "#B86B7D", "#7A3A4A"]],
+    ["umber", "赭石", "#8C5A2B", ["#8A5D35", "#73492A", "#A0744A", "#634023"]],
+    ["forest", "墨绿", "#3F6B45", ["#43684A", "#36573C", "#5A7E60", "#2E4A33"]],
+    ["lilac", "藕荷", "#8C6F94", ["#8A7290", "#735E79", "#A08AA6", "#5F4D64"]]
+  ];
+  function domColor(c) { return DOM_COLORS.filter(function (x) { return x[0] === c; })[0] || DOM_COLORS[0]; }
+  function domBuiltin(k) { return !!(TRACK[k] && SHELF_COL[k]); }
+  function domExists(k) { return domBuiltin(k) || !!(S.data.domains || {})[k]; }
+  /* 书墙上的领域，按顺序：内置五个，再按加的先后排自己加的；领域被删了但还有书的（换设备时可能出现），也留一格 */
+  function domList() {
+    var D = S.data.domains || {}, mb = S.data.mybooks || {};
+    var out = DIRS.concat(Object.keys(D).filter(function (k) { return D[k] && D[k].name; }).sort(function (a, b) { return String(D[a].t).localeCompare(String(D[b].t)); }));
+    Object.keys(mb).forEach(function (id) { var t = mb[id] && mb[id].track; if (t && typeof t === "string" && out.indexOf(t) < 0 && t !== "en") out.push(t); });
+    return out;
+  }
+  function domInfo(k) {
+    if (domBuiltin(k)) return { key: k, name: TRACK[k].short, code: SHELF_CLS[k] || "", col: "var(" + SHELF_COL[k] + ")", cloth: CLOTH[k], href: "#t-" + k, custom: false };
+    var d = (S.data.domains || {})[k], c = domColor(d && d.color);
+    return { key: k, name: d && d.name ? String(d.name) : "未命名领域", code: d && d.code ? String(d.code) : "", col: c[2], cloth: c[3], href: "", custom: true, missing: !d };
+  }
+  function domCount(k) { return trackBooks(k).books.length; }
+  function domNextColor() {
+    var D = S.data.domains || {}, used = Object.keys(D).map(function (k) { return D[k] && D[k].color; });
+    var free = DOM_COLORS.filter(function (c) { return used.indexOf(c[0]) < 0; })[0];
+    return (free || DOM_COLORS[Object.keys(D).length % DOM_COLORS.length])[0];
+  }
+  function domFieldsHTML(d) {
+    var col = d ? d.color : domNextColor();
+    return '<label class="add-f"><span>领域名称</span><input name="dname" maxlength="12" autocomplete="off" placeholder="比如：心理学" value="' + esc(d ? d.name : "") + '"></label>' +
+      '<label class="add-f"><span>分类号</span><input name="dcode" maxlength="8" autocomplete="off" placeholder="可以不填，比如中图分类号 B84" value="' + esc(d ? d.code || "" : "") + '"></label>' +
+      '<fieldset class="add-f"><legend>布面颜色</legend><div class="add-cols">' + DOM_COLORS.map(function (c) {
+        return '<label class="add-col" style="--c:' + c[2] + '"><input type="radio" name="dcol" value="' + c[0] + '"' + (c[0] === col ? " checked" : "") + '><i aria-hidden="true"></i>' + esc(c[1]) + "</label>";
+      }).join("") + "</div></fieldset>";
+  }
+  function domRead(f, selfKey) {
+    var name = (f.elements.dname.value || "").trim().replace(/\s+/g, " "), code = (f.elements.dcode.value || "").trim();
+    var color = (f.querySelector('input[name="dcol"]:checked') || {}).value || domNextColor();
+    if (!name) { toast("给领域起个名字"); f.elements.dname.focus(); return null; }
+    var same = domList().filter(function (k) { return k !== selfKey && domInfo(k).name === name; })[0];
+    return { name: name, code: code, color: color, same: same || "" };
+  }
+  function domSheetHTML() {
+    var k = S.domOpen, d = k && (S.data.domains || {})[k];
+    if (!d || !S.canEdit) return "";
+    var n = domCount(k);
+    return '<div class="add-sheet" role="dialog" aria-modal="true" aria-labelledby="dom-h"><form class="add-card" id="dom-form" data-k="' + esc(k) + '"><h2 id="dom-h">改这个领域</h2>' + domFieldsHTML(d) +
+      '<div class="btns"><button type="submit" class="btn">保存</button><button type="button" class="btn ghost" data-act="dom-close">取消</button></div>' +
+      (n ? '<p class="meta">这个领域里还有 ' + n + " 本书。把书拿下，或者在展台上点「改书名、作者、领域」换到别的领域，空了以后才能删。</p>"
+        : '<div class="pb-rm"><button type="button" class="linkbtn danger" data-act="dom-del" data-k="' + esc(k) + '">删掉这个领域</button></div>') + "</form></div>";
+  }
+  function domSave(f) {
+    var k = f.getAttribute("data-k"), old = (S.data.domains || {})[k]; if (!old) return;
+    var v = domRead(f, k); if (!v) return;
+    if (v.same) { toast("已经有叫「" + v.name + "」的领域了"); f.elements.dname.focus(); return; }
+    put("domains", k, { name: v.name, code: v.code, color: v.color, t: old.t });
+    S.domOpen = null; render(); toast("领域改好了");
+  }
   function syncMyBooks() {
     var mb = S.data.mybooks || {};
     Object.keys(ITEMS).forEach(function (id) { if (ITEMS[id].mine && !mb[id]) delete ITEMS[id]; });
     Object.keys(mb).forEach(function (id) {
-      var b = mb[id]; if (!b || !b.title || !TRACK[b.track]) return;
+      var b = mb[id]; if (!b || !b.title || !b.track || typeof b.track !== "string" || b.track === "en") return;
       ITEMS[id] = { id: id, title: String(b.title), by: String(b.by || ""), kind: "book", home: b.track, tracks: [b.track], why: String(b.why || ""), mine: true };
     });
   }
@@ -400,13 +464,16 @@
   function addSheetHTML() {
     if (!S.addOpen || !S.canEdit) return "";
     var ed = S.addOpen.edit && S.data.mybooks[S.addOpen.edit] ? S.data.mybooks[S.addOpen.edit] : null;
-    var tr = (ed && ed.track) || S.addOpen.track || (ITEMS[S.shelfPick] && ITEMS[S.shelfPick].home) || "geo";
-    var radios = DIRS.map(function (d) { return '<label class="add-dir" style="--c:var(' + SHELF_COL[d] + ')"><input type="radio" name="track" value="' + d + '"' + (d === tr ? " checked" : "") + '><i aria-hidden="true"></i>' + esc(TRACK[d].short) + "</label>"; }).join("");
+    var doms = domList(), tr = (ed && ed.track) || S.addOpen.track || (ITEMS[S.shelfPick] && ITEMS[S.shelfPick].home) || "geo";
+    if (tr !== "__new" && doms.indexOf(tr) < 0) tr = "geo";
+    var radios = doms.map(function (d) { var di = domInfo(d); return '<label class="add-dir" style="--c:' + di.col + '"><input type="radio" name="track" value="' + esc(d) + '"' + (d === tr ? " checked" : "") + '><i aria-hidden="true"></i>' + esc(di.name) + "</label>"; }).join("") +
+      '<label class="add-dir new"><input type="radio" name="track" value="__new"' + (tr === "__new" ? " checked" : "") + '><b aria-hidden="true">＋</b>新领域</label>';
     return '<div class="add-sheet" role="dialog" aria-modal="true" aria-labelledby="add-h"><form class="add-card" id="add-form" data-edit="' + esc(S.addOpen.edit || "") + '">' +
       '<h2 id="add-h">' + (ed ? "改一下这本书" : "加一本书") + "</h2>" +
       '<label class="add-f"><span>书名</span><input id="add-title" name="title" required maxlength="60" autocomplete="off" placeholder="比如：置身事内" value="' + esc(ed ? ed.title : "") + '"></label>' +
       '<label class="add-f"><span>作者</span><input name="by" maxlength="40" autocomplete="off" placeholder="可以不填" value="' + esc(ed ? ed.by || "" : "") + '"></label>' +
-      '<fieldset class="add-f"><legend>放在哪一格</legend><div class="add-dirs">' + radios + "</div></fieldset>" +
+      '<fieldset class="add-f"><legend>放在哪个领域</legend><div class="add-dirs">' + radios + "</div></fieldset>" +
+      '<div class="add-new">' + domFieldsHTML(null) + "</div>" +
       '<label class="add-f"><span>为什么读</span><textarea name="why" rows="3" maxlength="200" placeholder="一两句话，以后看到书脊就想得起来">' + esc(ed ? ed.why || "" : "") + "</textarea></label>" +
       '<div class="btns"><button type="submit" class="btn">' + (ed ? "保存" : "放上书墙") + '</button><button type="button" class="btn ghost" data-act="add-close">取消</button></div>' +
       (ed ? "" : '<p class="meta">放上去以后，在展台上可以上传这本书的 PDF 或 EPUB。</p>') + "</form></div>";
@@ -415,7 +482,12 @@
     var title = (f.elements.title.value || "").trim(), by = (f.elements.by.value || "").trim(), why = (f.elements.why.value || "").trim();
     var tr = (f.querySelector('input[name="track"]:checked') || {}).value;
     if (!title) { toast("先写书名"); f.elements.title.focus(); return; }
-    if (!TRACK[tr]) { toast("选一格放进去"); return; }
+    if (tr === "__new") {
+      var nd = domRead(f, ""); if (!nd) return;
+      if (nd.same) tr = nd.same;
+      else { tr = "dm-" + Date.now().toString(36); put("domains", tr, { name: nd.name, code: nd.code, color: nd.color, t: new Date().toISOString() }); }
+    }
+    if (!domExists(tr) && domList().indexOf(tr) < 0) { toast("选一个领域放进去"); return; }
     var edit = f.getAttribute("data-edit"), old = edit && S.data.mybooks[edit];
     var id = old ? edit : "my-" + Date.now().toString(36);
     put("mybooks", id, { title: title, by: by, track: tr, why: why, t: old ? old.t : new Date().toISOString() });
@@ -429,7 +501,7 @@
       return '<div class="pb-rm"><span>' + (it.mine ? "这本是你加的，拿下就删掉" + (ebookOf(id) ? "（连同电子书）" : "") + "，批注和划线留着。" : "拿下后不在书墙上显示，在书墙下方随时能放回去。") + "</span>" +
         '<button type="button" class="linkbtn danger" data-act="shelf-rm-yes" data-id="' + esc(id) + '">拿下</button><button type="button" class="linkbtn" data-act="shelf-rm-no">取消</button></div>';
     }
-    return '<div class="pb-rm">' + (it.mine ? '<button type="button" class="linkbtn" data-act="add-book" data-edit="' + esc(id) + '">改书名、作者</button>' : "") +
+    return '<div class="pb-rm">' + (it.mine ? '<button type="button" class="linkbtn" data-act="add-book" data-edit="' + esc(id) + '">改书名、作者、领域</button>' : "") +
       '<button type="button" class="linkbtn" data-act="shelf-rm" data-id="' + esc(id) + '">从书墙上拿下</button></div>';
   }
   function shelfRemove(id) {
@@ -526,7 +598,7 @@
     return HANGS.some(function (x) { return x[0] === h; }) ? h : "float";
   }
   function hangSet(h) { try { window.localStorage.setItem(HANG_KEY, h); } catch (e) { /* 存不了就只在这次生效 */ } }
-  function clothOf(tid, key) { var p = CLOTH[tid] || CLOTH.co; return p[hashN(key) % p.length]; }
+  function clothOf(tid, key) { var p = CLOTH[tid] || (tid !== "en" && !domBuiltin(tid) ? domInfo(tid).cloth : null) || CLOTH.co; return p[hashN(key) % p.length]; }
   function lumHex(h) {
     var c = [1, 3, 5].map(function (i) { var x = parseInt(h.substr(i, 2), 16) / 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); });
     return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2];
@@ -603,39 +675,132 @@
     pothos: '<span class="deco d-pothos" aria-hidden="true"><svg class="dz dz-pothos" viewBox="0 0 104 150" width="104" height="150" aria-hidden="true" focusable="false"><defs><linearGradient id="yxt-pot" x1="0" x2="1"><stop offset="0" stop-color="#C9C2B4"/><stop offset=".3" stop-color="#F4F0E8"/><stop offset=".65" stop-color="#E2DCD0"/><stop offset="1" stop-color="#B3AB9C"/></linearGradient><linearGradient id="yxt-lf" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8CBF5E"/><stop offset=".55" stop-color="#4F8C3A"/><stop offset="1" stop-color="#2F6526"/></linearGradient><linearGradient id="yxt-lf2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6FA94C"/><stop offset=".6" stop-color="#3C7A2F"/><stop offset="1" stop-color="#25521E"/></linearGradient></defs><g transform="translate(36 36) rotate(-150) scale(0.9)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M0.8,2.5 C0.6,6 -1.5,9 0.5,13.5" stroke="#E4E79A" stroke-width="0.9" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(46 30) rotate(-175) scale(1)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M0.4,2.5 C-0.7,6 -2.1,9 -0.8,13.5" stroke="#E4E79A" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(58 31) rotate(170) scale(0.9)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M0.9,2.5 C2.4,6 -1,9 0.5,13.5" stroke="#E4E79A" stroke-width="0.9" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(68 37) rotate(145) scale(0.8)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf2)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/></g><g transform="translate(52 27) rotate(178) scale(0.8)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.4,2.5 C-0.2,6 -2.9,9 0.2,13.5" stroke="#E4E79A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(41 33) rotate(-125) scale(0.7)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-0.1,2.5 C0.7,6 -1,9 0.1,13.5" stroke="#E4E79A" stroke-width="1" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(63 34) rotate(130) scale(0.8)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/></g><path d="M34,38 L36,70 L70,70 L72,38 Z" fill="url(#yxt-pot)"/><path d="M39,41 L38.7,69" stroke="#A39B8C" stroke-width=".4" opacity=".35"/><path d="M43,41 L42.7,69" stroke="#A39B8C" stroke-width=".4" opacity=".35"/><path d="M47,41 L46.7,69" stroke="#A39B8C" stroke-width=".4" opacity=".35"/><path d="M51,41 L50.7,69" stroke="#A39B8C" stroke-width=".4" opacity=".35"/><path d="M55,41 L55.3,69" stroke="#A39B8C" stroke-width=".4" opacity=".35"/><path d="M59,41 L59.3,69" stroke="#A39B8C" stroke-width=".4" opacity=".35"/><path d="M63,41 L63.3,69" stroke="#A39B8C" stroke-width=".4" opacity=".35"/><path d="M67,41 L67.3,69" stroke="#A39B8C" stroke-width=".4" opacity=".35"/><ellipse cx="53.0" cy="38" rx="19.0" ry="2.6" fill="#E9E4DA"/><ellipse cx="53.0" cy="38.4" rx="17.0" ry="1.7" fill="#3E2E20"/><ellipse cx="53.0" cy="69.5" rx="20.0" ry="1.4" fill="#2A1C0E" opacity=".25"/><path d="M36,39 C18,46 14,82 16,142 M40,39 C28,56 30,100 34,120 M70,39 C86,48 88,90 84,132 M66,39 C74,60 70,88 66,108" stroke="#5C7E3A" stroke-width="1" fill="none" stroke-linecap="round"/><g transform="translate(23.4 52.9) rotate(-18) scale(0.7)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1,2.5 C2.4,6 -0.7,9 -0.7,13.5" stroke="#E4E79A" stroke-width="1" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(19.4 66) rotate(41.6) scale(0.6)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-0.3,2.5 C0.6,6 -2.4,9 0.8,13.5" stroke="#E4E79A" stroke-width="0.9" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(16.9 83) rotate(-35.7) scale(0.5)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.2,2.5 C2.4,6 -0.6,9 -0.2,13.5" stroke="#E4E79A" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(15.7 103.9) rotate(33.5) scale(0.6)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.7,2.5 C2.5,6 -2.4,9 -0.4,13.5" stroke="#E4E79A" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(15.6 128.4) rotate(-35.7) scale(0.5)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf2)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/></g><g transform="translate(16 141) rotate(-9.8) scale(0.5)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.3,2.5 C1.1,6 -1.9,9 0.1,13.5" stroke="#E4E79A" stroke-width="1.6" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(32.7 60) rotate(-28.8) scale(0.7)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.5,2.5 C2.2,6 -0.5,9 -0.4,13.5" stroke="#E4E79A" stroke-width="1" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(31.2 74.1) rotate(45.7) scale(0.7)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf2)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/></g><g transform="translate(30.9 88.7) rotate(-48.4) scale(0.7)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.7,2.5 C-0.9,6 -0.1,9 -0.4,13.5" stroke="#E4E79A" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(31.7 102.7) rotate(28.1) scale(0.7)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.5,2.5 C1.5,6 -2.8,9 -0.4,13.5" stroke="#E4E79A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(33.1 114.9) rotate(-54.1) scale(0.6)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/></g><g transform="translate(34 119) rotate(-7.1) scale(0.5)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.2,2.5 C0.6,6 -2.8,9 -0.6,13.5" stroke="#E4E79A" stroke-width="1.1" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(80.8 55) rotate(-56.7) scale(0.6)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/></g><g transform="translate(83.9 68.6) rotate(39.3) scale(0.7)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.6,2.5 C-0.9,6 -2.9,9 1.3,13.5" stroke="#E4E79A" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(85.5 84.8) rotate(-49.9) scale(0.5)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M0.2,2.5 C0.1,6 0,9 -0.8,13.5" stroke="#E4E79A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(85.7 102.9) rotate(44) scale(0.7)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M0.4,2.5 C2.2,6 -1.9,9 0.7,13.5" stroke="#E4E79A" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(84.8 122.2) rotate(-41.1) scale(0.6)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/></g><g transform="translate(84 131) rotate(1.7) scale(0.5)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-0.9,2.5 C1,6 -1.2,9 -0.8,13.5" stroke="#E4E79A" stroke-width="1.3" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(70.3 59.2) rotate(-52) scale(0.8)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M0.2,2.5 C1,6 -1.7,9 1.1,13.5" stroke="#E4E79A" stroke-width="0.9" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(70.6 70.5) rotate(44.3) scale(0.6)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.3,2.5 C1.4,6 -1.5,9 0.5,13.5" stroke="#E4E79A" stroke-width="1.5" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(70 81.8) rotate(-27.7) scale(0.5)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.4,2.5 C-0.4,6 -0.3,9 0.6,13.5" stroke="#E4E79A" stroke-width="1.2" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(68.7 92.8) rotate(54.3) scale(0.6)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-0.7,2.5 C1.8,6 -0.3,9 1.2,13.5" stroke="#E4E79A" stroke-width="1.1" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(66.9 103.2) rotate(-29) scale(0.5)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf2)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/></g><g transform="translate(66 107) rotate(-0.1) scale(0.5)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/></g><g transform="translate(38 36) rotate(-60) scale(0.8)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/></g><g transform="translate(49 34) rotate(-10) scale(0.8)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M-1.1,2.5 C-0.2,6 -2.1,9 -0.8,13.5" stroke="#E4E79A" stroke-width="1.4" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(61 35) rotate(25) scale(0.8)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M0.5,2.5 C0.4,6 -0.1,9 1.1,13.5" stroke="#E4E79A" stroke-width="0.8" stroke-linecap="round" fill="none" opacity=".75"/></g><g transform="translate(70 37) rotate(70) scale(0.8)"><path d="M0,0 C-5.5,-1.5 -8.5,4 -6.5,8.5 C-4.5,12.5 -1,14.5 0,17.5 C1,14.5 4.5,12.5 6.5,8.5 C8.5,4 5.5,-1.5 0,0Z" fill="url(#yxt-lf)"/><path d="M0,1 L0,16" stroke="#2C5A22" stroke-width=".5" opacity=".6"/><path d="M0.7,2.5 C0.6,6 -0.1,9 0,13.5" stroke="#E4E79A" stroke-width="0.9" stroke-linecap="round" fill="none" opacity=".75"/></g></svg></span>'
   };
   function trackBooks(tid) {
-    var t = TRACK[tid], all = [];
-    t.stages.forEach(function (s) { s.items.forEach(function (it) { if (it.home === tid && all.indexOf(it) < 0) all.push(it); }); });
-    var cfa = tid === "fin" ? t.stages[0].items.filter(function (it) { return /^cfa-/.test(it.id) && it.kind === "topic"; }) : [];
+    var t = domBuiltin(tid) ? TRACK[tid] : null, all = [];
+    if (t) t.stages.forEach(function (s) { s.items.forEach(function (it) { if (it.home === tid && all.indexOf(it) < 0) all.push(it); }); });
+    var cfa = t && tid === "fin" ? t.stages[0].items.filter(function (it) { return /^cfa-/.test(it.id) && it.kind === "topic"; }) : [];
     var mine = Object.keys(ITEMS).filter(function (id) { return ITEMS[id].mine && ITEMS[id].home === tid; }).sort(function (a, b) { return String((S.data.mybooks[a] || {}).t).localeCompare(String((S.data.mybooks[b] || {}).t)); }).map(function (id) { return ITEMS[id]; });
     return { books: all.filter(function (it) { return it.kind === "book" && !isHidden(it.id); }).concat(mine), cfa: cfa, other: all.filter(function (it) { return it.kind !== "book" && cfa.indexOf(it) < 0; }) };
   }
-  function wmHTML(key, col, label, href, inner, cls) {
-    var plus = S.canEdit && TRACK[key] ? '<button type="button" class="wm-plus" data-act="add-book" data-t="' + key + '" title="在这一格加一本书" aria-label="在“' + esc(TRACK[key].short) + '”这一格加一本书">＋</button>' : "";
-    return '<section class="wm' + (cls ? " " + cls : "") + '" data-wm="' + key + '" style="--c:var(' + col + ')"><div class="wm-in">' + inner + "</div>" +
-      '<div class="wm-board">' + (label ? (href ? '<a class="wm-lab" href="' + href + '">' : '<span class="wm-lab">') + '<i class="wm-dot" aria-hidden="true"></i>' + label + (href ? "</a>" : "</span>") : "") + plus + "</div></section>";
+  function wmHTML(key, col, label, href, inner, cls, cont) {
+    var di = key !== "en" && key !== "+" ? domInfo(key) : null;
+    var plus = S.canEdit && di ? '<button type="button" class="wm-plus" data-act="add-book" data-t="' + esc(key) + '" title="在这个领域加一本书" aria-label="在“' + esc(di.name) + '”加一本书">＋</button>' : "";
+    var edit = S.canEdit && di && di.custom && !di.missing;
+    var open = href ? '<a class="wm-lab" href="' + href + '">' : edit ? '<button type="button" class="wm-lab" data-act="dom-edit" data-k="' + esc(key) + '" title="改这个领域的名称、分类号和颜色">' : '<span class="wm-lab">';
+    var close = href ? "</a>" : edit ? "</button>" : "</span>";
+    return '<section class="wm' + (cls ? " " + cls : "") + '" data-wm="' + esc(key) + '" style="--c:' + col + '"' + (cont ? ' data-cont="' + esc(cont) + '"' : "") + '><div class="wm-in">' + inner + "</div>" +
+      '<div class="wm-board">' + (label ? open + '<i class="wm-dot" aria-hidden="true"></i>' + label + close : "") + plus + "</div></section>";
   }
-  var WALL_ROWS = [["geo", "+"], ["cycle", "fut"], ["co", "fin"], ["en"]];
-  var WALL_DECO = { cycle: "glass", co: "vase" };
   function wallModule(key) {
     if (key === "+") return !S.canEdit ? "" : '<section class="wm ghost" data-wm="+"><div class="wm-in"><button type="button" class="wm-add" data-act="add-book">＋ 加一本<small>说书名就行</small></button></div><div class="wm-board"></div></section>';
     if (key === "en") {
       var films = (EN.films || []).map(function (x) { return EN_ITEM[x.id]; }), reads = (EN.books || []).map(function (x) { return EN_ITEM[x.id]; });
       var all = films.concat(reads), d = all.filter(function (x) { return enState(x.id).s === "doing"; }).length;
       var vocab = '<a class="vbox" href="' + esc(enHref("/vocabulary")) + '" target="_blank" rel="noopener" title="Baba 上的生词本（新标签页打开）"><span class="vb-cards" aria-hidden="true"><i></i><i></i><i></i></span><span class="vb-body"><b>生词本</b><small>Baba ↗</small></span></a>';
-      var innerE = films.map(filmCaseHTML).join("") + '<span class="bookend" aria-hidden="true"></span>' + reads.map(function (x) { return '<span class="easel">' + readCoverHTML(x) + "</span>"; }).join("") + '<span class="wm-fill" aria-hidden="true"></span>' + DECO.globe + vocab + DECO.succ + DECO.pothos;
-      return wmHTML("en", "--ln-en", "<b>EN</b>英语 · " + films.length + " 部片 · " + reads.length + " 本读物" + (d ? " · 在学 " + d : ""), "", innerE, "en");
+      var innerE = films.map(filmCaseHTML).join("") + '<span class="bookend" aria-hidden="true"></span>' + reads.map(function (x) { return '<span class="easel">' + readCoverHTML(x) + "</span>"; }).join("") + '<span class="wm-fill" aria-hidden="true"></span>' + vocab;
+      return wmHTML("en", "var(--ln-en)", "<b>EN</b>英语 · " + films.length + " 部片 · " + reads.length + " 本读物" + (d ? " · 在学 " + d : ""), "", innerE, "en", "<b>EN</b>英语 · 续");
     }
-    var tb = trackBooks(key), t = TRACK[key];
-    if (!t) return "";
+    var tb = trackBooks(key), di = domInfo(key);
     var nRead = tb.books.filter(function (it) { return bookState(it.id).s === "doing"; }).length, nDone = tb.books.filter(function (it) { var s = bookState(it.id).s; return s === "done" || s === "review"; }).length;
-    var label = "<b>" + SHELF_CLS[key] + "</b>" + esc(t.short) + " · " + tb.books.length + " 本" + (tb.cfa.length ? " + 十册" : "") + (nRead ? " · 在读 " + nRead : "") + (nDone ? " · 读完 " + nDone : "");
+    var head = (di.code ? "<b>" + esc(di.code) + "</b>" : "") + esc(di.name);
+    var label = head + " · " + tb.books.length + " 本" + (tb.cfa.length ? " + 十册" : "") + (nRead ? " · 在读 " + nRead : "") + (nDone ? " · 读完 " + nDone : "");
     var innerT = (tb.cfa.length ? cfaBoxHTML(tb.cfa) : "") + tb.books.map(function (it, i) { return clothSpine(it, key, i); }).join("") +
-      (tb.other.length ? basketHTML(key, tb.other.length) : "") + (WALL_DECO[key] ? '<span class="wm-fill" aria-hidden="true"></span>' + DECO[WALL_DECO[key]] : "");
-    return wmHTML(key, SHELF_COL[key] || "--ln-rev", label, "#t-" + key, innerT);
+      (tb.other.length ? basketHTML(key, tb.other.length) : "");
+    if (!innerT) innerT = '<span class="wm-empty">这一格还空着' + (S.canEdit ? "<small>点搁板右边的 ＋ 加书</small>" : "") + "</span>";
+    return wmHTML(key, di.col, label, di.href, innerT, di.custom ? "mine" : "", head + " · 续");
   }
+  /* 先把所有格子排成一排交给页面，再由 wallPack() 按实际宽度分排 */
   function wallHTML() {
-    return '<section class="wall hang-' + hangGet() + '" aria-label="书墙">' + WALL_ROWS.map(function (row) { return '<div class="wall-row">' + row.map(wallModule).join("") + "</div>"; }).join("") + "</section>";
+    var keys = domList().concat(["en", "+"]);
+    return '<section class="wall hang-' + hangGet() + '" aria-label="书墙"><div class="wall-row">' + keys.map(wallModule).join("") + "</div></section>";
   }
+  /* ---------- 书墙排版：按每一格实际多宽，动态排成几排 ----------
+   * 1. 量出每一格（一个领域）不换行时有多宽；比一整排还宽的，按书拆成几段，后面几段的标签写“续”。
+   * 2. 按领域顺序往下排：每一格放进最上面一排还放得下它的地方（“续”只往它前一段的下面排）。
+   * 3. 剩下的空当摆东西：先放“加一本”的空格，再放摆件（地球仪跟地缘、沙漏跟周期、蒲苇跟公司，多肉和绿萝找最空的地方，绿萝优先最下面一排）。
+   * 窄屏（单栏）不重排：每格一排，左右滑着看，摆件跟着各自的领域。 */
+  var DECO_PLAN = [["globe", "geo", 98], ["glass", "cycle", 74], ["vase", "co", 102], ["succ", "", 94], ["pothos", "", 120]];
+  var WALL_W = 0;
+  function wallPack() {
+    var wall = document.querySelector(".wall"), row0 = wall && wall.querySelector(".wall-row");
+    if (!row0) return;
+    WALL_W = wall.clientWidth;
+    function el(html) { var t = document.createElement("template"); t.innerHTML = html; return t.content.firstChild; }
+    function addDeco(mod, name) {
+      var wi = mod.querySelector(".wm-in");
+      if (!wi.querySelector(".wm-fill")) wi.appendChild(el('<span class="wm-fill" aria-hidden="true"></span>'));
+      wi.appendChild(el(DECO[name]));
+    }
+    function outerW(x) { var c = getComputedStyle(x); return x.getBoundingClientRect().width + (parseFloat(c.marginLeft) || 0) + (parseFloat(c.marginRight) || 0); }
+    var narrow = window.matchMedia && window.matchMedia("(max-width:1100px)").matches;
+    if (narrow) {
+      DECO_PLAN.forEach(function (d) { var k = d[0] === "succ" ? "en" : d[1], m = k && row0.querySelector('.wm[data-wm="' + k + '"]'); if (m && d[0] !== "pothos") addDeco(m, d[0]); });
+      return;
+    }
+    var mods = Array.prototype.slice.call(row0.children), ghost = row0.querySelector(".wm.ghost");
+    wall.classList.add("measuring");
+    var cs = getComputedStyle(wall), W = wall.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var gap = parseFloat(getComputedStyle(row0).columnGap) || 18, ghostW = ghost ? ghost.getBoundingClientRect().width : 0;
+    var items = [];
+    mods.forEach(function (m) {
+      if (m === ghost) return;
+      var w = m.getBoundingClientRect().width, key = m.getAttribute("data-wm");
+      if (w <= W + 0.5) { items.push({ el: m, w: w, key: key, part: 0 }); return; }
+      var wi = m.querySelector(".wm-in"), ic = getComputedStyle(wi), pad = parseFloat(ic.paddingLeft) + parseFloat(ic.paddingRight), ig = parseFloat(ic.columnGap) || 0;
+      var chunks = [[]], widths = [], acc = pad;
+      Array.prototype.slice.call(wi.children).forEach(function (c) {
+        var cw = outerW(c), cur = chunks[chunks.length - 1], add = (cur.length ? ig : 0) + cw;
+        if (cur.length && acc + add > W - 1) { widths.push(acc); chunks.push([c]); acc = pad + cw; }
+        else { cur.push(c); acc += add; }
+      });
+      widths.push(acc);
+      var plus = m.querySelector(".wm-plus"), last = m;
+      chunks.forEach(function (ch, i) {
+        var x = m;
+        if (i > 0) {
+          x = m.cloneNode(false); x.classList.add("cont"); x.setAttribute("data-part", String(i));
+          x.innerHTML = '<div class="wm-in"></div><div class="wm-board"><span class="wm-lab"><i class="wm-dot" aria-hidden="true"></i>' + (m.getAttribute("data-cont") || "续") + "</span></div>";
+          var nw = x.querySelector(".wm-in"); ch.forEach(function (c) { nw.appendChild(c); });
+          last = x;
+        }
+        items.push({ el: x, w: Math.min(W, widths[i]), key: key, part: i });
+      });
+      if (plus && last !== m) last.querySelector(".wm-board").appendChild(plus);
+    });
+    var rows = [], at = {};
+    items.forEach(function (it) {
+      var r = it.part ? at[it.key] + 1 : 0;
+      for (; r < rows.length; r++) if (rows[r].used + gap + it.w <= W + 0.5) break;
+      if (r === rows.length) rows.push({ els: [], used: -gap, deco: 0 });
+      rows[r].els.push(it); rows[r].used += gap + it.w; at[it.key] = r;
+    });
+    function room(r) { return W - rows[r].used - gap; }
+    function roomiest(min, preferLast) {
+      var best = -1;
+      if (preferLast && rows.length && room(rows.length - 1) >= min && rows[rows.length - 1].deco < 2) return rows.length - 1;
+      rows.forEach(function (r, i) { if (r.deco < 2 && room(i) >= min && (best < 0 || room(i) > room(best))) best = i; });
+      return best;
+    }
+    if (ghost) {
+      var gr = roomiest(ghostW + 40, false);
+      if (gr >= 0) { rows[gr].els.push({ el: ghost, w: ghostW, key: "+", part: 0 }); rows[gr].used += gap + ghostW; }
+      else ghost.parentNode.removeChild(ghost);
+    }
+    DECO_PLAN.forEach(function (d) {
+      var r = -1, host = null;
+      if (d[1]) rows.forEach(function (row, i) { if (r < 0 && row.deco < 2 && room(i) + gap >= d[2] && row.els.some(function (x) { return x.key === d[1]; })) r = i; });
+      if (r < 0) r = roomiest(d[2] - gap, d[0] === "pothos");
+      if (r < 0) return;
+      rows[r].els.forEach(function (x) { if (x.key === d[1]) host = x.el; });
+      if (!host) rows[r].els.forEach(function (x) { if (x.key !== "+") host = x.el; });
+      if (!host) return;
+      addDeco(host, d[0]); rows[r].used += d[2]; rows[r].deco++;
+    });
+    wall.classList.remove("measuring");
+    var frag = document.createDocumentFragment();
+    rows.forEach(function (row) { var div = document.createElement("div"); div.className = "wall-row"; row.els.forEach(function (x) { div.appendChild(x.el); }); frag.appendChild(div); });
+    wall.removeChild(row0); wall.appendChild(frag);
+  }
+  function wallRefresh() { var w = document.querySelector(".wall"); if (!w) return; w.outerHTML = wallHTML(); wallPack(); }
   function hangPicker() {
     var h = hangGet();
     return '<div class="hang" role="radiogroup" aria-label="书墙的挂法"><span class="hang-h">挂法</span>' + HANGS.map(function (x) {
@@ -673,8 +838,8 @@
       if (x.kind === "read") return '<div class="stg-cover pic' + flip + '"><span class="pk-sky" aria-hidden="true"><i></i><i></i><i></i></span><span class="sc-kind">' + esc(x.type) + '</span><span class="sc-en">' + esc(x.en) + '</span><span class="sc-t sm">' + esc(x.title) + '</span><span class="sc-foot">Baba · ' + esc(x.level || "") + "</span></div>";
       return '<div class="stg-cover film' + flip + '" style="--cl:' + clothOf("en", x.id) + '"><i class="sc-holes" aria-hidden="true"></i><span class="sc-kind">' + esc(x.type) + " · " + esc(String(x.year || "")) + '</span>' + coverTitle(x.title) + '<span class="sc-en">' + esc(x.en) + '</span><span class="sc-foot">' + (x.where === "local" ? "研习录跟读" : "Baba 英语") + "</span></div>";
     }
-    var it = ITEMS[id], tid = it.home, base = /^cfa-/.test(id) ? CLOTH.fin[0] : clothOf(tid, id), light = lumHex(base) > 0.2;
-    return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc((TRACK[tid] || {}).short || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
+    var it = ITEMS[id], tid = it.home, base = /^cfa-/.test(id) ? CLOTH.fin[0] : clothOf(tid, id), light = lumHex(base) > 0.2, tname = domInfo(tid).name;
+    return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc(tname || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
   }
   /* 展台在书墙右边一栏，滚动时停在屏幕上：上面是一小块打着光的展台（封面朝外），下面是展签 */
   function stageHTML() {
@@ -1480,15 +1645,15 @@
     if (EN_ITEM[id]) return enPulledHTML(id);
     if (!it) { id = S.shelfPick = FOCUS.filter(function (b) { return bookState(b).s === "doing"; })[0] || FOCUS[0]; it = ITEMS[id]; }
     if (!it) return "";
-    var b = LIB.books[id], bs = bookState(id), t = TRACK[it.home] || {}, col = SHELF_COL[it.home] || "--ln-rev";
+    var b = LIB.books[id], bs = bookState(id), dmi = domInfo(it.home), t = { short: dmi.name }, col = dmi.col;
     var lineName = id === "tragedy" ? "自选线 · 地缘" : id === "zhoulu" ? "自选线 · 随时读" : /^cfa-/.test(id) ? "目标线上的一站" : "";
-    var head = '<p class="eyebrow">展台上的书</p><div class="pb-h" style="--c:var(' + col + ')"><span class="pb-bar" aria-hidden="true"></span><div><h2 id="pulled-h">' + esc(it.title.replace(/（.*）$/, "")) + "</h2>" +
+    var head = '<p class="eyebrow">展台上的书</p><div class="pb-h" style="--c:' + col + '"><span class="pb-bar" aria-hidden="true"></span><div><h2 id="pulled-h">' + esc(it.title.replace(/（.*）$/, "")) + "</h2>" +
       '<p class="meta">' + esc([it.by, t.short, lineName].filter(Boolean).join(" · ")) + "</p></div></div>";
     if (!b) {
       var cnt = /^cfa-q|^cfa-e/.test(id) && bs.pct ? '<p class="meta">课表里学到 ' + Math.round(bs.pct * 100) + "%</p>" : "";
       return '<aside class="pulled" aria-labelledby="pulled-h">' + head + progCardHTML(id) + ebookBlock(id) + (it.why ? '<p class="pb-why">' + esc(it.why) + "</p>" : "") + cnt +
         '<div class="pb-st">' + statusCtl(id, it.title) + "</div>" + marksBoxHTML(id) + noteBlock(id, "我的批注", "读到哪、想到什么，写在这里") +
-        '<div class="btns"><a class="btn ghost small" href="#t-' + it.home + '">' + esc(t.short || "") + " 方向全部内容</a></div>" + shelfOpsHTML(id) + "</aside>";
+        (dmi.href ? '<div class="btns"><a class="btn ghost small" href="' + dmi.href + '">' + esc(t.short || "") + " 方向全部内容</a></div>" : "") + shelfOpsHTML(id) + "</aside>";
     }
     var next = b.chapters[Math.min(bs.done, b.chapters.length - 1)];
     var chs = b.chapters.map(function (c, i) {
@@ -1643,8 +1808,8 @@
     var f = S.shelfF || "all";
     function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="shelf-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
     return '<div class="view shelf wallv">' + bannerHTML() +
-      '<header class="w-head"><h1>书架</h1>' + shelfSeg("shelf") + '<div class="w-tools"><div class="chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div>" + hangPicker() + "</div></header>" +
-      '<div class="w-main"><div class="w-left">' + wallHTML() + wallLegend() + hiddenListHTML() + "</div>" + stageHTML() + "</div>" + addSheetHTML() + "</div>";
+      '<header class="w-head"><h1>书架</h1>' + shelfSeg("shelf") + (S.canEdit ? '<button type="button" class="btn small w-add" data-act="add-book">＋ 加一本书</button>' : "") + '<div class="w-tools"><div class="chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div>" + hangPicker() + "</div></header>" +
+      '<div class="w-main"><div class="w-left">' + wallHTML() + wallLegend() + hiddenListHTML() + "</div>" + stageHTML() + "</div>" + addSheetHTML() + domSheetHTML() + "</div>";
   }
 
   /* ---------- 方向页 ---------- */
@@ -3291,6 +3456,7 @@
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     $("#main").innerHTML = html;
+    wallPack();
     filmMount();
     ebHydrate();
     if (scrollTop) window.scrollTo(0, 0);
@@ -3374,6 +3540,9 @@
     if (act === "pick-go") { S.shelfPick = t.getAttribute("data-id"); S.shelfF = "all"; location.hash = "#shelf"; return; }
     if (act === "add-book") { S.addOpen = { track: t.getAttribute("data-t") || "", edit: t.getAttribute("data-edit") || "" }; render(); var ti = document.getElementById("add-title"); if (ti) ti.focus(); return; }
     if (act === "add-close") { S.addOpen = null; render(); return; }
+    if (act === "dom-edit") { S.domOpen = t.getAttribute("data-k"); render(); var dn = document.querySelector('#dom-form [name="dname"]'); if (dn) dn.focus(); return; }
+    if (act === "dom-close") { S.domOpen = null; render(); return; }
+    if (act === "dom-del") { var dk = t.getAttribute("data-k"), dd = (S.data.domains || {})[dk]; if (dd && !domCount(dk)) { del("domains", dk); S.domOpen = null; render(); toast("「" + dd.name + "」这个领域删掉了"); } return; }
     if (act === "shelf-rm") { S.rmConfirm = t.getAttribute("data-id"); render(); return; }
     if (act === "shelf-rm-no") { S.rmConfirm = null; render(); return; }
     if (act === "shelf-rm-yes") { shelfRemove(t.getAttribute("data-id")); return; }
@@ -3438,7 +3607,7 @@
     if (act === "j-del-yes") { var jid = t.getAttribute("data-id"); S.confirmDel = null; del("journal", jid); toast("已删除"); render(); return; }
   });
   document.addEventListener("keydown", function (e) { if (RD) { rdKeys(e); if (e.key === "Escape") e.stopImmediatePropagation(); } }, true);
-  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && S.addOpen) { S.addOpen = null; render(); } });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape" && (S.addOpen || S.domOpen)) { S.addOpen = null; S.domOpen = null; render(); } });
   /* 线网：用键盘打开站点详情，Esc 关闭 */
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape") { var pop = document.getElementById("mpop"); if (pop && !pop.hidden) { closePop(); return; } }
@@ -3499,6 +3668,7 @@
   });
   document.addEventListener("submit", function (e) {
     if (e.target.id === "add-form") { e.preventDefault(); addSave(e.target); return; }
+    if (e.target.id === "dom-form") { e.preventDefault(); domSave(e.target); return; }
     if (e.target.id !== "j-form") return;
     e.preventDefault();
     var f = e.target, date = $("#j-date", f).value || today(), minutes = Math.max(0, Math.round(Number($("#j-min", f).value) || 0));
@@ -3509,6 +3679,9 @@
     if (document.activeElement) document.activeElement.blur();
     S.dirty = false; render(); toast("已记下");
   });
+  var wallT = 0;
+  window.addEventListener("resize", function () { clearTimeout(wallT); wallT = setTimeout(function () { var w = document.querySelector(".wall"); if (w && Math.abs(w.clientWidth - WALL_W) > 1) wallRefresh(); }, 150); });
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (document.querySelector(".wall")) wallRefresh(); });
   var rzT = 0;
   window.addEventListener("resize", function () { if (!RD || RD.kind !== "pdf" || !RD.pdf) return; clearTimeout(rzT); rzT = setTimeout(function () { var c = pdfCur(); pdfLayout(); pdfGo(c.n, null, c.y); }, 200); });
   window.addEventListener("hashchange", function () {

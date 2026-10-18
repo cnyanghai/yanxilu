@@ -1188,12 +1188,14 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 /* 书墙 */
 .wall{position:relative;display:flex;flex-direction:column;gap:46px;padding:46px 16px 30px;border-radius:0 0 8px 8px;
   background:radial-gradient(70% 40% at 50% 0%,var(--wall-light),transparent 70%),var(--linen-bg),var(--linen);box-shadow:inset 0 14px 16px -12px rgba(60,40,20,.35)}
-.wall-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:52px 22px}
+.wall-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:52px 18px}
+.wall.measuring .wall-row{flex-wrap:nowrap}
+.wall.measuring .wm{flex:none;width:max-content}
 .wm{position:relative;flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
 .wm-in{position:relative;z-index:3;display:flex;align-items:flex-end;gap:3px;min-height:250px;padding:40px 14px 0}
 .wm-fill{flex:1 1 0;min-width:10px}
-.wm-board{position:relative;z-index:2;height:20px;background:var(--oak);border-radius:2px;box-shadow:0 14px 16px -10px rgba(40,28,14,.45),0 2px 0 rgba(110,78,40,.25)}
-.wm-lab{position:absolute;left:16px;top:3px;display:inline-flex;align-items:center;gap:7px;font-family:var(--f-ui);font-size:11px;letter-spacing:.04em;color:var(--oak-ink);white-space:nowrap;text-decoration:none}
+.wm-board{position:relative;z-index:2;display:flex;align-items:center;gap:12px;box-sizing:border-box;height:20px;padding:0 10px 0 16px;background:var(--oak);border-radius:2px;box-shadow:0 14px 16px -10px rgba(40,28,14,.45),0 2px 0 rgba(110,78,40,.25)}
+.wm-lab{position:relative;min-width:0;display:inline-flex;align-items:center;gap:7px;font-family:var(--f-ui);font-size:11px;letter-spacing:.04em;color:var(--oak-ink);white-space:nowrap;text-decoration:none}
 .wm-lab b{font-family:var(--f-mono);font-weight:600}
 a.wm-lab:hover{text-decoration:underline}
 .wm-dot{width:7px;height:7px;border-radius:50%;background:var(--c)}
@@ -1479,9 +1481,9 @@ button.lmk{width:100%;background:none;border:0;border-top:1px solid var(--rule);
 .d-glass{margin-left:10px}.d-vase{margin-left:6px}.d-globe{margin-left:6px}.d-succ{margin-left:12px}
 .d-pothos{width:104px;height:70px;margin-left:4px;margin-right:-6px}
 .d-pothos svg{position:absolute;left:0;bottom:-80px}
-.wall-row:has(.d-pothos){padding-bottom:48px}
+.wall-row:last-child:has(.d-pothos){padding-bottom:48px}
 /* 加一本书、从书墙上拿下 */
-.wm-plus{position:absolute;right:10px;top:1px;width:18px;height:18px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:rgba(255,250,238,.5);color:var(--oak-ink);font-family:var(--f-ui);font-size:13px;line-height:1;cursor:pointer;opacity:.55;transition:opacity .15s}
+.wm-plus{position:relative;flex:none;margin-left:auto;width:18px;height:18px;display:grid;place-items:center;padding:0;border:0;border-radius:50%;background:rgba(255,250,238,.5);color:var(--oak-ink);font-family:var(--f-ui);font-size:13px;line-height:1;cursor:pointer;opacity:.55;transition:opacity .15s}
 .wm:hover .wm-plus,.wm-plus:focus-visible{opacity:1}
 .wm-plus:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .add-sheet{position:fixed;inset:0;z-index:70;display:grid;place-items:center;padding:16px;background:rgba(28,24,20,.45)}
@@ -1501,6 +1503,22 @@ button.lmk{width:100%;background:none;border:0;border-top:1px solid var(--rule);
 .add-dir:has(input:focus-visible){outline:2px solid var(--indigo);outline-offset:2px}
 .pb-rm{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 18px;padding-top:12px;border-top:1px dashed var(--rule);font-family:var(--f-ui);font-size:12.5px;color:var(--ink-2)}
 .pb-rm span{flex:1 1 100%;line-height:1.6}
+.w-add{flex:none}
+.wm-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;min-width:150px;align-self:stretch;margin:0 auto 18px;font-family:var(--f-ui);font-size:13px;color:var(--ink-3);text-align:center}
+.wm-empty small{font-size:11.5px}
+button.wm-lab{padding:0;border:0;background:none;cursor:pointer}
+button.wm-lab:hover{text-decoration:underline;text-underline-offset:2px}
+button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.add-dir.new{border-style:dashed}
+.add-dir.new b{font-weight:400;color:var(--ink-3)}
+.add-new{display:none;flex-direction:column;gap:14px;padding:14px;border:1px dashed var(--rule-strong);border-radius:10px}
+.add-card:has(input[name="track"][value="__new"]:checked) .add-new{display:flex}
+.add-cols{display:flex;flex-wrap:wrap;gap:8px}
+.add-col{position:relative;display:inline-flex;align-items:center;gap:7px;min-height:34px;box-sizing:border-box;padding:4px 12px 4px 7px;border:1px solid var(--rule);border-radius:999px;background:var(--paper);font-family:var(--f-ui);font-size:13px;cursor:pointer}
+.add-col input{position:absolute;opacity:0;pointer-events:none}
+.add-col i{width:12px;height:22px;border-radius:2px;background:var(--c);box-shadow:inset 2px 0 0 rgba(255,255,255,.18),inset -2px 0 0 rgba(0,0,0,.18)}
+.add-col:has(input:checked){border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink);font-weight:700}
+.add-col:has(input:focus-visible){outline:2px solid var(--indigo);outline-offset:2px}
 .w-hidden{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 14px;margin:14px 0 0;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3)}
 /* 阅读进度卡：书口 */
 .prog{display:flex;flex-direction:column;gap:10px;padding:14px 16px 14px;background:var(--paper);border:1px solid var(--rule);border-radius:12px}
@@ -1606,12 +1624,10 @@ button.lmk{width:100%;background:none;border:0;border-top:1px solid var(--rule);
   .rd-foot{gap:8px;padding-left:10px;padding-right:10px}
 }
 
-@media (max-width:1299px){.d-succ{display:none}}
 @media (min-width:1101px) and (max-width:1239px){
   .w-main{grid-template-columns:minmax(0,1fr) 300px;gap:18px}
   .wall{padding-left:10px;padding-right:10px}
   .wm-in{padding-left:10px;padding-right:10px}
-  .d-globe{display:none}
 }
 @media (max-width:1100px){
   .cabinet.archive{width:100%}
