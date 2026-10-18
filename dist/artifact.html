@@ -1559,7 +1559,21 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .textLayer mark.c-g{background:rgba(110,195,120,.4)}.textLayer mark.c-b{background:rgba(100,165,235,.38)}.textLayer mark.c-p{background:rgba(240,130,165,.38)}
 .textLayer mark.has-note{box-shadow:inset 0 -2px 0 rgba(200,55,45,.8)}
 .rd-zoom{display:inline-flex;gap:4px}
-.rd-nb[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rd-tb[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.rs-ch{display:flex;flex-direction:column;gap:14px}
+.rs-chsel{width:100%;font-family:var(--f-display);font-size:15px;font-weight:700;padding:7px 10px;border:1px solid var(--rule-strong);border-radius:8px;background:var(--paper);color:var(--ink)}
+.rs-how{margin:-8px 0 0;font-family:var(--f-ui);font-size:12px;color:var(--ink-3)}
+.rs-q{padding:12px 14px;background:color-mix(in srgb,var(--seal) 7%,var(--paper));border-left:3px solid var(--seal);border-radius:0 8px 8px 0}
+.rs-q b,.rs-qs b{display:block;margin-bottom:4px;font-family:var(--f-ui);font-size:12px;letter-spacing:.06em;color:var(--ink-3)}
+.rs-q p{margin:0;font-family:var(--f-display);font-size:15.5px;line-height:1.7}
+.rs-pts summary{cursor:pointer;font-family:var(--f-ui);font-size:13px;color:var(--ink-2)}
+.rs-pts ol,.rs-qs ol{margin:8px 0 0;padding-left:1.3em;display:flex;flex-direction:column;gap:8px;font-size:14px;line-height:1.75;color:var(--ink-2)}
+.rs-qs ol{margin-top:4px}
+.rs-btns{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding-top:4px}
+.pb-up{display:flex;flex-direction:column;align-items:flex-start;gap:6px}
+.dz-id h2 a{color:inherit;text-decoration:none}
+.dz-id h2 a:hover{text-decoration:underline;text-decoration-thickness:1px;text-underline-offset:4px}
+.dz-id h2 a:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .rd-nbn{font-family:var(--f-num)}
 .rd-foot{align-items:center}
 .rd-pg{flex:1;min-width:40px;height:4px;overflow:hidden;border-radius:2px;background:var(--rule)}
@@ -4603,7 +4617,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       ebTx("readwrite", function (st) { return st.put({ blob: blob, kind: kind, name: file.name, size: file.size, t: new Date().toISOString() }, id); }).then(function () {
         ebForget(id);
         return put("ebooks", id, { local: true, kind: kind, name: file.name, size: file.size, t: new Date().toISOString() });
-      }).then(function () { S.ebBusy = null; render(); toast("已放上书架，点「打开电子书」就能看。"); },
+      }).then(function () { S.ebBusy = null; render(); toast("电子书挂好了，点「开始读」就能看。"); },
         function (e) { S.ebBusy = null; render(); toast(ebLocalErr(e)); });
       return;
     }
@@ -4629,7 +4643,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       if (kind === "epub") rec.enc = "b64";
       return put("ebooks", id, rec).then(function () {
         if (old && old.asset && old.asset !== r.id) S.assets.delete(old.asset).catch(function () {});
-        S.ebBusy = null; render(); toast("已放上书架，点「打开电子书」就能看。");
+        S.ebBusy = null; render(); toast("电子书挂好了，点「开始读」就能看。");
       });
     }, function (e) { S.ebBusy = null; render(); toast(EB_ERR[e && e.code] || "上传没成功，请再试一次。"); });
   }
@@ -4887,6 +4901,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     if (!rec) return;
     RD.last = rec;
+    if (RD.mod) { var chn = rdChOf(rec.label); if (chn && chn !== RD.chAuto) { RD.chAuto = chn; if (RD.side && RD.tab === "ch" && !RD.chPick) rdSidePaint(); } }
     try { localStorage.setItem(rdKey(RD.id), JSON.stringify({ i: rec.loc, y: rec.y })); } catch (e) { /* 忽略 */ }
     readingSave(RD.id, rec, force);
     rdProgUI(rec.pct);
@@ -4980,9 +4995,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     el.innerHTML = '<div class="rd-bar"><b class="rd-t">' + esc(title) + '</b><select class="rd-toc" aria-label="目录" disabled><option>目录</option></select>' +
       '<span class="rd-pos" aria-live="polite">正在打开……</span>' +
       (kind === "pdf" ? '<span class="rd-zoom"><button type="button" class="btn ghost small" data-act="rd-zoom" data-z="-1" aria-label="缩小">－</button><button type="button" class="btn ghost small" data-act="rd-zoom" data-z="1" aria-label="放大">＋</button></span>' : "") +
-      '<button type="button" class="btn ghost small rd-nb" data-act="rd-notes" aria-pressed="false">笔记 <span class="rd-nbn">' + nMk + "</span></button>" +
+      (LIB.books[id] ? '<button type="button" class="btn ghost small rd-tb" data-act="rd-side" data-tab="ch" aria-pressed="false">本章精读</button>' : "") +
+      '<button type="button" class="btn ghost small rd-tb rd-nb" data-act="rd-side" data-tab="mk" aria-pressed="false">笔记 <span class="rd-nbn">' + nMk + "</span></button>" +
       '<button type="button" class="btn ghost small" data-act="rd-close">关闭</button></div>' +
-      '<div class="rd-main"><div class="rd-view"><p class="rd-msg">正在打开……</p></div><aside class="rd-side" aria-label="划线和批注" hidden></aside></div>' +
+      '<div class="rd-main"><div class="rd-view"><p class="rd-msg">正在打开……</p></div><aside class="rd-side" aria-label="本章精读、划线和批注" hidden></aside></div>' +
       '<div class="rd-foot"><button type="button" class="btn ghost small" data-act="rd-prev">‹ ' + (kind === "pdf" ? "上一页" : "上一部分") + "</button>" +
       '<span class="rd-pg" aria-hidden="true"><i></i></span><span class="rd-pc">0%</span><button type="button" class="btn small rd-done" data-act="rd-done" hidden>读完了，标成已读</button>' +
       '<button type="button" class="btn ghost small" data-act="rd-next">' + (kind === "pdf" ? "下一页" : "下一部分") + " ›</button></div>" +
@@ -4990,7 +5006,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<button type="button" class="rt-b" data-act="mk-note">批注</button><button type="button" class="rt-b" data-act="mk-copy">复制</button></div>' +
       '<div class="rd-pop" role="dialog" aria-label="这条划线" hidden></div>';
     document.body.appendChild(el); document.body.classList.add("rd-on");
-    RD = { id: id, el: el, kind: kind, seq: 0, i: 0, back: document.activeElement, side: !!(opt && opt.notes) };
+    var mod = !!LIB.books[id], wide = window.innerWidth >= 1000;
+    RD = { id: id, el: el, kind: kind, seq: 0, i: 0, back: document.activeElement, mod: mod, tab: opt && opt.notes ? "mk" : mod ? "ch" : "mk", side: !!(opt && opt.notes) || (mod && wide), chAuto: 0, chPick: 0 };
     ["mouseup", "keyup", "touchend"].forEach(function (ev) { el.addEventListener(ev, function (e) { if (!e.target.closest(".rd-tip, .rd-pop, .rd-bar, .rd-foot, .rd-side")) rdTipSoon(); }); });
     if (RD.side) rdSideToggle(true);
     el.querySelector('[data-act="rd-close"]').focus();
@@ -5083,8 +5100,39 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var nb = RD.el.querySelector(".rd-nbn"); if (nb) nb.textContent = list.length;
     if (RD.side) RD.el.querySelector(".rd-side").innerHTML = rdSideHTML();
   }
+  /* 本章精读：原书读到哪一章，旁边就摆出精读模块里这一章的“带着问题读”、要点和思考题。
+   * 第几章从电子书目录的标题里认（“第三章……”或含有章名），认不出就用下一章没精读完的，也可以在下拉框里自己选。 */
+  function cnNum(t) {
+    if (/^\d+$/.test(t)) return +t;
+    var D = { 零: 0, 〇: 0, 一: 1, 二: 2, 两: 2, 三: 3, 四: 4, 五: 5, 六: 6, 七: 7, 八: 8, 九: 9 }, n = 0, cur = 0;
+    for (var i = 0; i < t.length; i++) { var c = t.charAt(i); if (c === "十") { n += (cur || 1) * 10; cur = 0; } else if (c === "百") { n += (cur || 1) * 100; cur = 0; } else if (D[c] != null) cur = D[c]; else return 0; }
+    return n + cur;
+  }
+  function rdChOf(label) {
+    var b = RD && LIB.books[RD.id]; if (!b || !label) return 0;
+    var m = /第\s*([0-9一二三四五六七八九十百零〇两]+)\s*章/.exec(label), n = m ? cnNum(m[1]) : 0;
+    if (n && b.chapters.some(function (c) { return c.n === n; })) return n;
+    var hit = b.chapters.filter(function (c) { var t = c.title.replace(/（.*）$/, "").trim(); return t.length >= 2 && label.indexOf(t) >= 0; })[0];
+    return hit ? hit.n : 0;
+  }
+  function rdCh() {
+    var b = LIB.books[RD.id], bs = bookState(RD.id);
+    return RD.chPick || RD.chAuto || (b ? b.chapters[Math.min(bs.done, b.chapters.length - 1)].n : 0);
+  }
+  function rdChHTML() {
+    var b = LIB.books[RD.id], n = rdCh(), c = b.chapters.filter(function (x) { return x.n === n; })[0] || b.chapters[0], done = isDone(chId(RD.id, c.n));
+    var how = RD.chPick ? "" : RD.chAuto ? "跟着你读到的位置" : "没从目录里认出是第几章，可以在上面选";
+    var sel = '<select class="rs-chsel" aria-label="对应精读的哪一章">' + b.chapters.map(function (x) { return '<option value="' + x.n + '"' + (x.n === c.n ? " selected" : "") + ">第" + (CN[x.n] || x.n) + "章 " + esc(x.title) + (isDone(chId(RD.id, x.n)) ? " ✓" : "") + "</option>"; }).join("") + "</select>";
+    return '<div class="rs-ch">' + sel + (how ? '<p class="rs-how">' + how + "</p>" : "") +
+      (c.q ? '<div class="rs-q"><b>带着这个问题读</b><p>' + esc(c.q) + "</p></div>" : "") +
+      (c.points && c.points.length ? '<details class="rs-pts"' + (RD.ptsOpen ? " open" : "") + '><summary>这一章的要点 · ' + c.points.length + ' 条</summary><ol>' + c.points.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol></details>" : "") +
+      (c.questions && c.questions.length ? '<div class="rs-qs"><b>读完想一想</b><ol>' + c.questions.map(function (x) { return "<li>" + esc(x) + "</li>"; }).join("") + "</ol></div>" : "") +
+      '<div class="rs-btns">' + (S.canEdit ? '<button type="button" class="btn small' + (done ? " ghost" : "") + '" data-act="rd-chdone" data-n="' + c.n + '" aria-pressed="' + done + '">' + (done ? "已精读完 ✓" : "这一章精读完了") + "</button>" : "") +
+      '<button type="button" class="linkbtn" data-act="rd-chpage" data-n="' + c.n + '">打开本章精读页</button></div></div>';
+  }
   function rdSideHTML() {
     var list = marksOf(RD.id);
+    if (RD.mod && RD.tab === "ch") return rdChHTML();
     var head = '<div class="rs-h"><b>划线和批注</b><span>' + list.length + " 条</span></div>";
     if (!list.length) return head + '<p class="rs-empty">还没有划线。选中一段文字，就能划线或写批注。</p>';
     return head + '<ol class="rs-list">' + list.map(function (m) {
@@ -5092,13 +5140,20 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
         (m.note ? '<span class="rs-n">' + esc(m.note) + "</span>" : "") + "</button></li>";
     }).join("") + "</ol>";
   }
-  function rdSideToggle(on) {
+  /* 顶上的“本章精读”“笔记”两个按钮共用一个侧栏：点另一个就换内容，点正在看的那个就收起侧栏 */
+  function rdSideToggle(on, tab) {
     if (!RD) return;
+    var was = RD.side;
+    if (tab && RD.side && on == null && tab !== RD.tab) { RD.tab = tab; on = true; }
+    else if (tab) RD.tab = tab;
     RD.side = on == null ? !RD.side : on;
-    var sd = RD.el.querySelector(".rd-side"); sd.hidden = !RD.side; if (RD.side) sd.innerHTML = rdSideHTML();
-    var b = RD.el.querySelector(".rd-nb"); if (b) b.setAttribute("aria-pressed", String(RD.side));
+    rdSidePaint();
     RD.el.classList.toggle("side-on", RD.side);
-    if (RD.kind === "pdf" && RD.pdf) { var cur = pdfCur(); setTimeout(function () { pdfLayout(); pdfGo(cur.n, null, cur.y); }, 0); }
+    if (was !== RD.side && RD.kind === "pdf" && RD.pdf) { var cur = pdfCur(); setTimeout(function () { pdfLayout(); pdfGo(cur.n, null, cur.y); }, 0); }
+  }
+  function rdSidePaint() {
+    var sd = RD.el.querySelector(".rd-side"); sd.hidden = !RD.side; if (RD.side) sd.innerHTML = rdSideHTML();
+    RD.el.querySelectorAll(".rd-tb").forEach(function (b) { b.setAttribute("aria-pressed", String(RD.side && b.getAttribute("data-tab") === RD.tab)); });
   }
   function mkGo(mid) {
     var m = S.data.marks[mid]; if (!m || !RD) return;
@@ -5280,8 +5335,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   /* 展台：上面一小块打着光的台子，封面立在左边，右边是书名、作者、领域和状态；
    * 下面只放三样：读到哪、下一步（继续读、打开电子书或挂一本电子书）、有几条划线。
    * 为什么读、批注、电子书文件、方向页和拿下这本书，都收在“更多”里（开合记在这次打开的页面里）。 */
-  function daisId(title, meta, en, status) {
-    return '<div class="dz-id"><h2 id="pulled-h">' + esc(String(title).replace(/（.*）$/, "")) + "</h2>" + (en ? '<p class="pb-en">' + esc(en) + "</p>" : "") +
+  function daisId(title, meta, en, status, href) {
+    var tt = esc(String(title).replace(/（.*）$/, ""));
+    return '<div class="dz-id"><h2 id="pulled-h">' + (href ? '<a href="' + href + '" title="打开整本书的精读">' + tt + "</a>" : tt) + "</h2>" + (en ? '<p class="pb-en">' + esc(en) + "</p>" : "") +
       '<p class="meta">' + esc(meta.filter(Boolean).join(" · ")) + "</p>" + (status ? '<div class="pb-st">' + status + "</div>" : "") + "</div>";
   }
   function moreHTML(inner, hint) {
@@ -5291,17 +5347,20 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function bookDais(id) {
     var it = ITEMS[id], b = LIB.books[id], bs = bookState(id), dmi = domInfo(it.home), eb = ebookOf(id), rdg = readingOf(id);
     var pct = rdg && rdg.pct > 0.004 ? Math.round(rdg.pct * 100) : 0, acts = [];
-    if (b) { var next = b.chapters[Math.min(bs.done, b.chapters.length - 1)]; acts.push('<button type="button" class="btn" data-act="open-ch" data-book="' + id + '" data-n="' + next.n + '">继续：第' + CN[next.n] + "章</button>"); }
-    if (eb) acts.push('<button type="button" class="btn' + (b ? " ghost" : "") + ' eb-open" data-act="eb-read" data-id="' + esc(id) + '">' + (pct ? (b ? "电子书 · " : "接着读 · ") + pct + "%" : (b ? "读电子书" : "打开电子书")) + "</button>");
-    if (b) acts.push('<a class="btn ghost" href="#b-' + id + '">整本书</a>');
+    /* 一本书只有一个主按钮：有电子书就打开电子书接着读（精读书在旁边摆出本章精读）；精读书还没挂电子书，就打开下一章的精读页 */
+    var next = b ? b.chapters[Math.min(bs.done, b.chapters.length - 1)] : null;
+    if (eb) acts.push('<button type="button" class="btn eb-open" data-act="eb-read" data-id="' + esc(id) + '">' + (pct ? "接着读 · " + pct + "%" : "开始读") + "</button>");
+    else if (b) acts.push('<button type="button" class="btn" data-act="open-ch" data-book="' + id + '" data-n="' + next.n + '">' + (bs.done ? "继续精读：第" : "开始精读：第") + CN[next.n] + "章</button>");
     if (/^cfa-/.test(id) && ROUTES["c-cfa"]) acts.push('<a class="btn ghost" href="#c-cfa">CFA 课程页</a>');
     if (!eb && !b) acts.push(ebUploadBtn(id, "＋ 挂一本电子书"));
     var nMk = marksOf(id).length;
     var mk = nMk ? '<p class="pb-mk">' + (eb ? '<button type="button" class="linkbtn" data-act="eb-read" data-id="' + esc(id) + '" data-notes="1">' + nMk + " 条划线和批注，在书里看</button>" : nMk + " 条划线和批注") + "</p>" : "";
-    var links = dmi.href ? '<p class="pb-links"><a class="linkbtn" href="' + dmi.href + '">「' + esc(dmi.name) + "」方向的全部内容</a></p>" : "";
-    var more = (it.why ? '<p class="pb-why">' + esc(it.why) + "</p>" : "") + noteBlock(id, "我的批注", "读到哪、想到什么，写在这里") + (eb ? ebFileHTML(id) : b && ebCanUpload() ? '<p class="pb-links">' + ebUploadBtn(id, "＋ 挂一本电子书").replace('class="btn ghost eb-up', 'class="btn ghost small eb-up') + "</p>" : "") + links + shelfOpsHTML(id);
-    var hint = [it.why ? "为什么读" : "", "批注", eb ? "电子书文件" : b && ebCanUpload() ? "挂电子书" : "", S.canEdit && !/^cfa-/.test(id) ? "拿下" : ""].filter(Boolean).join(" · ");
-    return { col: dmi.col, head: daisId(it.title, [it.by || (/^cfa-/.test(id) ? "CFA 一级" : ""), dmi.name], "", b ? "" : statusCtl(id, it.title)),
+    var links = (b ? '<p class="pb-links"><a class="linkbtn" href="#b-' + id + '">整本书的精读：导读、章节、论证地图、练习</a></p>' : "") +
+      (eb && b ? '<p class="pb-links"><button type="button" class="linkbtn" data-act="open-ch" data-book="' + id + '" data-n="' + next.n + '">只看精读：第' + CN[next.n] + "章</button></p>" : "") +
+      (dmi.href ? '<p class="pb-links"><a class="linkbtn" href="' + dmi.href + '">「' + esc(dmi.name) + "」方向的全部内容</a></p>" : "");
+    var more = (it.why ? '<p class="pb-why">' + esc(it.why) + "</p>" : "") + noteBlock(id, "我的批注", "读到哪、想到什么，写在这里") + (eb ? ebFileHTML(id) : b && ebCanUpload() ? '<div class="pb-up">' + ebUploadBtn(id, "＋ 挂一本电子书").replace('class="btn ghost eb-up', 'class="btn ghost small eb-up') + '<span class="meta">挂上原书以后，主按钮就打开原书接着读，旁边摆着本章精读。</span></div>' : "") + links + shelfOpsHTML(id);
+    var hint = [b ? "整本书" : "", it.why ? "为什么读" : "", "批注", eb ? "电子书文件" : b && ebCanUpload() ? "挂电子书" : "", S.canEdit && !/^cfa-/.test(id) ? "拿下" : ""].filter(Boolean).join(" · ");
+    return { col: dmi.col, head: daisId(it.title, [it.by || (/^cfa-/.test(id) ? "CFA 一级" : ""), dmi.name, b ? "精读 " + bs.done + " / " + b.chapters.length + " 章" : ""], "", b ? "" : statusCtl(id, it.title), b ? "#b-" + id : ""),
       body: progCardHTML(id) + (acts.join("") ? '<div class="btns pb-acts">' + acts.join("") + "</div>" : "") + mk + moreHTML(more, hint) };
   }
   /* ---------- 书架：档案架（研究课题一盒一盒放） ----------
@@ -7164,7 +7223,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "rd-prev") { rdStep(-1); return; }
     if (act === "rd-next") { rdStep(1); return; }
     if (act === "rd-zoom") { pdfZoom(+t.getAttribute("data-z")); return; }
-    if (act === "rd-notes") { rdSideToggle(); return; }
+    if (act === "rd-side") { rdSideToggle(null, t.getAttribute("data-tab")); return; }
+    if (act === "rd-chdone") { if (RD) { var cn0 = +t.getAttribute("data-n"), cid = chId(RD.id, cn0); if (isDone(cid)) del("progress", cid); else put("progress", cid, { s: "done", t: new Date().toISOString() }); rdSidePaint(); } return; }
+    if (act === "rd-chpage") { if (RD) { var bk = RD.id, cn1 = +t.getAttribute("data-n"); readerClose(); openChapter(bk, cn1); } return; }
     if (act === "rd-done") { if (RD) { put("progress", RD.id, { s: "done", t: new Date().toISOString() }); t.hidden = true; toast("标成已读完了"); } return; }
     if (act === "mk-add") { mkAdd(t.getAttribute("data-c")); return; }
     if (act === "mk-note") { mkAdd("y", true); return; }
@@ -7275,6 +7336,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "fp-file") { filmLoad(t.files); t.value = ""; return; }
+    if (t.classList && t.classList.contains("rs-chsel") && RD) { RD.chPick = +t.value; rdSidePaint(); return; }
     if (t.classList && t.classList.contains("rd-toc") && RD) {
       if (RD.pdf) { var tp = RD.pdf.toc[+t.value]; if (tp) pdfGo(tp.page); }
       else if (RD.ep) { var te = RD.ep.toc[+t.value]; if (te) rdShow(te.i, { frag: te.frag }); }
@@ -7289,6 +7351,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   });
   document.addEventListener("toggle", function (e) {
     var d = e.target; if (d.matches && d.matches("details[data-more]")) { S.moreOpen = d.open; return; }
+    if (d.matches && d.matches("details.rs-pts") && RD) { RD.ptsOpen = d.open; return; }
     if (!d.matches || !d.matches("details.ch")) return;
     S.openCh[d.getAttribute("data-ch")] = d.open;
   }, true);
