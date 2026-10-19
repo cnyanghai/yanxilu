@@ -25,12 +25,24 @@
 - **知识专题**：[期货做市商](reports/market-making.html)，准入条件、盈亏方程（可切换情景的示意账）、七块核心知识、可调参数的 Avellaneda-Stoikov 报价演示、跨期与对冲、常见亏法、学习路线与书单、自测题。
 - **知识专题**：[做市商研习计划](reports/market-making-plan.html)，12 周、每周一读一做，与每日课表第一阶段同步；附一天的模拟 tick 练习数据（`reports/data/mm_ticks.csv`，生成脚本 `make_mm_ticks.py`）、两轮纸上做市、SQL 与 Python 习题，参考答案在 `reports/data/mm_exercises/`。页面里的代码由构建脚本从这些文件插入。
 
-## 两个版本
+## 三个版本
 
 | 版本 | 进度与批注保存在哪里 |
 | --- | --- |
-| claude.ai 上的 Artifact（主用版） | 云端记录，跨设备同步，只有所有者能修改 |
+| claude.ai 上的 Artifact | 云端记录，跨设备同步，只有所有者能修改 |
+| 自己的服务器 https://baba.wogucloud.cn （`server/index.html`） | 存在 Baba 英语的账号里（Postgres），登录后跨设备同步；电子书存在服务器磁盘上，只有本人能打开；书架的「英语」一层直接读 Baba 的实时数据 |
 | 本仓库的 `index.html`（公开版） | 显示最近一次同步的学习记录；访客的修改只存在自己的浏览器里 |
+
+### 服务器版怎么跑
+
+Baba 英语（Next.js）的首页 `/` 直接读 `YXL_DIR/server/index.html`（服务器上一份本仓库的克隆，cron 定时 `git pull`），`/vendor/`、`/reports/` 也从这份克隆里读，所以研习录更新只要推送到这里，不用重新部署 Baba。
+`server/index.html` 和 `index.html` 是同一个页面，只是前面多一段 `src/server.js`：它仿照 claude.ai 的运行时接口（db / user / assets），背后换成 Baba 的 `/api/yxl/*`：
+
+- `GET /api/yxl/state`：当前账号的全部记录；`PUT / DELETE /api/yxl/doc`：写一条、删一条；`POST /api/yxl/docs`：整批导入（claude.ai 版导出的记录文件）
+- `POST /api/yxl/files`、`GET / DELETE /api/yxl/files/<id>`：电子书文件（页面里的地址仍是 `/_blob/<id>`，由 Baba 转过去）
+- `GET /api/yxl/english`：Baba 上每部片几集、多少句、看到哪一句、累计时长，生词本里各状态的数量
+
+英语一层：片盒的进度条、在学 / 学完由 Baba 的观看进度算出来；Baba 后来加的片子也会自动摆上书架。点「接着学」在浮层里打开 Baba 的逐句学页面，接着上次那一句；生词本、学习进度也在浮层里打开，关掉浮层就刷新。
 
 每次在对话里更新研习录后，Claude 会把云端记录导出到 `src/data.js` 的 `YXL_RECORD`，重新生成 `index.html` 并推送到这里，所以提交历史就是完整的学习轨迹。
 
@@ -44,10 +56,11 @@ src/plan.js     每日课表：一周时段安排与各科课程顺序
 src/metro.js    首页线网图的布局：线路走向、换乘站、区域、地标位置
 study/          课表进度（progress.json）、按课的讲义（lessons/<科目>/<序号>.md）、每日路线单（daily/）和推送、打卡脚本
 src/app.js      页面逻辑
+src/server.js   服务器版（baba.wogucloud.cn）的接口适配：把读写接到 Baba 的 /api/yxl/*
 vendor/pdfjs/   PDF.js 4.4（Mozilla，Apache-2.0 许可，见目录里的 LICENSE）：在页面里显示 PDF；cmaps.json、fonts.json 是打包好的中文字符映射表和标准字体
 src/report-*.html  专题页模板（数据专题的数据在构建时注入；知识专题不需要数据）
 reports/        数据专题页；data/ 下是整理脚本 make_data.py、JSON 与长表 CSV
-build.py        合成 index.html（公开版）与 dist/artifact.html（claude.ai 版），以及 reports/ 下的专题页
+build.py        合成 index.html（公开版）、dist/artifact.html（claude.ai 版）、server/index.html（服务器版），以及 reports/ 下的专题页
 ```
 
 修改内容后运行 `python3 build.py`。

@@ -1927,6 +1927,34 @@ svg.fold,svg.fold-mini{display:block;width:100%;min-width:1080px;height:auto;fon
   .w-head h1{font-size:30px}
 }
 @media (prefers-reduced-motion: reduce){.stg-cover.flip,.stg-box.flip{animation:none}.cb,.cv{transition:none}}
+
+/* ---------- 服务器版（baba.wogucloud.cn）：账号、导入、Baba 浮层、英语分集 ---------- */
+.topbar a.mode{text-decoration:none;min-height:32px;padding:0 10px;border-radius:16px;border:1px solid var(--rule-strong);color:var(--ink-2)}
+.topbar a.mode:hover{background:var(--paper);color:var(--ink)}
+.topbar a.mode.login{border-color:var(--ink);color:var(--ink);font-weight:600}
+.topbar a.mode.login i{background:var(--seal)}
+.acct-n{max-width:9em;overflow:hidden;text-overflow:ellipsis}
+.banner.soft{background:transparent;border:1px dashed var(--rule-strong)}
+.imp-btn{position:relative}
+.en-eps{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0}
+.en-ep{position:relative;display:flex;flex-direction:column;gap:4px;min-width:64px;padding:6px 9px 8px;border:1px solid var(--rule-strong);border-radius:5px;background:var(--leaf);font-family:var(--f-num);font-size:13px;color:var(--ink-2);cursor:pointer}
+.en-ep b{font-weight:600}
+.en-ep i{display:block;height:3px;border-radius:2px;background:linear-gradient(90deg,var(--ln-en) var(--p),var(--rule) var(--p))}
+.en-ep.on{border-color:var(--ln-en);color:var(--ink)}
+.en-ep.ok{background:var(--z-en)}
+.en-ep:hover{border-color:var(--ink)}
+.en-tools{display:flex;flex-wrap:wrap;gap:6px 16px}
+.en-tools .linkbtn{font-size:13.5px;color:var(--ink-2)}
+button.vbox{background:none;border:0;padding:0;font:inherit;cursor:pointer}
+html.ov-on,html.ov-on body{overflow:hidden}
+.ov{position:fixed;inset:0;z-index:80;display:flex;flex-direction:column;background:var(--paper)}
+.ov-bar{flex:none;display:flex;align-items:center;gap:12px;min-height:46px;padding:4px 12px 4px 16px;padding-top:max(4px,env(safe-area-inset-top,0px));background:var(--leaf);border-bottom:3px solid var(--ln-en);font-family:var(--f-ui)}
+.ov-src{flex:none;font-size:11.5px;font-weight:700;letter-spacing:.08em;color:#24211E;background:var(--ln-en);border-radius:3px;padding:2px 7px}
+.ov-t{flex:1 1 auto;min-width:0;font-family:var(--f-display);font-size:15.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ov-tab{flex:none;font-size:13px;color:var(--ink-3)}
+.ov-x{flex:none;min-height:36px;padding:0 16px;border:1px solid var(--ink);border-radius:18px;background:var(--ink);color:var(--paper);font-size:14px;font-weight:600;cursor:pointer}
+.ov-f{flex:1 1 auto;width:100%;border:0;background:#0B0B0C}
+@media (max-width:640px){ .ov-tab{display:none} .ov-bar{padding-left:12px} }
 </style>
 
 <header class="topbar" id="rail"></header>

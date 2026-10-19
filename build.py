@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
-"""把 src/ 下的页面、数据和脚本合成两个文件：
+"""把 src/ 下的页面、数据和脚本合成三个文件：
 - dist/artifact.html：发布到 claude.ai 的版本（不含 <html>/<head> 外壳，由平台包裹）
 - index.html：GitHub 上的完整网页（可直接打开或用 GitHub Pages 访问）
+- server/index.html：自己服务器上的版本（baba.wogucloud.cn 首页，记录存在 Baba 的账号里）
 用法：python3 build.py
 """
 import re, pathlib
@@ -37,7 +38,14 @@ full = ("<!doctype html>\n<html lang=\"zh-CN\">\n<head>\n<meta charset=\"utf-8\"
         + "\n".join(head_bits) + "\n<style>" + reset + "</style>\n</head>\n<body>\n"
         + rest.strip() + "\n<script>\n" + data.strip() + "\n</script>\n<script>\n" + app.strip() + "\n</script>\n</body>\n</html>\n")
 (root / "index.html").write_text(full, encoding="utf-8")
-print("dist/artifact.html", len(body.encode()), "bytes; index.html", len(full.encode()), "bytes")
+# 自己服务器上的版本（baba.wogucloud.cn 的首页）：同一个页面，前面多一段 src/server.js，
+# 把读写接到 Baba 的 /api/yxl/*（按 Baba 账号存），英语一层读 Baba 的实时数据
+shim = (root / "src/server.js").read_text(encoding="utf-8")
+server = full.replace("\n<script>\n" + data.strip(), "\n<script>\n" + shim.strip() + "\n</script>\n<script>\n" + data.strip(), 1)
+assert server != full
+(root / "server").mkdir(exist_ok=True)
+(root / "server/index.html").write_text(server, encoding="utf-8")
+print("dist/artifact.html", len(body.encode()), "bytes; index.html", len(full.encode()), "bytes; server/index.html", len(server.encode()), "bytes")
 
 # 专题页：src/report-*.html 里的 /*@DATA@*/ 换成 reports/data/ 下的 JSON；知识专题没有数据文件，填 None
 REPORTS = {"report-consumption.html": ("consumption-population.json", "consumption-population.html"),

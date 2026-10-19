@@ -3,6 +3,8 @@
   document.documentElement.lang = "zh-CN";
 
   var LIB = window.YXL_LIB, REC = window.YXL_RECORD || { data: {} };
+  /* 跑在自己的服务器上（baba.wogucloud.cn，见 src/server.js）：记录按 Baba 账号存，英语一层读 Baba 的实时数据 */
+  var SRV = window.YXL_SERVER || null, ON_SERVER = !!SRV;
   var PLAN = window.YXL_PLAN || null, STUDY_SNAP = window.YXL_STUDY || { next: {}, days: {}, streak: 0 };
   var LESSON_SNAP = window.YXL_LESSONS || {};
   /* 有课程页的线：电影、SQL、Python、CFA、地缘、周复盘 */
@@ -41,6 +43,7 @@
   var EN = LIB.english || { films: [], books: [] }, EN_ITEM = {}, EN_IDS = [];
   (EN.films || []).forEach(function (x) { EN_ITEM[x.id] = Object.assign({ kind: "film" }, x); EN_IDS.push(x.id); });
   (EN.books || []).forEach(function (x) { EN_ITEM[x.id] = Object.assign({ kind: "read" }, x); EN_IDS.push(x.id); });
+  if (ON_SERVER) EN.site = "";
   /* 正在精读的书：focus 可以是一本书的 id，也可以是几本书的数组 */
   var FOCUS = [].concat(LIB.focus || []).filter(function (id) { return LIB.books[id]; });
   if (!FOCUS.length) FOCUS = Object.keys(LIB.books).slice(0, 1);
@@ -113,6 +116,7 @@
     if (code === "invalid_argument") { S.canEdit = false; scheduleRender(); return "这份记录对你是只读的，修改没有保存。"; }
     if (code === "quota_exceeded") return "记录数量已到上限，需要先清理一些旧条目。";
     if (code === "revoked") { S.canEdit = false; scheduleRender(); return "访问已变更，页面转为只读。"; }
+    if (code === "upstream_auth" && ON_SERVER) { if (SRV) SRV.reload().catch(function () {}); return "登录过期了，重新登录后再改。"; }
     return "保存失败，请稍后再试。";
   }
   function chain(key, fn) {
@@ -157,6 +161,10 @@
       if (!db) { if (S.mode === "pending") enterLocal(); return; }
       if (S.mode === "local") return;
       S.db = db; S.mode = "db";
+      if (ON_SERVER) {
+        window.addEventListener("yxl-user", function () { S.canEdit = !!SRV.me(); enLoad(); scheduleRender(); });
+        enLoad();
+      }
       var owner = user ? user.isOwner() : Promise.resolve(false);
       Promise.resolve(owner).then(function (v) { S.canEdit = !!v; render(); }, function () { S.canEdit = false; render(); });
       window.claude.use("assets").then(function (a) { S.assets = a || null; render(); }, function () { S.assets = null; });
@@ -191,8 +199,8 @@
   });
 
   /* ---------- 通用片段 ---------- */
-  function statusCtl(id, label) {
-    var s = st(id), mk = MARK[s] ? '<i class="mk" aria-hidden="true">' + MARK[s] + "</i>" : "";
+  function statusCtl(id, label, cur) {
+    var s = cur || st(id), mk = MARK[s] ? '<i class="mk" aria-hidden="true">' + MARK[s] + "</i>" : "";
     if (!S.canEdit) return '<span class="stw s-' + s + '">' + mk + '<span class="st">' + STATUS_LABEL[s] + "</span></span>";
     var opts = STATUS.map(function (x) { return '<option value="' + x[0] + '"' + (x[0] === s ? " selected" : "") + ">" + x[1] + "</option>"; }).join("");
     return '<span class="stw s-' + s + '">' + mk + '<select class="st" id="st-' + esc(id) + '" data-act="status" data-id="' + esc(id) + '" aria-label="' + esc(label) + ' 的进度">' + opts + "</select></span>";
@@ -210,7 +218,17 @@
     }
     return '<div class="note"><span class="note-lab">' + esc(label) + "</span>" + (text ? '<div class="note-ro">' + esc(text) + "</div>" : '<div class="note-ro empty">还没有批注。</div>') + "</div>";
   }
+  function recCount() { var n = 0; COLLS.forEach(function (c) { if (c !== "lessons") n += Object.keys(S.data[c] || {}).length; }); return n; }
   function bannerHTML() {
+    if (ON_SERVER && S.mode === "db") {
+      var me = SRV.me();
+      if (!me) return '<div class="banner" role="note"><span>登录 Baba 账号后，进度、批注、电子书和英语的学习记录都记在你的账号里，换手机、换电脑都在。</span>' +
+        '<a class="btn small" href="' + esc(SRV.loginHref()) + '">登录</a></div>';
+      var empty = recCount() === 0;
+      if (!empty && S.route !== "journal") return "";
+      return '<div class="banner' + (empty ? "" : " soft") + '" role="note"><span>' + (empty ? "这个账号还没有学习记录。claude.ai 版导出的记录文件（JSON），可以在这里一次导进来，电子书需要重新挂一次。" : "还有 claude.ai 版导出的记录文件？可以再导一次，同一条记录以文件里的为准。") + "</span>" +
+        '<label class="btn small ghost imp-btn">' + (S.impBusy ? "正在导入……" : "导入记录文件") + '<input type="file" id="imp-file" accept=".json,application/json" hidden' + (S.impBusy ? " disabled" : "") + "></label></div>";
+    }
     if (S.mode !== "local") return "";
     return '<div class="banner" role="note"><span>公开阅读版：显示的是 ' + esc(REC.syncedAt || "") + ' 同步的学习记录。你在这里标的进度和写的批注只保存在当前浏览器。</span>' +
       '<button class="btn small ghost" type="button" data-act="export">复制我的记录</button></div>';
@@ -251,13 +269,19 @@
     var r = S.route, sec = /^[lc]-/.test(r) ? "home" : r === "shelf" || r === "archive" || /^[tbr]-/.test(r) ? "shelf" : r;
     function it(id, label, extra) { return '<a href="#' + id + '"' + (sec === id ? ' aria-current="page"' : "") + ">" + ICON[id] + "<span>" + label + "</span>" + (extra || "") + "</a>"; }
     var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接"];
+    var modeH = '<span class="mode ' + mode[0] + '"><i></i>' + mode[1] + "</span>";
+    if (ON_SERVER && S.mode === "db") {
+      var me = SRV.me();
+      modeH = me ? '<a class="mode db acct" href="/account" title="Baba 账号：' + esc(me.name || "") + '"><i></i><span class="acct-n">' + esc(me.name || "我的账号") + "</span></a>"
+        : '<a class="mode login" href="' + esc(SRV.loginHref()) + '"><i></i>登录</a>';
+    }
     return '<div class="tb-in"><a class="brand" href="#home" aria-label="研习录，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>研习录</b></a>' +
       '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + it("shelf", "书架") + it("journal", "足迹") + "</nav>" +
-      '<span class="mode ' + mode[0] + '"><i></i>' + mode[1] + "</span></div>";
+      modeH + "</div>";
   }
 
   /* ---------- 专题（独立页面，新标签页打开；按 reportGroups 分组） ---------- */
-  var IN_ARTIFACT = !!(window.claude && typeof window.claude.use === "function");
+  var IN_ARTIFACT = !ON_SERVER && !!(window.claude && typeof window.claude.use === "function");
   var REPORTS = LIB.reports || [];
   var RGROUPS = LIB.reportGroups || [{ id: "data", name: "数据专题", trackHead: "用数据看这个方向" }];
   function reportsIn(gid, list) { return (list || REPORTS).filter(function (rp) { return (rp.group || "data") === gid; }); }
@@ -335,7 +359,68 @@
       if (s === "todo" && r.done > 0) r.s = "doing";
       if (r.done >= r.total && r.total && s !== "review") r.s = "done";
     }
+    var bd = x && x.where === "baba" && x.baba;
+    if (bd && bd.sentences) {
+      r.total = bd.sentences; r.done = Math.min(bd.sentences, bd.reached || 0); r.pct = r.done / r.total;
+      if (s === "todo" && (r.done > 0 || bd.last)) r.s = "doing";
+      if (r.done >= r.total && s !== "review") r.s = "done";
+    }
     return r;
+  }
+  /* ---------- 英语一层在自己服务器上：读 Baba 的实时数据 ----------
+   * /api/yxl/english：每部片几集、多少句、你看到哪了、累计看了多久，生词本里新词 / 在学 / 认识各多少。
+   * data.js 里没写的片子（Baba 后来加的）也自动摆上来，只有片名、年份，不放海报。 */
+  var EN_TYPE = { DRAMA: "剧集", MOVIE: "电影", TED: "TED", CARTOON: "动画" };
+  var enBusy = null;
+  function enLoad() {
+    if (!ON_SERVER || enBusy) return;
+    enBusy = SRV.english().then(function (d) { enBusy = null; S.en = d; enMerge(d); scheduleRender(); }, function () { enBusy = null; });
+  }
+  function enMerge(d) {
+    (d.dramas || []).forEach(function (bd) {
+      var path = "/dramas/" + bd.slug, x = null;
+      EN_IDS.forEach(function (id) { var y = EN_ITEM[id]; if (y.where === "baba" && String(y.path || "").replace(/\/$/, "") === path) x = y; });
+      if (!x) {
+        x = { id: "en-b-" + bd.slug, kind: "film", title: bd.titleZh || bd.titleEn, en: bd.titleEn, year: bd.year || "", type: EN_TYPE[bd.type] || "片子", where: "baba", path: path, auto: true };
+        EN_ITEM[x.id] = x; EN_IDS.push(x.id); (EN.films = EN.films || []).push(x);
+      }
+      x.baba = bd;
+    });
+  }
+  function enEp(bd, code) { return (bd.episodes || []).filter(function (e) { return e.code === code; })[0] || null; }
+  function enEpName(bd, e) { return bd.episodes.length > 1 ? e.code : ""; }
+  function enDlg(slug, code, idx) { return "/dramas/" + encodeURIComponent(slug) + "/episodes/" + encodeURIComponent(code) + "/dialogues/" + (idx || 0); }
+  function msText(ms) { var m = Math.round((ms || 0) / 60000); return m < 60 ? m + " 分钟" : Math.floor(m / 60) + " 小时" + (m % 60 ? " " + (m % 60) + " 分" : ""); }
+  function enOpenBtn(href, title, label, cls) { return '<button type="button" class="' + (cls || "btn") + '" data-act="en-open" data-href="' + esc(href) + '" data-title="' + esc(title) + '">' + label + "</button>"; }
+  /* 服务器版的 Baba 片盒 / 绘本：主按钮在浮层里打开 Baba 的逐句学页面，接着上次那一句 */
+  function enDaisServer(id, x, es, head, why, noteLab, notePh) {
+    var film = x.kind === "film", bd = x.baba, me = SRV.me(), en = S.en, body = "", go;
+    if (film && bd) {
+      var last = bd.last, le = last ? enEp(bd, last.code) : null, first = bd.episodes[0];
+      var where = bd.sentences ? es.done + " / " + bd.sentences + " 句" + (bd.watchedMs ? " · 看了 " + msText(bd.watchedMs) : "") : "还没有字幕";
+      var sub = last && le ? "上次看到 " + (enEpName(bd, le) ? enEpName(bd, le) + " " : "") + "第 " + (last.idx + 1) + " 句 · " + agoText(last.at) : me ? "还没开始" : "登录后会记下看到哪一句";
+      body += '<section class="prog" aria-label="学到哪"><div class="pg-top"><b class="pg-pct">' + Math.round(es.pct * 100) + "<small>%</small></b>" +
+        '<span class="pg-where">' + esc(where) + '</span></div><div class="pg-edge" style="--p:' + (es.pct * 100).toFixed(1) + '%" role="img" aria-label="学到 ' + Math.round(es.pct * 100) + '%"><i class="pg-read"></i><i class="pg-rib"></i></div><p class="pg-sub">' + esc(sub) + "</p></section>";
+      if (last && le) {
+        var atEnd = last.idx + 1 >= le.sentences, nx = atEnd ? bd.episodes[bd.episodes.indexOf(le) + 1] : null;
+        go = nx ? enOpenBtn(enDlg(bd.slug, nx.code, nx.lastIdx || 0), x.title + " " + nx.code, "接着学：" + esc(nx.code))
+          : enOpenBtn(enDlg(bd.slug, le.code, last.idx), x.title, "接着学：" + (enEpName(bd, le) ? esc(le.code) + " " : "") + "第 " + (last.idx + 1) + " 句");
+      } else go = first ? enOpenBtn(enDlg(bd.slug, first.code, 0), x.title, "开始学") : enOpenBtn(x.path, x.title, "打开");
+      if (bd.episodes.length > 1) {
+        body += '<ol class="en-eps">' + bd.episodes.map(function (e) {
+          var p = e.sentences ? Math.min(1, ((e.lastIdx == null ? -1 : e.lastIdx) + 1) / e.sentences) : 0;
+          return '<li><button type="button" class="en-ep' + (p >= 1 ? " ok" : p > 0 ? " on" : "") + '" data-act="en-open" data-href="' + esc(enDlg(bd.slug, e.code, e.lastIdx || 0)) + '" data-title="' + esc(x.title + " " + e.code) + '" title="' + esc((e.title || e.code) + " · " + e.sentences + " 句") + '">' +
+            '<b>' + esc(e.code) + '</b><i style="--p:' + Math.round(p * 100) + '%"></i></button></li>';
+        }).join("") + "</ol>";
+      }
+    } else go = enOpenBtn(x.path, x.title, film ? "打开" : "打开绘本");
+    var tools = '<div class="btns pb-acts">' + go + "</div>" +
+      '<div class="en-tools">' + enOpenBtn("/vocabulary", "生词本", "生词本" + (en && en.vocab && en.vocab.total ? " · " + en.vocab.total : ""), "linkbtn") +
+      enOpenBtn("/progress", "学习进度", "学习进度", "linkbtn") + "</div>";
+    var meta = !me ? '<p class="meta">没登录也能看片子；<a href="' + esc(SRV.loginHref()) + '">登录</a>以后才会记下看到哪一句、收进生词本。</p>'
+      : en && !en.paid ? '<p class="meta">这个账号还没开通 Baba 会员：每集只能试看 10 分钟。</p>' : "";
+    var sync = '<p class="meta">看到哪一句、收了哪些生词都记在 Baba 上，关掉浮层就同步到这里。</p>';
+    return { col: "var(--ln-en)", head: head, body: body + tools + meta + moreHTML(why + sync + noteBlock(id, noteLab, notePh), (why ? "介绍 · " : "") + noteLab) };
   }
   function enFit(t, h) { return Math.max(10.5, Math.min(15, Math.floor((h - 104) / (t.length * 1.16) * 2) / 2)); }
   function filmCaseHTML(x) {
@@ -359,7 +444,7 @@
   /* 抽出来的片盒 / 英语读物 */
   function enDais(id) {
     var x = EN_ITEM[id], es = enState(id), film = x.kind === "film", local = x.where === "local";
-    var head = daisId(x.title, [x.year, x.type, x.level], x.en, local ? "" : statusCtl(id, x.title));
+    var head = daisId(x.title, [x.year, x.type, x.level], x.en, local ? "" : statusCtl(id, x.title, ON_SERVER && x.baba ? es.s : null));
     var noteLab = film ? "观影笔记" : "我的批注", notePh = film ? "哪几句听不出来、记住了哪些说法，写在这里" : "读到哪、想到什么，写在这里";
     var why = x.why ? '<p class="pb-why">' + esc(x.why) + "</p>" : "";
     if (local) {
@@ -371,6 +456,7 @@
       var go = es.done < es.total ? '<a class="btn" href="#c-' + esc(x.plan) + '" data-act="film-go" data-seg="' + next + '">继续：第 ' + (next + 1) + " 段</a>" : '<a class="btn" href="#c-' + esc(x.plan) + '">打开跟读播放器</a>';
       return { col: "var(--ln-en)", head: head, body: prog + '<div class="btns pb-acts">' + go + "</div>" + moreHTML(why + noteBlock(id, noteLab, notePh), "介绍 · " + noteLab) };
     }
+    if (ON_SERVER) return enDaisServer(id, x, es, head, why, noteLab, notePh);
     var go2 = '<a class="btn" href="' + esc(enHref(x.path)) + '" target="_blank" rel="noopener">' + (film ? "去 Baba 学" : "去 Baba 读") + " ↗</a>";
     var sync = '<p class="meta">学到哪、收了哪些生词都记在 Baba 上，暂时不传回研习录，学到一半或学完了在上面标一下。</p>';
     return { col: "var(--ln-en)", head: head, body: '<div class="btns pb-acts">' + go2 + "</div>" + moreHTML(why + sync + noteBlock(id, noteLab, notePh), "介绍 · " + noteLab) };
@@ -784,6 +870,10 @@
       var films = (EN.films || []).map(function (x) { return EN_ITEM[x.id]; }), reads = (EN.books || []).map(function (x) { return EN_ITEM[x.id]; });
       var all = films.concat(reads), d = all.filter(function (x) { return enState(x.id).s === "doing"; }).length;
       var vocab = '<a class="vbox" href="' + esc(enHref("/vocabulary")) + '" target="_blank" rel="noopener" title="Baba 上的生词本（新标签页打开）"><span class="vb-cards" aria-hidden="true"><i></i><i></i><i></i></span><span class="vb-body"><b>生词本</b><small>Baba ↗</small></span></a>';
+      if (ON_SERVER) {
+        var vc = S.en && S.en.vocab, vn = vc ? vc.total : 0, due = vc ? vc.new + vc.learning : 0;
+        vocab = '<button type="button" class="vbox" data-act="en-open" data-href="/vocabulary" data-title="生词本" title="生词本' + (vn ? "：" + vn + " 个，还没记住的 " + due + " 个" : "") + '"><span class="vb-cards" aria-hidden="true"><i></i><i></i><i></i></span><span class="vb-body"><b>生词本</b><small>' + (due ? "待复习 " + due : vn ? vn + " 个" : "打开") + "</small></span></button>";
+      }
       var innerE = films.map(filmCaseHTML).join("") + '<span class="bookend" aria-hidden="true"></span>' + reads.map(function (x) { return '<span class="easel">' + readCoverHTML(x) + "</span>"; }).join("") + '<span class="wm-fill" aria-hidden="true"></span>' + vocab;
       return wmHTML("en", "var(--ln-en)", "<b>EN</b>英语 · " + films.length + " 部片 · " + reads.length + " 本读物" + (d ? " · 在学 " + d : ""), "", innerE, "en", "<b>EN</b>英语 · 续");
     }
@@ -1015,18 +1105,18 @@
    * GitHub 公开版：文件只存在当前浏览器的 IndexedDB 里（库 yanxilu-ebooks，键 = 书的 id），不会传到网上；
    *   本地记录 ebooks[书的 id] = { local: true, kind, name, size, t }，跟公开版的其他本地记录一样存在 localStorage。
    * PDF 和 EPUB 都在页面里的阅读器打开（见下面的阅读器），PDF 也可以在新标签页打开。 */
-  var EB_MAX = 20 * 1024 * 1024, EPUB_MAX = 15 * 1024 * 1024;
+  var EB_MAX = (ON_SERVER ? 40 : 20) * 1024 * 1024, EPUB_MAX = (ON_SERVER ? 30 : 15) * 1024 * 1024, EB_MB = EB_MAX >> 20, EPUB_MB = EPUB_MAX >> 20;
   function ebKind(file) {
     var n = file.name || "";
     if (/\.epub$/i.test(n) || file.type === "application/epub+zip") return "epub";
     if (/\.pdf$/i.test(n) || file.type === "application/pdf") return "pdf";
     return "";
   }
-  var EB_ERR = { too_large: "文件太大了：PDF 最多 20 MB，EPUB 最多 15 MB。", unsupported_type: "只能上传 PDF 或 EPUB 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
-    rate_limited: "传得太频繁了，过一会儿再试。", upstream_auth: "登录状态过期了，刷新页面后再试。", capability_disabled: "这个页面现在不能上传文件。", not_granted: "这个页面现在不能上传文件。", capability_removed: "这个页面现在不能上传文件。" };
+  var EB_ERR = { too_large: "文件太大了：PDF 最多 " + EB_MB + " MB，EPUB 最多 " + EPUB_MB + " MB。", unsupported_type: "只能上传 PDF 或 EPUB 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
+    rate_limited: "传得太频繁了，过一会儿再试。", upstream_auth: ON_SERVER ? "登录过期了，重新登录后再传。" : "登录状态过期了，刷新页面后再试。", store_unavailable: "服务器存不下这个文件，过一会儿再试。", capability_disabled: "这个页面现在不能上传文件。", not_granted: "这个页面现在不能上传文件。", capability_removed: "这个页面现在不能上传文件。" };
   function ebookOf(id) {
     var e = S.data.ebooks ? S.data.ebooks[id] || null : null;
-    if (S.mode === "db") return IN_ARTIFACT && e && e.asset ? e : null;
+    if (S.mode === "db") return (IN_ARTIFACT || ON_SERVER) && e && e.asset ? e : null;
     if (S.mode === "local") return e && e.local ? e : null;
     return null;
   }
@@ -1087,7 +1177,7 @@
   function ebCanUpload() { return S.mode === "local" ? true : !!(S.assets && S.canEdit); }
   function ebUploadBtn(id, label) {
     if (!ebCanUpload()) return "";
-    var busy = S.ebBusy === id, tip = S.mode === "local" ? "PDF 或 EPUB，只存在这个浏览器里，不会传到网上" : "PDF（20 MB 以内）或 EPUB（15 MB 以内）";
+    var busy = S.ebBusy === id, tip = S.mode === "local" ? "PDF 或 EPUB，只存在这个浏览器里，不会传到网上" : "PDF（" + EB_MB + " MB 以内）或 EPUB（" + EPUB_MB + " MB 以内）";
     return '<label class="btn ghost eb-up' + (busy ? " busy" : "") + '" title="' + tip + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : label) + "</label>";
   }
   function ebFileHTML(id) {
@@ -1118,8 +1208,8 @@
         function (e) { S.ebBusy = null; render(); toast(ebLocalErr(e)); });
       return;
     }
-    if (kind === "pdf" && file.size > EB_MAX) { toast("PDF 超过 20 MB，压缩一下再传。"); return; }
-    if (kind === "epub" && file.size > EPUB_MAX) { toast("EPUB 超过 15 MB，传不上去。可以在公开版里放（只存在那个浏览器）。"); return; }
+    if (kind === "pdf" && file.size > EB_MAX) { toast("PDF 超过 " + EB_MB + " MB，压缩一下再传。"); return; }
+    if (kind === "epub" && file.size > EPUB_MAX) { toast("EPUB 超过 " + EPUB_MB + " MB，传不上去。" + (ON_SERVER ? "" : "可以在公开版里放（只存在那个浏览器）。")); return; }
     if (!S.assets) { toast("这个页面现在不能上传文件。"); return; }
     var old = S.data.ebooks[id];
     S.ebBusy = id; render();
@@ -3684,6 +3774,47 @@
     }
     try { navigator.clipboard.writeText(text).then(function () { toast(msg || "已复制"); }, fallback); } catch (e) { fallback(); }
   }
+  /* ---------- 浮层：服务器版里在研习录上面打开 Baba 的页面（逐句学、生词本、学习进度） ----------
+   * 同一个网站，用 iframe 套进来；Baba 那边看到自己在浮层里，就把顶栏藏掉（见 Baba 的 layout）。关掉浮层时重新取一次英语数据。 */
+  var OV = null;
+  function ovOpen(href, title) {
+    if (OV) ovClose(true);
+    var d = document.createElement("div");
+    d.className = "ov"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-label", title || "Baba 英语");
+    d.innerHTML = '<div class="ov-bar"><span class="ov-src">Baba 英语</span><b class="ov-t">' + esc(title || "") + '</b>' +
+      '<a class="ov-tab" href="' + esc(href) + '" target="_blank" rel="noopener" data-act="ov-tab">新标签页打开 ↗</a><button type="button" class="ov-x" data-act="ov-close" aria-label="关闭，回到书架">关闭</button></div>' +
+      '<iframe class="ov-f" src="' + esc(href) + '" title="' + esc(title || "Baba 英语") + '" allow="autoplay; fullscreen; clipboard-write"></iframe>';
+    document.body.appendChild(d); document.documentElement.classList.add("ov-on");
+    OV = { el: d, back: document.activeElement };
+    var f = d.querySelector(".ov-f");
+    f.addEventListener("load", function () {
+      try {
+        var w = f.contentWindow, a = d.querySelector(".ov-tab");
+        /* 浮层里点来点去（Next 的页内跳转不触发 load），新标签页按钮在点下去的那一刻取当前地址 */
+        a.href = w.location.href;
+      } catch (e) { /* 不同源时不管 */ }
+    });
+    d.querySelector(".ov-x").focus();
+  }
+  function ovClose(quiet) {
+    if (!OV) return;
+    var o = OV; OV = null; o.el.remove(); document.documentElement.classList.remove("ov-on");
+    if (quiet) return;
+    try { if (o.back && o.back.isConnected) o.back.focus({ preventScroll: true }); } catch (e) { /* 忽略 */ }
+    enLoad(); if (SRV) SRV.reload().catch(function () {});
+  }
+  function impFile(file) {
+    if (!file || !SRV) return;
+    var fr = new FileReader();
+    fr.onload = function () {
+      var obj; try { obj = JSON.parse(String(fr.result)); } catch (e) { toast("这个文件不是记录文件（JSON）。"); return; }
+      S.impBusy = true; render();
+      SRV.importDocs(obj).then(function (r) { S.impBusy = false; render(); toast("导入了 " + r.written + " 条记录" + (r.skipped ? "，" + r.skipped + " 条格式不对没导" : "") + "。"); },
+        function (e) { S.impBusy = false; render(); toast(e && e.code === "empty" ? "文件里没有能导入的记录。" : e && e.code === "upstream_auth" ? "登录过期了，重新登录后再导。" : "导入没成功，请再试一次。"); });
+    };
+    fr.onerror = function () { toast("读不了这个文件。"); };
+    fr.readAsText(file);
+  }
   function openChapter(bid, n) {
     var id = chId(bid, n); S.openCh[id] = true; S.bookTab = "chapters";
     if (S.route !== "b-" + bid) { location.hash = "b-" + bid; }
@@ -3700,6 +3831,9 @@
     var t = e.target.closest("[data-act]"); if (!t) return;
     var act = t.getAttribute("data-act");
     if (act === "mst") { openStation(t.getAttribute("data-l"), +t.getAttribute("data-i")); return; }
+    if (act === "en-open") { e.preventDefault(); ovOpen(t.getAttribute("data-href"), t.getAttribute("data-title")); return; }
+    if (act === "ov-close") { ovClose(); return; }
+    if (act === "ov-tab") { try { var ofr = OV && OV.el.querySelector(".ov-f"); if (ofr) t.href = ofr.contentWindow.location.href; } catch (e2) { /* 用原地址 */ } return; }
     if (act === "mgs") { openGoalStop(t.getAttribute("data-g"), +t.getAttribute("data-i")); return; }
     if (act === "pick") {
       var pid = t.getAttribute("data-id"), fly = null;
@@ -3818,6 +3952,7 @@
   });
   document.addEventListener("keydown", function (e) { if (RD) { rdKeys(e); if (e.key === "Escape") e.stopImmediatePropagation(); } }, true);
   document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && OV) { ovClose(); return; }
     if (e.key === "Escape" && (S.addOpen || S.domOpen)) { S.addOpen = null; S.domOpen = null; render(); return; }
     if (e.key === "Escape" && S.lookOpen) { S.lookOpen = false; render(); var lb = document.querySelector(".look-btn"); if (lb) lb.focus(); }
   });
@@ -3850,6 +3985,7 @@
   document.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "fp-file") { filmLoad(t.files); t.value = ""; return; }
+    if (t.id === "imp-file") { var jf = t.files && t.files[0]; t.value = ""; impFile(jf); return; }
     if (t.classList && t.classList.contains("lk-place")) {
       var pk = t.getAttribute("data-d"), pv = t.value, dl2 = LK().deco.filter(function (x) { return x !== pk; }), pl = Object.assign({}, LK().place);
       delete pl[pk]; if (pv) { dl2.push(pk); if (pv !== "auto") pl[pk] = pv; }
@@ -3908,6 +4044,7 @@
   var rzT = 0;
   window.addEventListener("resize", function () { if (!RD || RD.kind !== "pdf" || !RD.pdf) return; clearTimeout(rzT); rzT = setTimeout(function () { var c = pdfCur(); pdfLayout(); pdfGo(c.n, null, c.y); }, 200); });
   window.addEventListener("hashchange", function () {
+    if (OV) ovClose(true);
     var r = readHash();
     S.route = r; S.confirmDel = null; render(true);
   });

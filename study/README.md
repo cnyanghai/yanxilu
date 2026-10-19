@@ -27,7 +27,7 @@ node study/today.js --record         # 早上用：把今天的安排记进 prog
 node study/checkin.js 2026-10-15 --done film,sql,cfa --minutes 165 --note "……"
 node study/checkin.js 2026-10-15 --done all
 node study/checkin.js 2026-10-15 --done none
-python3 build.py                     # 改完进度或讲义后重新生成 index.html
+python3 build.py                     # 改完进度或讲义后重新生成 index.html（连同服务器版 server/index.html，一起提交）
 ```
 
 科目代号：`film` 英语·电影，`sql` SQL，`py` Python，`cfa` CFA 一级，`geo` 地缘政治，`rev` 周复盘，`prep` 准备日（`en` 是 10 月 12—14 日的旧英语时段）。
