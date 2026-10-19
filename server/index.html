@@ -1328,6 +1328,7 @@ a.wm-lab:hover{text-decoration:underline}
 .wallv .fcase{background:var(--shade),var(--cloth-tx),var(--case)}
 .fc-lab{flex:none;padding:9px 3px;background:var(--cloth-tx),var(--plab);border:1px solid var(--plab-line)}
 .fc-lab .fc-t{color:#2B2620}
+.fc-lab .fc-t.two{display:block;line-height:1.15}
 .easel{position:relative;flex:none;align-self:flex-end;display:flex;padding:0 8px 20px;margin-left:20px;isolation:isolate;background:linear-gradient(var(--oak-hi),var(--oak-2)) bottom/100% 20px no-repeat;border-radius:2px}
 .easel::before,.easel::after{content:"";position:absolute;z-index:-1;top:16px;bottom:8px;width:4px;background:#9C7E52}
 .easel::before{left:34px;transform:rotate(10deg)}.easel::after{right:34px;transform:rotate(-10deg)}
@@ -4382,7 +4383,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     enBusy = SRV.english().then(function (d) { enBusy = null; S.en = d; enMerge(d); scheduleRender(); }, function () { enBusy = null; });
   }
   function enMerge(d) {
-    (d.dramas || []).forEach(function (bd) {
+    (d.dramas || []).slice().sort(function (a, b) { return String(a.slug).localeCompare(String(b.slug), "en", { numeric: true }); }).forEach(function (bd) {
       var path = "/dramas/" + bd.slug, x = null;
       EN_IDS.forEach(function (id) { var y = EN_ITEM[id]; if (y.where === "baba" && String(y.path || "").replace(/\/$/, "") === path) x = y; });
       if (!x) {
@@ -4427,13 +4428,20 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var sync = '<p class="meta">看到哪一句、收了哪些生词都记在 Baba 上，关掉浮层就同步到这里。</p>';
     return { col: "var(--ln-en)", head: head, body: body + tools + meta + moreHTML(why + sync + noteBlock(id, noteLab, notePh), (why ? "介绍 · " : "") + noteLab) };
   }
+  /* 片名太长（Baba 上的哈利波特系列）竖着放不下：分成两列，优先在“与”“·”后面断开 */
+  function enLines(t) {
+    if (t.length <= 9 || isLatin(t)) return [t];
+    var mid = t.length / 2, best = Math.ceil(mid), bd = 99;
+    for (var i = 2; i < t.length - 2; i++) if ("与·：".indexOf(t[i - 1]) >= 0 && Math.abs(i - mid) < bd) { bd = Math.abs(i - mid); best = i; }
+    return [t.slice(0, best), t.slice(best)];
+  }
   function enFit(t, h) { return Math.max(10.5, Math.min(15, Math.floor((h - 104) / (t.length * 1.16) * 2) / 2)); }
   function filmCaseHTML(x) {
-    var es = enState(x.id), h = 226, size = enFit(x.title, h);
+    var es = enState(x.id), h = 226, lines = enLines(x.title), size = lines.length > 1 ? Math.min(11.5, enFit(lines[0].length > lines[1].length ? lines[0] : lines[1], h)) : enFit(x.title, h);
     var cls = "fcase" + (es.s === "doing" ? " doing" : es.s === "done" || es.s === "review" ? " done" : "") + (shelfMatch(es.s === "review" ? "done" : es.s) ? "" : " dim") + (S.shelfPick === x.id ? " picked" : "");
     var src = x.where === "local" ? '<span class="fc-src">本地</span>' : '<span class="fc-src baba">Baba</span>';
     return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(x.id) + '" style="height:' + h + "px;--p:" + Math.round(es.pct * 100) + '%" title="《' + esc(x.title) + "》" + esc(x.en) + " · " + esc(x.type) + " · " + esc(STATUS_LABEL[es.s] || "") + '">' +
-      '<span class="fc-type">' + esc(x.type) + '</span><span class="fc-lab"><span class="fc-t" style="font-size:' + size + 'px">' + esc(x.title) + "</span></span>" +
+      '<span class="fc-type">' + esc(x.type) + '</span><span class="fc-lab"><span class="fc-t' + (lines.length > 1 ? " two" : "") + '" style="font-size:' + size + 'px">' + lines.map(esc).join("<br>") + "</span></span>" +
       '<span class="fc-foot">' + src + (es.s === "done" || es.s === "review" ? '<i class="sp-seal" aria-hidden="true">' + (es.s === "review" ? "熟" : "完") + "</i>" : "<span>" + esc(String(x.year || "")) + "</span>") + "</span>" +
       (es.total ? '<i class="fc-prog" aria-hidden="true"></i>' : "") + (es.s === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
   }
