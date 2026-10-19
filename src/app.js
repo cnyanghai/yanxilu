@@ -246,7 +246,7 @@
     return '<ul class="jlist">' + list.map(function (e) {
       var ref = refLabel(e.ref), href = refHref(e.ref);
       var del = "";
-      if (S.canEdit && deletable) {
+      if (S.canEdit && deletable && !e.auto) {
         del = S.confirmDel === e.id
           ? '<span class="jdel">删除这条？<button type="button" class="linkbtn danger" data-act="j-del-yes" data-id="' + esc(e.id) + '">删除</button><button type="button" class="linkbtn" data-act="j-del-no">取消</button></span>'
           : '<button type="button" class="linkbtn" data-act="j-del" data-id="' + esc(e.id) + '">删除</button>';
@@ -2636,7 +2636,7 @@
     if (!S.foldDay) S.foldDay = curStudy().days[t] ? t : Object.keys(curStudy().days).filter(function (d) { return d <= t; }).sort().pop() || t;
     var MS = milestones(JD), days = 0, stamps = 0, mins = 0;
     for (var d = addDaysBJ(PLAN.start, -1); d <= t; d = addDaysBJ(d, 1)) { var di = dayInfo(d, JD); if (di.stamps.length || di.min) days++; stamps += di.stamps.length; mins += di.min; }
-    var js = journalEntries();
+    var js = journalWithDaily();
     var stats = [[days, "天有章", "从 " + cnDate(PLAN.start) + " 起"], [stamps, "枚站章", "一行一条线"], [hrs(mins), "小时", "累计"], [curStudy().streak || 0, "天连续", "打卡"]];
     var legend = ["sql", "py", "cfa", "film", "geo"].map(function (k) { return '<span><svg viewBox="-26 -26 52 52" width="38" height="38" aria-hidden="true">' + stampSVG(k, k === "film" ? 22 : 9, 0, 0, 0, 0.9) + "</svg>" + { sql: "SQL 课", py: "Python 课", cfa: "CFA 课", film: "电影段落", geo: "精读章节" }[k] + "</span>"; }).join("");
     var form = S.canEdit ? '<form class="jform" id="j-form" autocomplete="off"><h3>记一笔</h3><div class="row">' +
@@ -2879,6 +2879,24 @@
   /* 这一天这一科要不要往前走一课（复习时段、还没开始的科目都不算） */
   function onDay(subj, d) { return sinceOk(subj, d) && (PLAN.week[wdOf(d)] || []).some(function (x) { return x[0] === subj && x[2] !== "review"; }); }
   function checkedIn(rec) { return !!(rec && rec.status && rec.status !== "pushed"); }
+  /* 足迹列表：除了自己记的，每个打过卡、学了东西的日子，按课表进度（study/progress.json）自动列一条“每日课表”。
+   * 以前由晚上的打卡任务写进 journal（id 为 j-<日期>-daily）；有这条就用它，没有就自动生成，只显示不能删，不重复计时。 */
+  function journalWithDaily() {
+    var list = journalEntries(), have = {}, days = curStudy().days || {};
+    list.forEach(function (e) { have[e.id] = 1; });
+    Object.keys(days).forEach(function (d) {
+      var rec = days[d], done = (rec && rec.done) || [], id = "j-" + d.replace(/-/g, "") + "-daily";
+      if (have[id] || !checkedIn(rec) || !rec.planned) return;
+      var parts = rec.planned.filter(function (sl) { return done.indexOf(sl.subj) >= 0 && sl.subj !== "prep"; }).map(function (sl) {
+        if (sl.subj === "film") return sl.review ? "电影本周复习" : "电影第 " + ((sl.index || 0) + 1) + " 段";
+        if (sl.subj === "rev") return "第 " + ((sl.index || 0) + 1) + " 周复盘";
+        return subjName(sl.subj) + (sl.review ? " 复习" : sl.index != null ? " 第 " + (sl.index + 1) + " 课" : "");
+      });
+      if (!parts.length) return;
+      list.push({ id: id, date: d, minutes: rec.minutes || "", ref: "plan", text: "每日课表：完成 " + parts.join("、") + (rec.note ? "。" + rec.note : ""), t: d, auto: true });
+    });
+    return list.sort(function (a, b) { return a.date === b.date ? String(b.t || "").localeCompare(String(a.t || "")) : String(b.date).localeCompare(String(a.date)); });
+  }
   function nextWhen(subj) {
     var t = bjToday();
     for (var k = 0; k < 8; k++) { var d = addDaysBJ(t, k); if (onDay(subj, d)) return k === 0 ? "今天" : k === 1 ? "明天" : WD[wdOf(d)]; }

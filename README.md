@@ -29,11 +29,13 @@
 
 | 版本 | 进度与批注保存在哪里 |
 | --- | --- |
-| claude.ai 上的 Artifact | 云端记录，跨设备同步，只有所有者能修改 |
-| 自己的服务器 https://baba.wogucloud.cn （`server/index.html`） | 存在 Baba 英语的账号里（Postgres），登录后跨设备同步；电子书存在服务器磁盘上，只有本人能打开；书架的「英语」一层直接读 Baba 的实时数据 |
+| 自己的服务器 https://baba.wogucloud.cn （`server/index.html`，**主用版**） | 存在 Baba 英语的账号里（Postgres），登录后跨设备同步；电子书存在服务器磁盘上，只有本人能打开；书架的「英语」一层直接读 Baba 的实时数据 |
+| claude.ai 上的 Artifact（旧版，2026-10-19 起不再同步） | 它自己的云端记录；记录已导出到服务器版 |
 | 本仓库的 `index.html`（公开版） | 显示最近一次同步的学习记录；访客的修改只存在自己的浏览器里 |
 
 ### 服务器版怎么跑
+
+讲义、路线单、课表进度在构建时打包进页面，推送到 main 后服务器几分钟内自动更新，不用部署。
 
 Baba 英语（Next.js）的首页 `/` 直接读 `YXL_DIR/server/index.html`（服务器上一份本仓库的克隆，cron 定时 `git pull`），`/vendor/`、`/reports/` 也从这份克隆里读，所以研习录更新只要推送到这里，不用重新部署 Baba。
 `server/index.html` 和 `index.html` 是同一个页面，只是前面多一段 `src/server.js`：它仿照 claude.ai 的运行时接口（db / user / assets），背后换成 Baba 的 `/api/yxl/*`：
