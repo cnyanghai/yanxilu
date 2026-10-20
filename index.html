@@ -6112,7 +6112,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
   /* 清洗网页上取来的正文：只留段落、标题、列表、引用、粗斜体、链接、图片、表格、代码这些；去掉广告卡片、脚本、样式和所有属性 */
   var CLIP_KEEP = { p: 1, br: 1, h1: 1, h2: 1, h3: 1, h4: 1, h5: 1, h6: 1, blockquote: 1, ul: 1, ol: 1, li: 1, b: 1, strong: 1, i: 1, em: 1, u: 1, s: 1, del: 1, a: 1, img: 1,
-    figure: 1, figcaption: 1, pre: 1, code: 1, hr: 1, table: 1, thead: 1, tbody: 1, tr: 1, th: 1, td: 1, sup: 1, sub: 1 };
+    figure: 1, figcaption: 1, pre: 1, code: 1, hr: 1, table: 1, thead: 1, tbody: 1, tr: 1, th: 1, td: 1, sup: 1, sub: 1, "yx-math": 1 };
   var CLIP_DROP = "script,style,noscript,template,iframe,object,embed,svg,canvas,button,input,textarea,select,form,video,audio,link,meta," +
     ".RichText-MCNLinkCardContainer,.RichText-ADLinkCardContainer,.GoodsRecommendCard,.CPSCommonCard,.MCNLinkCard,.ZVideoLinkCard,.Reward,.ContentItem-actions";
   function clipUrl(u, base) {
@@ -6123,6 +6123,20 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function clipClean(html, base) {
     var doc = new DOMParser().parseFromString('<div id="yx-r">' + String(html || "") + "</div>", "text/html"), root = doc.getElementById("yx-r");
     if (!root) return "";
+    /* 数学公式：知乎的公式是 <span class="ztext-math" data-tex="…">（里面是 MathJax 的脚本和渲染结果），老的是 <img data-formula> 或 /equation?tex= 图片；
+     * 别的网站常见 <script type="math/tex">。统一换成 <yx-math display>TeX</yx-math>，显示时用 KaTeX 排版 */
+    Array.prototype.forEach.call(root.querySelectorAll('.ztext-math, [data-tex], img[data-formula], img[src*="equation?tex="], script[type^="math/tex"]'), function (m) {
+      if (!root.contains(m)) return;
+      var sc = m.tagName === "SCRIPT" ? m : m.querySelector('script[type^="math/tex"]'), tex = m.getAttribute("data-tex") || m.getAttribute("data-formula") || "";
+      if (!tex && m.tagName === "IMG") { try { tex = new URL(m.getAttribute("src"), base).searchParams.get("tex") || ""; } catch (e) { tex = ""; } }
+      if (!tex && sc) tex = sc.textContent || "";
+      if (!tex.trim()) return;
+      var display = sc ? /mode=display/.test(sc.getAttribute("type") || "") : /\\\\\s*$/.test(tex);
+      var x = doc.createElement("yx-math");
+      if (display) x.setAttribute("display", "1");
+      x.textContent = tex.replace(/\\\\\s*$/, "").trim();
+      m.parentNode.replaceChild(x, m);
+    });
     Array.prototype.forEach.call(root.querySelectorAll(CLIP_DROP), function (n) { n.parentNode && n.parentNode.removeChild(n); });
     Array.prototype.forEach.call(root.querySelectorAll("a.LinkCard"), function (a) {
       var p = doc.createElement("p"), na = doc.createElement("a");
@@ -6144,6 +6158,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
           if (!keep.src) { el.removeChild(n); return; }
         }
         if (tag === "td" || tag === "th") { keep.colspan = n.getAttribute("colspan"); keep.rowspan = n.getAttribute("rowspan"); }
+        if (tag === "yx-math") { keep.display = n.getAttribute("display"); n.textContent = n.textContent; }
         Array.prototype.slice.call(n.attributes).forEach(function (at) { n.removeAttribute(at.name); });
         Object.keys(keep).forEach(function (k) { if (keep[k]) n.setAttribute(k, keep[k]); });
         if (tag === "a" && keep.href) { n.setAttribute("target", "_blank"); n.setAttribute("rel", "noopener"); }
@@ -6152,6 +6167,47 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       });
     })(root);
     return root.innerHTML.trim();
+  }
+  /* KaTeX：随站点放在 vendor/katex，剪报里有公式时才加载 */
+  var KATEX = null, KATEX_CSS = null;
+  function katexLib() {
+    if (!KATEX) {
+      KATEX = new Promise(function (res, rej) {
+        if (window.katex) { res(window.katex); return; }
+        var sc = document.createElement("script");
+        sc.src = new URL("vendor/katex/katex.min.js", document.baseURI).href;
+        sc.onload = function () { if (window.katex) res(window.katex); else rej(new Error("katex")); };
+        sc.onerror = function () { rej(new Error("katex")); };
+        document.head.appendChild(sc);
+      });
+      KATEX.catch(function () { KATEX = null; });
+    }
+    return KATEX;
+  }
+  function katexCss() {
+    if (!KATEX_CSS) { KATEX_CSS = fetch(new URL("vendor/katex/katex.fonts.css", document.baseURI).href).then(function (r) { return r.ok ? r.text() : ""; }, function () { return ""; }); }
+    return KATEX_CSS;
+  }
+  /* 把 <yx-math> 排成公式；KaTeX 加载不上就退回成等宽的 TeX 原文 */
+  function mathRender(html) {
+    if (String(html).indexOf("<yx-math") < 0) return Promise.resolve(html);
+    function swap(K) {
+      var d = new DOMParser().parseFromString('<div id="yx-r">' + html + "</div>", "text/html"), r = d.getElementById("yx-r");
+      Array.prototype.forEach.call(r.querySelectorAll("yx-math"), function (m) {
+        var disp = m.hasAttribute("display"), tex = m.textContent, w = d.createElement(disp ? "div" : "span"), out = "";
+        if (K) { try { out = K.renderToString(tex, { displayMode: disp, throwOnError: false, strict: "ignore", output: "htmlAndMathml" }); } catch (e) { out = ""; } }
+        if (out) w.innerHTML = out; else { var c = d.createElement("code"); c.textContent = tex; w.appendChild(c); }
+        w.setAttribute("class", disp ? "yx-mdisp" : "yx-minl");
+        m.parentNode.replaceChild(w, m);
+      });
+      return r.innerHTML;
+    }
+    return katexLib().then(swap, function () { return swap(null); });
+  }
+  function mathHydrate(el) {
+    if (!el || !el.querySelector("yx-math")) return;
+    if (!document.getElementById("yx-katex-css")) katexCss().then(function (css) { if (css && !document.getElementById("yx-katex-css")) { var st = document.createElement("style"); st.id = "yx-katex-css"; st.textContent = css; document.head.appendChild(st); } });
+    mathRender(el.innerHTML).then(function (h) { if (el.isConnected) el.innerHTML = h; });
   }
   function clipPlain(html) {
     var d = new DOMParser().parseFromString("<div>" + String(html || "") + "</div>", "text/html");
@@ -6317,10 +6373,14 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       if (!d || !d.html) throw epErr("missing");
       var head = "<h1>" + esc(c.title) + '</h1><p style="color:#8a8378;font-size:15px;margin-top:-8px">' + esc([c.author, clipKindLabel(c), (c.date || "").slice(0, 10)].filter(Boolean).join(" · ")) +
         (c.sel ? " · 选摘" : "") + ' · <a href="' + esc(c.url) + '">原文</a></p>' + (c.note ? '<blockquote style="border-left:3px solid #c9a24e;margin:0 0 1.6em;padding:.2em 1em;color:#6b6358">' + esc(c.note) + "</blockquote>" : "");
-      var html = '<!doctype html><html><head><meta charset="utf-8"><title>' + esc(c.title) + "</title></head><body>" + head + clipClean(d.html, c.url) + "</body></html>";
-      var it = { id: "clip", path: "clip.html", type: "text/html", props: "" };
-      var z = { text: function (p) { return Promise.resolve(p === "clip.html" ? html : null); }, data: function () { return Promise.resolve(null); }, size: function () { return html.length; } };
-      return { z: z, spine: [it], byPath: { "clip.html": it }, title: c.title, toc: [], w: [html.length], cum: [0], tot: html.length };
+      var body = clipClean(d.html, c.url), math = body.indexOf("<yx-math") >= 0;
+      return Promise.all([mathRender(body), math ? katexCss() : ""]).then(function (r) {
+        var html = '<!doctype html><html><head><meta charset="utf-8"><title>' + esc(c.title) + "</title>" +
+          (math ? '<link rel="stylesheet" href="katex.css"><style>.yx-mdisp{overflow-x:auto;overflow-y:hidden;margin:1em 0}.katex{font-size:1.05em}</style>' : "") + "</head><body>" + head + r[0] + "</body></html>";
+        var it = { id: "clip", path: "clip.html", type: "text/html", props: "" }, css = r[1] || "";
+        var z = { text: function (p) { return Promise.resolve(p === "clip.html" ? html : p === "katex.css" ? css : null); }, data: function () { return Promise.resolve(null); }, size: function () { return html.length; } };
+        return { z: z, spine: [it], byPath: { "clip.html": it }, title: c.title, toc: [], w: [html.length], cum: [0], tot: html.length };
+      });
     });
   }
   function shelfHTML() {
@@ -8005,6 +8065,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);
     filmMount();
     ebHydrate();
+    if (r === "clip") mathHydrate(document.querySelector(".cp-body"));
     if (scrollTop) window.scrollTo(0, 0);
     if (S.pendingSec) {
       var sid = S.pendingSec; S.pendingSec = null;
