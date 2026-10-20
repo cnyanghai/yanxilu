@@ -1704,6 +1704,9 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
   background:linear-gradient(90deg,var(--cl) 0 2px,transparent 2px calc(100% - 2px),var(--cl) calc(100% - 2px)),repeating-linear-gradient(90deg,#F4EEDF 0 1px,#E3D9C4 1px 2px);box-shadow:inset 0 -30px 30px -10px rgba(40,28,14,.35)}
 .wall.fx-tilt .cb:not(.face):hover{transform:rotateX(-12deg)}
 .wall.fx-tilt .cb.picked:not(.face){transform:translateY(-8px) rotateX(-8deg)}
+/* 抽出半截的书（在读）指上去时保持抽出来的高度，只加动效，不往下掉（否则鼠标会来回进出、闪动） */
+.wall.fx-tilt.read-pull .cb.doing:not(.face):hover{transform:translateY(-24px) rotateX(-12deg)}
+.wall.fx-tilt.read-pull .cb.doing.picked:not(.face),.wall.fx-tilt.read-pull .cb.doing.picked:not(.face):hover{transform:translateY(-26px) rotateX(-8deg)}
 .wall.read-tilt .cb.doing{transform:rotateX(-17deg)}
 .wall.read-tilt .cb.doing:hover{transform:rotateX(-22deg)}
 .wall.read-tilt .cb.doing.picked{transform:translateY(-6px) rotateX(-20deg)}
@@ -1740,11 +1743,17 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .fly{position:fixed;z-index:70;transform-origin:0 0;pointer-events:none;border-radius:2px 5px 5px 2px;
   background:linear-gradient(90deg,rgba(0,0,0,.28) 0 8%,rgba(255,255,255,.14) 8% 10%,transparent 10%),radial-gradient(90% 60% at 60% 10%,rgba(255,255,255,.18),transparent 70%),var(--cl)}
 /* 指到一本书时的几种动效 */
-.cb-gl,.cb-sd,.cb-cv{display:none}
+.cb-gl,.cb-sd{display:none}
+/* 指上去以后，判定区比书往下多 8px：书浮起来，鼠标还算在书上，不会来回闪。没指着时不加，免得挡住下面搁板上的标签和按钮 */
+.cb-hit{display:none;position:absolute;left:0;right:0;top:0;bottom:-8px}
+.cb:hover .cb-hit{display:block}
 .lk-sws{display:inline-flex;gap:0;border-radius:3px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,.12)}
 .lk-sws b{display:block;width:5px;height:16px}
 /* 烫金反光：浮起一点，一道光扫过书脊 */
 .fx-sheen .cb:not(.face){transition:transform .25s,box-shadow .25s}
+.fx-sheen .cb.picked:not(.face):hover{transform:translateY(-14px)}
+.fx-sheen.read-pull .cb.doing:not(.face):hover{transform:translateY(-24px)}
+.fx-sheen.read-pull .cb.doing.picked:not(.face):hover{transform:translateY(-26px)}
 .fx-sheen .cb:not(.face):hover{transform:translateY(-6px);box-shadow:3px 0 6px -2px rgba(45,30,14,.4),0 16px 18px -10px rgba(40,28,14,.55)}
 .fx-sheen .cb-gl{display:block;position:absolute;inset:0;overflow:hidden;pointer-events:none;border-radius:inherit}
 .fx-sheen .cb-gl::before{content:"";position:absolute;top:-10%;bottom:-10%;left:-80%;width:60%;background:linear-gradient(100deg,rgba(255,255,255,0),rgba(255,247,222,.6) 50%,rgba(255,255,255,0));opacity:0;transform:skewX(-14deg)}
@@ -1753,26 +1762,16 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 /* 抽出来：书朝你抽出来，露出两边的封皮 */
 .fx-pull .wm-in{perspective:900px}
 .fx-pull .cb:not(.face){transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
-.fx-pull .cb:not(.face):hover{transform:translateZ(54px) translateY(-2px);z-index:6}
+.fx-pull .cb:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-2px);z-index:6}
+.fx-pull .cb.picked:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-14px)}
+.fx-pull.read-pull .cb.doing:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-24px)}
+.fx-pull.read-pull .cb.doing.picked:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-26px)}
 .fx-pull .cb-sd{display:block;position:absolute;top:0;bottom:0;width:var(--dp,130px);pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.38),rgba(0,0,0,.16) 30%,rgba(0,0,0,.3)),var(--cloth-tx),var(--cl)}
 .fx-pull .cb-sd{visibility:hidden;transition:visibility 0s .35s}
 .fx-pull .cb:hover .cb-sd{visibility:visible;transition-delay:0s}
 .fx-pull .cb-sd.l{right:100%;transform-origin:100% 50%;transform:rotateY(-90deg)}
 .fx-pull .cb-sd.r{left:100%;transform-origin:0 50%;transform:rotateY(90deg)}
-/* 转出封面：书转过来一点，露出封面 */
-.fx-turn .wm-in{perspective:1100px}
-.fx-turn .cb:not(.face){transform-style:preserve-3d;transition:transform .45s cubic-bezier(.2,.8,.2,1)}
-.fx-turn .cb:not(.face):hover{transform:translateZ(40px) rotateY(-58deg);z-index:6;transition-delay:.05s}
-.fx-turn .cb.picked:not(.face):hover{transform:translateY(-14px) translateZ(40px) rotateY(-58deg)}
-.fx-turn .cb-cv{display:flex;flex-direction:column;gap:7px;position:absolute;top:0;bottom:0;left:100%;width:var(--dp,140px);box-sizing:border-box;padding:16px 12px 12px 15px;pointer-events:none;transform-origin:0 50%;transform:rotateY(90deg);
-  color:var(--tx,var(--foil));text-align:left;font-family:var(--f-display);writing-mode:horizontal-tb;
-  background:linear-gradient(90deg,rgba(0,0,0,.28) 0 5px,rgba(255,255,255,.12) 5px 7px,transparent 7px),radial-gradient(90% 60% at 60% 8%,rgba(255,255,255,.18),transparent 70%),var(--cloth-tx),var(--cl);border-radius:0 4px 4px 0;box-shadow:inset -1px 0 0 rgba(0,0,0,.2)}
-.fx-turn .cb-cv{visibility:hidden;transition:visibility 0s .5s}
-.fx-turn .cb:hover .cb-cv{visibility:visible;transition-delay:0s}
-.fx-turn .cb.light .cb-cv{color:var(--tx,#2B2620)}
-.cb-cv b{margin-top:6px;font-size:15px;font-weight:900;line-height:1.28;letter-spacing:.04em;overflow-wrap:anywhere}
-.cb-cv small{margin-top:auto;font-family:var(--f-ui);font-size:10px;letter-spacing:.06em;opacity:.85}
-@media (prefers-reduced-motion: reduce){.fx-turn .cb,.fx-pull .cb,.fx-sheen .cb{transition:none}.fx-sheen .cb:hover .cb-gl::before{animation:none}}
+@media (prefers-reduced-motion: reduce){.fx-pull .cb,.fx-sheen .cb{transition:none}.fx-sheen .cb:hover .cb-gl::before{animation:none}}
 
 @media (max-width:1100px){
   .cabinet.archive{width:100%}
@@ -1935,7 +1934,7 @@ svg.fold,svg.fold-mini{display:block;width:100%;min-width:1080px;height:auto;fon
 .topbar a.mode.login{border-color:var(--ink);color:var(--ink);font-weight:600}
 .topbar a.mode.login i{background:var(--seal)}
 .acct-n{max-width:9em;overflow:hidden;text-overflow:ellipsis}
-.banner.soft{background:transparent;border:1px dashed var(--rule-strong)}
+.imp-line{margin-top:14px}
 .imp-btn{position:relative}
 .en-eps{list-style:none;display:flex;flex-wrap:wrap;gap:6px;margin:0;padding:0}
 .en-ep{position:relative;display:flex;flex-direction:column;gap:4px;min-width:64px;padding:6px 9px 8px;border:1px solid var(--rule-strong);border-radius:5px;background:var(--leaf);font-family:var(--f-num);font-size:13px;color:var(--ink-2);cursor:pointer}
@@ -4119,16 +4118,18 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     return '<div class="note"><span class="note-lab">' + esc(label) + "</span>" + (text ? '<div class="note-ro">' + esc(text) + "</div>" : '<div class="note-ro empty">还没有批注。</div>') + "</div>";
   }
+  /* 服务器版：把 claude.ai 版导出的记录文件（JSON）导进当前账号。只在足迹页底部留一行小字 */
+  function impLineHTML() {
+    if (!ON_SERVER || S.mode !== "db" || !SRV.me()) return "";
+    return '<p class="meta imp-line">' + (S.impBusy ? "正在导入记录……" : '<label class="linkbtn">从 claude.ai 版的记录文件导入<input type="file" id="imp-file" accept=".json,application/json" hidden></label>') + "</p>";
+  }
   function recCount() { var n = 0; COLLS.forEach(function (c) { if (c !== "lessons") n += Object.keys(S.data[c] || {}).length; }); return n; }
   function bannerHTML() {
     if (ON_SERVER && S.mode === "db") {
       var me = SRV.me();
       if (!me) return '<div class="banner" role="note"><span>登录 Baba 账号后，进度、批注、电子书和英语的学习记录都记在你的账号里，换手机、换电脑都在。</span>' +
         '<a class="btn small" href="' + esc(SRV.loginHref()) + '">登录</a></div>';
-      var empty = recCount() === 0;
-      if (!empty && S.route !== "journal") return "";
-      return '<div class="banner' + (empty ? "" : " soft") + '" role="note"><span>' + (empty ? "这个账号还没有学习记录。claude.ai 版导出的记录文件（JSON），可以在这里一次导进来，电子书需要重新挂一次。" : "还有 claude.ai 版导出的记录文件？可以再导一次，同一条记录以文件里的为准。") + "</span>" +
-        '<label class="btn small ghost imp-btn">' + (S.impBusy ? "正在导入……" : "导入记录文件") + '<input type="file" id="imp-file" accept=".json,application/json" hidden' + (S.impBusy ? " disabled" : "") + "></label></div>";
+      return "";
     }
     if (S.mode !== "local") return "";
     return '<div class="banner" role="note"><span>公开阅读版：显示的是 ' + esc(REC.syncedAt || "") + ' 同步的学习记录。你在这里标的进度和写的批注只保存在当前浏览器。</span>' +
@@ -4579,14 +4580,21 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function hangSet(h) { try { window.localStorage.setItem(HANG_KEY, h); } catch (e) { /* 存不了就只在这次生效 */ } }
   /* 书墙的布置：在读的书怎么摆、书要不要立体、摆哪些摆件。和挂法一样记在这台设备的浏览器里（yanxilu-look）。 */
   var READS = [["face", "封面朝外", "在读的书转过来，封面朝外立在这一格最前面"], ["pull", "抽出半截", "在读的书从书列里抽出一截，书签带从底下垂出来"], ["tilt", "往前倾", "在读的书顶部往外倾，露出书顶和夹在里面的书签"]];
-  var FXS = [["turn", "转出封面", "书转过来一点，露出它的封面"], ["pull", "抽出来", "书从书列里朝你抽出来，露出两边的封皮"], ["sheen", "烫金反光", "书浮起一点，一道光扫过书脊"], ["tilt", "往前倾", "书从顶上往外倾，露出书顶"], ["none", "不动", "只稍微浮起一点"]];
+  var FXS = [["pull", "抽出来", "书从书列里朝你抽出来，露出两边的封皮"], ["sheen", "烫金反光", "书浮起一点，一道光扫过书脊"], ["tilt", "往前倾", "书从顶上往外倾，露出书顶"], ["none", "不动", "只稍微浮起一点"]];
   var COLORS = [["named", "名色", "每个领域一个经典色系：勃艮第红、爱马仕橙、孔雀绿、普鲁士蓝、克莱因蓝……"], ["qinghua", "青花瓷", "钴蓝、霁蓝、天青、瓷白"], ["orange", "橙与驼", "爱马仕橙、驼色、象牙白、墨黑"], ["cloth", "布面", "原来的低饱和布色"]];
   var LOOK_KEY = "yanxilu-look", DECO_DEFAULT = ["globe", "glass", "vase", "succ", "pothos", "candle"];
+  /* 默认：浮板 + 抽出半截 + 名色 + 烫金反光（2026-10-19 起）。以前存过的布置升级一次：这四样换成新默认，摆件和摆放位置保留 */
+  var LOOK_V = 2, LOOK_DEF = { read: "pull", fx: "sheen", color: "named" };
   function lookGet() {
     var v = {};
     try { v = JSON.parse(window.localStorage.getItem(LOOK_KEY) || "{}") || {}; } catch (e) { v = {}; }
-    return { read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : "face", motion: v.motion !== false,
-      fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : "turn", color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : "named",
+    if (v.v !== LOOK_V) {
+      v = Object.assign({}, v, LOOK_DEF, { v: LOOK_V });
+      hangSet("float");
+      try { window.localStorage.setItem(LOOK_KEY, JSON.stringify(v)); } catch (e) { /* 存不了就只在这次生效 */ }
+    }
+    return { v: LOOK_V, read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : LOOK_DEF.read, motion: v.motion !== false,
+      fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : LOOK_DEF.fx, color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : LOOK_DEF.color,
       deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice(),
       place: (function () { var o = {}, p = v.place && typeof v.place === "object" ? v.place : {}; Object.keys(p).forEach(function (k) { if (DECO[k] && typeof p[k] === "string") o[k] = p[k]; }); return o; })() };
   }
@@ -4685,11 +4693,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     else if (withBy) foot = '<span class="cb-by">' + esc(by) + "</span>";
     var rp = state === "doing" ? Math.max(0, Math.min(1, bs.epct || (prog ? prog.done / Math.max(1, prog.total) : bs.pct) || 0)) : 0;
     var rib = state === "doing" ? '<i class="sp-rib" style="left:' + Math.round(14 + 70 * rp) + '%" aria-hidden="true"></i>' : "";
-    var tail = (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "");
+    var tail = '<i class="cb-hit" aria-hidden="true"></i>' + (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "");
     if (fx === "tilt" || (state === "doing" && LK().read === "tilt")) tail += '<i class="cb-top" aria-hidden="true"></i>';
     if (fx === "sheen") tail += '<i class="cb-gl" aria-hidden="true"></i>';
     if (fx === "pull") tail += '<i class="cb-sd l" aria-hidden="true"></i><i class="cb-sd r" aria-hidden="true"></i>';
-    if (fx === "turn") tail += '<span class="cb-cv" aria-hidden="true"><i class="sc-rule"></i><b>' + esc(title.replace(/（.*）$/, "").split("：")[0]) + "</b>" + (by ? "<small>" + esc(by) + " 著</small>" : "") + '<i class="sc-rule"></i></span>';
     var dimc = (shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim") + (S.shelfPick === it.id ? " picked" : "") + (ebookOf(it.id) ? " has-eb" : "");
     var tip = '《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (paint.name ? " · " + esc(paint.name) : "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "");
     if (state === "doing" && LK().read === "face") {
@@ -4897,6 +4904,21 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     wall.style.minHeight = "";
     document.querySelectorAll(".lk-it").forEach(function (t) {
       var k = t.getAttribute("data-d"); t.classList.toggle("off", LK().deco.indexOf(k) >= 0 && !wall.querySelector(".d-" + k)); });
+    fxPrep(wall);
+  }
+  /* 动效「抽出来」：书朝你移出 54px。透视中心在这一格正中，离中心远的书会被透视往外推，推出鼠标底下就松开、弹回、再被指中，来回闪。
+   * 按每本书离中心的距离往回挪一点（54 / 900，和 CSS 里的透视距离对应），书放大但停在原地。 */
+  function fxPrep(wall) {
+    if (!wall || LK().fx !== "pull") return;
+    wall.querySelectorAll(".wm-in").forEach(function (box) {
+      var r = box.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+      box.querySelectorAll(".cb:not(.face)").forEach(function (b) {
+        if (b.matches(":hover")) return;
+        var q = b.getBoundingClientRect(), k = 54 / 900;
+        b.style.setProperty("--pdx", (-(q.left + q.width / 2 - cx) * k).toFixed(1) + "px");
+        b.style.setProperty("--pdy", (-(q.top + q.height / 2 - cy) * k).toFixed(1) + "px");
+      });
+    });
   }
   /* 黄铜座钟：按现在的时间摆好三根指针，之后由 CSS 动画走（停掉动静时就只摆好位置） */
   function clockSet(dz) {
@@ -6558,7 +6580,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<section class="fold-mini-w" aria-label="全卷缩略"><div class="fold-scroll">' + foldMiniHTML(ws, JD) + "</div></section>" +
       '<div class="fd-grid">' + foldDayHTML(S.foldDay, JD) +
       '<section class="panel" aria-labelledby="jr-h"><h2 id="jr-h">随手记</h2><p class="meta">课表之外读的书、查的资料、想明白的事，在这里记一笔；关联到《涛动周期录》的会盖在它那一行。</p>' + form +
-      journalList(js.slice(0, 8), true) + "</section></div></div>";
+      journalList(js.slice(0, 8), true) + impLineHTML() + "</section></div></div>";
   }
 
   /* ---------- 每日课表 ---------- */
@@ -7780,7 +7802,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "look-color") { lookSet({ color: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-motion") { lookSet({ motion: !LK().motion }); render(); return; }
     if (act === "look-deco") { var dn = t.getAttribute("data-d"), dl = LK().deco.slice(), di = dl.indexOf(dn); if (di >= 0) dl.splice(di, 1); else dl.push(dn); lookSet({ deco: dl }); render(); return; }
-    if (act === "look-reset") { hangSet("float"); lookSet({ read: "face", fx: "turn", color: "named", motion: true, deco: DECO_DEFAULT.slice(), place: {} }); render(); return; }
+    if (act === "look-reset") { hangSet("float"); lookSet({ v: LOOK_V, read: LOOK_DEF.read, fx: LOOK_DEF.fx, color: LOOK_DEF.color, motion: true, deco: DECO_DEFAULT.slice(), place: {} }); render(); return; }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = wallClass(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
     if (act === "abox") { S.archPick = t.getAttribute("data-t"); render(); var ap = document.querySelector(".apanel"); if (ap && window.innerWidth < 1100) ap.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
