@@ -1004,21 +1004,6 @@
     wall.style.minHeight = "";
     document.querySelectorAll(".lk-it").forEach(function (t) {
       var k = t.getAttribute("data-d"); t.classList.toggle("off", LK().deco.indexOf(k) >= 0 && !wall.querySelector(".d-" + k)); });
-    fxPrep(wall);
-  }
-  /* 动效「抽出来」：书朝你移出 54px。透视中心在这一格正中，离中心远的书会被透视往外推，推出鼠标底下就松开、弹回、再被指中，来回闪。
-   * 按每本书离中心的距离往回挪一点（54 / 900，和 CSS 里的透视距离对应），书放大但停在原地。 */
-  function fxPrep(wall) {
-    if (!wall || LK().fx !== "pull") return;
-    wall.querySelectorAll(".wm-in").forEach(function (box) {
-      var r = box.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-      box.querySelectorAll(".cb:not(.face)").forEach(function (b) {
-        if (b.matches(":hover")) return;
-        var q = b.getBoundingClientRect(), k = 54 / 900;
-        b.style.setProperty("--pdx", (-(q.left + q.width / 2 - cx) * k).toFixed(1) + "px");
-        b.style.setProperty("--pdy", (-(q.top + q.height / 2 - cy) * k).toFixed(1) + "px");
-      });
-    });
   }
   /* 黄铜座钟：按现在的时间摆好三根指针，之后由 CSS 动画走（停掉动静时就只摆好位置） */
   function clockSet(dz) {
@@ -1135,15 +1120,21 @@
    * GitHub 公开版：文件只存在当前浏览器的 IndexedDB 里（库 yanxilu-ebooks，键 = 书的 id），不会传到网上；
    *   本地记录 ebooks[书的 id] = { local: true, kind, name, size, t }，跟公开版的其他本地记录一样存在 localStorage。
    * PDF 和 EPUB 都在页面里的阅读器打开（见下面的阅读器），PDF 也可以在新标签页打开。 */
-  var EB_MAX = (ON_SERVER ? 40 : 20) * 1024 * 1024, EPUB_MAX = (ON_SERVER ? 30 : 15) * 1024 * 1024, EB_MB = EB_MAX >> 20, EPUB_MB = EPUB_MAX >> 20;
+  /* 服务器版：文件原样（EPUB 不再包成 base64）边传边写盘，单本最多 600 MB；claude.ai 版受它的存储限制 */
+  /* 单本上限：claude.ai 版 PDF 20 MB、EPUB 15 MB（它的存储限制）；服务器版按服务器说的（新版本流式上传 600 MB，旧版本表单上传 48 MB） */
+  function ebLimMB(kind) {
+    if (!ON_SERVER) return kind === "epub" ? 15 : 20;
+    var c = SRV.caps && SRV.caps();
+    return c && c.maxMB ? c.maxMB : 48;
+  }
   function ebKind(file) {
     var n = file.name || "";
     if (/\.epub$/i.test(n) || file.type === "application/epub+zip") return "epub";
     if (/\.pdf$/i.test(n) || file.type === "application/pdf") return "pdf";
     return "";
   }
-  var EB_ERR = { too_large: "文件太大了：PDF 最多 " + EB_MB + " MB，EPUB 最多 " + EPUB_MB + " MB。", unsupported_type: "只能上传 PDF 或 EPUB 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
-    rate_limited: "传得太频繁了，过一会儿再试。", upstream_auth: ON_SERVER ? "登录过期了，重新登录后再传。" : "登录状态过期了，刷新页面后再试。", store_unavailable: "服务器存不下这个文件，过一会儿再试。", capability_disabled: "这个页面现在不能上传文件。", not_granted: "这个页面现在不能上传文件。", capability_removed: "这个页面现在不能上传文件。" };
+  var EB_ERR = { too_large: "", unsupported_type: "只能上传 PDF 或 EPUB 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
+    disk_full: "服务器的磁盘快满了，传不下这本书。", rate_limited: "传得太频繁了，过一会儿再试。", upstream_auth: ON_SERVER ? "登录过期了，重新登录后再传。" : "登录状态过期了，刷新页面后再试。", store_unavailable: "服务器存不下这个文件，过一会儿再试。", capability_disabled: "这个页面现在不能上传文件。", not_granted: "这个页面现在不能上传文件。", capability_removed: "这个页面现在不能上传文件。" };
   function ebookOf(id) {
     var e = S.data.ebooks ? S.data.ebooks[id] || null : null;
     if (S.mode === "db") return (IN_ARTIFACT || ON_SERVER) && e && e.asset ? e : null;
@@ -1205,10 +1196,15 @@
   }
   function fmtSize(n) { return n >= 1048576 ? Math.round(n / 104857.6) / 10 + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
   function ebCanUpload() { return S.mode === "local" ? true : !!(S.assets && S.canEdit); }
+  function ebBusyText() { return S.ebPct != null ? "上传中 " + Math.floor(S.ebPct * 100) + "%" : "上传中……"; }
+  function ebProgress(f) {
+    S.ebPct = f;
+    document.querySelectorAll(".eb-up.busy .eb-up-t").forEach(function (el) { el.textContent = ebBusyText(); });
+  }
   function ebUploadBtn(id, label) {
     if (!ebCanUpload()) return "";
-    var busy = S.ebBusy === id, tip = S.mode === "local" ? "PDF 或 EPUB，只存在这个浏览器里，不会传到网上" : "PDF（" + EB_MB + " MB 以内）或 EPUB（" + EPUB_MB + " MB 以内）";
-    return '<label class="btn ghost eb-up' + (busy ? " busy" : "") + '" title="' + tip + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : label) + "</label>";
+    var busy = S.ebBusy === id, tip = S.mode === "local" ? "PDF 或 EPUB，只存在这个浏览器里，不会传到网上" : ebLimMB("pdf") === ebLimMB("epub") ? "PDF 或 EPUB，" + ebLimMB("pdf") + " MB 以内" : "PDF（" + ebLimMB("pdf") + " MB 以内）或 EPUB（" + ebLimMB("epub") + " MB 以内）";
+    return '<label class="btn ghost eb-up' + (busy ? " busy" : "") + '" title="' + tip + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + '><span class="eb-up-t">' + (busy ? ebBusyText() : label) + "</span></label>";
   }
   function ebFileHTML(id) {
     var eb = ebookOf(id); if (!eb) return "";
@@ -1219,7 +1215,7 @@
     if (ebCanUpload()) tools = (S.ebConfirm === id
       ? '<span class="eb-conf">文件会删掉，确定？<button type="button" class="linkbtn danger" data-act="eb-del-yes" data-id="' + esc(id) + '">移除</button><button type="button" class="linkbtn" data-act="eb-del-no">取消</button></span>'
       : '<button type="button" class="linkbtn" data-act="eb-del" data-id="' + esc(id) + '">移除</button>');
-    var swap = ebCanUpload() ? '<label class="linkbtn eb-up' + (S.ebBusy === id ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '">' + (S.ebBusy === id ? "上传中……" : "换一个文件") + "</label>" : "";
+    var swap = ebCanUpload() ? '<label class="linkbtn eb-up' + (S.ebBusy === id ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '"><span class="eb-up-t">' + (S.ebBusy === id ? ebBusyText() : "换一个文件") + "</span></label>" : "";
     return '<div class="eb-file"><span class="eb-meta">电子书：' + esc(eb.name || "PDF") + (eb.size ? " · " + fmtSize(eb.size) : "") + (local ? " · 存在这个浏览器里" : "") + "</span>" +
       '<span class="eb-tools">' + tab + swap + tools + "</span></div>";
   }
@@ -1238,31 +1234,35 @@
         function (e) { S.ebBusy = null; render(); toast(ebLocalErr(e)); });
       return;
     }
-    if (kind === "pdf" && file.size > EB_MAX) { toast("PDF 超过 " + EB_MB + " MB，压缩一下再传。"); return; }
-    if (kind === "epub" && file.size > EPUB_MAX) { toast("EPUB 超过 " + EPUB_MB + " MB，传不上去。" + (ON_SERVER ? "" : "可以在公开版里放（只存在那个浏览器）。")); return; }
+    var lim = ebLimMB(kind);
+    if (file.size > lim * 1048576) { toast((kind === "pdf" ? "PDF" : "EPUB") + " 超过 " + lim + " MB，传不上去。" + (ON_SERVER ? "" : kind === "pdf" ? "压缩一下再传，或者在公开版里放（只存在那个浏览器）。" : "可以在公开版里放（只存在那个浏览器）。")); return; }
     if (!S.assets) { toast("这个页面现在不能上传文件。"); return; }
     var old = S.data.ebooks[id];
     S.ebBusy = id; render();
-    var body = kind === "pdf" ? Promise.resolve(file) : new Promise(function (res, rej) {
+    S.ebPct = null;
+    var mime = kind === "pdf" ? "application/pdf" : "application/epub+zip";
+    var body = kind === "pdf" || ON_SERVER ? Promise.resolve(file) : new Promise(function (res, rej) {
       var fr = new FileReader();
       fr.onload = function () { var s2 = String(fr.result), k = s2.indexOf(","); res(new Blob([s2.slice(k + 1)], { type: "text/plain" })); };
       fr.onerror = function () { rej(epErr("read")); };
       fr.readAsDataURL(file);
     });
     function tryUp(again) {
-      return body.then(function (b) { return S.assets.upload(b, { type: kind === "pdf" ? "application/pdf" : "text/plain" }); }).catch(function (e) {
-        if (!again && e && e.code === "store_unavailable") return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return tryUp(true); });
+      return body.then(function (b) {
+        return S.assets.upload(b, ON_SERVER ? { type: mime, name: file.name, onProgress: ebProgress } : { type: kind === "pdf" ? "application/pdf" : "text/plain" });
+      }).catch(function (e) {
+        if (!again && !ON_SERVER && e && e.code === "store_unavailable") return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return tryUp(true); });
         throw e;
       });
     }
     tryUp(false).then(function (r) {
       var rec = { asset: r.id, kind: kind, name: file.name, size: file.size, t: new Date().toISOString() };
-      if (kind === "epub") rec.enc = "b64";
+      if (kind === "epub" && !ON_SERVER) rec.enc = "b64";
       return put("ebooks", id, rec).then(function () {
         if (old && old.asset && old.asset !== r.id) S.assets.delete(old.asset).catch(function () {});
-        S.ebBusy = null; render(); toast("电子书挂好了，点「开始读」就能看。");
+        S.ebBusy = null; S.ebPct = null; render(); toast("电子书挂好了，点「开始读」就能看。");
       });
-    }, function (e) { S.ebBusy = null; render(); toast(EB_ERR[e && e.code] || "上传没成功，请再试一次。"); });
+    }, function (e) { S.ebBusy = null; S.ebPct = null; render(); toast(e && e.code === "too_large" ? "文件太大了：最多 " + ebLimMB(kind) + " MB。" : EB_ERR[e && e.code] || "上传没成功，请再试一次。"); });
   }
   function ebRemove(id) {
     var eb = S.data.ebooks[id]; S.ebConfirm = null;
@@ -1824,10 +1824,13 @@
   function pdfStart(id) {
     var view = RD.el.querySelector(".rd-view");
     var lib = pdfLib().catch(function () { throw epErr("pdf_lib"); });
-    Promise.all([lib, ebBytes(id)]).then(function (r) {
+    var eb0 = ebookOf(id), byUrl = ON_SERVER && eb0 && eb0.asset && !eb0.enc;
+    Promise.all([lib, byUrl ? null : ebBytes(id)]).then(function (r) {
       if (!RD || RD.id !== id) return null;
       var L = r[0];
-      return L.getDocument({ data: new Uint8Array(r[1]), CMapReaderFactory: PdfCMaps, StandardFontDataFactory: PdfFonts, useWorkerFetch: false, isEvalSupported: false, cMapPacked: true }).promise.then(function (doc) {
+      /* 服务器版：给 PDF.js 文件地址，服务器支持分段读取（Range），大书只取看到的那几页，不用先整本下载 */
+      var src = byUrl ? { url: "/_blob/" + eb0.asset, rangeChunkSize: 1 << 20, disableAutoFetch: true, disableStream: true } : { data: new Uint8Array(r[1]) };
+      return L.getDocument(Object.assign(src, { CMapReaderFactory: PdfCMaps, StandardFontDataFactory: PdfFonts, useWorkerFetch: false, isEvalSupported: false, cMapPacked: true })).promise.then(function (doc) {
         if (!RD || RD.id !== id) { doc.destroy(); return null; }
         return doc.getPage(1).then(function (p1) {
           var z = 1; try { z = +localStorage.getItem(pdfZoomKey(id)) || 1; } catch (e) { /* 忽略 */ }

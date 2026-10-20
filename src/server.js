@@ -32,7 +32,7 @@
       loading = null;
       if (pending) return state;
       var was = state && state.user ? state.user.id : null;
-      state = { user: s.user || null, docs: s.docs || {} };
+      state = { user: s.user || null, docs: s.docs || {}, caps: s.caps || null };
       loadedAt = Date.now(); emitAll();
       if (was !== (state.user ? state.user.id : null)) window.dispatchEvent(new Event("yxl-user"));
       return state;
@@ -79,10 +79,30 @@
     }
   };
   var user = { isOwner: function () { return Promise.resolve(!!(state && state.user)); } };
+  /* 电子书：PUT 原样上传（请求体就是文件），服务器边收边写盘，几百 MB 的书也不占内存；用 XHR 是为了拿到上传进度。
+   * 服务器在 /api/yxl/state 里说明自己支持（caps.put）才用；旧版本服务器走表单上传。 */
+  function xhrPut(url, body, type, onp) {
+    return new Promise(function (res, rej) {
+      var x = new XMLHttpRequest();
+      x.open("PUT", url);
+      x.setRequestHeader("content-type", type);
+      if (onp && x.upload) x.upload.onprogress = function (e) { if (e.lengthComputable) onp(e.loaded / e.total); };
+      x.onload = function () {
+        var b = {}; try { b = JSON.parse(x.responseText || "{}"); } catch (e) { /* nginx 的错误页不是 JSON */ }
+        if (x.status >= 200 && x.status < 300) { res(b); return; }
+        rej(err(x.status === 401 ? "upstream_auth" : b.code || (x.status === 413 ? "too_large" : x.status === 415 ? "unsupported_type" : x.status === 507 ? "disk_full" : "http_" + x.status), b.error));
+      };
+      x.onerror = function () { rej(err("store_unavailable", "网络中断")); };
+      x.send(body);
+    });
+  }
   var assets = {
     upload: function (blob, opt) {
       var type = (opt && opt.type) || blob.type || "application/octet-stream";
-      var name = blob.name || (type === "application/pdf" ? "book.pdf" : "book.epub.b64.txt");
+      var name = (opt && opt.name) || blob.name || (type === "application/pdf" ? "book.pdf" : "book.epub");
+      var c = state && state.caps;
+      if (c && c.put) return xhrPut(API + "/files?name=" + enc(name), blob, type, opt && opt.onProgress);
+      /* 旧版本服务器：表单上传，整个文件进内存，只收 48 MB 以内 */
       var fd = new FormData(); fd.append("file", new File([blob], name, { type: type }));
       return req("/files", { method: "POST", body: fd });
     },
@@ -91,6 +111,8 @@
 
   window.YXL_SERVER = {
     me: function () { return state && state.user; },
+    /* 服务器能做什么：{ put: 能不能流式上传, maxMB: 单本上限 }；旧版本服务器没有这一项 */
+    caps: function () { return (state && state.caps) || null; },
     reload: function () { return load(); },
     loginHref: function () { return "/login?callbackUrl=" + enc("/" + location.hash); },
     /* 英语一层：Baba 上的片子、每部看到哪、生词本各状态的数量 */

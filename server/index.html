@@ -1768,17 +1768,19 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .fx-sheen .cb:hover .cb-gl::before{animation:cbsheen 1.05s cubic-bezier(.3,.6,.3,1)}
 @keyframes cbsheen{0%{opacity:0;transform:translateX(0) skewX(-14deg)}18%{opacity:1}100%{opacity:0;transform:translateX(340%) skewX(-14deg)}}
 /* 抽出来：书朝你抽出来，露出两边的封皮 */
-.fx-pull .wm-in{perspective:900px}
-.fx-pull .cb:not(.face){transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
-.fx-pull .cb:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-2px);z-index:6}
-.fx-pull .cb.picked:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-14px)}
-.fx-pull.read-pull .cb.doing:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-24px)}
-.fx-pull.read-pull .cb.doing.picked:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-26px)}
-.fx-pull .cb-sd{display:block;position:absolute;top:0;bottom:0;width:var(--dp,130px);pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.38),rgba(0,0,0,.16) 30%,rgba(0,0,0,.3)),var(--cloth-tx),var(--cl)}
-.fx-pull .cb-sd{visibility:hidden;transition:visibility 0s .35s}
-.fx-pull .cb:hover .cb-sd{visibility:visible;transition-delay:0s}
-.fx-pull .cb-sd.l{right:100%;transform-origin:100% 50%;transform:rotateY(-90deg)}
-.fx-pull .cb-sd.r{left:100%;transform-origin:0 50%;transform:rotateY(90deg)}
+/* 抽出来：书朝你移出一截——从底边往前放大一点、浮起来，底下落一片投影，右边露出一窄条封面板的厚度；同一格别的书稍微暗下去，衬出这一本 */
+.fx-pull .cb:not(.face){transform-origin:50% 100%;transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s,filter .28s}
+.fx-pull .cb:not(.face):hover{transform:translateY(-3px) scale(1.07);z-index:6;filter:brightness(1.05);
+  box-shadow:0 20px 22px -14px rgba(28,18,8,.62),0 6px 10px -6px rgba(28,18,8,.4)}
+.fx-pull .cb.picked:not(.face):hover{transform:translateY(-14px) scale(1.07)}
+.fx-pull.read-pull .cb.doing:not(.face):hover{transform:translateY(-22px) scale(1.07)}
+.fx-pull.read-pull .cb.doing.picked:not(.face):hover{transform:translateY(-26px) scale(1.07)}
+.fx-pull .cb-sd.l{display:none}
+.fx-pull .cb-sd.r{display:block;position:absolute;top:1px;bottom:0;left:100%;width:5px;pointer-events:none;
+  background:linear-gradient(90deg,rgba(0,0,0,.5),rgba(0,0,0,.22) 70%,rgba(255,240,210,.18)),var(--cloth-tx),var(--cl);
+  clip-path:polygon(0 0,100% 3px,100% calc(100% - 1px),0 100%);transform:scaleX(0);transform-origin:0 50%;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.fx-pull .cb:not(.face):hover .cb-sd.r{transform:scaleX(1)}
+.fx-pull .wm-in:has(.cb:not(.face):hover) .cb:not(:hover){filter:brightness(.9) saturate(.82)}
 @media (prefers-reduced-motion: reduce){.fx-pull .cb,.fx-sheen .cb{transition:none}.fx-sheen .cb:hover .cb-gl::before{animation:none}}
 
 @media (max-width:1100px){
@@ -2003,7 +2005,7 @@ html.ov-on,html.ov-on body{overflow:hidden}
       loading = null;
       if (pending) return state;
       var was = state && state.user ? state.user.id : null;
-      state = { user: s.user || null, docs: s.docs || {} };
+      state = { user: s.user || null, docs: s.docs || {}, caps: s.caps || null };
       loadedAt = Date.now(); emitAll();
       if (was !== (state.user ? state.user.id : null)) window.dispatchEvent(new Event("yxl-user"));
       return state;
@@ -2050,10 +2052,30 @@ html.ov-on,html.ov-on body{overflow:hidden}
     }
   };
   var user = { isOwner: function () { return Promise.resolve(!!(state && state.user)); } };
+  /* 电子书：PUT 原样上传（请求体就是文件），服务器边收边写盘，几百 MB 的书也不占内存；用 XHR 是为了拿到上传进度。
+   * 服务器在 /api/yxl/state 里说明自己支持（caps.put）才用；旧版本服务器走表单上传。 */
+  function xhrPut(url, body, type, onp) {
+    return new Promise(function (res, rej) {
+      var x = new XMLHttpRequest();
+      x.open("PUT", url);
+      x.setRequestHeader("content-type", type);
+      if (onp && x.upload) x.upload.onprogress = function (e) { if (e.lengthComputable) onp(e.loaded / e.total); };
+      x.onload = function () {
+        var b = {}; try { b = JSON.parse(x.responseText || "{}"); } catch (e) { /* nginx 的错误页不是 JSON */ }
+        if (x.status >= 200 && x.status < 300) { res(b); return; }
+        rej(err(x.status === 401 ? "upstream_auth" : b.code || (x.status === 413 ? "too_large" : x.status === 415 ? "unsupported_type" : x.status === 507 ? "disk_full" : "http_" + x.status), b.error));
+      };
+      x.onerror = function () { rej(err("store_unavailable", "网络中断")); };
+      x.send(body);
+    });
+  }
   var assets = {
     upload: function (blob, opt) {
       var type = (opt && opt.type) || blob.type || "application/octet-stream";
-      var name = blob.name || (type === "application/pdf" ? "book.pdf" : "book.epub.b64.txt");
+      var name = (opt && opt.name) || blob.name || (type === "application/pdf" ? "book.pdf" : "book.epub");
+      var c = state && state.caps;
+      if (c && c.put) return xhrPut(API + "/files?name=" + enc(name), blob, type, opt && opt.onProgress);
+      /* 旧版本服务器：表单上传，整个文件进内存，只收 48 MB 以内 */
       var fd = new FormData(); fd.append("file", new File([blob], name, { type: type }));
       return req("/files", { method: "POST", body: fd });
     },
@@ -2062,6 +2084,8 @@ html.ov-on,html.ov-on body{overflow:hidden}
 
   window.YXL_SERVER = {
     me: function () { return state && state.user; },
+    /* 服务器能做什么：{ put: 能不能流式上传, maxMB: 单本上限 }；旧版本服务器没有这一项 */
+    caps: function () { return (state && state.caps) || null; },
     reload: function () { return load(); },
     loginHref: function () { return "/login?callbackUrl=" + enc("/" + location.hash); },
     /* 英语一层：Baba 上的片子、每部看到哪、生词本各状态的数量 */
@@ -5037,21 +5061,6 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     wall.style.minHeight = "";
     document.querySelectorAll(".lk-it").forEach(function (t) {
       var k = t.getAttribute("data-d"); t.classList.toggle("off", LK().deco.indexOf(k) >= 0 && !wall.querySelector(".d-" + k)); });
-    fxPrep(wall);
-  }
-  /* 动效「抽出来」：书朝你移出 54px。透视中心在这一格正中，离中心远的书会被透视往外推，推出鼠标底下就松开、弹回、再被指中，来回闪。
-   * 按每本书离中心的距离往回挪一点（54 / 900，和 CSS 里的透视距离对应），书放大但停在原地。 */
-  function fxPrep(wall) {
-    if (!wall || LK().fx !== "pull") return;
-    wall.querySelectorAll(".wm-in").forEach(function (box) {
-      var r = box.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
-      box.querySelectorAll(".cb:not(.face)").forEach(function (b) {
-        if (b.matches(":hover")) return;
-        var q = b.getBoundingClientRect(), k = 54 / 900;
-        b.style.setProperty("--pdx", (-(q.left + q.width / 2 - cx) * k).toFixed(1) + "px");
-        b.style.setProperty("--pdy", (-(q.top + q.height / 2 - cy) * k).toFixed(1) + "px");
-      });
-    });
   }
   /* 黄铜座钟：按现在的时间摆好三根指针，之后由 CSS 动画走（停掉动静时就只摆好位置） */
   function clockSet(dz) {
@@ -5168,15 +5177,21 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
    * GitHub 公开版：文件只存在当前浏览器的 IndexedDB 里（库 yanxilu-ebooks，键 = 书的 id），不会传到网上；
    *   本地记录 ebooks[书的 id] = { local: true, kind, name, size, t }，跟公开版的其他本地记录一样存在 localStorage。
    * PDF 和 EPUB 都在页面里的阅读器打开（见下面的阅读器），PDF 也可以在新标签页打开。 */
-  var EB_MAX = (ON_SERVER ? 40 : 20) * 1024 * 1024, EPUB_MAX = (ON_SERVER ? 30 : 15) * 1024 * 1024, EB_MB = EB_MAX >> 20, EPUB_MB = EPUB_MAX >> 20;
+  /* 服务器版：文件原样（EPUB 不再包成 base64）边传边写盘，单本最多 600 MB；claude.ai 版受它的存储限制 */
+  /* 单本上限：claude.ai 版 PDF 20 MB、EPUB 15 MB（它的存储限制）；服务器版按服务器说的（新版本流式上传 600 MB，旧版本表单上传 48 MB） */
+  function ebLimMB(kind) {
+    if (!ON_SERVER) return kind === "epub" ? 15 : 20;
+    var c = SRV.caps && SRV.caps();
+    return c && c.maxMB ? c.maxMB : 48;
+  }
   function ebKind(file) {
     var n = file.name || "";
     if (/\.epub$/i.test(n) || file.type === "application/epub+zip") return "epub";
     if (/\.pdf$/i.test(n) || file.type === "application/pdf") return "pdf";
     return "";
   }
-  var EB_ERR = { too_large: "文件太大了：PDF 最多 " + EB_MB + " MB，EPUB 最多 " + EPUB_MB + " MB。", unsupported_type: "只能上传 PDF 或 EPUB 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
-    rate_limited: "传得太频繁了，过一会儿再试。", upstream_auth: ON_SERVER ? "登录过期了，重新登录后再传。" : "登录状态过期了，刷新页面后再试。", store_unavailable: "服务器存不下这个文件，过一会儿再试。", capability_disabled: "这个页面现在不能上传文件。", not_granted: "这个页面现在不能上传文件。", capability_removed: "这个页面现在不能上传文件。" };
+  var EB_ERR = { too_large: "", unsupported_type: "只能上传 PDF 或 EPUB 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
+    disk_full: "服务器的磁盘快满了，传不下这本书。", rate_limited: "传得太频繁了，过一会儿再试。", upstream_auth: ON_SERVER ? "登录过期了，重新登录后再传。" : "登录状态过期了，刷新页面后再试。", store_unavailable: "服务器存不下这个文件，过一会儿再试。", capability_disabled: "这个页面现在不能上传文件。", not_granted: "这个页面现在不能上传文件。", capability_removed: "这个页面现在不能上传文件。" };
   function ebookOf(id) {
     var e = S.data.ebooks ? S.data.ebooks[id] || null : null;
     if (S.mode === "db") return (IN_ARTIFACT || ON_SERVER) && e && e.asset ? e : null;
@@ -5238,10 +5253,15 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
   function fmtSize(n) { return n >= 1048576 ? Math.round(n / 104857.6) / 10 + " MB" : Math.max(1, Math.round(n / 1024)) + " KB"; }
   function ebCanUpload() { return S.mode === "local" ? true : !!(S.assets && S.canEdit); }
+  function ebBusyText() { return S.ebPct != null ? "上传中 " + Math.floor(S.ebPct * 100) + "%" : "上传中……"; }
+  function ebProgress(f) {
+    S.ebPct = f;
+    document.querySelectorAll(".eb-up.busy .eb-up-t").forEach(function (el) { el.textContent = ebBusyText(); });
+  }
   function ebUploadBtn(id, label) {
     if (!ebCanUpload()) return "";
-    var busy = S.ebBusy === id, tip = S.mode === "local" ? "PDF 或 EPUB，只存在这个浏览器里，不会传到网上" : "PDF（" + EB_MB + " MB 以内）或 EPUB（" + EPUB_MB + " MB 以内）";
-    return '<label class="btn ghost eb-up' + (busy ? " busy" : "") + '" title="' + tip + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + ">" + (busy ? "上传中……" : label) + "</label>";
+    var busy = S.ebBusy === id, tip = S.mode === "local" ? "PDF 或 EPUB，只存在这个浏览器里，不会传到网上" : ebLimMB("pdf") === ebLimMB("epub") ? "PDF 或 EPUB，" + ebLimMB("pdf") + " MB 以内" : "PDF（" + ebLimMB("pdf") + " MB 以内）或 EPUB（" + ebLimMB("epub") + " MB 以内）";
+    return '<label class="btn ghost eb-up' + (busy ? " busy" : "") + '" title="' + tip + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '"' + (busy ? " disabled" : "") + '><span class="eb-up-t">' + (busy ? ebBusyText() : label) + "</span></label>";
   }
   function ebFileHTML(id) {
     var eb = ebookOf(id); if (!eb) return "";
@@ -5252,7 +5272,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (ebCanUpload()) tools = (S.ebConfirm === id
       ? '<span class="eb-conf">文件会删掉，确定？<button type="button" class="linkbtn danger" data-act="eb-del-yes" data-id="' + esc(id) + '">移除</button><button type="button" class="linkbtn" data-act="eb-del-no">取消</button></span>'
       : '<button type="button" class="linkbtn" data-act="eb-del" data-id="' + esc(id) + '">移除</button>');
-    var swap = ebCanUpload() ? '<label class="linkbtn eb-up' + (S.ebBusy === id ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '">' + (S.ebBusy === id ? "上传中……" : "换一个文件") + "</label>" : "";
+    var swap = ebCanUpload() ? '<label class="linkbtn eb-up' + (S.ebBusy === id ? " busy" : "") + '"><input class="vh" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub" data-eb="' + esc(id) + '"><span class="eb-up-t">' + (S.ebBusy === id ? ebBusyText() : "换一个文件") + "</span></label>" : "";
     return '<div class="eb-file"><span class="eb-meta">电子书：' + esc(eb.name || "PDF") + (eb.size ? " · " + fmtSize(eb.size) : "") + (local ? " · 存在这个浏览器里" : "") + "</span>" +
       '<span class="eb-tools">' + tab + swap + tools + "</span></div>";
   }
@@ -5271,31 +5291,35 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
         function (e) { S.ebBusy = null; render(); toast(ebLocalErr(e)); });
       return;
     }
-    if (kind === "pdf" && file.size > EB_MAX) { toast("PDF 超过 " + EB_MB + " MB，压缩一下再传。"); return; }
-    if (kind === "epub" && file.size > EPUB_MAX) { toast("EPUB 超过 " + EPUB_MB + " MB，传不上去。" + (ON_SERVER ? "" : "可以在公开版里放（只存在那个浏览器）。")); return; }
+    var lim = ebLimMB(kind);
+    if (file.size > lim * 1048576) { toast((kind === "pdf" ? "PDF" : "EPUB") + " 超过 " + lim + " MB，传不上去。" + (ON_SERVER ? "" : kind === "pdf" ? "压缩一下再传，或者在公开版里放（只存在那个浏览器）。" : "可以在公开版里放（只存在那个浏览器）。")); return; }
     if (!S.assets) { toast("这个页面现在不能上传文件。"); return; }
     var old = S.data.ebooks[id];
     S.ebBusy = id; render();
-    var body = kind === "pdf" ? Promise.resolve(file) : new Promise(function (res, rej) {
+    S.ebPct = null;
+    var mime = kind === "pdf" ? "application/pdf" : "application/epub+zip";
+    var body = kind === "pdf" || ON_SERVER ? Promise.resolve(file) : new Promise(function (res, rej) {
       var fr = new FileReader();
       fr.onload = function () { var s2 = String(fr.result), k = s2.indexOf(","); res(new Blob([s2.slice(k + 1)], { type: "text/plain" })); };
       fr.onerror = function () { rej(epErr("read")); };
       fr.readAsDataURL(file);
     });
     function tryUp(again) {
-      return body.then(function (b) { return S.assets.upload(b, { type: kind === "pdf" ? "application/pdf" : "text/plain" }); }).catch(function (e) {
-        if (!again && e && e.code === "store_unavailable") return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return tryUp(true); });
+      return body.then(function (b) {
+        return S.assets.upload(b, ON_SERVER ? { type: mime, name: file.name, onProgress: ebProgress } : { type: kind === "pdf" ? "application/pdf" : "text/plain" });
+      }).catch(function (e) {
+        if (!again && !ON_SERVER && e && e.code === "store_unavailable") return new Promise(function (r) { setTimeout(r, 1500); }).then(function () { return tryUp(true); });
         throw e;
       });
     }
     tryUp(false).then(function (r) {
       var rec = { asset: r.id, kind: kind, name: file.name, size: file.size, t: new Date().toISOString() };
-      if (kind === "epub") rec.enc = "b64";
+      if (kind === "epub" && !ON_SERVER) rec.enc = "b64";
       return put("ebooks", id, rec).then(function () {
         if (old && old.asset && old.asset !== r.id) S.assets.delete(old.asset).catch(function () {});
-        S.ebBusy = null; render(); toast("电子书挂好了，点「开始读」就能看。");
+        S.ebBusy = null; S.ebPct = null; render(); toast("电子书挂好了，点「开始读」就能看。");
       });
-    }, function (e) { S.ebBusy = null; render(); toast(EB_ERR[e && e.code] || "上传没成功，请再试一次。"); });
+    }, function (e) { S.ebBusy = null; S.ebPct = null; render(); toast(e && e.code === "too_large" ? "文件太大了：最多 " + ebLimMB(kind) + " MB。" : EB_ERR[e && e.code] || "上传没成功，请再试一次。"); });
   }
   function ebRemove(id) {
     var eb = S.data.ebooks[id]; S.ebConfirm = null;
@@ -5857,10 +5881,13 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function pdfStart(id) {
     var view = RD.el.querySelector(".rd-view");
     var lib = pdfLib().catch(function () { throw epErr("pdf_lib"); });
-    Promise.all([lib, ebBytes(id)]).then(function (r) {
+    var eb0 = ebookOf(id), byUrl = ON_SERVER && eb0 && eb0.asset && !eb0.enc;
+    Promise.all([lib, byUrl ? null : ebBytes(id)]).then(function (r) {
       if (!RD || RD.id !== id) return null;
       var L = r[0];
-      return L.getDocument({ data: new Uint8Array(r[1]), CMapReaderFactory: PdfCMaps, StandardFontDataFactory: PdfFonts, useWorkerFetch: false, isEvalSupported: false, cMapPacked: true }).promise.then(function (doc) {
+      /* 服务器版：给 PDF.js 文件地址，服务器支持分段读取（Range），大书只取看到的那几页，不用先整本下载 */
+      var src = byUrl ? { url: "/_blob/" + eb0.asset, rangeChunkSize: 1 << 20, disableAutoFetch: true, disableStream: true } : { data: new Uint8Array(r[1]) };
+      return L.getDocument(Object.assign(src, { CMapReaderFactory: PdfCMaps, StandardFontDataFactory: PdfFonts, useWorkerFetch: false, isEvalSupported: false, cMapPacked: true })).promise.then(function (doc) {
         if (!RD || RD.id !== id) { doc.destroy(); return null; }
         return doc.getPage(1).then(function (p1) {
           var z = 1; try { z = +localStorage.getItem(pdfZoomKey(id)) || 1; } catch (e) { /* 忽略 */ }

@@ -1760,17 +1760,19 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .fx-sheen .cb:hover .cb-gl::before{animation:cbsheen 1.05s cubic-bezier(.3,.6,.3,1)}
 @keyframes cbsheen{0%{opacity:0;transform:translateX(0) skewX(-14deg)}18%{opacity:1}100%{opacity:0;transform:translateX(340%) skewX(-14deg)}}
 /* 抽出来：书朝你抽出来，露出两边的封皮 */
-.fx-pull .wm-in{perspective:900px}
-.fx-pull .cb:not(.face){transform-style:preserve-3d;transition:transform .35s cubic-bezier(.2,.8,.2,1)}
-.fx-pull .cb:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-2px);z-index:6}
-.fx-pull .cb.picked:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-14px)}
-.fx-pull.read-pull .cb.doing:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-24px)}
-.fx-pull.read-pull .cb.doing.picked:not(.face):hover{transform:translate3d(var(--pdx,0px),var(--pdy,0px),54px) translateY(-26px)}
-.fx-pull .cb-sd{display:block;position:absolute;top:0;bottom:0;width:var(--dp,130px);pointer-events:none;background:linear-gradient(90deg,rgba(0,0,0,.38),rgba(0,0,0,.16) 30%,rgba(0,0,0,.3)),var(--cloth-tx),var(--cl)}
-.fx-pull .cb-sd{visibility:hidden;transition:visibility 0s .35s}
-.fx-pull .cb:hover .cb-sd{visibility:visible;transition-delay:0s}
-.fx-pull .cb-sd.l{right:100%;transform-origin:100% 50%;transform:rotateY(-90deg)}
-.fx-pull .cb-sd.r{left:100%;transform-origin:0 50%;transform:rotateY(90deg)}
+/* 抽出来：书朝你移出一截——从底边往前放大一点、浮起来，底下落一片投影，右边露出一窄条封面板的厚度；同一格别的书稍微暗下去，衬出这一本 */
+.fx-pull .cb:not(.face){transform-origin:50% 100%;transition:transform .28s cubic-bezier(.2,.8,.2,1),box-shadow .28s,filter .28s}
+.fx-pull .cb:not(.face):hover{transform:translateY(-3px) scale(1.07);z-index:6;filter:brightness(1.05);
+  box-shadow:0 20px 22px -14px rgba(28,18,8,.62),0 6px 10px -6px rgba(28,18,8,.4)}
+.fx-pull .cb.picked:not(.face):hover{transform:translateY(-14px) scale(1.07)}
+.fx-pull.read-pull .cb.doing:not(.face):hover{transform:translateY(-22px) scale(1.07)}
+.fx-pull.read-pull .cb.doing.picked:not(.face):hover{transform:translateY(-26px) scale(1.07)}
+.fx-pull .cb-sd.l{display:none}
+.fx-pull .cb-sd.r{display:block;position:absolute;top:1px;bottom:0;left:100%;width:5px;pointer-events:none;
+  background:linear-gradient(90deg,rgba(0,0,0,.5),rgba(0,0,0,.22) 70%,rgba(255,240,210,.18)),var(--cloth-tx),var(--cl);
+  clip-path:polygon(0 0,100% 3px,100% calc(100% - 1px),0 100%);transform:scaleX(0);transform-origin:0 50%;transition:transform .28s cubic-bezier(.2,.8,.2,1)}
+.fx-pull .cb:not(.face):hover .cb-sd.r{transform:scaleX(1)}
+.fx-pull .wm-in:has(.cb:not(.face):hover) .cb:not(:hover){filter:brightness(.9) saturate(.82)}
 @media (prefers-reduced-motion: reduce){.fx-pull .cb,.fx-sheen .cb{transition:none}.fx-sheen .cb:hover .cb-gl::before{animation:none}}
 
 @media (max-width:1100px){
