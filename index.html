@@ -1965,6 +1965,54 @@ html.ov-on,html.ov-on body{overflow:hidden}
 .ov-x{flex:none;min-height:36px;padding:0 16px;border:1px solid var(--ink);border-radius:18px;background:var(--ink);color:var(--paper);font-size:14px;font-weight:600;cursor:pointer}
 .ov-f{flex:1 1 auto;width:100%;border:0;background:#0B0B0C}
 @media (max-width:640px){ .ov-tab{display:none} .ov-bar{padding-left:12px} }
+
+/* ---------- 剪报：档案架上的剪报夹、书签按钮弹出的小窗 ---------- */
+.clips{margin-top:56px;padding:24px 26px 28px;background:var(--leaf);border:1px solid var(--rule);border-radius:var(--r);box-shadow:0 1px 0 var(--rule)}
+.cl-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px}
+.cl-head h2{margin:0;display:flex;align-items:baseline;gap:10px}
+.cl-head h2 small{font-family:var(--f-ui);font-size:13px;font-weight:500;color:var(--ink-3)}
+.cl-link{display:flex;gap:8px;flex:1 1 320px;max-width:520px}
+.cl-link input{flex:1;min-width:0;height:34px;padding:0 12px;border:1px solid var(--rule-strong);border-radius:17px;background:var(--paper);font-family:var(--f-ui);font-size:13.5px}
+.cl-help{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px 28px;margin:18px 0 6px;padding:16px 18px;background:var(--paper);border-radius:var(--r);font-size:14.5px;line-height:1.7;color:var(--ink-2)}
+.cl-help h3{font-size:15px;margin:0 0 4px;color:var(--ink)}
+.cl-help p{margin:6px 0}
+.cl-bm{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border:1px dashed var(--seal);border-radius:16px;background:var(--seal-wash);color:var(--seal);font-family:var(--f-ui);font-size:14px;font-weight:700;text-decoration:none;cursor:grab}
+.cl-bm::before{content:"";width:9px;height:12px;background:var(--seal);clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%)}
+.cl-group{margin-top:22px}
+.clg-h{display:flex;align-items:center;gap:8px;font-size:15px;margin:0 0 8px}
+.clg-h i{width:10px;height:10px;border-radius:2px;background:var(--c)}
+.clg-h small{font-family:var(--f-num);font-size:13px;color:var(--ink-3);font-weight:500}
+.cl-list{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+.cl-card{position:relative;display:flex;flex-direction:column;gap:5px;padding:14px 16px 12px;background:var(--card);border:1px solid var(--card-line);border-radius:3px;box-shadow:0 2px 4px -3px rgba(40,30,15,.35)}
+.cl-card::before{content:"";position:absolute;top:-6px;left:18px;width:34px;height:12px;background:rgba(214,190,140,.55);transform:rotate(-3deg)}
+.cl-card.link{background:transparent;border-style:dashed}
+.cl-t{align-self:flex-start;padding:0;border:0;background:none;text-align:left;font-family:var(--f-display);font-size:16px;font-weight:700;line-height:1.45;color:var(--ink);cursor:pointer;text-decoration:none}
+.cl-t:hover{color:var(--indigo)}
+.cl-wait{font-family:var(--f-ui);font-size:11.5px;font-weight:600;color:var(--seal);border:1px solid var(--seal);border-radius:9px;padding:0 6px;margin-left:4px;white-space:nowrap}
+.cl-m{margin:0;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3)}
+.cl-why,.cl-ex{margin:2px 0 0;font-size:14px;line-height:1.65;color:var(--ink-2)}
+.cl-why{padding-left:10px;border-left:3px solid var(--ln-cycle,#c9a24e)}
+.cl-acts{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:6px}
+.cl-trk{max-width:12em;height:28px;border:1px solid var(--rule);border-radius:14px;background:var(--leaf);font-family:var(--f-ui);font-size:12.5px;color:var(--ink-2);padding:0 8px}
+html.clip-mode .topbar,html.clip-mode .mainnav{display:none}
+html.clip-mode main{padding:18px 18px 40px}
+.clip-page{max-width:560px}
+.cp-h{display:flex;align-items:center;gap:10px;padding-bottom:12px;margin-bottom:16px;border-bottom:3px solid var(--ink)}
+.cp-h b{font-family:var(--f-display);font-size:19px}
+.cp-to{margin-left:auto;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3)}
+.cp-msg{font-size:15.5px;line-height:1.8;color:var(--ink-2)}
+.cp-form{display:flex;flex-direction:column;gap:12px}
+.cp-form .field{display:flex;flex-direction:column;gap:4px;font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
+.cp-form input,.cp-form select,.cp-form textarea{font-size:15px;padding:8px 10px;border:1px solid var(--rule-strong);border-radius:5px;background:var(--leaf);color:var(--ink);font-family:var(--f-body)}
+.cp-form input[name=title]{font-family:var(--f-display);font-weight:700;font-size:16.5px}
+.cp-meta,.cp-note{margin:-4px 0 0;font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
+.cp-note{color:var(--seal)}
+.cp-prev{border:1px solid var(--rule);border-radius:5px;background:var(--paper)}
+.cp-pm{margin:0;padding:7px 12px;border-bottom:1px solid var(--rule);font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3)}
+.cp-body{max-height:260px;overflow:auto;padding:4px 14px 10px;font-size:14.5px;line-height:1.75;color:var(--ink-2)}
+.cp-body img{max-width:100%;height:auto}
+.cp-done b{font-family:var(--f-display);font-size:22px;color:var(--ln-sql)}
+@media (max-width:640px){ .clips{padding:18px 14px 22px;margin-inline:-4px} .cl-list{grid-template-columns:minmax(0,1fr)} }
 </style>
 
 <header class="topbar" id="rail"></header>
@@ -3919,7 +3967,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   var LESSON_SNAP = window.YXL_LESSONS || {};
   /* 有课程页的线：电影、SQL、Python、CFA、地缘、周复盘 */
   var COURSES = PLAN ? ["film", "sql", "py", "cfa", "geo", "rev"].filter(function (k) { return PLAN.lessons[k]; }) : [];
-  var COLLS = ["progress", "notes", "journal", "cards", "study", "film", "ebooks", "mybooks", "hidden", "reading", "marks", "domains"];
+  var COLLS = ["progress", "notes", "journal", "cards", "study", "film", "ebooks", "mybooks", "hidden", "reading", "marks", "domains", "clips"];
   var STATUS = [["todo", "未开始"], ["doing", "进行中"], ["done", "已完成"], ["review", "已内化"]];
   var STATUS_LABEL = {}; STATUS.forEach(function (s) { STATUS_LABEL[s[0]] = s[1]; });
   var MARK = { done: "阅", review: "熟" };
@@ -3936,7 +3984,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function today() { return ymd(new Date()); }
   function addDays(s, n) { var p = s.split("-").map(Number); return ymd(new Date(p[0], p[1] - 1, p[2] + n)); }
   function hhmm() { var d = new Date(); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
-  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {}, study: {}, film: {}, ebooks: {}, mybooks: {}, hidden: {}, reading: {}, marks: {}, domains: {} }; }
+  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {}, study: {}, film: {}, ebooks: {}, mybooks: {}, hidden: {}, reading: {}, marks: {}, domains: {}, clips: {} }; }
 
   /* ---------- 索引 ---------- */
   var ITEMS = {};
@@ -5515,8 +5563,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
   function readerOpen(id, opt) {
     readerClose();
-    var eb = ebookOf(id), kind = eb && (eb.kind || "pdf") === "pdf" ? "pdf" : "epub";
-    var it = ITEMS[id] || {}, title = (it.title || "").replace(/（.*）$/, "") || "电子书", nMk = marksOf(id).length;
+    var clip = /^cl-/.test(id) ? (S.data.clips || {})[id] : null;
+    var eb = clip ? null : ebookOf(id), kind = !clip && eb && (eb.kind || "pdf") === "pdf" ? "pdf" : "epub";
+    var it = ITEMS[id] || {}, title = clip ? clip.title : (it.title || "").replace(/（.*）$/, "") || "电子书", nMk = marksOf(id).length;
     var el = document.createElement("div");
     el.className = "rd"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-label", "阅读《" + title + "》");
     el.innerHTML = '<div class="rd-bar"><b class="rd-t">' + esc(title) + '</b><select class="rd-toc" aria-label="目录" disabled><option>目录</option></select>' +
@@ -5539,7 +5588,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (RD.side) rdSideToggle(true);
     el.querySelector('[data-act="rd-close"]').focus();
     if (kind === "pdf") { pdfStart(id); return; }
-    ebBytes(id).then(epOpen).then(function (ep) {
+    (clip ? clipEp(id, clip) : ebBytes(id).then(epOpen)).then(function (ep) {
       if (!RD || RD.id !== id) return;
       RD.ep = ep;
       var sel = el.querySelector(".rd-toc");
@@ -5992,7 +6041,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function shelfSeg(cur) {
     var nBooks = allItems().filter(function (id) { return ITEMS[id].kind === "book"; }).length;
     return '<nav class="seg shelf-seg" aria-label="书架里的两件家具"><a href="#shelf"' + (cur === "shelf" ? ' aria-current="page"' : "") + ">书墙 · " + nBooks + " 本</a>" +
-      '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件</a></nav>";
+      '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "") + "</a></nav>";
   }
   function archiveHTML() {
     if (!TOPIC[S.archPick]) S.archPick = (TOPICS.filter(function (tp) { return tp.status === "doing"; })[0] || TOPICS[0] || {}).id;
@@ -6015,6 +6064,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<div class="arch-side"><div class="k-legend"><span class="kl-h">盒顶的色签</span>' + legend + "</div>" +
       '<label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
       '<div class="arch-main"><section class="cabinet archive" aria-label="档案架"><div class="cab-top"><span>研究档案</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + archPanelHTML() + "</div>" +
+      clipsHTML() +
       '<section class="arules" aria-labelledby="ar-h"><h2 id="ar-h">怎样归档</h2><div class="ar-grid">' + rules.map(function (r) { return '<div class="arule"><p><b class="ar-n">' + r[0] + "</b><b>" + r[1] + "</b></p><p>" + r[2] + "</p></div>"; }).join("") + "</div>" +
       '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进研习录”，我按这四条归档。</p></section></div>';
   }
@@ -6023,6 +6073,255 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var q = S.archQ || "";
     document.querySelectorAll(".archive .abox").forEach(function (b) { var tp = TOPIC[b.getAttribute("data-t")]; if (tp) b.classList.toggle("dim", !archMatch(tp)); });
     document.querySelectorAll(".archive .asheet").forEach(function (a) { a.classList.toggle("dim", !!q && (a.getAttribute("data-q") || "").indexOf(q) < 0); });
+  }
+  /* ---------- 剪报：把知乎（或微信公众号、别的网页）上看到的好回答、好文章收进档案架 ----------
+   * 只在服务器版（baba.wogucloud.cn）上有：记录存在 Baba 账号里，不进公开的 GitHub 仓库。
+   * clips：每篇一条，文档 id = "cl-" + 时间 + 随机，内容 { key 去重用的键, url, title, author, site, kind（answer / article / page）,
+   *   date 原文发表时间, track 领域, note 为什么存, excerpt 开头一段, words 字数, sel 只存了选中的一段, status（full 有全文 / link 只有链接）, t 存的时间, ut 更新时间 }。
+   * clipbody：正文，文档 id 同上，内容 { html（清洗过的）, t }。正文可能很长，不随记录一起下发，打开时才取。
+   * 剪的办法：浏览器书签栏里的「收进研习录」按钮（一段 javascript: 书签），在知乎页面上点它，
+   *   它读出当前回答或文章（选中了文字就只取选中的），开一个研习录的小窗口（#clip），用 postMessage 把内容递过去，你在小窗里确认、选领域、写一句再保存。
+   * 手机知乎 App：分享 → 复制链接，粘贴到档案架的框里先存链接；回电脑打开原文再点一次按钮，补上全文。 */
+  function clipsOn() { return ON_SERVER && S.mode === "db" && !!(SRV.caps && SRV.caps() && SRV.caps().clips); }
+  function clipList() {
+    var C = S.data.clips || {};
+    return Object.keys(C).map(function (k) { return Object.assign({ id: k }, C[k]); }).filter(function (c) { return c.url; })
+      .sort(function (a, b) { return String(b.t || "").localeCompare(String(a.t || "")); });
+  }
+  function clipKey(url) {
+    var u = String(url || ""), m = /zhihu\.com\/(?:question\/\d+\/)?answer\/(\d+)/.exec(u);
+    if (m) return "zh-a-" + m[1];
+    if ((m = /zhihu\.com\/p\/(\d+)/.exec(u))) return "zh-p-" + m[1];
+    if ((m = /mp\.weixin\.qq\.com\/s\/([\w-]+)/.exec(u))) return "wx-" + m[1];
+    return u.replace(/[?#].*$/, "").replace(/\/$/, "");
+  }
+  function clipByKey(key) { return clipList().filter(function (c) { return c.key === key; })[0] || null; }
+  function clipKindLabel(c) { return (c.site || "") + (c.kind === "answer" ? "回答" : c.kind === "article" ? "文章" : ""); }
+  /* 手机上从知乎 App 复制来的分享文字，形如「【问题 - 某某的回答 - 知乎】https://www.zhihu.com/question/1/answer/2?share_code=…」 */
+  function clipParseShare(text) {
+    var s = String(text || ""), m = s.match(/https?:\/\/[^\s<>"'）)】]+/);
+    if (!m) return null;
+    var url = m[0].replace(/[?#].*$/, ""), title = "", author = "", b = s.match(/【([^】]+)】/);
+    title = b ? b[1] : s.replace(m[0], "").trim();
+    title = title.replace(/\s*[-—]\s*知乎\s*$/, "");
+    var a = title.match(/\s*[-—]\s*([^-—]+?)的回答\s*$/);
+    if (a) { author = a[1].trim(); title = title.slice(0, a.index).trim(); }
+    var host = ""; try { host = new URL(url).hostname; } catch (e) { return null; }
+    return { url: url, title: title.replace(/^[“"]|[”"]$/g, "").trim() || url, author: author, site: /zhihu\.com$/.test(host) ? "知乎" : /weixin\.qq\.com$/.test(host) ? "微信公众号" : host,
+      kind: /answer\/\d+/.test(url) ? "answer" : /\/p\/\d+|\/s\//.test(url) ? "article" : "page" };
+  }
+  /* 清洗网页上取来的正文：只留段落、标题、列表、引用、粗斜体、链接、图片、表格、代码这些；去掉广告卡片、脚本、样式和所有属性 */
+  var CLIP_KEEP = { p: 1, br: 1, h1: 1, h2: 1, h3: 1, h4: 1, h5: 1, h6: 1, blockquote: 1, ul: 1, ol: 1, li: 1, b: 1, strong: 1, i: 1, em: 1, u: 1, s: 1, del: 1, a: 1, img: 1,
+    figure: 1, figcaption: 1, pre: 1, code: 1, hr: 1, table: 1, thead: 1, tbody: 1, tr: 1, th: 1, td: 1, sup: 1, sub: 1 };
+  var CLIP_DROP = "script,style,noscript,template,iframe,object,embed,svg,canvas,button,input,textarea,select,form,video,audio,link,meta," +
+    ".RichText-MCNLinkCardContainer,.RichText-ADLinkCardContainer,.GoodsRecommendCard,.CPSCommonCard,.MCNLinkCard,.ZVideoLinkCard,.Reward,.ContentItem-actions";
+  function clipUrl(u, base) {
+    var x; try { x = new URL(u, base); } catch (e) { return ""; }
+    if (/(^|\.)link\.zhihu\.com$/.test(x.hostname) && x.searchParams.get("target")) { try { x = new URL(x.searchParams.get("target")); } catch (e2) { return ""; } }
+    return /^https?:$/.test(x.protocol) ? x.href : "";
+  }
+  function clipClean(html, base) {
+    var doc = new DOMParser().parseFromString('<div id="yx-r">' + String(html || "") + "</div>", "text/html"), root = doc.getElementById("yx-r");
+    if (!root) return "";
+    Array.prototype.forEach.call(root.querySelectorAll(CLIP_DROP), function (n) { n.parentNode && n.parentNode.removeChild(n); });
+    Array.prototype.forEach.call(root.querySelectorAll("a.LinkCard"), function (a) {
+      var p = doc.createElement("p"), na = doc.createElement("a");
+      na.setAttribute("href", a.getAttribute("href") || ""); na.textContent = "↗ " + (a.getAttribute("data-text") || a.textContent || a.getAttribute("href") || "").trim();
+      p.appendChild(na); var box = a.closest(".RichText-LinkCardContainer") || a; box.parentNode.replaceChild(p, box);
+    });
+    (function walk(el) {
+      Array.prototype.slice.call(el.childNodes).forEach(function (n) {
+        if (n.nodeType === 8) { el.removeChild(n); return; }
+        if (n.nodeType !== 1) return;
+        walk(n);
+        var tag = n.tagName.toLowerCase();
+        if (!CLIP_KEEP[tag]) { while (n.firstChild) el.insertBefore(n.firstChild, n); el.removeChild(n); return; }
+        var keep = {};
+        if (tag === "a") keep.href = clipUrl(n.getAttribute("href"), base);
+        if (tag === "img") {
+          var src = [n.getAttribute("data-original"), n.getAttribute("data-actualsrc"), n.getAttribute("data-src"), n.getAttribute("src")].filter(function (v) { return v && !/^data:/.test(v); })[0];
+          keep.src = clipUrl(src, base); keep.alt = n.getAttribute("alt") || n.getAttribute("data-tex") || "";
+          if (!keep.src) { el.removeChild(n); return; }
+        }
+        if (tag === "td" || tag === "th") { keep.colspan = n.getAttribute("colspan"); keep.rowspan = n.getAttribute("rowspan"); }
+        Array.prototype.slice.call(n.attributes).forEach(function (at) { n.removeAttribute(at.name); });
+        Object.keys(keep).forEach(function (k) { if (keep[k]) n.setAttribute(k, keep[k]); });
+        if (tag === "a" && keep.href) { n.setAttribute("target", "_blank"); n.setAttribute("rel", "noopener"); }
+        if (tag === "img") { n.setAttribute("referrerpolicy", "no-referrer"); n.setAttribute("loading", "lazy"); }
+        if (tag === "p" && !n.textContent.trim() && !n.querySelector("img")) el.removeChild(n);
+      });
+    })(root);
+    return root.innerHTML.trim();
+  }
+  function clipPlain(html) {
+    var d = new DOMParser().parseFromString("<div>" + String(html || "") + "</div>", "text/html");
+    return (d.body.textContent || "").replace(/\s+/g, " ").trim();
+  }
+  /* 书签按钮：在别的网站上运行，所以必须自给自足（不能用这个文件里的任何变量）。用 Function.toString 取出源码拼成 javascript: 地址 */
+  function clipperMain(ORIGIN) {
+    try {
+      var D = document, L = location, h = L.hostname;
+      var t = function (el) { return el ? (el.textContent || "").replace(/[​\s]+/g, " ").trim() : ""; };
+      var q = function (s, r) { return (r || D).querySelector(s); };
+      var meta = function (n, r) { var m = (r || D).querySelector('meta[itemprop="' + n + '"]'); return m ? m.getAttribute("content") || "" : ""; };
+      var out = { v: 1, url: L.href.split("#")[0], title: D.title.replace(/\s*-\s*知乎\s*$/, ""), site: h, kind: "page", author: "", date: "", html: "", sel: false };
+      var s = window.getSelection ? window.getSelection() : null, hasSel = !!(s && s.rangeCount && String(s).replace(/\s/g, "").length > 8);
+      var node = null, anchor = hasSel ? s.getRangeAt(0).commonAncestorContainer : null;
+      if (anchor && anchor.nodeType !== 1) anchor = anchor.parentNode;
+      if (/(^|\.)zhihu\.com$/.test(h)) {
+        out.site = "知乎";
+        if (/^zhuanlan\./.test(h) || /^\/p\/\d+/.test(L.pathname)) {
+          out.kind = "article"; out.title = t(q(".Post-Title")) || out.title;
+          out.author = t(q(".Post-Author .AuthorInfo-name")) || t(q(".AuthorInfo-name"));
+          out.date = meta("datePublished"); var pu = meta("url"); if (/\/p\/\d+/.test(pu)) out.url = pu;
+          node = q(".Post-RichTextContainer .RichText") || q(".Post-RichText");
+        } else {
+          var qt = t(q(".QuestionHeader-title")), m = L.pathname.match(/answer\/(\d+)/), item = anchor && anchor.closest ? anchor.closest(".AnswerItem, .ArticleItem, .ContentItem") : null;
+          if (!item && m) item = q('.AnswerItem[name="' + m[1] + '"]');
+          if (!item) {
+            /* 屏幕上露出最多的那个回答；一个都没露出来就取第一个 */
+            var all = D.querySelectorAll(".AnswerItem, .ArticleItem"), best = null, bv = 0;
+            Array.prototype.forEach.call(all, function (x) {
+              var r = x.getBoundingClientRect(), v = Math.min(r.bottom, innerHeight) - Math.max(r.top, 0);
+              if (v > bv) { bv = v; best = x; }
+            });
+            item = best || all[0] || null;
+          }
+          if (item) {
+            var z = {}; try { z = JSON.parse(item.getAttribute("data-zop") || "{}"); } catch (e) { /* 没有就算了 */ }
+            out.kind = z.type === "article" ? "article" : "answer"; out.title = z.title || qt || out.title; out.author = z.authorName || t(q(".AuthorInfo-name", item));
+            var us = item.querySelectorAll('meta[itemprop="url"]'), au = us.length ? us[us.length - 1].getAttribute("content") || "" : "";
+            if (/answer\/\d+|\/p\/\d+/.test(au)) out.url = au;
+            out.date = meta("dateCreated", item) || meta("datePublished", item);
+            node = q(".RichContent-inner .RichText", item) || q(".RichText", item);
+          } else out.title = qt || out.title;
+        }
+      } else if (/(^|\.)weixin\.qq\.com$/.test(h)) {
+        out.site = "微信公众号"; out.kind = "article"; out.title = t(q("#activity-name")) || out.title; out.author = t(q("#js_name")); node = q("#js_content");
+      }
+      if (!node) node = q("article") || q("main") || D.body;
+      if (hasSel) {
+        var c = D.createElement("div");
+        for (var i = 0; i < s.rangeCount; i++) c.appendChild(s.getRangeAt(i).cloneContents());
+        out.html = c.innerHTML; out.sel = true;
+      } else out.html = node.innerHTML;
+      var W = window.open(ORIGIN + "/#clip", "yxlclip", "width=540,height=760");
+      if (!W) { alert("浏览器拦住了弹出窗口。请允许这个网站弹出窗口，再点一次「收进研习录」。"); return; }
+      var n = 0, iv = setInterval(function () { try { W.postMessage({ yxlClip: out }, ORIGIN); } catch (e) { /* 小窗还没打开好 */ } if (++n > 80) clearInterval(iv); }, 300);
+      window.addEventListener("message", function f(e) { if (e.origin === ORIGIN && e.data === "yxl-clip-got") { clearInterval(iv); window.removeEventListener("message", f); } });
+    } catch (err) { alert("收进研习录出错了：" + (err && err.message)); }
+  }
+  function clipperHref() { return "javascript:" + encodeURIComponent("(" + clipperMain.toString().replace(/\n\s*/g, "\n") + ")(" + JSON.stringify(location.origin) + ")"); }
+
+  /* 小窗（#clip）：收书签按钮递来的内容 */
+  var CLIP_SS = "yxl-clip-in";
+  try { S.clipIn = JSON.parse(sessionStorage.getItem(CLIP_SS) || "null"); } catch (e) { S.clipIn = null; }
+  window.addEventListener("message", function (e) {
+    var d = e.data && e.data.yxlClip;
+    if (!d || typeof d !== "object" || typeof d.html !== "string" || !d.url) return;
+    try { if (e.source) e.source.postMessage("yxl-clip-got", e.origin); } catch (x) { /* 对面关了 */ }
+    if (S.clipIn && S.clipIn.url === d.url && S.clipIn.sel === !!d.sel && S.clipIn.raw === d.html.length) return;
+    S.clipIn = { url: String(d.url).slice(0, 2000), title: String(d.title || "").slice(0, 300), author: String(d.author || "").slice(0, 100), site: String(d.site || "").slice(0, 60),
+      kind: ["answer", "article"].indexOf(d.kind) >= 0 ? d.kind : "page", date: String(d.date || "").slice(0, 40), sel: !!d.sel, raw: d.html.length,
+      html: clipClean(d.html.slice(0, 3000000), d.url), from: e.origin };
+    S.clipDone = null;
+    try { sessionStorage.setItem(CLIP_SS, JSON.stringify(S.clipIn)); } catch (x) { /* 太大存不下就算了 */ }
+    if (S.route === "clip") render();
+  });
+  function clipPageHTML() {
+    var c = S.clipIn, me = ON_SERVER && SRV.me();
+    var head = '<header class="cp-h"><span class="roundel" aria-hidden="true"><i></i></span><b>收进研习录</b><span class="cp-to">档案架 · 剪报</span></header>';
+    if (!ON_SERVER) return '<div class="view clip-page">' + head + '<p class="cp-msg">剪报只在研习录的网站版（baba.wogucloud.cn）上能用。</p></div>';
+    if (S.mode !== "db") return '<div class="view clip-page">' + head + '<p class="cp-msg">正在连接……</p></div>';
+    if (!me) return '<div class="view clip-page">' + head + '<p class="cp-msg">先登录 Baba 账号，剪下的内容会存进你的账号。' + (c ? "刚才那篇已经记下了，登录回来还在。" : "") + '</p><p><a class="btn" href="' + esc(SRV.loginHref()) + '">登录</a></p></div>';
+    if (!clipsOn()) return '<div class="view clip-page">' + head + '<p class="cp-msg">服务器还是旧版本，存不了剪报。部署一次 Baba 就好了。</p></div>';
+    if (S.clipDone) {
+      var dn = (S.data.clips || {})[S.clipDone] || {};
+      return '<div class="view clip-page">' + head + '<div class="cp-done"><b>存好了 ✓</b><p>《' + esc(dn.title || "") + "》放进了档案架的剪报" + (dn.track ? "，归在「" + esc(domInfo(dn.track).name) + "」" : "") + "。</p>" +
+        '<p class="btns"><a class="btn ghost small" href="/#archive" target="_blank" rel="noopener">在研习录里看</a><button type="button" class="btn small" data-act="clip-close">关掉这个窗口</button></p></div></div>';
+    }
+    if (!c) return '<div class="view clip-page">' + head + '<p class="cp-msg">等书签按钮把内容递过来……<br><small>如果一直没反应：回到原来的页面，再点一次书签栏里的「收进研习录」。</small></p></div>';
+    var old = clipByKey(clipKey(c.url)), text = clipPlain(c.html), trk = old && old.track || "";
+    var opts = '<option value="">不分领域</option>' + domList().map(function (k) { return '<option value="' + esc(k) + '"' + (k === trk ? " selected" : "") + ">" + esc(domInfo(k).name) + "</option>"; }).join("");
+    return '<div class="view clip-page">' + head +
+      '<form id="clip-form" class="cp-form" autocomplete="off">' +
+      '<label class="field"><span>标题</span><input name="title" value="' + esc(c.title) + '" maxlength="300"></label>' +
+      '<p class="cp-meta">' + esc([c.author, clipKindLabel(c), (c.date || "").slice(0, 10)].filter(Boolean).join(" · ")) + ' · <a href="' + esc(c.url) + '" target="_blank" rel="noopener">原文</a></p>' +
+      (old ? '<p class="cp-note">' + (old.status === "link" ? "手机上先存过这篇的链接，这次补上全文。" : "这篇以前存过，保存会用这次的内容更新它。") + "</p>" : "") +
+      '<label class="field"><span>放进哪个领域</span><select name="track">' + opts + "</select></label>" +
+      '<label class="field"><span>为什么存（可以不写）</span><textarea name="note" rows="2" placeholder="例如：把加息和汇率的关系讲清楚了">' + esc(old && old.note || "") + "</textarea></label>" +
+      '<div class="cp-prev"><p class="cp-pm">' + (c.sel ? "只存你选中的这一段 · " : "全文 · ") + text.length + " 字" + (text.length ? "" : " · 没取到正文，只会存链接") + '</p><div class="cp-body">' + c.html.slice(0, 6000) + "</div></div>" +
+      '<p class="btns"><button type="submit" class="btn">保存到剪报</button><button type="button" class="btn ghost" data-act="clip-close">不存了</button></p></form></div>';
+  }
+  function clipSave(form) {
+    var c = S.clipIn; if (!c) return;
+    var key = clipKey(c.url), old = clipByKey(key), now = new Date().toISOString(), text = clipPlain(c.html);
+    var id = old ? old.id : "cl-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    var meta = { key: key, url: c.url, title: (form.title.value || c.title || c.url).trim().slice(0, 300), author: c.author, site: c.site, kind: c.kind, date: c.date,
+      track: form.track.value || "", note: form.note.value.trim().slice(0, 2000), excerpt: text.slice(0, 160), words: text.length, sel: c.sel ? 1 : 0,
+      status: text.length ? "full" : "link", t: old && old.t || now, ut: now };
+    var btn = form.querySelector('[type="submit"]'); if (btn) { btn.disabled = true; btn.textContent = "正在保存……"; }
+    var body = text.length ? put("clipbody", id, { html: c.html, t: now }) : Promise.resolve();
+    body.then(function () { return put("clips", id, meta); }).then(function () {
+      S.clipDone = id; S.clipIn = null; try { sessionStorage.removeItem(CLIP_SS); } catch (e) { /* 忽略 */ }
+      render(); setTimeout(function () { if (S.route === "clip" && S.clipDone === id) window.close(); }, 2500);
+    }, function () { if (btn) { btn.disabled = false; btn.textContent = "保存到剪报"; } });
+  }
+  /* 档案架上的剪报夹 */
+  function clipsHTML() {
+    if (!clipsOn()) return "";
+    var list = clipList(), groups = {}, order = [];
+    list.forEach(function (c) { var k = c.track && domExists(c.track) ? c.track : ""; if (!groups[k]) { groups[k] = []; order.push(k); } groups[k].push(c); });
+    order.sort(function (a, b) { return a === "" ? 1 : b === "" ? -1 : domList().indexOf(a) - domList().indexOf(b); });
+    var help = S.clipHelp || !list.length ? '<div class="cl-help">' +
+      '<div class="clh-col"><h3>电脑上</h3><p>把这个按钮拖到浏览器的书签栏：</p><p><a class="cl-bm" href="' + esc(clipperHref()) + '" data-act="clip-bm" draggable="true">收进研习录</a></p>' +
+      "<p>在知乎看到好的回答或文章，点一下书签栏里的「收进研习录」，弹出的小窗里选个领域、写一句为什么存，就进了这里。先选中一段文字再点，就只存那一段。微信公众号文章和别的网页也能剪。</p></div>" +
+      '<div class="clh-col"><h3>手机上</h3><p>知乎 App 里点「分享 → 复制链接」，粘贴到上面的框里，先把链接存下；回到电脑打开原文，再点一次按钮补上全文。</p>' +
+      '<p>手机浏览器看知乎网页版的话，也能用按钮：随便收藏一个书签，把它的网址改成按钮的代码。<button type="button" class="linkbtn" data-act="clip-copy-bm">复制按钮代码</button></p></div></div>' : "";
+    var cards = order.map(function (k) {
+      var name = k ? domInfo(k).name : "还没分领域";
+      return '<div class="cl-group"><h3 class="clg-h"><i style="--c:' + (k ? domInfo(k).col : "var(--ink-3)") + '" aria-hidden="true"></i>' + esc(name) + " <small>" + groups[k].length + "</small></h3><ul class=\"cl-list\">" +
+        groups[k].map(clipCardHTML).join("") + "</ul></div>";
+    }).join("");
+    return '<section class="clips" aria-labelledby="cl-h"><div class="cl-head"><h2 id="cl-h">剪报<small>' + list.length + " 篇</small></h2>" +
+      '<form id="clip-link" class="cl-link" autocomplete="off"><input name="t" placeholder="粘贴知乎的分享链接，先存下来" aria-label="粘贴分享链接"><button type="submit" class="btn small">存链接</button></form>' +
+      '<button type="button" class="linkbtn" data-act="clip-help">' + (S.clipHelp || !list.length ? "收起说明" : "怎么剪") + "</button></div>" + help +
+      (cards || '<p class="empty-line">还没有剪报。</p>') + "</section>";
+  }
+  function clipCardHTML(c) {
+    var rd = S.data.reading && S.data.reading[c.id], nMk = marksOf(c.id).length, full = c.status !== "link";
+    var meta = [c.author, clipKindLabel(c), String(c.t || "").slice(0, 10) + " 存", full ? (c.words || 0) + " 字" : "", rd && rd.pct ? "读到 " + Math.round(rd.pct * 100) + "%" : "", nMk ? nMk + " 条划线" : ""].filter(Boolean).join(" · ");
+    var title = full ? '<button type="button" class="cl-t" data-act="clip-open" data-id="' + esc(c.id) + '">' + esc(c.title) + "</button>"
+      : '<a class="cl-t" href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.title) + ' <span class="cl-wait">待补全文</span></a>';
+    var opts = '<option value="">不分领域</option>' + domList().map(function (k) { return '<option value="' + esc(k) + '"' + (k === c.track ? " selected" : "") + ">" + esc(domInfo(k).name) + "</option>"; }).join("");
+    var del = S.clipDel === c.id ? '<span class="jdel">删掉这篇？<button type="button" class="linkbtn danger" data-act="clip-del-yes" data-id="' + esc(c.id) + '">删除</button><button type="button" class="linkbtn" data-act="clip-del-no">取消</button></span>'
+      : '<button type="button" class="linkbtn" data-act="clip-del" data-id="' + esc(c.id) + '">删除</button>';
+    return '<li class="cl-card' + (full ? "" : " link") + '">' + title + '<p class="cl-m">' + esc(meta) + "</p>" +
+      (c.note ? '<p class="cl-why">' + esc(c.note) + "</p>" : full && c.excerpt ? '<p class="cl-ex">' + esc(c.excerpt) + "……</p>" : "") +
+      '<div class="cl-acts"><a class="linkbtn" href="' + esc(c.url) + '" target="_blank" rel="noopener">原文 ↗</a><select class="cl-trk" data-id="' + esc(c.id) + '" aria-label="改领域">' + opts + "</select>" + del + "</div></li>";
+  }
+  function clipLinkSave(form) {
+    var p = clipParseShare(form.t.value);
+    if (!p) { toast("没认出链接。把知乎「分享 → 复制链接」得到的文字整段粘进来。"); return; }
+    var key = clipKey(p.url), old = clipByKey(key);
+    if (old) { toast("这篇已经存过了。"); form.t.value = ""; return; }
+    var now = new Date().toISOString(), id = "cl-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    put("clips", id, { key: key, url: p.url, title: p.title.slice(0, 300), author: p.author, site: p.site, kind: p.kind, date: "", track: "", note: "", excerpt: "", words: 0, sel: 0, status: "link", t: now, ut: now })
+      .then(function () { toast("链接存下了。回电脑打开原文，点「收进研习录」补上全文。"); });
+    form.t.value = ""; render();
+  }
+  function clipEp(id, c) {
+    if (!S.db) return Promise.reject(epErr("missing"));
+    return S.db.collection("clipbody").doc(id).get().then(function (snap) {
+      var d = snap && snap.exists ? snap.data() : null;
+      if (!d || !d.html) throw epErr("missing");
+      var head = "<h1>" + esc(c.title) + '</h1><p style="color:#8a8378;font-size:15px;margin-top:-8px">' + esc([c.author, clipKindLabel(c), (c.date || "").slice(0, 10)].filter(Boolean).join(" · ")) +
+        (c.sel ? " · 选摘" : "") + ' · <a href="' + esc(c.url) + '">原文</a></p>' + (c.note ? '<blockquote style="border-left:3px solid #c9a24e;margin:0 0 1.6em;padding:.2em 1em;color:#6b6358">' + esc(c.note) + "</blockquote>" : "");
+      var html = '<!doctype html><html><head><meta charset="utf-8"><title>' + esc(c.title) + "</title></head><body>" + head + clipClean(d.html, c.url) + "</body></html>";
+      var it = { id: "clip", path: "clip.html", type: "text/html", props: "" };
+      var z = { text: function (p) { return Promise.resolve(p === "clip.html" ? html : null); }, data: function () { return Promise.resolve(null); }, size: function () { return html.length; } };
+      return { z: z, spine: [it], byPath: { "clip.html": it }, title: c.title, toc: [], w: [html.length], cum: [0], tot: html.length };
+    });
   }
   function shelfHTML() {
     var books = allItems().filter(function (id) { return ITEMS[id].kind === "book" && !isHidden(id); });
@@ -7675,7 +7974,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
 
   /* ---------- 主渲染 ---------- */
-  var ROUTES = { home: 1, shelf: 1, archive: 1, journal: 1 };
+  var ROUTES = { home: 1, shelf: 1, archive: 1, journal: 1, clip: 1 };
   COURSES.forEach(function (k) { ROUTES["c-" + k] = 1; });
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
   Object.keys(LIB.books).forEach(function (b) {
@@ -7686,6 +7985,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
 
   function render(scrollTop) {
     syncMyBooks();
+    document.documentElement.classList.toggle("clip-mode", S.route === "clip");
     $("#rail").innerHTML = railHTML();
     var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);
     if (rm) html = readerHTML(rm[1], +rm[2]);
@@ -7696,6 +7996,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     else if (/^c-/.test(r)) html = courseHTML(r.slice(2));
     else if (r === "shelf") html = shelfHTML();
     else if (r === "archive") html = archiveHTML();
+    else if (r === "clip") html = clipPageHTML();
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
@@ -7792,6 +8093,14 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var t = e.target.closest("[data-act]"); if (!t) return;
     var act = t.getAttribute("data-act");
     if (act === "mst") { openStation(t.getAttribute("data-l"), +t.getAttribute("data-i")); return; }
+    if (act === "clip-open") { readerOpen(t.getAttribute("data-id")); return; }
+    if (act === "clip-del") { S.clipDel = t.getAttribute("data-id"); render(); return; }
+    if (act === "clip-del-no") { S.clipDel = null; render(); return; }
+    if (act === "clip-del-yes") { var cid = t.getAttribute("data-id"); S.clipDel = null; del("clips", cid); del("clipbody", cid); toast("剪报删掉了。"); render(); return; }
+    if (act === "clip-help") { S.clipHelp = !S.clipHelp; render(); return; }
+    if (act === "clip-bm") { e.preventDefault(); toast("把这个按钮拖到浏览器的书签栏，在知乎页面上点它。"); return; }
+    if (act === "clip-copy-bm") { copyText(clipperHref(), "按钮代码复制好了：新建一个书签，把网址换成它。"); return; }
+    if (act === "clip-close") { S.clipIn = null; try { sessionStorage.removeItem(CLIP_SS); } catch (e3) { /* 忽略 */ } window.close(); setTimeout(function () { if (!window.closed) { location.hash = "#archive"; } }, 300); return; }
     if (act === "en-open") { e.preventDefault(); ovOpen(t.getAttribute("data-href"), t.getAttribute("data-title")); return; }
     if (act === "ov-close") { ovClose(); return; }
     if (act === "ov-tab") { try { var ofr = OV && OV.el.querySelector(".ov-f"); if (ofr) t.href = ofr.contentWindow.location.href; } catch (e2) { /* 用原地址 */ } return; }
@@ -7946,6 +8255,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "fp-file") { filmLoad(t.files); t.value = ""; return; }
+    if (t.classList && t.classList.contains("cl-trk")) { var tc = (S.data.clips || {})[t.getAttribute("data-id")]; if (tc) put("clips", t.getAttribute("data-id"), Object.assign({}, tc, { track: t.value, ut: new Date().toISOString() })); render(); return; }
     if (t.id === "imp-file") { var jf = t.files && t.files[0]; t.value = ""; impFile(jf); return; }
     if (t.classList && t.classList.contains("lk-place")) {
       var pk = t.getAttribute("data-d"), pv = t.value, dl2 = LK().deco.filter(function (x) { return x !== pk; }), pl = Object.assign({}, LK().place);
@@ -7989,6 +8299,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("submit", function (e) {
     if (e.target.id === "add-form") { e.preventDefault(); addSave(e.target); return; }
     if (e.target.id === "dom-form") { e.preventDefault(); domSave(e.target); return; }
+    if (e.target.id === "clip-form") { e.preventDefault(); clipSave(e.target); return; }
+    if (e.target.id === "clip-link") { e.preventDefault(); clipLinkSave(e.target); return; }
     if (e.target.id !== "j-form") return;
     e.preventDefault();
     var f = e.target, date = $("#j-date", f).value || today(), minutes = Math.max(0, Math.round(Number($("#j-min", f).value) || 0));
