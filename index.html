@@ -19,7 +19,7 @@
   --indigo:#1F5FAE; --indigo-wash:#E4EDF8; --seal:#C8372D; --seal-wash:#F7E4DE; --seal-ink:#FFFFFF;
   --map-bg:#F7F2E6;
   --ln-en:#E09A1E; --ln-cfa:#8A3A8E; --ln-sql:#00897B; --ln-py:#2B5FAE; --ln-geo:#D4402F; --ln-tao:#9A5B2E; --ln-mm:#7C9A1E; --ln-rev:#727775;
-  --k-doc:#1F4E8C; --k-data:#00897B; --k-plan:#C8372D; --k-note:#D08A12;
+  --k-doc:#1F4E8C; --k-data:#00897B; --k-plan:#C8372D; --k-note:#D08A12; --k-clip:#7A4E9C;
   --z-en:#FBEFD8; --z-cycle:#F6EADB; --z-geo:#F8E4DF; --z-fin:#F1E6F1; --z-data:#E3EEF6; --z-fut:#EEF0DE;
   --zi-en:#8A5A0E; --zi-cycle:#7A4A22; --zi-geo:#9E3324; --zi-fin:#6E2C72; --zi-data:#1F4E8C; --zi-fut:#556E12; --zi-co:#686D6A;
   --bdg-on:#FFFFFF; --bdg-on-dk:#1A1A1A; --late:#F2B23E; --early:#7FD1E3; --on-signal:#1A1A1A;
@@ -42,7 +42,7 @@
     --indigo:#8FB4E6; --indigo-wash:#1D2735; --seal:#F06A57; --seal-wash:#3A221E; --seal-ink:#171513;
     --map-bg:#1B1916;
     --ln-en:#F2B23E; --ln-cfa:#C688CB; --ln-sql:#2DB4A4; --ln-py:#6F9DE2; --ln-geo:#F06A57; --ln-tao:#CF925F; --ln-mm:#A9C443; --ln-rev:#A3A8A5;
-    --k-doc:#6F9DE2; --k-data:#2DB4A4; --k-plan:#F06A57; --k-note:#F2B23E;
+    --k-doc:#6F9DE2; --k-data:#2DB4A4; --k-plan:#F06A57; --k-note:#F2B23E; --k-clip:#B996D8;
     --z-en:#29230F; --z-cycle:#2A231B; --z-geo:#2D1F1C; --z-fin:#271F29; --z-data:#16202B; --z-fut:#222716;
     --zi-en:#F2C46E; --zi-cycle:#E2B486; --zi-geo:#F29A8C; --zi-fin:#D9A6DD; --zi-data:#8FB4E6; --zi-fut:#C3DA6E; --zi-co:#A0978A;
     --bdg-on:#171513; --bdg-on-dk:#171513; --late:#F2B23E; --early:#7FD1E3; --on-signal:#171513;
@@ -56,7 +56,7 @@
   --indigo:#8FB4E6; --indigo-wash:#1D2735; --seal:#F06A57; --seal-wash:#3A221E; --seal-ink:#171513;
   --map-bg:#1B1916;
   --ln-en:#F2B23E; --ln-cfa:#C688CB; --ln-sql:#2DB4A4; --ln-py:#6F9DE2; --ln-geo:#F06A57; --ln-tao:#CF925F; --ln-mm:#A9C443; --ln-rev:#A3A8A5;
-    --k-doc:#6F9DE2; --k-data:#2DB4A4; --k-plan:#F06A57; --k-note:#F2B23E;
+    --k-doc:#6F9DE2; --k-data:#2DB4A4; --k-plan:#F06A57; --k-note:#F2B23E; --k-clip:#B996D8;
   --z-en:#29230F; --z-cycle:#2A231B; --z-geo:#2D1F1C; --z-fin:#271F29; --z-data:#16202B; --z-fut:#222716;
   --zi-en:#F2C46E; --zi-cycle:#E2B486; --zi-geo:#F29A8C; --zi-fin:#D9A6DD; --zi-data:#8FB4E6; --zi-fut:#C3DA6E; --zi-co:#A0978A;
   --bdg-on:#171513; --bdg-on-dk:#171513; --late:#F2B23E; --early:#7FD1E3; --on-signal:#171513;
@@ -1444,6 +1444,44 @@ body.rd-on{overflow:hidden}
 .asheet:hover b{text-decoration:underline}
 .atray-base{position:absolute;left:0;right:0;bottom:0;height:30px;background:linear-gradient(#7A6650,#5A4A3B);border-radius:0 0 4px 4px;box-shadow:inset 0 3px 0 rgba(255,255,255,.15)}
 .atray .lip{justify-content:center;padding-left:0}
+button.plate{cursor:pointer;line-height:1}
+button.plate:hover span,button.plate[aria-pressed="true"] span{text-decoration:underline;opacity:1}
+button.asheet{font:inherit;cursor:pointer;appearance:none}
+.arch-col{flex:none;width:900px;max-width:100%}
+.arch-col .a-off{margin-top:12px}
+.bay.grow{flex:1 1 0}
+/* 剪报夹：牛皮纸文件架，前脸斜切，露出插着的剪报 */
+.afold{position:relative;flex:none;width:58px;height:178px;padding:0;border:0;background:none;cursor:pointer;font:inherit;transition:transform .15s,opacity .15s}
+.afold:hover{transform:translateY(-4px)}
+.afold.picked{outline:3px solid var(--ink);outline-offset:3px}
+.afold:focus-visible{outline:2px solid var(--indigo);outline-offset:3px}
+.afold.dim{opacity:.28}
+.af-papers{position:absolute;left:5px;right:5px;top:0;height:100px}
+.af-papers i{position:absolute;bottom:0;width:calc(100% - 10px);height:var(--h,50px);background:#FBF7EC;border:1px solid #CFC3A6;border-bottom:0;border-radius:1px 1px 0 0;box-shadow:0 -1px 3px -2px rgba(0,0,0,.35)}
+.af-papers i::before{content:"";position:absolute;left:5px;top:6px;width:14px;height:3px;background:var(--k-clip)}
+.af-papers i::after{content:"";position:absolute;left:5px;right:7px;top:13px;height:9px;background:repeating-linear-gradient(#CFC6B2 0 1px,transparent 1px 4px)}
+.af-body{position:absolute;left:0;right:0;top:36px;bottom:0;border-radius:2px 2px 0 0;clip-path:polygon(0 36%,100% 0,100% 100%,0 100%);
+  background:linear-gradient(90deg,#A9844C 0,#C9A367 10%,#D3B077 50%,#C59E62 90%,#A27D46 100%);box-shadow:inset 0 -7px 0 var(--c)}
+.af-label{position:absolute;left:8px;right:8px;bottom:16px;height:86px;box-sizing:border-box;padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:6px;background:#F7F1E2;border:1px solid #B79A63;color:#24211E}
+.af-label b{writing-mode:vertical-rl;font-family:var(--f-display);font-size:14px;font-weight:700;letter-spacing:.24em}
+.af-label span{margin-top:auto;font-family:var(--f-mono);font-size:10px;color:#6E675E}
+/* 空位：在这一格新立一盒 */
+.anew{flex:none;width:44px;height:112px;box-sizing:border-box;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:8px;border:1.5px dashed color-mix(in srgb,var(--ink-3) 70%,transparent);border-bottom:0;border-radius:3px 3px 0 0;background:transparent;color:var(--ink-3);font:inherit;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
+.anew b{font-family:var(--f-ui);font-size:18px;font-weight:400;line-height:1}
+.anew span{writing-mode:vertical-rl;font-family:var(--f-ui);font-size:12px;letter-spacing:.16em}
+.anew:hover{color:var(--ink);border-color:var(--ink-2);background:color-mix(in srgb,var(--leaf) 55%,transparent)}
+.anew:focus-visible{outline:2px solid var(--indigo);outline-offset:3px}
+.bay.vacant .anew{margin-right:auto}
+.abox.mine .ab-label{background:#FBF6EA}
+.chip-new{border-style:dashed;color:var(--ink-2)}
+.chip-new:hover{border-style:solid;color:var(--ink)}
+.aitems .ai-t{padding:0;border:0;background:none;font:inherit;font-weight:700;color:var(--ink);text-align:left;cursor:pointer}
+.aitems .ai-t:hover{text-decoration:underline}
+button.linkrow.ai-t{font-weight:400}
+.cl-place{display:flex;align-items:center;gap:6px;margin-top:6px;font-family:var(--f-ui);font-size:12px;color:var(--ink-3)}
+.cl-place .cl-trk{max-width:100%;min-width:0;flex:1 1 auto}
+.ap-empty{margin:0;padding:14px;border:1px dashed var(--rule-strong);border-radius:8px;line-height:1.7}
+.afpanel .aitems td:nth-child(2){width:100%}
 .pulled{scroll-margin-top:84px}
 .apanel{gap:16px}
 .ap-no{display:inline-block;font-family:var(--f-mono);font-size:12px;font-weight:600;padding:1px 7px;border:1px solid var(--c);color:var(--c)}
@@ -1788,8 +1826,9 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
   .arch-side{align-items:flex-start}
   .archive .bay-row{flex-wrap:wrap;row-gap:30px}
   .bay.atray{flex:1 1 100%;min-height:250px}
-  .archive .bay:has(.bay-empty){min-height:64px;padding-top:14px}
-  .archive .bay:has(.bay-empty) .bookend{display:none}
+  .arch-col{width:100%}
+  .archive .bay:has(.bay-empty),.archive .bay.vacant{min-height:64px;padding-top:14px}
+  .archive .bay:has(.bay-empty) .bookend,.archive .bay.vacant .bookend{display:none}
   .archive .bay-empty{margin:0 0 4px 0}
   .bay.atray:has(.atray-empty){min-height:0}
   .atray:has(.atray-empty) .atray-pile{height:70px}
@@ -1993,7 +2032,7 @@ html.ov-on,html.ov-on body{overflow:hidden}
 .cl-why,.cl-ex{margin:2px 0 0;font-size:14px;line-height:1.65;color:var(--ink-2)}
 .cl-why{padding-left:10px;border-left:3px solid var(--ln-cycle,#c9a24e)}
 .cl-acts{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;margin-top:6px}
-.cl-trk{max-width:12em;height:28px;border:1px solid var(--rule);border-radius:14px;background:var(--leaf);font-family:var(--f-ui);font-size:12.5px;color:var(--ink-2);padding:0 8px}
+.cl-trk{max-width:17em;height:28px;border:1px solid var(--rule);border-radius:14px;background:var(--leaf);font-family:var(--f-ui);font-size:12.5px;color:var(--ink-2);padding:0 8px}
 html.clip-mode .topbar,html.clip-mode .mainnav{display:none}
 html.clip-mode main{padding:18px 18px 40px}
 .clip-page{max-width:560px}
@@ -3967,7 +4006,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   var LESSON_SNAP = window.YXL_LESSONS || {};
   /* 有课程页的线：电影、SQL、Python、CFA、地缘、周复盘 */
   var COURSES = PLAN ? ["film", "sql", "py", "cfa", "geo", "rev"].filter(function (k) { return PLAN.lessons[k]; }) : [];
-  var COLLS = ["progress", "notes", "journal", "cards", "study", "film", "ebooks", "mybooks", "hidden", "reading", "marks", "domains", "clips"];
+  var COLLS = ["progress", "notes", "journal", "cards", "study", "film", "ebooks", "mybooks", "hidden", "reading", "marks", "domains", "clips", "aboxes", "aboxoff"];
   var STATUS = [["todo", "未开始"], ["doing", "进行中"], ["done", "已完成"], ["review", "已内化"]];
   var STATUS_LABEL = {}; STATUS.forEach(function (s) { STATUS_LABEL[s[0]] = s[1]; });
   var MARK = { done: "阅", review: "熟" };
@@ -3984,7 +4023,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function today() { return ymd(new Date()); }
   function addDays(s, n) { var p = s.split("-").map(Number); return ymd(new Date(p[0], p[1] - 1, p[2] + n)); }
   function hhmm() { var d = new Date(); return pad(d.getHours()) + ":" + pad(d.getMinutes()); }
-  function emptyData() { return { progress: {}, notes: {}, journal: {}, cards: {}, study: {}, film: {}, ebooks: {}, mybooks: {}, hidden: {}, reading: {}, marks: {}, domains: {}, clips: {} }; }
+  function emptyData() { var o = {}; COLLS.forEach(function (c) { o[c] = {}; }); return o; }
 
   /* ---------- 索引 ---------- */
   var ITEMS = {};
@@ -4483,10 +4522,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function domSheetHTML() {
     var k = S.domOpen, d = k && (S.data.domains || {})[k];
     if (!d || !S.canEdit) return "";
-    var n = domCount(k);
+    var n = domCount(k), nb = TOPICS.filter(function (tp) { return tp.mine && tp.track === k; }).length;
     return '<div class="add-sheet" role="dialog" aria-modal="true" aria-labelledby="dom-h"><form class="add-card" id="dom-form" data-k="' + esc(k) + '"><h2 id="dom-h">改这个领域</h2>' + domFieldsHTML(d) +
       '<div class="btns"><button type="submit" class="btn">保存</button><button type="button" class="btn ghost" data-act="dom-close">取消</button></div>' +
-      (n ? '<p class="meta">这个领域里还有 ' + n + " 本书。把书拿下，或者在展台上点「改书名、作者、领域」换到别的领域，空了以后才能删。</p>"
+      (n || nb ? '<p class="meta">这个领域里还有 ' + [n ? n + " 本书" : "", nb ? nb + " 个档案盒" : ""].filter(Boolean).join("、") + "。" + (n ? "把书拿下，或者在展台上点「改书名、作者、领域」换到别的领域；" : "") + (nb ? "档案盒在档案架上改到别的领域或删掉；" : "") + "空了以后才能删。</p>"
         : '<div class="pb-rm"><button type="button" class="linkbtn danger" data-act="dom-del" data-k="' + esc(k) + '">删掉这个领域</button></div>') + "</form></div>";
   }
   function domSave(f) {
@@ -5027,7 +5066,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var flip = S.flip === id ? " flip" : "";
     if (/^t:/.test(id)) {
       var tp = TOPIC[id.slice(2)];
-      return '<div class="stg-box' + flip + '" style="--c:var(' + (SHELF_COL[tp.track] || "--ln-rev") + ')"><span class="sb-label"><span class="sb-no">' + esc(topicNo(tp)) + '</span><b>' + esc(tp.title.split("：")[0]) + "</b><span>" + topicItems(tp).length + " 件 · " + esc(TP_STATUS[tp.status] || "") + '</span></span><i class="sb-hole" aria-hidden="true"></i></div>';
+      return '<div class="stg-box' + flip + '" style="--c:' + domCol(tp.track) + '"><span class="sb-label"><span class="sb-no">' + esc(topicNo(tp)) + '</span><b>' + esc(tp.title.split("：")[0]) + "</b><span>" + topicItems(tp).length + " 件 · " + esc(TP_STATUS[tp.status] || "") + '</span></span><i class="sb-hole" aria-hidden="true"></i></div>';
     }
     if (EN_ITEM[id]) {
       var x = EN_ITEM[id];
@@ -5943,22 +5982,83 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       body: progCardHTML(id) + (acts.join("") ? '<div class="btns pb-acts">' + acts.join("") + "</div>" : "") + mk + moreHTML(more, hint) };
   }
   /* ---------- 书架：档案架（研究课题一盒一盒放） ----------
-   * 一个课题一个档案盒，盒里按件编号；件越多盒越厚，盒顶露出每件的色签（档案、数据、计划、纪要）。
-   * 在做的盒子抽出半截、挂丝带；要年更的挂小牌；结卷的盖“结”字章。没立课题的单件放收件匣。 */
-  var TOPICS = LIB.topics || [], TOPIC = {};
-  TOPICS.forEach(function (tp) { TOPIC[tp.id] = tp; });
-  var KINDS = { "档案": "--k-doc", "数据": "--k-data", "计划": "--k-plan", "纪要": "--k-note" };
+   * 一个课题一个档案盒，盒里按件编号；件越多盒越厚，盒顶露出每件的色签（档案、数据、计划、纪要、剪报）。
+   * 在做的盒子抽出半截、挂丝带；要年更的挂小牌；结卷的盖“结”字章。没立课题的单件放收件匣。
+   * 盒子有两种：内置的（LIB.topics，讨论完一个问题说“放进研习录”时归进仓库），和自己在档案架上立的。
+   * aboxes：自己立的档案盒，文档 id = "ab-" + 时间，内容 { title 盒名, track 领域, question 这一盒想回答的问题, status（doing / yearly / closed）, note 备考, t }。
+   * aboxoff：从档案架上撤下的内置档案盒，文档 id = 课题 id，内容 { t }；放回去就删掉这一条。
+   * 剪报（clips）里的 box 记着装进了哪一盒；没装盒的挂在那个领域一格里的剪报夹，没分领域的进收件匣。 */
+  var TOPICS_LIB = LIB.topics || [], LIB_TOPIC = {}, TOPICS = [], TOPIC = {};
+  TOPICS_LIB.forEach(function (tp) { LIB_TOPIC[tp.id] = tp; });
+  var KINDS = { "档案": "--k-doc", "数据": "--k-data", "计划": "--k-plan", "纪要": "--k-note", "剪报": "--k-clip" };
   var TP_STATUS = { doing: "在做", yearly: "要年更", closed: "已结卷" };
   var ARCH_ROWS = [[["geo", 332], ["fin", 260], ["co", 256]], [["cycle", 300], ["fut", 380], ["+", 168]]];
-  function reportKind(rp) { return KINDS[rp.kind] ? rp.kind : (rp.group === "note" ? "档案" : "数据"); }
-  function topicItems(tp) {
-    return REPORTS.map(function (rp, i) { return { rp: rp, i: i }; }).filter(function (x) { return x.rp.topic === tp.id; })
-      .sort(function (a, b) { return String(a.rp.date).localeCompare(String(b.rp.date)) || a.i - b.i; }).map(function (x) { return x.rp; });
+  /* 把内置的盒子（去掉撤下的）和自己立的盒子排成一张表；自己立的接在同一领域内置盒子的编号后面 */
+  function syncBoxes() {
+    var A = S.data.aboxes || {}, off = S.data.aboxoff || {}, top = {};
+    TOPICS.length = 0; Object.keys(TOPIC).forEach(function (k) { delete TOPIC[k]; });
+    TOPICS_LIB.forEach(function (tp) { top[tp.track] = Math.max(top[tp.track] || 0, tp.no || 1); if (!off[tp.id]) TOPICS.push(tp); });
+    Object.keys(A).filter(function (k) { var b = A[k]; return b && b.title && b.track && typeof b.track === "string" && !LIB_TOPIC[k]; })
+      .sort(function (a, b) { return String(A[a].t || "").localeCompare(String(A[b].t || "")) || (a < b ? -1 : 1); })
+      .forEach(function (k) {
+        var b = A[k]; top[b.track] = (top[b.track] || 0) + 1;
+        TOPICS.push({ id: k, title: String(b.title), track: b.track, question: String(b.question || ""), status: TP_STATUS[b.status] ? b.status : "", note: String(b.note || ""),
+          no: top[b.track], since: String(b.t || "").slice(0, 7), mine: true });
+      });
+    TOPICS.forEach(function (tp) { TOPIC[tp.id] = tp; });
   }
-  function inboxItems() { return REPORTS.filter(function (rp) { return !rp.topic || !TOPIC[rp.topic]; }); }
-  function topicNo(tp) { return (SHELF_CLS[tp.track] || "研") + " · " + pad2(tp.no || 1); }
+  syncBoxes();
+  function domCol(k) { return domInfo(k).col; }
+  function reportKind(rp) { return KINDS[rp.kind] ? rp.kind : (rp.group === "note" ? "档案" : "数据"); }
+  /* 一篇剪报当作盒里的一件 */
+  function clipItem(c) { return { clip: c, id: c.id, title: c.title, date: String(c.t || "").slice(0, 10), kind: "剪报", desc: c.note || (c.excerpt ? c.excerpt + "……" : ""), topic: c.box }; }
+  function topicItems(tp) {
+    var a = REPORTS.filter(function (rp) { return rp.topic === tp.id; });
+    if (clipsOn()) clipList().forEach(function (c) { if (c.box === tp.id) a.push(clipItem(c)); });
+    return a.map(function (rp, i) { return { rp: rp, i: i }; })
+      .sort(function (x, y) { return String(x.rp.date).localeCompare(String(y.rp.date)) || x.i - y.i; }).map(function (x) { return x.rp; });
+  }
+  function inboxItems() { return REPORTS.filter(function (rp) { return !rp.topic || !LIB_TOPIC[rp.topic]; }); }
+  /* 没装盒的剪报：tid 是领域；"" 是没分领域的（放收件匣）。装的那一盒被删了或撤下了，也算没装盒 */
+  function looseClips(tid) {
+    if (!clipsOn()) return [];
+    return clipList().filter(function (c) {
+      if (c.box && TOPIC[c.box]) return false;
+      return (c.track && domExists(c.track) ? c.track : "") === tid;
+    });
+  }
+  /* 剪报现在放在哪：b:盒子 id / 领域 / ""（收件匣） */
+  function clipPlace(c) { return c.box && TOPIC[c.box] ? "b:" + c.box : c.track && domExists(c.track) ? c.track : ""; }
+  function boxesOf(k) { return TOPICS.filter(function (tp) { return tp.track === k; }).sort(function (a, b) { return (a.no || 0) - (b.no || 0); }); }
+  /* “放到哪”的选项：每个领域一组，组里先是这个领域的剪报夹，再是这个领域的档案盒，最后是“新立一盒” */
+  function placeOpts(cur, withNew) {
+    function opt(v, label) { return '<option value="' + esc(v) + '"' + (v === cur ? " selected" : "") + ">" + esc(label) + "</option>"; }
+    return opt("", "不分领域（收件匣）") + domList().map(function (k) {
+      var nm = domInfo(k).name;
+      return '<optgroup label="' + esc(nm) + '">' + opt(k, nm + " · 剪报夹（先不装盒）") +
+        boxesOf(k).map(function (tp) { return opt("b:" + tp.id, nm + " › " + pad2(tp.no || 1) + " " + tp.title); }).join("") +
+        (withNew ? opt("nb:" + k, nm + " › ＋ 新立一盒…") : "") + "</optgroup>";
+    }).join("");
+  }
+  function placeSel(c, bare) {
+    var sel = '<select class="cl-trk" data-id="' + esc(c.id) + '" aria-label="放到哪">' + placeOpts(clipPlace(c), true) + "</select>";
+    return bare ? sel : '<label class="cl-place"><span>放到</span>' + sel + "</label>";
+  }
+  function placeName(c) {
+    var p = clipPlace(c);
+    if (/^b:/.test(p)) return "「" + TOPIC[p.slice(2)].title + "」这一盒";
+    return p ? "「" + domInfo(p).name + "」的剪报夹" : "收件匣";
+  }
+  /* 盒里一件的标题：剪报在研习录里打开，别的在新标签页打开原文 */
+  function itemLink(rp, inner, cls) {
+    var c = rp.clip;
+    if (c && c.status !== "link") return '<button type="button" class="ai-t' + (cls ? " " + cls : "") + '" data-act="clip-open" data-id="' + esc(c.id) + '">' + inner + "</button>";
+    return "<a" + (cls ? ' class="' + cls + '"' : "") + ' href="' + esc(c ? c.url : reportHref(rp)) + '" target="_blank" rel="noopener">' + inner + "</a>";
+  }
+  function itemOut(rp) { return !(rp.clip && rp.clip.status !== "link"); }
+  function topicNo(tp) { var c = domInfo(tp.track).code; return (c ? c + " · " : "") + pad2(tp.no || 1); }
   function topicText(tp) {
-    return [tp.title, tp.question, tp.answer, tp.origin, (TRACK[tp.track] || {}).short].concat(topicItems(tp).map(function (rp) { return rp.title + " " + (rp.desc || "") + " " + (rp.question || ""); })).join(" ").toLowerCase();
+    return [tp.title, tp.question, tp.answer, tp.origin, domInfo(tp.track).name].concat(topicItems(tp).map(function (rp) { return rp.title + " " + (rp.desc || "") + " " + (rp.question || ""); })).join(" ").toLowerCase();
   }
   function archMatch(tp) {
     var f = S.archF || "all", q = S.archQ || "";
@@ -5975,68 +6075,203 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     return vcol(t.slice(0, m), sz) + vcol(t.slice(m), sz);
   }
   function boxHTML(tp, wall) {
-    var items = topicItems(tp), n = items.length, w = Math.min(150, 54 + 9 * Math.max(1, n)), col = SHELF_COL[tp.track] || "--ln-rev";
+    var items = topicItems(tp), n = items.length, w = Math.min(150, 54 + 9 * Math.max(1, n)), col = domCol(tp.track);
     var shown = items.slice(0, 10), step = (w - 22) / Math.max(1, shown.length);
     var slips = shown.map(function (rp, i) {
       var h = 12 + (i * 5) % 9;
       return '<i style="left:' + Math.round(11 + i * step + (step - 9) / 2) + "px;top:-" + h + "px;height:" + (h + 6) + "px;--k:var(" + KINDS[reportKind(rp)] + ')"></i>';
     }).join("");
     var on = wall ? S.shelfPick === "t:" + tp.id : S.archPick === tp.id;
-    var cls = "abox" + (tp.status ? " " + tp.status : "") + (on ? " picked" : "") + (wall || archMatch(tp) ? "" : " dim");
+    var cls = "abox" + (tp.status ? " " + tp.status : "") + (tp.mine ? " mine" : "") + (on ? " picked" : "") + (wall || archMatch(tp) ? "" : " dim");
     var act = wall ? 'data-act="pick" data-id="t:' + esc(tp.id) + '"' : 'data-act="abox" data-t="' + esc(tp.id) + '"';
-    return '<button type="button" class="' + cls + '" ' + act + ' style="--c:var(' + col + ");width:" + w + 'px" title="' + esc(tp.title + (tp.question ? "：" + tp.question : "")) + '" aria-pressed="' + on + '">' +
+    return '<button type="button" class="' + cls + '" ' + act + ' style="--c:' + col + ";width:" + w + 'px" title="' + esc(tp.title + (tp.question ? "：" + tp.question : "")) + '" aria-pressed="' + on + '">' +
       '<span class="ab-slips" aria-hidden="true">' + slips + '</span><span class="ab-band" aria-hidden="true"></span>' +
-      '<span class="ab-label"><span class="ab-no">' + esc(SHELF_CLS[tp.track] || "") + "<b>" + pad2(tp.no || 1) + '</b></span><span class="ab-t">' + boxTitle(tp) + "</span>" +
+      '<span class="ab-label"><span class="ab-no">' + esc(domInfo(tp.track).code || "研") + "<b>" + pad2(tp.no || 1) + '</b></span><span class="ab-t">' + boxTitle(tp) + "</span>" +
       '<span class="ab-foot">' + (tp.status === "closed" ? '<i class="ab-seal" aria-hidden="true">结</i>' : "") + "<span>" + n + " 件</span></span></span>" +
       '<i class="ab-hole" aria-hidden="true"></i>' + (tp.status === "yearly" ? '<span class="ab-tag">年更</span>' : "") + (tp.status === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
   }
+  /* 剪报夹：一个领域里还没装盒的剪报，插在一只牛皮纸文件架里，露出纸头 */
+  function folderText(list) { return list.map(function (c) { return c.title + " " + (c.note || "") + " " + (c.author || ""); }).join(" ").toLowerCase(); }
+  function folderHTML(tid, list) {
+    var on = S.archPick === "cf:" + tid, q = S.archQ || "", text = folderText(list);
+    var papers = list.slice(0, 5).map(function (c, i) { return '<i style="left:' + (2 + (i % 3) * 4) + "px;height:" + [84, 72, 92, 78, 88][i] + 'px"></i>'; }).join("");
+    return '<button type="button" class="afold' + (on ? " picked" : "") + (q && text.indexOf(q) < 0 ? " dim" : "") + '" data-act="abox" data-t="cf:' + esc(tid) + '" data-q="' + esc(text) + '" title="剪报夹：还没装盒的 ' + list.length + ' 篇" aria-pressed="' + on + '">' +
+      '<span class="af-papers" aria-hidden="true">' + papers + '</span><span class="af-body" aria-hidden="true"></span><span class="af-label"><b>剪报</b><span>' + list.length + " 篇</span></span></button>";
+  }
+  function newBoxSlot(tid) {
+    return S.canEdit ? '<button type="button" class="anew" data-act="abox-new" data-t="' + esc(tid) + '" title="在「' + esc(domInfo(tid).name) + '」新立一个档案盒"><b aria-hidden="true">＋</b><span>新档案盒</span></button>' : "";
+  }
   function archBayHTML(tid, w) {
-    var t = TRACK[tid], col = SHELF_COL[tid] || "--ln-rev";
-    var tps = TOPICS.filter(function (tp) { return tp.track === tid; }).sort(function (a, b) { return (a.no || 0) - (b.no || 0); });
+    var di = domInfo(tid), tps = boxesOf(tid), loose = looseClips(tid);
     var n = tps.reduce(function (a, tp) { return a + topicItems(tp).length; }, 0);
-    var row = tps.length ? tps.map(boxHTML).join("") : '<span class="bay-empty">还没有课题</span>';
-    return '<div class="bay" style="--c:var(' + col + ");--w:" + w + 'px"><div class="bay-row">' + row + '<span class="bookend" aria-hidden="true"></span></div>' +
-      '<div class="lip"><a class="plate" href="#t-' + tid + '"><b class="cls">' + SHELF_CLS[tid] + "</b><b>" + esc(t.short) + "</b><span>" + tps.length + " 卷 · " + n + " 件</span></a></div></div>";
+    var row = tps.map(function (tp) { return boxHTML(tp); }).join("") + (loose.length ? folderHTML(tid, loose) : "");
+    var vacant = !row;
+    row = (row || (S.canEdit ? "" : '<span class="bay-empty">还没有课题</span>')) + newBoxSlot(tid);
+    var plate = (di.code ? '<b class="cls">' + esc(di.code) + "</b>" : "") + "<b>" + esc(di.name) + "</b><span>" + tps.length + " 卷 · " + n + " 件" + (loose.length ? " · 剪报 " + loose.length : "") + "</span>";
+    return '<div class="bay' + (w ? "" : " grow") + (vacant ? " vacant" : "") + '" style="--c:' + di.col + (w ? ";--w:" + w + "px" : "") + '"><div class="bay-row">' + row + '<span class="bookend" aria-hidden="true"></span></div>' +
+      '<div class="lip">' + (di.href ? '<a class="plate" href="' + esc(di.href) + '">' + plate + "</a>" : '<span class="plate">' + plate + "</span>") + "</div></div>";
   }
   function trayHTML(w) {
-    var list = inboxItems(), q = S.archQ || "";
-    var sheets = list.slice(-3).map(function (rp, i, arr) {
+    var list = inboxItems(), clips = looseClips(""), q = S.archQ || "";
+    var all = list.concat(clips.slice(0, 3).reverse().map(clipItem));
+    var sheets = all.slice(-3).map(function (rp, i, arr) {
       var k = arr.length - 1 - i, text = (rp.title + " " + (rp.desc || "")).toLowerCase();
-      return '<a class="asheet' + (q && text.indexOf(q) < 0 ? " dim" : "") + '" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener" data-q="' + esc(text) + '" style="--k:var(' + KINDS[reportKind(rp)] + ");bottom:" + (16 + k * 40) + "px;transform:rotate(" + (k % 2 ? -3 : 2) + 'deg)">' +
-        '<i aria-hidden="true"></i><b>' + esc(rp.title) + "</b><span>" + esc(reportKind(rp)) + " · " + esc(rp.date || "") + "</span></a>";
+      var st = ' style="--k:var(' + KINDS[reportKind(rp)] + ");bottom:" + (16 + k * 40) + "px;transform:rotate(" + (k % 2 ? -3 : 2) + 'deg)"';
+      var inner = '<i aria-hidden="true"></i><b>' + esc(rp.title) + "</b><span>" + esc(reportKind(rp)) + " · " + esc(rp.date || "") + "</span>";
+      var cls = "asheet" + (q && text.indexOf(q) < 0 ? " dim" : "");
+      if (rp.clip && rp.clip.status !== "link") return '<button type="button" class="' + cls + '" data-act="clip-open" data-id="' + esc(rp.clip.id) + '" data-q="' + esc(text) + '"' + st + ">" + inner + "</button>";
+      return '<a class="' + cls + '" href="' + esc(rp.clip ? rp.clip.url : reportHref(rp)) + '" target="_blank" rel="noopener" data-q="' + esc(text) + '"' + st + ">" + inner + "</a>";
     }).join("");
-    return '<div class="bay atray" style="--w:' + w + 'px"><div class="atray-h"><b>收件匣</b><span>零散的小分析先放这里；攒到两件讲同一件事，再立卷装盒。</span></div>' +
+    var nn = list.length + clips.length, lab = "<span>" + (nn ? nn + " 件待归卷" : "没有待归卷的") + "</span>";
+    return '<div class="bay atray" style="--w:' + w + 'px"><div class="atray-h"><b>收件匣</b><span>零散的小分析、没分领域的剪报先放这里；攒到两件讲同一件事，再立卷装盒。</span></div>' +
       '<div class="atray-pile">' + (sheets || '<span class="atray-empty">空</span>') + '<i class="atray-base" aria-hidden="true"></i></div>' +
-      '<div class="lip"><span class="plate"><span>' + (list.length ? list.length + " 件待归卷" : "没有待归卷的") + "</span></span></div></div>";
+      '<div class="lip">' + (clips.length ? '<button type="button" class="plate" data-act="abox" data-t="cf:" aria-pressed="' + (S.archPick === "cf:") + '">' + lab + "</button>" : '<span class="plate">' + lab + "</span>") + "</div></div>";
+  }
+  /* 打开的盒子下面：改、删（自己立的）或撤下（内置的） */
+  function boxActsHTML(tp) {
+    if (!S.canEdit) return "";
+    var tid = ' data-t="' + esc(tp.id) + '"';
+    if (S.aboxDel === tp.id) {
+      var nc = topicItems(tp).filter(function (rp) { return rp.clip; }).length;
+      var msg = tp.mine ? "删掉「" + tp.title + "」这一盒？" + (nc ? "盒里的 " + nc + " 篇剪报会放回「" + domInfo(tp.track).name + "」的剪报夹，不会删掉。" : "")
+        : "从档案架上撤下「" + tp.title + "」？档案架和线网上都不再显示这一盒，里面的资料还在，随时可以在档案架下面放回。";
+      return '<div class="pb-rm"><span>' + esc(msg) + '</span><button type="button" class="linkbtn danger" data-act="abox-del-yes"' + tid + ">" + (tp.mine ? "删除" : "撤下") + '</button><button type="button" class="linkbtn" data-act="abox-del-no">取消</button></div>';
+    }
+    return '<div class="pb-rm">' + (tp.mine ? '<button type="button" class="linkbtn" data-act="abox-edit"' + tid + '>改这一盒</button><button type="button" class="linkbtn danger" data-act="abox-del"' + tid + ">删掉这一盒</button>"
+      : '<button type="button" class="linkbtn" data-act="abox-del"' + tid + ">从档案架撤下</button>") + "</div>";
+  }
+  function itemRowsHTML(items, tp) {
+    return items.map(function (rp, i) {
+      var k = reportKind(rp), c = rp.clip;
+      var sub = c ? [c.author, clipKindLabel(c)].filter(Boolean).join(" · ") + (rp.desc ? (c.author || c.site ? " · " : "") + rp.desc : "") : (rp.question && tp && rp.question !== tp.question ? rp.question : rp.desc || "");
+      return '<tr><td class="n">' + pad2(i + 1) + "</td><td>" + itemLink(rp, esc(rp.title) + (itemOut(rp) ? ' <span aria-hidden="true">↗</span>' : "")) + '<span class="d">' + esc(sub) + "</span>" + (c && S.canEdit ? placeSel(c) : "") + "</td>" +
+        '<td class="k" style="--k:var(' + KINDS[k] + ')"><i aria-hidden="true"></i>' + k + '</td><td class="dt">' + esc(rp.date || "") + "</td></tr>";
+    }).join("");
+  }
+  function itemTableHTML(rows) {
+    return '<table class="aitems"><thead><tr><th scope="col">件</th><th scope="col">题名</th><th scope="col">类型</th><th scope="col" class="dt">日期</th></tr></thead><tbody>' + rows + "</tbody></table>";
   }
   function archPanelHTML(tpArg) {
     var tp = tpArg || TOPIC[S.archPick]; if (!tp) return "";
-    var items = topicItems(tp), col = SHELF_COL[tp.track] || "--ln-rev", t = TRACK[tp.track] || {};
-    var meta = [t.short, tp.since ? "立卷 " + tp.since : "", TP_STATUS[tp.status], items.length + " 件"].filter(Boolean).join(" · ");
-    var rows = items.map(function (rp, i) {
-      var k = reportKind(rp);
-      return '<tr><td class="n">' + pad2(i + 1) + '</td><td><a href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener">' + esc(rp.title) + ' <span aria-hidden="true">↗</span></a><span class="d">' + esc(rp.question && rp.question !== tp.question ? rp.question : rp.desc || "") + "</span></td>" +
-        '<td class="k" style="--k:var(' + KINDS[k] + ')"><i aria-hidden="true"></i>' + k + '</td><td class="dt">' + esc(rp.date || "") + "</td></tr>";
-    }).join("");
-    var books = (tp.books || []).filter(function (b) { return ITEMS[b]; });
-    var spines = books.map(function (b, i) {
-      var it = ITEMS[b], c2 = SHELF_COL[it.home] || col;
-      return '<button type="button" class="ms" data-act="pick-go" data-id="' + esc(b) + '" title="《' + esc(it.title) + "》" + esc(it.by || "") + '" aria-label="在书墙上看《' + esc(it.title) + '》" style="--c:var(' + c2 + ");height:" + (40 + (hashN(b) % 12)) + 'px"></button>';
-    }).join("");
-    var uses = [];
-    items.forEach(function (rp) { (rp.uses || []).forEach(function (u) { uses.push(useLabel(u)); }); });
-    var line = tp.line && typeof freeLine === "function" ? freeLine(tp.line) : null, grown = "";
-    if (line) grown += '<span class="ln" style="--c2:var(' + line.color + ')"></span>自选线「' + esc(freeName(line)) + "」" + freeStops(line).length + " 站";
-    if (uses.length) grown += (grown ? "<br>" : "") + uses.map(esc).join("<br>");
-    var rel = '<div class="arel"><div><b>从哪来</b>' + esc(tp.origin || "—") + "</div>" +
-      "<div><b>用到的书</b>" + (books.length ? '<span class="ms-row">' + spines + "</span>书架上 " + books.length + " 本" : "—") + "</div>" +
-      "<div><b>" + (line ? "长出来的" : "用得上") + "</b>" + (grown || "—") + "</div></div>";
-    return '<aside class="pulled apanel" aria-labelledby="ap-h" style="--c:var(' + col + ')"><p class="eyebrow">打开的档案盒 · 卷内目录</p>' +
+    var items = topicItems(tp), col = domCol(tp.track), di = domInfo(tp.track);
+    var meta = [di.name, tp.since ? "立卷 " + tp.since : "", TP_STATUS[tp.status], items.length + " 件"].filter(Boolean).join(" · ");
+    var rel = "";
+    if (!tp.mine) {
+      var books = (tp.books || []).filter(function (b) { return ITEMS[b]; });
+      var spines = books.map(function (b) {
+        var it = ITEMS[b], c2 = it.home ? domCol(it.home) : col;
+        return '<button type="button" class="ms" data-act="pick-go" data-id="' + esc(b) + '" title="《' + esc(it.title) + "》" + esc(it.by || "") + '" aria-label="在书墙上看《' + esc(it.title) + '》" style="--c:' + c2 + ";height:" + (40 + (hashN(b) % 12)) + 'px"></button>';
+      }).join("");
+      var uses = [];
+      items.forEach(function (rp) { (rp.uses || []).forEach(function (u) { uses.push(useLabel(u)); }); });
+      var line = tp.line && typeof freeLine === "function" ? freeLine(tp.line) : null, grown = "";
+      if (line) grown += '<span class="ln" style="--c2:var(' + line.color + ')"></span>自选线「' + esc(freeName(line)) + "」" + freeStops(line).length + " 站";
+      if (uses.length) grown += (grown ? "<br>" : "") + uses.map(esc).join("<br>");
+      rel = '<div><p class="meta ap-rel-h">来龙去脉</p><div class="arel"><div><b>从哪来</b>' + esc(tp.origin || "—") + "</div>" +
+        "<div><b>用到的书</b>" + (books.length ? '<span class="ms-row">' + spines + "</span>书架上 " + books.length + " 本" : "—") + "</div>" +
+        "<div><b>" + (line ? "长出来的" : "用得上") + "</b>" + (grown || "—") + "</div></div></div>";
+    }
+    var q = tp.question || tp.answer ? '<div class="ap-q">' + (tp.question ? '<small>课题问题</small><p class="q">' + esc(tp.question) + "</p>" : "") +
+      (tp.answer ? "<small>现在的答案（每装进一件就改一次）</small><p class=\"a\">" + esc(tp.answer) + "</p>" : "") + "</div>" : "";
+    var table = items.length ? itemTableHTML(itemRowsHTML(items, tp))
+      : '<p class="meta ap-empty">盒里还是空的。' + (clipsOn() ? "在剪报的「放到」里选这一盒，就装进来了。" : "") + "</p>";
+    return '<aside class="pulled apanel" aria-labelledby="ap-h" style="--c:' + col + '"><p class="eyebrow">打开的档案盒 · 卷内目录' + (tp.mine ? " · 自己立的" : "") + "</p>" +
       '<div class="pb-h"><span class="pb-bar" aria-hidden="true"></span><div><span class="ap-no">研 · ' + esc(topicNo(tp)) + '</span><h2 id="ap-h">' + esc(tp.title) + '</h2><p class="meta">' + esc(meta) + "</p></div></div>" +
-      '<div class="ap-q"><small>课题问题</small><p class="q">' + esc(tp.question || "") + "</p>" + (tp.answer ? "<small>现在的答案（每装进一件就改一次）</small><p class=\"a\">" + esc(tp.answer) + "</p>" : "") + "</div>" +
-      '<table class="aitems"><thead><tr><th scope="col">件</th><th scope="col">题名</th><th scope="col">类型</th><th scope="col" class="dt">日期</th></tr></thead><tbody>' + rows + "</tbody></table>" +
-      '<div><p class="meta ap-rel-h">来龙去脉</p>' + rel + "</div>" +
-      (tp.note ? '<p class="ap-note"><b>备考</b>' + esc(tp.note) + "</p>" : "") + "</aside>";
+      q + table + rel + (tp.note ? '<p class="ap-note"><b>备考</b>' + esc(tp.note) + "</p>" : "") + boxActsHTML(tp) + "</aside>";
+  }
+  /* 打开的剪报夹（tid 为 "" 是收件匣里没分领域的剪报） */
+  function folderPanelHTML(tid) {
+    var list = looseClips(tid), di = tid ? domInfo(tid) : null, col = di ? di.col : "var(--ink-3)";
+    var rows = list.map(function (c, i) {
+      var rp = clipItem(c), sub = [c.author, clipKindLabel(c)].filter(Boolean).join(" · ") + (rp.desc ? " · " + rp.desc : "");
+      return '<tr><td class="n">' + pad2(i + 1) + "</td><td>" + itemLink(rp, esc(c.title) + (itemOut(rp) ? ' <span aria-hidden="true">↗</span>' : "")) + '<span class="d">' + esc(sub) + "</span>" + (S.canEdit ? placeSel(c) : "") + "</td>" +
+        '<td class="dt">' + esc(rp.date) + "</td></tr>";
+    }).join("");
+    var tip = tid ? "在「放到」里选一个档案盒，就装进盒里；讲同一件事的攒到两三篇，可以新立一盒。" : "选一个领域，它就挂进那一格的剪报夹；也可以直接装进某个档案盒。";
+    return '<aside class="pulled apanel afpanel" aria-labelledby="ap-h" style="--c:' + col + '"><p class="eyebrow">' + (tid ? "打开的剪报夹 · 还没装盒的剪报" : "收件匣 · 没分领域的剪报") + "</p>" +
+      '<div class="pb-h"><span class="pb-bar" aria-hidden="true"></span><div>' + (di && di.code ? '<span class="ap-no">' + esc(di.code) + "</span>" : "") + '<h2 id="ap-h">' + (tid ? esc(di.name) + " · 剪报夹" : "没分领域的剪报") + '</h2><p class="meta">' + list.length + " 篇</p></div></div>" +
+      '<p class="meta">' + tip + "</p>" +
+      '<table class="aitems"><thead><tr><th scope="col">篇</th><th scope="col">题名</th><th scope="col" class="dt">存的日期</th></tr></thead><tbody>' + rows + "</tbody></table>" +
+      (S.canEdit && tid ? '<div class="btns"><button type="button" class="btn small" data-act="abox-new" data-t="' + esc(tid) + '">＋ 在「' + esc(di.name) + "」新立一盒</button></div>" : "") + "</aside>";
+  }
+  /* 新立一个档案盒 / 改自己立的盒子 */
+  function boxSheetHTML() {
+    if (!S.boxOpen || !S.canEdit) return "";
+    var eid = S.boxOpen.edit || "", ed = eid && (S.data.aboxes || {})[eid] ? S.data.aboxes[eid] : null;
+    var doms = domList(), tr = (ed && ed.track) || S.boxOpen.track || doms[0];
+    if (doms.indexOf(tr) < 0) tr = doms[0];
+    var st = ed ? (TP_STATUS[ed.status] ? ed.status : "") : "doing";
+    var radios = doms.map(function (d) { var di = domInfo(d); return '<label class="add-dir" style="--c:' + di.col + '"><input type="radio" name="track" value="' + esc(d) + '"' + (d === tr ? " checked" : "") + '><i aria-hidden="true"></i>' + esc(di.name) + "</label>"; }).join("") +
+      '<label class="add-dir new"><input type="radio" name="track" value="__new"><b aria-hidden="true">＋</b>新领域</label>';
+    var sts = Object.keys(TP_STATUS).map(function (k) { return '<label class="add-dir"><input type="radio" name="bstatus" value="' + k + '"' + (k === st ? " checked" : "") + ">" + TP_STATUS[k] + "</label>"; }).join("");
+    var c = S.boxOpen.clip && (S.data.clips || {})[S.boxOpen.clip];
+    return '<div class="add-sheet" role="dialog" aria-modal="true" aria-labelledby="box-h"><form class="add-card" id="box-form" data-edit="' + esc(eid) + '"><h2 id="box-h">' + (ed ? "改这一盒" : "新立一个档案盒") + "</h2>" +
+      (c ? '<p class="meta">立好以后，《' + esc(c.title) + "》装进这一盒。</p>" : "") +
+      '<label class="add-f"><span>盒名</span><input id="box-title" name="title" required maxlength="40" autocomplete="off" placeholder="比如：凯利公式与仓位管理" value="' + esc(ed ? ed.title : "") + '"></label>' +
+      '<label class="add-f"><span>这一盒想回答什么问题</span><textarea name="question" rows="2" maxlength="200" placeholder="可以不写，比如：下注比例怎么定，才不会输光？">' + esc(ed ? ed.question || "" : "") + "</textarea></label>" +
+      '<fieldset class="add-f"><legend>放在哪个领域</legend><div class="add-dirs">' + radios + "</div></fieldset>" +
+      '<div class="add-new">' + domFieldsHTML(null) + "</div>" +
+      '<fieldset class="add-f"><legend>状态</legend><div class="add-dirs">' + sts + "</div></fieldset>" +
+      '<label class="add-f"><span>备考</span><textarea name="note" rows="2" maxlength="300" placeholder="可以不写：跟哪本书、哪条线一起看">' + esc(ed ? ed.note || "" : "") + "</textarea></label>" +
+      '<div class="btns"><button type="submit" class="btn">' + (ed ? "保存" : "放上档案架") + '</button><button type="button" class="btn ghost" data-act="box-close">取消</button></div></form></div>';
+  }
+  function boxSave(f) {
+    var title = (f.elements.title.value || "").trim().replace(/\s+/g, " "), question = (f.elements.question.value || "").trim(), note = (f.elements.note.value || "").trim();
+    var tr = (f.querySelector('input[name="track"]:checked') || {}).value, st = (f.querySelector('input[name="bstatus"]:checked') || {}).value || "";
+    if (!title) { toast("给这一盒起个名字"); f.elements.title.focus(); return; }
+    if (tr === "__new") {
+      var nd = domRead(f, ""); if (!nd) return;
+      if (nd.same) tr = nd.same;
+      else { tr = "dm-" + Date.now().toString(36); put("domains", tr, { name: nd.name, code: nd.code, color: nd.color, t: new Date().toISOString() }); }
+    }
+    if (!tr || domList().indexOf(tr) < 0) { toast("选一个领域放进去"); return; }
+    var edit = f.getAttribute("data-edit"), old = edit && (S.data.aboxes || {})[edit], now = new Date().toISOString();
+    var id = old ? edit : "ab-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+    put("aboxes", id, { title: title.slice(0, 40), track: tr, question: question.slice(0, 200), status: TP_STATUS[st] ? st : "", note: note.slice(0, 300), t: old ? old.t : now });
+    var C = S.data.clips || {}, cid = S.boxOpen && S.boxOpen.clip;
+    if (old && old.track !== tr) Object.keys(C).forEach(function (k) { if (C[k] && C[k].box === id) put("clips", k, Object.assign({}, C[k], { track: tr, ut: now })); });
+    if (cid && C[cid]) put("clips", cid, Object.assign({}, C[cid], { box: id, track: tr, ut: now }));
+    S.boxOpen = null; S.aboxDel = null; S.archPick = id; S.archF = "all"; syncBoxes();
+    if (S.route !== "archive") location.hash = "#archive"; else render();
+    toast(old ? "改好了" : "「" + title + "」放上档案架了" + (cid && C[cid] ? "，剪报装进去了" : ""));
+  }
+  function boxOffHTML() {
+    var off = S.data.aboxoff || {}, list = TOPICS_LIB.filter(function (tp) { return off[tp.id]; });
+    if (!list.length) return "";
+    return '<p class="w-hidden a-off"><span>撤下的档案盒：</span>' + list.map(function (tp) {
+      return S.canEdit ? '<button type="button" class="linkbtn" data-act="abox-on" data-t="' + esc(tp.id) + '">「' + esc(tp.title) + "」放回去</button>" : "「" + esc(tp.title) + "」";
+    }).join("") + "</p>";
+  }
+  /* 剪报换地方：v 是 b:盒子 id / 领域 / ""（收件匣）/ nb:领域（在那个领域新立一盒再装进去） */
+  function clipMove(id, v) {
+    var c = (S.data.clips || {})[id]; if (!c) return;
+    if (/^nb:/.test(v)) { S.boxOpen = { track: v.slice(3), clip: id }; render(); var bt = document.getElementById("box-title"); if (bt) bt.focus(); return; }
+    var bx = /^b:/.test(v) ? TOPIC[v.slice(2)] : null, upd = bx ? { box: bx.id, track: bx.track } : { box: "", track: v || "" };
+    var was = S.archPick;
+    put("clips", id, Object.assign({}, c, upd, { ut: new Date().toISOString() }));
+    /* 剪报夹里最后一篇装进盒了，就把那一盒打开 */
+    if (/^cf:/.test(was || "") && bx && !looseClips(was.slice(3)).length) S.archPick = bx.id;
+    render();
+    toast(bx ? "装进了「" + bx.title + "」" : upd.track ? "挂进了「" + domInfo(upd.track).name + "」的剪报夹" : "放进了收件匣");
+  }
+  function boxRemove(id) {
+    var tp = TOPIC[id]; S.aboxDel = null;
+    if (!tp) { render(); return; }
+    if (tp.mine) {
+      var C = S.data.clips || {}, n = 0, now = new Date().toISOString();
+      Object.keys(C).forEach(function (k) { if (C[k] && C[k].box === id) { n++; put("clips", k, Object.assign({}, C[k], { box: "", ut: now })); } });
+      del("aboxes", id); toast("「" + tp.title + "」删掉了" + (n ? "，" + n + " 篇剪报放回了剪报夹" : ""));
+    } else { put("aboxoff", id, { t: new Date().toISOString() }); toast("「" + tp.title + "」撤下了，档案架下面可以放回"); }
+    S.archPick = null; syncBoxes(); render();
+  }
+  /* 自己加的领域：里面有档案盒或剪报的，在档案架下面另起几层，一层三格 */
+  function archCustom() {
+    var out = [];
+    domList().concat(TOPICS.map(function (tp) { return tp.track; })).forEach(function (k) {
+      if (domBuiltin(k) || k === "en" || out.indexOf(k) >= 0) return;
+      if (boxesOf(k).length || looseClips(k).length) out.push(k);
+    });
+    return out;
   }
   function shelfSeg(cur) {
     var nBooks = allItems().filter(function (id) { return ITEMS[id].kind === "book"; }).length;
@@ -6044,35 +6279,42 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "") + "</a></nav>";
   }
   function archiveHTML() {
-    if (!TOPIC[S.archPick]) S.archPick = (TOPICS.filter(function (tp) { return tp.status === "doing"; })[0] || TOPICS[0] || {}).id;
-    var f = S.archF || "all";
+    var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null;
+    if (fp !== null && !looseClips(fp).length) { fp = null; S.archPick = null; }
+    if (fp === null && !TOPIC[S.archPick]) S.archPick = (TOPICS.filter(function (tp) { return tp.status === "doing"; })[0] || TOPICS[0] || {}).id;
+    var f = S.archF || "all", cust = archCustom();
     function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="arch-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
     function cnt(s) { return TOPICS.filter(function (tp) { return tp.status === s; }).length; }
-    var cab = ARCH_ROWS.map(function (row) {
-      var empty = row.every(function (c) { return c[0] === "+" ? !inboxItems().length : !TOPICS.some(function (tp) { return tp.track === c[0]; }); });
-      return '<div class="tier' + (empty ? " empty" : "") + '">' + row.map(function (c) { return c[0] === "+" ? trayHTML(c[1]) : TRACK[c[0]] ? archBayHTML(c[0], c[1]) : ""; }).join("") + "</div>";
+    var rows = ARCH_ROWS.slice();
+    for (var ci = 0; ci < cust.length; ci += 3) rows.push(cust.slice(ci, ci + 3).map(function (k) { return [k, 0]; }));
+    var cab = rows.map(function (row) {
+      var empty = row.every(function (c) { return c[0] === "+" ? !inboxItems().length && !looseClips("").length : !boxesOf(c[0]).length && !looseClips(c[0]).length; });
+      return '<div class="tier' + (empty ? " empty" : "") + '">' + row.map(function (c) { return c[0] === "+" ? trayHTML(c[1]) : archBayHTML(c[0], c[1]); }).join("") + "</div>";
     }).join("");
-    var legend = Object.keys(KINDS).map(function (k) { return '<span style="--k:var(' + KINDS[k] + ')"><i aria-hidden="true"></i>' + k + "</span>"; }).join("");
-    var rules = [["一", "一个问题一盒", "新资料先问：它在回答哪个问题？已经有这个问题，就装进那一盒；是新问题才立新卷。卷号跟书架用同一套索书号。"],
-      ["二", "盒里按件编号", "每件是档案、数据、计划、纪要四种之一，色签露在盒顶。件越多盒越厚，一眼看出这一盒是查资料多，还是做数据多。"],
-      ["三", "零散的先进收件匣", "一次性的小分析不急着立卷。攒到两件讲同一件事，再一起装盒。"],
+    var legend = Object.keys(KINDS).filter(function (k) { return k !== "剪报" || clipsOn(); }).map(function (k) { return '<span style="--k:var(' + KINDS[k] + ')"><i aria-hidden="true"></i>' + k + "</span>"; }).join("");
+    var nItems = REPORTS.length + (clipsOn() ? clipList().length : 0);
+    var rules = [["一", "一个问题一盒", "新资料先问：它在回答哪个问题？已经有这个问题，就装进那一盒；是新问题才立新卷，点「＋ 新档案盒」自己就能立。卷号跟书架用同一套索书号。"],
+      ["二", "盒里按件编号", "每件是档案、数据、计划、纪要、剪报之一，色签露在盒顶。件越多盒越厚，一眼看出这一盒是查资料多，还是做数据多。"],
+      ["三", "零散的先进收件匣", "一次性的小分析、没分领域的剪报不急着立卷；分了领域还没装盒的剪报插在那一格的剪报夹里。攒到两件讲同一件事，再一起装盒。"],
       ["四", "线网上一盒一个地标", "地图上只画课题，不画单件，地标下面写着件数。资料再多，地标也只随课题增长。"]];
     return '<div class="view shelf archive-v">' + bannerHTML() +
-      '<header class="phead"><div><p class="eyebrow">五个方向 · ' + TOPICS.length + " 个课题 · " + REPORTS.length + ' 件资料</p><h1>书架<span class="h1-sub">档案架</span></h1>' +
-      '<p class="lede">书挂在书墙上；自己做的研究按课题装进档案盒，书墙上也挂着一排，这里是完整的档案架。一个课题一盒，盒里按件编号，资料再多也只是盒子变厚、盒子变多。</p>' + shelfSeg("archive") +
-      '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", TOPICS.length) + chip("doing", "在做", cnt("doing")) + chip("yearly", "要年更", cnt("yearly")) + chip("closed", "已结卷", cnt("closed")) + "</div></div>" +
+      '<header class="phead"><div><p class="eyebrow">' + (5 + cust.length) + " 个方向 · " + TOPICS.length + " 个课题 · " + nItems + ' 件资料</p><h1>书架<span class="h1-sub">档案架</span></h1>' +
+      '<p class="lede">书挂在书墙上；自己做的研究、剪下来的好文章按课题装进档案盒，这里是完整的档案架。一个课题一盒，盒里按件编号，资料再多也只是盒子变厚、盒子变多。</p>' + shelfSeg("archive") +
+      '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", TOPICS.length) + chip("doing", "在做", cnt("doing")) + chip("yearly", "要年更", cnt("yearly")) + chip("closed", "已结卷", cnt("closed")) +
+      (S.canEdit ? '<button type="button" class="chipbtn chip-new" data-act="abox-new">＋ 新档案盒</button>' : "") + "</div></div>" +
       '<div class="arch-side"><div class="k-legend"><span class="kl-h">盒顶的色签</span>' + legend + "</div>" +
       '<label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
-      '<div class="arch-main"><section class="cabinet archive" aria-label="档案架"><div class="cab-top"><span>研究档案</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + archPanelHTML() + "</div>" +
+      '<div class="arch-main"><div class="arch-col"><section class="cabinet archive" aria-label="档案架"><div class="cab-top"><span>研究档案</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + boxOffHTML() + "</div>" +
+      (fp !== null ? folderPanelHTML(fp) : archPanelHTML()) + "</div>" +
       clipsHTML() +
       '<section class="arules" aria-labelledby="ar-h"><h2 id="ar-h">怎样归档</h2><div class="ar-grid">' + rules.map(function (r) { return '<div class="arule"><p><b class="ar-n">' + r[0] + "</b><b>" + r[1] + "</b></p><p>" + r[2] + "</p></div>"; }).join("") + "</div>" +
-      '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进研习录”，我按这四条归档。</p></section></div>';
+      '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进研习录”，我按这四条归档；剪报和自己立的盒子，在这里直接整理。</p></section>' + boxSheetHTML() + "</div>";
   }
   /* 搜索框：不重画页面，只把不相关的盒子调暗 */
   function applyArchFilter() {
     var q = S.archQ || "";
     document.querySelectorAll(".archive .abox").forEach(function (b) { var tp = TOPIC[b.getAttribute("data-t")]; if (tp) b.classList.toggle("dim", !archMatch(tp)); });
-    document.querySelectorAll(".archive .asheet").forEach(function (a) { a.classList.toggle("dim", !!q && (a.getAttribute("data-q") || "").indexOf(q) < 0); });
+    document.querySelectorAll(".archive .asheet, .archive .afold").forEach(function (a) { a.classList.toggle("dim", !!q && (a.getAttribute("data-q") || "").indexOf(q) < 0); });
   }
   /* ---------- 剪报：把知乎（或微信公众号、别的网页）上看到的好回答、好文章收进档案架 ----------
    * 只在服务器版（baba.wogucloud.cn）上有：记录存在 Baba 账号里，不进公开的 GitHub 仓库。
@@ -6293,18 +6535,18 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (!clipsOn()) return '<div class="view clip-page">' + head + '<p class="cp-msg">服务器还是旧版本，存不了剪报。部署一次 Baba 就好了。</p></div>';
     if (S.clipDone) {
       var dn = (S.data.clips || {})[S.clipDone] || {};
-      return '<div class="view clip-page">' + head + '<div class="cp-done"><b>存好了 ✓</b><p>《' + esc(dn.title || "") + "》放进了档案架的剪报" + (dn.track ? "，归在「" + esc(domInfo(dn.track).name) + "」" : "") + "。</p>" +
+      return '<div class="view clip-page">' + head + '<div class="cp-done"><b>存好了 ✓</b><p>《' + esc(dn.title || "") + "》放进了档案架上" + esc(placeName(dn)) + "。</p>" +
         '<p class="btns"><a class="btn ghost small" href="/#archive" target="_blank" rel="noopener">在研习录里看</a><button type="button" class="btn small" data-act="clip-close">关掉这个窗口</button></p></div></div>';
     }
     if (!c) return '<div class="view clip-page">' + head + '<p class="cp-msg">等书签按钮把内容递过来……<br><small>如果一直没反应：回到原来的页面，再点一次书签栏里的「收进研习录」。</small></p></div>';
-    var old = clipByKey(clipKey(c.url)), text = clipPlain(c.html), trk = old && old.track || "";
-    var opts = '<option value="">不分领域</option>' + domList().map(function (k) { return '<option value="' + esc(k) + '"' + (k === trk ? " selected" : "") + ">" + esc(domInfo(k).name) + "</option>"; }).join("");
+    var old = clipByKey(clipKey(c.url)), text = clipPlain(c.html);
     return '<div class="view clip-page">' + head +
       '<form id="clip-form" class="cp-form" autocomplete="off">' +
       '<label class="field"><span>标题</span><input name="title" value="' + esc(c.title) + '" maxlength="300"></label>' +
       '<p class="cp-meta">' + esc([c.author, clipKindLabel(c), (c.date || "").slice(0, 10)].filter(Boolean).join(" · ")) + ' · <a href="' + esc(c.url) + '" target="_blank" rel="noopener">原文</a></p>' +
       (old ? '<p class="cp-note">' + (old.status === "link" ? "手机上先存过这篇的链接，这次补上全文。" : "这篇以前存过，保存会用这次的内容更新它。") + "</p>" : "") +
-      '<label class="field"><span>放进哪个领域</span><select name="track">' + opts + "</select></label>" +
+      '<label class="field"><span>放到哪</span><select name="place">' + placeOpts(old ? clipPlace(old) : "", true) + "</select></label>" +
+      '<label class="field cp-nb" hidden><span>新档案盒的名字</span><input name="nbtitle" maxlength="40" placeholder="比如：凯利公式与仓位管理"></label>' +
       '<label class="field"><span>为什么存（可以不写）</span><textarea name="note" rows="2" placeholder="例如：把加息和汇率的关系讲清楚了">' + esc(old && old.note || "") + "</textarea></label>" +
       '<div class="cp-prev"><p class="cp-pm">' + (c.sel ? "只存你选中的这一段 · " : "全文 · ") + text.length + " 字" + (text.length ? "" : " · 没取到正文，只会存链接") + '</p><div class="cp-body">' + c.html.slice(0, 6000) + "</div></div>" +
       '<p class="btns"><button type="submit" class="btn">保存到剪报</button><button type="button" class="btn ghost" data-act="clip-close">不存了</button></p></form></div>';
@@ -6313,8 +6555,16 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var c = S.clipIn; if (!c) return;
     var key = clipKey(c.url), old = clipByKey(key), now = new Date().toISOString(), text = clipPlain(c.html);
     var id = old ? old.id : "cl-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+    var pl = form.place.value || "", track = pl, box = "";
+    if (/^b:/.test(pl)) { box = pl.slice(2); track = TOPIC[box] ? TOPIC[box].track : ""; if (!track) box = ""; }
+    else if (/^nb:/.test(pl)) {
+      var nt = (form.nbtitle.value || "").trim().replace(/\s+/g, " ");
+      if (!nt) { toast("给新档案盒起个名字"); form.nbtitle.focus(); return; }
+      track = pl.slice(3); box = "ab-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+      put("aboxes", box, { title: nt.slice(0, 40), track: track, question: "", status: "doing", note: "", t: now }); syncBoxes();
+    }
     var meta = { key: key, url: c.url, title: (form.title.value || c.title || c.url).trim().slice(0, 300), author: c.author, site: c.site, kind: c.kind, date: c.date,
-      track: form.track.value || "", note: form.note.value.trim().slice(0, 2000), excerpt: text.slice(0, 160), words: text.length, sel: c.sel ? 1 : 0,
+      track: track, box: box, note: form.note.value.trim().slice(0, 2000), excerpt: text.slice(0, 160), words: text.length, sel: c.sel ? 1 : 0,
       status: text.length ? "full" : "link", t: old && old.t || now, ut: now };
     var btn = form.querySelector('[type="submit"]'); if (btn) { btn.disabled = true; btn.textContent = "正在保存……"; }
     var body = text.length ? put("clipbody", id, { html: c.html, t: now }) : Promise.resolve();
@@ -6349,12 +6599,11 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var meta = [c.author, clipKindLabel(c), String(c.t || "").slice(0, 10) + " 存", full ? (c.words || 0) + " 字" : "", rd && rd.pct ? "读到 " + Math.round(rd.pct * 100) + "%" : "", nMk ? nMk + " 条划线" : ""].filter(Boolean).join(" · ");
     var title = full ? '<button type="button" class="cl-t" data-act="clip-open" data-id="' + esc(c.id) + '">' + esc(c.title) + "</button>"
       : '<a class="cl-t" href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.title) + ' <span class="cl-wait">待补全文</span></a>';
-    var opts = '<option value="">不分领域</option>' + domList().map(function (k) { return '<option value="' + esc(k) + '"' + (k === c.track ? " selected" : "") + ">" + esc(domInfo(k).name) + "</option>"; }).join("");
     var del = S.clipDel === c.id ? '<span class="jdel">删掉这篇？<button type="button" class="linkbtn danger" data-act="clip-del-yes" data-id="' + esc(c.id) + '">删除</button><button type="button" class="linkbtn" data-act="clip-del-no">取消</button></span>'
       : '<button type="button" class="linkbtn" data-act="clip-del" data-id="' + esc(c.id) + '">删除</button>';
     return '<li class="cl-card' + (full ? "" : " link") + '">' + title + '<p class="cl-m">' + esc(meta) + "</p>" +
       (c.note ? '<p class="cl-why">' + esc(c.note) + "</p>" : full && c.excerpt ? '<p class="cl-ex">' + esc(c.excerpt) + "……</p>" : "") +
-      '<div class="cl-acts"><a class="linkbtn" href="' + esc(c.url) + '" target="_blank" rel="noopener">原文 ↗</a><select class="cl-trk" data-id="' + esc(c.id) + '" aria-label="改领域">' + opts + "</select>" + del + "</div></li>";
+      '<div class="cl-acts"><a class="linkbtn" href="' + esc(c.url) + '" target="_blank" rel="noopener">原文 ↗</a>' + placeSel(c, true) + del + "</div></li>";
   }
   function clipLinkSave(form) {
     var p = clipParseShare(form.t.value);
@@ -7629,7 +7878,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       var tp = TOPIC[rid.slice(2)]; if (!tp) return "";
       return '<button type="button" class="mp-x" data-act="mpop-close" aria-label="关闭">×</button><div class="mp-h"><b>研究课题 · ' + esc(tp.title) + '</b><span class="mp-pos">' + esc(topicNo(tp)) + (TP_STATUS[tp.status] ? " · " + TP_STATUS[tp.status] : "") + "</span></div>" +
         (tp.question ? '<p class="mp-t" style="font-size:15px">' + esc(tp.question) + "</p>" : "") + (tp.answer ? '<p class="mp-s">' + esc(tp.answer) + "</p>" : "") +
-        "<ul>" + topicItems(tp).map(function (rp, i) { return '<li><a class="linkrow" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener"><b class="lbadge" style="--c:var(' + KINDS[reportKind(rp)] + ')">' + pad2(i + 1) + " " + reportKind(rp) + "</b> " + esc(rp.title) + " ↗</a></li>"; }).join("") + "</ul>" +
+        "<ul>" + topicItems(tp).map(function (rp, i) { return "<li>" + itemLink(rp, '<b class="lbadge" style="--c:var(' + KINDS[reportKind(rp)] + ')">' + pad2(i + 1) + " " + reportKind(rp) + "</b> " + esc(rp.title) + (itemOut(rp) ? " ↗" : ""), "linkrow") + "</li>"; }).join("") + "</ul>" +
         '<div class="btns"><button type="button" class="btn small" data-act="abox-go" data-t="' + esc(tp.id) + '">打开档案盒</button></div>';
     }
     var rp = REPORTS.filter(function (x) { return x.id === rid; })[0]; if (!rp) return "";
@@ -8044,7 +8293,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] || (PLAN && /^l-(\d{4}-\d{2}-\d{2}|[a-z]+-\d{2})$/.test(h)) ? h : "home"; }
 
   function render(scrollTop) {
-    syncMyBooks();
+    syncMyBooks(); syncBoxes();
     document.documentElement.classList.toggle("clip-mode", S.route === "clip");
     $("#rail").innerHTML = railHTML();
     var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);
@@ -8190,6 +8439,13 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
     if (act === "abox") { S.archPick = t.getAttribute("data-t"); render(); var ap = document.querySelector(".apanel"); if (ap && window.innerWidth < 1100) ap.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
     if (act === "arch-f") { S.archF = t.getAttribute("data-f"); render(); return; }
+    if (act === "abox-new") { S.boxOpen = { track: t.getAttribute("data-t") || (TOPIC[S.archPick] || {}).track || "" }; render(); var bt = document.getElementById("box-title"); if (bt) bt.focus(); return; }
+    if (act === "abox-edit") { S.boxOpen = { edit: t.getAttribute("data-t") }; render(); var be = document.getElementById("box-title"); if (be) be.focus(); return; }
+    if (act === "box-close") { S.boxOpen = null; render(); return; }
+    if (act === "abox-del") { S.aboxDel = t.getAttribute("data-t"); render(); return; }
+    if (act === "abox-del-no") { S.aboxDel = null; render(); return; }
+    if (act === "abox-del-yes") { boxRemove(t.getAttribute("data-t")); return; }
+    if (act === "abox-on") { var on = t.getAttribute("data-t"); del("aboxoff", on); S.archPick = on; syncBoxes(); render(); toast("「" + ((LIB_TOPIC[on] || {}).title || "") + "」放回档案架了"); return; }
     if (act === "abox-go") { S.archPick = t.getAttribute("data-t"); S.archF = "all"; closePop(); if (S.route === "archive") render(); else location.hash = "#archive"; return; }
     if (act === "eb-del") { S.ebConfirm = t.getAttribute("data-id"); render(); return; }
     if (act === "eb-del-no") { S.ebConfirm = null; render(); return; }
@@ -8217,7 +8473,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "add-close") { S.addOpen = null; render(); return; }
     if (act === "dom-edit") { S.domOpen = t.getAttribute("data-k"); render(); var dn = document.querySelector('#dom-form [name="dname"]'); if (dn) dn.focus(); return; }
     if (act === "dom-close") { S.domOpen = null; render(); return; }
-    if (act === "dom-del") { var dk = t.getAttribute("data-k"), dd = (S.data.domains || {})[dk]; if (dd && !domCount(dk)) { del("domains", dk); S.domOpen = null; render(); toast("「" + dd.name + "」这个领域删掉了"); } return; }
+    if (act === "dom-del") { var dk = t.getAttribute("data-k"), dd = (S.data.domains || {})[dk]; if (dd && !domCount(dk) && !TOPICS.some(function (tp) { return tp.mine && tp.track === dk; })) { del("domains", dk); S.domOpen = null; render(); toast("「" + dd.name + "」这个领域删掉了"); } return; }
     if (act === "shelf-rm") { S.rmConfirm = t.getAttribute("data-id"); render(); return; }
     if (act === "shelf-rm-no") { S.rmConfirm = null; render(); return; }
     if (act === "shelf-rm-yes") { shelfRemove(t.getAttribute("data-id")); return; }
@@ -8284,7 +8540,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("keydown", function (e) { if (RD) { rdKeys(e); if (e.key === "Escape") e.stopImmediatePropagation(); } }, true);
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && OV) { ovClose(); return; }
-    if (e.key === "Escape" && (S.addOpen || S.domOpen)) { S.addOpen = null; S.domOpen = null; render(); return; }
+    if (e.key === "Escape" && (S.addOpen || S.domOpen || S.boxOpen)) { S.addOpen = null; S.domOpen = null; S.boxOpen = null; render(); return; }
     if (e.key === "Escape" && S.lookOpen) { S.lookOpen = false; render(); var lb = document.querySelector(".look-btn"); if (lb) lb.focus(); }
   });
   /* 线网：用键盘打开站点详情，Esc 关闭 */
@@ -8316,7 +8572,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("change", function (e) {
     var t = e.target;
     if (t.id === "fp-file") { filmLoad(t.files); t.value = ""; return; }
-    if (t.classList && t.classList.contains("cl-trk")) { var tc = (S.data.clips || {})[t.getAttribute("data-id")]; if (tc) put("clips", t.getAttribute("data-id"), Object.assign({}, tc, { track: t.value, ut: new Date().toISOString() })); render(); return; }
+    if (t.classList && t.classList.contains("cl-trk")) { clipMove(t.getAttribute("data-id"), t.value); return; }
+    if (t.name === "place" && t.form && t.form.id === "clip-form") { var nb = t.form.querySelector(".cp-nb"); if (nb) { nb.hidden = !/^nb:/.test(t.value); if (!nb.hidden) nb.querySelector("input").focus(); } return; }
     if (t.id === "imp-file") { var jf = t.files && t.files[0]; t.value = ""; impFile(jf); return; }
     if (t.classList && t.classList.contains("lk-place")) {
       var pk = t.getAttribute("data-d"), pv = t.value, dl2 = LK().deco.filter(function (x) { return x !== pk; }), pl = Object.assign({}, LK().place);
@@ -8360,6 +8617,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("submit", function (e) {
     if (e.target.id === "add-form") { e.preventDefault(); addSave(e.target); return; }
     if (e.target.id === "dom-form") { e.preventDefault(); domSave(e.target); return; }
+    if (e.target.id === "box-form") { e.preventDefault(); boxSave(e.target); return; }
     if (e.target.id === "clip-form") { e.preventDefault(); clipSave(e.target); return; }
     if (e.target.id === "clip-link") { e.preventDefault(); clipLinkSave(e.target); return; }
     if (e.target.id !== "j-form") return;
