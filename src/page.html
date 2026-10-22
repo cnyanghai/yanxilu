@@ -733,6 +733,42 @@ button.stp .stp-tx{display:flex}
 .rt-st{display:inline-block;opacity:0;animation:rt-stamp .55s cubic-bezier(.2,1.5,.4,1) forwards}
 @keyframes rt-stamp{0%{opacity:0;transform:scale(2.2) rotate(-14deg)}55%{opacity:1;transform:scale(.9) rotate(1deg)}78%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
 @media (prefers-reduced-motion: reduce){.rt-st{animation:none;opacity:1}}
+/* 切页淡接 */
+::view-transition-old(root){animation-duration:.14s}
+::view-transition-new(root){animation-duration:.18s}
+/* 剪报入夹的小纸条 */
+.fly-slip{position:fixed;z-index:95;width:60px;height:34px;pointer-events:none;background:#FBF7EC;border:1px solid #CFC3A6;border-radius:2px;box-shadow:0 8px 14px -8px rgba(0,0,0,.5)}
+.fly-slip::before{content:"";position:absolute;left:6px;top:6px;width:20px;height:3.5px;background:var(--k-clip,#7A4E9C)}
+.fly-slip::after{content:"";position:absolute;left:6px;right:8px;top:13px;height:14px;background:repeating-linear-gradient(#CFC6B2 0 1px,transparent 1px 5px)}
+/* 阅读器翻部分：新一页轻轻推进来，带一道页影 */
+.rd-view{position:relative}
+.rd-view.turn-r .rd-frame{animation:rd-in-r .26s cubic-bezier(.25,.7,.3,1)}
+.rd-view.turn-l .rd-frame{animation:rd-in-l .26s cubic-bezier(.25,.7,.3,1)}
+.rd-view.turn-r::after,.rd-view.turn-l::after{content:"";position:absolute;top:0;bottom:0;width:28px;pointer-events:none;animation:rd-sh .3s ease-out forwards}
+.rd-view.turn-r::after{right:0;background:linear-gradient(270deg,rgba(40,30,15,.18),transparent)}
+.rd-view.turn-l::after{left:0;background:linear-gradient(90deg,rgba(40,30,15,.18),transparent)}
+@keyframes rd-in-r{from{transform:translateX(30px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes rd-in-l{from{transform:translateX(-30px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes rd-sh{from{opacity:1}to{opacity:0}}
+@media (prefers-reduced-motion: reduce){.rd-view.turn-r .rd-frame,.rd-view.turn-l .rd-frame{animation:none}.rd-view.turn-r::after,.rd-view.turn-l::after{display:none}}
+/* 快捷键单 */
+.ks-card{width:min(460px,100%)}
+.ks-t{border-collapse:collapse;width:100%;font-size:14px}
+.ks-t td{padding:8px 10px 8px 0;border-top:1px solid var(--rule);vertical-align:top}
+.ks-t tr:first-child td{border-top:0}
+.ks-t kbd{display:inline-block;padding:2px 8px;border:1px solid var(--rule-strong);border-bottom-width:2.5px;border-radius:6px;background:var(--paper);font-family:var(--f-mono);font-size:12px;white-space:nowrap}
+/* 微立体与拖拽 */
+.wall .deco{will-change:transform;transition:transform .2s ease-out}
+.abox.picked .ab-band{transform:perspective(260px) rotateX(34deg);transform-origin:50% 0}
+.ab-band{transition:transform .25s ease}
+.stg-cover,.stg-box{transition:transform .3s ease}
+.dais .stg-cover:hover,.dais .stg-box:hover{transform:perspective(900px) rotateY(-3.5deg) translateY(-2px)}
+@media (prefers-reduced-motion: reduce){.dais .stg-cover:hover,.dais .stg-box:hover{transform:none}.abox.picked .ab-band{transform:none}}
+body.drag-clip .abox:not([data-t^="cf:"]),body.drag-clip .afold,body.drag-clip .atray{outline:2px dashed color-mix(in srgb,var(--ink-3) 55%,transparent);outline-offset:3px}
+.drop-ok{outline:3px solid var(--ink) !important;outline-offset:3px}
+.abox.drop-ok,.afold.drop-ok{transform:translateY(-6px)}
+.cl-card[draggable="true"]{cursor:grab}
+.cl-card[draggable="true"]:active{cursor:grabbing}
 /* 书墙光阴：清晨微凉、黄昏偏暖、夜里暗下来 */
 .wall::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;opacity:0;transition:opacity 1.2s,background 1.2s}
 .wall.tod-dawn::after{opacity:1;background:linear-gradient(170deg,rgba(195,210,228,.10),rgba(248,224,200,.05) 45%,transparent 75%)}

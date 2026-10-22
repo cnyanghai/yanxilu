@@ -741,6 +741,42 @@ button.stp .stp-tx{display:flex}
 .rt-st{display:inline-block;opacity:0;animation:rt-stamp .55s cubic-bezier(.2,1.5,.4,1) forwards}
 @keyframes rt-stamp{0%{opacity:0;transform:scale(2.2) rotate(-14deg)}55%{opacity:1;transform:scale(.9) rotate(1deg)}78%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
 @media (prefers-reduced-motion: reduce){.rt-st{animation:none;opacity:1}}
+/* 切页淡接 */
+::view-transition-old(root){animation-duration:.14s}
+::view-transition-new(root){animation-duration:.18s}
+/* 剪报入夹的小纸条 */
+.fly-slip{position:fixed;z-index:95;width:60px;height:34px;pointer-events:none;background:#FBF7EC;border:1px solid #CFC3A6;border-radius:2px;box-shadow:0 8px 14px -8px rgba(0,0,0,.5)}
+.fly-slip::before{content:"";position:absolute;left:6px;top:6px;width:20px;height:3.5px;background:var(--k-clip,#7A4E9C)}
+.fly-slip::after{content:"";position:absolute;left:6px;right:8px;top:13px;height:14px;background:repeating-linear-gradient(#CFC6B2 0 1px,transparent 1px 5px)}
+/* 阅读器翻部分：新一页轻轻推进来，带一道页影 */
+.rd-view{position:relative}
+.rd-view.turn-r .rd-frame{animation:rd-in-r .26s cubic-bezier(.25,.7,.3,1)}
+.rd-view.turn-l .rd-frame{animation:rd-in-l .26s cubic-bezier(.25,.7,.3,1)}
+.rd-view.turn-r::after,.rd-view.turn-l::after{content:"";position:absolute;top:0;bottom:0;width:28px;pointer-events:none;animation:rd-sh .3s ease-out forwards}
+.rd-view.turn-r::after{right:0;background:linear-gradient(270deg,rgba(40,30,15,.18),transparent)}
+.rd-view.turn-l::after{left:0;background:linear-gradient(90deg,rgba(40,30,15,.18),transparent)}
+@keyframes rd-in-r{from{transform:translateX(30px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes rd-in-l{from{transform:translateX(-30px);opacity:.3}to{transform:none;opacity:1}}
+@keyframes rd-sh{from{opacity:1}to{opacity:0}}
+@media (prefers-reduced-motion: reduce){.rd-view.turn-r .rd-frame,.rd-view.turn-l .rd-frame{animation:none}.rd-view.turn-r::after,.rd-view.turn-l::after{display:none}}
+/* 快捷键单 */
+.ks-card{width:min(460px,100%)}
+.ks-t{border-collapse:collapse;width:100%;font-size:14px}
+.ks-t td{padding:8px 10px 8px 0;border-top:1px solid var(--rule);vertical-align:top}
+.ks-t tr:first-child td{border-top:0}
+.ks-t kbd{display:inline-block;padding:2px 8px;border:1px solid var(--rule-strong);border-bottom-width:2.5px;border-radius:6px;background:var(--paper);font-family:var(--f-mono);font-size:12px;white-space:nowrap}
+/* 微立体与拖拽 */
+.wall .deco{will-change:transform;transition:transform .2s ease-out}
+.abox.picked .ab-band{transform:perspective(260px) rotateX(34deg);transform-origin:50% 0}
+.ab-band{transition:transform .25s ease}
+.stg-cover,.stg-box{transition:transform .3s ease}
+.dais .stg-cover:hover,.dais .stg-box:hover{transform:perspective(900px) rotateY(-3.5deg) translateY(-2px)}
+@media (prefers-reduced-motion: reduce){.dais .stg-cover:hover,.dais .stg-box:hover{transform:none}.abox.picked .ab-band{transform:none}}
+body.drag-clip .abox:not([data-t^="cf:"]),body.drag-clip .afold,body.drag-clip .atray{outline:2px dashed color-mix(in srgb,var(--ink-3) 55%,transparent);outline-offset:3px}
+.drop-ok{outline:3px solid var(--ink) !important;outline-offset:3px}
+.abox.drop-ok,.afold.drop-ok{transform:translateY(-6px)}
+.cl-card[draggable="true"]{cursor:grab}
+.cl-card[draggable="true"]:active{cursor:grabbing}
 /* 书墙光阴：清晨微凉、黄昏偏暖、夜里暗下来 */
 .wall::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;opacity:0;transition:opacity 1.2s,background 1.2s}
 .wall.tod-dawn::after{opacity:1;background:linear-gradient(170deg,rgba(195,210,228,.10),rgba(248,224,200,.05) 45%,transparent 75%)}
@@ -5784,9 +5820,12 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var seq = ++RD.seq, view = RD.el.querySelector(".rd-view");
     RD.el.querySelector(".rd-pos").textContent = "正在翻到这一部分……";
     rdTipHide();
+    var dir = i > RD.i ? "r" : i < RD.i ? "l" : "";
     epChapter(RD.ep, i, rdTheme()).then(function (html) {
       if (!RD || RD.seq !== seq) return;
       RD.i = i;
+      view.classList.remove("turn-l", "turn-r");
+      if (dir && !REDUCE) { void view.offsetWidth; view.classList.add("turn-" + dir); setTimeout(function () { view.classList.remove("turn-l", "turn-r"); }, 320); }
       view.innerHTML = '<iframe class="rd-frame" sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox" title="正文"></iframe>';
       var f = view.querySelector(".rd-frame");
       f.addEventListener("load", function () {
@@ -5807,6 +5846,14 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
           else if (j >= 0) rdShow(j, { frag: v[1] });
         });
         d.addEventListener("keydown", rdKeys);
+        /* 手机：左右滑翻部分（选中文字、斜着滑都不算） */
+        var tx0 = 0, ty0 = 0, tt0 = 0;
+        d.addEventListener("touchstart", function (e) { if (e.touches.length === 1) { tx0 = e.touches[0].clientX; ty0 = e.touches[0].clientY; tt0 = Date.now(); } }, { passive: true });
+        d.addEventListener("touchend", function (e) {
+          if (!tt0 || Date.now() - tt0 > 600 || !d.getSelection().isCollapsed) { tt0 = 0; return; }
+          var dx = e.changedTouches[0].clientX - tx0, dy = e.changedTouches[0].clientY - ty0; tt0 = 0;
+          if (Math.abs(dx) > 64 && Math.abs(dy) < 46) rdStep(dx < 0 ? 1 : -1);
+        }, { passive: true });
         ["mouseup", "keyup", "touchend"].forEach(function (ev) { d.addEventListener(ev, rdTipSoon); });
         var timer = 0;
         d.addEventListener("scroll", function () { rdTipHide(); clearTimeout(timer); timer = setTimeout(function () { rdSave(); }, 400); });
@@ -6495,16 +6542,41 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       return S.canEdit ? '<button type="button" class="linkbtn" data-act="abox-on" data-t="' + esc(tp.id) + '">「' + esc(tp.title) + "」放回去</button>" : "「" + esc(tp.title) + "」";
     }).join("") + "</p>";
   }
+  /* 收剪报的动效：一张小纸条从卡片飞进目标盒子 / 剪报夹 / 收件匣 */
+  function flySlip(r0, target) {
+    if (!r0 || !target || REDUCE || !LK().motion || !document.body.animate) return;
+    var r1b = target.getBoundingClientRect();
+    if (!r1b.width || (r1b.bottom < 0 && r0.bottom < 0)) return;
+    var f = document.createElement("div");
+    f.className = "fly-slip"; f.setAttribute("aria-hidden", "true");
+    f.style.cssText = "left:" + Math.round(r0.left + r0.width / 2 - 30) + "px;top:" + Math.round(r0.top + 8) + "px";
+    document.body.appendChild(f);
+    var dx = r1b.left + r1b.width / 2 - (r0.left + r0.width / 2), dy = r1b.top + r1b.height * 0.3 - r0.top - 8;
+    f.animate([
+      { transform: "translate(0,0) rotate(0deg) scale(1)", opacity: 1 },
+      { transform: "translate(" + dx * 0.55 + "px," + (dy * 0.45 - 36) + "px) rotate(-7deg) scale(.9)", opacity: 1, offset: 0.55 },
+      { transform: "translate(" + dx + "px," + dy + "px) rotate(4deg) scale(.4)", opacity: 0.1 }
+    ], { duration: 520, easing: "cubic-bezier(.3,.7,.4,1)" }).onfinish = function () { f.remove(); };
+    setTimeout(function () { if (f.parentNode) f.remove(); }, 900);
+  }
   /* 剪报换地方：v 是 b:盒子 id / 领域 / ""（收件匣）/ nb:领域（在那个领域新立一盒再装进去） */
   function clipMove(id, v) {
     var c = (S.data.clips || {})[id]; if (!c) return;
     if (/^nb:/.test(v)) { S.boxOpen = { track: v.slice(3), clip: id }; render(); var bt = document.getElementById("box-title"); if (bt) bt.focus(); return; }
     var bx = /^b:/.test(v) ? TOPIC[v.slice(2)] : null, upd = bx ? { box: bx.id, track: bx.track } : { box: "", track: v || "" };
     var was = S.archPick;
+    var srcEl = document.querySelector('.cl-card select[data-id="' + id + '"], .apanel select[data-id="' + id + '"]');
+    var r0 = srcEl && srcEl.closest(".cl-card, tr") ? srcEl.closest(".cl-card, tr").getBoundingClientRect() : null;
     put("clips", id, Object.assign({}, c, upd, { ut: new Date().toISOString() }));
     /* 剪报夹里最后一篇装进盒了，就把那一盒打开 */
     if (/^cf:/.test(was || "") && bx && !looseClips(was.slice(3)).length) S.archPick = bx.id;
     render();
+    if (r0 && S.route === "archive") {
+      var tg = bx ? document.querySelector('.abox[data-t="' + bx.id + '"]')
+        : upd.track ? document.querySelector('.afold[data-t="cf:' + upd.track + '"]')
+        : document.querySelector(".atray");
+      flySlip(r0, tg);
+    }
     toast(bx ? "装进了「" + bx.title + "」" : upd.track ? "挂进了「" + domInfo(upd.track).name + "」的剪报夹" : "放进了收件匣");
   }
   function boxRemove(id) {
@@ -6856,7 +6928,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       : '<a class="cl-t" href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.title) + ' <span class="cl-wait">待补全文</span></a>';
     var del = S.clipDel === c.id ? '<span class="jdel">删掉这篇？<button type="button" class="linkbtn danger" data-act="clip-del-yes" data-id="' + esc(c.id) + '">删除</button><button type="button" class="linkbtn" data-act="clip-del-no">取消</button></span>'
       : '<button type="button" class="linkbtn" data-act="clip-del" data-id="' + esc(c.id) + '">删除</button>';
-    return '<li class="cl-card' + (full ? "" : " link") + '">' + title + '<p class="cl-m">' + esc(meta) + "</p>" +
+    return '<li class="cl-card' + (full ? "" : " link") + '"' + (S.canEdit ? ' draggable="true" data-clip="' + esc(c.id) + '"' : "") + ">" + title + '<p class="cl-m">' + esc(meta) + "</p>" +
       (c.note ? '<p class="cl-why">' + esc(c.note) + "</p>" : full && c.excerpt ? '<p class="cl-ex">' + esc(c.excerpt) + "……</p>" : "") +
       '<div class="cl-acts"><a class="linkbtn" href="' + esc(c.url) + '" target="_blank" rel="noopener">原文 ↗</a>' + placeSel(c, true) + del + "</div></li>";
   }
@@ -8880,7 +8952,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
-    $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML());
+    $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML() + keysHTML());
     wallPack();
     if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);
     filmMount();
@@ -8965,6 +9037,32 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     setTimeout(function () { var el = document.getElementById("d-" + id); if (el) el.scrollIntoView({ block: "start", behavior: "smooth" }); }, 80);
   }
 
+  /* 键盘在书墙上走：左右方向键在书与书之间移动焦点，回车上展台 */
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "ArrowLeft" && e.key !== "ArrowRight") return;
+    var cur = e.target.closest && e.target.closest('.wall [data-act="pick"]');
+    if (!cur) return;
+    e.preventDefault();
+    var list = Array.prototype.slice.call(document.querySelectorAll('.wall [data-act="pick"]'));
+    var i = list.indexOf(cur) + (e.key === "ArrowRight" ? 1 : -1);
+    if (i >= 0 && i < list.length) list[i].focus();
+  });
+  /* ? 弹出快捷键单 */
+  function keysHTML() {
+    if (!S.keysOpen) return "";
+    var rows = [["Ctrl / Cmd + K", "全站搜索"], ["← →（书墙上）", "在书与书之间移动，回车上展台"], ["← →（阅读器）", "上一部分 / 下一部分，手机上左右滑"],
+      ["Esc", "关掉阅读器、弹层、小窗"], ["空格（跟读播放器）", "播放 / 暂停这一句"], ["← → r（跟读播放器）", "上一句 / 下一句 / 重播"], ["h · k（跟读播放器）", "换字幕显示 · 标记背熟"], ["?", "打开 / 收起这张单子"]];
+    return '<div class="add-sheet" role="dialog" aria-modal="true" aria-labelledby="ks-h"><div class="add-card ks-card"><h2 id="ks-h">快捷键</h2><table class="ks-t">' +
+      rows.map(function (r) { return "<tr><td><kbd>" + esc(r[0]) + "</kbd></td><td>" + esc(r[1]) + "</td></tr>"; }).join("") +
+      '</table><div class="btns"><button type="button" class="btn small" data-act="keys-close">知道了</button></div></div></div>';
+  }
+  document.addEventListener("keydown", function (e) {
+    if (e.key !== "?" || e.ctrlKey || e.metaKey || e.altKey) return;
+    var tg = e.target, tag = tg && tg.tagName;
+    if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (tg && tg.isContentEditable) || RD || CK) return;
+    e.preventDefault();
+    S.keysOpen = !S.keysOpen; render();
+  });
   document.addEventListener("mouseover", function (e) {
     var b = e.target.closest && e.target.closest(".cb.dusty");
     if (!b) return;
@@ -9030,6 +9128,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "rv-flip") { if (S.review) { S.review.flip = !S.review.flip; render(); } return; }
     if (act === "rv-grade") { var RV = S.review; if (RV && RV.flip) { var gg = t.getAttribute("data-g"); gradeCard(RV.q[RV.i], gg); RV[gg === "good" ? "good" : "again"]++; RV.i++; RV.flip = false; render(); } return; }
     if (act === "exp-all") { expAll(); return; }
+    if (act === "keys-close") { S.keysOpen = false; render(); return; }
     if (act === "ritual-close") { S.ritual = null; if (!t.getAttribute("href")) { render(); return; } setTimeout(render, 0); return; }
     if (act === "ritual-none") { var rtf = document.getElementById("ritual-form"); if (rtf) { Array.prototype.forEach.call(rtf.querySelectorAll(".rt-on"), function (x) { x.checked = false; }); ritualSave(rtf); } return; }
     if (act === "abox-new") { S.boxOpen = { track: t.getAttribute("data-t") || (TOPIC[S.archPick] || {}).track || "" }; render(); var bt = document.getElementById("box-title"); if (bt) bt.focus(); return; }
@@ -9135,6 +9234,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (e.key === "Escape" && OV) { ovClose(); return; }
     if (e.key === "Escape" && S.ritual) { S.ritual = null; render(); return; }
     if (e.key === "Escape" && S.review) { S.review = null; render(); return; }
+    if (e.key === "Escape" && S.keysOpen) { S.keysOpen = false; render(); return; }
     if (e.key === "Escape" && (S.addOpen || S.domOpen || S.boxOpen)) { S.addOpen = null; S.domOpen = null; S.boxOpen = null; render(); return; }
     if (e.key === "Escape" && S.lookOpen) { S.lookOpen = false; render(); var lb = document.querySelector(".look-btn"); if (lb) lb.focus(); }
   });
@@ -9163,6 +9263,42 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     else if (k === "r" || k === "R") filmPlayCue(cur);
     else if (k === "h" || k === "H") { var ms = FILM_MODES.map(function (m) { return m[0]; }); FILM.mode = ms[(ms.indexOf(FILM.mode) + 1) % ms.length]; filmPaint(); }
     else if (k === "k" || k === "K") filmToggleKnown(cur);
+  });
+  /* 拖拽归档：把剪报卡片拖到档案盒、剪报夹或收件匣上 */
+  document.addEventListener("dragstart", function (e) {
+    var card = e.target.closest && e.target.closest(".cl-card[data-clip]");
+    if (!card || !e.dataTransfer) return;
+    e.dataTransfer.setData("text/yxl-clip", card.getAttribute("data-clip"));
+    e.dataTransfer.effectAllowed = "move";
+    document.body.classList.add("drag-clip");
+  });
+  document.addEventListener("dragend", function () {
+    document.body.classList.remove("drag-clip");
+    document.querySelectorAll(".drop-ok").forEach(function (el) { el.classList.remove("drop-ok"); });
+  });
+  function dropTarget(e) {
+    var el = e.target.closest && e.target.closest('.abox[data-t]:not([data-t^="cf:"]), .afold, .atray');
+    return el || null;
+  }
+  document.addEventListener("dragover", function (e) {
+    if (!e.dataTransfer || Array.prototype.indexOf.call(e.dataTransfer.types, "text/yxl-clip") < 0) return;
+    var tg = dropTarget(e);
+    document.querySelectorAll(".drop-ok").forEach(function (el) { if (el !== tg) el.classList.remove("drop-ok"); });
+    if (!tg) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = "move";
+    tg.classList.add("drop-ok");
+  });
+  document.addEventListener("drop", function (e) {
+    if (!e.dataTransfer) return;
+    var id = e.dataTransfer.getData("text/yxl-clip");
+    if (!id) return;
+    var tg = dropTarget(e);
+    document.body.classList.remove("drag-clip");
+    if (!tg) return;
+    e.preventDefault();
+    var v = tg.classList.contains("atray") ? "" : tg.classList.contains("afold") ? tg.getAttribute("data-t").slice(3) : "b:" + tg.getAttribute("data-t");
+    clipMove(id, v);
   });
   document.addEventListener("change", function (e) {
     var t = e.target;
@@ -9226,6 +9362,18 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (document.activeElement) document.activeElement.blur();
     S.dirty = false; render(); toast("已记下");
   });
+  /* 微立体：滚动时摆件比书慢半拍地浮一浮（很轻；减少动态或关掉动静就没有） */
+  var pxRaf = 0;
+  window.addEventListener("scroll", function () {
+    if (REDUCE || pxRaf || S.route !== "shelf" || !LK().motion) return;
+    pxRaf = requestAnimationFrame(function () {
+      pxRaf = 0;
+      var y = window.scrollY;
+      document.querySelectorAll(".wall .deco").forEach(function (el, i) {
+        el.style.transform = "translateY(" + Math.max(-9, Math.min(9, (y % 2000) * 0.012 * ((i % 3) + 1))).toFixed(1) + "px)";
+      });
+    });
+  }, { passive: true });
   var wallT = 0;
   window.addEventListener("resize", function () { clearTimeout(wallT); wallT = setTimeout(function () { var w = document.querySelector(".wall"); if (w && Math.abs(w.clientWidth - WALL_W) > 1) wallRefresh(); }, 150); });
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(function () { if (document.querySelector(".wall")) wallRefresh(); });
@@ -9234,7 +9382,12 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   window.addEventListener("hashchange", function () {
     if (OV) ovClose(true);
     var r = readHash();
-    S.route = r; S.confirmDel = null; render(true);
+    S.route = r; S.confirmDel = null;
+    /* 切页时淡接一下（浏览器支持且没开“减少动态”才用） */
+    if (document.startViewTransition && !REDUCE && LK().motion) {
+      try { document.startViewTransition(function () { render(true); }); return; } catch (e) { /* 退回直接画 */ }
+    }
+    render(true);
   });
 
   /* ---------- 启动 ---------- */
