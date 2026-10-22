@@ -733,6 +733,48 @@ button.stp .stp-tx{display:flex}
 .rt-st{display:inline-block;opacity:0;animation:rt-stamp .55s cubic-bezier(.2,1.5,.4,1) forwards}
 @keyframes rt-stamp{0%{opacity:0;transform:scale(2.2) rotate(-14deg)}55%{opacity:1;transform:scale(.9) rotate(1deg)}78%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
 @media (prefers-reduced-motion: reduce){.rt-st{animation:none;opacity:1}}
+/* 全站搜索（Ctrl+K） */
+.tb-srch{flex:none;display:inline-grid;place-items:center;width:38px;height:38px;border:0;border-radius:50%;background:none;color:var(--ink-2);cursor:pointer}
+.tb-srch:hover{background:var(--paper);color:var(--ink)}
+.tb-srch:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.ck{position:fixed;inset:0;z-index:92;background:rgba(28,24,20,.42);display:flex;justify-content:center;align-items:flex-start;padding:9vh 16px 16px}
+.ck-panel{width:min(640px,100%);max-height:74vh;display:flex;flex-direction:column;background:var(--leaf);border-radius:14px;box-shadow:0 30px 60px -28px rgba(0,0,0,.6);overflow:hidden}
+.ck-bar{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--rule)}
+.ck-ic{flex:none;font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
+.ck-in{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:16px;color:var(--ink);outline:none}
+.ck-res{overflow:auto;padding:4px 8px 10px;overscroll-behavior:contain}
+.ck-g{margin:10px 8px 3px;font-family:var(--f-ui);font-size:11.5px;letter-spacing:.14em;color:var(--ink-3)}
+.ck-it{display:flex;flex-direction:column;gap:1px;width:100%;text-align:left;padding:8px 10px;border:0;border-radius:8px;background:none;font:inherit;cursor:pointer}
+.ck-it b{font-size:15px;font-weight:600;line-height:1.5}
+.ck-it span{font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ck-it[aria-selected="true"],.ck-it:hover{background:var(--paper)}
+.ck-it[aria-selected="true"]{box-shadow:inset 2.5px 0 0 var(--seal)}
+.ck-none{padding:22px 12px;font-family:var(--f-ui);font-size:14px;color:var(--ink-3)}
+.ck-foot{margin:0;padding:9px 16px;border-top:1px solid var(--rule);font-family:var(--f-ui);font-size:11.5px;color:var(--ink-3)}
+@media (max-width:640px){ .ck{padding:12px} .ck-foot{display:none} }
+/* 摘抄册 */
+.mkbook{--hy:#E5BB2E;--hg:#4FA35C;--hb:#3F86D6;--hp:#D45C86}
+.mkbook .pstats{margin-top:16px}
+.mkf-c{display:inline-flex;gap:8px;align-items:center;margin-left:10px}
+.mkf-dot{width:24px;height:24px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;padding:0;box-shadow:inset 0 0 0 2px var(--leaf)}
+.mkf-dot.c-y{background:var(--hy)}.mkf-dot.c-g{background:var(--hg)}.mkf-dot.c-b{background:var(--hb)}.mkf-dot.c-p{background:var(--hp)}
+.mkf-dot[aria-pressed="true"]{border-color:var(--ink)}
+.mkb-src{margin-top:36px;padding-left:16px;border-left:3px solid var(--c);max-width:860px}
+.mkb-src h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px;margin:0 0 14px}
+.mkb-src h2 small{font-family:var(--f-ui);font-size:12.5px;font-weight:500;color:var(--ink-3)}
+.mkb-src ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+.mkb-m{position:relative;padding:2px 0 2px 16px}
+.mkb-m.c-y{--hl:var(--hy)}.mkb-m.c-g{--hl:var(--hg)}.mkb-m.c-b{--hl:var(--hb)}.mkb-m.c-p{--hl:var(--hp)}
+.mkb-m::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:4.5px;border-radius:2px;background:var(--hl)}
+.mkb-m blockquote{margin:0;font-family:var(--f-display);font-size:15.5px;line-height:1.9}
+.mkb-n{margin:7px 0 0;font-size:14px;line-height:1.7;color:var(--ink-2);padding-left:10px;border-left:2px dashed var(--rule-strong)}
+.mkb-meta{margin:5px 0 0;font-family:var(--f-ui);font-size:12px;color:var(--ink-3)}
+.mkb-print{margin-top:40px}
+@media print{
+  .topbar,.banner,.shelf-seg,.chips,.mkf-c,.mkb-print,.mkb-meta .linkbtn,#toast{display:none!important}
+  body{background:#FFF}
+  .mkb-m{break-inside:avoid}
+}
 /* 复习翻卡 */
 .rv-card{width:min(520px,100%)}
 .rv-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}

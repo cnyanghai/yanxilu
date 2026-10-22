@@ -733,6 +733,48 @@ button.stp .stp-tx{display:flex}
 .rt-st{display:inline-block;opacity:0;animation:rt-stamp .55s cubic-bezier(.2,1.5,.4,1) forwards}
 @keyframes rt-stamp{0%{opacity:0;transform:scale(2.2) rotate(-14deg)}55%{opacity:1;transform:scale(.9) rotate(1deg)}78%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
 @media (prefers-reduced-motion: reduce){.rt-st{animation:none;opacity:1}}
+/* 全站搜索（Ctrl+K） */
+.tb-srch{flex:none;display:inline-grid;place-items:center;width:38px;height:38px;border:0;border-radius:50%;background:none;color:var(--ink-2);cursor:pointer}
+.tb-srch:hover{background:var(--paper);color:var(--ink)}
+.tb-srch:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
+.ck{position:fixed;inset:0;z-index:92;background:rgba(28,24,20,.42);display:flex;justify-content:center;align-items:flex-start;padding:9vh 16px 16px}
+.ck-panel{width:min(640px,100%);max-height:74vh;display:flex;flex-direction:column;background:var(--leaf);border-radius:14px;box-shadow:0 30px 60px -28px rgba(0,0,0,.6);overflow:hidden}
+.ck-bar{display:flex;align-items:center;gap:10px;padding:13px 16px;border-bottom:1px solid var(--rule)}
+.ck-ic{flex:none;font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
+.ck-in{flex:1;min-width:0;border:0;background:none;font:inherit;font-size:16px;color:var(--ink);outline:none}
+.ck-res{overflow:auto;padding:4px 8px 10px;overscroll-behavior:contain}
+.ck-g{margin:10px 8px 3px;font-family:var(--f-ui);font-size:11.5px;letter-spacing:.14em;color:var(--ink-3)}
+.ck-it{display:flex;flex-direction:column;gap:1px;width:100%;text-align:left;padding:8px 10px;border:0;border-radius:8px;background:none;font:inherit;cursor:pointer}
+.ck-it b{font-size:15px;font-weight:600;line-height:1.5}
+.ck-it span{font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.ck-it[aria-selected="true"],.ck-it:hover{background:var(--paper)}
+.ck-it[aria-selected="true"]{box-shadow:inset 2.5px 0 0 var(--seal)}
+.ck-none{padding:22px 12px;font-family:var(--f-ui);font-size:14px;color:var(--ink-3)}
+.ck-foot{margin:0;padding:9px 16px;border-top:1px solid var(--rule);font-family:var(--f-ui);font-size:11.5px;color:var(--ink-3)}
+@media (max-width:640px){ .ck{padding:12px} .ck-foot{display:none} }
+/* 摘抄册 */
+.mkbook{--hy:#E5BB2E;--hg:#4FA35C;--hb:#3F86D6;--hp:#D45C86}
+.mkbook .pstats{margin-top:16px}
+.mkf-c{display:inline-flex;gap:8px;align-items:center;margin-left:10px}
+.mkf-dot{width:24px;height:24px;border-radius:50%;border:2.5px solid transparent;cursor:pointer;padding:0;box-shadow:inset 0 0 0 2px var(--leaf)}
+.mkf-dot.c-y{background:var(--hy)}.mkf-dot.c-g{background:var(--hg)}.mkf-dot.c-b{background:var(--hb)}.mkf-dot.c-p{background:var(--hp)}
+.mkf-dot[aria-pressed="true"]{border-color:var(--ink)}
+.mkb-src{margin-top:36px;padding-left:16px;border-left:3px solid var(--c);max-width:860px}
+.mkb-src h2{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 12px;margin:0 0 14px}
+.mkb-src h2 small{font-family:var(--f-ui);font-size:12.5px;font-weight:500;color:var(--ink-3)}
+.mkb-src ul{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:16px}
+.mkb-m{position:relative;padding:2px 0 2px 16px}
+.mkb-m.c-y{--hl:var(--hy)}.mkb-m.c-g{--hl:var(--hg)}.mkb-m.c-b{--hl:var(--hb)}.mkb-m.c-p{--hl:var(--hp)}
+.mkb-m::before{content:"";position:absolute;left:0;top:5px;bottom:5px;width:4.5px;border-radius:2px;background:var(--hl)}
+.mkb-m blockquote{margin:0;font-family:var(--f-display);font-size:15.5px;line-height:1.9}
+.mkb-n{margin:7px 0 0;font-size:14px;line-height:1.7;color:var(--ink-2);padding-left:10px;border-left:2px dashed var(--rule-strong)}
+.mkb-meta{margin:5px 0 0;font-family:var(--f-ui);font-size:12px;color:var(--ink-3)}
+.mkb-print{margin-top:40px}
+@media print{
+  .topbar,.banner,.shelf-seg,.chips,.mkf-c,.mkb-print,.mkb-meta .linkbtn,#toast{display:none!important}
+  body{background:#FFF}
+  .mkb-m{break-inside:avoid}
+}
 /* 复习翻卡 */
 .rv-card{width:min(520px,100%)}
 .rv-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
@@ -4417,7 +4459,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     journal: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20c-1.5-2-1.5-5 0-7s1.5-5 0-7M17 18c-1.5-2-1.5-5 0-7s1.5-5 0-7"></path></svg>'
   };
   function railHTML() {
-    var r = S.route, sec = /^[lc]-/.test(r) ? "home" : r === "shelf" || r === "archive" || /^[tbr]-/.test(r) ? "shelf" : r;
+    var r = S.route, sec = /^[lc]-/.test(r) ? "home" : r === "shelf" || r === "archive" || r === "marks" || /^[tbr]-/.test(r) ? "shelf" : r;
     function it(id, label, extra) { return '<a href="#' + id + '"' + (sec === id ? ' aria-current="page"' : "") + ">" + ICON[id] + "<span>" + label + "</span>" + (extra || "") + "</a>"; }
     var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接"];
     var modeH = '<span class="mode ' + mode[0] + '"><i></i>' + mode[1] + "</span>";
@@ -4426,9 +4468,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       modeH = me ? '<a class="mode db acct" href="/account" title="Baba 账号：' + esc(me.name || "") + '"><i></i><span class="acct-n">' + esc(me.name || "我的账号") + "</span></a>"
         : '<a class="mode login" href="' + esc(SRV.loginHref()) + '"><i></i>登录</a>';
     }
+    var srch = '<button type="button" class="tb-srch" data-act="cmdk" title="全站搜索（Ctrl + K）" aria-label="全站搜索"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><line x1="13.4" y1="13.4" x2="17.6" y2="17.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>';
     return '<div class="tb-in"><a class="brand" href="#home" aria-label="研习录，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>研习录</b></a>' +
       '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + it("shelf", "书架") + it("journal", "足迹") + "</nav>" +
-      modeH + "</div>";
+      srch + modeH + "</div>";
   }
 
   /* ---------- 专题（独立页面，新标签页打开；按 reportGroups 分组） ---------- */
@@ -5796,7 +5839,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     ["mouseup", "keyup", "touchend"].forEach(function (ev) { el.addEventListener(ev, function (e) { if (!e.target.closest(".rd-tip, .rd-pop, .rd-bar, .rd-foot, .rd-side")) rdTipSoon(); }); });
     if (RD.side) rdSideToggle(true);
     el.querySelector('[data-act="rd-close"]').focus();
-    if (kind === "pdf") { pdfStart(id); return; }
+    if (kind === "pdf") { RD.jumpMark = opt && opt.mark; pdfStart(id); return; }
     (clip ? clipEp(id, clip) : ebBytes(id).then(epOpen)).then(function (ep) {
       if (!RD || RD.id !== id) return;
       RD.ep = ep;
@@ -5805,8 +5848,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
         sel.innerHTML = ep.toc.map(function (t, k) { return '<option value="' + k + '">' + "　".repeat(Math.min(3, t.depth || 0)) + esc(t.label) + "</option>"; }).join("");
         sel.disabled = false;
       } else sel.hidden = true;
-      var saved = rdResume(id, "epub");
-      rdShow(saved && saved.i < ep.spine.length ? saved.i : 0, saved ? { y: saved.y } : null);
+      var mk0 = opt && opt.mark && (S.data.marks || {})[opt.mark];
+      if (mk0 && mk0.book === id) rdShow(Math.max(0, Math.min(ep.spine.length - 1, mk0.loc || 0)), { mark: opt.mark });
+      else { var saved = rdResume(id, "epub"); rdShow(saved && saved.i < ep.spine.length ? saved.i : 0, saved ? { y: saved.y } : null); }
     }).catch(rdFail);
   }
   function readerClose() {
@@ -6015,8 +6059,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
           var tm = 0;
           view.addEventListener("scroll", function () { rdTipHide(); clearTimeout(tm); tm = setTimeout(function () { rdSave(); }, 300); });
           pdfOutline();
-          var sv = rdResume(id, "pdf");
-          pdfGo(sv && sv.i ? Math.min(P.n, sv.i) : 1, null, sv ? sv.y : 0);
+          var jm = RD.jumpMark && (S.data.marks || {})[RD.jumpMark];
+          if (jm && jm.book === id) pdfGo(Math.max(1, Math.min(P.n, jm.loc || 1)), RD.jumpMark);
+          else { var sv = rdResume(id, "pdf"); pdfGo(sv && sv.i ? Math.min(P.n, sv.i) : 1, null, sv ? sv.y : 0); }
           return null;
         });
       });
@@ -6445,8 +6490,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
   function shelfSeg(cur) {
     var nBooks = allItems().filter(function (id) { return ITEMS[id].kind === "book"; }).length;
-    return '<nav class="seg shelf-seg" aria-label="书架里的两件家具"><a href="#shelf"' + (cur === "shelf" ? ' aria-current="page"' : "") + ">书墙 · " + nBooks + " 本</a>" +
-      '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "") + "</a></nav>";
+    var mkN = allMarks().length;
+    return '<nav class="seg shelf-seg" aria-label="书架里的几件家具"><a href="#shelf"' + (cur === "shelf" ? ' aria-current="page"' : "") + ">书墙 · " + nBooks + " 本</a>" +
+      '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "") + "</a>" +
+      (mkN ? '<a href="#marks"' + (cur === "marks" ? ' aria-current="page"' : "") + ">摘抄册 · " + mkN + " 条</a>" : "") + "</nav>";
   }
   function archiveHTML() {
     var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null;
@@ -7381,6 +7428,168 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<section class="panel" aria-labelledby="jr-h"><h2 id="jr-h">随手记</h2><p class="meta">课表之外读的书、查的资料、想明白的事，在这里记一笔；关联到《涛动周期录》的会盖在它那一行。</p>' + form +
       journalList(js.slice(0, 8), true) + impLineHTML() + "</section></div></div>";
   }
+
+  /* ---------- 摘抄册：所有书和剪报里的划线、批注汇成一册 ---------- */
+  function allMarks() {
+    var M = S.data.marks || {};
+    return Object.keys(M).map(function (k) { return Object.assign({ id: k }, M[k]); }).filter(function (m) { return m.exact; });
+  }
+  function markSrcInfo(bid) {
+    if (/^cl-/.test(bid)) {
+      var c = (S.data.clips || {})[bid];
+      return c ? { title: c.title, kind: "剪报", track: c.track && domExists(c.track) ? c.track : "", ok: c.status !== "link" } : null;
+    }
+    var it = ITEMS[bid];
+    return it ? { title: it.title, kind: "书", track: it.home || "", ok: !!ebookOf(bid) } : null;
+  }
+  function markOpen(mid) {
+    var m = (S.data.marks || {})[mid]; if (!m) return;
+    readerOpen(m.book, { mark: mid });
+  }
+  function marksPageHTML() {
+    var ms = allMarks(), F = S.mkFilter || (S.mkFilter = { t: "all", c: "" });
+    var bySrc = {}, order = [];
+    ms.forEach(function (m) { if (!bySrc[m.book]) { bySrc[m.book] = []; order.push(m.book); } bySrc[m.book].push(m); });
+    order.sort(function (a, b) {
+      function w(x) { var inf = markSrcInfo(x); return !inf ? 9 : /^cl-/.test(x) ? 5 : 1; }
+      return w(a) - w(b) || String(a).localeCompare(String(b));
+    });
+    var nNote = ms.filter(function (m) { return m.note; }).length, tracks = [];
+    order.forEach(function (bid) { var inf = markSrcInfo(bid); if (inf && inf.track && tracks.indexOf(inf.track) < 0) tracks.push(inf.track); });
+    function chip(k, label) { return '<button type="button" class="chipbtn" data-act="mk-f" data-f="' + esc(k) + '" aria-pressed="' + (F.t === k) + '">' + esc(label) + "</button>"; }
+    var chips = chip("all", "全部") + tracks.map(function (k) { return chip(k, domInfo(k).name); }).join("");
+    var dots = '<span class="mkf-c" role="group" aria-label="按颜色">' + MK_COLORS.map(function (c) {
+      return '<button type="button" class="mkf-dot c-' + c[0] + '" data-act="mk-fc" data-c="' + c[0] + '" aria-pressed="' + (F.c === c[0]) + '" aria-label="只看' + c[1] + '色划线" title="只看' + c[1] + '色"></button>';
+    }).join("") + "</span>";
+    var secs = order.map(function (bid) {
+      var inf = markSrcInfo(bid) || { title: "已删除的来源", kind: "", track: "", ok: 0 };
+      if (F.t !== "all" && inf.track !== F.t) return "";
+      var list = bySrc[bid].filter(function (m) { return !F.c || (m.c || "y") === F.c; });
+      if (!list.length) return "";
+      list.sort(function (a, b) { return (a.loc - b.loc) || ((a.pos || 0) - (b.pos || 0)); });
+      var col = inf.track ? domInfo(inf.track).col : "var(--ink-3)";
+      var rows = list.map(function (m) {
+        return '<li class="mkb-m c-' + esc(m.c || "y") + '"><blockquote>' + esc(m.exact) + "</blockquote>" +
+          (m.note ? '<p class="mkb-n">' + esc(m.note) + "</p>" : "") +
+          '<p class="mkb-meta">' + esc([m.label, String(m.t || "").slice(0, 10)].filter(Boolean).join(" · ")) +
+          (inf.ok ? ' · <button type="button" class="linkbtn" data-act="mk-open" data-id="' + esc(m.id) + '">回到原处</button>' : "") + "</p></li>";
+      }).join("");
+      var quote = inf.kind === "剪报" ? ["", ""] : ["《", "》"];
+      return '<section class="mkb-src" style="--c:' + col + '"><h2><i aria-hidden="true"></i>' + quote[0] + esc(inf.title) + quote[1] +
+        ' <small>' + esc([inf.kind, inf.track ? domInfo(inf.track).name : "", list.length + " 条"].filter(Boolean).join(" · ")) + "</small></h2><ul>" + rows + "</ul></section>";
+    }).join("");
+    return '<div class="view mkbook">' + bannerHTML() +
+      '<header class="phead"><div><p class="eyebrow">书架 · 摘抄册</p><h1>摘抄册<span class="h1-sub">划线与批注</span></h1>' +
+      '<p class="lede">所有书和剪报里的划线、批注，按来源抄在一册上。点「回到原处」接着读那一段。</p>' + shelfSeg("marks") +
+      '<div class="chips" role="group" aria-label="只看">' + chips + dots + "</div></div>" +
+      '<div class="pstats"><div><b>' + ms.length + "<span>条划线</span></b></div><div><b>" + nNote + '<span>条批注</span></b></div><div><b>' + order.length + "<span>处来源</span></b></div></div></header>" +
+      (secs || '<p class="empty-line">还没有划线。打开一本挂了电子书的书或一篇剪报，选中文字就能划线、写批注。</p>') +
+      (ms.length ? '<p class="meta mkb-print"><button type="button" class="linkbtn" data-act="mk-print">打印这一册，或存成 PDF</button></p>' : "") + "</div>";
+  }
+
+  /* ---------- 全站搜索（Ctrl+K 命令面板） ---------- */
+  var CK = null;
+  function ckItems() {
+    var out = [];
+    function add(g, t, su, go) { t = String(t || ""); su = String(su || ""); out.push({ g: g, t: t, s: su, go: go, x: (t + " " + su).toLowerCase() }); }
+    add("页面", "线网图", "首页 · 今日路线", { h: "home" });
+    add("页面", "书墙", "书架", { h: "shelf" });
+    add("页面", "档案架", "研究课题与剪报", { h: "archive" });
+    add("页面", "足迹", "经折集章册 · 打卡", { h: "journal" });
+    if (allMarks().length) add("页面", "摘抄册", "划线与批注", { h: "marks" });
+    COURSES.forEach(function (k) { add("页面", subjName(k) + " 课程页", k === "film" ? "跟读播放器" : "全部课程与讲义", { h: "c-" + k }); });
+    allItems().forEach(function (id) { var it = ITEMS[id]; if (!isHidden(id)) add("书", it.title, (it.by || "") + (it.home ? " · " + domInfo(it.home).name : ""), { pick: id }); });
+    Object.keys(EN_ITEM || {}).forEach(function (id) { var x = EN_ITEM[id]; add("书", x.title, (x.en || "") + " · 英语", { pick: id }); });
+    if (clipsOn()) clipList().forEach(function (c) { add("剪报", c.title, [c.author, clipKindLabel(c), c.note].filter(Boolean).join(" · "), c.status !== "link" ? { clip: c.id } : { url: c.url }); });
+    TOPICS.forEach(function (tp) { add("档案盒", tp.title, tp.question || domInfo(tp.track).name, { box: tp.id }); });
+    if (PLAN) Object.keys(PLAN.lessons).forEach(function (subj) {
+      lessonList(subj).forEach(function (l, i) {
+        add("讲义", l.title, subjName(subj) + " 第 " + (i + 1) + " 课", i < issuedN(subj) ? { h: "l-" + lessonKey(subj, i) } : { h: "c-" + subj });
+      });
+    });
+    Object.keys(LIB.books).forEach(function (bid) {
+      var b = LIB.books[bid], bt = (ITEMS[bid] || {}).title || "";
+      Object.keys(b.deep || {}).forEach(function (n) {
+        var ch = b.chapters.filter(function (c) { return c.n === +n; })[0];
+        add("精读", "《" + bt + "》第" + (CN[+n] || n) + "章", ch ? ch.title : "", { h: "r-" + bid + "-" + n });
+      });
+    });
+    REPORTS.forEach(function (rp) { add("专题", rp.title, rp.desc || "", { url: reportHref(rp) }); });
+    journalEntries().slice(0, 300).forEach(function (e) { if (e.text) add("足迹", e.text.slice(0, 44), e.date + (e.ref ? " · " + refLabel(e.ref) : ""), { day: e.date }); });
+    allMarks().forEach(function (m) { var inf = markSrcInfo(m.book); if (inf) add("划线", m.exact.slice(0, 44), (m.note ? m.note.slice(0, 24) + " · " : "") + inf.title, { mark: m.id }); });
+    return out;
+  }
+  function ckOpen() {
+    if (CK) { CK.el.querySelector(".ck-in").focus(); return; }
+    var el = document.createElement("div");
+    el.className = "ck"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-label", "全站搜索");
+    el.innerHTML = '<div class="ck-panel"><div class="ck-bar"><span class="ck-ic" aria-hidden="true">找</span>' +
+      '<input class="ck-in" type="search" autocomplete="off" spellcheck="false" placeholder="搜书、剪报、档案盒、讲义、精读、足迹、划线……" aria-label="全站搜索"></div>' +
+      '<div class="ck-res" role="listbox" aria-label="搜索结果"></div><p class="ck-foot">↑ ↓ 选中 · 回车打开 · Esc 关闭</p></div>';
+    document.body.appendChild(el);
+    CK = { el: el, all: ckItems(), hits: [], sel: 0 };
+    var inp = el.querySelector(".ck-in");
+    inp.addEventListener("input", function () { ckPaint(inp.value); });
+    inp.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowDown") { e.preventDefault(); ckMove(1); }
+      else if (e.key === "ArrowUp") { e.preventDefault(); ckMove(-1); }
+      else if (e.key === "Enter") { e.preventDefault(); var it = CK.hits[CK.sel]; if (it) ckGo(it); }
+    });
+    el.addEventListener("mousedown", function (e) { if (e.target === el) ckClose(); });
+    el.addEventListener("click", function (e) { var b = e.target.closest(".ck-it"); if (b) ckGo(CK.hits[+b.getAttribute("data-i")]); });
+    ckPaint("");
+    inp.focus();
+  }
+  function ckClose() { if (CK) { CK.el.remove(); CK = null; } }
+  function ckMove(d) {
+    if (!CK || !CK.hits.length) return;
+    CK.sel = (CK.sel + d + CK.hits.length) % CK.hits.length;
+    var list = CK.el.querySelectorAll(".ck-it");
+    Array.prototype.forEach.call(list, function (b, i) { b.setAttribute("aria-selected", String(i === CK.sel)); });
+    if (list[CK.sel]) list[CK.sel].scrollIntoView({ block: "nearest" });
+  }
+  function ckPaint(q) {
+    q = (q || "").trim().toLowerCase();
+    var groups = ["页面", "书", "剪报", "档案盒", "讲义", "精读", "专题", "足迹", "划线"], hits = [];
+    if (!q) hits = CK.all.filter(function (it) { return it.g === "页面"; });
+    else {
+      var scored = [];
+      CK.all.forEach(function (it) {
+        var i = it.x.indexOf(q); if (i < 0) return;
+        scored.push({ it: it, sc: (it.t.toLowerCase().indexOf(q) >= 0 ? 0 : 100) + i });
+      });
+      scored.sort(function (a, b) { return a.sc - b.sc; });
+      var per = {};
+      scored.forEach(function (x) {
+        var g = x.it.g; per[g] = (per[g] || 0) + 1;
+        if (per[g] <= 6 && hits.length < 30) hits.push(x.it);
+      });
+      hits.sort(function (a, b) { return groups.indexOf(a.g) - groups.indexOf(b.g); });
+    }
+    CK.hits = hits; CK.sel = 0;
+    var h = "", lastG = "";
+    hits.forEach(function (it, i) {
+      if (it.g !== lastG) { h += '<p class="ck-g">' + it.g + "</p>"; lastG = it.g; }
+      h += '<button type="button" class="ck-it" role="option" data-i="' + i + '" aria-selected="' + (i === 0) + '"><b>' + esc(it.t) + "</b>" + (it.s ? "<span>" + esc(it.s) + "</span>" : "") + "</button>";
+    });
+    CK.el.querySelector(".ck-res").innerHTML = h || '<p class="ck-none">没找到。书名、人名、课名、问题都能搜。</p>';
+  }
+  function ckGo(it) {
+    if (!it) return;
+    var go = it.go;
+    ckClose();
+    if (go.url) { window.open(go.url, "_blank", "noopener"); return; }
+    if (go.clip) { readerOpen(go.clip); return; }
+    if (go.mark) { markOpen(go.mark); return; }
+    if (go.pick) { S.shelfPick = go.pick; S.shelfF = "all"; if (S.route === "shelf") render(); else location.hash = "#shelf"; return; }
+    if (go.box) { S.archPick = go.box; S.archF = "all"; if (S.route === "archive") render(); else location.hash = "#archive"; return; }
+    if (go.day) { S.foldDay = go.day; S.foldStart = Math.max(0, Math.min((PLAN.weeks || 12) - 3, Math.floor(dayDiff(PLAN.start, go.day) / 7) - 1)); if (S.route === "journal") render(); else location.hash = "#journal"; return; }
+    if (go.h) { if (S.route === go.h) render(); else location.hash = "#" + go.h; }
+  }
+  document.addEventListener("keydown", function (e) {
+    if ((e.ctrlKey || e.metaKey) && !e.altKey && (e.key === "k" || e.key === "K")) { e.preventDefault(); e.stopImmediatePropagation(); if (CK) ckClose(); else ckOpen(); return; }
+    if (e.key === "Escape" && CK) { e.preventDefault(); e.stopImmediatePropagation(); ckClose(); }
+  }, true);
 
   /* ---------- 晚间仪式：打卡 · 盖章 ----------
    * 30 秒流程：整页摆出当天的几站，学完的亮着，点灭没学完的，写一句话，盖章。
@@ -8564,7 +8773,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
 
   /* ---------- 主渲染 ---------- */
-  var ROUTES = { home: 1, shelf: 1, archive: 1, journal: 1, clip: 1 };
+  var ROUTES = { home: 1, shelf: 1, archive: 1, journal: 1, clip: 1, marks: 1 };
   COURSES.forEach(function (k) { ROUTES["c-" + k] = 1; });
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
   Object.keys(LIB.books).forEach(function (b) {
@@ -8586,6 +8795,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     else if (/^c-/.test(r)) html = courseHTML(r.slice(2));
     else if (r === "shelf") html = shelfHTML();
     else if (r === "archive") html = archiveHTML();
+    else if (r === "marks") html = marksPageHTML();
     else if (r === "clip") html = clipPageHTML();
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
@@ -8730,6 +8940,11 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "arch-f") { S.archF = t.getAttribute("data-f"); render(); return; }
     if (act === "ritual") { ritualOpen(t.getAttribute("data-d")); return; }
     if (act === "review") { reviewOpen(); return; }
+    if (act === "cmdk") { ckOpen(); return; }
+    if (act === "mk-open") { markOpen(t.getAttribute("data-id")); return; }
+    if (act === "mk-f") { (S.mkFilter = S.mkFilter || { t: "all", c: "" }).t = t.getAttribute("data-f"); render(); return; }
+    if (act === "mk-fc") { var mcf = S.mkFilter = S.mkFilter || { t: "all", c: "" }, mc = t.getAttribute("data-c"); mcf.c = mcf.c === mc ? "" : mc; render(); return; }
+    if (act === "mk-print") { window.print(); return; }
     if (act === "review-close") { S.review = null; render(); return; }
     if (act === "rv-flip") { if (S.review) { S.review.flip = !S.review.flip; render(); } return; }
     if (act === "rv-grade") { var RV = S.review; if (RV && RV.flip) { var gg = t.getAttribute("data-g"); gradeCard(RV.q[RV.i], gg); RV[gg === "good" ? "good" : "again"]++; RV.i++; RV.flip = false; render(); } return; }
