@@ -741,6 +741,32 @@ button.stp .stp-tx{display:flex}
 .rt-st{display:inline-block;opacity:0;animation:rt-stamp .55s cubic-bezier(.2,1.5,.4,1) forwards}
 @keyframes rt-stamp{0%{opacity:0;transform:scale(2.2) rotate(-14deg)}55%{opacity:1;transform:scale(.9) rotate(1deg)}78%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
 @media (prefers-reduced-motion: reduce){.rt-st{animation:none;opacity:1}}
+/* 书墙光阴：清晨微凉、黄昏偏暖、夜里暗下来 */
+.wall::after{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;z-index:4;opacity:0;transition:opacity 1.2s,background 1.2s}
+.wall.tod-dawn::after{opacity:1;background:linear-gradient(170deg,rgba(195,210,228,.10),rgba(248,224,200,.05) 45%,transparent 75%)}
+.wall.tod-dusk::after{opacity:1;background:linear-gradient(115deg,rgba(242,180,106,.13),rgba(222,140,80,.05) 50%,transparent 80%)}
+.wall.tod-night::after{opacity:1;background:linear-gradient(rgba(36,30,52,.16),rgba(36,30,52,.10) 60%,rgba(60,40,24,.05))}
+.wall.tod-night{box-shadow:inset 0 14px 22px -12px rgba(25,18,10,.55)}
+.wall.tod-night .d-candle{filter:brightness(1.15) drop-shadow(0 0 14px rgba(255,190,90,.55))}
+@media (prefers-color-scheme: dark){
+  .wall.tod-dawn::after,.wall.tod-dusk::after{opacity:.5}
+  .wall.tod-night::after{background:linear-gradient(rgba(10,8,18,.22),rgba(10,8,18,.12) 60%,transparent)}
+}
+/* 学习年轮 */
+.yearring{margin-top:26px}
+.yr-wrap{display:flex;justify-content:center}
+.yearring svg{width:min(380px,100%);height:auto}
+.yr-base{fill:none;stroke:var(--rule);stroke-width:1}
+.yearring line{stroke-linecap:round}
+.yr-0{stroke:var(--rule);stroke-width:1.1}
+.yr-f{stroke:var(--rule);stroke-width:.8;opacity:.45}
+.yr-s{stroke:var(--ink-2);stroke-width:2.1}
+.yr-r{stroke:#A97E4F;stroke-width:1.8}
+.yr-tick{stroke:var(--rule-strong);stroke-width:1}
+.yr-mo{font-family:var(--f-ui);font-size:10.5px;fill:var(--ink-3)}
+.yr-td{stroke:var(--seal);stroke-width:2.6}
+.yr-y{font-family:var(--f-num);font-size:26px;font-weight:600;fill:var(--ink)}
+.yr-n{font-family:var(--f-ui);font-size:12px;fill:var(--ink-3)}
 /* 全站搜索（Ctrl+K） */
 .tb-srch{flex:none;display:inline-grid;place-items:center;width:38px;height:38px;border:0;border-radius:50%;background:none;color:var(--ink-2);cursor:pointer}
 .tb-srch:hover{background:var(--paper);color:var(--ink)}
@@ -5056,7 +5082,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       hangSet("float");
       try { window.localStorage.setItem(LOOK_KEY, JSON.stringify(v)); } catch (e) { /* 存不了就只在这次生效 */ }
     }
-    return { v: LOOK_V, read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : LOOK_DEF.read, motion: v.motion !== false, dust: v.dust !== false,
+    return { v: LOOK_V, read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : LOOK_DEF.read, motion: v.motion !== false, dust: v.dust !== false, tod: v.tod !== false,
       fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : LOOK_DEF.fx, color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : LOOK_DEF.color,
       deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice(),
       place: (function () { var o = {}, p = v.place && typeof v.place === "object" ? v.place : {}; Object.keys(p).forEach(function (k) { if (DECO[k] && typeof p[k] === "string") o[k] = p[k]; }); return o; })() };
@@ -5066,7 +5092,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var v = Object.assign({}, LK(), patch); S.look = v;
     try { window.localStorage.setItem(LOOK_KEY, JSON.stringify(v)); } catch (e) { /* 存不了就只在这次生效 */ }
   }
-  function wallClass() { var L = LK(); return "wall hang-" + hangGet() + " read-" + L.read + " fx-" + L.fx + " pal-" + L.color + (REDUCE || !L.motion ? " still" : ""); }
+  /* 时辰：书墙跟着一天的光走（清晨微凉、黄昏偏暖、夜里暗下来） */
+  function todName() { var h = new Date().getHours(); return h >= 5 && h < 8 ? "dawn" : h >= 8 && h < 16 ? "day" : h >= 16 && h < 19 ? "dusk" : "night"; }
+  function wallClass() { var L = LK(); return "wall hang-" + hangGet() + " read-" + L.read + " fx-" + L.fx + " pal-" + L.color + (L.tod ? " tod-" + todName() : "") + (REDUCE || !L.motion ? " still" : ""); }
+  setInterval(function () { var wl = document.querySelector(".wall"); if (wl && wl.className !== "wall measuring" && wl.className.indexOf("measuring") < 0) { var c = wallClass(); if (wl.className !== c) wl.className = c; } }, 600000);
   /* ---------- 书的颜色 ----------
    * 名色：每个领域一个经典色系，同一格里相邻两本一定不同色；青花瓷、橙与驼：全墙一套色；布面：原来的低饱和布色（按书名散开）。
    * 每项 [名字, 颜色, 字色]：字色可空，深色书脊用烫金字、浅色书脊用深字。 */
@@ -5405,6 +5434,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<section class="lk-sec"><h3>在读的书</h3>' + radios(READS, L.read, "look-read", "data-v", false) + "</section>" +
       '<section class="lk-sec"><h3>书的颜色</h3>' + radios(COLORS, L.color, "look-color", "data-v", false, true) + "</section>" +
       '<section class="lk-sec"><h3>指到一本书时</h3>' + radios(FXS, L.fx, "look-fx", "data-v", false) + "</section>" +
+      '<section class="lk-sec lk-row"><h3>跟着时辰变光</h3><button type="button" class="lk-sw" data-act="look-tod" role="switch" aria-checked="' + L.tod + '"><i aria-hidden="true"></i>' + (L.tod ? "开" : "关") + '</button><p class="meta">书墙跟着一天的光走：清晨微凉，黄昏偏暖，夜里暗下来、烛光更亮。</p></section>' +
       '<section class="lk-sec lk-row"><h3>久不读的书落灰</h3><button type="button" class="lk-sw" data-act="look-dust" role="switch" aria-checked="' + L.dust + '"><i aria-hidden="true"></i>' + (L.dust ? "开" : "关") + '</button><p class="meta">在读的书 30 天没碰，书顶会积一层薄灰，鼠标扫过就擦掉。</p></section>' +
       '<section class="lk-sec lk-row"><h3>摆件的动静</h3><button type="button" class="lk-sw" data-act="look-motion" role="switch" aria-checked="' + L.motion + '"' + (REDUCE ? " disabled" : "") + '><i aria-hidden="true"></i>' + (L.motion && !REDUCE ? "开" : "关") + '</button><p class="meta">' + (REDUCE ? "系统设了减少动态效果，摆件都静着。" : "沙在流、烛火跳、热气往上冒、钟在走。") + "</p></section>" +
       '<section class="lk-sec"><h3>摆件 <small>每件可以指定放在哪一格的书后面，也可以让它自己找空当</small></h3><ul class="lk-list">' + tiles + "</ul></section>" +
@@ -7548,6 +7578,48 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<div class="btns">' + (canStamp ? '<button type="button" class="btn small" data-act="ritual" data-d="' + d + '">' + (d === bjToday() ? "今晚打卡 · 盖章" : "补上这天的章") + "</button>" : "") +
       (rec && rec.file ? '<a class="btn ghost small" href="' + esc(lessonHref(rec.file)) + '">当天路线单</a>' : "") + reStamp + "</div></section>";
   }
+  /* 学习年轮：一年绕一圈，一天一粒木纹，学了就长、翻了书上色 */
+  function yearRingHTML(JD) {
+    var yr = bjToday().slice(0, 4), start = yr + "-01-01", t = bjToday();
+    var readDays = {};
+    Object.keys(S.data.reading || {}).forEach(function (k) {
+      var dd = (S.data.reading[k] || {}).days || {};
+      Object.keys(dd).forEach(function (d) { readDays[d] = 1; });
+    });
+    var days = [], tot = 0, nDays = 0, i = 0;
+    for (var d = start; d.slice(0, 4) === yr && i < 370; d = addDaysBJ(d, 1), i++) {
+      var fut = d > t, mn = fut ? 0 : dayInfo(d, JD).min;
+      if (!fut && (mn || readDays[d])) nDays++;
+      tot += mn;
+      days.push({ d: d, mn: mn, rd: !fut && readDays[d], fut: fut });
+    }
+    var N = days.length, R0 = 96, C = 165, tIdx = -1;
+    var segs = days.map(function (x, k) {
+      var a = -Math.PI / 2 + k / N * 2 * Math.PI, cos = Math.cos(a), sin = Math.sin(a);
+      if (x.d === t) tIdx = k;
+      var ln = x.mn >= 180 ? 36 : x.mn >= 90 ? 28 : x.mn >= 30 ? 20 : x.mn > 0 ? 13 : x.rd ? 10 : 5;
+      var cls = x.fut ? "yr-f" : x.mn ? "yr-s" : x.rd ? "yr-r" : "yr-0";
+      var tip = cnDate(x.d) + (x.mn ? " · " + Math.round(x.mn) + " 分钟" : x.rd ? " · 翻了书" : x.fut ? "" : " · 没学");
+      return '<line class="' + cls + '" x1="' + r1(C + cos * R0) + '" y1="' + r1(C + sin * R0) + '" x2="' + r1(C + cos * (R0 + ln)) + '" y2="' + r1(C + sin * (R0 + ln)) + '"><title>' + esc(tip) + "</title></line>";
+    }).join("");
+    var ticks = "";
+    for (var m = 1; m <= 12; m++) {
+      var di = dayDiff(start, yr + "-" + pad2(m) + "-01"), a2 = -Math.PI / 2 + di / N * 2 * Math.PI;
+      ticks += '<line class="yr-tick" x1="' + r1(C + Math.cos(a2) * (R0 - 8)) + '" y1="' + r1(C + Math.sin(a2) * (R0 - 8)) + '" x2="' + r1(C + Math.cos(a2) * (R0 - 2)) + '" y2="' + r1(C + Math.sin(a2) * (R0 - 2)) + '"/>' +
+        (m % 3 === 1 ? '<text class="yr-mo" x="' + r1(C + Math.cos(a2) * (R0 - 22)) + '" y="' + r1(C + Math.sin(a2) * (R0 - 22) + 4) + '" text-anchor="middle">' + m + "月</text>" : "");
+    }
+    var today = "";
+    if (tIdx >= 0) {
+      var a3 = -Math.PI / 2 + tIdx / N * 2 * Math.PI, c3 = Math.cos(a3), s3 = Math.sin(a3);
+      today = '<line class="yr-td" x1="' + r1(C + c3 * (R0 + 1)) + '" y1="' + r1(C + s3 * (R0 + 1)) + '" x2="' + r1(C + c3 * (R0 + 10)) + '" y2="' + r1(C + s3 * (R0 + 10)) + '"><title>今天</title></line>';
+    }
+    return '<section class="panel yearring" aria-labelledby="yr-h"><h2 id="yr-h">学习年轮</h2>' +
+      '<p class="meta">一年绕一圈，一天一粒。学得久，木纹就长；只翻了书没打卡的日子是浅浅一粒。</p>' +
+      '<div class="yr-wrap"><svg viewBox="0 0 330 330" role="img" aria-label="' + yr + ' 年的学习年轮：' + nDays + ' 天有动静，共 ' + hrs(tot) + ' 小时">' +
+      '<circle class="yr-base" cx="' + C + '" cy="' + C + '" r="' + R0 + '"/>' + ticks + segs + today +
+      '<text class="yr-y" x="' + C + '" y="' + (C - 8) + '" text-anchor="middle">' + yr + '</text>' +
+      '<text class="yr-n" x="' + C + '" y="' + (C + 16) + '" text-anchor="middle">' + hrs(tot) + " 小时 · " + nDays + " 天</text></svg></div></section>";
+  }
   function foldWS() {
     var weeks = PLAN.weeks || 12, cw = Math.max(0, Math.min(weeks - 1, Math.floor(dayDiff(PLAN.start, bjToday()) / 7)));
     var ws = S.foldStart != null ? S.foldStart : Math.max(0, cw - 2);
@@ -7581,7 +7653,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<section class="fold-mini-w" aria-label="全卷缩略"><div class="fold-scroll">' + foldMiniHTML(ws, JD) + "</div></section>" +
       '<div class="fd-grid">' + foldDayHTML(S.foldDay, JD) +
       '<section class="panel" aria-labelledby="jr-h"><h2 id="jr-h">随手记</h2><p class="meta">课表之外读的书、查的资料、想明白的事，在这里记一笔；关联到《涛动周期录》的会盖在它那一行。</p>' + form +
-      journalList(js.slice(0, 8), true) + impLineHTML() + "</section></div></div>";
+      journalList(js.slice(0, 8), true) + impLineHTML() + "</section></div>" + yearRingHTML(JD) + "</div>";
   }
 
   /* ---------- 摘抄册：所有书和剪报里的划线、批注汇成一册 ---------- */
@@ -9087,6 +9159,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "look-color") { lookSet({ color: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-motion") { lookSet({ motion: !LK().motion }); render(); return; }
     if (act === "look-dust") { lookSet({ dust: !LK().dust }); render(); return; }
+    if (act === "look-tod") { lookSet({ tod: !LK().tod }); render(); return; }
     if (act === "look-deco") { var dn = t.getAttribute("data-d"), dl = LK().deco.slice(), di = dl.indexOf(dn); if (di >= 0) dl.splice(di, 1); else dl.push(dn); lookSet({ deco: dl }); render(); return; }
     if (act === "look-reset") { hangSet("float"); lookSet({ v: LOOK_V, read: LOOK_DEF.read, fx: LOOK_DEF.fx, color: LOOK_DEF.color, motion: true, deco: DECO_DEFAULT.slice(), place: {} }); render(); return; }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = wallClass(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }
