@@ -5183,6 +5183,11 @@
     render(true);
   });
 
+  /* ---------- 手机装成 App：注册 Service Worker（只在自己的网站和 GitHub Pages 上） ---------- */
+  if ("serviceWorker" in navigator && (ON_SERVER || /\.github\.io$/.test(location.hostname))) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () { /* 注册不上就当普通网页 */ }); });
+  }
+
   /* ---------- 启动 ---------- */
   S.route = readHash();
   if (window.claude && typeof window.claude.use === "function") { render(); connect(); }

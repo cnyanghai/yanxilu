@@ -5,9 +5,13 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>研习录</title>
 <link rel="stylesheet" href="vendor/fonts/fonts.css">
+<link rel="manifest" href="vendor/pwa/manifest.json">
+<link rel="apple-touch-icon" href="vendor/pwa/icon-192.png">
+<link rel="icon" href="vendor/pwa/icon-192.png" type="image/png">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
 </head>
 <body>
+<meta name="theme-color" content="#F2EEE5">
 <style>
 /* 布局：顶部三个入口（线网 · 书架 · 足迹，手机上是底部标签栏）+ 居中的主栏；首页是全宽的线网图。
    字体：标题用思源宋体，正文思源黑体，数字 Barlow；颜色：纸色底、墨色字，每条学习线一种颜色，区域底色表示学习方向。 */
@@ -9536,6 +9540,11 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     render(true);
   });
+
+  /* ---------- 手机装成 App：注册 Service Worker（只在自己的网站和 GitHub Pages 上） ---------- */
+  if ("serviceWorker" in navigator && (ON_SERVER || /\.github\.io$/.test(location.hostname))) {
+    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () { /* 注册不上就当普通网页 */ }); });
+  }
 
   /* ---------- 启动 ---------- */
   S.route = readHash();

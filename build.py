@@ -47,6 +47,11 @@ assert server != full
 (root / "server/index.html").write_text(server, encoding="utf-8")
 print("dist/artifact.html", len(body.encode()), "bytes; index.html", len(full.encode()), "bytes; server/index.html", len(server.encode()), "bytes")
 
+# Service Worker：版本号跟着页面内容走，页面一变缓存整个换新
+import hashlib
+sw = (root / "src/sw.js").read_text(encoding="utf-8")
+(root / "sw.js").write_text(sw.replace("__YXL_SW_V__", hashlib.sha1(full.encode()).hexdigest()[:10]), encoding="utf-8")
+
 # 专题页：src/report-*.html 里的 /*@DATA@*/ 换成 reports/data/ 下的 JSON；知识专题没有数据文件，填 None
 REPORTS = {"report-consumption.html": ("consumption-population.json", "consumption-population.html"),
            "report-wealth.html": ("wealth.json", "wealth.html"),
