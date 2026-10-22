@@ -741,6 +741,27 @@ button.stp .stp-tx{display:flex}
 .rt-st{display:inline-block;opacity:0;animation:rt-stamp .55s cubic-bezier(.2,1.5,.4,1) forwards}
 @keyframes rt-stamp{0%{opacity:0;transform:scale(2.2) rotate(-14deg)}55%{opacity:1;transform:scale(.9) rotate(1deg)}78%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
 @media (prefers-reduced-motion: reduce){.rt-st{animation:none;opacity:1}}
+/* 复习翻卡 */
+.rv-card{width:min(520px,100%)}
+.rv-top{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.rv-top .eyebrow{margin:0}
+.rv-cd{display:flex;flex-direction:column;gap:14px;min-height:240px;padding:26px 24px 18px;border:1px solid var(--rule-strong);border-radius:12px;background:var(--paper);font:inherit;text-align:left;cursor:pointer;box-shadow:0 10px 18px -16px rgba(40,30,15,.55)}
+.rv-cd:focus-visible{outline:2px solid var(--indigo);outline-offset:3px}
+.rv-cd .front{font-family:var(--f-display);font-size:19px;font-weight:700;line-height:1.6}
+.rv-cd .back{font-size:15.5px;line-height:1.8;color:var(--ink-2);padding-top:12px;border-top:1px dashed var(--rule-strong)}
+.rv-cd .hint{font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
+.rv-cd .meta{margin-top:auto}
+.rv-acts{justify-content:flex-end}
+.rv-acts .btn.again{background:transparent;color:var(--seal);border:1.5px solid var(--seal)}
+.rv-end{text-align:center;align-items:center}
+/* 在读的书落灰 */
+.cb.dusty{filter:saturate(.75) brightness(.97);transition:filter .7s}
+.cb.dusty::after{content:"";position:absolute;left:0;right:0;top:0;height:44%;pointer-events:none;border-radius:inherit;opacity:1;transition:opacity .7s;
+  background:linear-gradient(rgba(205,196,176,.58),rgba(205,196,176,.2) 55%,transparent),radial-gradient(5px 2px at 24% 7%,rgba(226,218,198,.8),transparent 70%),radial-gradient(4px 2px at 62% 4%,rgba(226,218,198,.75),transparent 70%),radial-gradient(6px 2px at 84% 10%,rgba(226,218,198,.6),transparent 70%)}
+.cb.wiping{filter:none}
+.cb.wiping::after{opacity:0}
+/* 足迹册：还没翻到的日子印着淡章位 */
+.fd-ghost{fill:none;stroke:var(--rule-strong);stroke-width:1;stroke-dasharray:2.5 3.5;opacity:.45}
 a.stp:hover .stp-title{text-decoration:underline;text-underline-offset:3px}
 a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-radius:8px}
 .brow-a{display:block;color:inherit;text-decoration:none}
@@ -4138,7 +4159,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     mode: "pending", canEdit: false, db: null,
     data: Object.assign(emptyData(), clone(REC.data || {})), local: emptyData(),
     route: "home", bookTab: "intro", openCh: {}, flipped: {}, hl: null, rv: null,
-    confirmDel: null, dirty: false, raf: 0,
+    confirmDel: null, dirty: false, raf: 0, wiped: {},
     zoom: "gist", secOpen: {}, prShown: {}, prDone: {}, pendingSec: null,
     practice: "switch", sw: { A1: true, A2: true, A3: true, A4: true, A5: true },
     mapMode: "trunk", mapOpen: {}, nestOff: {}
@@ -4162,6 +4183,34 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       if (c.prompt && !s) return false; // 嵌入式自测题：读到并自评过之后才进入复习
       return !s || !s.due || s.due <= t;
     });
+  }
+  /* 已进入复习轮换、今天到期的概念卡 */
+  function reviewDue() {
+    var t = today();
+    return CARDS.filter(function (c) { var s = S.data.cards[c.id]; return s && s.due && s.due <= t; });
+  }
+  function reviewOpen() {
+    var q = reviewDue().map(function (c) { return c.id; });
+    if (!q.length) { toast("今天没有到期的卡。"); return; }
+    S.review = { q: q, i: 0, flip: false, good: 0, again: 0 };
+    render();
+  }
+  function reviewHTML() {
+    var R = S.review; if (!R) return "";
+    if (R.i >= R.q.length) {
+      return '<div class="add-sheet rv-sheet" role="dialog" aria-modal="true" aria-labelledby="rv-h"><div class="add-card rv-card rv-end">' +
+        '<p class="eyebrow">间隔复习 · 1 / 3 / 7 / 16 / 35 天</p><h2 id="rv-h">今天的卡翻完了</h2>' +
+        '<p class="meta">记住 ' + R.good + " 张 · 没记住 " + R.again + ' 张。没记住的回到第 1 盒，明天再来。</p>' +
+        '<div class="btns"><button type="button" class="btn small" data-act="review-close">收起</button></div></div></div>';
+    }
+    var c = CARD[R.q[R.i]], b = LIB.books[c.book];
+    return '<div class="add-sheet rv-sheet" role="dialog" aria-modal="true" aria-labelledby="rv-h"><div class="add-card rv-card">' +
+      '<div class="rv-top"><p class="eyebrow" id="rv-h">复习 · 第 ' + (R.i + 1) + " / " + R.q.length + ' 张</p><button type="button" class="linkbtn" data-act="review-close">先不复习</button></div>' +
+      '<button type="button" class="rv-cd' + (R.flip ? " flipped" : "") + '" data-act="rv-flip" aria-pressed="' + R.flip + '">' +
+      '<span class="front">' + esc(c.f) + "</span>" + (R.flip ? '<span class="back">' + esc(c.b) + "</span>" : '<span class="hint">先自己说出答案，点卡片翻面</span>') +
+      '<span class="meta">《' + esc(b ? b.title : c.book) + "》第" + CN[c.ch] + "章 · " + esc(cardMeta(c.id)) + "</span></button>" +
+      (R.flip ? '<div class="btns rv-acts"><button type="button" class="btn again" data-act="rv-grade" data-g="again">没记住</button><button type="button" class="btn" data-act="rv-grade" data-g="good">记住了</button></div>'
+        : '<div class="btns rv-acts"><button type="button" class="btn ghost" data-act="rv-flip">翻面</button></div>') + "</div></div>";
   }
   function gradeCard(id, g) {
     var cur = S.data.cards[id] || {}, box = cur.box || 0;
@@ -4302,8 +4351,34 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
   /* 服务器版：把 claude.ai 版导出的记录文件（JSON）导进当前账号。只在足迹页底部留一行小字 */
   function impLineHTML() {
-    if (!ON_SERVER || S.mode !== "db" || !SRV.me()) return "";
-    return '<p class="meta imp-line">' + (S.impBusy ? "正在导入记录……" : '<label class="linkbtn">从 claude.ai 版的记录文件导入<input type="file" id="imp-file" accept=".json,application/json" hidden></label>') + "</p>";
+    var exp = S.canEdit && recCount() ? '<button type="button" class="linkbtn" data-act="exp-all">' + (S.expBusy ? "正在整理备份……" : "备份：导出全部记录（JSON）") + "</button>" : "";
+    if (!ON_SERVER || S.mode !== "db" || !SRV.me()) return exp ? '<p class="meta imp-line">' + exp + "</p>" : "";
+    return '<p class="meta imp-line">' + exp + (exp ? " · " : "") + (S.impBusy ? "正在导入记录……" : '<label class="linkbtn">从记录文件导入<input type="file" id="imp-file" accept=".json,application/json" hidden></label>') + "</p>";
+  }
+  /* 备份：所有记录打成一个 JSON（剪报正文也取下来），文件能原样导回 */
+  function expAll() {
+    if (S.expBusy) return;
+    S.expBusy = true; render();
+    var data = {};
+    COLLS.forEach(function (c) { if (c !== "lessons" && Object.keys(S.data[c] || {}).length) data[c] = clone(S.data[c]); });
+    var clipIds = Object.keys(S.data.clips || {});
+    var p = Promise.resolve();
+    if (S.mode === "db" && S.db && clipIds.length) {
+      var bodies = {};
+      clipIds.forEach(function (id) {
+        p = p.then(function () { return S.db.collection("clipbody").doc(id).get().then(function (sn) { if (sn.exists) bodies[id] = sn.data(); }, function () {}); });
+      });
+      p = p.then(function () { if (Object.keys(bodies).length) data.clipbody = bodies; });
+    }
+    p.then(function () {
+      var me = ON_SERVER && SRV.me();
+      var blob = new Blob([JSON.stringify({ app: "研习录", exported: new Date().toISOString(), user: (me && me.name) || "", data: data })], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob); a.download = "研习录备份-" + today() + ".json";
+      document.body.appendChild(a); a.click();
+      setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
+      S.expBusy = false; render(); toast("备份下载好了，放个妥当的地方。");
+    }, function () { S.expBusy = false; render(); toast("备份没做成，稍后再试。"); });
   }
   function recCount() { var n = 0; COLLS.forEach(function (c) { if (c !== "lessons") n += Object.keys(S.data[c] || {}).length; }); return n; }
   function bannerHTML() {
@@ -4397,6 +4472,22 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   var SHELF_COL = { geo: "--ln-geo", fin: "--ln-cfa", co: "--ln-rev", cycle: "--ln-tao", fut: "--ln-mm" };
   function hashN(s) { var x = 7; for (var i = 0; i < s.length; i++) x = (x * 31 + s.charCodeAt(i)) % 100003; return x; }
   function isLatin(t) { return /^[\x00-\xff]*$/.test(t); }
+  /* 落灰：在读的书 30 天没碰（没翻电子书、没动章节进度、没划线），书顶积一层薄灰，扫过就擦掉 */
+  function lastTouch(id) {
+    var t = "";
+    var r = S.data.reading && S.data.reading[id];
+    if (r && r.t && r.t > t) t = r.t;
+    var pg = S.data.progress || {};
+    Object.keys(pg).forEach(function (k) { var e = pg[k]; if (e && e.t && (k === id || k.indexOf(id + "-") === 0) && e.t > t) t = e.t; });
+    marksOf(id).forEach(function (m) { if (m.t && m.t > t) t = m.t; });
+    return t;
+  }
+  function dustDays(id) {
+    if (!LK().dust || S.wiped[id]) return 0;
+    var t = lastTouch(id); if (!t) return 0;
+    var n = Math.floor((Date.now() - new Date(t).getTime()) / 86400000);
+    return n >= 30 ? n : 0;
+  }
   /* 一本书读到哪：精读模块按章节，《大国政治的悲剧》再参考课表里地缘线学到第几课 */
   function bookState(id) {
     var s = st(id), b = LIB.books[id], r = { s: s, pct: 0, done: 0, total: 0 };
@@ -4775,7 +4866,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       hangSet("float");
       try { window.localStorage.setItem(LOOK_KEY, JSON.stringify(v)); } catch (e) { /* 存不了就只在这次生效 */ }
     }
-    return { v: LOOK_V, read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : LOOK_DEF.read, motion: v.motion !== false,
+    return { v: LOOK_V, read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : LOOK_DEF.read, motion: v.motion !== false, dust: v.dust !== false,
       fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : LOOK_DEF.fx, color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : LOOK_DEF.color,
       deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice(),
       place: (function () { var o = {}, p = v.place && typeof v.place === "object" ? v.place : {}; Object.keys(p).forEach(function (k) { if (DECO[k] && typeof p[k] === "string") o[k] = p[k]; }); return o; })() };
@@ -4891,8 +4982,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
         (by ? '<span class="cf-by">' + esc(by) + " 著</span>" : "") + '<span class="cf-ft">' + ft + '</span><i class="cf-bar" style="--p:' + Math.round(rp * 100) + '%" aria-hidden="true"></i><i class="sc-rule" aria-hidden="true"></i></span>' +
         '<i class="cf-ed" aria-hidden="true"></i>' + (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "") + "</button>";
     }
-    var cls = "cb v-" + variant + (light ? " light" : "") + (state ? " " + state : "") + dimc;
-    return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + base + ";height:" + h + "px;width:" + w + "px;--dp:" + Math.round(h * 0.64) + "px" + (paint.ink ? ";--tx:" + paint.ink : "") + (state === "doing" ? ";--rp:" + Math.round(14 + 70 * rp) + "%" : "") + '" title="《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (paint.name ? " · " + esc(paint.name) : "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "") + '">' +
+    var dust = state === "doing" ? dustDays(it.id) : 0;
+    var cls = "cb v-" + variant + (light ? " light" : "") + (state ? " " + state : "") + (dust ? " dusty" : "") + dimc;
+    return '<button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + base + ";height:" + h + "px;width:" + w + "px;--dp:" + Math.round(h * 0.64) + "px" + (paint.ink ? ";--tx:" + paint.ink : "") + (state === "doing" ? ";--rp:" + Math.round(14 + 70 * rp) + "%" : "") + '" title="《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (paint.name ? " · " + esc(paint.name) : "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "") + (dust ? " · 搁了 " + dust + " 天了，扫一下灰" : "") + '">' +
       t + foot + rib + tail + "</button>";
   }
   var CFA_CODE = { "cfa-ethics": "ETH", "cfa-quant": "QM", "cfa-econ": "EC", "cfa-fsa": "FSA", "cfa-corp": "CI", "cfa-equity": "EQ", "cfa-fi": "FI", "cfa-deriv": "DER", "cfa-alt": "ALT", "cfa-pm": "PM" };
@@ -5123,6 +5215,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       '<section class="lk-sec"><h3>在读的书</h3>' + radios(READS, L.read, "look-read", "data-v", false) + "</section>" +
       '<section class="lk-sec"><h3>书的颜色</h3>' + radios(COLORS, L.color, "look-color", "data-v", false, true) + "</section>" +
       '<section class="lk-sec"><h3>指到一本书时</h3>' + radios(FXS, L.fx, "look-fx", "data-v", false) + "</section>" +
+      '<section class="lk-sec lk-row"><h3>久不读的书落灰</h3><button type="button" class="lk-sw" data-act="look-dust" role="switch" aria-checked="' + L.dust + '"><i aria-hidden="true"></i>' + (L.dust ? "开" : "关") + '</button><p class="meta">在读的书 30 天没碰，书顶会积一层薄灰，鼠标扫过就擦掉。</p></section>' +
       '<section class="lk-sec lk-row"><h3>摆件的动静</h3><button type="button" class="lk-sw" data-act="look-motion" role="switch" aria-checked="' + L.motion + '"' + (REDUCE ? " disabled" : "") + '><i aria-hidden="true"></i>' + (L.motion && !REDUCE ? "开" : "关") + '</button><p class="meta">' + (REDUCE ? "系统设了减少动态效果，摆件都静着。" : "沙在流、烛火跳、热气往上冒、钟在走。") + "</p></section>" +
       '<section class="lk-sec"><h3>摆件 <small>每件可以指定放在哪一格的书后面，也可以让它自己找空当</small></h3><ul class="lk-list">' + tiles + "</ul></section>" +
       '<div class="lk-foot"><button type="button" class="linkbtn" data-act="look-reset">恢复默认</button><button type="button" class="btn small" data-act="look">好了</button></div></div>';
@@ -7199,7 +7292,11 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
         o.push(tx(cx, Y_DAY + 14, "一二三四五六日"[c], "fd-wd" + (c >= 5 ? " we" : "")) + tx(cx, Y_DAY + 33, String(+d.slice(8, 10)), "fd-dn" + (isT ? " today" : fut ? " fut" : "")));
         if (+d.slice(8, 10) === 1) o.push(tx(cx, Y_TOP - 10, (+d.slice(5, 7)) + " 月", "fd-mo", "middle") + '<line x1="' + cx + '" y1="' + (Y_TOP - 6) + '" x2="' + cx + '" y2="' + Y_TOP + '" class="fd-base"/>');
         if (isT) o.push('<rect x="' + (cx - COLW / 2 + 1) + '" y="' + (Y_DAY - 2) + '" width="' + (COLW - 2) + '" height="' + (Y_BAR + BARH - Y_DAY + 4) + '" rx="4" class="fd-today"/>' + tx(cx, Y_BAR + BARH + 20, "今日", "fd-tl", "middle"));
-        if (fut) continue;
+        if (fut) {
+          /* 还没翻到的日子：印好淡淡的章位，像一本等着盖章的空账册 */
+          lanes.forEach(function (ln, i2) { o.push('<circle cx="' + cx + '" cy="' + (Y_ROW + i2 * RH + RH / 2) + '" r="11" class="fd-ghost"/>'); });
+          continue;
+        }
         if (di.rec && (di.rec.done || []).indexOf("rev") >= 0) o.push('<g transform="translate(' + (cx + 15) + " " + (Y_DAY + 28.5) + ')" class="fd-chk"><circle r="7"/><text y="3.5" text-anchor="middle">检</text></g>');
         lanes.forEach(function (ln, i) {
           var ss = di.stamps.filter(function (s) { return ln.subjs.indexOf(s.subj) >= 0; });
@@ -7786,6 +7883,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       : mode === "plus" ? "目标线上多学一课，小时数多涨一点。"
       : "按今天的路线单学。哪一课没学完，下次从这一课接着学，不记欠账。";
     var btn = rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">今天的路线单</a>' : '<span class="meta">路线单每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>";
+    var rvN = S.canEdit ? reviewDue().length : 0;
+    if (rvN) btn += '<button type="button" class="btn ghost" data-act="review">概念卡复习 · 到期 ' + rvN + " 张</button>";
     var y = addDaysBJ(t, -1), yr = curStudy().days[y], warn = "";
     if (yr && !checkedIn(yr) && y !== PLAN.prep) warn = '<p class="ts-warn"><b>' + cnDate(y) + "还没打卡。</b>先按没学处理，那几课下次接着学，不记欠账。" + (S.canEdit ? '<button type="button" class="linkbtn" data-act="ritual" data-d="' + y + '">其实学了？现在补盖</button>' : "其实学了的话，晚上打卡时一起说，足迹和小时数都会补上。") + "</p>";
     return '<section class="tstrip" aria-labelledby="ts-h">' + head + '<div class="ts-route">' + route + "</div>" +
@@ -8499,7 +8598,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
-    $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML());
+    $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML());
     wallPack();
     if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);
     filmMount();
@@ -8584,6 +8683,13 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     setTimeout(function () { var el = document.getElementById("d-" + id); if (el) el.scrollIntoView({ block: "start", behavior: "smooth" }); }, 80);
   }
 
+  document.addEventListener("mouseover", function (e) {
+    var b = e.target.closest && e.target.closest(".cb.dusty");
+    if (!b) return;
+    S.wiped[b.getAttribute("data-id")] = 1;
+    b.classList.add("wiping");
+    setTimeout(function () { b.classList.remove("dusty", "wiping"); }, 700);
+  });
   document.addEventListener("click", function (e) {
     var pop = document.getElementById("mpop");
     if (pop && !pop.hidden && !e.target.closest("#mpop") && !e.target.closest('[data-act="mst"],[data-act="mgs"],[data-act="mhub"],[data-act="mlm"]')) closePop();
@@ -8623,6 +8729,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "look-fx") { lookSet({ fx: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-color") { lookSet({ color: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-motion") { lookSet({ motion: !LK().motion }); render(); return; }
+    if (act === "look-dust") { lookSet({ dust: !LK().dust }); render(); return; }
     if (act === "look-deco") { var dn = t.getAttribute("data-d"), dl = LK().deco.slice(), di = dl.indexOf(dn); if (di >= 0) dl.splice(di, 1); else dl.push(dn); lookSet({ deco: dl }); render(); return; }
     if (act === "look-reset") { hangSet("float"); lookSet({ v: LOOK_V, read: LOOK_DEF.read, fx: LOOK_DEF.fx, color: LOOK_DEF.color, motion: true, deco: DECO_DEFAULT.slice(), place: {} }); render(); return; }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = wallClass(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }
@@ -8630,6 +8737,11 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "abox") { S.archPick = t.getAttribute("data-t"); render(); var ap = document.querySelector(".apanel"); if (ap && window.innerWidth < 1100) ap.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
     if (act === "arch-f") { S.archF = t.getAttribute("data-f"); render(); return; }
     if (act === "ritual") { ritualOpen(t.getAttribute("data-d")); return; }
+    if (act === "review") { reviewOpen(); return; }
+    if (act === "review-close") { S.review = null; render(); return; }
+    if (act === "rv-flip") { if (S.review) { S.review.flip = !S.review.flip; render(); } return; }
+    if (act === "rv-grade") { var RV = S.review; if (RV && RV.flip) { var gg = t.getAttribute("data-g"); gradeCard(RV.q[RV.i], gg); RV[gg === "good" ? "good" : "again"]++; RV.i++; RV.flip = false; render(); } return; }
+    if (act === "exp-all") { expAll(); return; }
     if (act === "ritual-close") { S.ritual = null; if (!t.getAttribute("href")) { render(); return; } setTimeout(render, 0); return; }
     if (act === "ritual-none") { var rtf = document.getElementById("ritual-form"); if (rtf) { Array.prototype.forEach.call(rtf.querySelectorAll(".rt-on"), function (x) { x.checked = false; }); ritualSave(rtf); } return; }
     if (act === "abox-new") { S.boxOpen = { track: t.getAttribute("data-t") || (TOPIC[S.archPick] || {}).track || "" }; render(); var bt = document.getElementById("box-title"); if (bt) bt.focus(); return; }
@@ -8734,6 +8846,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && OV) { ovClose(); return; }
     if (e.key === "Escape" && S.ritual) { S.ritual = null; render(); return; }
+    if (e.key === "Escape" && S.review) { S.review = null; render(); return; }
     if (e.key === "Escape" && (S.addOpen || S.domOpen || S.boxOpen)) { S.addOpen = null; S.domOpen = null; S.boxOpen = null; render(); return; }
     if (e.key === "Escape" && S.lookOpen) { S.lookOpen = false; render(); var lb = document.querySelector(".look-btn"); if (lb) lb.focus(); }
   });
