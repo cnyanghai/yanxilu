@@ -709,6 +709,38 @@ svg.metro{display:block;width:100%;height:auto;font-family:var(--f-ui)}
 
 /* 今日路线的站可以点；各线到站一行可以点 */
 a.stp{color:inherit;text-decoration:none}
+button.stp{font:inherit;text-align:inherit;background:none;border:0;padding:0;color:inherit;cursor:pointer}
+button.stp:hover .stp-title{text-decoration:underline;text-underline-offset:3px}
+button.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-radius:6px}
+button.stp .stp-tx{display:flex}
+/* 晚间仪式：打卡 · 盖章 */
+.rt-card{width:min(560px,100%)}
+.rt-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px}
+.rt-s{display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--rule);border-radius:10px;background:var(--paper);transition:opacity .15s}
+.rt-s:has(.rt-on:not(:checked)){opacity:.5}
+.rt-tgl{flex:1;display:flex;align-items:center;gap:12px;cursor:pointer;min-width:0}
+.rt-tgl input{position:absolute;opacity:0;pointer-events:none}
+.rt-tgl i{flex:none;width:18px;height:18px;border-radius:50%;border:3px solid var(--c);background:transparent;box-sizing:border-box;transition:background .15s,box-shadow .15s}
+.rt-tgl input:checked + i{background:var(--c);box-shadow:0 0 0 4px color-mix(in srgb,var(--c) 20%,transparent)}
+.rt-tgl input:focus-visible + i{outline:2px solid var(--indigo);outline-offset:2px}
+.rt-tx{display:flex;flex-direction:column;min-width:0}
+.rt-tx b{font-size:15px;line-height:1.4}
+.rt-tx span{font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rt-min{display:inline-flex;align-items:baseline;gap:3px;font-family:var(--f-mono);font-size:13px;color:var(--ink-2)}
+.rt-min input{width:3.4em;font:inherit;text-align:right;padding:5px 6px;border:1px solid var(--rule);border-radius:7px;background:var(--leaf);color:var(--ink)}
+.rt-foot{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.rt-gap{flex:1}
+.rt-seal{flex:none;width:78px;height:78px;border-radius:50%;border:0;background:var(--seal);color:#FFF;cursor:pointer;display:grid;place-items:center;
+  box-shadow:inset 0 0 0 2.5px #FFF,inset 0 0 0 5px var(--seal),0 12px 20px -12px rgba(120,25,15,.85);transition:transform .12s}
+.rt-seal i{font-style:normal;font-family:var(--f-display);font-weight:900;font-size:19px;letter-spacing:.3em;padding-top:.3em;writing-mode:vertical-rl}
+.rt-seal:hover{transform:translateY(-2px)}
+.rt-seal:active{transform:translateY(3px) scale(.96)}
+.rt-seal:focus-visible{outline:2.5px solid var(--indigo);outline-offset:4px}
+.rt-done{align-items:center;text-align:center}
+.rt-sts{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin:4px 0}
+.rt-st{display:inline-block;opacity:0;animation:rt-stamp .55s cubic-bezier(.2,1.5,.4,1) forwards}
+@keyframes rt-stamp{0%{opacity:0;transform:scale(2.2) rotate(-14deg)}55%{opacity:1;transform:scale(.9) rotate(1deg)}78%{transform:scale(1.06)}100%{opacity:1;transform:scale(1)}}
+@media (prefers-reduced-motion: reduce){.rt-st{animation:none;opacity:1}}
 a.stp:hover .stp-title{text-decoration:underline;text-underline-offset:3px}
 a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-radius:8px}
 .brow-a{display:block;color:inherit;text-decoration:none}
@@ -7365,8 +7397,12 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     var notes = (rec && rec.note ? '<blockquote class="fdc-note">“' + esc(rec.note) + '”<span>晚上打卡时写的一句</span></blockquote>' : "") +
       je.map(function (e) { return '<blockquote class="fdc-note j">' + esc(e.text) + "<span>随手记" + (e.minutes ? " · " + esc(e.minutes) + " 分钟" : "") + (e.ref ? " · " + esc(refLabel(e.ref)) : "") + "</span></blockquote>"; }).join("");
     var empty = !rows && !notes ? '<p class="empty-line">这一天没有记录。</p>' : rec && !checkedIn(rec) && d < bjToday() ? '<p class="meta">这天还没打卡：学了的话，晚上打卡时一起说，章就补上。</p>' : "";
+    var canStamp = S.canEdit && d !== PLAN.prep && d <= bjToday() && !checkedIn(rec) &&
+      ((rec && rec.planned && rec.planned.length) || dayPlan(d).slots.length);
+    var reStamp = S.canEdit && checkedIn(rec) && rec.planned && rec.planned.length ? '<button type="button" class="linkbtn" data-act="ritual" data-d="' + d + '">改一下这天的章</button>' : "";
     return '<section class="fdc" aria-labelledby="fdc-h">' + head + (big ? '<div class="fdc-st">' + big + "</div>" : "") + (rows ? '<ul class="fdc-l">' + rows + "</ul>" : "") + notes + empty +
-      (rec && rec.file ? '<div class="btns"><a class="btn ghost small" href="' + esc(lessonHref(rec.file)) + '">当天路线单</a></div>' : "") + "</section>";
+      '<div class="btns">' + (canStamp ? '<button type="button" class="btn small" data-act="ritual" data-d="' + d + '">' + (d === bjToday() ? "今晚打卡 · 盖章" : "补上这天的章") + "</button>" : "") +
+      (rec && rec.file ? '<a class="btn ghost small" href="' + esc(lessonHref(rec.file)) + '">当天路线单</a>' : "") + reStamp + "</div></section>";
   }
   function foldWS() {
     var weeks = PLAN.weeks || 12, cw = Math.max(0, Math.min(weeks - 1, Math.floor(dayDiff(PLAN.start, bjToday()) / 7)));
@@ -7404,12 +7440,109 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       journalList(js.slice(0, 8), true) + impLineHTML() + "</section></div></div>";
   }
 
+  /* ---------- 晚间仪式：打卡 · 盖章 ----------
+   * 30 秒流程：整页摆出当天的几站，学完的亮着，点灭没学完的，写一句话，盖章。
+   * 写进 study.progress 文档（跟 study/checkin.js 同一套规则：done、status、minutes、note、checkedAt，
+   * 学完带课号的科目把 next 往前推），curStudy 会把它和构建快照合并，足迹和线网立刻跟着走。 */
+  function ritualSlots(d) {
+    var rec = curStudy().days[d];
+    var src = rec && rec.planned && rec.planned.length ? rec.planned : dayPlan(d).slots || [];
+    return src.filter(function (s) { return s.subj && s.subj !== "prep"; }).map(function (s) {
+      var o = { subj: s.subj, mins: s.mins || 0, title: s.title || "" };
+      if (typeof s.index === "number") o.index = s.index;
+      if (s.review) o.review = true;
+      return o;
+    });
+  }
+  function ritualOpen(d) {
+    if (!S.canEdit || !PLAN) return;
+    var slots = ritualSlots(d);
+    if (!slots.length) { toast("这一天没有排课。"); return; }
+    var rec = curStudy().days[d] || {};
+    S.ritual = { d: d, slots: slots, done0: rec.done || null, note0: rec.note || "", saved: null };
+    render();
+  }
+  function ritualStampLabel(s) { return s.review ? "回看" : s.subj === "en" ? "术语" : s.index != null ? s.index + 1 : "学"; }
+  function ritualHTML() {
+    var R = S.ritual; if (!R) return "";
+    if (R.saved) {
+      var sv = R.saved;
+      var stamps = sv.stamps.map(function (s, i) {
+        return '<span class="rt-st" style="animation-delay:' + (0.12 + i * 0.22) + 's"><svg viewBox="-30 -30 60 60" width="78" height="78" aria-hidden="true">' + stampSVG(s.subj, s.label, 0, 0, (hashN(R.d + s.subj) % 11) - 5, 1.1) + "</svg></span>";
+      }).join("");
+      return '<div class="add-sheet rt-sheet" role="dialog" aria-modal="true" aria-labelledby="rt-h"><div class="add-card rt-card rt-done">' +
+        '<p class="eyebrow">' + cnDate(R.d) + " · " + WD[wdOf(R.d)] + '</p><h2 id="rt-h">' + (sv.stamps.length ? "章盖上了" : "记下了：这天没学") + "</h2>" +
+        (stamps ? '<div class="rt-sts">' + stamps + "</div>" : "") +
+        '<p class="meta">' + (sv.stamps.length ? sv.stamps.length + " 枚章 · " + sv.min + " 分钟" + (sv.streak > 1 ? " · 连续 " + sv.streak + " 天" : "") : "没断没欠账，下次从同一课接着学。") + "</p>" +
+        '<div class="btns">' + (S.route !== "journal" ? '<a class="btn ghost small" href="#journal" data-act="ritual-close">去足迹看</a>' : "") + '<button type="button" class="btn small" data-act="ritual-close">收册</button></div></div></div>';
+    }
+    var rows = R.slots.map(function (s, i) {
+      var c = LINE_COLOR[s.subj] || "--ln-rev";
+      var on = R.done0 ? R.done0.indexOf(s.subj) >= 0 : true;
+      return '<li class="rt-s" style="--c:var(' + c + ')"><label class="rt-tgl"><input type="checkbox" class="rt-on" name="rt' + i + '"' + (on ? " checked" : "") + '><i aria-hidden="true"></i>' +
+        '<span class="rt-tx"><b>' + esc(subjName(s.subj)) + (s.index != null ? " · 第 " + (s.index + 1) + (s.subj === "film" ? " 段" : " 课") : s.review ? " · 复习" : "") + "</b><span>" + esc(s.title || "") + "</span></span></label>" +
+        '<span class="rt-min"><input name="rm' + i + '" type="number" min="0" step="5" inputmode="numeric" value="' + (s.mins || 0) + '" aria-label="用时（分钟）">′</span></li>';
+    }).join("");
+    return '<div class="add-sheet rt-sheet" role="dialog" aria-modal="true" aria-labelledby="rt-h"><form class="add-card rt-card" id="ritual-form" autocomplete="off">' +
+      '<p class="eyebrow">晚间仪式 · 经折集章册</p><h2 id="rt-h">' + cnDate(R.d) + " · " + WD[wdOf(R.d)] + '</h2>' +
+      '<p class="meta">学完的亮着，没学完的点一下熄掉；分钟数可以改。盖了章，足迹和线网马上跟着走，没学完的下次接着学，不记欠账。</p>' +
+      '<ul class="rt-list">' + rows + "</ul>" +
+      '<label class="add-f"><span>今天一句话（学了什么、哪里没懂，可以不写）</span><textarea name="rnote" rows="2" maxlength="500" placeholder="例如：WHERE 和 HAVING 还是有点分不清">' + esc(R.note0) + "</textarea></label>" +
+      '<div class="rt-foot"><button type="button" class="linkbtn" data-act="ritual-none">今天没学，如实记下</button><span class="rt-gap"></span><button type="button" class="btn ghost" data-act="ritual-close">先不盖</button><button type="submit" class="rt-seal"><i>盖章</i></button></div></form></div>';
+  }
+  function ritualSave(f) {
+    var R = S.ritual; if (!R || !S.canEdit) return;
+    var d = R.d, done = [], total = 0, stamps = [];
+    R.slots.forEach(function (s, i) {
+      var on = f.elements["rt" + i] && f.elements["rt" + i].checked;
+      var m = Math.max(0, Math.round(Number(f.elements["rm" + i] && f.elements["rm" + i].value) || 0));
+      if (on) { done.push(s.subj); total += m || s.mins || 0; stamps.push({ subj: s.subj, label: ritualStampLabel(s) }); }
+    });
+    var note = (f.elements.rnote.value || "").trim().slice(0, 500);
+    var cs = curStudy(), old = cs.days[d] || {};
+    var doc = S.data.study && S.data.study.progress;
+    doc = doc && doc.days && doc.next ? JSON.parse(JSON.stringify(doc)) : { days: {}, next: {} };
+    var rec = { planned: R.slots, done: done, status: done.length === 0 ? "missed" : done.length === R.slots.length ? "done" : "partial",
+      minutes: total, checkedAt: new Date().toISOString() };
+    if (note) rec.note = note;
+    if (old.file) rec.file = old.file;
+    doc.days[d] = rec;
+    R.slots.forEach(function (s) {
+      if (done.indexOf(s.subj) >= 0 && !s.review && typeof s.index === "number") doc.next[s.subj] = Math.max(doc.next[s.subj] || 0, cs.next[s.subj] || 0, s.index + 1);
+    });
+    doc.updated = String(doc.updated || "") > d ? doc.updated : d;
+    put("study", "progress", doc);
+    R.saved = { stamps: stamps, min: total, streak: curStudy().streak };
+    S.foldDay = S.foldDay || null;
+    render();
+  }
+
   /* ---------- 每日课表 ---------- */
-  /* 课表进度：云端版优先读 study/progress 文档（每天早晚由定时任务写入），读不到就用构建时的快照 */
+  /* 课表进度：构建快照（study/progress.json，定时任务经 git 更新）和网页上盖的章（study.progress 文档）合并：
+   * 每一天听 checkedAt 新的那份，进度指针、已出讲义数按科目取大，连续天数现算。 */
+  var STUDY_MEMO = { doc: null, val: null };
   function curStudy() {
-    var d = S.data.study && S.data.study.progress;
-    if (d && d.days && d.next && String(d.updated || "") >= String(STUDY_SNAP.updated || "")) return d;
-    return STUDY_SNAP;
+    var doc = S.data.study && S.data.study.progress;
+    if (!doc || !doc.days || !doc.next) return STUDY_SNAP;
+    if (STUDY_MEMO.doc === doc) return STUDY_MEMO.val;
+    var out = Object.assign({}, STUDY_SNAP, { days: {}, next: {}, issued: {}, checks: {},
+      updated: String(doc.updated || "") > String(STUDY_SNAP.updated || "") ? doc.updated : STUDY_SNAP.updated });
+    [STUDY_SNAP, doc].forEach(function (p) {
+      Object.keys(p.days || {}).forEach(function (d) {
+        var a = out.days[d], b = p.days[d];
+        out.days[d] = !a || String(b.checkedAt || "") >= String(a.checkedAt || "") ? b : a;
+      });
+      Object.keys(p.next || {}).forEach(function (k) { out.next[k] = Math.max(out.next[k] || 0, p.next[k] || 0); });
+      Object.keys(p.issued || {}).forEach(function (k) { out.issued[k] = Math.max(out.issued[k] || 0, p.issued[k] || 0); });
+      Object.keys(p.checks || {}).forEach(function (k) { out.checks[k] = out.checks[k] || p.checks[k]; });
+    });
+    function st(r) { return !!(r && (r.status === "done" || r.status === "partial")); }
+    var c = bjToday(), n = 0;
+    if (!st(out.days[c])) c = addDaysBJ(c, -1);
+    while (st(out.days[c])) { n++; c = addDaysBJ(c, -1); }
+    out.streak = n;
+    STUDY_MEMO.doc = doc; STUDY_MEMO.val = out;
+    return out;
   }
   var WD = ["周日", "周一", "周二", "周三", "周四", "周五", "周六"];
   var DAY_STATUS = { done: "完成", partial: "部分完成", missed: "没学", pushed: "待打卡" };
@@ -7791,13 +7924,17 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       return '<a class="stp' + (s.extra ? " extra" : "") + '" href="' + slotHref(s) + '" style="--c:var(' + c + ');flex-grow:' + (s.mins || 20) + '"><span class="stp-dot" aria-hidden="true"></span><span class="stp-bar" aria-hidden="true"></span>' +
         '<span class="stp-tx"><span class="stp-tag"><b class="stp-line">' + esc(stopLine(s)) + (s.extra ? " · 多学" : "") + '</b><span class="stp-min">' + (s.mins || "") + "′</span></span>" +
         '<span class="stp-title">' + esc(s.title || "") + '</span><span class="stp-seq">' + esc([stopSeq(s), plus].filter(Boolean).join(" · ")) + (s.subj === "film" ? " · 跟读播放器" : s.lesson || (PLAN.lessons[s.subj] && isWritten(s.subj)) ? " · 讲义" : "") + "</span></span></a>";
-    }).join("") + '<div class="stp end"><span class="stp-dot" aria-hidden="true"></span><div class="stp-tx"><span class="stp-min">' + PLAN.checkin + '</span><span class="stp-title">打卡 · 盖章</span></div></div>';
+    }).join("") + (checkedIn(rec)
+      ? '<div class="stp end"><span class="stp-dot" aria-hidden="true"></span><div class="stp-tx"><span class="stp-min">✓</span><span class="stp-title">今天已盖章</span></div></div>'
+      : S.canEdit
+      ? '<button type="button" class="stp end" data-act="ritual" data-d="' + t + '"><span class="stp-dot" aria-hidden="true"></span><span class="stp-tx"><span class="stp-min">' + PLAN.checkin + '</span><span class="stp-title">打卡 · 盖章</span></span></button>'
+      : '<div class="stp end"><span class="stp-dot" aria-hidden="true"></span><div class="stp-tx"><span class="stp-min">' + PLAN.checkin + '</span><span class="stp-title">打卡 · 盖章</span></div></div>');
     var note = mode === "min" ? "时间不够就只学电影这一段，学一点也算没断。其余几课下次接着学，不记欠账。"
       : mode === "plus" ? "目标线上多学一课，小时数多涨一点。"
       : "按今天的路线单学。哪一课没学完，下次从这一课接着学，不记欠账。";
     var btn = rec && rec.file ? '<a class="btn" href="' + esc(lessonHref(rec.file)) + '">今天的路线单</a>' : '<span class="meta">路线单每天早上 ' + PLAN.push + "（" + PLAN.tz + "）推送</span>";
     var y = addDaysBJ(t, -1), yr = curStudy().days[y], warn = "";
-    if (yr && !checkedIn(yr) && y !== PLAN.prep) warn = '<p class="ts-warn"><b>' + cnDate(y) + "还没打卡。</b>先按没学处理，那几课下次接着学；其实学了的话，晚上打卡时一起说，足迹和小时数都会补上。</p>";
+    if (yr && !checkedIn(yr) && y !== PLAN.prep) warn = '<p class="ts-warn"><b>' + cnDate(y) + "还没打卡。</b>先按没学处理，那几课下次接着学，不记欠账。" + (S.canEdit ? '<button type="button" class="linkbtn" data-act="ritual" data-d="' + y + '">其实学了？现在补盖</button>' : "其实学了的话，晚上打卡时一起说，足迹和小时数都会补上。") + "</p>";
     return '<section class="tstrip" aria-labelledby="ts-h">' + head + '<div class="ts-route">' + route + "</div>" +
       '<div class="ts-foot">' + btn + '<p class="ts-note">全程 ' + total + " 分钟。" + note + "</p></div>" + warn + "</section>";
   }
@@ -8509,7 +8646,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
-    $("#main").innerHTML = html;
+    $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML());
     wallPack();
     if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);
     filmMount();
@@ -8639,6 +8776,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
     if (act === "abox") { S.archPick = t.getAttribute("data-t"); render(); var ap = document.querySelector(".apanel"); if (ap && window.innerWidth < 1100) ap.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
     if (act === "arch-f") { S.archF = t.getAttribute("data-f"); render(); return; }
+    if (act === "ritual") { ritualOpen(t.getAttribute("data-d")); return; }
+    if (act === "ritual-close") { S.ritual = null; if (!t.getAttribute("href")) { render(); return; } setTimeout(render, 0); return; }
+    if (act === "ritual-none") { var rtf = document.getElementById("ritual-form"); if (rtf) { Array.prototype.forEach.call(rtf.querySelectorAll(".rt-on"), function (x) { x.checked = false; }); ritualSave(rtf); } return; }
     if (act === "abox-new") { S.boxOpen = { track: t.getAttribute("data-t") || (TOPIC[S.archPick] || {}).track || "" }; render(); var bt = document.getElementById("box-title"); if (bt) bt.focus(); return; }
     if (act === "abox-edit") { S.boxOpen = { edit: t.getAttribute("data-t") }; render(); var be = document.getElementById("box-title"); if (be) be.focus(); return; }
     if (act === "box-close") { S.boxOpen = null; render(); return; }
@@ -8740,6 +8880,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   document.addEventListener("keydown", function (e) { if (RD) { rdKeys(e); if (e.key === "Escape") e.stopImmediatePropagation(); } }, true);
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && OV) { ovClose(); return; }
+    if (e.key === "Escape" && S.ritual) { S.ritual = null; render(); return; }
     if (e.key === "Escape" && (S.addOpen || S.domOpen || S.boxOpen)) { S.addOpen = null; S.domOpen = null; S.boxOpen = null; render(); return; }
     if (e.key === "Escape" && S.lookOpen) { S.lookOpen = false; render(); var lb = document.querySelector(".look-btn"); if (lb) lb.focus(); }
   });
@@ -8818,6 +8959,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (e.target.id === "add-form") { e.preventDefault(); addSave(e.target); return; }
     if (e.target.id === "dom-form") { e.preventDefault(); domSave(e.target); return; }
     if (e.target.id === "box-form") { e.preventDefault(); boxSave(e.target); return; }
+    if (e.target.id === "ritual-form") { e.preventDefault(); ritualSave(e.target); return; }
     if (e.target.id === "clip-form") { e.preventDefault(); clipSave(e.target); return; }
     if (e.target.id === "clip-link") { e.preventDefault(); clipLinkSave(e.target); return; }
     if (e.target.id !== "j-form") return;
