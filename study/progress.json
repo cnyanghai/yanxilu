@@ -1,5 +1,5 @@
 {
-  "updated": "2026-10-24",
+  "updated": "2026-10-25",
   "next": {
     "sql": 0,
     "py": 0,
@@ -379,6 +379,34 @@
         }
       ],
       "file": "study/daily/2026-10-24.md",
+      "status": "pushed"
+    },
+    "2026-10-25": {
+      "planned": [
+        {
+          "subj": "film",
+          "mins": 90,
+          "title": "本周复习：还没有学过的段落，今天可以先看一遍全片",
+          "review": true
+        },
+        {
+          "subj": "geo",
+          "mins": 30,
+          "title": "第一章 导论：读原书与精读页",
+          "index": 0,
+          "lesson": "geo-01",
+          "file": "study/lessons/geo/01.md"
+        },
+        {
+          "subj": "rev",
+          "mins": 50,
+          "title": "第 1 周复盘",
+          "index": 0,
+          "lesson": "rev-01",
+          "file": "study/lessons/rev/01.md"
+        }
+      ],
+      "file": "study/daily/2026-10-25.md",
       "status": "pushed"
     }
   },
