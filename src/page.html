@@ -288,7 +288,7 @@ details.ch summary:hover .ttl{color:var(--indigo)}
 .btn.hard{background:transparent;color:var(--ink);border-color:var(--ink-3)}
 .btn.good{background:var(--indigo);border-color:var(--indigo);color:var(--leaf)}
 
-.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:50;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);font-family:var(--f-ui);font-size:13px;padding:9px 16px;border-radius:999px}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:96;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);font-family:var(--f-ui);font-size:13px;padding:9px 16px;border-radius:999px}
 
 /* 每日课表 */
 .today{margin-top:40px;background:var(--leaf);border:1px solid var(--rule);border-radius:6px;padding:22px 24px 24px;display:grid;gap:14px}
@@ -1551,7 +1551,7 @@ body.rd-on{overflow:hidden}
 .arch-q{display:flex;align-items:center;gap:8px;width:300px;max-width:100%;height:40px;padding:0 14px;box-sizing:border-box;border:1px solid var(--rule-strong);border-radius:20px;background:var(--leaf);font-family:var(--f-ui);font-size:13px;color:var(--ink-3)}
 .arch-q:focus-within{border-color:var(--ink)}
 .arch-q input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:14px;color:var(--ink);outline:none}
-.arch-main{display:flex;flex-wrap:wrap;align-items:flex-start;gap:34px;margin-top:22px}
+.arch-main{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:34px;margin-top:22px}
 .cabinet{margin-top:0}
 .cabinet.archive{width:900px}
 .archive .tier.empty .bay{min-height:150px}
@@ -1691,6 +1691,42 @@ button.asheet{font:inherit;cursor:pointer;appearance:none}
 .ybag.tearing .yb-tie::before{transform:translate(6px,10px) rotate(28deg);opacity:.8}
 body.drag-clip .afold.drop-ok,.ybag.drop-ok{transform:translateY(-6px)}
 @media (max-width:640px){ .ypack.sealed{min-height:400px} .yc{width:104px;height:146px} .yc-scene{width:62px;height:62px;top:58px} .yc-tag{max-height:104px} .yc-tag span{max-height:95px} .ymat{width:240px;height:240px;margin-left:-120px} .ybag.big{transform:perspective(1200px) scale(1.5) rotateY(-14deg);margin:30px 0 50px} }
+/* 桌面：点开一盒或一夹，整屏盖上一张深色木桌 */
+body.desk-on{overflow:hidden}
+.ydesk{position:fixed;inset:0;z-index:60;overflow:auto;overscroll-behavior:contain;padding:22px 24px 48px;box-sizing:border-box;color:#EDE0C4;
+  --ink:#EDE0C4;--ink-2:#D9C08A;--ink-3:#B9A47C;--rule:rgba(233,218,178,.18);--rule-strong:rgba(233,218,178,.4);--paper:rgba(0,0,0,.22);--leaf:rgba(0,0,0,.18);--indigo:#F2C14E;--seal:#E86A5C;
+  background:radial-gradient(70% 45% at 50% 18%,#4A3523 0%,#2E2118 45%,#17100A 100%)}
+.ydesk::before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(178deg,rgba(255,220,150,.035) 0 2px,transparent 2px 9px,rgba(0,0,0,.08) 9px 11px,transparent 11px 23px);mix-blend-mode:overlay}
+.yd-in{position:relative;max-width:1080px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+.yd-eye{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 4px}
+.yd-eye .btn{border-color:rgba(233,218,178,.45);color:var(--ink);background:rgba(0,0,0,.25)}
+.yd-eye .btn:hover{background:rgba(255,227,160,.14)}
+.yd-eye kbd{margin-left:8px;padding:1px 6px;border:1px solid rgba(233,218,178,.4);border-radius:4px;font-family:var(--f-mono);font-size:11px;color:var(--ink-3)}
+.ydesk .pb-h h2,.ydesk .ap-q p,.ydesk .aitems a,.ydesk .aitems .ai-t,.ydesk .ylist summary b,.ydesk .arel,.ydesk .ap-note{color:var(--ink)}
+.ydesk .ap-no{color:var(--ink);border-color:rgba(233,218,178,.45);background:rgba(0,0,0,.25)}
+.ydesk .ap-q{background:rgba(0,0,0,.26);border-left-color:#F2C14E}
+.ydesk .btn{background:#F2C14E;border-color:#F2C14E;color:#2A1408}
+.ydesk .btn.ghost{background:rgba(0,0,0,.25);color:var(--ink);border-color:rgba(233,218,178,.45)}
+.ydesk .linkbtn{color:var(--ink-2)}
+.ydesk .linkbtn.danger{color:#E86A5C}
+.ydesk select{color:var(--ink);background:rgba(0,0,0,.3);border:1px solid rgba(233,218,178,.35);border-radius:4px}
+.ydesk .yhand{gap:18px 14px;padding:14px 4px 12px}
+.ydesk .yhand .yc{zoom:1.32}
+.ydesk .ymat{background:radial-gradient(circle at 50% 50%,rgba(255,227,160,.16),rgba(255,227,160,.05) 55%,transparent 72%);box-shadow:inset 0 0 0 1.5px rgba(242,193,78,.35),inset 0 0 0 9px transparent,inset 0 0 0 10px rgba(242,193,78,.18)}
+.ydesk .ymat span{color:rgba(242,193,78,.38)}
+.ydesk .ypack.opened .ypk-txt{color:var(--ink-3)}
+.yd-boxes{padding-top:14px;border-top:1px dashed var(--rule)}
+.yd-boxes > .meta{margin:0 0 10px}
+.yd-boxrow{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px;padding:10px 12px 12px;border-radius:8px;background:rgba(0,0,0,.28);box-shadow:inset 0 -10px 0 rgba(0,0,0,.25)}
+.yd-boxrow .anew{color:var(--ink-3);border-color:rgba(233,218,178,.35)}
+.ydesk .aitems .d,.ydesk .aitems .n,.ydesk .aitems th,.ydesk .aitems .dt,.ydesk .aitems .k{color:var(--ink-3)}
+.ydesk .cl-del{margin-left:10px}
+@media (max-width:640px){ .ydesk{padding:14px 12px 90px} .ydesk .yhand .yc{zoom:1} .ydesk .yhand{gap:12px 8px} .yd-eye .btn kbd{display:none} }
+/* 剪报栏：只剩“存链接”和怎么剪 */
+.clipbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-top:18px;padding:12px 16px;background:var(--leaf);border:1px solid var(--rule);border-radius:var(--r)}
+.clipbar > b{font-family:var(--f-display);font-size:17px}
+.clipbar > b small{margin-left:8px;font-family:var(--f-ui);font-size:12.5px;font-weight:500;color:var(--ink-3)}
+.clipbar .cl-help{flex:1 1 100%;margin:4px 0 0}
 /* 空位：在这一格新立一盒 */
 .anew{flex:none;width:44px;height:112px;box-sizing:border-box;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:8px;border:1.5px dashed color-mix(in srgb,var(--ink-3) 70%,transparent);border-bottom:0;border-radius:3px 3px 0 0;background:transparent;color:var(--ink-3);font:inherit;cursor:pointer;transition:color .15s,border-color .15s,background .15s}
 .anew b{font-family:var(--f-ui);font-size:18px;font-weight:400;line-height:1}

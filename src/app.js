@@ -2233,14 +2233,17 @@
     return items.map(function (rp, i) {
       var k = reportKind(rp), c = rp.clip;
       var sub = c ? [c.author, clipKindLabel(c)].filter(Boolean).join(" · ") + (rp.desc ? (c.author || c.site ? " · " : "") + rp.desc : "") : (rp.question && tp && rp.question !== tp.question ? rp.question : rp.desc || "");
-      return '<tr><td class="n">' + pad2(i + 1) + "</td><td>" + itemLink(rp, esc(rp.title) + (itemOut(rp) ? ' <span aria-hidden="true">↗</span>' : "")) + '<span class="d">' + esc(sub) + "</span>" + (c && S.canEdit ? placeSel(c) : "") + "</td>" +
+      return '<tr><td class="n">' + pad2(i + 1) + "</td><td>" + itemLink(rp, esc(rp.title) + (itemOut(rp) ? ' <span aria-hidden="true">↗</span>' : "")) + '<span class="d">' + esc(sub) + "</span>" + (c && S.canEdit ? placeSel(c) + clipDelHTML(c) : "") + "</td>" +
         '<td class="k" style="--k:var(' + KINDS[k] + ')"><i aria-hidden="true"></i>' + k + '</td><td class="dt">' + esc(rp.date || "") + "</td></tr>";
     }).join("");
   }
   function itemTableHTML(rows) {
     return '<table class="aitems"><thead><tr><th scope="col">件</th><th scope="col">题名</th><th scope="col">类型</th><th scope="col" class="dt">日期</th></tr></thead><tbody>' + rows + "</tbody></table>";
   }
-  function archPanelHTML(tpArg) {
+  function deskEye(text) {
+    return '<p class="eyebrow yd-eye"><span>' + text + '</span><button type="button" class="btn ghost small" data-act="desk-close" aria-label="关上，回到档案架">回到档案架<kbd>Esc</kbd></button></p>';
+  }
+  function archPanelHTML(tpArg, desk) {
     var tp = tpArg || TOPIC[S.archPick]; if (!tp) return "";
     var items = topicItems(tp), col = domCol(tp.track), di = domInfo(tp.track);
     var meta = [di.name, tp.since ? "立卷 " + tp.since : "", TP_STATUS[tp.status], items.length + " 件"].filter(Boolean).join(" · ");
@@ -2265,19 +2268,21 @@
     var table = items.length ? handHTML(items, tp) + gemLegendHTML(items, tp) +
         '<details class="ylist" data-ylist=""' + (S.ylist ? " open" : "") + '><summary><b>牌册</b><small>卷内目录 · ' + items.length + " 件</small></summary>" + itemTableHTML(itemRowsHTML(items, tp)) + "</details>"
       : '<p class="meta ap-empty">盒里还是空的。' + (clipsOn() ? "在剪报的「放到」里选这一盒，就装进来了。" : "") + "</p>";
-    return '<aside class="pulled apanel" aria-labelledby="ap-h" style="--c:' + col + '"><p class="eyebrow">打开的档案盒 · 卷内目录' + (tp.mine ? " · 自己立的" : "") + "</p>" +
+    var eye = "打开的档案盒 · 一副牌" + (tp.mine ? " · 自己立的" : "");
+    return (desk ? '<div class="yd-in apanel" aria-labelledby="ap-h" style="--c:' + col + '">' + deskEye(eye) : '<aside class="pulled apanel" aria-labelledby="ap-h" style="--c:' + col + '"><p class="eyebrow">' + eye + "</p>") +
       '<div class="pb-h"><span class="pb-bar" aria-hidden="true"></span><div><span class="ap-no">研 · ' + esc(topicNo(tp)) + '</span><h2 id="ap-h">' + esc(tp.title) + '</h2><p class="meta">' + esc(meta) + "</p></div></div>" +
-      q + table + rel + (tp.note ? '<p class="ap-note"><b>备考</b>' + esc(tp.note) + "</p>" : "") + boxActsHTML(tp) + "</aside>";
+      q + table + rel + (tp.note ? '<p class="ap-note"><b>备考</b>' + esc(tp.note) + "</p>" : "") + boxActsHTML(tp) + (desk ? "</div>" : "</aside>");
   }
   /* 打开的剪报夹（tid 为 "" 是收件匣里没分领域的剪报） */
   function folderPanelHTML(tid) {
     var list = looseClips(tid), di = tid ? domInfo(tid) : null, col = di ? di.col : "var(--ink-3)";
     var rows = list.map(function (c, i) {
       var rp = clipItem(c), sub = [c.author, clipKindLabel(c)].filter(Boolean).join(" · ") + (rp.desc ? " · " + rp.desc : "");
-      return '<tr><td class="n">' + pad2(i + 1) + "</td><td>" + itemLink(rp, esc(c.title) + (itemOut(rp) ? ' <span aria-hidden="true">↗</span>' : "")) + '<span class="d">' + esc(sub) + "</span>" + (S.canEdit ? placeSel(c) : "") + "</td>" +
+      return '<tr><td class="n">' + pad2(i + 1) + "</td><td>" + itemLink(rp, esc(c.title) + (itemOut(rp) ? ' <span aria-hidden="true">↗</span>' : "")) + '<span class="d">' + esc(sub) + "</span>" + (S.canEdit ? placeSel(c) + clipDelHTML(c) : "") + "</td>" +
         '<td class="dt">' + esc(rp.date) + "</td></tr>";
     }).join("");
-    var tip = tid ? "把牌拖到架子上的档案盒里，或在牌册的「放到」里选一个盒子，就装进盒里；讲同一件事的攒到两三篇，可以新立一盒。" : "把牌拖到某个领域的剪报夹或档案盒里；也可以在牌册的「放到」里选。";
+    var tip = tid ? "把牌拖到下面的档案盒上就装进盒里，或在牌册的「放到」里选；讲同一件事的攒到两三篇，可以新立一盒。" : "在牌册的「放到」里选一个领域或档案盒。";
+    var boxes = tid && S.canEdit ? '<div class="yd-boxes"><p class="meta">「' + esc(di.name) + '」的档案盒 · 把牌拖上去就装进盒里</p><div class="yd-boxrow">' + boxesOf(tid).map(function (tp) { return boxHTML(tp); }).join("") + newBoxSlot(tid) + "</div></div>" : "";
     var unseen = list.filter(function (c) { return !c.seen; }), anim = S.packAnim === tid, sealed = unseen.length > 0 || anim;
     var seen = anim ? list : list.filter(function (c) { return c.seen; });
     var pack = sealed
@@ -2285,11 +2290,25 @@
         '<p class="meta">' + (anim ? "拆封……" : (S.canEdit ? "点袋子拆封：" : "封着的：") + unseen.length + " 篇新剪的还没拆，约 " + packMinutes(unseen) + " 分钟" + (seen.length ? "；拆过的 " + seen.length + " 篇在下面" : "")) + "</p></div>"
       : '<div class="ypack opened">' + bagHTML(tid, list, "opened") + '<p class="ypk-txt">拆过的袋子。' + list.length + " 篇牌在下面：拖到架子上的档案盒里就装盒；点一张翻开读。</p></div>";
     var hand = seen.length ? handHTML(seen.map(clipItem), null, sealed && !anim ? "" : "") + gemLegendHTML(seen.map(clipItem), null) : "";
-    return '<aside class="pulled apanel afpanel" aria-labelledby="ap-h" style="--c:' + col + '"><p class="eyebrow">' + (tid ? "打开的剪报夹 · 卡包" : "收件匣 · 没分领域的剪报") + "</p>" +
+    return '<div class="yd-in apanel afpanel" aria-labelledby="ap-h" style="--c:' + col + '">' + deskEye(tid ? "打开的剪报夹 · 卡包" : "收件匣 · 没分领域的剪报") +
       '<div class="pb-h"><span class="pb-bar" aria-hidden="true"></span><div>' + (di && di.code ? '<span class="ap-no">' + esc(di.code) + "</span>" : "") + '<h2 id="ap-h">' + (tid ? esc(di.name) + " · 剪报夹" : "没分领域的剪报") + '</h2><p class="meta">' + list.length + " 篇" + (unseen.length ? " · " + unseen.length + " 篇没拆" : "") + "</p></div></div>" +
-      pack + hand + '<p class="meta">' + tip + "</p>" +
+      pack + hand + '<p class="meta">' + tip + "</p>" + boxes +
       '<details class="ylist" data-ylist=""' + (S.ylist ? " open" : "") + '><summary><b>牌册</b><small>放到哪 · ' + list.length + ' 篇</small></summary><table class="aitems"><thead><tr><th scope="col">篇</th><th scope="col">题名</th><th scope="col" class="dt">存的日期</th></tr></thead><tbody>' + rows + "</tbody></table></details>" +
-      (S.canEdit && tid ? '<div class="btns"><button type="button" class="btn small" data-act="abox-new" data-t="' + esc(tid) + '">＋ 在「' + esc(di.name) + "」新立一盒</button></div>" : "") + "</aside>";
+      (S.canEdit && tid ? '<div class="btns"><button type="button" class="btn small" data-act="abox-new" data-t="' + esc(tid) + '">＋ 在「' + esc(di.name) + "」新立一盒</button></div>" : "") + "</div>";
+  }
+  /* 桌面：点开一盒或一夹，整屏盖上一张深色木桌，牌摆在上面；Esc 或“回到档案架”关上 */
+  function deskHTML() {
+    if (!S.deskOpen || S.route !== "archive") return "";
+    var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null, inner = "";
+    if (fp !== null) { if (looseClips(fp).length) inner = folderPanelHTML(fp); }
+    else if (TOPIC[S.archPick]) inner = archPanelHTML(null, true);
+    if (!inner) { S.deskOpen = false; return ""; }
+    return '<div class="ydesk" role="dialog" aria-modal="true" aria-labelledby="ap-h">' + inner + "</div>";
+  }
+  function deskClose() {
+    var pick = S.archPick; S.deskOpen = false; render();
+    var back = pick && document.querySelector('.archive [data-act="abox"][data-t="' + pick + '"]');
+    if (back) try { back.focus({ preventScroll: true }); } catch (e) { /* 忽略 */ }
   }
   /* 新立一个档案盒 / 改自己立的盒子 */
   function boxSheetHTML() {
@@ -2362,8 +2381,8 @@
     if (/^nb:/.test(v)) { S.boxOpen = { track: v.slice(3), clip: id }; render(); var bt = document.getElementById("box-title"); if (bt) bt.focus(); return; }
     var bx = /^b:/.test(v) ? TOPIC[v.slice(2)] : null, upd = bx ? { box: bx.id, track: bx.track } : { box: "", track: v || "" };
     var was = S.archPick;
-    var srcEl = document.querySelector('.cl-card select[data-id="' + id + '"], .apanel select[data-id="' + id + '"]');
-    var r0 = srcEl && srcEl.closest(".cl-card, tr") ? srcEl.closest(".cl-card, tr").getBoundingClientRect() : null;
+    var srcEl = document.querySelector('.apanel select[data-id="' + id + '"]');
+    var r0 = srcEl && srcEl.closest("tr") && !S.deskOpen ? srcEl.closest("tr").getBoundingClientRect() : null;
     put("clips", id, Object.assign({}, c, upd, { ut: new Date().toISOString() }));
     /* 剪报夹里最后一篇装进盒了，就把那一盒打开 */
     if (/^cf:/.test(was || "") && bx && !looseClips(was.slice(3)).length) S.archPick = bx.id;
@@ -2405,7 +2424,7 @@
   function archiveHTML() {
     var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null;
     if (fp !== null && !looseClips(fp).length) { fp = null; S.archPick = null; }
-    if (fp === null && !TOPIC[S.archPick]) S.archPick = (TOPICS.filter(function (tp) { return tp.status === "doing"; })[0] || TOPICS[0] || {}).id;
+    if (fp === null && S.archPick && !TOPIC[S.archPick]) S.archPick = null;
     var f = S.archF || "all", cust = archCustom();
     function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="arch-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
     function cnt(s) { return TOPICS.filter(function (tp) { return tp.status === s; }).length; }
@@ -2419,7 +2438,7 @@
     var nItems = REPORTS.length + (clipsOn() ? clipList().length : 0);
     var rules = [["一", "一个问题一盒", "新资料先问：它在回答哪个问题？已经有这个问题，就装进那一盒；是新问题才立新卷，点「＋ 新档案盒」自己就能立。卷号跟书架用同一套索书号。"],
       ["二", "盒里按件编号", "每件是档案、数据、计划、纪要、剪报之一，色签露在盒顶。件越多盒越厚，一眼看出这一盒是查资料多，还是做数据多。"],
-      ["三", "零散的先进收件匣", "一次性的小分析、没分领域的剪报不急着立卷；分了领域还没装盒的剪报插在那一格的剪报夹里。攒到两件讲同一件事，再一起装盒。"],
+      ["三", "零散的先进收件匣", "一次性的小分析、没分领域的剪报不急着立卷；分了领域还没装盒的剪报装在那一格的剪报夹（档案袋）里，点开拆封。攒到两件讲同一件事，再一起装盒。"],
       ["四", "线网上一盒一个地标", "地图上只画课题，不画单件，地标下面写着件数。资料再多，地标也只随课题增长。"]];
     return '<div class="view shelf archive-v">' + bannerHTML() +
       '<header class="phead"><div><p class="eyebrow">' + (5 + cust.length) + " 个方向 · " + TOPICS.length + " 个课题 · " + nItems + ' 件资料</p><h1>书架<span class="h1-sub">档案架</span></h1>' +
@@ -2428,11 +2447,9 @@
       (S.canEdit ? '<button type="button" class="chipbtn chip-new" data-act="abox-new">＋ 新档案盒</button>' : "") + "</div></div>" +
       '<div class="arch-side"><div class="k-legend"><span class="kl-h">盒顶的色签</span>' + legend + "</div>" +
       '<label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
-      '<div class="arch-main"><div class="arch-col"><section class="cabinet archive" aria-label="档案架"><div class="cab-top"><span>研究档案</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + boxOffHTML() + "</div>" +
-      (fp !== null ? folderPanelHTML(fp) : archPanelHTML()) + "</div>" +
-      clipsHTML() +
+      '<div class="arch-main"><div class="arch-col"><section class="cabinet archive" aria-label="档案架"><div class="cab-top"><span>研究档案</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>' + boxOffHTML() + clipBarHTML() + "</div></div>" +
       '<section class="arules" aria-labelledby="ar-h"><h2 id="ar-h">怎样归档</h2><div class="ar-grid">' + rules.map(function (r) { return '<div class="arule"><p><b class="ar-n">' + r[0] + "</b><b>" + r[1] + "</b></p><p>" + r[2] + "</p></div>"; }).join("") + "</div>" +
-      '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进研习录”，我按这四条归档；剪报和自己立的盒子，在这里直接整理。</p></section>' + boxSheetHTML() + "</div>";
+      '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进研习录”，我按这四条归档；剪报和自己立的盒子，在这里直接整理。</p></section>' + boxSheetHTML() + deskHTML() + "</div>";
   }
   /* 搜索框：不重画页面，只把不相关的盒子调暗 */
   function applyArchFilter() {
@@ -2840,36 +2857,24 @@
     }, function () { if (btn) { btn.disabled = false; btn.textContent = "保存到剪报"; } });
   }
   /* 档案架上的剪报夹 */
-  function clipsHTML() {
-    if (!clipsOn()) return "";
-    var list = clipList(), groups = {}, order = [];
-    list.forEach(function (c) { var k = c.track && domExists(c.track) ? c.track : ""; if (!groups[k]) { groups[k] = []; order.push(k); } groups[k].push(c); });
-    order.sort(function (a, b) { return a === "" ? 1 : b === "" ? -1 : domList().indexOf(a) - domList().indexOf(b); });
-    var help = S.clipHelp || !list.length ? '<div class="cl-help">' +
+  /* 剪报栏：只留“存链接”的框和怎么剪的说明；剪报本身都是牌，在盒子和夹子里 */
+  function clipHelpHTML() {
+    return '<div class="cl-help">' +
       '<div class="clh-col"><h3>电脑上</h3><p>把这个按钮拖到浏览器的书签栏：</p><p><a class="cl-bm" href="' + esc(clipperHref()) + '" data-act="clip-bm" draggable="true">收进研习录</a></p>' +
-      "<p>在知乎看到好的回答或文章，点一下书签栏里的「收进研习录」，弹出的小窗里选个领域、写一句为什么存，就进了这里。先选中一段文字再点，就只存那一段。微信公众号文章和别的网页也能剪。</p></div>" +
-      '<div class="clh-col"><h3>手机上</h3><p>知乎 App 里点「分享 → 复制链接」，粘贴到上面的框里，先把链接存下；回到电脑打开原文，再点一次按钮补上全文。</p>' +
-      '<p>手机浏览器看知乎网页版的话，也能用按钮：随便收藏一个书签，把它的网址改成按钮的代码。<button type="button" class="linkbtn" data-act="clip-copy-bm">复制按钮代码</button></p></div></div>' : "";
-    var cards = order.map(function (k) {
-      var name = k ? domInfo(k).name : "还没分领域";
-      return '<div class="cl-group"><h3 class="clg-h"><i style="--c:' + (k ? domInfo(k).col : "var(--ink-3)") + '" aria-hidden="true"></i>' + esc(name) + " <small>" + groups[k].length + "</small></h3><ul class=\"cl-list\">" +
-        groups[k].map(clipCardHTML).join("") + "</ul></div>";
-    }).join("");
-    return '<section class="clips" aria-labelledby="cl-h"><div class="cl-head"><h2 id="cl-h">剪报<small>' + list.length + " 篇</small></h2>" +
-      '<form id="clip-link" class="cl-link" autocomplete="off"><input name="t" placeholder="粘贴知乎的分享链接，先存下来" aria-label="粘贴分享链接"><button type="submit" class="btn small">存链接</button></form>' +
-      '<button type="button" class="linkbtn" data-act="clip-help">' + (S.clipHelp || !list.length ? "收起说明" : "怎么剪") + "</button></div>" + help +
-      (cards || '<p class="empty-line">还没有剪报。</p>') + "</section>";
+      "<p>在知乎看到好的回答或文章，点一下书签栏里的「收进研习录」，弹出的小窗里选个领域、写一句为什么存，它就成了那个领域剪报夹里的一张牌。先选中一段文字再点，就只存那一段。微信公众号文章和别的网页也能剪。</p></div>" +
+      '<div class="clh-col"><h3>手机上</h3><p>知乎 App 里点「分享 → 复制链接」，粘贴到旁边的框里，先把链接存下；回到电脑打开原文，再点一次按钮补上全文。</p>' +
+      '<p>手机浏览器看知乎网页版的话，也能用按钮：随便收藏一个书签，把它的网址改成按钮的代码。<button type="button" class="linkbtn" data-act="clip-copy-bm">复制按钮代码</button></p></div></div>';
   }
-  function clipCardHTML(c) {
-    var rd = S.data.reading && S.data.reading[c.id], nMk = marksOf(c.id).length, full = c.status !== "link";
-    var meta = [c.author, clipKindLabel(c), String(c.t || "").slice(0, 10) + " 存", full ? (c.words || 0) + " 字" : "", rd && rd.pct ? "读到 " + Math.round(rd.pct * 100) + "%" : "", nMk ? nMk + " 条划线" : ""].filter(Boolean).join(" · ");
-    var title = full ? '<button type="button" class="cl-t" data-act="clip-open" data-id="' + esc(c.id) + '">' + esc(c.title) + "</button>"
-      : '<a class="cl-t" href="' + esc(c.url) + '" target="_blank" rel="noopener">' + esc(c.title) + ' <span class="cl-wait">待补全文</span></a>';
-    var del = S.clipDel === c.id ? '<span class="jdel">删掉这篇？<button type="button" class="linkbtn danger" data-act="clip-del-yes" data-id="' + esc(c.id) + '">删除</button><button type="button" class="linkbtn" data-act="clip-del-no">取消</button></span>'
-      : '<button type="button" class="linkbtn" data-act="clip-del" data-id="' + esc(c.id) + '">删除</button>';
-    return '<li class="cl-card' + (full ? "" : " link") + '"' + (S.canEdit ? ' draggable="true" data-clip="' + esc(c.id) + '"' : "") + ">" + title + '<p class="cl-m">' + esc(meta) + "</p>" +
-      (c.note ? '<p class="cl-why">' + esc(c.note) + "</p>" : full && c.excerpt ? '<p class="cl-ex">' + esc(c.excerpt) + "……</p>" : "") +
-      '<div class="cl-acts"><a class="linkbtn" href="' + esc(c.url) + '" target="_blank" rel="noopener">原文 ↗</a>' + placeSel(c, true) + del + "</div></li>";
+  function clipBarHTML() {
+    if (!clipsOn()) return "";
+    var n = clipList().length, open = S.clipHelp || !n;
+    return '<section class="clipbar" aria-label="剪报"><b>剪报<small>' + n + " 篇</small></b>" +
+      '<form id="clip-link" class="cl-link" autocomplete="off"><input name="t" placeholder="粘贴知乎的分享链接，先存下来" aria-label="粘贴分享链接"><button type="submit" class="btn small">存链接</button></form>' +
+      '<button type="button" class="linkbtn" data-act="clip-help">' + (open ? "收起说明" : "怎么剪") + "</button>" + (open ? clipHelpHTML() : "") + "</section>";
+  }
+  function clipDelHTML(c) {
+    return S.clipDel === c.id ? '<span class="jdel">删掉这篇？<button type="button" class="linkbtn danger" data-act="clip-del-yes" data-id="' + esc(c.id) + '">删除</button><button type="button" class="linkbtn" data-act="clip-del-no">取消</button></span>'
+      : '<button type="button" class="linkbtn cl-del" data-act="clip-del" data-id="' + esc(c.id) + '">删除</button>';
   }
   function clipLinkSave(form) {
     var p = clipParseShare(form.t.value);
@@ -4892,6 +4897,7 @@
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
     $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML() + keysHTML());
+    document.body.classList.toggle("desk-on", !!document.querySelector(".ydesk"));
     wallPack();
     if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);
     filmMount();
@@ -5055,7 +5061,8 @@
     if (act === "look-reset") { hangSet("float"); lookSet({ v: LOOK_V, read: LOOK_DEF.read, fx: LOOK_DEF.fx, color: LOOK_DEF.color, motion: true, deco: DECO_DEFAULT.slice(), place: {} }); render(); return; }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = wallClass(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
-    if (act === "abox") { S.archPick = t.getAttribute("data-t"); render(); var ap = document.querySelector(".apanel"); if (ap && window.innerWidth < 1100) ap.scrollIntoView({ block: "start", behavior: "smooth" }); return; }
+    if (act === "abox") { S.archPick = t.getAttribute("data-t"); S.deskOpen = true; S.clipDel = null; render(); var dc = document.querySelector('.ydesk [data-act="desk-close"]'); if (dc) try { dc.focus({ preventScroll: true }); } catch (e2) { /* 忽略 */ } return; }
+    if (act === "desk-close") { deskClose(); return; }
     if (act === "arch-f") { S.archF = t.getAttribute("data-f"); render(); return; }
     if (act === "ritual") { ritualOpen(t.getAttribute("data-d")); return; }
     if (act === "review") { reviewOpen(); return; }
@@ -5176,6 +5183,7 @@
     if (e.key === "Escape" && S.review) { S.review = null; render(); return; }
     if (e.key === "Escape" && S.keysOpen) { S.keysOpen = false; render(); return; }
     if (e.key === "Escape" && (S.addOpen || S.domOpen || S.boxOpen)) { S.addOpen = null; S.domOpen = null; S.boxOpen = null; render(); return; }
+    if (e.key === "Escape" && S.deskOpen && S.route === "archive") { deskClose(); return; }
     if (e.key === "Escape" && S.lookOpen) { S.lookOpen = false; render(); var lb = document.querySelector(".look-btn"); if (lb) lb.focus(); }
   });
   /* 线网：用键盘打开站点详情，Esc 关闭 */
