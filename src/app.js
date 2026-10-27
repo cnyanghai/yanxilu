@@ -218,7 +218,7 @@
     return a.tagName === "TEXTAREA" || (a.tagName === "INPUT" && ["text", "number", "date", "search"].indexOf(a.type) >= 0);
   }
   function scheduleRender() {
-    if (isEditing()) { S.dirty = true; return; }
+    if (isEditing() || S.packAnim) { S.dirty = true; return; }
     if (S.raf) return;
     S.raf = requestAnimationFrame(function () { S.raf = 0; render(); });
   }
@@ -1694,6 +1694,7 @@
   function readerOpen(id, opt) {
     readerClose();
     var clip = /^cl-/.test(id) ? (S.data.clips || {})[id] : null;
+    if (clip && !clip.seen && S.canEdit) put("clips", id, Object.assign({}, clip, { seen: new Date().toISOString() }));
     var eb = clip ? null : ebookOf(id), kind = !clip && eb && (eb.kind || "pdf") === "pdf" ? "pdf" : "epub";
     var it = ITEMS[id] || {}, title = clip ? clip.title : (it.title || "").replace(/（.*）$/, "") || "电子书", nMk = marksOf(id).length;
     var el = document.createElement("div");
@@ -2185,12 +2186,7 @@
   }
   /* 剪报夹：一个领域里还没装盒的剪报，插在一只牛皮纸文件架里，露出纸头 */
   function folderText(list) { return list.map(function (c) { return c.title + " " + (c.note || "") + " " + (c.author || ""); }).join(" ").toLowerCase(); }
-  function folderHTML(tid, list) {
-    var on = S.archPick === "cf:" + tid, q = S.archQ || "", text = folderText(list);
-    var papers = list.slice(0, 5).map(function (c, i) { return '<i style="left:' + (2 + (i % 3) * 4) + "px;height:" + [84, 72, 92, 78, 88][i] + 'px"></i>'; }).join("");
-    return '<button type="button" class="afold' + (on ? " picked" : "") + (q && text.indexOf(q) < 0 ? " dim" : "") + '" data-act="abox" data-t="cf:' + esc(tid) + '" data-q="' + esc(text) + '" title="剪报夹：还没装盒的 ' + list.length + ' 篇" aria-pressed="' + on + '">' +
-      '<span class="af-papers" aria-hidden="true">' + papers + '</span><span class="af-body" aria-hidden="true"></span><span class="af-label"><b>剪报</b><span>' + list.length + " 篇</span></span></button>";
-  }
+  function folderHTML(tid, list) { return bagHTML(tid, list, "shelf"); }
   function newBoxSlot(tid) {
     return S.canEdit ? '<button type="button" class="anew" data-act="abox-new" data-t="' + esc(tid) + '" title="在「' + esc(domInfo(tid).name) + '」新立一个档案盒"><b aria-hidden="true">＋</b><span>新档案盒</span></button>' : "";
   }
@@ -2266,7 +2262,8 @@
     }
     var q = tp.question || tp.answer ? '<div class="ap-q">' + (tp.question ? '<small>课题问题</small><p class="q">' + esc(tp.question) + "</p>" : "") +
       (tp.answer ? "<small>现在的答案（每装进一件就改一次）</small><p class=\"a\">" + esc(tp.answer) + "</p>" : "") + "</div>" : "";
-    var table = items.length ? itemTableHTML(itemRowsHTML(items, tp))
+    var table = items.length ? handHTML(items, tp) + gemLegendHTML(items, tp) +
+        '<details class="ylist" data-ylist=""' + (S.ylist ? " open" : "") + '><summary><b>牌册</b><small>卷内目录 · ' + items.length + " 件</small></summary>" + itemTableHTML(itemRowsHTML(items, tp)) + "</details>"
       : '<p class="meta ap-empty">盒里还是空的。' + (clipsOn() ? "在剪报的「放到」里选这一盒，就装进来了。" : "") + "</p>";
     return '<aside class="pulled apanel" aria-labelledby="ap-h" style="--c:' + col + '"><p class="eyebrow">打开的档案盒 · 卷内目录' + (tp.mine ? " · 自己立的" : "") + "</p>" +
       '<div class="pb-h"><span class="pb-bar" aria-hidden="true"></span><div><span class="ap-no">研 · ' + esc(topicNo(tp)) + '</span><h2 id="ap-h">' + esc(tp.title) + '</h2><p class="meta">' + esc(meta) + "</p></div></div>" +
@@ -2280,11 +2277,18 @@
       return '<tr><td class="n">' + pad2(i + 1) + "</td><td>" + itemLink(rp, esc(c.title) + (itemOut(rp) ? ' <span aria-hidden="true">↗</span>' : "")) + '<span class="d">' + esc(sub) + "</span>" + (S.canEdit ? placeSel(c) : "") + "</td>" +
         '<td class="dt">' + esc(rp.date) + "</td></tr>";
     }).join("");
-    var tip = tid ? "在「放到」里选一个档案盒，就装进盒里；讲同一件事的攒到两三篇，可以新立一盒。" : "选一个领域，它就挂进那一格的剪报夹；也可以直接装进某个档案盒。";
-    return '<aside class="pulled apanel afpanel" aria-labelledby="ap-h" style="--c:' + col + '"><p class="eyebrow">' + (tid ? "打开的剪报夹 · 还没装盒的剪报" : "收件匣 · 没分领域的剪报") + "</p>" +
-      '<div class="pb-h"><span class="pb-bar" aria-hidden="true"></span><div>' + (di && di.code ? '<span class="ap-no">' + esc(di.code) + "</span>" : "") + '<h2 id="ap-h">' + (tid ? esc(di.name) + " · 剪报夹" : "没分领域的剪报") + '</h2><p class="meta">' + list.length + " 篇</p></div></div>" +
-      '<p class="meta">' + tip + "</p>" +
-      '<table class="aitems"><thead><tr><th scope="col">篇</th><th scope="col">题名</th><th scope="col" class="dt">存的日期</th></tr></thead><tbody>' + rows + "</tbody></table>" +
+    var tip = tid ? "把牌拖到架子上的档案盒里，或在牌册的「放到」里选一个盒子，就装进盒里；讲同一件事的攒到两三篇，可以新立一盒。" : "把牌拖到某个领域的剪报夹或档案盒里；也可以在牌册的「放到」里选。";
+    var unseen = list.filter(function (c) { return !c.seen; }), anim = S.packAnim === tid, sealed = unseen.length > 0 || anim;
+    var seen = anim ? list : list.filter(function (c) { return c.seen; });
+    var pack = sealed
+      ? '<div class="ypack sealed"><div class="ymat" aria-hidden="true"><span>拆 封 处</span></div>' + bagHTML(tid, list, "sealed") +
+        '<p class="meta">' + (anim ? "拆封……" : (S.canEdit ? "点袋子拆封：" : "封着的：") + unseen.length + " 篇新剪的还没拆，约 " + packMinutes(unseen) + " 分钟" + (seen.length ? "；拆过的 " + seen.length + " 篇在下面" : "")) + "</p></div>"
+      : '<div class="ypack opened">' + bagHTML(tid, list, "opened") + '<p class="ypk-txt">拆过的袋子。' + list.length + " 篇牌在下面：拖到架子上的档案盒里就装盒；点一张翻开读。</p></div>";
+    var hand = seen.length ? handHTML(seen.map(clipItem), null, sealed && !anim ? "" : "") + gemLegendHTML(seen.map(clipItem), null) : "";
+    return '<aside class="pulled apanel afpanel" aria-labelledby="ap-h" style="--c:' + col + '"><p class="eyebrow">' + (tid ? "打开的剪报夹 · 卡包" : "收件匣 · 没分领域的剪报") + "</p>" +
+      '<div class="pb-h"><span class="pb-bar" aria-hidden="true"></span><div>' + (di && di.code ? '<span class="ap-no">' + esc(di.code) + "</span>" : "") + '<h2 id="ap-h">' + (tid ? esc(di.name) + " · 剪报夹" : "没分领域的剪报") + '</h2><p class="meta">' + list.length + " 篇" + (unseen.length ? " · " + unseen.length + " 篇没拆" : "") + "</p></div></div>" +
+      pack + hand + '<p class="meta">' + tip + "</p>" +
+      '<details class="ylist" data-ylist=""' + (S.ylist ? " open" : "") + '><summary><b>牌册</b><small>放到哪 · ' + list.length + ' 篇</small></summary><table class="aitems"><thead><tr><th scope="col">篇</th><th scope="col">题名</th><th scope="col" class="dt">存的日期</th></tr></thead><tbody>' + rows + "</tbody></table></details>" +
       (S.canEdit && tid ? '<div class="btns"><button type="button" class="btn small" data-act="abox-new" data-t="' + esc(tid) + '">＋ 在「' + esc(di.name) + "」新立一盒</button></div>" : "") + "</aside>";
   }
   /* 新立一个档案盒 / 改自己立的盒子 */
@@ -2435,6 +2439,148 @@
     var q = S.archQ || "";
     document.querySelectorAll(".archive .abox").forEach(function (b) { var tp = TOPIC[b.getAttribute("data-t")]; if (tp) b.classList.toggle("dim", !archMatch(tp)); });
     document.querySelectorAll(".archive .asheet, .archive .afold").forEach(function (a) { a.classList.toggle("dim", !!q && (a.getAttribute("data-q") || "").indexOf(q) < 0); });
+  }
+  /* ---------- 卡牌：一篇文章一张牌 ----------
+   * 盒里的每一件、夹里的每一篇都是一张牌，平时牌背朝上。牌背是固定的封面（圆光里一幅夜读小景：月、远山、一盏灯、一卷书）
+   * 加左上一张题签；右上铜钱是读完大约几分钟；底边左边是来源，右边一颗宝石说学到哪一步：
+   * 灰没读 / 青读了 / 金写了批注 / 朱这一盒结卷了（盖“引”印）。一个领域一种底色，一盒就是一副牌。
+   * 点一下牌翻过来、放大，翻面就是整篇文章（阅读器）。
+   * 剪报夹是卡包：画成一只牛皮纸档案袋。夹里有还没拆过的剪报（clip.seen 为空）就封着——缠绳扣、封条、朱印；
+   * 点袋子拆封：封条崩开，牌从袋口飞出来落成一排；拆过的袋子留着，当这几张牌的夹子。seen 记拆封（或第一次翻开）的时间。 */
+  function cardMin(rp) {
+    var c = rp.clip; if (!c) return "";
+    return c.status === "link" ? "链" : String(Math.max(1, Math.round((c.words || 0) / 400)));
+  }
+  function cardSrc(rp) {
+    var c = rp.clip;
+    if (!c) return { k: "me", label: reportKind(rp) };
+    var u = String(c.url || ""), s = String(c.site || "");
+    if (/zhihu\.com/.test(u) || /知乎/.test(s)) return { k: "zh", label: "知乎" + (c.kind === "answer" ? "回答" : c.kind === "article" ? "文章" : "") };
+    if (/mp\.weixin\.qq\.com/.test(u) || /公众号|微信/.test(s)) return { k: "wx", label: "公众号" };
+    return { k: "web", label: s || "网页" };
+  }
+  var GEM_LABEL = ["没读", "读了", "写了批注", "结卷引用"], GEM_CH = ["未", "读", "批", "引"];
+  /* 学到哪一步：0 没读 / 1 读了（翻开过、划过线或标成已读）/ 2 写了批注 / 3 这一盒结卷了 */
+  function cardGem(rp, tp) {
+    if (tp && tp.status === "closed") return 3;
+    var ms = marksOf(rp.id);
+    if (ms.some(function (m) { return m.note; })) return 2;
+    var pg = (S.data.progress || {})[rp.id];
+    if (ms.length || readingOf(rp.id) || (pg && pg.s === "done")) return 1;
+    return 0;
+  }
+  function cardHTML(rp, tp) {
+    var c = rp.clip, tr = tp ? tp.track : c && c.track && domExists(c.track) ? c.track : "";
+    var col = tr ? domCol(tr) : "#6E675E", g = cardGem(rp, tp), src = cardSrc(rp), min = cardMin(rp), out = itemOut(rp);
+    var tag = String(rp.title || "").replace(/\s+/g, " ").slice(0, 40), kind = reportKind(rp);
+    var coin = c ? '<span class="yc-coin" aria-hidden="true">' + esc(min) + "</span>" : '<span class="yc-coin k" style="--k:var(' + KINDS[kind] + ')" aria-hidden="true">' + esc(kind.charAt(0)) + "</span>";
+    var inner = '<span class="yc-silk" aria-hidden="true"></span><span class="yc-rim" aria-hidden="true"></span>' +
+      '<svg class="yc-scene" aria-hidden="true"><use href="#yx-scene"/></svg>' +
+      (g === 3 ? '<i class="yc-yin" aria-hidden="true">引</i>' : "") +
+      '<span class="yc-tag"><span>' + esc(tag) + "</span></span>" + coin +
+      '<span class="yc-band"><span class="yc-src ' + src.k + '"><i aria-hidden="true"></i>' + esc(src.label) + '</span><i class="yc-gem g' + g + '" aria-hidden="true">' + GEM_CH[g] + "</i></span>";
+    var tip = rp.title + " · " + src.label + (c && min !== "链" ? " · 约 " + min + " 分钟" : "") + " · " + GEM_LABEL[g] + (out ? " · 在新标签页打开原文" : " · 点一下翻开读");
+    var wait = c && S.packNew && S.packNew[c.id] ? " yc-wait" : "";
+    var attrs = ' class="yc' + wait + '" style="--dom:' + col + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"' + (c && S.canEdit ? ' draggable="true" data-clip="' + esc(c.id) + '"' : "");
+    if (out) return "<a" + attrs + ' href="' + esc(c ? c.url : reportHref(rp)) + '" target="_blank" rel="noopener">' + inner + "</a>";
+    return '<button type="button"' + attrs + ' data-act="clip-open" data-id="' + esc(c.id) + '">' + inner + "</button>";
+  }
+  function handHTML(items, tp, cls) {
+    return '<div class="yhand' + (cls ? " " + cls : "") + '">' + items.map(function (rp) { return cardHTML(rp, tp); }).join("") + "</div>";
+  }
+  /* 宝石图例：这一把牌里各有几张 */
+  function gemLegendHTML(items, tp) {
+    var n = [0, 0, 0, 0];
+    items.forEach(function (rp) { n[cardGem(rp, tp)]++; });
+    return '<p class="meta ylegend">' + n.map(function (k, i) { return k ? '<span><i class="yc-gem g' + i + '" aria-hidden="true"></i>' + GEM_LABEL[i] + " " + k + "</span>" : ""; }).join("") + "</p>";
+  }
+  function packUnseen(tid) { return looseClips(tid).filter(function (c) { return !c.seen; }); }
+  function packMinutes(list) { return list.reduce(function (a, c) { return a + (c.status === "link" ? 0 : Math.max(1, Math.round((c.words || 0) / 400))); }, 0); }
+  /* 档案袋：剪报夹画成一只牛皮纸档案袋。mode: "shelf" 架子上的小袋 / "sealed" 面板里封着的大袋（点它拆封）/ "opened" 面板里拆过的袋 */
+  function bagHTML(tid, list, mode) {
+    var di = tid ? domInfo(tid) : null, col = di ? di.col : "#6E675E", unseen = list.filter(function (c) { return !c.seen || (S.packNew && S.packNew[c.id]); });
+    var sealed = mode === "sealed" || (mode === "shelf" && unseen.length > 0), on = S.archPick === "cf:" + tid, anim = S.packAnim === tid && mode === "sealed";
+    var q = S.archQ || "", text = folderText(list), name = di ? di.name : "没分领域";
+    var when = unseen.length ? String(unseen[unseen.length - 1].t || "").slice(5, 10).replace("-", "/") : "";
+    var strip = sealed ? '<span class="yb-strip" aria-hidden="true"><i>封</i><small>' + esc(when) + '</small></span><span class="yb-strip b" aria-hidden="true"></span>' : "";
+    var cnt = sealed && mode !== "shelf" ? unseen.length + " 篇" : list.length + " 篇";
+    var tip = sealed ? "剪报夹：" + unseen.length + " 篇还没拆封" + (list.length > unseen.length ? "，另有 " + (list.length - unseen.length) + " 篇拆过" : "") : "剪报夹：还没装盒的 " + list.length + " 篇";
+    var inner = '<span class="yb-flap" aria-hidden="true"></span><span class="yb-tie" aria-hidden="true"></span>' + strip +
+      '<span class="yb-label"><b>' + (mode === "shelf" ? "剪报" : esc(name)) + "</b><span>" + esc(cnt) + "</span></span>" +
+      (mode === "shelf" && unseen.length ? '<span class="yb-badge" aria-hidden="true">' + unseen.length + "</span>" : "");
+    if (mode === "shelf") return '<button type="button" class="afold ybag' + (sealed ? " sealed" : " opened") + (on ? " picked" : "") + (q && text.indexOf(q) < 0 ? " dim" : "") + '" style="--dom:' + col + '" data-act="abox" data-t="cf:' + esc(tid) + '" data-q="' + esc(text) + '" title="' + esc(tip) + '" aria-pressed="' + on + '">' + inner + "</button>";
+    if (sealed) return '<button type="button" class="ybag big sealed' + (anim ? " tearing" : "") + '" style="--dom:' + col + '" data-act="pack-open" data-t="' + esc(tid) + '" title="点一下拆封">' + inner + "</button>";
+    return '<div class="ybag big opened" style="--dom:' + col + '" aria-hidden="true">' + inner + "</div>";
+  }
+  /* 拆封：封条崩开，牌从袋口飞出来，落到它们在这一把牌里的位置上 */
+  function packOpen(tid) {
+    var list = packUnseen(tid); if (!list.length || !S.canEdit) return;
+    var now = new Date().toISOString(), C = S.data.clips || {};
+    var anim = !REDUCE && LK().motion && !!document.body.animate && !!document.querySelector('.ybag.big[data-t="' + tid + '"]');
+    S.packNew = {}; list.forEach(function (c) { S.packNew[c.id] = 1; });
+    if (anim) S.packAnim = tid;
+    list.forEach(function (c) { if (C[c.id]) put("clips", c.id, Object.assign({}, C[c.id], { seen: now })); });
+    S.archPick = "cf:" + tid; render();
+    if (!anim) { S.packAnim = null; S.packNew = null; render(); return; }
+    var panel = document.querySelector(".afpanel"), bag = panel && panel.querySelector(".ybag.big");
+    var cards = panel ? Array.prototype.slice.call(panel.querySelectorAll(".yhand .yc.yc-wait")) : [];
+    /* 收尾：袋子缩成拆过的小袋，牌从落点滑到它们在这一把牌里的位置 */
+    function finish() {
+      S.packAnim = null; S.packNew = null; S.dirty = false;
+      if (S.route !== "archive") return;
+      var old = {};
+      document.querySelectorAll(".afpanel .yhand .yc[data-clip]").forEach(function (el) { old[el.getAttribute("data-clip")] = el.getBoundingClientRect(); });
+      render();
+      document.querySelectorAll(".afpanel .yhand .yc[data-clip]").forEach(function (el) {
+        var r0 = old[el.getAttribute("data-clip")]; if (!r0) return;
+        var r1 = el.getBoundingClientRect(), dx = r0.left - r1.left, dy = r0.top - r1.top;
+        if (Math.abs(dx) + Math.abs(dy) < 2) return;
+        el.animate([{ transform: "translate(" + dx + "px," + dy + "px)" }, { transform: "translate(0,0)" }], { duration: 420, easing: "cubic-bezier(.3,.6,.3,1)" });
+      });
+    }
+    if (!bag || !cards.length) { finish(); return; }
+    if (window.innerWidth < 1100) panel.scrollIntoView({ block: "start", behavior: "smooth" });
+    setTimeout(function () {
+      bag = document.querySelector('.afpanel .ybag.big[data-t="' + tid + '"]') || bag;
+      cards = Array.prototype.slice.call(document.querySelectorAll(".afpanel .yhand .yc.yc-wait"));
+      if (!cards.length) { finish(); return; }
+      var rb = bag.getBoundingClientRect(), mx = rb.left + rb.width / 2, my = rb.top + rb.height * 0.22;
+      var fl = document.createElement("i"); fl.className = "yflash"; fl.setAttribute("aria-hidden", "true");
+      fl.style.cssText = "left:" + Math.round(mx) + "px;top:" + Math.round(my) + "px"; document.body.appendChild(fl);
+      setTimeout(function () { fl.remove(); }, 700);
+      var step = Math.min(90, Math.round(700 / cards.length)), left = cards.length;
+      cards.forEach(function (el, i) {
+        var r = el.getBoundingClientRect(), cl = document.createElement("div");
+        cl.className = "yc yfly"; cl.setAttribute("style", el.getAttribute("style") + ";left:" + Math.round(mx - r.width / 2) + "px;top:" + Math.round(my - r.height / 2) + "px;width:" + r.width + "px;height:" + r.height + "px");
+        cl.innerHTML = el.innerHTML; cl.setAttribute("aria-hidden", "true"); document.body.appendChild(cl);
+        var dx = r.left - (mx - r.width / 2), dy = r.top - (my - r.height / 2), rot = (i % 2 ? 1 : -1) * (8 + (i * 7) % 14);
+        var a = cl.animate([
+          { transform: "translate(0,0) scale(.45) rotate(" + rot + "deg)", opacity: 0.6 },
+          { transform: "translate(" + (dx * 0.35) + "px," + (dy * 0.3 - 90) + "px) scale(1.08) rotate(" + (-rot / 2) + "deg)", opacity: 1, offset: 0.45 },
+          { transform: "translate(" + dx + "px," + dy + "px) scale(1) rotate(0deg)", opacity: 1 }
+        ], { duration: 720, delay: i * step, easing: "cubic-bezier(.3,.6,.3,1)", fill: "backwards" });
+        a.onfinish = function () { el.classList.remove("yc-wait"); cl.remove(); if (--left <= 0) setTimeout(finish, 120); };
+      });
+      setTimeout(function () { document.querySelectorAll(".yfly").forEach(function (x) { x.remove(); }); if (S.packAnim) finish(); }, 720 + step * cards.length + 800);
+    }, 450);
+  }
+  /* 翻牌：牌从原位翻过来、放大到屏幕中间，翻面就是文章，接着阅读器盖上来 */
+  function cardFlip(el, id) {
+    if (!el || REDUCE || !LK().motion || !document.body.animate) { readerOpen(id); return; }
+    var r = el.getBoundingClientRect(), W = window.innerWidth, H = window.innerHeight, c = (S.data.clips || {})[id] || {};
+    if (!r.width || !r.height) { readerOpen(id); return; }
+    var f = document.createElement("div"); f.className = "yflip"; f.setAttribute("aria-hidden", "true");
+    f.style.cssText = "left:" + r.left + "px;top:" + r.top + "px;width:" + r.width + "px;height:" + r.height + "px";
+    f.innerHTML = '<div class="yf-in"><div class="yf-back yc" style="' + esc(el.getAttribute("style") || "") + '">' + el.innerHTML + '</div><div class="yf-front"><b>' + esc(c.title || "") + "</b><span>翻开 · 整篇文章</span></div></div>";
+    document.body.appendChild(f);
+    var sc = Math.max(1.4, Math.min(2.8, (H * 0.78) / r.height, (W * 0.8) / r.width)), dx = W / 2 - (r.left + r.width / 2), dy = H / 2 - (r.top + r.height / 2), done = false;
+    function go() { if (done) return; done = true; readerOpen(id); setTimeout(function () { f.remove(); }, 160); }
+    f.firstChild.animate([
+      { transform: "translate(0,0) scale(1) rotateY(0deg)" },
+      { transform: "translate(" + dx * 0.5 + "px," + dy * 0.5 + "px) scale(" + ((1 + sc) / 2) + ") rotateY(90deg)", offset: 0.5 },
+      { transform: "translate(" + dx + "px," + dy + "px) scale(" + sc + ") rotateY(180deg)" }
+    ], { duration: 640, easing: "cubic-bezier(.4,0,.2,1)", fill: "forwards" }).onfinish = go;
+    setTimeout(go, 1000);
   }
   /* ---------- 剪报：把知乎（或微信公众号、别的网页）上看到的好回答、好文章收进档案架 ----------
    * 只在服务器版（baba.wogucloud.cn）上有：记录存在 Baba 账号里，不进公开的 GitHub 仓库。
@@ -4872,7 +5018,8 @@
     var t = e.target.closest("[data-act]"); if (!t) return;
     var act = t.getAttribute("data-act");
     if (act === "mst") { openStation(t.getAttribute("data-l"), +t.getAttribute("data-i")); return; }
-    if (act === "clip-open") { readerOpen(t.getAttribute("data-id")); return; }
+    if (act === "clip-open") { if (t.classList.contains("yc")) cardFlip(t, t.getAttribute("data-id")); else readerOpen(t.getAttribute("data-id")); return; }
+    if (act === "pack-open") { packOpen(t.getAttribute("data-t")); return; }
     if (act === "clip-del") { S.clipDel = t.getAttribute("data-id"); render(); return; }
     if (act === "clip-del-no") { S.clipDel = null; render(); return; }
     if (act === "clip-del-yes") { var cid = t.getAttribute("data-id"); S.clipDel = null; del("clips", cid); del("clipbody", cid); toast("剪报删掉了。"); render(); return; }
@@ -5059,7 +5206,7 @@
   });
   /* 拖拽归档：把剪报卡片拖到档案盒、剪报夹或收件匣上 */
   document.addEventListener("dragstart", function (e) {
-    var card = e.target.closest && e.target.closest(".cl-card[data-clip]");
+    var card = e.target.closest && e.target.closest(".cl-card[data-clip], .yc[data-clip]");
     if (!card || !e.dataTransfer) return;
     e.dataTransfer.setData("text/yxl-clip", card.getAttribute("data-clip"));
     e.dataTransfer.effectAllowed = "move";
@@ -5121,6 +5268,7 @@
   });
   document.addEventListener("toggle", function (e) {
     var d = e.target; if (d.matches && d.matches("details[data-more]")) { S.moreOpen = d.open; return; }
+    if (d.matches && d.matches("details[data-ylist]")) { S.ylist = d.open; return; }
     if (d.matches && d.matches("details.rs-pts") && RD) { RD.ptsOpen = d.open; return; }
     if (!d.matches || !d.matches("details.ch")) return;
     S.openCh[d.getAttribute("data-ch")] = d.open;
