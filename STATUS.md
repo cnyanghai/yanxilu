@@ -13,7 +13,7 @@ updated: 2026-10-28
 ## 现在停在哪
 
 - 版本 1：书架、档案架、卡牌与卡包、书房样机 `room/`（CSS 3D 第一稿）都在线，主版本在 https://baba.wogucloud.cn 。git 标签 `v1` 指向 2026-10-28 的 main。
-- 版本 2：`world/` 第一版写完（`index.html` + `world.js` + `sample.js`，three.js 0.186.1 自带在 `vendor/three/`）。有：院子总览（书房 + 三块待建地基）、书房建筑层（墙、地、梁、窗、书墙、档案架、桌、看板、灯）、程序化的书（InstancedMesh + 书脊贴图集）、盒与袋（题签 / 封条 / 引印）、今天的牌、文竹（茎与羽叶合并成两个网格，grow 参数控制株数层数）、四景别镜头与 hash 路由、三种光（夜读聚光灯一盏、晴窗左窗来光、雨天青灰）、指到显示铜色名字、Esc / 后退 / 面包屑退后。测试 `tools/tests/world_test.py` 通过：draw call 49 到 86，三角面约 9 千，控制台无报错。
+- 版本 2：`world/` 第一版写完（`index.html` + `world.js` + `sample.js`，three.js 0.186.1 自带在 `vendor/three/`）。有：院子总览（书房 + 三块待建地基）、书房建筑层（墙、地、梁、窗、书墙、档案架、桌、看板、灯）、程序化的书（InstancedMesh + 书脊贴图集）、盒与袋（题签 / 封条 / 引印）、今天的牌、文竹（茎与羽叶合并成两个网格，grow 参数控制株数层数）、四景别镜头与 hash 路由、三种光（夜读聚光灯一盏、晴窗左窗来光、雨天青灰）、指到显示铜色名字、Esc / 后退 / 面包屑退后。测试 `tools/tests/world_test.py` 通过：draw call 49 到 86，三角面约 9 千，控制台无报错。截图在 `tools/out/world/`（已 gitignore，是测试产物，每次跑都会覆盖）。
 - Baba 仓库已加 `/world` 和 `/world/[...path]` 两条路由并推送（f25dc6c），**还没部署**，线上 `/world` 要等人跑 `scripts/deploy-yanxilu.sh`。
 - 还是灰盒：没有烘焙、没有 CC0 家具模型、数据是 `sample.js` 的样例，还没接 `S.data`。
 
