@@ -1,0 +1,7 @@
+# 统一用 LF，Windows 上克隆也不会把 build.py 生成的文件改成 CRLF
+* text=auto eol=lf
+*.woff2 binary
+*.png binary
+*.jpg binary
+*.webp binary
+*.pdf binary

@@ -20,9 +20,10 @@
 
 ```
 python3 build.py
-python3 tools/baba_mock.py 8790 &        # 本地模拟 Baba：/api/yxl/*、首页给 server/index.html
+python3 tools/baba_mock.py 8790          # 本地模拟 Baba：/api/yxl/*、首页给 server/index.html（另开一个终端跑着）
 python3 tools/tests/desk_test.py         # 档案架：拆封、翻牌、桌面（Playwright）
 ```
+Windows 上把 `python3` 换成 `python`；脚本都是纯 Python，Windows 和 Linux 都能跑。mock 起来以后浏览器窗格打开 http://127.0.0.1:8790/#archive 就能看到服务器版（测试账号 cookie `sid=u1`，测试脚本会自己带）。
 截图落在 `tools/out/`（已 gitignore）。`abox_test.py`、`clip_test.py` 写于侧栏面板时期，部分步骤已过时，改之前先看。本机没有 Playwright 就 `pip install playwright && playwright install chromium`。
 
 ## 规矩（人定的，不要改）
