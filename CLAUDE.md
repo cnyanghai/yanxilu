@@ -12,6 +12,7 @@
 
 - 单文件前端：`src/app.js`（全部逻辑）+ `src/page.html`（CSS 和外壳）+ `src/server.js`（服务器版垫片）。**改完必须跑 `python3 build.py`**，它生成 `index.html`、`server/index.html`、`dist/artifact.html`、`reports/*.html` 和 `sw.js`（版本号来自 index.html 的 sha1）。生成物要一起提交。
 - `room/index.html`：书房样机（CSS 3D 路线的第一稿），独立页面，服务器版在 `/room`。
+- `world/`：版本 2 的小世界（WebGL）。`index.html` 外壳和 HUD，`world.js` 全部逻辑（ES 模块，用 importmap 引 `vendor/three/`），`sample.js` 灰盒阶段的样例数据。服务器版在 `/world`（Baba 那边 `src/app/world/route.ts` 和 `world/[...path]/route.ts`）。不打包，不引框架。
 - `vendor/`：自带的字体（`vendor/fonts`）、KaTeX、PDF.js、PWA 清单。不要引用 Google Fonts，国内打不开。
 - 数据：`S.data[集合][id]`，`put(coll, id, val)` / `del(coll, id)` 写入；服务器版走 Baba 的 `/api/yxl/*`，公开版存 localStorage。集合名在 `COLLS`。剪报（`clips`/`clipbody`）只在服务器版有。
 - 服务器端（另一个仓库 cnyanghai/baba-english）：`src/lib/yxl.ts` 的 `serveYxl` 直接读研习录克隆里的静态文件；新的顶层路径要在那边加一条 route（例如 `src/app/room/route.ts`）。Baba 的部署由人在 WSL 里跑 `scripts/deploy-yanxilu.sh`，Claude 不要自己部署。
@@ -22,6 +23,7 @@
 python3 build.py
 python3 tools/baba_mock.py 8790          # 本地模拟 Baba：/api/yxl/*、首页给 server/index.html（另开一个终端跑着）
 python3 tools/tests/desk_test.py         # 档案架：拆封、翻牌、桌面（Playwright）
+python3 tools/tests/world_test.py        # 小世界：四景别截图、三种光、draw call 数（自己起模拟服务器）
 ```
 Windows 上把 `python3` 换成 `python`；脚本都是纯 Python，Windows 和 Linux 都能跑。mock 起来以后浏览器窗格打开 http://127.0.0.1:8790/#archive 就能看到服务器版（测试账号 cookie `sid=u1`，测试脚本会自己带）。
 截图落在 `tools/out/`（已 gitignore）。`abox_test.py`、`clip_test.py` 写于侧栏面板时期，部分步骤已过时，改之前先看。本机没有 Playwright 就 `pip install playwright && playwright install chromium`。

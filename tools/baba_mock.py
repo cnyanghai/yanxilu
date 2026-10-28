@@ -44,7 +44,7 @@ def english(uid):
         out.append({k:d[k] for k in ("slug","type","titleEn","titleZh","posterUrl","year")} | {"sentences":sent,"reached":reached,"watchedMs":watched,"last":last,"episodes":eps})
     vocab = {"total":23,"new":12,"learning":4,"known":7,"lastAddedAt":"2026-10-18T12:00:00.000Z"} if uid else {"total":0,"new":0,"learning":0,"known":0,"lastAddedAt":None}
     return {"user": {"name": USERS[uid]["name"]} if uid else None, "paid": bool(uid and USERS[uid]["paid"]), "dramas": out, "vocab": vocab, "at": now()}
-TYPES = {".html":"text/html; charset=utf-8",".mjs":"text/javascript; charset=utf-8",".js":"text/javascript; charset=utf-8",".json":"application/json; charset=utf-8",".css":"text/css",".csv":"text/csv; charset=utf-8"}
+TYPES = {".html":"text/html; charset=utf-8",".mjs":"text/javascript; charset=utf-8",".js":"text/javascript; charset=utf-8",".json":"application/json; charset=utf-8",".css":"text/css",".csv":"text/csv; charset=utf-8",".wasm":"application/wasm",".woff2":"font/woff2",".png":"image/png",".svg":"image/svg+xml"}
 def baba_page(title, body):
     return ("<!doctype html><html><head><meta charset=utf-8><title>Baba 英语 · 看视频学英语</title><script>" + EMBED + "</script>"
       "<style>html[data-embed] [data-site-header]{display:none} html[data-embed] [data-site-main]{padding-top:0} [data-site-header]{position:fixed;top:0;left:0;right:0;height:56px;background:#222;color:#fff} [data-site-main]{padding-top:56px} body{margin:0;font-family:sans-serif;background:#111;color:#eee}</style></head>"
@@ -84,7 +84,9 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(YXL + "/server/index.html", "rb").read(), "text/html; charset=utf-8", {"cache-control": "no-cache"})
         if p == "/sw.js":
             return self.send(200, open(YXL + "/sw.js", "rb").read(), "text/javascript; charset=utf-8", {"cache-control": "no-cache"})
-        if p.startswith("/vendor/") or p.startswith("/reports/"):
+        if p in ("/room", "/room/"): p = "/room/index.html"
+        if p in ("/world", "/world/"): p = "/world/index.html"
+        if p.startswith("/vendor/") or p.startswith("/reports/") or p.startswith("/room/") or p.startswith("/world/"):
             f = os.path.normpath(YXL + p)
             if not f.startswith(YXL + "/") or not os.path.isfile(f): return self.send(404, "nf", "text/plain")
             return self.send(200, open(f, "rb").read(), TYPES.get(os.path.splitext(f)[1], "application/octet-stream"))

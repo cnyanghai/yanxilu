@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="研习录版本 2：一个人的小世界。院子、书房、书墙、案头的文竹。WebGL 的第一稿。">
+<meta name="theme-color" content="#17110C">
+<!-- 研习录 · 版本 2（world/）。独立页面，用自带的 three.js（vendor/three），不走任何 CDN。
+     结构：院子（总览）→ 间 → 家具 → 物，四个景别；URL 的 hash 对应景别，浏览器后退就是镜头拉远。
+     这一稿是灰盒：建筑和家具是简单几何，书、盒、牌、文竹按数据程序化生成。
+     材质只有四种：纸、木、墨、铜。光：夜读一盏灯，晴窗左窗来光，雨天青灰。 -->
+<title>研习录 · 小世界</title>
+<link rel="stylesheet" href="../vendor/fonts/fonts.css">
+<script type="importmap">
+{ "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }
+</script>
+<style>
+:root{
+  --bg:#17110C; --fg:#EDE0C4;
+  --brass:#C9A05A; --brass-hi:#F3D98A; --brass-lo:#7E5A1E;
+  --f-brush:"Ma Shan Zheng","Kaiti SC","STKaiti",serif;
+  --f-kai:"ZCOOL XiaoWei","Kaiti SC","STKaiti","KaiTi","楷体",serif;
+  --f-song:"Noto Serif SC","Songti SC","STSong",serif;
+  --f-num:"Barlow Condensed","Arial Narrow",sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-kai);overflow:hidden;overscroll-behavior:none;touch-action:none}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit}
+#gl{position:fixed;inset:0;display:block;outline:none}
+#gl.hand{cursor:pointer}
+
+/* 角落的系统功能：扁平小图标 */
+.top{position:fixed;left:max(16px,env(safe-area-inset-left,0px));top:calc(14px + env(safe-area-inset-top,0px));display:flex;align-items:center;gap:10px;pointer-events:none}
+.top .seal{width:28px;height:28px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#A3231B 0 42%,#F7E9C8 44% 56%,#A3231B 58%);box-shadow:0 2px 4px rgba(0,0,0,.5)}
+.top .name{font-family:var(--f-brush);font-size:24px;letter-spacing:.1em;color:var(--fg);text-shadow:0 1px 0 rgba(0,0,0,.6)}
+.corner{position:fixed;right:max(16px,env(safe-area-inset-right,0px));top:calc(14px + env(safe-area-inset-top,0px));display:flex;gap:8px}
+.corner button{width:36px;height:36px;border-radius:50%;border:0;cursor:pointer;background:rgba(237,224,196,.12);color:var(--fg);font-size:14px;letter-spacing:0;display:grid;place-items:center;backdrop-filter:blur(6px)}
+.corner button:hover{background:rgba(237,224,196,.2)}
+
+/* 面包屑：院子 › 书房 › 书墙。点前面的一级就是拉远 */
+.crumb{position:fixed;left:50%;top:calc(16px + env(safe-area-inset-top,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;font-size:14px;letter-spacing:.12em;color:rgba(237,224,196,.8);pointer-events:none;white-space:nowrap}
+.crumb button{pointer-events:auto;appearance:none;border:0;background:none;color:inherit;padding:4px 2px;cursor:pointer;letter-spacing:inherit;font-size:inherit}
+.crumb button:hover{color:var(--brass-hi)}
+.crumb b{font-weight:400;color:var(--brass-hi)}
+.crumb i{font-style:normal;opacity:.5}
+
+/* 指到的东西：一个铜色的名字，跟着它走 */
+.tag{position:fixed;left:0;top:0;transform:translate(-50%,-120%);font-family:var(--f-brush);font-size:22px;letter-spacing:.25em;padding-left:.25em;color:var(--brass-hi);text-shadow:0 2px 0 #3A2008,0 0 18px rgba(242,193,78,.35);white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .25s}
+.tag.on{opacity:1}
+.tag small{display:block;font-family:var(--f-kai);font-size:12px;letter-spacing:.1em;color:rgba(237,224,196,.75);text-shadow:0 1px 0 rgba(0,0,0,.6)}
+
+/* 铜按钮：3 像素厚，按下去会沉 */
+.brass{position:relative;appearance:none;border:0;padding:0 14px;height:30px;border-radius:15px;cursor:pointer;font-family:var(--f-kai);font-size:13px;letter-spacing:.06em;color:#2A1408;
+  background:linear-gradient(180deg,var(--brass-hi),var(--brass) 55%,#A9833F);box-shadow:0 3px 0 var(--brass-lo),0 6px 10px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.6);transform:translateY(0);transition:transform .08s,box-shadow .08s}
+.brass:hover{filter:brightness(1.05)}
+.brass:active,.brass[aria-pressed="true"]{transform:translateY(3px);box-shadow:0 0 0 var(--brass-lo),0 2px 4px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.brass[aria-pressed="true"]{background:linear-gradient(180deg,var(--brass),#A9833F)}
+.brass:focus-visible{outline:2px solid var(--brass-hi);outline-offset:3px}
+.panel{position:fixed;left:50%;bottom:calc(16px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:8px;padding:8px 12px;border-radius:24px;
+  background:rgba(23,17,12,.55);backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 1px rgba(201,160,90,.25);max-width:calc(100vw - 24px)}
+.panel .sep{width:1px;height:22px;background:rgba(201,160,90,.35)}
+.panel .lbl{font-size:12px;letter-spacing:.14em;color:rgba(237,224,196,.7);padding:0 2px;white-space:nowrap}
+@media (max-width:640px){ .panel{gap:6px;padding:6px 8px} .brass{padding:0 10px;font-size:12px} .panel .lbl{display:none} .crumb{font-size:12px} }
+
+/* 晴窗时底是纸白，字改墨色 */
+body[data-light="day"] .crumb{color:rgba(42,31,20,.8)} body[data-light="day"] .crumb b{color:#7E5A1E} body[data-light="day"] .hint{color:rgba(42,31,20,.7)}
+body[data-light="day"] .top .name{color:#2A1F14;text-shadow:none} body[data-light="day"] .corner button{background:rgba(42,31,20,.1);color:#2A1F14}
+body[data-light="day"] .panel{background:rgba(242,235,218,.6);box-shadow:0 10px 30px rgba(0,0,0,.18),inset 0 0 0 1px rgba(126,90,30,.3)} body[data-light="day"] .panel .lbl{color:rgba(42,31,20,.7)} body[data-light="day"] .panel .sep{background:rgba(126,90,30,.3)}
+body[data-light="day"] .tag{text-shadow:0 1px 0 #fff} body[data-light="day"] .tag small{color:rgba(42,31,20,.8);text-shadow:none}
+
+/* 一句提示，只在院子里出现一次 */
+.hint{position:fixed;left:50%;bottom:calc(66px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:13px;letter-spacing:.08em;color:rgba(237,224,196,.7);white-space:nowrap;pointer-events:none;transition:opacity .4s}
+.hint.off{opacity:0}
+
+/* WebGL 开不了时的退路：回版本 1 */
+.fallback{position:fixed;inset:0;display:none;place-items:center;text-align:center;padding:24px;line-height:1.9}
+.fallback a{color:var(--brass-hi)}
+body.nogl .fallback{display:grid}
+body.nogl #gl,body.nogl .panel,body.nogl .crumb,body.nogl .hint{display:none}
+@media (prefers-reduced-motion:reduce){ .tag,.hint,.brass{transition:none} }
+</style>
+</head>
+<body>
+<canvas id="gl" tabindex="0" aria-label="研习录的小世界"></canvas>
+<div class="top"><span class="seal"></span><span class="name">研习录</span></div>
+<div class="corner"><button type="button" id="back" title="退后一步（Esc）">←</button></div>
+<nav class="crumb" id="crumb" aria-label="你在哪"></nav>
+<div class="tag" id="tag"></div>
+<div class="hint" id="hint">点一间房走近 · Esc 或 ← 退后</div>
+<div class="panel" role="toolbar" aria-label="房间的光">
+  <span class="lbl">光</span>
+  <button type="button" class="brass" data-light="night" aria-pressed="true">夜读</button>
+  <button type="button" class="brass" data-light="day" aria-pressed="false">晴窗</button>
+  <button type="button" class="brass" data-light="rain" aria-pressed="false">雨天</button>
+  <span class="sep"></span>
+  <button type="button" class="brass" id="grow" title="假装读了一周">长一周</button>
+</div>
+<div class="fallback"><div>这台设备开不了 WebGL。<br><a href="../">回到研习录的平面版</a></div></div>
+<script type="module" src="./world.js"></script>
+</body>
+</html>
