@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="研习录首屏的 CSS 3D 样机：一间书房、一盏灯、一个镜头。">
+<meta name="theme-color" content="#17110C">
+<!-- 研习录 · 书房样机（CSS 3D 路线的第一稿）。独立页面，不动现有的站；主站入口仍是 index.html。 -->
+<title>研习录书房</title>
+<link rel="stylesheet" href="../vendor/fonts/fonts.css">
+<style>
+/* 布局：整页就是一间房。一个透视舞台，一个世界坐标系（墙在 z=0，桌面在 y=+260 向观众伸出），镜头是对 .world 的一次变换。
+   材质只有四种：纸（牌、签、袋、盒面）、木（桌、架）、墨（字）、铜（能按的东西）。一盏灯。 */
+:root{
+  --bg:#17110C; --fg:#EDE0C4;
+  --paper:#F1E3C0; --paper-2:#E3CFA0; --paper-3:#C9AD78; --ink:#1F1309; --ink-2:#4A3218; --zhu:#A3231B;
+  --brass:#C9A05A; --brass-hi:#F3D98A; --brass-lo:#7E5A1E;
+  --f-brush:"Ma Shan Zheng","Kaiti SC","STKaiti",serif;
+  --f-kai:"LXGW WenKai TC","Kaiti SC","STKaiti","KaiTi","楷体",serif;
+  --f-song:"Noto Serif SC","Songti SC","STSong",serif;
+  --f-num:"Barlow Condensed","Arial Narrow",sans-serif;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:light){ :root:not([data-theme="dark"]){ --bg:#17110C; --fg:#EDE0C4; color-scheme:dark } }
+:root[data-theme="light"]{ --bg:#17110C; --fg:#EDE0C4; color-scheme:dark }
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-kai);overflow:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0;box-sizing:border-box}
+*{box-sizing:border-box}
+button{font:inherit;color:inherit}
+
+/* ---------- 房间（三间）：墙、桌面木色、灯的颜色和强度、窗光 ---------- */
+.stage{--wall:#2B1F17;--wall-2:#1C130D;--desk-1:#4C3220;--desk-2:#2E1C10;--desk-hi:#6A4A2E;
+  --lamp:rgba(255,214,140,.95);--lamp-pool:rgba(255,206,120,.55);--lamp-wall:rgba(255,200,120,.22);--amb:0;--win:0;--rain:0;
+  --label:#EDE0C4;--chalk:#EFE6D2;
+  position:fixed;inset:0;overflow:hidden;perspective:1500px;perspective-origin:50% 44%;
+  background:radial-gradient(120% 90% at 50% 30%,var(--wall) 0%,var(--wall-2) 70%,#0B0705 100%)}
+.stage[data-room="day"]{--wall:#E6DDC9;--wall-2:#CFC3AA;--desk-1:#B98A54;--desk-2:#8E6436;--desk-hi:#D9B280;
+  --lamp:rgba(255,214,140,0);--lamp-pool:rgba(255,240,210,.0);--lamp-wall:rgba(255,230,180,0);--amb:1;--win:1;--label:#2A1F14;--chalk:#F6F1E4;
+  background:radial-gradient(120% 90% at 30% 20%,#F2EBDA 0%,var(--wall) 55%,#BDAF93 100%)}
+.stage[data-room="rain"]{--wall:#5B636A;--wall-2:#3A4046;--desk-1:#5E4634;--desk-2:#3B2A1E;--desk-hi:#7A5E46;
+  --lamp:rgba(255,214,160,.85);--lamp-pool:rgba(255,220,170,.42);--lamp-wall:rgba(255,220,170,.16);--amb:.5;--win:.5;--rain:1;--label:#E9E4DA;--chalk:#EEE9DD;
+  background:radial-gradient(120% 90% at 40% 25%,#6B737B 0%,var(--wall) 50%,#24282C 100%)}
+.world{position:absolute;left:50%;top:50%;width:0;height:0;transform-style:preserve-3d;transition:transform 1.1s cubic-bezier(.4,0,.2,1)}
+@media (prefers-reduced-motion:reduce){ .world{transition:none} }
+
+/* 墙：z=0 的一张大面 */
+.wall{position:absolute;left:-1200px;top:-620px;width:2400px;height:1240px;transform:translateZ(0);
+  background:
+    radial-gradient(50% 50% at 72% 66%,var(--lamp-wall),transparent 70%),
+    linear-gradient(90deg,rgba(255,245,220,calc(.18 * var(--win))) 0%,transparent 38%),
+    linear-gradient(180deg,rgba(255,255,255,.04),transparent 40%,rgba(0,0,0,.35) 100%),
+    var(--wall)}
+.wall::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 2px,transparent 2px 46px),repeating-linear-gradient(0deg,rgba(255,255,255,.02) 0 1px,transparent 1px 7px);opacity:.7}
+/* 踢脚线 */
+.skirt{position:absolute;left:-1200px;top:236px;width:2400px;height:26px;transform:translateZ(1px);background:linear-gradient(180deg,var(--desk-hi),var(--desk-2));box-shadow:0 2px 0 rgba(0,0,0,.4)}
+
+/* 桌面：从 y=260 向观众伸出 700 */
+.desk{position:absolute;left:-1200px;top:260px;width:2400px;height:720px;transform-origin:50% 0;transform:rotateX(90deg);
+  background:
+    radial-gradient(30% 60% at 72% 14%,var(--lamp-pool),transparent 70%),
+    linear-gradient(90deg,rgba(255,245,220,calc(.14 * var(--win))) 0%,transparent 40%),
+    repeating-linear-gradient(94deg,rgba(255,220,160,.045) 0 3px,transparent 3px 14px,rgba(0,0,0,.08) 14px 16px,transparent 16px 31px),
+    linear-gradient(180deg,var(--desk-1) 0%,var(--desk-2) 100%);
+  box-shadow:inset 0 0 160px rgba(0,0,0,.45)}
+.desk::before{content:"";position:absolute;left:0;right:0;top:0;height:14px;background:linear-gradient(180deg,rgba(0,0,0,.35),transparent)}
+/* 桌沿：桌面前边的一条厚度 */
+.desk-edge{position:absolute;left:-1200px;top:260px;width:2400px;height:22px;transform:translateZ(720px);background:linear-gradient(180deg,var(--desk-hi),var(--desk-2));box-shadow:0 8px 30px rgba(0,0,0,.6)}
+
+/* ---------- 通用：有厚度的盒子 ---------- */
+.box{position:absolute;transform-style:preserve-3d}
+.box > i{position:absolute;display:block}
+.box .f{left:0;top:0;width:var(--w);height:var(--h);transform:translateZ(var(--d))}
+.box .t{left:0;top:0;width:var(--w);height:var(--d);transform-origin:50% 0;transform:rotateX(90deg)}
+.box .s{left:0;top:0;width:var(--d);height:var(--h);transform-origin:0 50%;transform:rotateY(-90deg)}
+.box .s.r{left:var(--w);transform-origin:0 50%;transform:rotateY(-90deg)}
+.box .s.l{left:0;transform-origin:0 50%;transform:rotateY(-90deg)}
+
+/* ---------- 书墙：靠墙的书架，有背板、侧板、层板 ---------- */
+.case{position:absolute;transform-style:preserve-3d;cursor:pointer}
+.case .back{position:absolute;left:0;top:0;width:var(--w);height:var(--h);background:linear-gradient(180deg,var(--desk-2),#1A110A);box-shadow:inset 0 0 60px rgba(0,0,0,.6)}
+.case .side{position:absolute;top:0;width:var(--d);height:var(--h);transform-origin:0 50%;background:linear-gradient(90deg,var(--desk-2),var(--desk-1) 60%,var(--desk-hi))}
+.case .side.l{left:0;transform:rotateY(-90deg)}
+.case .side.r{left:var(--w);transform:rotateY(-90deg)}
+.case .top{position:absolute;left:0;top:0;width:var(--w);height:var(--d);transform-origin:50% 0;transform:rotateX(90deg);background:linear-gradient(180deg,var(--desk-hi),var(--desk-1))}
+.case .edge{position:absolute;left:0;width:var(--w);height:12px;transform:translateZ(var(--d));background:linear-gradient(180deg,var(--desk-hi),var(--desk-2));box-shadow:0 6px 14px rgba(0,0,0,.5)}
+.case .board{position:absolute;left:0;width:var(--w);height:var(--d);transform-origin:50% 0;transform:rotateX(90deg);background:linear-gradient(180deg,var(--desk-1),var(--desk-2))}
+.case .shade{position:absolute;left:0;width:var(--w);height:70px;transform:translateZ(1px);background:linear-gradient(180deg,rgba(0,0,0,.45),transparent);pointer-events:none}
+.case .label{position:absolute;left:50%;transform:translate(-50%,0) translateZ(calc(var(--d) + 6px));white-space:nowrap;font-family:var(--f-brush);font-size:30px;letter-spacing:.3em;padding-left:.3em;color:var(--brass-hi);text-shadow:0 2px 0 #3A2008,0 0 18px rgba(242,193,78,.35);opacity:0;transition:opacity .4s,transform .4s;pointer-events:none}
+.case:hover .label,.case:focus-visible .label{opacity:1;transform:translate(-50%,-8px) translateZ(calc(var(--d) + 6px))}
+.case:focus-visible{outline:none}
+.case .halo{position:absolute;left:-40px;top:-40px;width:calc(var(--w) + 80px);height:calc(var(--h) + 80px);transform:translateZ(-2px);border-radius:40px;background:radial-gradient(50% 50% at 50% 50%,rgba(0,0,0,.55),transparent 70%);pointer-events:none}
+.case .glow{position:absolute;left:-20px;top:-20px;width:calc(var(--w) + 40px);height:calc(var(--h) + 40px);transform:translateZ(calc(var(--d) + 2px));border-radius:14px;box-shadow:0 0 0 2px rgba(242,193,78,0),0 0 60px rgba(242,193,78,0);transition:box-shadow .4s;pointer-events:none}
+.case:hover .glow{box-shadow:0 0 0 2px rgba(242,193,78,.55),0 0 70px rgba(242,193,78,.25)}
+/* 书：立在层板上的书脊 */
+.books{position:absolute;left:14px;display:flex;align-items:flex-end;gap:2px;transform:translateZ(22px)}
+.books b{display:block;width:var(--bw,22px);height:var(--bh,150px);border-radius:2px 2px 0 0;background:linear-gradient(90deg,rgba(0,0,0,.35),transparent 18%,rgba(255,255,255,.14) 45%,transparent 60%,rgba(0,0,0,.3)),var(--c);box-shadow:-2px 0 0 rgba(0,0,0,.25),0 -1px 0 rgba(255,255,255,.12);position:relative}
+.books b::after{content:attr(data-t);position:absolute;left:50%;top:14px;transform:translateX(-50%);writing-mode:vertical-rl;font-family:var(--f-song);font-weight:600;font-size:10.5px;letter-spacing:.12em;color:rgba(255,248,230,.85);white-space:nowrap;max-height:calc(var(--bh,150px) - 30px);overflow:hidden}
+.books b.lean{transform-origin:0 100%;transform:rotate(-7deg);margin-left:8px}
+.books b.flat{width:120px;height:18px;margin-right:6px}
+.books b.flat::after{writing-mode:horizontal-tb;top:3px;left:14px;transform:none;font-size:9px}
+
+/* ---------- 档案架：盒与袋 ---------- */
+.abox{--w:46px;--h:150px;--d:118px;transform-style:preserve-3d;position:absolute}
+.abox .f{background:linear-gradient(180deg,var(--c),color-mix(in srgb,var(--c) 70%,#000));box-shadow:inset 0 0 0 1px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.15)}
+.abox .f .lab{position:absolute;left:6px;right:6px;top:12px;height:84px;background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--paper),inset 0 0 0 2.5px rgba(90,60,20,.6);display:flex;flex-direction:column;align-items:center;padding:5px 0 3px}
+.abox .f .lab b{writing-mode:vertical-rl;font-family:var(--f-kai);font-weight:700;font-size:11.5px;letter-spacing:.08em;color:var(--ink);white-space:nowrap;max-height:62px;overflow:hidden}
+.abox .f .lab small{margin-top:auto;font-family:var(--f-num);font-size:9px;color:var(--ink-2)}
+.abox .f .hole{position:absolute;left:50%;bottom:18px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:radial-gradient(circle at 40% 35%,#2A1A10,#0B0705);box-shadow:0 0 0 2px rgba(255,255,255,.12)}
+.abox .f .seal{position:absolute;left:50%;bottom:36px;width:18px;height:18px;margin-left:-9px;background:var(--zhu);color:#F7E9C8;font-family:var(--f-brush);font-size:11px;line-height:18px;text-align:center;transform:rotate(-8deg);box-shadow:inset 0 0 0 1px #F3E2B8}
+.abox .t{background:linear-gradient(180deg,color-mix(in srgb,var(--c) 80%,#fff),var(--c))}
+.abox .s.r{background:linear-gradient(90deg,color-mix(in srgb,var(--c) 55%,#000),color-mix(in srgb,var(--c) 80%,#000))}
+.abox .s.l{background:color-mix(in srgb,var(--c) 45%,#000)}
+.abox.doing{transform:translateZ(26px)}
+/* 袋：牛皮纸档案袋 */
+.ybag{--w:70px;--h:150px;--d:34px;position:absolute;transform-style:preserve-3d}
+.ybag .f{background:radial-gradient(120% 90% at 30% 20%,rgba(255,240,200,.35),transparent 55%),linear-gradient(180deg,#C9A569,#C09C62 55%,#AE8A4E);box-shadow:inset 0 0 0 1px rgba(60,40,15,.55)}
+.ybag .t{background:#8E6B36}
+.ybag .s.r{background:linear-gradient(90deg,#8E6B36,#B08C50 50%,#8E6B36)}
+.ybag .flap{position:absolute;left:0;right:0;top:0;height:40px;clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%);background:linear-gradient(180deg,#B8955A,#C9A569 40%,#B38F55)}
+.ybag .flap::after{content:"";position:absolute;left:0;right:0;top:0;height:7px;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 50%,#000),var(--c) 50%,color-mix(in srgb,var(--c) 50%,#000))}
+.ybag .strip{position:absolute;left:50%;top:18px;width:13px;height:56px;margin-left:-6.5px;transform:rotate(-2deg);background:#F1E2BD;box-shadow:inset 0 0 0 1px rgba(163,35,27,.7),0 1px 3px rgba(0,0,0,.4)}
+.ybag .strip::after{content:"封";position:absolute;left:50%;top:50%;width:13px;height:13px;margin:-6.5px 0 0 -6.5px;background:rgba(163,35,27,.92);color:#F7E9C8;font-family:var(--f-brush);font-size:8.5px;line-height:13px;text-align:center}
+.ybag .lab{position:absolute;left:8px;right:8px;bottom:12px;height:62px;background:var(--paper);box-shadow:inset 0 0 0 1.5px var(--paper),inset 0 0 0 2.5px rgba(90,60,20,.6);display:flex;flex-direction:column;align-items:center;padding:5px 0 3px}
+.ybag .lab b{writing-mode:vertical-rl;font-family:var(--f-kai);font-weight:700;font-size:11px;letter-spacing:.12em;color:var(--ink)}
+.ybag .lab small{margin-top:auto;font-family:var(--f-num);font-size:9px;color:var(--ink-2)}
+.ybag .badge{position:absolute;right:-8px;top:-8px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;display:grid;place-items:center;font-family:var(--f-num);font-size:11.5px;font-weight:700;color:#2A1408;background:radial-gradient(circle at 35% 30%,var(--brass-hi),var(--brass) 55%,var(--brass-lo));box-shadow:0 2px 4px rgba(0,0,0,.6);transform:translateZ(var(--d))}
+
+/* ---------- 看板：挂在墙上的木牌，粉笔字 ---------- */
+.board{position:absolute;left:-290px;top:-360px;width:580px;height:118px;transform:translateZ(14px);transform-style:preserve-3d}
+.board .wood{position:absolute;inset:0;border-radius:4px;background:repeating-linear-gradient(92deg,rgba(255,220,160,.05) 0 3px,transparent 3px 11px,rgba(0,0,0,.1) 11px 13px,transparent 13px 26px),linear-gradient(180deg,var(--desk-hi),var(--desk-1) 30%,var(--desk-2));box-shadow:0 1px 0 rgba(255,255,255,.12) inset,0 14px 24px -12px rgba(0,0,0,.8),0 0 0 1px rgba(0,0,0,.4)}
+.board .wood::before{content:"";position:absolute;inset:8px;border:1.5px solid rgba(201,160,90,.45);border-radius:2px}
+.board .cord{position:absolute;top:-60px;width:2px;height:62px;background:linear-gradient(180deg,#8E7A52,#C9B58C);transform-origin:50% 100%}
+.board .cord.a{left:110px;transform:rotate(14deg)}
+.board .cord.b{right:110px;transform:rotate(-14deg)}
+.board .nail{position:absolute;left:50%;top:-66px;width:12px;height:12px;margin-left:-6px;border-radius:50%;background:radial-gradient(circle at 40% 35%,var(--brass-hi),var(--brass-lo));box-shadow:0 2px 3px rgba(0,0,0,.6)}
+.board .chalk{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:28px;padding:0 24px;font-family:var(--f-brush);font-size:25px;letter-spacing:.06em;color:var(--chalk);text-shadow:0 0 6px rgba(255,255,255,.25);white-space:nowrap}
+.board .chalk small{font-family:var(--f-num);font-size:17px;letter-spacing:.1em;opacity:.8}
+.board .chalk b{font-weight:400;font-size:34px;color:var(--brass-hi)}
+
+/* ---------- 桌上的东西：都是立在桌面上的面，z 越大越近 ---------- */
+.on{position:absolute;left:0;top:260px;transform-style:preserve-3d}
+/* 桌灯 */
+.lamp{--z:140px;left:540px;transform:translate3d(0,-300px,var(--z))}
+.lamp .base{position:absolute;left:-54px;top:286px;width:108px;height:14px;border-radius:50%;background:radial-gradient(circle at 50% 30%,var(--brass),var(--brass-lo));box-shadow:0 6px 10px rgba(0,0,0,.6)}
+.lamp .stem{position:absolute;left:-4px;top:60px;width:8px;height:230px;background:linear-gradient(90deg,var(--brass-lo),var(--brass-hi) 40%,var(--brass-lo));border-radius:4px}
+.lamp .arm{position:absolute;left:-4px;top:58px;width:8px;height:120px;transform-origin:50% 0;transform:rotate(55deg);background:linear-gradient(90deg,var(--brass-lo),var(--brass-hi) 40%,var(--brass-lo));border-radius:4px}
+.lamp .shade{position:absolute;left:-142px;top:120px;width:150px;height:74px;clip-path:polygon(22% 0,78% 0,100% 100%,0 100%);background:linear-gradient(180deg,#3B6B5B,#1F3F35);box-shadow:inset 0 -3px 0 var(--brass)}
+.lamp .shade::after{content:"";position:absolute;left:0;right:0;bottom:0;height:40%;background:linear-gradient(180deg,transparent,var(--lamp));opacity:.9}
+.lamp .glow{position:absolute;left:-250px;top:150px;width:370px;height:300px;border-radius:50%;pointer-events:none;background:radial-gradient(ellipse at 50% 0%,var(--lamp) 0%,transparent 62%);opacity:.5}
+.stage[data-room="day"] .lamp .glow{opacity:0}
+.stage[data-room="day"] .lamp .shade::after{opacity:0}
+/* 砚台 */
+.ink{left:-330px;transform:translate3d(0,-26px,210px)}
+.ink i{position:absolute;left:-60px;top:0;width:120px;height:26px;border-radius:6px/10px;background:linear-gradient(180deg,#2E2A28,#120F0E);box-shadow:inset 0 2px 0 rgba(255,255,255,.08),0 10px 14px -6px rgba(0,0,0,.8)}
+.ink i::after{content:"";position:absolute;left:14px;right:14px;top:5px;height:9px;border-radius:50%;background:radial-gradient(ellipse at 50% 40%,#111 40%,#2A2522)}
+.ink .brush{position:absolute;left:-70px;top:-6px;width:150px;height:6px;border-radius:3px;background:linear-gradient(90deg,#1F1309 0 14%,#C9A05A 14% 18%,#8E5A2E 18% 100%);transform:rotate(-6deg);box-shadow:0 4px 6px rgba(0,0,0,.5)}
+/* 盆栽：养的那个东西 */
+.plant{left:-150px;transform:translate3d(0,-250px,262px);cursor:pointer}
+.plant svg{position:absolute;left:-110px;top:0;width:220px;height:250px;overflow:visible}
+.plant .leaf{transform-origin:0 0;transform:scale(0);transition:transform .9s cubic-bezier(.3,.8,.3,1.2)}
+.plant .leaf.on{transform:scale(1)}
+.plant .sh{position:absolute;left:-70px;top:236px;width:140px;height:22px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.6),transparent 70%)}
+.plant .tip{position:absolute;left:50%;top:-30px;transform:translateX(-50%);white-space:nowrap;font-family:var(--f-kai);font-size:14px;color:var(--label);opacity:0;transition:opacity .4s;pointer-events:none}
+.plant:hover .tip{opacity:.9}
+/* 今天的牌：立在小画架上 */
+.today{left:170px;transform:translate3d(0,-212px,250px) rotateX(-6deg);transform-style:preserve-3d;cursor:pointer}
+.today .easel{position:absolute;left:-30px;top:208px;width:60px;height:8px;background:linear-gradient(180deg,var(--desk-hi),var(--desk-2));border-radius:2px;transform:translateZ(-8px)}
+.today .sh{position:absolute;left:-100px;top:204px;width:200px;height:26px;border-radius:50%;background:radial-gradient(ellipse,rgba(0,0,0,.55),transparent 70%);transform:rotateX(90deg)}
+.yc{position:absolute;left:-74px;top:0;width:148px;height:208px;border-radius:8px;overflow:hidden;color:var(--paper);background:var(--dom);--dom2:color-mix(in srgb,var(--dom) 68%,#fff);--domd:color-mix(in srgb,var(--dom) 48%,#000);
+  box-shadow:0 0 0 1px rgba(0,0,0,.6),0 18px 26px -12px rgba(0,0,0,.9);transition:transform .25s,box-shadow .25s}
+.today:hover .yc{transform:translateY(-10px);box-shadow:0 0 0 1px rgba(0,0,0,.6),0 0 0 2px rgba(242,193,78,.75),0 0 30px rgba(242,193,78,.4),0 26px 30px -12px rgba(0,0,0,.95)}
+.yc-silk{position:absolute;inset:0;background:repeating-linear-gradient(45deg,rgba(255,255,255,.06) 0 1px,transparent 1px 4px),radial-gradient(80% 60% at 50% 42%,rgba(255,255,255,.08),transparent 60%),radial-gradient(100% 90% at 50% 50%,transparent 55%,rgba(0,0,0,.45) 100%)}
+.yc-rim{position:absolute;inset:6px;border:1px solid rgba(243,226,184,.7);border-radius:4px}
+.yc-scene{position:absolute;left:50%;top:82px;width:90px;height:90px;transform:translateX(-50%);filter:drop-shadow(0 3px 5px rgba(0,0,0,.5))}
+.yc-tag{position:absolute;left:10px;top:10px;max-height:150px;padding:6px 4px 5px;display:flex;background:linear-gradient(180deg,#F3E2B8,#E6CF9E);box-shadow:inset 0 0 0 2px #F3E2B8,inset 0 0 0 3px rgba(90,60,20,.6),1px 2px 3px rgba(0,0,0,.55)}
+.yc-tag span{writing-mode:vertical-rl;max-height:138px;font-family:var(--f-kai);font-size:12px;line-height:1.25;letter-spacing:.04em;font-weight:700;color:var(--ink)}
+.yc-coin{position:absolute;right:10px;top:10px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle at 35% 30%,var(--brass-hi),var(--brass) 55%,var(--brass-lo));box-shadow:inset 0 0 0 1px rgba(90,60,20,.45),0 1px 2px rgba(0,0,0,.5);font-family:var(--f-num);font-size:14px;font-weight:700;color:#2A1408}
+.yc-band{position:absolute;left:11px;right:11px;bottom:10px;display:flex;align-items:center;justify-content:space-between;font-size:11px;letter-spacing:.04em;color:rgba(243,226,184,.85)}
+.yc-band i{width:18px;height:18px;border-radius:50%;display:grid;place-items:center;font-style:normal;font-size:10px;font-weight:700;color:#fff;background:radial-gradient(circle at 40% 35%,#B5AFA3,#6E675E);box-shadow:inset 0 0 0 1px rgba(255,255,255,.55),0 1px 2px rgba(0,0,0,.5)}
+.today .front{position:absolute;left:-74px;top:0;width:148px;height:208px;border-radius:8px;background:radial-gradient(90% 70% at 50% 30%,#F3E2B8,#EDD8A6 60%,#E3C994);box-shadow:inset 0 0 0 1px rgba(90,60,20,.6),inset 0 0 0 6px #F3E2B8,inset 0 0 0 7px rgba(90,60,20,.35);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:14px;text-align:center;color:var(--ink);transform:rotateY(180deg);backface-visibility:hidden}
+.today .front b{font-family:var(--f-song);font-size:15px;line-height:1.45}
+.today .front span{font-size:11px;letter-spacing:.12em;color:var(--ink-2)}
+.today .yc{backface-visibility:hidden}
+.today .flip{position:absolute;left:0;top:0;transform-style:preserve-3d;transition:transform .7s cubic-bezier(.4,0,.2,1)}
+.today.open .flip{transform:rotateY(180deg)}
+.today .tip{position:absolute;left:50%;top:-30px;transform:translateX(-50%);white-space:nowrap;font-family:var(--f-kai);font-size:14px;color:var(--label);opacity:0;transition:opacity .4s;pointer-events:none}
+.today:hover .tip{opacity:.9}
+/* 雨：窗外的雨，只在雨天房 */
+.rainfx{position:absolute;inset:0;pointer-events:none;opacity:var(--rain);background:repeating-linear-gradient(100deg,transparent 0 23px,rgba(255,255,255,.06) 23px 24px);animation:rain 1.1s linear infinite;mask-image:linear-gradient(180deg,rgba(0,0,0,.6),transparent 70%)}
+@keyframes rain{to{background-position:-60px 120px}}
+.vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(80% 70% at 50% 45%,transparent 50%,rgba(0,0,0,.55) 100%)}
+.dust{position:absolute;left:35%;top:0;width:34%;height:70%;pointer-events:none;opacity:calc(.5 * var(--win));background:linear-gradient(100deg,transparent 30%,rgba(255,248,225,.16) 50%,transparent 70%);filter:blur(10px)}
+
+/* ---------- 铜扣：全站唯一一种按钮 ---------- */
+.brass{position:relative;appearance:none;border:0;padding:0 16px;height:34px;border-radius:17px;cursor:pointer;font-family:var(--f-kai);font-size:14px;letter-spacing:.06em;color:#2A1408;
+  background:linear-gradient(180deg,var(--brass-hi),var(--brass) 55%,#A9833F);box-shadow:0 3px 0 var(--brass-lo),0 6px 10px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.6);transform:translateY(0);transition:transform .08s,box-shadow .08s}
+.brass:hover{filter:brightness(1.05)}
+.brass:active,.brass[aria-pressed="true"]{transform:translateY(3px);box-shadow:0 0 0 var(--brass-lo),0 2px 4px rgba(0,0,0,.5),inset 0 1px 0 rgba(255,255,255,.4)}
+.brass[aria-pressed="true"]{background:linear-gradient(180deg,var(--brass),#A9833F)}
+.brass:focus-visible{outline:2px solid var(--brass-hi);outline-offset:3px}
+.brass.sm{height:28px;padding:0 12px;font-size:12.5px}
+.panel{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);display:flex;align-items:center;gap:10px;padding:8px 12px;border-radius:24px;
+  background:rgba(20,13,8,.55);backdrop-filter:blur(6px);box-shadow:0 0 0 1px rgba(201,160,90,.35),0 12px 30px rgba(0,0,0,.5)}
+.panel .sep{width:1px;height:22px;background:rgba(201,160,90,.35)}
+.panel .lbl{font-size:12px;letter-spacing:.14em;color:rgba(237,224,196,.7);padding:0 2px}
+.brand{position:fixed;left:max(20px,env(safe-area-inset-left,0px));top:18px;display:flex;align-items:center;gap:10px;font-family:var(--f-brush);font-size:26px;letter-spacing:.14em;color:var(--label);text-shadow:0 2px 6px rgba(0,0,0,.4);pointer-events:none}
+.brand i{width:30px;height:30px;border-radius:50%;border:7px solid #C8372D;box-sizing:border-box;position:relative}
+.brand i::after{content:"";position:absolute;left:-9px;right:-9px;top:4px;height:8px;background:var(--paper)}
+.corner{position:fixed;right:max(20px,env(safe-area-inset-right,0px));top:18px;display:flex;gap:8px}
+.corner .brass{width:34px;padding:0;display:grid;place-items:center}
+.hint{position:fixed;left:50%;bottom:calc(72px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:13px;letter-spacing:.08em;color:rgba(237,224,196,.7);white-space:nowrap;pointer-events:none;transition:opacity .4s}
+.hint.off{opacity:0}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media (max-width:900px){ .brand{font-size:20px} .panel{gap:6px;padding:6px 8px} .panel .lbl{display:none} .brass{padding:0 10px;font-size:12px;height:30px} .hint{font-size:11.5px;bottom:calc(64px + env(safe-area-inset-bottom,0px))} .board .chalk{font-size:22px} }
+</style>
+
+</head>
+<body>
+<div class="stage" id="stage" data-room="night" data-cam="far">
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <defs>
+      <clipPath id="yx-cc"><circle cx="100" cy="100" r="97"/></clipPath>
+      <radialGradient id="yx-vig" cx="50%" cy="38%" r="70%"><stop offset="0" stop-color="#fff" stop-opacity=".16"/><stop offset=".6" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".5"/></radialGradient>
+      <radialGradient id="yx-glow"><stop offset="0" stop-color="#FFE3A0" stop-opacity=".6"/><stop offset="1" stop-color="#FFE3A0" stop-opacity="0"/></radialGradient>
+      <symbol id="yx-scene" viewBox="0 0 200 200">
+        <g clip-path="url(#yx-cc)">
+          <rect width="200" height="200" style="fill:var(--domd,#2E1A3A)"/><rect width="200" height="200" fill="url(#yx-vig)"/>
+          <path d="M140 34 A 19 19 0 1 0 140 72 A 24 24 0 0 1 140 34 Z" fill="#F3E2B8"/>
+          <path d="M-10 132 C 28 96, 62 114, 92 104 S 150 72, 215 120 L 215 200 L -10 200 Z" style="fill:var(--dom2,#7A5590)" opacity=".6"/>
+          <path d="M-10 152 C 40 120, 80 138, 120 128 S 184 112, 215 144 L 215 200 L -10 200 Z" style="fill:var(--dom,#4B2E5A)"/>
+          <rect x="0" y="160" width="200" height="40" fill="#000" opacity=".38"/><rect x="0" y="159" width="200" height="1.5" fill="#F3E2B8" opacity=".35"/>
+          <circle cx="66" cy="152" r="52" fill="url(#yx-glow)"/>
+          <rect x="58" y="153" width="16" height="4" rx="1" fill="#F2C14E"/><rect x="64" y="140" width="4" height="13" fill="#F2C14E"/><ellipse cx="66" cy="133" rx="5" ry="7.5" fill="#FFE3A0"/>
+          <rect x="96" y="150" width="70" height="20" rx="2" fill="#F3E2B8"/><rect x="91" y="146" width="9" height="28" rx="4.5" fill="#E6CF9E" stroke="#8A5E1E" stroke-width="1"/><rect x="162" y="146" width="9" height="28" rx="4.5" fill="#E6CF9E" stroke="#8A5E1E" stroke-width="1"/>
+        </g>
+        <circle cx="100" cy="100" r="97" fill="none" stroke="#F3E2B8" stroke-width="2.2"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="world" id="world">
+    <div class="wall"></div>
+    <div class="skirt"></div>
+    <div class="desk"></div>
+    <div class="desk-edge"></div>
+
+    <!-- 书墙 -->
+    <button type="button" class="case" id="case-wall" style="--w:640px;--h:600px;--d:46px;left:-900px;top:-340px" data-go="wall" aria-label="书墙，39 本书，点一下走近">
+      <span class="halo"></span><span class="back"></span><span class="side l"></span><span class="side r"></span><span class="top"></span>
+      <span class="board" style="top:150px"></span><span class="edge" style="top:150px"></span><span class="shade" style="top:150px"></span>
+      <span class="board" style="top:300px"></span><span class="edge" style="top:300px"></span><span class="shade" style="top:300px"></span>
+      <span class="board" style="top:450px"></span><span class="edge" style="top:450px"></span><span class="shade" style="top:450px"></span>
+      <span class="board" style="top:600px"></span><span class="edge" style="top:600px"></span>
+      <span class="shade" style="top:0"></span>
+      <span class="books" style="top:0;height:150px"><b style="--c:#2F3F5E;--bw:30px;--bh:138px" data-t="大国政治的悲剧"></b><b style="--c:#6B2E25;--bw:22px;--bh:128px" data-t="涛动周期录"></b><b style="--c:#3F6B45;--bw:26px;--bh:142px" data-t="证券分析"></b><b style="--c:#8C5A2B;--bw:20px;--bh:120px" data-t="伯罗奔尼撒战争史"></b><b style="--c:#4B2E5A;--bw:24px;--bh:134px" data-t="周期"></b><b class="lean" style="--c:#2A2A2A;--bw:22px;--bh:126px" data-t="论战争"></b><b style="--c:#A0744A;--bw:28px;--bh:146px" data-t="金融炼金术"></b><b style="--c:#1F4E8C;--bw:18px;--bh:118px" data-t="期货市场"></b><b style="--c:#733F2A;--bw:24px;--bh:130px" data-t="通往奴役之路"></b><b style="--c:#2E4A33;--bw:22px;--bh:140px" data-t="大繁荣"></b><b style="--c:#5F4D64;--bw:26px;--bh:124px" data-t="国富论"></b><b style="--c:#8A3A2E;--bw:20px;--bh:136px" data-t="债务危机"></b><b style="--c:#3A4A6A;--bw:24px;--bh:132px" data-t="大博弈"></b><b style="--c:#5E3A1C;--bw:22px;--bh:128px" data-t="货币金融学"></b><b style="--c:#2F5DA8;--bw:26px;--bh:144px" data-t="地缘政治学"></b><b style="--c:#9A5B2E;--bw:20px;--bh:122px" data-t="商品投资"></b><b style="--c:#1E3150;--bw:24px;--bh:138px" data-t="公司财务"></b><b style="--c:#4A443D;--bw:22px;--bh:130px" data-t="枪炮病菌与钢铁"></b><b style="--c:#6E2C72;--bw:26px;--bh:126px" data-t="财报分析"></b><b style="--c:#2C4529;--bw:20px;--bh:134px" data-t="长期资本"></b></span>
+      <span class="books" style="top:150px;height:150px"><b style="--c:#733F2A;--bw:26px;--bh:140px" data-t="战争论"></b><b style="--c:#2F3F5E;--bw:22px;--bh:128px" data-t="大国的兴衰"></b><b style="--c:#3F6B45;--bw:30px;--bh:146px" data-t="周期与定价"></b><b style="--c:#4B2E5A;--bw:20px;--bh:120px" data-t="衍生品"></b><b style="--c:#8C5A2B;--bw:24px;--bh:134px" data-t="石油战争"></b><b style="--c:#2A2A2A;--bw:26px;--bh:142px" data-t="利率史"></b><b class="lean" style="--c:#A0744A;--bw:22px;--bh:126px" data-t="美国货币史"></b><b style="--c:#1F4E8C;--bw:24px;--bh:138px" data-t="公司之道"></b><b style="--c:#5F4D64;--bw:20px;--bh:118px" data-t="炼金术士"></b><b style="--c:#8A3A2E;--bw:28px;--bh:146px" data-t="萧条经济学"></b><b style="--c:#2E4A33;--bw:22px;--bh:130px" data-t="资本市场"></b><b style="--c:#3A4A6A;--bw:24px;--bh:136px" data-t="中东史"></b><b style="--c:#9A5B2E;--bw:20px;--bh:124px" data-t="农产品期货"></b><b style="--c:#6B2E25;--bw:26px;--bh:140px" data-t="大衰退"></b><b style="--c:#2F5DA8;--bw:22px;--bh:128px" data-t="海权论"></b><b style="--c:#4A443D;--bw:24px;--bh:134px" data-t="制度经济学"></b><b style="--c:#1E3150;--bw:20px;--bh:120px" data-t="估值"></b><b style="--c:#5E3A1C;--bw:26px;--bh:142px" data-t="库存周期"></b></span>
+      <span class="books" style="top:300px;height:150px"><b class="flat" style="--c:#6B2E25" data-t="三联周刊合订"></b><b style="--c:#2F3F5E;--bw:28px;--bh:146px" data-t="美国世纪"></b><b style="--c:#3F6B45;--bw:22px;--bh:128px" data-t="大宗商品"></b><b style="--c:#8C5A2B;--bw:24px;--bh:134px" data-t="欧洲史"></b><b style="--c:#4B2E5A;--bw:26px;--bh:140px" data-t="信用周期"></b><b style="--c:#2A2A2A;--bw:20px;--bh:120px" data-t="风险"></b><b style="--c:#A0744A;--bw:24px;--bh:136px" data-t="冷战"></b><b class="lean" style="--c:#1F4E8C;--bw:22px;--bh:126px" data-t="投资组合"></b><b style="--c:#733F2A;--bw:26px;--bh:144px" data-t="金融史"></b><b style="--c:#2E4A33;--bw:20px;--bh:118px" data-t="油价"></b><b style="--c:#5F4D64;--bw:24px;--bh:132px" data-t="产业史"></b></span>
+      <span class="books" style="top:450px;height:150px"><b style="--c:#8A3A2E;--bw:24px;--bh:138px" data-t="战略"></b><b style="--c:#3A4A6A;--bw:26px;--bh:142px" data-t="航运史"></b><b style="--c:#9A5B2E;--bw:22px;--bh:128px" data-t="棉花帝国"></b><b style="--c:#2F5DA8;--bw:20px;--bh:120px" data-t="央行"></b><b style="--c:#4A443D;--bw:28px;--bh:146px" data-t="现代世界体系"></b><b style="--c:#1E3150;--bw:24px;--bh:134px" data-t="财政史"></b><b style="--c:#5E3A1C;--bw:22px;--bh:130px" data-t="期权"></b><b class="flat" style="--c:#2F3F5E" data-t="经济学人合订"></b></span>
+      <span class="glow"></span>
+      <span class="label">书 墙</span>
+    </button>
+
+    <!-- 档案架 -->
+    <button type="button" class="case" id="case-arch" style="--w:600px;--h:600px;--d:130px;left:300px;top:-340px" data-go="arch" aria-label="档案架，4 卷 2 袋，点一下走近">
+      <span class="halo"></span><span class="back"></span><span class="side l"></span><span class="side r"></span><span class="top"></span>
+      <span class="board" style="top:170px"></span><span class="edge" style="top:170px"></span><span class="shade" style="top:170px"></span>
+      <span class="board" style="top:370px"></span><span class="edge" style="top:370px"></span><span class="shade" style="top:370px"></span>
+      <span class="board" style="top:600px"></span><span class="edge" style="top:600px"></span>
+      <span class="shade" style="top:0"></span>
+      <!-- 第一层：地缘、CFA -->
+      <span class="box abox" style="--c:#8E3324;left:26px;top:20px"><i class="f"><span class="lab"><b>俄乌战争的结局</b><small>D8 · 01</small></span><span class="hole"></span></i><i class="t"></i><i class="s r"></i></span>
+      <span class="box abox doing" style="--c:#6E2C72;left:90px;top:20px"><i class="f"><span class="lab"><b>仓位管理</b><small>F830 · 01</small></span><span class="hole"></span></i><i class="t"></i><i class="s r"></i></span>
+      <span class="box ybag" style="--c:#6E2C72;left:160px;top:20px"><i class="f"><span class="flap"></span><span class="strip"></span><span class="lab"><b>剪报</b><small>5 篇</small></span></i><i class="t"></i><i class="s r"></i><span class="badge">5</span></span>
+      <span class="box ybag" style="--c:#8E3324;left:250px;top:20px"><i class="f"><span class="flap" style="clip-path:none;height:22px"></span><span class="lab"><b>剪报</b><small>1 篇</small></span></i><i class="t"></i><i class="s r"></i></span>
+      <!-- 第二层：周期、期货 -->
+      <span class="box abox" style="--c:#9A5B2E;left:26px;top:220px"><i class="f"><span class="lab"><b>居民部门：消费、人口与财富</b><small>F0 · 01</small></span><span class="hole"></span></i><i class="t"></i><i class="s r"></i></span>
+      <span class="box abox doing" style="--c:#7C9A1E;left:90px;top:220px"><i class="f"><span class="lab"><b>做市商靠什么赚钱</b><small>F724 · 01</small></span><span class="hole"></span></i><i class="t"></i><i class="s r"></i></span>
+      <span class="box abox" style="--c:#727775;left:154px;top:220px"><i class="f"><span class="lab"><b>基差与套保</b><small>F27 · 01</small></span><span class="hole"></span><span class="seal">结</span></i><i class="t"></i><i class="s r"></i></span>
+      <span class="glow"></span>
+      <span class="label">档 案 架</span>
+    </button>
+
+    <!-- 看板 -->
+    <div class="board" aria-label="今天的看板">
+      <span class="nail"></span><span class="cord a"></span><span class="cord b"></span>
+      <span class="wood"></span>
+      <span class="chalk"><span>十月廿七</span><span>没读 <b>3</b></span><span>本周结卷 <b>1</b></span><span><small>连着</small> <b>12</b> <small>天</small></span></span>
+    </div>
+
+    <!-- 桌上 -->
+    <div class="on lamp"><span class="glow"></span><span class="base"></span><span class="stem"></span><span class="arm"></span><span class="shade"></span></div>
+    <div class="on ink"><i></i><span class="brush"></span></div>
+    <button type="button" class="on plant" id="plant" aria-label="案头的文竹，读一篇长一片叶子">
+      <span class="sh"></span>
+      <svg viewBox="-110 0 220 250" aria-hidden="true">
+        <defs><linearGradient id="pot" x1="0" x2="1"><stop offset="0" stop-color="#7A4A2E"/><stop offset=".5" stop-color="#B07A52"/><stop offset="1" stop-color="#6A3E26"/></linearGradient></defs>
+        <g stroke="#3E6B3A" stroke-width="2.2" fill="none" stroke-linecap="round">
+          <path d="M0 196 C -4 150, -2 120, 4 70"/>
+          <path d="M0 196 C 14 160, 30 130, 46 92"/>
+          <path d="M0 196 C -16 160, -34 134, -48 100"/>
+          <path d="M0 196 C 6 170, 20 150, 60 130"/>
+        </g>
+        <g id="leaves" fill="#5B8F55">
+          <g transform="translate(4,70)"><g class="leaf on"><path d="M0 0 C 10 -16, 26 -22, 40 -18 C 24 -10, 12 -2, 0 0 Z"/><path d="M0 0 C -12 -14, -28 -18, -42 -12 C -26 -6, -12 0, 0 0 Z"/></g></g>
+          <g transform="translate(46,92)"><g class="leaf on"><path d="M0 0 C 12 -14, 28 -18, 44 -12 C 28 -6, 14 0, 0 0 Z"/><path d="M0 0 C 2 -18, 10 -32, 24 -40 C 16 -26, 8 -12, 0 0 Z"/></g></g>
+          <g transform="translate(-48,100)"><g class="leaf on"><path d="M0 0 C -12 -14, -30 -18, -46 -10 C -30 -4, -14 2, 0 0 Z"/><path d="M0 0 C -2 -18, -12 -30, -28 -36 C -18 -24, -8 -12, 0 0 Z"/></g></g>
+          <g transform="translate(2,118)"><g class="leaf on"><path d="M0 0 C 12 -10, 28 -12, 42 -6 C 28 0, 14 4, 0 0 Z"/><path d="M0 0 C -14 -10, -30 -12, -44 -4 C -30 2, -14 4, 0 0 Z"/></g></g>
+          <g transform="translate(60,130)"><g class="leaf on"><path d="M0 0 C 10 -14, 26 -20, 42 -16 C 28 -8, 14 -2, 0 0 Z"/></g></g>
+          <g transform="translate(28,122)"><g class="leaf"><path d="M0 0 C 2 -18, 12 -30, 28 -36 C 18 -22, 8 -10, 0 0 Z"/><path d="M0 0 C 14 -10, 30 -12, 44 -4 C 30 2, 14 4, 0 0 Z"/></g></g>
+          <g transform="translate(-26,136)"><g class="leaf"><path d="M0 0 C -14 -10, -30 -12, -44 -6 C -30 0, -14 4, 0 0 Z"/><path d="M0 0 C -2 -18, -10 -30, -26 -38 C -16 -24, -6 -10, 0 0 Z"/></g></g>
+          <g transform="translate(6,52)"><g class="leaf"><path d="M0 0 C 6 -18, 16 -30, 32 -36 C 20 -22, 10 -10, 0 0 Z"/><path d="M0 0 C -8 -18, -18 -28, -34 -32 C -20 -20, -10 -8, 0 0 Z"/></g></g>
+          <g transform="translate(-10,160)"><g class="leaf"><path d="M0 0 C -14 -8, -30 -8, -46 0 C -30 4, -14 6, 0 0 Z"/><path d="M0 0 C 14 -8, 30 -8, 46 0 C 30 4, 14 6, 0 0 Z"/></g></g>
+        </g>
+        <path d="M-44 196 L 44 196 L 34 246 L -34 246 Z" fill="url(#pot)"/>
+        <rect x="-50" y="190" width="100" height="14" rx="3" fill="#8E5A3A"/>
+        <path d="M-44 204 L 44 204" stroke="#5A3420" stroke-width="2"/>
+      </svg>
+      <span class="tip">文竹 · 这周长了 2 片叶</span>
+    </button>
+    <button type="button" class="on today" id="today" aria-label="今天要读的牌：如何计算凯利公式的仓位系数，点一下翻开">
+      <span class="sh"></span><span class="easel"></span>
+      <span class="flip">
+        <span class="yc" style="--dom:#6E2C72"><span class="yc-silk"></span><span class="yc-rim"></span><svg class="yc-scene"><use href="#yx-scene"/></svg><span class="yc-tag"><span>如何计算凯利公式的仓位系数</span></span><span class="yc-coin">40</span><span class="yc-band"><span>知乎回答 · 仓位管理</span><i>未</i></span></span>
+        <span class="front"><b>如何计算凯利公式的仓位系数</b><span>今天 · 约 40 分钟</span><span>翻开就是整篇文章</span></span>
+      </span>
+      <span class="tip">今天的牌 · 点一下翻开</span>
+    </button>
+  </div>
+
+  <div class="dust"></div>
+  <div class="rainfx"></div>
+  <div class="vig"></div>
+</div>
+
+<div class="brand" aria-hidden="true"><i></i>研习录</div>
+<div class="corner"><button type="button" class="brass" aria-label="找">⌕</button><button type="button" class="brass" aria-label="账号">我</button></div>
+<p class="hint" id="hint">点书墙、档案架或桌上的东西走近 · Esc 退后</p>
+<div class="panel" role="toolbar" aria-label="镜头与房间">
+  <button type="button" class="brass sm" data-cam="far" aria-pressed="true">整间房</button>
+  <button type="button" class="brass sm" data-cam="wall" aria-pressed="false">书墙</button>
+  <button type="button" class="brass sm" data-cam="arch" aria-pressed="false">档案架</button>
+  <button type="button" class="brass sm" data-cam="desk" aria-pressed="false">桌面</button>
+  <span class="sep"></span>
+  <span class="lbl">房间</span>
+  <button type="button" class="brass sm" data-room="night" aria-pressed="true">夜读</button>
+  <button type="button" class="brass sm" data-room="day" aria-pressed="false">晴窗</button>
+  <button type="button" class="brass sm" data-room="rain" aria-pressed="false">雨天</button>
+  <span class="sep"></span>
+  <button type="button" class="brass sm" id="feed">今天读了一篇</button>
+</div>
+
+<script>
+(function () {
+  var stage = document.getElementById("stage"), world = document.getElementById("world"), hint = document.getElementById("hint");
+  var CAM = {
+    far:  "translate3d(0px, 30px, -720px) rotateX(1deg)",
+    wall: "translate3d(600px, 40px, 120px) rotateY(10deg)",
+    arch: "translate3d(-600px, 40px, 60px) rotateY(-9deg)",
+    desk: "translate3d(0px, -60px, 330px) rotateX(-7deg)"
+  };
+  function scale() { var w = window.innerWidth, h = window.innerHeight; return Math.min(1, Math.max(.38, Math.min(w / 1440, h / 900))); }
+  function apply(cam) {
+    stage.setAttribute("data-cam", cam);
+    world.style.transform = "scale(" + scale().toFixed(3) + ") " + CAM[cam];
+    document.querySelectorAll("[data-cam]").forEach(function (b) { if (b.tagName === "BUTTON") b.setAttribute("aria-pressed", String(b.getAttribute("data-cam") === cam)); });
+    hint.classList.toggle("off", cam !== "far");
+  }
+  function room(r) {
+    stage.setAttribute("data-room", r);
+    document.querySelectorAll("[data-room]").forEach(function (b) { if (b.tagName === "BUTTON") b.setAttribute("aria-pressed", String(b.getAttribute("data-room") === r)); });
+  }
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-cam],[data-go],[data-room],#feed,#today");
+    if (!t) return;
+    if (t.id === "feed") { var next = document.querySelector("#leaves .leaf:not(.on)"); if (next) next.classList.add("on"); var tip = document.querySelector("#plant .tip"); if (tip) tip.textContent = "文竹 · 又长了一片"; return; }
+    if (t.id === "today") { if (stage.getAttribute("data-cam") !== "desk") { apply("desk"); setTimeout(function () { t.classList.add("open"); }, 900); } else t.classList.toggle("open"); return; }
+    if (t.hasAttribute("data-room")) { room(t.getAttribute("data-room")); return; }
+    var cam = t.getAttribute("data-go") || t.getAttribute("data-cam");
+    if (cam && CAM[cam]) apply(cam);
+  });
+  document.getElementById("plant").addEventListener("click", function () { if (stage.getAttribute("data-cam") !== "desk") apply("desk"); });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") { document.getElementById("today").classList.remove("open"); apply("far"); } });
+  window.addEventListener("resize", function () { apply(stage.getAttribute("data-cam") || "far"); });
+  apply(window.innerWidth < 700 ? "desk" : "far");
+})();
+</script>
+
+</body>
+</html>
