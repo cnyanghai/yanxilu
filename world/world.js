@@ -52,7 +52,7 @@ function woodTexture(base = "#4C3220", hi = "#6A4A2E", lo = "#2E1C10", w = 512, 
   return t;
 }
 const texWood = woodTexture();
-const texFloor = woodTexture("#3A2616", "#5A3C24", "#20120A"); texFloor.repeat.set(3, 3);
+const texFloor = woodTexture("#3A2616", "#5A3C24", "#20120A"); texFloor.repeat.set(5, 4);
 const texWall = (() => {
   const c = document.createElement("canvas"); c.width = 256; c.height = 256; const g = c.getContext("2d");
   g.fillStyle = "#CFC6B6"; g.fillRect(0, 0, 256, 256);
@@ -71,12 +71,18 @@ const M = {
   kraft: new THREE.MeshStandardMaterial({ color: C.kraft, roughness: 0.95 }),
   ink: new THREE.MeshStandardMaterial({ color: C.ink, roughness: 0.55 }),
   brass: new THREE.MeshStandardMaterial({ color: C.brass, roughness: 0.35, metalness: 0.9 }),
-  shade: new THREE.MeshStandardMaterial({ color: C.shade, roughness: 0.6, metalness: 0.2, side: THREE.DoubleSide }),
+  shade: new THREE.MeshStandardMaterial({ color: C.shade, roughness: 0.45, metalness: 0.25, side: THREE.DoubleSide }),
   clay: new THREE.MeshStandardMaterial({ color: C.clay, roughness: 0.9 }),
   soil: new THREE.MeshStandardMaterial({ color: C.soil, roughness: 1 }),
   stone: new THREE.MeshStandardMaterial({ color: C.stone, roughness: 1 }),
   stone2: new THREE.MeshStandardMaterial({ color: 0x7E7A70, roughness: 1 }),
-  roof: new THREE.MeshStandardMaterial({ color: 0x3B3634, roughness: 0.9, transparent: true, opacity: 1 }),
+  roof: new THREE.MeshStandardMaterial({ map: (() => {
+    const c = document.createElement("canvas"); c.width = 256; c.height = 256; const g = c.getContext("2d");
+    g.fillStyle = "#5C5450"; g.fillRect(0, 0, 256, 256);
+    for (let y = 0; y < 256; y += 32) { g.fillStyle = "rgba(0,0,0,.28)"; g.fillRect(0, y, 256, 5); g.fillStyle = "rgba(255,255,255,.08)"; g.fillRect(0, y + 5, 256, 3); }
+    for (let x = 0; x < 256; x += 16) { g.fillStyle = "rgba(0,0,0,.12)"; g.fillRect(x, 0, 2, 256); }
+    const t = new THREE.CanvasTexture(c); t.wrapS = t.wrapT = THREE.RepeatWrapping; t.repeat.set(14, 6); t.colorSpace = THREE.SRGBColorSpace; return t;
+  })(), roughness: 0.95, transparent: true, opacity: 1 }),
 };
 
 /* 文字贴图：竖排的题签、看板、牌面都靠它。等字体到了再画，否则是宋体兜底 */
@@ -261,7 +267,7 @@ const booksGroup = new THREE.Group(); house.add(booksGroup);
     let x = -slot.w / 2 + 0.06;
     const yBase = slot.y0 + (slot.shelves - 1 - s) * slot.shelfH;
     for (let k = 0; k < perShelf && i < n; k++, i++) {
-      const b = BOOKS[i], bw = 0.024 + R() * 0.026, bh = 0.19 + R() * 0.08, bd = 0.15 + R() * 0.05;
+      const b = BOOKS[i], bw = 0.028 + R() * 0.032, bh = 0.19 + R() * 0.08, bd = 0.15 + R() * 0.05;
       const lean = R() < 0.12 && k > 0;
       const out = b.state === "在读" ? 0.03 : 0;
       dummy.position.set(slot.x + x + bw / 2, yBase + bh / 2 + 0.0, -ROOM.d / 2 + slot.depth - bd / 2 - 0.04 + out);
@@ -277,6 +283,19 @@ const booksGroup = new THREE.Group(); house.add(booksGroup);
     }
   }
   mesh.count = i; mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor.needsUpdate = true; off.needsUpdate = true;
+  /* 每层末尾平放两三本（没有字的），像随手搁的；真实数据来了按"在读"的摆 */
+  const flats = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshStandardMaterial({ roughness: 0.9 }), slot.shelves * 3);
+  let fi = 0; const fc = new THREE.Color();
+  for (let s2 = 0; s2 < slot.shelves; s2++) {
+    const yBase = slot.y0 + (slot.shelves - 1 - s2) * slot.shelfH, k = 2 + (s2 % 2);
+    let yy = yBase, xx = slot.x + slot.w / 2 - 0.26 - R() * 0.1;
+    for (let j = 0; j < k; j++, fi++) {
+      const fw = 0.15 + R() * 0.04, fh = 0.028 + R() * 0.012, fd = 0.2 + R() * 0.03;
+      dummy.position.set(xx + (R() - 0.5) * 0.02, yy + fh / 2, -ROOM.d / 2 + slot.depth - fd / 2 - 0.05); dummy.rotation.set(0, (R() - 0.5) * 0.12, 0); dummy.scale.set(fw, fh, fd); dummy.updateMatrix(); flats.setMatrixAt(fi, dummy.matrix);
+      fc.setHex(Object.values(DOMAINS)[(s2 * 3 + j) % 6].color); fc.offsetHSL(0, -0.1, 0.05); flats.setColorAt(fi, fc); yy += fh;
+    }
+  }
+  flats.count = fi; flats.instanceMatrix.needsUpdate = true; flats.instanceColor.needsUpdate = true; flats.castShadow = true; flats.receiveShadow = true; booksGroup.add(flats);
   hotspot(mesh, "/study/wall/", "书"); booksGroup.add(mesh); booksGroup.userData.mesh = mesh;
 }
 
@@ -332,8 +351,10 @@ const lamp = new THREE.Group();
   const base = new THREE.Mesh(new THREE.CylinderGeometry(0.09, 0.1, 0.02, 24), M.brass); base.position.y = 0.01; lamp.add(base);
   const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.46, 10), M.brass); stem.position.y = 0.24; lamp.add(stem);
   const arm = new THREE.Mesh(new THREE.CylinderGeometry(0.007, 0.007, 0.34, 10), M.brass); arm.position.set(-0.14, 0.51, 0); arm.rotation.z = 1.0; lamp.add(arm);
-  const shade = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.13, 28, 1, true), M.shade); shade.position.set(-0.28, 0.56, 0); shade.rotation.z = -0.25; lamp.add(shade);
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.006, 8, 32), M.brass); rim.position.copy(shade.position); rim.position.y -= 0.065; rim.rotation.x = Math.PI / 2; rim.rotation.z = -0.25; lamp.add(rim);
+  /* 灯罩：尖朝上、口朝下的锥，铜口箍在锥底；一起稍微歪一点 */
+  const head = new THREE.Group(); head.position.set(-0.28, 0.56, 0); head.rotation.z = -0.25; lamp.add(head);
+  const shade = new THREE.Mesh(new THREE.ConeGeometry(0.15, 0.13, 28, 1, true), M.shade); head.add(shade);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.15, 0.006, 8, 32), M.brass); rim.position.y = -0.065; rim.rotation.x = Math.PI / 2; head.add(rim);
   lamp.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
   lamp.position.set(s.x + 0.62, deskTop, s.z - 0.15); house.add(lamp);
   lamp.userData.bulb = new THREE.Vector3(s.x + 0.62 - 0.28, deskTop + 0.5, s.z - 0.15);
@@ -388,14 +409,14 @@ const leafTex = (() => {
   g.clearRect(0, 0, 512, 512);
   /* 一层淡淡的叶形打底，让远看有一团绿 */
   g.fillStyle = "rgba(94,138,78,.42)"; g.beginPath(); g.moveTo(256, 30);
-  for (let i = 0; i <= 20; i++) { const t = i / 20, y = 30 + t * 470, w = 170 * Math.sin(Math.PI * Math.min(1, t * 1.15)) * (1 - t * 0.15) + 6; g.lineTo(256 + w, y); }
-  for (let i = 20; i >= 0; i--) { const t = i / 20, y = 30 + t * 470, w = 170 * Math.sin(Math.PI * Math.min(1, t * 1.15)) * (1 - t * 0.15) + 6; g.lineTo(256 - w, y); }
+  for (let i = 0; i <= 20; i++) { const t = i / 20, y = 30 + t * 470, w = 118 * Math.sin(Math.PI * Math.min(1, t * 1.15)) * (1 - t * 0.25) + 5; g.lineTo(256 + w, y); }
+  for (let i = 20; i >= 0; i--) { const t = i / 20, y = 30 + t * 470, w = 118 * Math.sin(Math.PI * Math.min(1, t * 1.15)) * (1 - t * 0.25) + 5; g.lineTo(256 - w, y); }
   g.closePath(); g.fill();
   g.strokeStyle = "#5E8A4E"; g.lineCap = "round"; g.lineJoin = "round";
   g.lineWidth = 5; g.beginPath(); g.moveTo(256, 500); g.lineTo(256, 36); g.stroke();
   let rr = 11; const RR = () => (rr = (rr * 48271) % 2147483647) / 2147483647;
   for (let i = 0; i < 34; i++) {
-    const y = 486 - i * 13, len = 160 * Math.sin((i / 34) * Math.PI * 0.95 + 0.08) + 10;
+    const y = 486 - i * 13, len = 112 * Math.sin((i / 34) * Math.PI * 0.95 + 0.08) * (1 - i / 60) + 8;
     for (const sx of [-1, 1]) {
       g.lineWidth = 2.6; g.globalAlpha = 0.95; g.beginPath(); g.moveTo(256, y); g.lineTo(256 + sx * len, y - 26); g.stroke();
       for (let j = 0; j < 26; j++) { const t = j / 26, px = 256 + sx * len * t, py = y - 26 * t, L = 9 + RR() * 7; g.lineWidth = 2; g.globalAlpha = 0.75 + RR() * 0.25; g.beginPath(); g.moveTo(px, py); g.lineTo(px + sx * L * 0.45, py - L); g.stroke(); g.beginPath(); g.moveTo(px, py); g.lineTo(px - sx * L * 0.25, py - L * 0.8); g.stroke(); }
@@ -404,7 +425,7 @@ const leafTex = (() => {
   g.globalAlpha = 1;
   const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 4; return t;
 })();
-const leafMat = new THREE.MeshStandardMaterial({ map: leafTex, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.9, color: 0xE4F2D8 });
+const leafMat = new THREE.MeshStandardMaterial({ map: leafTex, transparent: true, alphaTest: 0.4, side: THREE.DoubleSide, roughness: 0.9, color: 0xEEF8E2 });
 const stemMat = new THREE.MeshStandardMaterial({ color: 0x4E7A3E, roughness: 0.9 });
 let plantState = { grow: PLANT.grow, newLeaves: PLANT.newLeaves };
 function buildPlant(grow) {
@@ -412,28 +433,38 @@ function buildPlant(grow) {
   const pot = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.075, 0.15, 24), M.clay); pot.position.y = 0.075; pot.castShadow = true; pot.receiveShadow = true; plant.add(pot);
   const rim = new THREE.Mesh(new THREE.CylinderGeometry(0.108, 0.1, 0.03, 24), M.clay); rim.position.y = 0.15; plant.add(rim);
   const soil = new THREE.Mesh(new THREE.CylinderGeometry(0.095, 0.095, 0.01, 24), M.soil); soil.position.y = 0.16; plant.add(soil);
-  const stems = 2 + Math.round(grow * 4), leafGeom = new THREE.PlaneGeometry(0.22, 0.22);
+  const stems = 3 + Math.round(grow * 4), leafGeom = new THREE.PlaneGeometry(0.22, 0.22);
   let rnd = 3; const R = () => (rnd = (rnd * 48271) % 2147483647) / 2147483647;
   const foliage = new THREE.Group(), stemGeos = [];
   for (let s = 0; s < stems; s++) {
-    const h = 0.28 + grow * 0.5 + R() * 0.12, ang = (s / stems) * Math.PI * 2 + R() * 0.6, lean = 0.06 + R() * 0.08;
+    /* 一根茎：先直上，到上半段往外拱，像文竹那样散开 */
+    const h = 0.26 + grow * 0.5 + R() * 0.14, ang = (s / stems) * Math.PI * 2 + R() * 0.7, lean = 0.1 + R() * 0.12 + grow * 0.06;
     const pts = [];
-    for (let k = 0; k <= 6; k++) { const t = k / 6; pts.push(new THREE.Vector3(Math.cos(ang) * lean * t * t * 2, 0.16 + h * t, Math.sin(ang) * lean * t * t * 2)); }
+    for (let k = 0; k <= 7; k++) { const t = k / 7; const r = lean * t * t * 2.2; pts.push(new THREE.Vector3(Math.cos(ang) * r, 0.16 + h * (t - 0.12 * t * t), Math.sin(ang) * r)); }
     const curve = new THREE.CatmullRomCurve3(pts);
-    stemGeos.push(new THREE.TubeGeometry(curve, 10, 0.0035, 5, false));
-    const tiers = 2 + Math.round(grow * 4);
-    for (let t = 1; t <= tiers; t++) {
-      const u = 0.35 + 0.65 * t / tiers, p = curve.getPoint(u), tier = new THREE.Group(); tier.position.copy(p);
-      const n = 3 + Math.round(R() * 2), size = 0.6 + 0.6 * (1 - Math.abs(u - 0.7)) + grow * 0.3;
+    stemGeos.push(new THREE.TubeGeometry(curve, 12, 0.003, 5, false));
+    /* 节：沿上面三分之二，每节左右交替长一簇扁平的小羽叶，越往梢越小 */
+    const nodes = 7 + Math.round(grow * 6);
+    for (let t = 0; t < nodes; t++) {
+      const u = 0.38 + 0.62 * (t / (nodes - 1)), p = curve.getPoint(u), dir = curve.getTangent(u);
+      const tier = new THREE.Group(); tier.position.copy(p);
+      /* 这一节的朝向：茎的切线在水平面上的方向，左右交替偏 90 度 */
+      const base = Math.atan2(dir.x, dir.z) + (t % 2 ? 1 : -1) * (Math.PI / 2) * (0.75 + R() * 0.3);
+      const n = 3 + Math.round(R() * 1.6), size = (0.5 + 0.42 * (1 - t / nodes)) * (0.8 + grow * 0.4);
       for (let k = 0; k < n; k++) {
-        const leaf = new THREE.Mesh(leafGeom, leafMat); leaf.castShadow = true;
-        leaf.position.set(0, 0.0, 0); leaf.rotation.set(-Math.PI / 2 + 0.25 + R() * 0.2, 0, 0); leaf.rotation.y = (k / n) * Math.PI * 2 + R() * 0.5;
-        const g = new THREE.Group(); g.rotation.y = (k / n) * Math.PI * 2 + R() * 0.4; g.rotation.z = 0.35 + R() * 0.25;
-        leaf.rotation.set(-Math.PI / 2 + 0.2, 0, 0); leaf.position.set(0, 0, 0.1 * size); leaf.scale.setScalar(size);
+        const g = new THREE.Group();
+        g.rotation.y = base + ((k - (n - 1) / 2) * 0.42) + (R() - 0.5) * 0.3;
+        g.rotation.z = 0.04 + R() * 0.14;       /* 几乎平躺，微微上翘 */
+        const leaf = new THREE.Mesh(leafGeom, leafMat);
+        leaf.rotation.set(-Math.PI / 2, 0, 0); leaf.position.set(0, 0.004, 0.105 * size); leaf.scale.setScalar(size);
         g.add(leaf); tier.add(g);
       }
       foliage.add(tier);
     }
+    /* 梢头一小簇朝上的嫩叶 */
+    const tip = new THREE.Group(); tip.position.copy(curve.getPoint(1));
+    for (let k = 0; k < 3; k++) { const g = new THREE.Group(); g.rotation.y = (k / 3) * Math.PI * 2 + R(); g.rotation.z = 0.5 + R() * 0.4; const leaf = new THREE.Mesh(leafGeom, leafMat); leaf.rotation.set(-Math.PI / 2, 0, 0); leaf.position.set(0, 0, 0.03); leaf.scale.setScalar(0.22 + grow * 0.1); g.add(leaf); tip.add(g); }
+    foliage.add(tip);
   }
   /* 叶子几十上百片，合成一个网格一笔画完；整株轻轻晃就够了 */
   foliage.updateMatrixWorld(true);
@@ -505,7 +536,7 @@ L.fill.position.set(3, 4, 6);
 for (const k in L) scene.add(L[k]); scene.add(L.sun.target, L.lamp.target);
 
 const LIGHTS = {
-  night: { bg: 0x17110C, fog: 0x0B0705, wall: 0x3A2A1E, amb: 0.22, hemi: 0.4, lamp: 16, sun: 0, fill: 0.35, fillC: 0x8FA3C8, pane: 0x2A2440, exposure: 1.1 },
+  night: { bg: 0x17110C, fog: 0x0B0705, wall: 0x3A2A1E, amb: 0.3, hemi: 0.52, lamp: 16, sun: 0, fill: 0.5, fillC: 0x8FA3C8, pane: 0x2A2440, exposure: 1.1 },
   day:   { bg: 0xE6DDC9, fog: 0xBDAF93, wall: 0xF2EBDA, amb: 0.45, hemi: 0.7, lamp: 0, sun: 2.6, fill: 0.6, fillC: 0xDDE6F0, pane: 0xFFF4DC, exposure: 1.0 },
   rain:  { bg: 0x5B636A, fog: 0x3A4046, wall: 0x8A8E90, amb: 0.35, hemi: 0.5, lamp: 10, sun: 0.45, fill: 0.5, fillC: 0xB8C4D0, pane: 0xC9D2DA, exposure: 0.95 },
 };
@@ -530,7 +561,7 @@ function applyLight(dt) {
   scene.background.copy(n.bgC).lerp(new THREE.Color(t.bg), k); scene.fog.color.copy(n.fogC).lerp(new THREE.Color(t.fog), k);
   house.userData.pane.material.color.copy(n.paneC).lerp(new THREE.Color(t.pane), k);
   M.wall.color.copy(n.wallC).lerp(new THREE.Color(t.wall), k);
-  M.shade.emissive.setHex(0xFFD68C).multiplyScalar(Math.min(1, L.lamp.intensity / 16) * 0.35);
+  M.shade.emissive.setHex(0xFFD68C).multiplyScalar(Math.min(1, L.lamp.intensity / 16) * 0.14);
   if (lightT >= 1) lightNow = { ...t, bgC: new THREE.Color(t.bg), fogC: new THREE.Color(t.fog), paneC: new THREE.Color(t.pane), wallC: new THREE.Color(t.wall) };
   return true;
 }
@@ -543,7 +574,7 @@ const SHOTS = {
   "/study/wall":    { pos: [-1.75, 1.45, 1.1], at: [-1.75, 1.3, -2.5], fov: 44 },
   "/study/archive": { pos: [1.95, 1.3, 1.0], at: [1.95, 1.15, -2.5], fov: 44 },
   "/study/desk":    { pos: [0.15, 1.55, 0.35], at: [0.15, 0.85, -1.45], fov: 44 },
-  "/study/desk/plant": { pos: [0.05, 1.5, -0.15], at: [-0.4, 1.12, -1.55], fov: 42 },
+  "/study/desk/plant": { pos: [0.1, 1.42, -0.1], at: [-0.4, 1.1, -1.55], fov: 40 },
   "/study/desk/card":  { pos: [0.3, 1.05, -0.95], at: [0.27, 0.87, -1.45], fov: 36 },
   "/study/desk/lamp":  { pos: [0.95, 1.5, -0.6], at: [0.5, 1.25, -1.6], fov: 40 },
 };
