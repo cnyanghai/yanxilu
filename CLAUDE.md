@@ -35,8 +35,9 @@ Windows 上把 `python3` 换成 `python`；脚本都是纯 Python，Windows 和 
 - 提交用 `git -c user.name="cnyanghai" -c user.email="usyanghai86@gmail.com" commit`，提交信息用中文，结尾带 `Co-Authored-By: Claude <模型名> <noreply@anthropic.com>`。
 - 不打印、不传递任何密钥；不碰 nginx 的 80/443；不改 `data/`。
 
-## 现在的状态（2026-10-28）
+## 版本与状态
 
-- 档案架：每篇文章一张牌（牌背是固定封面加题签，宝石灰/青/金/朱记学到哪一步），剪报夹是封着的档案袋（拆封动画），盒子和夹子点开是整屏深色桌面。
-- 书房样机 `room/` 刚上线第一稿，等用户看过效果再定主角（今天的牌 / 案头的文竹）和下一步。
+- 进度的唯一事实源是 `STATUS.md`，先读它。参考与结论在 `REFERENCES.md`。
+- **版本 1 系列**：现在的书架 + 档案架网页（git 标签 `v1`），保留并继续可开发。档案架每篇文章一张牌，剪报夹是档案袋，盒和夹点开是整屏桌面。
+- **版本 2 系列**：三维小世界，立项分析和分步路线在 `design/V2-ROADMAP.md`；代码将放 `world/`（服务器版 `/world`），用自带的 Three.js，不引框架不走 CDN。`room/` 是 CSS 3D 样机，版本 2 第 3 步做完后归档。
 - 设计稿在 claude.ai 的画布里（见 `design/BRIEF.md` 的链接），那是讨论用的，不是代码。

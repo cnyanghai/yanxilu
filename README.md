@@ -32,6 +32,10 @@
 - **知识专题**：[期货做市商](reports/market-making.html)，准入条件、盈亏方程（可切换情景的示意账）、七块核心知识、可调参数的 Avellaneda-Stoikov 报价演示、跨期与对冲、常见亏法、学习路线与书单、自测题。
 - **知识专题**：[做市商研习计划](reports/market-making-plan.html)，12 周、每周一读一做，与每日课表第一阶段同步；附一天的模拟 tick 练习数据（`reports/data/mm_ticks.csv`，生成脚本 `make_mm_ticks.py`）、两轮纸上做市、SQL 与 Python 习题，参考答案在 `reports/data/mm_exercises/`。页面里的代码由构建脚本从这些文件插入。
 
+## 版本系列
+
+现在的书架 + 档案架网页是版本 1 系列（git 标签 `v1`）。版本 2 系列把它做成三维的小世界，立项分析在 `design/V2-ROADMAP.md`，进度在 `STATUS.md`。
+
 ## 三个版本
 
 | 版本 | 进度与批注保存在哪里 |
