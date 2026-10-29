@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="研习录版本 2：一个人的小世界。院子、书房、书墙、案头的文竹。WebGL 的第一稿。">
-<meta name="theme-color" content="#17110C">
+<meta name="description" content="研习录版本 2：一个人的小世界。院子、书房、书墙、案头的文竹。烘焙的壳、长焦的镜头。">
+<meta name="theme-color" content="#DED4C0">
 <!-- 研习录 · 版本 2（world/）。独立页面，用自带的 three.js（vendor/three），不走任何 CDN。
      结构：院子（总览）→ 间 → 家具 → 物，四个景别；URL 的 hash 对应景别，浏览器后退就是镜头拉远。
      这一稿是灰盒：建筑和家具是简单几何，书、盒、牌、文竹按数据程序化生成。
@@ -28,7 +28,11 @@
   color-scheme:dark;
 }
 html,body{height:100%}
-body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-kai);overflow:hidden;overscroll-behavior:none;touch-action:none}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:var(--f-kai);overflow:hidden;overscroll-behavior:none;touch-action:none;transition:background 1.2s}
+/* 底色随光变：晴窗纸白、夜读深木、雨天青灰。画布是透明的，像 kriss 一样底是一片柔和的渐变 */
+body[data-light="day"]{background:radial-gradient(120% 90% at 35% 20%,#F0EADB 0%,#DED4C0 55%,#C4B89E 100%)}
+body[data-light="night"]{background:radial-gradient(120% 90% at 50% 30%,#2B1F17 0%,#17110C 60%,#0B0705 100%)}
+body[data-light="rain"]{background:radial-gradient(120% 90% at 40% 25%,#7B838B 0%,#5B636A 55%,#3A4046 100%)}
 *{box-sizing:border-box}
 button{font:inherit;color:inherit}
 #gl{position:fixed;inset:0;display:block;outline:none}
@@ -79,7 +83,7 @@ body[data-light="day"] .tag{text-shadow:0 1px 0 #fff} body[data-light="day"] .ta
 
 /* WebGL 开不了时的退路：回版本 1 */
 .fallback{position:fixed;inset:0;display:none;place-items:center;text-align:center;padding:24px;line-height:1.9}
-.fallback a{color:var(--brass-hi)}
+.fallback a{color:var(--brass-hi)} .fallback code{font-family:var(--f-num)}
 body.nogl .fallback{display:grid}
 body.nogl #gl,body.nogl .panel,body.nogl .crumb,body.nogl .hint{display:none}
 @media (prefers-reduced-motion:reduce){ .tag,.hint,.brass{transition:none} }
@@ -94,8 +98,8 @@ body.nogl #gl,body.nogl .panel,body.nogl .crumb,body.nogl .hint{display:none}
 <div class="hint" id="hint">点一间房走近 · Esc 或 ← 退后</div>
 <div class="panel" role="toolbar" aria-label="房间的光">
   <span class="lbl">光</span>
-  <button type="button" class="brass" data-light="night" aria-pressed="true">夜读</button>
-  <button type="button" class="brass" data-light="day" aria-pressed="false">晴窗</button>
+  <button type="button" class="brass" data-light="day" aria-pressed="true">晴窗</button>
+  <button type="button" class="brass" data-light="night" aria-pressed="false">夜读</button>
   <button type="button" class="brass" data-light="rain" aria-pressed="false">雨天</button>
   <span class="sep"></span>
   <button type="button" class="brass" id="grow" title="假装读了一周">长一周</button>

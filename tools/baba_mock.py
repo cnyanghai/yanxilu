@@ -44,7 +44,7 @@ def english(uid):
         out.append({k:d[k] for k in ("slug","type","titleEn","titleZh","posterUrl","year")} | {"sentences":sent,"reached":reached,"watchedMs":watched,"last":last,"episodes":eps})
     vocab = {"total":23,"new":12,"learning":4,"known":7,"lastAddedAt":"2026-10-18T12:00:00.000Z"} if uid else {"total":0,"new":0,"learning":0,"known":0,"lastAddedAt":None}
     return {"user": {"name": USERS[uid]["name"]} if uid else None, "paid": bool(uid and USERS[uid]["paid"]), "dramas": out, "vocab": vocab, "at": now()}
-TYPES = {".html":"text/html; charset=utf-8",".mjs":"text/javascript; charset=utf-8",".js":"text/javascript; charset=utf-8",".json":"application/json; charset=utf-8",".css":"text/css",".csv":"text/csv; charset=utf-8",".wasm":"application/wasm",".woff2":"font/woff2",".png":"image/png",".svg":"image/svg+xml"}
+TYPES = {".html":"text/html; charset=utf-8",".mjs":"text/javascript; charset=utf-8",".js":"text/javascript; charset=utf-8",".json":"application/json; charset=utf-8",".css":"text/css",".csv":"text/csv; charset=utf-8",".wasm":"application/wasm",".woff2":"font/woff2",".png":"image/png",".svg":"image/svg+xml",".jpg":"image/jpeg",".glb":"model/gltf-binary"}
 def baba_page(title, body):
     return ("<!doctype html><html><head><meta charset=utf-8><title>Baba 英语 · 看视频学英语</title><script>" + EMBED + "</script>"
       "<style>html[data-embed] [data-site-header]{display:none} html[data-embed] [data-site-main]{padding-top:0} [data-site-header]{position:fixed;top:0;left:0;right:0;height:56px;background:#222;color:#fff} [data-site-main]{padding-top:56px} body{margin:0;font-family:sans-serif;background:#111;color:#eee}</style></head>"

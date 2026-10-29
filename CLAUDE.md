@@ -12,7 +12,8 @@
 
 - 单文件前端：`src/app.js`（全部逻辑）+ `src/page.html`（CSS 和外壳）+ `src/server.js`（服务器版垫片）。**改完必须跑 `python3 build.py`**，它生成 `index.html`、`server/index.html`、`dist/artifact.html`、`reports/*.html` 和 `sw.js`（版本号来自 index.html 的 sha1）。生成物要一起提交。
 - `room/index.html`：书房样机（CSS 3D 路线的第一稿），独立页面，服务器版在 `/room`。
-- `world/`：版本 2 的小世界（WebGL）。`index.html` 外壳和 HUD，`world.js` 全部逻辑（ES 模块，用 importmap 引 `vendor/three/`），`sample.js` 灰盒阶段的样例数据。服务器版在 `/world`（走 Baba 的通配路由）。不打包，不引框架。
+- `world/`：版本 2 的小世界（WebGL）。`index.html` 外壳和 HUD，`world.js` 全部逻辑（ES 模块，用 importmap 引 `vendor/three/`），`sample.js` 样例数据，`assets/` 是 Blender 烘焙出来的壳（`study.gltf.json` 几何、`study_<光>_<组>.jpg` 三套贴图、`study.json` 机位与槽位配置）。服务器版在 `/world`（走 Baba 的通配路由）。不打包，不引框架。场景里没有实时光：建筑和大件家具用烘焙贴图当无光照材质，三种光是三套贴图淡接；书、盒、牌、文竹程序化生成。
+- `tools/blender/`：bpy 脚本。`study_scene.py` 搭场景（尺寸、槽位、机位、三种光的唯一来源，`config()` 导出给 world.js），`study_frames.py` 渲静帧，`bake_study.py` 烘焙导出，`bake.sh` 一键跑（优先用 Windows 侧 `D:\齐河OnLine\tools\blender\blender.exe` 4.5，有显卡；没有就用 WSL 的 4.0 CPU，慢几十倍且没降噪器）。改了房间尺寸或家具位置要重新 `bash tools/blender/bake.sh`，产物提交。
 - `vendor/`：自带的字体（`vendor/fonts`）、KaTeX、PDF.js、PWA 清单。不要引用 Google Fonts，国内打不开。
 - 数据：`S.data[集合][id]`，`put(coll, id, val)` / `del(coll, id)` 写入；服务器版走 Baba 的 `/api/yxl/*`，公开版存 localStorage。集合名在 `COLLS`。剪报（`clips`/`clipbody`）只在服务器版有。
 - 服务器端（另一个仓库 cnyanghai/baba-english）：`src/lib/yxl.ts` 的 `serveYxl` 直接读研习录克隆里的静态文件。2026-10-28 起是通配路由 `src/app/[...path]/route.ts`：本仓库里**任何带 `index.html` 的顶层目录**（`room/`、`world/`、以后的花房）推到 main 就能在 `/<目录>` 访问，不用再改 Baba。不对外的目录（server、src、tools、study、dist、design、data）写在那边的 DENY 里。页面地址是 `/<目录>`（没有尾斜杠），页面里的相对路径要能按目录解析：Baba 会注入 `<base>`（12cbf4e 之后的部署），在那之前新页面的 `index.html` 开头照抄 `world/index.html` 里补 `<base>` 的那段脚本。Baba 的部署由人在 WSL 里跑 `scripts/deploy-yanxilu.sh`，Claude 不要自己部署（用户明确授权的那次除外）。
@@ -24,6 +25,7 @@ python3 build.py
 python3 tools/baba_mock.py 8790          # 本地模拟 Baba：/api/yxl/*、首页给 server/index.html（另开一个终端跑着）
 python3 tools/tests/desk_test.py         # 档案架：拆封、翻牌、桌面（Playwright）
 python3 tools/tests/world_test.py        # 小世界：四景别截图、三种光、draw call 数（自己起模拟服务器）
+bash tools/blender/bake.sh               # 重新烘焙小世界的壳（约 10 分钟，显卡）；静帧：blender -b --python tools/blender/study_frames.py -- --lights day,night,rain
 ```
 Windows 上把 `python3` 换成 `python`；脚本都是纯 Python，Windows 和 Linux 都能跑。mock 起来以后浏览器窗格打开 http://127.0.0.1:8790/#archive 就能看到服务器版（测试账号 cookie `sid=u1`，测试脚本会自己带）。
 截图落在 `tools/out/`（已 gitignore）。`abox_test.py`、`clip_test.py` 写于侧栏面板时期，部分步骤已过时，改之前先看。本机没有 Playwright 就 `pip install playwright && playwright install chromium`。
