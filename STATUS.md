@@ -3,7 +3,7 @@ type: status
 status: active
 cluster: product
 stage: 版本 2 灰盒书房在线上 /world；深拆 kriss.ai 后改了做法：静帧先行、Blender 无头脚本搭壳并烘焙、长焦镜头在房外、默认光晴窗（design/KRISS-ANALYSIS.md）
-next: 用户定两件事（默认光改晴窗？案头的活物是什么？）；然后用 bpy 出第 1 步的三张构图静帧（院子 / 整间 / 案头）给用户定
+next: 九张静帧渲完拼对照图给用户定视场角与构图；默认光改晴窗与案头活物仍等用户
 blocked_by: 用户看效果
 updated: 2026-10-28
 ---
@@ -45,6 +45,7 @@ updated: 2026-10-28
 
 ## 日志
 
+- 2026-10-28 用户选「出静帧」→ 写 `tools/blender/study_frames.py`（bpy 搭有厚度带倒角的书房剖面灰模 + 院子，晴窗光，三机位按视场角反算距离）和 `contact_sheet.py`（拼对照图）；系统包的 Blender 没有降噪器也看不到显卡，改成 CPU 64 采样不降噪，每张约 72 秒；5、8、12 度三档共九张渲染中，试渲已证明长焦 + 厚墙就是模型屋的感觉
 - 2026-10-28 第二轮：还原 kriss 的 JS 排版逐段精读，解析其场景文件的 glTF 头（XOR 伪加密的 GLB，glTF-Transform 打包，89 张 KTX2 共 17.6 MB，112 个 _BAKED 材质把烘焙贴图放 emissive、底色黑、着色器无光照；相机 fov 2.3 到 4.1 度；镜头 / 热点在 Blender 里摆）→ 写进 `design/KRISS-ANALYSIS.md` 第 7 节，列出九条可直接搬的做法
 - 2026-10-28 用户问为什么和 kriss.ai 差那么多 → 真浏览器 + 网络 + JS 包深拆 kriss（29 MB 单文件场景、全烘焙无实时阴影、长焦房外镜头、房色系统），写 `design/KRISS-ANALYSIS.md`：差异来源八条，我们的做法调整八条，新的五步计划；发现本机有 Blender 4.0.2 可无头烘焙 → 等用户定默认光与活物
 - 2026-10-28 用户打开线上 /world 是黑屏 → 原因：页面地址没有尾斜杠，`./world.js` 被解析到 `/world.js`（404）。修法：index.html 开头一段脚本补 `<base>`（已推送）；Baba 的通配路由也加了 base 注入（12cbf4e，已推送、未部署，下次部署 Baba 时一起上）。
