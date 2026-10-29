@@ -10,6 +10,9 @@
      这一稿是灰盒：建筑和家具是简单几何，书、盒、牌、文竹按数据程序化生成。
      材质只有四种：纸、木、墨、铜。光：夜读一盏灯，晴窗左窗来光，雨天青灰。 -->
 <title>研习录 · 小世界</title>
+<!-- 服务器版这页的地址是 /world（没有尾斜杠），相对路径会解析到根上去；补一个 base 让 ./world.js、../vendor 都按 /world/ 算。
+     GitHub Pages 上地址以 / 结尾，这段什么也不做。要放在 importmap 前面，importmap 也按 base 解析。 -->
+<script>(function(){var p=location.pathname;if(!/\/$/.test(p))document.write('<base href="'+p.replace(/[^\w\-\/.~%]/g,'')+'/">');})();</script>
 <link rel="stylesheet" href="../vendor/fonts/fonts.css">
 <script type="importmap">
 { "imports": { "three": "../vendor/three/three.module.js", "three/addons/": "../vendor/three/addons/" } }
