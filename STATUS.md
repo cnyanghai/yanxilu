@@ -3,7 +3,7 @@ type: status
 status: active
 cluster: product
 stage: 版本 2 第 3 步完成：烘焙的壳进了 world/（Windows 侧 Blender 4.5 显卡烘焙，三套贴图淡接，无实时光），长焦镜头在房外，默认晴窗；draw call 4 到 19
-next: 用户在 design/concepts 里选目标图（A / B / 混合）；然后写色彩脚本，按图改建筑壳造型，主角家具逐件图生三维
+next: 用户定「可养不可建」与 kriss 形态；开 Hyper3D 账号用 B 试 Agentic Mode 整间生成（提示词与费用先过目），与 fal 单件对比
 blocked_by: 用户看效果
 updated: 2026-10-28
 ---
@@ -47,6 +47,7 @@ updated: 2026-10-28
 
 ## 日志
 
+- 2026-10-29 讨论：游戏家园系统的做法（套件 + 网格 + 数据 + 实时光）、我们「可养不可建」、形态以 kriss 式固定机位为主体；拆浩克肥虫的 Blender + Hyper3D 视频（Rodin Agentic Mode 整场景生成并自动拆件、Low Poly、生成端改材质）→ 写进 KRISS-ANALYSIS 第 10 节，建议拿 B 试一次 Rodin
 - 2026-10-29 用户定「先 AI 生图再按图建模」；Grok 命令行工具登录态过期、网页弹条款确认页（没替用户点），改用 ai-studio 的 gpt-image-2（fal）出四张概念图（A 按渲染改、B 自由发挥、院子、夜读，共约 1.5 元），收进 `design/concepts/` → 等用户选目标图
 - 2026-10-28 用户看线上后问为什么还和 kriss 不一样 → 写诊断（KRISS-ANALYSIS 第 8 节）：不是工具、主要不是流程，是资产问题；代码能解决的一组（AgX、柔光、AO、后期、大倒角、降噪）与资产来源的四条路，等用户选
 - 2026-10-28 第 3 步上线并验证（线上截图正常）；512 采样重烘（11 分钟）替换了贴图，颗粒明显减少 → 等用户看效果
