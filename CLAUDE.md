@@ -12,10 +12,10 @@
 
 - 单文件前端：`src/app.js`（全部逻辑）+ `src/page.html`（CSS 和外壳）+ `src/server.js`（服务器版垫片）。**改完必须跑 `python3 build.py`**，它生成 `index.html`、`server/index.html`、`dist/artifact.html`、`reports/*.html` 和 `sw.js`（版本号来自 index.html 的 sha1）。生成物要一起提交。
 - `room/index.html`：书房样机（CSS 3D 路线的第一稿），独立页面，服务器版在 `/room`。
-- `world/`：版本 2 的小世界（WebGL）。`index.html` 外壳和 HUD，`world.js` 全部逻辑（ES 模块，用 importmap 引 `vendor/three/`），`sample.js` 灰盒阶段的样例数据。服务器版在 `/world`（Baba 那边 `src/app/world/route.ts` 和 `world/[...path]/route.ts`）。不打包，不引框架。
+- `world/`：版本 2 的小世界（WebGL）。`index.html` 外壳和 HUD，`world.js` 全部逻辑（ES 模块，用 importmap 引 `vendor/three/`），`sample.js` 灰盒阶段的样例数据。服务器版在 `/world`（走 Baba 的通配路由）。不打包，不引框架。
 - `vendor/`：自带的字体（`vendor/fonts`）、KaTeX、PDF.js、PWA 清单。不要引用 Google Fonts，国内打不开。
 - 数据：`S.data[集合][id]`，`put(coll, id, val)` / `del(coll, id)` 写入；服务器版走 Baba 的 `/api/yxl/*`，公开版存 localStorage。集合名在 `COLLS`。剪报（`clips`/`clipbody`）只在服务器版有。
-- 服务器端（另一个仓库 cnyanghai/baba-english）：`src/lib/yxl.ts` 的 `serveYxl` 直接读研习录克隆里的静态文件；新的顶层路径要在那边加一条 route（例如 `src/app/room/route.ts`）。Baba 的部署由人在 WSL 里跑 `scripts/deploy-yanxilu.sh`，Claude 不要自己部署。
+- 服务器端（另一个仓库 cnyanghai/baba-english）：`src/lib/yxl.ts` 的 `serveYxl` 直接读研习录克隆里的静态文件。2026-10-28 起是通配路由 `src/app/[...path]/route.ts`：本仓库里**任何带 `index.html` 的顶层目录**（`room/`、`world/`、以后的花房）推到 main 就能在 `/<目录>` 访问，不用再改 Baba。不对外的目录（server、src、tools、study、dist、design、data）写在那边的 DENY 里。Baba 的部署由人在 WSL 里跑 `scripts/deploy-yanxilu.sh`，Claude 不要自己部署（用户明确授权的那次除外）。
 
 ## 怎么测
 

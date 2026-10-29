@@ -3,8 +3,8 @@ type: status
 status: active
 cluster: product
 stage: 版本 2 第 0 步完成、第 1 步灰盒书房第一版已上线 /world：院子 → 书房 → 家具 → 物四景别、三种光、程序化的书墙 / 档案架 / 文竹 / 今天的牌
-next: 用户在真机和手机上看 /world 的效果给反馈；Baba 那边由人跑 deploy-yanxilu.sh 部署新路由；第二风格 / 暂停哪个项目 / 与智慧树的关系仍等用户
-blocked_by: 用户看效果；Baba 部署
+next: 用户在电脑和手机上开 https://baba.wogucloud.cn/world 看效果给反馈；第二风格 / 暂停哪个项目 / 与智慧树的关系仍等用户
+blocked_by: 用户看效果
 updated: 2026-10-28
 ---
 
@@ -14,7 +14,7 @@ updated: 2026-10-28
 
 - 版本 1：书架、档案架、卡牌与卡包、书房样机 `room/`（CSS 3D 第一稿）都在线，主版本在 https://baba.wogucloud.cn 。git 标签 `v1` 指向 2026-10-28 的 main。
 - 版本 2：`world/` 第一版写完（`index.html` + `world.js` + `sample.js`，three.js 0.186.1 自带在 `vendor/three/`）。有：院子总览（书房 + 三块待建地基）、书房建筑层（墙、地、梁、窗、书墙、档案架、桌、看板、灯）、程序化的书（InstancedMesh + 书脊贴图集）、盒与袋（题签 / 封条 / 引印）、今天的牌、文竹（茎与羽叶合并成两个网格，grow 参数控制株数层数）、四景别镜头与 hash 路由、三种光（夜读聚光灯一盏、晴窗左窗来光、雨天青灰）、指到显示铜色名字、Esc / 后退 / 面包屑退后。测试 `tools/tests/world_test.py` 通过：draw call 49 到 86，三角面约 9 千，控制台无报错。截图在 `tools/out/world/`（已 gitignore，是测试产物，每次跑都会覆盖）。
-- Baba 仓库已加 `/world` 和 `/world/[...path]` 两条路由并推送（f25dc6c），**还没部署**，线上 `/world` 要等人跑 `scripts/deploy-yanxilu.sh`。
+- Baba 那边 2026-10-28 改成通配路由（2497f4a）：本仓库任何带 `index.html` 的顶层目录推到 main 就能在 `/<目录>` 访问。用户授权 Claude 跑了部署，已完成：线上 https://baba.wogucloud.cn/world 、/room 可开，/src、/server、/tools 被挡（404）。
 - 还是灰盒：没有烘焙、没有 CC0 家具模型、数据是 `sample.js` 的样例，还没接 `S.data`。
 
 ## 下一步
@@ -43,6 +43,7 @@ updated: 2026-10-28
 
 ## 日志
 
+- 2026-10-28 用户问为什么要人部署 → 解释后选「改通配路由再部署」；Baba 通配路由已部署上线，线上 /world 验证通过；CLAUDE.md 同步
 - 2026-10-28 用户选「先修外观」→ 外观第一轮：文竹叶形、夜读亮度、屋顶瓦纹、平放的书、灯罩；测试通过
 - 2026-10-28 用户拍板：首屏主角文竹；建模走 CC0 加程序化起步。随后写出 `world/` 第一版（灰盒书房、四景别、三种光、程序化书 / 盒 / 牌 / 文竹），three.js 自带进 vendor，Baba 加 /world 路由，截图测试通过 → 等用户看效果。
 - 2026-10-28 研究 igloo.inc、kriss.ai（实地看、读 Awwwards 案例）、Bruno Simon my-room-in-3d、flo-bit/room、Rooms.xyz、img2threejs；截图诊断 `room/` 样机；写 `design/V2-ROADMAP.md`；建 STATUS / REFERENCES；打标签 `v1` → 版本 2 立项，等拍板。
