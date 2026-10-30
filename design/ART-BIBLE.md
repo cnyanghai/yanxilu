@@ -2,7 +2,30 @@
 
 阶段 1 的交付物。门：用户看主视觉说"就是这个"，对照墙六项每项 4 分以上。本页写满即阶段 1 完成。
 
-状态：骨架（2026-10-30）。第 1 节的出图方案等用户看提示词；第 2 到 5 节是草稿，可以直接改。
+状态：骨架（2026-10-30）。第 0 节是风格的总建议（项目经理提出，等用户定渲染风格）；第 1 节的出图方案等用户看提示词；第 2 到 7 节是草稿，可以直接改。
+
+## 0. 风格的两层：渲染风格全项目一种，题材按包换
+
+用户 2026-10-30 问：方案改成在场模式后，风格要不要重定，是魔兽那种、皮克斯那种、魔法风格还是山水田园。起因是鲍勃列侬的魔兽练级回忆视频，"以前练级，走到哪儿都能待半天"。
+
+**先把"风格"拆成两层**，不拆开就会一直打架：
+- **渲染风格**：东西怎么画。清爽哑光（皮克斯、kriss、动物森友会）、手绘贴图（魔兽、炉石、盗贼之海）、水墨、写实。
+- **题材**：世界是什么。现代书房、宋朝小院、酒馆、魔法书院、幻想荒野。
+
+魔兽是"手绘贴图 + 幻想题材"，皮克斯是"清爽哑光 + 任何题材"，kriss 是"清爽哑光 + 现代题材"。我们要做风格包进商店，**渲染风格必须全项目只有一种**，否则同一个角色、同一只猫、同一张地毯换到另一个包里就不搭；题材才是按包换的东西。
+
+**项目经理的建议：渲染风格选清爽哑光，加一点手绘的调味；题材第一个包仍是现代书房。** 理由：
+1. 清爽哑光是图生三维、CC0 套件和我们烘焙流水线天然产出的样子，皮克斯式角色也是它的一部分；手绘贴图要有人一张张画，AI 出的贴图风格难统一，没有美术的团队风险最大。
+2. 俯视在场的游戏里清爽哑光有成熟先例：动物森友会、双点医院、Tiny Glade、Unpacking。
+3. 魔兽好看的根子不是手绘，是**地方感**：每张地图自己的色彩脚本、一个地标、能坐下的角落、周围有活物、有昼夜。这些是设计规矩，不挑渲染风格，我们照学，写成下面的第 8 节。
+4. 魔兽的美术本身不能用（项目铁律：借鉴机制和结构，不用暴雪的美术）。"幻想荒野"可以是以后的第五个题材包，画法还是我们自己的。
+
+**代价**：清爽哑光比手绘贴图"冷"一点，靠色彩脚本、暖光和细节把温度补回来；第二轮主视觉就要验证这一点。
+
+**怎么让用户定**：第二轮主视觉同一构图出两张，一张清爽哑光加手绘调味，一张手绘贴图风，并排看。选了哪张，渲染风格就定了，主视觉也一起有了。两张约 0.8 元，提示词见第 1 节。
+
+定下来之后的顺序（一步步来）：渲染风格 → 主视觉 → 角色（皮克斯式，已定方向）→ 地方感规矩 → 材质板与色板 → 三种光 → 零件表 → 进阶段 2。
+
 
 ## 1. 主视觉（待出图）
 
@@ -32,12 +55,16 @@ Claude 的对照墙打分（形体 / 材质 / 光 / 密度 / 生命 / 整体感�
 2026-10-30 视角与操控定为"在场为底，对焦为点"，第一轮的展柜取景不再是目标画面，两张留作材质与家具的参考（02 的家具组合与笔记本斜面架保留）。
 
 **第二轮出图方案**（等用户点头）：
-- 模型：gpt-image-2 中档，3:2，带参考图 `concepts/keyart_modern_02.jpg` 维持材质与家具，两张，约 0.8 元。
+- 模型：gpt-image-2 中档，3:2，带参考图 `concepts/keyart_modern_02.jpg` 维持家具组合，两张（A 清爽哑光、B 手绘贴图，见第 0 节），约 0.8 元。
 - 变化：取景改成游戏画面，跟随镜头约 40 度俯角、长焦压扁透视、没有天花板、靠镜头的两面墙去掉、远侧两面墙完整可见；角色换成皮克斯式卡通（头约占身高四分之一、大眼、圆润、哑光），正在房中朝书墙走；不画界面、不画文字。
 - 画面里要有：远墙整面书墙、笔记本斜面架、靠左窗的橡木桌与一张牌和黄铜灯、读书椅与壁灯、格子里睡着的猫、一盆植物、橡木地板上一块地毯。
 - 材质色调不变：暖白哑光墙、浅橡木、墨青点缀、一点黄铜。
 
-英文提示词：
+两张的区别只在渲染风格的描述，构图、家具、角色相同：
+- A 清爽哑光加手绘调味：`clean matte stylized render, soft gradients, subtle hand-painted texture grain, warm color script`
+- B 手绘贴图：`hand-painted texture style like a stylized fantasy MMO, painted lighting baked into textures, chunky stylized shapes, visible brush strokes, warm saturated palette`
+
+英文提示词（A 版；B 版把末尾的渲染描述换成上面的 B）：
 
 > In-game screenshot of a cozy modern study room from a fixed three-quarter top-down game camera at about 40 degrees pitch, long telephoto lens with flattened perspective, no ceiling, the two walls nearest the camera removed, the two far walls fully visible. A stylized Pixar-like cartoon character, young adult, head about one quarter of body height, big friendly eyes, simple rounded shapes, matte skin and fabric, is walking across the room toward a full-height bookshelf wall densely filled with books on the far wall. Also in the room: a low slanted display rack holding six muted-color notebooks with small labels; a pale oak desk with one single card and a slim brass lamp beside a window on the left with soft daylight; a reading armchair with a wall lamp; a sleeping cat in a shelf cubby and one potted plant as collectible items; a soft rug on an oak floor. Materials: warm white matte walls, pale oak wood, deep ink-teal accents, a touch of brass. Soft studio lighting, no harsh shadows, clean and minimal, premium stylized game art render, no UI, no text.
 
@@ -110,3 +137,16 @@ Claude 的对照墙打分（形体 / 材质 / 光 / 密度 / 生命 / 整体感�
 "自由摆放"还是"预设槽位"：SCOPE 定的是预设槽位、可选不可建。用户 2026-10-30 的提问里出现了"自由摆放"，两者的差别是一套摆放界面、碰撞与吸附、存坐标，约多两周工作量，且光照折衷更明显。Claude 的建议：**第一期槽位制，但 `placements` 从第一天就按网格坐标存**（物品、x、y、朝向、放置面），以后开放自由摆放只是加界面，不用迁数据。要不要改成自由摆放，用户定。
 
 角色：用户 2026-10-30 定为**皮克斯式的卡通人物**（风格类别，不用任何皮克斯角色）：头身比约 1 比 4 到 1 比 5，大眼、圆润简洁的形体、哑光皮肤与布料。一个基础身体加可换的衣服网格，骨骼与动作共用。第一轮主视觉里的角色偏写实，与此不符；建议第二轮主视觉用 02 当参考图、只换角色描述再出两张，让主视觉里的角色就是定稿的角色风格。
+
+## 8. 地方感规矩（从魔兽的地图学来的，不用它的美术）
+
+"走到哪儿都能待半天"是一个可验收的目标。每个房间和院子都要有：
+1. **自己的色彩脚本**：一主一辅一点缀，和隔壁房间明显不同，一眼知道在哪。
+2. **一个地标**：进门第一眼落在它上面（书房是书墙，院子是那棵树或那口井）。
+3. **一个能停的角落**：有椅子、有光、有东西看（读书椅加壁灯加窗外）。角色走到那里坐下，镜头慢慢推近，这是"待半天"的物理形式。
+4. **活物**：猫、鸟、风吹的帘子、窗外的云。至少两样在动。
+5. **昼夜与天气**：三种光已经有；跟真实时间走。
+6. **声音**：阶段 4 之后加环境声，翻书、雨、猫。
+7. **路上有事**：从门到书墙的路上至少经过一件能点的东西。
+
+验收时加到十条验收单后面当第 11 条：在这间房里，你愿意什么都不干坐一会儿吗。
