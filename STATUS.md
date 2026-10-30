@@ -3,7 +3,7 @@ type: status
 status: active
 cluster: product
 stage: 版本 2 第 3 步完成：烘焙的壳进了 world/（Windows 侧 Blender 4.5 显卡烘焙，三套贴图淡接，无实时光），长焦镜头在房外，默认晴窗；draw call 4 到 19
-next: 用户选小人方向并点头出三张概念图；练习二家具改成「一组出图再拆件」；书房做零件表与材质板
+next: 用户看纸人概念图（design/concepts/attendant_paper.jpg）定稿或提修改；练习二家具改成「一组出图再拆件」；书房做零件表与材质板
 blocked_by: 用户看效果
 updated: 2026-10-28
 ---
@@ -51,6 +51,7 @@ updated: 2026-10-28
 
 ## 日志
 
+- 2026-10-30 用户选小人方向「只出纸人」→ gpt-image-2 中档一张（0.38 元）存 `design/concepts/attendant_paper.jpg`：折纸层叠身体、墨线勾边、胸前朱印、黄铜坠、木屐，站姿与走姿并排；待用户定稿
 - 2026-10-30 用户给 -Duduu-《岩洞村落》落地思路（抖音图文六张）并提家具功能 / 设计高级感 / 小人特色 → 抓图分析，写 `design/FUNCTION-AND-CHARACTER.md`：Duduu 的流水线六步、每件家具的容器 / 动作 / 状态表、高级感四件事、小人三个方向（纸人 / 墨童 / 木偶）与书童的职责；小人概念图提示词等过目
 - 2026-10-30 练习二开工：`studies/kriss/scene.py`（bpy 灰盒加色块：厚楼板大圆边、弧形隔断、楼梯、灯箱、桌椅灯植物与人物占位、摄影棚三盏区域光、4.1 度长焦）+ `render.sh`（Windows Blender 显卡 12 秒一张，自动与 kriss 截图并排）；三版对照图在 tools/out/kriss_study/；家具参考图提示词写在 `studies/kriss/PROMPTS.md` 等过目
 - 2026-10-30 用户定路线「先临摹 kriss 和农场，积累经验和工具，再用到研习录」→ 写 `design/STUDIES.md`：练习一秋日农场（跑通 AI 出模 → 清洗 → 烘焙 → 网页 + 简单动画，五天）、练习二 kriss 的一间房（look-dev 与交互，七天）、练习三回到书房；建 `studies/` 目录 → 等用户定顺序与预算
