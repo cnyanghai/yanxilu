@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: 阶段 2 概念表：资产规范 design/ASSET-SPEC.md 已写（单位网格、槽位类型、尺寸表、交付定义、包目录、角色规格、卡片视口）；角色四视图方案等用户看提示词
-next: 用户看 ASSET-SPEC 第 8 节角色四视图提示词（两张约 0.75 元）→ 出图 → 笔记本一族 → 家具一组图 → 商店首批卡片 → 院子鸟瞰
+stage: 阶段 2 概念表：角色四视图两张已出（concepts/character_turnaround_01/02.jpg），等用户选；资产规范已写
+next: 用户选角色基础身体（建议 02）→ 笔记本一族一张（0.38 元，提示词在 ASSET-SPEC 末尾）→ 家具一组图 → 商店首批卡片 → 院子鸟瞰
 blocked_by: 用户看效果
 updated: 2026-10-30
 ---
@@ -58,6 +58,7 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-10-30 角色四视图：图生图参考 B 两张（0.75 元）存 concepts/character_turnaround_01/02.jpg，建议 02 为基础身体；笔记本一族出图方案写入 ASSET-SPEC
 - 2026-10-30 阶段 1 过门 → 阶段 2：写 design/ASSET-SPEC.md；角色四视图出图方案等用户
 - 2026-10-30 BRIEF 重写为跨包不变 / 随包变两部分，旧决定与未决列清；阶段 1 交付物齐，等用户过门
 - 2026-10-30 材质板：五块手绘风样块（1.88 元）存 concepts/material_board_B.jpg 与 mat_1..5.jpg；观察：墙与封皮色相太近、黄铜过亮，画贴图时修不重出；零件表九件与验收单第 11 条写入 ART-BIBLE

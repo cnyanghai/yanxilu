@@ -94,3 +94,19 @@ world/characters/  基础身体、骨骼、动作剪辑、服装
 > Character turnaround sheet of the same cartoon character as in the reference image: a young adult in a deep ink-teal sweater, charcoal trousers and white sneakers, Pixar-like proportions with the head about one quarter of the body height, big friendly eyes, simple rounded shapes, matte hand-painted skin and fabric with visible brush strokes. Four full-body views side by side on one row: front, left side, back, three-quarter. Neutral A-pose with arms slightly away from the body, feet flat. Plain light-grey background, soft flat lighting, consistent scale across views, no text, no props.
 
 - 中文意思：同一个角色的四视图，墨青毛衣、炭色长裤、白鞋，皮克斯式头身比约一比四，大眼圆润哑光手绘；正、左侧、背、四分之三四个全身视图并排，A 姿势，素底平光，同比例，无文字无道具。
+
+### 第 1 项结果（2026-10-30）
+
+两张：`concepts/character_turnaround_01.jpg`、`character_turnaround_02.jpg`，共 0.75 元。
+
+这两张图用了什么：图生图，参考图主视觉 B 只负责服装与手绘质感，提示词把头身比、A 姿势、四视图、素底平光全部写死，所以两张的差异只剩造型本身，可以直接比。
+
+Claude 的观察：两张都达到了四视图的要求（同比例、同服装、A 姿势、四个角度一致），都能直接送图生三维。01 头更大、眼更大，更像皮克斯，腿略短；02 比例更匀、侧视与四分之三视更一致，更好绑骨。建议 **02** 为基础身体，脸的大眼从 01 取一点。无论哪张，皮肤与毛衣的颜色进三维后按六色色板校正（毛衣 = 墨青，裤 = 炭）。
+
+### 第 2 项的出图方案（等用户点头）：笔记本一族
+
+- 模型：gpt-image-2 中档，3:2，参考图主视觉 B，一张约 0.38 元。
+- 画面：六本笔记本一排立在斜面展示架上，封面六种从色板派生的低饱和色（墨青、本色、赭、炭、灰绿、暖灰），每本一枚小题签在同一位置，布面封皮边缘略磨；前景一本翻开，露出纸页与一行手写的空行；手绘贴图风，素底。
+- 英文提示词：
+
+> Product sheet in the same hand-painted style as the reference image: six cloth-bound notebooks standing in a row on a low slanted oak display rack, covers in six muted colors (deep ink-teal, natural paper beige, rust brown, charcoal, grey-green, warm grey), each with a small brass label plate in the same position near the bottom, slightly worn edges. In the foreground one notebook lies open showing cream paper pages with faint ruled lines. Plain light-grey background, soft flat lighting, visible brush strokes, no text, no other objects.
