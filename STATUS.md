@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: 阶段 1 风格圣经：渲染风格 B、主视觉、色板草稿、三种光三张都有了；待材质样块五张、零件表、BRIEF 重写、验收单定稿
-next: 用户看 ART-BIBLE 第 5 节材质样块方案（五张约 1.9 元）→ 出图 → 零件表 → BRIEF 重写 → 阶段 1 过门
+stage: 阶段 1 风格圣经交付物齐了（渲染风格 B、主视觉、六色、五材质、三种光、九零件、验收单十一条、BRIEF 重写），等用户过门
+next: 用户看 ART-BIBLE 与 BRIEF 说「过」→ 阶段 2 概念表（先出尺寸表与资产规范，再角色四视图）
 blocked_by: 用户看效果
 updated: 2026-10-30
 ---
@@ -57,6 +57,8 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-10-30 BRIEF 重写为跨包不变 / 随包变两部分，旧决定与未决列清；阶段 1 交付物齐，等用户过门
+- 2026-10-30 材质板：五块手绘风样块（1.88 元）存 concepts/material_board_B.jpg 与 mat_1..5.jpg；观察：墙与封皮色相太近、黄铜过亮，画贴图时修不重出；零件表九件与验收单第 11 条写入 ART-BIBLE
 - 2026-10-30 三种光：图生图参考 B 出夜读、雨天（0.75 元）存 concepts/light_night_B.jpg、light_rain_B.jpg；观察：夜读书墙要亮一档，雨天物件固有色只降饱和不改色相；材质样块方案等用户
 - 2026-10-30 用户定 B（手绘贴图）→ 记入 SCOPE / ART-BIBLE / STATUS；PRODUCTION-PLAN 阶段 3 开头改为五天手绘复现验证（三条路并行、门 3.5 分、止损回 A）；从 B 按角色取六色出色卡 concepts/palette_modern_B.png；材质板五种草稿与手绘三规矩；三种光出图方案等用户
 - 2026-10-30 主视觉第二轮：图生图带第一轮 02 参考，A 清爽哑光 / B 手绘贴图各一张（0.75 元）存 concepts/keyart_modern_r2_A/B.jpg；验证 40 度俯角下远墙书墙可读；建议定 A、从 B 搬角色比例与暖色
