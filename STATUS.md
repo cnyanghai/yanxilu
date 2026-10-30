@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: 制作总计划阶段 1 风格圣经（现代书房风格包）：ART-BIBLE 骨架已建，主视觉出图方案等用户看提示词
-next: 用户看 ART-BIBLE 第 1 节的主视觉提示词（gpt-image-2 中档两张约 0.76 元）→ 出图 → 对照墙打分 → 门：用户说「就是这个」
+stage: 阶段 1 风格圣经：现代书房主视觉第一轮两张已出（concepts/keyart_modern_01/02.jpg），等用户选
+next: 用户选主视觉（Claude 推荐 02）或要求第二轮 → 抽材质板与色板 → 三种光 → 零件表
 blocked_by: 用户看效果
 updated: 2026-10-30
 ---
@@ -53,6 +53,7 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-10-30 主视觉第一轮：gpt-image-2 两张（0.75 元）存 concepts/keyart_modern_01/02.jpg，对照墙打分与问题记在 ART-BIBLE 第 1 节，推荐 02；意外收获：笔记本架做成斜面展示架
 - 2026-10-30 用户说「定」，阶段 0 过门 → 进阶段 1：建 `design/ART-BIBLE.md` 骨架（主视觉出图方案、风格包边界、十条验收单、禁止项、材质色板占位），主视觉提示词等用户过目
 - 2026-10-30 用户改范围六处并提出风格包先做 kriss 式 → SCOPE.md 第二稿、PRODUCTION-PLAN 阶段 1 到 6 跟着改（概念图 B 与纸人归第二个包），技术结论：角色走骨骼动画、卡片共用渲染器分区绘制、新集合 items / inventory / placements、风格包定义
 - 2026-10-30 用户指出缺项目领导、产出散点 → 写 `design/PRODUCTION-PLAN.md`（唯一计划：规矩、五阶段表、已有物归位、待办区）和 `design/SCOPE.md`（阶段 0 的一页纸，八个场景三选一，带建议）；STATUS 顶部挂当前阶段；旧文档的下一步全部作废
