@@ -68,6 +68,16 @@ Claude 的对照墙打分（形体 / 材质 / 光 / 密度 / 生命 / 整体感�
 
 > In-game screenshot of a cozy modern study room from a fixed three-quarter top-down game camera at about 40 degrees pitch, long telephoto lens with flattened perspective, no ceiling, the two walls nearest the camera removed, the two far walls fully visible. A stylized Pixar-like cartoon character, young adult, head about one quarter of body height, big friendly eyes, simple rounded shapes, matte skin and fabric, is walking across the room toward a full-height bookshelf wall densely filled with books on the far wall. Also in the room: a low slanted display rack holding six muted-color notebooks with small labels; a pale oak desk with one single card and a slim brass lamp beside a window on the left with soft daylight; a reading armchair with a wall lamp; a sleeping cat in a shelf cubby and one potted plant as collectible items; a soft rug on an oak floor. Materials: warm white matte walls, pale oak wood, deep ink-teal accents, a touch of brass. Soft studio lighting, no harsh shadows, clean and minimal, premium stylized game art render, no UI, no text.
 
+**第二轮结果（2026-10-30）**：`concepts/keyart_modern_r2_A.jpg`（清爽哑光加手绘调味）、`concepts/keyart_modern_r2_B.jpg`（手绘贴图风），共 0.75 元。
+
+这两张图用了什么：gpt-image-2 图生图，参考图是第一轮的 02，所以家具组合、笔记本斜面架、猫窝几乎原样保留，镜头被提示词推高到约 40 度；两张只差最后一句渲染风格的描述，其余全同，是一次受控对照。
+
+Claude 的打分（形体 / 材质 / 光 / 密度 / 生命 / 整体感）：
+- A：4 / 4 / 4 / 4 / 3.5 / 4。干净，和我们流水线能做出来的东西最接近；角色还是偏写实，没到皮克斯式的头身比，这一点阶段 2 单独做角色时修，不靠主视觉。
+- B：4 / 4.5 / 4 / 4 / 4 / 4.5。更暖、更有画意，角色更卡通、眼睛更大；但这是一张画，手绘笔触在实时三维里要有人一张张画贴图，我们复现不了，复现度只有 2 分。
+- 两张共同验证了两件事：40 度俯角下书墙放在远墙上仍然读得出每一本（地方感规矩第 2 条成立）；厚楼板加去掉近墙的剖切在游戏镜头下也成立。
+- 项目经理的建议：**渲染风格定 A，把 B 的两样东西搬过来**：角色的卡通比例（阶段 2 角色四视图用 B 的角色当参考），以及更暖的色彩脚本（色板取色时向 B 的暖调靠）。
+
 中文意思：游戏截图感，固定的三分之一俯视游戏镜头约 40 度、长焦压扁、没天花板、近处两面墙去掉、远处两面墙完整。皮克斯式卡通青年（头约四分之一身高、大眼、圆润、哑光）正走向远墙的整面书墙。房里还有笔记本斜面架、靠左窗的橡木桌上一张牌和黄铜细灯、读书椅配壁灯、格子里的睡猫和一盆植物、橡木地板上的地毯。材质：暖白哑光墙、浅橡木、墨青点缀、一点黄铜。柔和棚光无硬影，干净极简，高级风格化游戏美术渲染，无界面无文字。
 
 ## 2. 风格包的边界（跨包不变 / 随包变）
