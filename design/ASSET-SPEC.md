@@ -148,3 +148,17 @@ Claude 的观察：七件都出来了，造型统一（方块脚、厚板圆边�
 - 英文提示词（动物）：
 
 > Collectible item sheet in the same hand-painted style as the reference image: three small animals in a row, each on a small round oak base, same scale, Pixar-like rounded proportions, calm idle poses: a grey-and-white cat lying curled up, a small shiba inu dog sitting, a tiny round songbird perched on a short wooden peg. Matte hand-painted fur and feathers with visible brush strokes, plain light-grey background, soft flat lighting, no text, nothing else.
+
+### 第 4 项结果（2026-10-30）：商店首批卡片
+
+`concepts/shop_plants.jpg`（龟背竹、无花果、吊绿萝、多肉盘、薄荷）、`concepts/shop_animals.jpg`（卧猫、坐柴犬、小鸟），共 0.75 元。图生图参考 B，每件站圆形橡木底座。
+
+Claude 的观察：风格和家具、笔记本一致，底座正好就是卡片三维视口里的摆法；植物的叶子画得偏细，做三维时按面数表简化成大片圆叶（每盆 1500 面以内）；吊绿萝需要一个"吊挂"位置，归入墙面类型，挂在书墙侧板或窗边；三只动物里柴犬最接近皮克斯比例，猫和鸟做三维时头再大一点向它看齐；动物各配一个待机循环（猫呼吸、犬摇尾、鸟歪头），不做行走。
+
+### 第 5 项的出图方案（等用户点头）：院子鸟瞰
+
+- 模型：gpt-image-2 中档，3:2，参考图主视觉 B，一张约 0.38 元。
+- 画面：在场模式的室外一景，跟随镜头约 40 度俯角、长焦：一块小院子，中间是书房所在的小房子（没有屋顶，从上能看见里面的书墙一角），门口一条石板小路，一棵树下一张长椅（能停的角落），院门和一个黄铜信箱，一小块草地和菜畦（商店植物的室外槽位），角色正从院门走向房子；院子外围淡淡能看到隔壁两块空地（以后邻居的院子）。手绘风，暖色，无文字。
+- 英文提示词：
+
+> In-game screenshot in the same hand-painted style as the reference image, fixed three-quarter top-down game camera at about 40 degrees pitch, long telephoto lens: a small cozy courtyard around a one-room house seen without its roof so a corner of the bookshelf wall inside is visible; a stone-slab path from a low wooden gate to the door, a brass mailbox by the gate, one round-canopy tree with a wooden bench under it, a small lawn and a tiny vegetable bed with a few potted plants, a low fence; the same Pixar-like cartoon character is walking along the path toward the house. Two empty neighboring plots fade softly at the edges. Warm afternoon light, visible brush strokes, painted lighting, no UI, no text.
