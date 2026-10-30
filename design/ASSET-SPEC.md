@@ -162,3 +162,24 @@ Claude 的观察：风格和家具、笔记本一致，底座正好就是卡片�
 - 英文提示词：
 
 > In-game screenshot in the same hand-painted style as the reference image, fixed three-quarter top-down game camera at about 40 degrees pitch, long telephoto lens: a small cozy courtyard around a one-room house seen without its roof so a corner of the bookshelf wall inside is visible; a stone-slab path from a low wooden gate to the door, a brass mailbox by the gate, one round-canopy tree with a wooden bench under it, a small lawn and a tiny vegetable bed with a few potted plants, a low fence; the same Pixar-like cartoon character is walking along the path toward the house. Two empty neighboring plots fade softly at the edges. Warm afternoon light, visible brush strokes, painted lighting, no UI, no text.
+
+### 第 5 项结果（2026-10-30）：院子鸟瞰
+
+`concepts/yard_modern.jpg`，0.38 元。图生图参考 B。
+
+Claude 的观察：没有屋顶的小屋从 40 度俯角能看见书墙、桌、椅、笔记本架和猫，证明在场模式下"室内外同一片地面"成立；图里靠镜头的两面墙是全高的，游戏里要降矮或淡出，这是阶段 3 的遮挡淡出要做的事；院子的色彩脚本是暖黄绿，和室内的暖米白加墨青明显不同，符合地方感第 1 条；树下长椅是院子的"能停的角落"，信箱是以后社交的留言入口，菜畦是商店植物的室外槽位（地面类型），隔壁两块空地留给邻居。三维时：树一棵（3000 面）、长椅、信箱、院门、栅栏段（可重复的套件）、石板路（贴花）、菜畦（地面槽位 2 × 2）。
+
+## 9. 阶段 2 交付物清单（2026-10-30 齐，等过门）
+
+| 项 | 文件 | 花费 |
+|---|---|---|
+| 资产规范与尺寸表 | 本页第 1 到 7 节 | 0 |
+| 角色四视图（定 02） | `concepts/character_turnaround_02.jpg` | 0.75 元 |
+| 笔记本一族与六种封面色 | `concepts/notebooks_family.jpg` | 0.38 元 |
+| 家具一组图 | `concepts/furniture_lineup.jpg` | 0.38 元 |
+| 商店首批卡片 | `concepts/shop_plants.jpg`、`shop_animals.jpg` | 0.75 元 |
+| 院子鸟瞰 | `concepts/yard_modern.jpg` | 0.38 元 |
+
+合计 2.64 元。门：每张对照主视觉 B 四分以上 —— Claude 自评全部 4 分以上（风格一致靠的是同一张参考图加写死的构图描述）；用户看完说"过"。
+
+没做的：角色五个动作示意（走、坐、取书、摸猫、张望）。原因：动作示意对图生三维没有用，三维角色的动作来自动作库，不照图做；省下这笔。若用户想先看角色动起来的样子，阶段 3 用三维直接出。
