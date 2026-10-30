@@ -29,7 +29,19 @@ Claude 的对照墙打分（形体 / 材质 / 光 / 密度 / 生命 / 整体感�
 - 02：4.5 / 4 / 4 / 4 / 4 / 4.5。两面墙的厚度与圆角读得出"一件物品"；桌靠窗、读书椅配壁灯、笔记本架居中、猫在架子下层的窝里，密度与生命都够。推荐 02。
 - 两张共同的问题：和 kriss 比还是"微缩模型"而不是"剖开的房间"，墙再厚一倍、楼板剖切面再明显一点会更像；角色偏写实，阶段 2 要往更简的比例走。
 
-等用户：选一张说"就是这个"进第 5 节抽材质和色板，或说要改什么再出第二轮。
+2026-10-30 视角与操控定为"在场为底，对焦为点"，第一轮的展柜取景不再是目标画面，两张留作材质与家具的参考（02 的家具组合与笔记本斜面架保留）。
+
+**第二轮出图方案**（等用户点头）：
+- 模型：gpt-image-2 中档，3:2，带参考图 `concepts/keyart_modern_02.jpg` 维持材质与家具，两张，约 0.8 元。
+- 变化：取景改成游戏画面，跟随镜头约 40 度俯角、长焦压扁透视、没有天花板、靠镜头的两面墙去掉、远侧两面墙完整可见；角色换成皮克斯式卡通（头约占身高四分之一、大眼、圆润、哑光），正在房中朝书墙走；不画界面、不画文字。
+- 画面里要有：远墙整面书墙、笔记本斜面架、靠左窗的橡木桌与一张牌和黄铜灯、读书椅与壁灯、格子里睡着的猫、一盆植物、橡木地板上一块地毯。
+- 材质色调不变：暖白哑光墙、浅橡木、墨青点缀、一点黄铜。
+
+英文提示词：
+
+> In-game screenshot of a cozy modern study room from a fixed three-quarter top-down game camera at about 40 degrees pitch, long telephoto lens with flattened perspective, no ceiling, the two walls nearest the camera removed, the two far walls fully visible. A stylized Pixar-like cartoon character, young adult, head about one quarter of body height, big friendly eyes, simple rounded shapes, matte skin and fabric, is walking across the room toward a full-height bookshelf wall densely filled with books on the far wall. Also in the room: a low slanted display rack holding six muted-color notebooks with small labels; a pale oak desk with one single card and a slim brass lamp beside a window on the left with soft daylight; a reading armchair with a wall lamp; a sleeping cat in a shelf cubby and one potted plant as collectible items; a soft rug on an oak floor. Materials: warm white matte walls, pale oak wood, deep ink-teal accents, a touch of brass. Soft studio lighting, no harsh shadows, clean and minimal, premium stylized game art render, no UI, no text.
+
+中文意思：游戏截图感，固定的三分之一俯视游戏镜头约 40 度、长焦压扁、没天花板、近处两面墙去掉、远处两面墙完整。皮克斯式卡通青年（头约四分之一身高、大眼、圆润、哑光）正走向远墙的整面书墙。房里还有笔记本斜面架、靠左窗的橡木桌上一张牌和黄铜细灯、读书椅配壁灯、格子里的睡猫和一盆植物、橡木地板上的地毯。材质：暖白哑光墙、浅橡木、墨青点缀、一点黄铜。柔和棚光无硬影，干净极简，高级风格化游戏美术渲染，无界面无文字。
 
 ## 2. 风格包的边界（跨包不变 / 随包变）
 
