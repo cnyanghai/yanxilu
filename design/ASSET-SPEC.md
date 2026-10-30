@@ -128,3 +128,23 @@ Claude 的观察：题签位置、布面磨边、翻开页的纸色都能直接�
 - 英文提示词：
 
 > Furniture lineup sheet in the same hand-painted style as the reference image, all pieces at the same scale in one row, consistent three-quarter view, soft flat lighting, plain light-grey background: a full-height oak bookshelf wall with square cubbies mostly empty with only a few books; a pale oak writing desk; a simple oak desk chair; a deep ink-teal upholstered reading armchair with wooden legs; a low oak display rack with a slanted top and open cubbies below; a slim brass desk lamp; a brass wall lamp with a small ink-teal shade. A plain grey mannequin figure 1.5 meters tall stands beside them for scale. Visible brush strokes, painted lighting, no text, nothing else.
+
+### 第 3 项结果（2026-10-30）：家具一组图
+
+`concepts/furniture_lineup.jpg`，0.38 元。图生图参考 B；七件同比例一排，旁边 1.5 米素模人形。
+
+Claude 的观察：七件都出来了，造型统一（方块脚、厚板圆边、黄铜细杆、墨青布面），每件可以单独裁下来送图生三维；桌椅的座面给了墨青，和读书椅呼应，采纳；书墙在图里是 4 列 6 行约 2 米宽，只作造型参考，三维按尺寸表做 4.2 米宽、格 0.3 米；笔记本架这次有下层格子窝了，以这张为准。
+
+### 第 4 项的出图方案（等用户点头）：商店首批卡片
+
+- 模型：gpt-image-2 中档，3:2，参考图主视觉 B，两张共约 0.75 元：一张植物五种，一张动物三种。
+- 植物五种：龟背竹、无花果小树、垂吊的绿萝、窗台多肉一盘、桌上小盆的薄荷。每盆一个简单陶盆，色从色板取（本色、墨青、炭）。
+- 动物三种：卧着的灰白猫、站着的小柴犬、架上的一只小鸟。都是待机的姿态，皮克斯式圆润比例，手绘风。
+- 每张图里物件排成一排，各站在一块圆形小底座上（卡片三维视口里也是这样放），素底平光，无文字。
+- 英文提示词（植物）：
+
+> Collectible item sheet in the same hand-painted style as the reference image: five potted plants in a row, each on a small round oak base, same scale: a monstera in a natural-beige clay pot, a small fiddle-leaf fig tree in an ink-teal pot, a trailing pothos in a hanging charcoal pot, a shallow tray of mixed succulents, a small mint plant in a tiny pot. Rounded stylized leaves, visible brush strokes, painted lighting, plain light-grey background, soft flat lighting, no text, nothing else.
+
+- 英文提示词（动物）：
+
+> Collectible item sheet in the same hand-painted style as the reference image: three small animals in a row, each on a small round oak base, same scale, Pixar-like rounded proportions, calm idle poses: a grey-and-white cat lying curled up, a small shiba inu dog sitting, a tiny round songbird perched on a short wooden peg. Matte hand-painted fur and feathers with visible brush strokes, plain light-grey background, soft flat lighting, no text, nothing else.

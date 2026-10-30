@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: 阶段 2 概念表：角色基础身体定 02；笔记本一族已出（concepts/notebooks_family.jpg）；家具一组图方案等用户
-next: 用户点头家具一组图（0.38 元，提示词在 ASSET-SPEC 末尾）→ 商店首批卡片 → 院子鸟瞰 → 阶段 2 过门
+stage: 阶段 2 概念表：角色 02、笔记本一族、家具一组图都有了；商店首批卡片（植物五、动物三）方案等用户
+next: 用户点头商店首批卡片两张（0.75 元，提示词在 ASSET-SPEC 末尾）→ 院子鸟瞰 → 阶段 2 过门 → 阶段 3 先做五天手绘复现验证
 blocked_by: 用户看效果
 updated: 2026-10-30
 ---
@@ -59,6 +59,7 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-10-30 家具一组图一张（0.38 元）存 concepts/furniture_lineup.jpg，七件同比例可单独裁切送图生三维；商店首批卡片方案写入 ASSET-SPEC
 - 2026-10-30 角色定 02；笔记本一族一张（0.38 元）存 concepts/notebooks_family.jpg，取六种封面色；家具一组图方案写入 ASSET-SPEC
 - 2026-10-30 角色四视图：图生图参考 B 两张（0.75 元）存 concepts/character_turnaround_01/02.jpg，建议 02 为基础身体；笔记本一族出图方案写入 ASSET-SPEC
 - 2026-10-30 阶段 1 过门 → 阶段 2：写 design/ASSET-SPEC.md；角色四视图出图方案等用户
