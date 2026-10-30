@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: 阶段 2 概念表：角色四视图两张已出（concepts/character_turnaround_01/02.jpg），等用户选；资产规范已写
-next: 用户选角色基础身体（建议 02）→ 笔记本一族一张（0.38 元，提示词在 ASSET-SPEC 末尾）→ 家具一组图 → 商店首批卡片 → 院子鸟瞰
+stage: 阶段 2 概念表：角色基础身体定 02；笔记本一族已出（concepts/notebooks_family.jpg）；家具一组图方案等用户
+next: 用户点头家具一组图（0.38 元，提示词在 ASSET-SPEC 末尾）→ 商店首批卡片 → 院子鸟瞰 → 阶段 2 过门
 blocked_by: 用户看效果
 updated: 2026-10-30
 ---
@@ -28,6 +28,7 @@ updated: 2026-10-30
 
 ## 已定决策
 
+- 2026-10-30 角色基础身体用四视图 02（design/concepts/character_turnaround_02.jpg）—— 用户定
 - 2026-10-30 阶段 1 风格圣经过门 —— 用户说「过」。资产规范（design/ASSET-SPEC.md）：单位 1 米、网格 0.5、原点底面中心正面 -Z、房间 5.2 × 4.2 × 3.0、六种槽位类型、尺寸与面数表、交付六件、包目录、角色身高 1.5 头身比 1 : 4.5 标准人形骨骼 —— Claude 定（技术规矩，可逆）
 - 2026-10-30 渲染风格：手绘贴图风，主视觉定稿 design/concepts/keyart_modern_r2_B.jpg —— 用户定（Claude 建议过清爽哑光 A）。约定：阶段 3 开头五天手绘复现验证，材质与整体感不到 3.5 分则回 A 并保留 B 的角色比例与暖色板
 - 2026-10-30 色板草稿六色（ART-BIBLE 第 5 节）：暖米白 #f3ddb9、橡木 #987755、墨青 #182121、黄铜 #dfaa6d、本色 #e5c08e、炭 #3f2814 —— Claude 从 B 取色，阶段 2 前可微调
@@ -58,6 +59,7 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-10-30 角色定 02；笔记本一族一张（0.38 元）存 concepts/notebooks_family.jpg，取六种封面色；家具一组图方案写入 ASSET-SPEC
 - 2026-10-30 角色四视图：图生图参考 B 两张（0.75 元）存 concepts/character_turnaround_01/02.jpg，建议 02 为基础身体；笔记本一族出图方案写入 ASSET-SPEC
 - 2026-10-30 阶段 1 过门 → 阶段 2：写 design/ASSET-SPEC.md；角色四视图出图方案等用户
 - 2026-10-30 BRIEF 重写为跨包不变 / 随包变两部分，旧决定与未决列清；阶段 1 交付物齐，等用户过门

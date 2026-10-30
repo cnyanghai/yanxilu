@@ -110,3 +110,21 @@ Claude 的观察：两张都达到了四视图的要求（同比例、同服装�
 - 英文提示词：
 
 > Product sheet in the same hand-painted style as the reference image: six cloth-bound notebooks standing in a row on a low slanted oak display rack, covers in six muted colors (deep ink-teal, natural paper beige, rust brown, charcoal, grey-green, warm grey), each with a small brass label plate in the same position near the bottom, slightly worn edges. In the foreground one notebook lies open showing cream paper pages with faint ruled lines. Plain light-grey background, soft flat lighting, visible brush strokes, no text, no other objects.
+
+### 第 1 项定稿（2026-10-30）：角色基础身体用 **02**（`concepts/character_turnaround_02.jpg`），脸的大眼从 01 取一点 —— 用户定。
+
+### 第 2 项结果（2026-10-30）：笔记本一族
+
+`concepts/notebooks_family.jpg`，0.38 元。图生图参考 B，提示词写死六色、题签同位、前景一本翻开。
+
+六种封面色（从图里取，作为笔记本的默认可选色，都在六色色板的明度档内）：墨青 #37423f、本色 #af8e69、赭 #804928、炭 #3b3936、灰绿 #666253、暖灰 #846e5a。
+
+Claude 的观察：题签位置、布面磨边、翻开页的纸色都能直接用；斜面架在这张里没画下层格子窝，以家具一组图为准；笔记本的三维只做一个几何（0.18 × 0.02 × 0.25），封面色与题签走程序化贴图。
+
+### 第 3 项的出图方案（等用户点头）：家具一组图
+
+- 模型：gpt-image-2 中档，3:2，参考图主视觉 B，一张约 0.38 元。
+- 画面：七件固定槽家具一排，同一张图、同一比例、同一四分之三视角：整面书墙（大部分格子空着，只放几本书，为看清结构）、案桌、桌椅、墨青读书椅、带下层格子窝的斜面笔记本架、黄铜台灯、黄铜壁灯；旁边站一个 1.5 米高的灰色素模人形当比例尺；素底平光，手绘风，无文字。
+- 英文提示词：
+
+> Furniture lineup sheet in the same hand-painted style as the reference image, all pieces at the same scale in one row, consistent three-quarter view, soft flat lighting, plain light-grey background: a full-height oak bookshelf wall with square cubbies mostly empty with only a few books; a pale oak writing desk; a simple oak desk chair; a deep ink-teal upholstered reading armchair with wooden legs; a low oak display rack with a slanted top and open cubbies below; a slim brass desk lamp; a brass wall lamp with a small ink-teal shade. A plain grey mannequin figure 1.5 meters tall stands beside them for scale. Visible brush strokes, painted lighting, no text, nothing else.
