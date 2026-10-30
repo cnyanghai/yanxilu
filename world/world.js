@@ -345,6 +345,9 @@ function applyLight(dt) {
   return true;
 }
 
+/* 工坊面板的开关（design/HOW-WE-DECIDE.md 第 7 节：技术也要看得见） */
+const DEV = { wire: false, unbaked: false, wide: false, hot: false, atlas: false, still: false };
+
 /* ============ 8. 镜头：长焦、在房外；三层：机位 → 呼吸 → 视差 ============ */
 const SHOTS = {};
 for (const k in cfg.shots) SHOTS[k] = cfg.shots[k];
@@ -395,12 +398,13 @@ function stepCamera(dt, t) {
   /* 竖屏：镜头再靠近一点，视场角按宽高比补 */
   const a = innerWidth / innerHeight;
   if (a < 1) offset.multiplyScalar(0.84);
+  if (DEV.wide) offset.multiplyScalar(0.16);   /* 工坊：广角对比 —— 同一个焦点，镜头凑近、视角放宽 */
   camera.position.copy(rig.at).add(offset);
   camera.quaternion.copy(lookQuat(camera.position, rig.at));
   /* 待机呼吸：几乎看不见 */
-  if (!reduceMotion) { camera.rotateX(Math.sin(t * 0.7) * 0.0006); camera.rotateY(Math.sin(t * 1.0) * 0.0006); }
+  if (!reduceMotion && !DEV.still) { camera.rotateX(Math.sin(t * 0.7) * 0.0006); camera.rotateY(Math.sin(t * 1.0) * 0.0006); }
   const fovAdjust = a < 1.1 ? THREE.MathUtils.mapLinear(Math.max(0.5, Math.min(1.1, a)), 1.1, 0.5, 0, 3.0) : 0;
-  const f = rig.fov + camFovExtra + fovAdjust;
+  const f = DEV.wide ? 45 : rig.fov + camFovExtra + fovAdjust;
   if (Math.abs(camera.fov - f) > 0.005) { camera.fov = f; camera.updateProjectionMatrix(); }
   /* near / far 跟着距离走（长焦下深度精度要留给房子） */
   const dist = camera.position.distanceTo(rig.at), near = Math.max(0.2, dist - 25), farP = dist + 60;
@@ -474,7 +478,37 @@ function frame() {
   if (!reduceMotion) for (const o of plant.children) if (o.userData.sway) { o.rotation.z = Math.sin(t * 0.9) * 0.018; o.rotation.x = Math.sin(t * 0.7 + 1.3) * 0.012; }
   if (hover && tagEl.classList.contains("on")) { const v = hover.point.clone().project(camera); tagEl.style.transform = `translate(${(v.x + 1) / 2 * innerWidth}px, ${(1 - v.y) / 2 * innerHeight}px) translate(-50%, -130%)`; }
   renderer.render(scene, camera);
+  devStats();
   requestAnimationFrame(frame);
+}
+
+/* ============ 11b. 工坊：把技术做成开关 ============ */
+const devEl = document.getElementById("dev"), devSt = document.getElementById("devst"), devAtlas = document.getElementById("devatlas");
+const flatMat = new THREE.MeshLambertMaterial({ color: 0xC9BFAE });
+const shellMeshes = () => house.children.filter((o) => o.isMesh && (o.name === "shell" || o.name === "furn"));
+let fpsAcc = 0, fpsN = 0, fpsShown = 0, fpsAt = performance.now();
+function devToggle(k) {
+  DEV[k] = !DEV[k];
+  document.querySelectorAll("[data-dev]").forEach((b) => b.setAttribute("aria-pressed", String(!!DEV[b.dataset.dev])));
+  if (k === "wire") { for (const g in shellMats) shellMats[g].wireframe = DEV.wire; flatMat.wireframe = DEV.wire; house.traverse((o) => { if (o.isMesh && o.material && o.material.isMeshLambertMaterial) o.material.wireframe = DEV.wire; }); }
+  if (k === "unbaked") { for (const m of shellMeshes()) m.material = DEV.unbaked ? flatMat : shellMats[m.name]; hemi.intensity = DEV.unbaked ? 1.3 : LIGHTS[lightTarget].hemi[2]; }
+  if (k === "hot") for (const o of hot) { if (!o.isInstancedMesh) { o.material.visible = DEV.hot; o.material.wireframe = true; o.material.color = new THREE.Color(0xF3D98A); } }
+  if (k === "atlas") {
+    devAtlas.classList.toggle("on", DEV.atlas); devAtlas.innerHTML = "";
+    if (DEV.atlas) {
+      for (const g of ["shell", "furn"]) { const img = document.createElement("img"); img.src = "./assets/" + cfg.textures[lightTarget + "_" + g]; const sm = document.createElement("small"); sm.textContent = `烘焙贴图 · ${lightTarget} · ${g}（${cfg.atlas[g]} 像素见方，墙地桌架各占一块）`; devAtlas.append(sm, img); }
+      const bm = booksGroup.userData.mesh.material.map.image; if (bm) { const c = document.createElement("canvas"); c.width = bm.width; c.height = bm.height; c.getContext("2d").drawImage(bm, 0, 0); const sm = document.createElement("small"); sm.textContent = `书脊贴图集（${bm.width} × ${bm.height}，一本一条，着色器按编号取）`; devAtlas.append(sm, c); }
+    }
+  }
+}
+document.querySelectorAll("[data-dev]").forEach((b) => b.addEventListener("click", () => devToggle(b.dataset.dev)));
+addEventListener("keydown", (e) => { if (e.key === "`" && !e.ctrlKey && !e.metaKey) { devEl.hidden = !devEl.hidden; } });
+if (/[?&]dev=1/.test(location.search)) devEl.hidden = false;
+function devStats() {
+  if (devEl.hidden) return;
+  const now = performance.now(); fpsN++; if (now - fpsAt > 500) { fpsShown = Math.round(fpsN * 1000 / (now - fpsAt)); fpsN = 0; fpsAt = now; }
+  const i = renderer.info.render, dist = camera.position.distanceTo(rig.at);
+  devSt.innerHTML = [["帧率", fpsShown], ["draw call", i.calls], ["三角面", i.triangles.toLocaleString()], ["视场角", camera.fov.toFixed(1) + "°" + (DEV.wide ? "（对比：45°）" : "")], ["镜头距离", dist.toFixed(1) + " m"], ["景别", route], ["光", lightTarget + (lightT < 1 ? `（淡接 ${Math.round(lightT * 100)}%）` : "")], ["画布", renderer.domElement.width + " × " + renderer.domElement.height]].map(([k, v]) => `<b>${k}</b><span>${v}</span>`).join("");
 }
 
 /* ============ 12. 开场 ============ */
@@ -490,6 +524,6 @@ function frame() {
   /* 另外两套贴图在空闲时预载 */
   const idle = window.requestIdleCallback || ((f) => setTimeout(f, 1500));
   idle(() => { for (const l of cfg.lights) for (const g of ["shell", "furn"]) bakedTex(l, g); });
-  window.__yxlWorld = { renderer, scene, camera, go, route: () => route, setLight, info: () => renderer.info.render, hot, settled: () => rig.t >= 1 && lightT >= 1 };
+  window.__yxlWorld = { renderer, scene, camera, go, route: () => route, setLight, info: () => renderer.info.render, hot, settled: () => rig.t >= 1 && lightT >= 1, dev: devToggle, DEV };
   frame();
 }

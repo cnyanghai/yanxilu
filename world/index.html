@@ -81,6 +81,22 @@ body[data-light="day"] .tag{text-shadow:0 1px 0 #fff} body[data-light="day"] .ta
 .hint{position:fixed;left:50%;bottom:calc(66px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);font-size:13px;letter-spacing:.08em;color:rgba(237,224,196,.7);white-space:nowrap;pointer-events:none;transition:opacity .4s}
 .hint.off{opacity:0}
 
+/* 工坊：看得见的技术。按反引号键 ` 或地址加 ?dev=1 打开 */
+.dev{position:fixed;right:max(12px,env(safe-area-inset-right,0px));top:calc(60px + env(safe-area-inset-top,0px));width:min(320px,calc(100vw - 24px));max-height:calc(100vh - 90px);overflow:auto;padding:10px 12px;border-radius:12px;background:rgba(23,17,12,.86);color:#EDE0C4;font-family:var(--f-num),var(--f-kai);font-size:13px;line-height:1.5;box-shadow:0 10px 30px rgba(0,0,0,.45),inset 0 0 0 1px rgba(201,160,90,.3);backdrop-filter:blur(8px);z-index:5}
+.dev[hidden]{display:none}
+.dev h4{margin:0 0 6px;font:14px var(--f-kai);letter-spacing:.12em;color:var(--brass-hi)}
+.dev .st{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;margin-bottom:8px}
+.dev .st b{font-weight:400;color:rgba(237,224,196,.6)}
+.dev .tg{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.dev .tg button{appearance:none;border:0;border-radius:8px;padding:4px 9px;background:rgba(237,224,196,.12);color:inherit;font:12px var(--f-kai);cursor:pointer}
+.dev .tg button[aria-pressed="true"]{background:var(--brass);color:#2A1408}
+.dev .atlas{display:none;flex-direction:column;gap:6px}
+.dev .atlas.on{display:flex}
+.dev .atlas img,.dev .atlas canvas{width:100%;border-radius:6px;background:#000}
+.dev .atlas small{color:rgba(237,224,196,.6)}
+.dev p{margin:6px 0 0;color:rgba(237,224,196,.6);font-family:var(--f-kai);font-size:12px}
+.dev a{color:var(--brass-hi)}
+
 /* WebGL 开不了时的退路：回版本 1 */
 .fallback{position:fixed;inset:0;display:none;place-items:center;text-align:center;padding:24px;line-height:1.9}
 .fallback a{color:var(--brass-hi)} .fallback code{font-family:var(--f-num)}
@@ -104,6 +120,20 @@ body.nogl #gl,body.nogl .panel,body.nogl .crumb,body.nogl .hint{display:none}
   <span class="sep"></span>
   <button type="button" class="brass" id="grow" title="假装读了一周">长一周</button>
 </div>
+<aside class="dev" id="dev" hidden aria-label="工坊">
+  <h4>工坊 · 看得见的技术</h4>
+  <div class="st" id="devst"></div>
+  <div class="tg">
+    <button type="button" data-dev="wire" aria-pressed="false">线框</button>
+    <button type="button" data-dev="unbaked" aria-pressed="false">关烘焙</button>
+    <button type="button" data-dev="wide" aria-pressed="false">广角对比</button>
+    <button type="button" data-dev="hot" aria-pressed="false">显示热点</button>
+    <button type="button" data-dev="atlas" aria-pressed="false">看贴图集</button>
+    <button type="button" data-dev="still" aria-pressed="false">停呼吸</button>
+  </div>
+  <div class="atlas" id="devatlas"></div>
+  <p>每个开关对应一张技术卡：<a href="https://github.com/cnyanghai/yanxilu/blob/main/design/TECH-NOTES.md" target="_blank" rel="noopener">design/TECH-NOTES.md</a>。按 ` 关闭。</p>
+</aside>
 <div class="fallback"><div>这台设备开不了 WebGL。<br><a href="../">回到研习录的平面版</a></div></div>
 <script type="module" src="./world.js"></script>
 </body>
