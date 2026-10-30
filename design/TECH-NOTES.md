@@ -75,3 +75,19 @@
 - **在哪能看见**：`sample.js` 里改一本书的状态为"在读"，它就抽出半截；点"长一周"，文竹多长一层叶。
 - **换个做法会怎样**：原神尘歌壶式的自由摆放，要实时光、要碰撞系统，还会把研习录变成装修游戏。
 - **想深究**：`design/MASTER-PLAN.md` 第 2 节、`design/KRISS-ANALYSIS.md` 第 10.2 节。
+
+## 十、图生三维（Rodin，经 fal）
+
+- 是什么：一张参考图进去，一个带贴图的 glb 出来；Shaded 材质把明暗画进颜色贴图，正合手绘风。
+- 为什么：没有三维美术，家具和商店物件靠它一件件出；0.4 美元一件，一分钟。
+- 在哪能看见：`/world` 工坊面板「验证椅子」；脚本 `tools/fal_image3d.py`。
+- 换个做法会怎样：手工建模一件要半天；CC0 套件风格不对。
+- 想深究看什么：fal 的 Rodin 接口页；gltf-transform 的 simplify / weld 减面。
+
+## 十一、贴图风格化与屏幕空间画风后期
+
+- 是什么：两种给画面加"笔触感"的办法。贴图空间：把烘焙贴图过 Kuwahara 滤镜或图生图（`tools/paint_texture.py`、assets/paint*）。屏幕空间：先把场景画到离屏图，再用 Kuwahara 着色器加暖调纸纹画到屏幕（world.js 的 renderPost）。
+- 为什么：手绘贴图风定了，要知道程序能补多少、美术要画多少。第一天验证的结论：灰盒上两者都无米可炊，要先有颜色和形体。
+- 在哪能看见：工坊面板「画风贴图·滤镜」「画风贴图·图生图」「画风后期」三个开关；`tools/tests/paint_verify.py` 出对照墙。
+- 换个做法会怎样：不做后期，全靠贴图，手机更省；后期开着每帧多一次全屏 64 次采样。
+- 想深究看什么：Kuwahara filter、Kyprianidis 的各向异性 Kuwahara；three.js 的 WebGLRenderTarget 与 tonemapping 顺序（渲到离屏图时不做色调映射，最后一遍才做）。

@@ -346,7 +346,7 @@ function applyLight(dt) {
 }
 
 /* 工坊面板的开关（design/HOW-WE-DECIDE.md 第 7 节：技术也要看得见） */
-const DEV = { wire: false, unbaked: false, wide: false, hot: false, atlas: false, still: false };
+const DEV = { wire: false, unbaked: false, wide: false, hot: false, atlas: false, still: false, paint: false, paintai: false, post: false, chair: false };
 
 /* ============ 8. 镜头：长焦、在房外；三层：机位 → 呼吸 → 视差 ============ */
 const SHOTS = {};
@@ -477,9 +477,79 @@ function frame() {
   if (performance.now() - wheelAt > 400) wheelAcc *= 0.9;
   if (!reduceMotion) for (const o of plant.children) if (o.userData.sway) { o.rotation.z = Math.sin(t * 0.9) * 0.018; o.rotation.x = Math.sin(t * 0.7 + 1.3) * 0.012; }
   if (hover && tagEl.classList.contains("on")) { const v = hover.point.clone().project(camera); tagEl.style.transform = `translate(${(v.x + 1) / 2 * innerWidth}px, ${(1 - v.y) / 2 * innerHeight}px) translate(-50%, -130%)`; }
-  renderer.render(scene, camera);
+  if (DEV.post) renderPost(); else renderer.render(scene, camera);
   devStats();
   requestAnimationFrame(frame);
+}
+
+/* ============ 11a. 手绘复现验证（design/PRODUCTION-PLAN.md 阶段 3 开头）：三条路各一个开关 ============ */
+/* 路②：换成风格化过的烘焙贴图（tools/paint_texture.py 的滤镜版在 assets/paint/，图生图版在 assets/paint_ai/） */
+const ALT_TEX = { paint: ["shell", "furn"], paint_ai: ["shell"] };
+function altTex(dir, g) {
+  const key = dir + "/" + g;
+  if (!texCache[key]) {
+    const t = texLoader.load(`./assets/${dir}/${cfg.textures["day_" + g]}`);
+    t.colorSpace = THREE.SRGBColorSpace; t.flipY = false; t.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+    texCache[key] = t;
+  }
+  return texCache[key];
+}
+function applyAltTex() {
+  const dir = DEV.paintai ? "paint_ai" : DEV.paint ? "paint" : null;
+  for (const g in shellMats) {
+    const m = shellMats[g];
+    const t = dir && ALT_TEX[dir].includes(g) ? altTex(dir, g) : (dir === "paint_ai" && ALT_TEX.paint.includes(g) ? altTex("paint", g) : bakedTex(lightTarget, g));
+    m.uniforms.mapA.value = t; m.uniforms.mapB.value = t; m.uniforms.uMix.value = 0;
+  }
+}
+/* 路③：屏幕空间画风后期。先把场景画进一张离屏图，再用 Kuwahara 滤镜（四个象限取方差最小的均值：平处更平、边缘保持）
+   加一点暖调和纸纹画到屏幕。色调映射和色彩空间转换挪到这一步做。 */
+const post = { rt: null, scene: new THREE.Scene(), cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1) };
+post.mat = new THREE.ShaderMaterial({
+  uniforms: { tDiffuse: { value: null }, uTexel: { value: new THREE.Vector2() }, uWarm: { value: 0.05 }, uGrain: { value: 0.035 } },
+  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
+  fragmentShader: `uniform sampler2D tDiffuse; uniform vec2 uTexel; uniform float uWarm, uGrain; varying vec2 vUv;
+    const int R = 3;
+    void main(){
+      vec3 m0 = vec3(0.), m1 = vec3(0.), m2 = vec3(0.), m3 = vec3(0.), s0 = vec3(0.), s1 = vec3(0.), s2 = vec3(0.), s3 = vec3(0.);
+      for (int j = 0; j <= R; j++) for (int i = 0; i <= R; i++) {
+        vec2 o = vec2(float(i), float(j)) * uTexel;
+        vec3 a = texture2D(tDiffuse, vUv + vec2(-o.x, -o.y)).rgb; m0 += a; s0 += a * a;
+        vec3 b = texture2D(tDiffuse, vUv + vec2( o.x, -o.y)).rgb; m1 += b; s1 += b * b;
+        vec3 c = texture2D(tDiffuse, vUv + vec2( o.x,  o.y)).rgb; m2 += c; s2 += c * c;
+        vec3 d = texture2D(tDiffuse, vUv + vec2(-o.x,  o.y)).rgb; m3 += d; s3 += d * d;
+      }
+      float n = float((R + 1) * (R + 1));
+      vec3 col = m0 / n; vec3 v = s0 / n - col * col; float best = v.r + v.g + v.b;
+      vec3 mm = m1 / n; v = s1 / n - mm * mm; float sv = v.r + v.g + v.b; if (sv < best) { best = sv; col = mm; }
+      mm = m2 / n; v = s2 / n - mm * mm; sv = v.r + v.g + v.b; if (sv < best) { best = sv; col = mm; }
+      mm = m3 / n; v = s3 / n - mm * mm; sv = v.r + v.g + v.b; if (sv < best) { best = sv; col = mm; }
+      col *= vec3(1.0 + uWarm, 1.0, 1.0 - uWarm);
+      float g = fract(sin(dot(vUv * vec2(1234.5, 789.1), vec2(12.9898, 78.233))) * 43758.5453);
+      col += (g - 0.5) * uGrain * (col + 0.2);
+      gl_FragColor = vec4(max(col, 0.0), 1.0);
+      #include <tonemapping_fragment>
+      #include <colorspace_fragment>
+    }`,
+});
+post.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), post.mat));
+function renderPost() {
+  const w = renderer.domElement.width, h = renderer.domElement.height;
+  if (!post.rt || post.rt.width !== w || post.rt.height !== h) { if (post.rt) post.rt.dispose(); post.rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples: 4 }); }
+  renderer.setRenderTarget(post.rt); renderer.render(scene, camera); renderer.setRenderTarget(null);
+  post.mat.uniforms.tDiffuse.value = post.rt.texture; post.mat.uniforms.uTexel.value.set(1 / w, 1 / h);
+  renderer.render(post.scene, post.cam);
+}
+/* 路①：图生三维出来的读书椅（tools/fal_image3d.py → assets/verify/chair.glb，不入库），Shaded 材质当无光照用 */
+let chairObj = null;
+async function loadChair() {
+  if (chairObj) return chairObj;
+  const gltf = await new GLTFLoader().loadAsync("./assets/verify/chair.glb");
+  const o = gltf.scene; const box = new THREE.Box3().setFromObject(o); const size = box.getSize(new THREE.Vector3());
+  const s = 0.9 / size.y; o.scale.setScalar(s); box.setFromObject(o);
+  o.position.set(1.7 - (box.min.x + box.max.x) / 2, -box.min.y, 0.5 - (box.min.z + box.max.z) / 2);
+  o.traverse((m) => { if (m.isMesh) { const map = m.material.map || null; m.material = new THREE.MeshBasicMaterial({ map, color: map ? 0xffffff : 0x244040 }); if (map) map.colorSpace = THREE.SRGBColorSpace; } });
+  o.name = "verify-chair"; house.add(o); chairObj = o; return o;
 }
 
 /* ============ 11b. 工坊：把技术做成开关 ============ */
@@ -492,6 +562,8 @@ function devToggle(k) {
   document.querySelectorAll("[data-dev]").forEach((b) => b.setAttribute("aria-pressed", String(!!DEV[b.dataset.dev])));
   if (k === "wire") { for (const g in shellMats) shellMats[g].wireframe = DEV.wire; flatMat.wireframe = DEV.wire; house.traverse((o) => { if (o.isMesh && o.material && o.material.isMeshLambertMaterial) o.material.wireframe = DEV.wire; }); }
   if (k === "unbaked") { for (const m of shellMeshes()) m.material = DEV.unbaked ? flatMat : shellMats[m.name]; hemi.intensity = DEV.unbaked ? 1.3 : LIGHTS[lightTarget].hemi[2]; }
+  if (k === "paint" || k === "paintai") { if (k === "paint" && DEV.paint) DEV.paintai = false; if (k === "paintai" && DEV.paintai) DEV.paint = false; document.querySelectorAll("[data-dev]").forEach((b) => b.setAttribute("aria-pressed", String(!!DEV[b.dataset.dev]))); applyAltTex(); }
+  if (k === "chair") { loadChair().then((o) => { o.visible = DEV.chair; }).catch((e) => console.warn("验证椅子没加载到", e)); }
   if (k === "hot") for (const o of hot) { if (!o.isInstancedMesh) { o.material.visible = DEV.hot; o.material.wireframe = true; o.material.color = new THREE.Color(0xF3D98A); } }
   if (k === "atlas") {
     devAtlas.classList.toggle("on", DEV.atlas); devAtlas.innerHTML = "";
