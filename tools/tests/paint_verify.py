@@ -21,7 +21,6 @@ STEPS_DAY2 = [
     ("d2_base", "第 2 天：壳按色板上色重烘", []),
     ("d2_rodin", "重烘 + Rodin 五件家具", ["rodin"]),
     ("d2_rodin_post", "重烘 + Rodin + 路③后期", ["rodin", "post"]),
-    ("d2_rodin_ai", "重烘 + Rodin + 图生图贴图", ["rodin", "paintai"]),
 ]
 if len(sys.argv) > 2 and sys.argv[2] == "day2": STEPS = STEPS_DAY2; SHEET = "compare_day2.jpg"
 else: SHEET = "compare_day1.jpg"

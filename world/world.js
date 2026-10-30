@@ -483,7 +483,8 @@ function frame() {
 }
 
 /* ============ 11a. 手绘复现验证（design/PRODUCTION-PLAN.md 阶段 3 开头）：三条路各一个开关 ============ */
-/* 路②：换成风格化过的烘焙贴图（tools/paint_texture.py 的滤镜版在 assets/paint/，图生图版在 assets/paint_ai/） */
+/* 路②：换成风格化过的烘焙贴图（tools/paint_texture.py 的滤镜版在 assets/paint/）。
+   图生图版（assets/paint_ai/）第二天验证后排除：墙地变成斑驳墙纸；开关 paintai 保留但默认没有文件。 */
 const ALT_TEX = { paint: ["shell", "furn"], paint_ai: ["shell"] };
 function altTex(dir, g) {
   const key = dir + "/" + g;
