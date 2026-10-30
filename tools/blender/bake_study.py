@@ -64,8 +64,13 @@ for light in LIGHTS_WANTED:
                 nodes = m.node_tree.nodes
                 n = nodes.get("BAKE") or nodes.new("ShaderNodeTexImage"); n.name = "BAKE"; n.image = img; nodes.active = n
         select(G[g])
+        # 烘壳的时候把灰盒家具从渲染里拿掉：家具以后由图生三维的模型替换，墙上不能留它们的黑影（2026-10-30）
+        if g == "shell":
+            for o in G["furn"]: o.hide_render = True
         t1 = time.time()
         bpy.ops.object.bake(type="COMBINED", margin=10, use_clear=True)
+        if g == "shell":
+            for o in G["furn"]: o.hide_render = False
         fn = os.path.join(OUT, f"study_{light}_{g}.jpg")
         img.save_render(fn)
         images[(light, g)] = fn

@@ -41,12 +41,34 @@ LIGHTS = {
 G = {"shell": [], "furn": [], "items": [], "bakeonly": []}
 M = {}
 
-def mat(name, rgb, rough=0.85, metal=0.0, emit=None, emit_strength=0.0, alpha=1.0):
+def srgb(hex_):
+    """色板的十六进制（sRGB）转 Blender 要的线性值。色板见 design/ART-BIBLE.md 第 5 节。"""
+    h = hex_.lstrip("#"); out = []
+    for i in (0, 2, 4):
+        c = int(h[i:i + 2], 16) / 255
+        out.append(c / 12.92 if c <= 0.04045 else ((c + 0.055) / 1.055) ** 2.4)
+    return tuple(out)
+
+def mat(name, rgb, rough=0.85, metal=0.0, emit=None, emit_strength=0.0, alpha=1.0, grain=None):
+    """grain=("noise", 量) 给灰泥 / 布 / 纸一点手绘色斑；grain=("wave", 量) 给木头画出木纹。都是烘进贴图的，运行时没有代价。"""
     m = bpy.data.materials.new(name); m.use_nodes = True
-    b = m.node_tree.nodes["Principled BSDF"]
+    nt = m.node_tree; b = nt.nodes["Principled BSDF"]
     b.inputs["Base Color"].default_value = (*rgb, 1); b.inputs["Roughness"].default_value = rough; b.inputs["Metallic"].default_value = metal
     if emit is not None: b.inputs["Emission Color"].default_value = (*emit, 1); b.inputs["Emission Strength"].default_value = emit_strength
     if alpha < 1: b.inputs["Alpha"].default_value = alpha; m.blend_method = "BLEND"
+    if grain:
+        kind, amt = grain
+        coord = nt.nodes.new("ShaderNodeTexCoord")
+        if kind == "wave":
+            tex = nt.nodes.new("ShaderNodeTexWave"); tex.inputs["Scale"].default_value = 6.0; tex.inputs["Distortion"].default_value = 7.0; tex.inputs["Detail"].default_value = 1.5; tex.inputs["Detail Scale"].default_value = 0.6
+            nt.links.new(coord.outputs["Object"], tex.inputs["Vector"]); fac = tex.outputs["Fac"]
+        else:
+            tex = nt.nodes.new("ShaderNodeTexNoise"); tex.inputs["Scale"].default_value = 18.0; tex.inputs["Detail"].default_value = 2.0; tex.inputs["Roughness"].default_value = 0.45
+            nt.links.new(coord.outputs["Object"], tex.inputs["Vector"]); fac = tex.outputs["Fac"]
+        mix = nt.nodes.new("ShaderNodeMix"); mix.data_type = "RGBA"; mix.blend_type = "MULTIPLY"; mix.inputs["Factor"].default_value = amt
+        mix.inputs[6].default_value = (*rgb, 1)
+        ramp = nt.nodes.new("ShaderNodeValToRGB"); ramp.color_ramp.elements[0].color = (0.72, 0.72, 0.72, 1); ramp.color_ramp.elements[1].color = (1.08, 1.08, 1.08, 1)
+        nt.links.new(fac, ramp.inputs["Fac"]); nt.links.new(ramp.outputs["Color"], mix.inputs[7]); nt.links.new(mix.outputs[2], b.inputs["Base Color"])
     return m
 
 def finish(ob, m, bevel, group, smooth=True):
@@ -77,11 +99,12 @@ def build(with_items=True):
     bpy.ops.wm.read_factory_settings(use_empty=True)
     for k in G: G[k].clear()
     M.update({
-        "paper": mat("paper", (0.92, 0.89, 0.83)), "paper2": mat("paper2", (0.86, 0.81, 0.70)), "paper3": mat("paper3", (0.80, 0.74, 0.64)),
-        "floor": mat("floor", (0.72, 0.58, 0.42)), "wood": mat("wood", (0.55, 0.40, 0.27)), "wood2": mat("wood2", (0.30, 0.20, 0.13)),
-        "ink": mat("ink", (0.09, 0.07, 0.06), 0.55), "brass": mat("brass", (0.78, 0.62, 0.36), 0.35, 0.9), "shade": mat("shade", (0.17, 0.33, 0.28), 0.6),
-        "clay": mat("clay", (0.62, 0.38, 0.25)), "leaf": mat("leaf", (0.40, 0.58, 0.34)), "stem": mat("stem", (0.30, 0.45, 0.25)), "card": mat("card", (0.36, 0.18, 0.42)),
-        "kraft": mat("kraft", (0.73, 0.60, 0.40)), "stone": mat("stone", (0.62, 0.60, 0.55)), "stone2": mat("stone2", (0.55, 0.53, 0.49)), "ground": mat("ground", (0.47, 0.45, 0.41)),
+        # 2026-10-30 起按现代书房包的色板（ART-BIBLE 第 5 节）：墙暖米白、木橡木、点缀墨青、金属黄铜、纸本色、深色炭
+        "paper": mat("paper", srgb("#f3ddb9"), 0.95, grain=("noise", 0.35)), "paper2": mat("paper2", srgb("#e5c08e"), 0.9, grain=("noise", 0.3)), "paper3": mat("paper3", srgb("#d9c39b"), 0.9),
+        "floor": mat("floor", srgb("#a8845e"), 0.7, grain=("wave", 0.45)), "wood": mat("wood", srgb("#987755"), 0.7, grain=("wave", 0.4)), "wood2": mat("wood2", srgb("#6b4a30"), 0.7, grain=("wave", 0.35)),
+        "ink": mat("ink", srgb("#3f2814"), 0.55), "brass": mat("brass", srgb("#dfaa6d"), 0.35, 0.9), "shade": mat("shade", srgb("#2b4a4a"), 0.75, grain=("noise", 0.25)),
+        "clay": mat("clay", srgb("#b58a66"), 0.85), "leaf": mat("leaf", (0.40, 0.58, 0.34)), "stem": mat("stem", (0.30, 0.45, 0.25)), "card": mat("card", srgb("#2b4a4a")),
+        "kraft": mat("kraft", srgb("#c9a070"), 0.9), "stone": mat("stone", srgb("#b9ad98"), 0.9, grain=("noise", 0.3)), "stone2": mat("stone2", srgb("#a89d8a"), 0.9, grain=("noise", 0.3)), "ground": mat("ground", srgb("#8d9468"), 0.95, grain=("noise", 0.4)),
         "glass": mat("glass", (0.96, 0.95, 0.90), 0.2, alpha=0.12), "bulb": mat("bulb", (1.0, 0.9, 0.7), 0.5, emit=(1.0, 0.82, 0.55)), "moon": mat("moon", (0.9, 0.93, 1.0), 0.5, emit=(0.75, 0.82, 1.0)),
     })
     DOMAIN = [mat("d_geo", (0.45, 0.18, 0.17)), mat("d_cfa", (0.17, 0.24, 0.40)), mat("d_firm", (0.12, 0.40, 0.39)), mat("d_cycle", (0.74, 0.38, 0.12)), mat("d_comm", (0.34, 0.28, 0.46))]
@@ -147,7 +170,7 @@ def build(with_items=True):
         for sy in (-1, 1): box(f"cleg_{sx}_{sy}", (0.04, 0.04, 0.43), (DX + sx * 0.2, CY + sy * 0.2, 0.215), M["wood2"], "furn", 0.003)
     AX, AY, AR = -1.55, -0.85, math.radians(40)
     def rot_xy(x_, y_, cx, cy, a): dx, dy = x_ - cx, y_ - cy; return (cx + dx * math.cos(a) - dy * math.sin(a), cy + dx * math.sin(a) + dy * math.cos(a))
-    for nm, dims, off, z, m in [("arm_seat", (0.62, 0.62, 0.14), (0, 0), 0.36, M["paper2"]), ("arm_back", (0.62, 0.12, 0.42), (0, 0.25), 0.64, M["paper2"]),
+    for nm, dims, off, z, m in [("arm_seat", (0.62, 0.62, 0.14), (0, 0), 0.36, M["shade"]), ("arm_back", (0.62, 0.12, 0.42), (0, 0.25), 0.64, M["shade"]),
                                 ("arm_l", (0.10, 0.62, 0.22), (-0.26, 0), 0.54, M["wood2"]), ("arm_r", (0.10, 0.62, 0.22), (0.26, 0), 0.54, M["wood2"]), ("arm_base", (0.58, 0.58, 0.28), (0, 0), 0.15, M["wood2"])]:
         px_, py_ = rot_xy(AX + off[0], AY + off[1], AX, AY, AR); box(nm, dims, (px_, py_, z), m, "furn", 0.02, rot=(0, 0, AR))
 

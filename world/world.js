@@ -346,7 +346,7 @@ function applyLight(dt) {
 }
 
 /* 工坊面板的开关（design/HOW-WE-DECIDE.md 第 7 节：技术也要看得见） */
-const DEV = { wire: false, unbaked: false, wide: false, hot: false, atlas: false, still: false, paint: false, paintai: false, post: false, chair: false };
+const DEV = { wire: false, unbaked: false, wide: false, hot: false, atlas: false, still: false, paint: false, paintai: false, post: false, chair: false, rodin: false };
 
 /* ============ 8. 镜头：长焦、在房外；三层：机位 → 呼吸 → 视差 ============ */
 const SHOTS = {};
@@ -540,16 +540,34 @@ function renderPost() {
   post.mat.uniforms.tDiffuse.value = post.rt.texture; post.mat.uniforms.uTexel.value.set(1 / w, 1 / h);
   renderer.render(post.scene, post.cam);
 }
-/* 路①：图生三维出来的读书椅（tools/fal_image3d.py → assets/verify/chair.glb，不入库），Shaded 材质当无光照用 */
-let chairObj = null;
-async function loadChair() {
-  if (chairObj) return chairObj;
-  const gltf = await new GLTFLoader().loadAsync("./assets/verify/chair.glb");
-  const o = gltf.scene; const box = new THREE.Box3().setFromObject(o); const size = box.getSize(new THREE.Vector3());
-  const s = 0.9 / size.y; o.scale.setScalar(s); box.setFromObject(o);
-  o.position.set(1.7 - (box.min.x + box.max.x) / 2, -box.min.y, 0.5 - (box.min.z + box.max.z) / 2);
-  o.traverse((m) => { if (m.isMesh) { const map = m.material.map || null; m.material = new THREE.MeshBasicMaterial({ map, color: map ? 0xffffff : 0x244040 }); if (map) map.colorSpace = THREE.SRGBColorSpace; } });
-  o.name = "verify-chair"; house.add(o); chairObj = o; return o;
+/* 路①：图生三维出来的家具（tools/fal_image3d.py → assets/verify/*.glb，不入库），Shaded 材质当无光照用。
+   按资产规范：按高度缩放、原点落地、放到槽位中心。「验证椅子」只放读书椅；「Rodin 家具」把烘焙的灰盒家具整组隐掉、五件全放。 */
+const VERIFY_SLOTS = {
+  chair: { h: 0.9, x: -1.55, z: 0.85, ry: -40 },
+  deskchair: { h: 0.85, x: cfg.desk.x, z: cfg.desk.z - cfg.desk.d / 2 - 0.35, ry: 180 },
+  desk: { h: cfg.desk.h, w: cfg.desk.w, x: cfg.desk.x, z: cfg.desk.z, ry: 0 },
+  shelf: { h: cfg.wall.y0 + cfg.wall.shelves * cfg.wall.shelf_h + 0.04, x: cfg.wall.cx, z: cfg.wall.back_z + cfg.wall.depth / 2, ry: 0 },
+  rack: { h: 1.0, x: cfg.archive.cx, z: cfg.archive.back_z + 0.25, ry: 0 },
+};
+const verifyObjs = {};
+async function loadVerify(name) {
+  if (verifyObjs[name]) return verifyObjs[name];
+  const slot = VERIFY_SLOTS[name];
+  const gltf = await new GLTFLoader().loadAsync(`./assets/verify/${name}.glb`);
+  const o = gltf.scene; o.rotation.y = THREE.MathUtils.degToRad(slot.ry);
+  const box = new THREE.Box3().setFromObject(o); const size = box.getSize(new THREE.Vector3());
+  o.scale.setScalar(slot.w ? slot.w / size.x : slot.h / size.y); box.setFromObject(o);
+  o.position.set(slot.x - (box.min.x + box.max.x) / 2, -box.min.y, slot.z - (box.min.z + box.max.z) / 2);
+  /* Rodin 的 Shaded 材质和 kriss 一样：底色黑、画好明暗的贴图放在自发光里。拿它当无光照贴图用 */
+  /* 壳的贴图是按 bake_scale 压暗烘的，再靠曝光提回来；Rodin 的贴图没压过，这里乘同一个系数，两者过同一道色调映射才一样亮 */
+  const k = cfg.bake_scale || 1;
+  o.traverse((m) => { if (m.isMesh) { const map = m.material.emissiveMap || m.material.map || null; m.material = new THREE.MeshBasicMaterial({ map, color: map ? new THREE.Color(k, k, k) : 0x244040 }); if (map) map.colorSpace = THREE.SRGBColorSpace; } });
+  o.name = "verify-" + name; o.visible = false; house.add(o); verifyObjs[name] = o; return o;
+}
+const loadChair = () => loadVerify("chair");
+function applyRodin() {
+  for (const m of shellMeshes()) if (m.name === "furn") m.visible = !DEV.rodin;
+  for (const n in VERIFY_SLOTS) loadVerify(n).then((o) => { o.visible = DEV.rodin || (n === "chair" && DEV.chair); }).catch((e) => console.warn("验证家具没加载到", n, e));
 }
 
 /* ============ 11b. 工坊：把技术做成开关 ============ */
@@ -563,7 +581,8 @@ function devToggle(k) {
   if (k === "wire") { for (const g in shellMats) shellMats[g].wireframe = DEV.wire; flatMat.wireframe = DEV.wire; house.traverse((o) => { if (o.isMesh && o.material && o.material.isMeshLambertMaterial) o.material.wireframe = DEV.wire; }); }
   if (k === "unbaked") { for (const m of shellMeshes()) m.material = DEV.unbaked ? flatMat : shellMats[m.name]; hemi.intensity = DEV.unbaked ? 1.3 : LIGHTS[lightTarget].hemi[2]; }
   if (k === "paint" || k === "paintai") { if (k === "paint" && DEV.paint) DEV.paintai = false; if (k === "paintai" && DEV.paintai) DEV.paint = false; document.querySelectorAll("[data-dev]").forEach((b) => b.setAttribute("aria-pressed", String(!!DEV[b.dataset.dev]))); applyAltTex(); }
-  if (k === "chair") { loadChair().then((o) => { o.visible = DEV.chair; }).catch((e) => console.warn("验证椅子没加载到", e)); }
+  if (k === "chair") { loadChair().then((o) => { o.visible = DEV.chair || DEV.rodin; }).catch((e) => console.warn("验证椅子没加载到", e)); }
+  if (k === "rodin") applyRodin();
   if (k === "hot") for (const o of hot) { if (!o.isInstancedMesh) { o.material.visible = DEV.hot; o.material.wireframe = true; o.material.color = new THREE.Color(0xF3D98A); } }
   if (k === "atlas") {
     devAtlas.classList.toggle("on", DEV.atlas); devAtlas.innerHTML = "";

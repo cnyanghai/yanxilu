@@ -17,6 +17,14 @@ STEPS = [  # (文件名, 标签, 要打开的开关列表；每步前先把上�
     ("chair", "路① 图生三维的椅子（无后期）", ["chair"]),
     ("chair_all", "路① + ②a + ③", ["chair", "paint", "post"]),
 ]
+STEPS_DAY2 = [
+    ("d2_base", "第 2 天：壳按色板上色重烘", []),
+    ("d2_rodin", "重烘 + Rodin 五件家具", ["rodin"]),
+    ("d2_rodin_post", "重烘 + Rodin + 路③后期", ["rodin", "post"]),
+    ("d2_rodin_ai", "重烘 + Rodin + 图生图贴图", ["rodin", "paintai"]),
+]
+if len(sys.argv) > 2 and sys.argv[2] == "day2": STEPS = STEPS_DAY2; SHEET = "compare_day2.jpg"
+else: SHEET = "compare_day1.jpg"
 
 def wait_up():
     for _ in range(50):
@@ -39,7 +47,7 @@ async def run():
             for k in list(on - set(want)): await pg.evaluate(f"window.__yxlWorld.dev('{k}')"); on.discard(k)
             for k in want:
                 if k not in on: await pg.evaluate(f"window.__yxlWorld.dev('{k}')"); on.add(k)
-            await pg.wait_for_timeout(2500 if ("chair" in want or "paint" in want or "paintai" in want) else 600)
+            await pg.wait_for_timeout(4000 if ("rodin" in want or "chair" in want or "paint" in want or "paintai" in want) else 600)
             await pg.screenshot(path=os.path.join(OUT, f"shot_{fn}.png"))
             info = await pg.evaluate("(() => { const i = window.__yxlWorld.info(); return [i.calls, i.triangles]; })()")
             print(f"  {fn:11s} {label:28s} calls={info[0]} tris={info[1]}")
@@ -57,7 +65,7 @@ def montage():
         im = im.convert("RGB"); r = min(W / im.width, H / im.height); im = im.resize((int(im.width * r), int(im.height * r)), Image.LANCZOS)
         x, y = (i % cols) * W, (i // cols) * (H + 40)
         sheet.paste(im, (x + (W - im.width) // 2, y + (H - im.height) // 2)); d.text((x + 10, y + H + 8), label, fill=(40, 40, 40), font=f)
-    out = os.path.join(OUT, "compare_day1.jpg"); sheet.save(out, quality=86); print("对照墙", out)
+    out = os.path.join(OUT, SHEET); sheet.save(out, quality=86); print("对照墙", out)
 
 if __name__ == "__main__":
     srv = subprocess.Popen([sys.executable, os.path.join(ROOT, "tools", "baba_mock.py"), str(PORT)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
