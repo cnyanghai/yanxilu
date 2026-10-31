@@ -1,5 +1,7 @@
 # 研习录 版本 2 · 制作总计划
 
+> **2026-10-30 改版：项目改按暗黑 2 团队建制推进。** 建制与流程在 `studio/README.md`，部门提案在 `studio/proposals/`，评审记录与里程碑计划在 `studio/REVIEW-1.md` 第 3 节。本页下方的"阶段表"是改版前的计划，保留备查；两者冲突以 REVIEW-1 为准。当前里程碑：**M0 概念收尾 → M1 工具先行与骨架**，等用户裁两份裁判页与 REVIEW-1 第 4 节。
+
 **这是唯一的计划。** `design/` 里其他文档（V2-ROADMAP、KRISS-ANALYSIS、MASTER-PLAN、HOW-WE-DECIDE、TECH-NOTES、INTERACTION、STUDIES、FUNCTION-AND-CHARACTER）从今天起都是附录，它们各自写的"下一步"作废，以这页为准。进度仍记在 `STATUS.md`，STATUS 顶部挂"当前阶段"。
 
 起因：2026-10-30 用户指出项目缺一个项目经理的思维，产出像散点。这页按游戏制作的常规流程（立项、前期、垂直切片、量产、打磨）重排。
