@@ -10,6 +10,9 @@ import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { DRACOLoader } from "three/addons/loaders/DRACOLoader.js";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { DOMAINS, BOOKS, BOXES, BAGS, TODAY, STATS, PLANT } from "./sample.js";
+import { loadTables } from "./data/tables.js";
+import { detectTier, TIER_BUDGET } from "./render/tiers.js";
+import { Composite } from "./render/post.js";
 
 /* ============ 0. 基本设施 ============ */
 const canvas = document.getElementById("gl");
@@ -32,8 +35,15 @@ const crumbEl = document.getElementById("crumb"), hintEl = document.getElementBy
 /* 配置：bpy 生成，机位和槽位两边同源 */
 const cfg = await fetch("./assets/study.json").then((r) => { if (!r.ok) throw new Error("assets/study.json " + r.status); return r.json(); })
   .catch((e) => { document.body.classList.add("nogl"); document.querySelector(".fallback div").innerHTML = "小世界的资产还没生成（" + e.message + "）。<br>跑 <code>bash tools/blender/bake.sh</code> 生成 world/assets/。"; throw e; });
-renderer.toneMappingExposure = 1 / (cfg.bake_scale || 1) * 0.95;
+const EXPOSURE_BASE = 1 / (cfg.bake_scale || 1) * 0.95;
+renderer.toneMappingExposure = EXPOSURE_BASE;
 const deskTop = cfg.desk.h;
+
+/* 七张表（world/data/，格式见 schema/README.md）与硬件档位。表坏了不挡画面，报到工坊面板 */
+const T = await loadTables("./").catch((e) => { console.warn("表加载失败", e); return null; });
+if (T && T.problems.length) console.warn("表校验问题", T.problems);
+const TIER = detectTier(renderer, { isMobile });
+const composite = TIER >= 1 ? new Composite(renderer) : null;
 
 /* 材质纪律：纸木墨铜。程序化物件用的几种 */
 const C = { paper: 0xF1E3C0, kraft: 0xC09C62, ink: 0x1F1309, zhu: 0xA3231B, leaf: 0x6E9A5E, stem: 0x4E7A3E, card: 0x5B2A6B };
@@ -339,34 +349,61 @@ const groundMat = new THREE.MeshBasicMaterial({ color: 0x8E8A80 });
   const hit = new THREE.Mesh(new THREE.BoxGeometry(cfg.room.w + 0.6, cfg.room.h + 0.8, cfg.room.d + 0.6), new THREE.MeshBasicMaterial({ visible: false })); hit.position.y = cfg.room.h / 2; hotspot(hit, "/study", "书房"); yard.add(hit);
 }
 
-/* ============ 7. 光：三套烘焙贴图淡接；程序化物件的半球光跟着换色 ============ */
-const LIGHTS = {
-  day:   { hemi: [0xFFF3E0, 0x6A5640, 1.1], key: 0.9, ground: 0x8E8A80 },
-  night: { hemi: [0x3A3A55, 0x120C08, 0.6], key: 0.15, ground: 0x1A1512 },
-  rain:  { hemi: [0xC9D2DA, 0x3A3F44, 0.9], key: 0.35, ground: 0x5E6165 },
-};
-let lightNow = "day", lightTarget = "day", lightT = 1;
+/* ============ 7. 光：vis 表驱动（world/data/vis.json，一房一时段一行），烘焙贴图按 bakeSet 淡接 ============
+   旧的三个按钮（晴窗 / 夜读 / 雨天）映射为：day = 白天；night = 夜晚；rain = 白天 + 雨天天气层。
+   烘焙现在只有 day / night / rain 三套贴图，黎明暂借白天、黄昏暂借夜晚，重烘四时段后去掉这个映射。 */
+const BAKE_ALIAS = { dawn: "day", day: "day", dusk: "night", night: "night" };
+const LIGHT_MODES = { day: { period: "day", weather: null }, night: { period: "night", weather: null }, rain: { period: "day", weather: "rain" } };
+const ROOM_ID = "study";
+const toC = (hex) => new THREE.Color(hex);
+/* 把一行 vis 变成运行时要的数（颜色先转成 Color，雨天叠加层在这里算进去） */
+function visNumbers(entry, weather) {
+  const wx = weather && T ? T.weather[weather] : null;
+  const keyPower = entry.key.power * (wx ? wx.keyPowerMul : 1);
+  const fog = entry.fog.density + (wx ? wx.fogDensity : 0);
+  const sat = wx ? 1 + wx.saturation : 1;
+  return {
+    exposure: entry.exposure, keyColor: toC(entry.key.color), keyPower, fillColor: toC(entry.fill.color), fillPower: entry.fill.power,
+    sky: toC(entry.ambient.sky), ground: toC(entry.ambient.ground), ambientPower: entry.ambient.power,
+    fogColor: toC(entry.fog.color), fogDensity: fog, vignette: entry.vignette, grade: [sat, 1, 2 - sat],
+    unitPower: entry.unitLight.power, unitRadius: entry.unitLight.radius, bakeSet: BAKE_ALIAS[entry.bakeSet] || "day",
+  };
+}
+/* 没有表的时候的兜底（和表里的白天一样） */
+const FALLBACK_VIS = { day: { exposure: 1, key: { color: "#f3e2b4", power: 1 }, fill: { color: "#dfe6f0", power: 0.25 }, ambient: { sky: "#f3ddb9", ground: "#987755", power: 0.6 }, fog: { color: "#e6dcc0", density: 0.02 }, vignette: 0.25, unitLight: { power: 0, radius: 2.5 }, bakeSet: "day" } };
+function visEntry(period) { return T ? T.visFor(ROOM_ID, period) : FALLBACK_VIS.day; }
+let lightNow = "day", lightTarget = "day", lightT = 1, visA = visNumbers(visEntry("day"), null), visB = visA;
+const lerpC = new THREE.Color();
+function applyVisMix(k) {
+  const a = visA, b = visB, L = THREE.MathUtils.lerp;
+  hemi.color.copy(a.sky).lerp(b.sky, k); hemi.groundColor.copy(a.ground).lerp(b.ground, k); hemi.intensity = L(a.ambientPower, b.ambientPower, k) * 1.8;
+  key.color.copy(a.keyColor).lerp(b.keyColor, k); key.intensity = L(a.keyPower, b.keyPower, k) * 0.9;
+  renderer.toneMappingExposure = EXPOSURE_BASE * L(a.exposure, b.exposure, k);
+  groundMat.color.copy(a.ground).lerp(b.ground, k).multiplyScalar(0.9);
+  if (composite) composite.setVis({ fogColor: lerpC.copy(a.fogColor).lerp(b.fogColor, k).getHex(), fogDensity: L(a.fogDensity, b.fogDensity, k), vignette: L(a.vignette, b.vignette, k), grade: [L(a.grade[0], b.grade[0], k), 1, L(a.grade[2], b.grade[2], k)] });
+}
 function setLight(name) {
-  if (!LIGHTS[name] || name === lightTarget) { document.body.dataset.light = name; return; }
-  for (const g in shellMats) { const m = shellMats[g]; m.uniforms.mapA.value = (lightT < 1) ? m.uniforms.mapB.value : m.uniforms.mapA.value; m.uniforms.mapB.value = bakedTex(name, g); m.uniforms.uMix.value = 0; }
+  const mode = LIGHT_MODES[name]; if (!mode) return;
+  if (name === lightTarget) { document.body.dataset.light = name; return; }
+  const nb = visNumbers(visEntry(mode.period), mode.weather);
+  const bakeB = mode.weather === "rain" && cfg.textures["rain_shell"] ? "rain" : nb.bakeSet;
+  for (const g in shellMats) { const m = shellMats[g]; m.uniforms.mapA.value = (lightT < 1) ? m.uniforms.mapB.value : m.uniforms.mapA.value; m.uniforms.mapB.value = bakedTex(bakeB, g); m.uniforms.uMix.value = 0; }
+  visA = lightT < 1 ? visB : visA; visB = nb;
   lightNow = lightTarget; lightTarget = name; lightT = 0;
   document.body.dataset.light = name;
   document.querySelectorAll("[data-light]").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.light === name)));
   try { localStorage.setItem("yxl-world-light", name); } catch (e) {}
 }
-const hemiA = new THREE.Color(), hemiB = new THREE.Color(), gA = new THREE.Color(), gB = new THREE.Color();
 function applyLight(dt) {
   if (lightT >= 1) return false;
-  lightT = Math.min(1, lightT + dt / (reduceMotion ? 0.01 : 1.4));
+  lightT = Math.min(1, lightT + dt / (reduceMotion ? 0.01 : (T ? T.transition.seconds : 2.5)));
   const k = lightT < 0.5 ? 2 * lightT * lightT : 1 - Math.pow(-2 * lightT + 2, 2) / 2;
   for (const g in shellMats) shellMats[g].uniforms.uMix.value = k;
-  const a = LIGHTS[lightNow], b = LIGHTS[lightTarget];
-  hemi.color.copy(hemiA.setHex(a.hemi[0])).lerp(hemiB.setHex(b.hemi[0]), k); hemi.groundColor.copy(hemiA.setHex(a.hemi[1])).lerp(hemiB.setHex(b.hemi[1]), k);
-  hemi.intensity = THREE.MathUtils.lerp(a.hemi[2], b.hemi[2], k); key.intensity = THREE.MathUtils.lerp(a.key, b.key, k);
-  groundMat.color.copy(gA.setHex(a.ground)).lerp(gB.setHex(b.ground), k);
-  if (lightT >= 1) for (const g in shellMats) { const m = shellMats[g]; m.uniforms.mapA.value = m.uniforms.mapB.value; m.uniforms.uMix.value = 0; }
+  applyVisMix(k);
+  if (lightT >= 1) { for (const g in shellMats) { const m = shellMats[g]; m.uniforms.mapA.value = m.uniforms.mapB.value; m.uniforms.uMix.value = 0; } visA = visB; }
   return true;
 }
+applyVisMix(1);
 
 /* 工坊面板的开关（design/HOW-WE-DECIDE.md 第 7 节：技术也要看得见） */
 const DEV = { wire: false, unbaked: false, wide: false, hot: false, atlas: false, still: false, paint: false, paintai: false, post: false, chair: false, rodin: false };
@@ -500,7 +537,7 @@ function frame() {
   if (performance.now() - wheelAt > 400) wheelAcc *= 0.9;
   if (!reduceMotion) for (const o of plant.children) if (o.userData.sway) { o.rotation.z = Math.sin(t * 0.9) * 0.018; o.rotation.x = Math.sin(t * 0.7 + 1.3) * 0.012; }
   if (hover && tagEl.classList.contains("on")) { const v = hover.point.clone().project(camera); tagEl.style.transform = `translate(${(v.x + 1) / 2 * innerWidth}px, ${(1 - v.y) / 2 * innerHeight}px) translate(-50%, -130%)`; }
-  if (DEV.post) renderPost(); else renderer.render(scene, camera);
+  if (composite) { composite.mat.uniforms.uPaint.value = DEV.post ? 1 : 0; composite.render(scene, camera); } else renderer.render(scene, camera);
   devStats();
   requestAnimationFrame(frame);
 }
@@ -526,44 +563,7 @@ function applyAltTex() {
     m.uniforms.mapA.value = t; m.uniforms.mapB.value = t; m.uniforms.uMix.value = 0;
   }
 }
-/* 路③：屏幕空间画风后期。先把场景画进一张离屏图，再用 Kuwahara 滤镜（四个象限取方差最小的均值：平处更平、边缘保持）
-   加一点暖调和纸纹画到屏幕。色调映射和色彩空间转换挪到这一步做。 */
-const post = { rt: null, scene: new THREE.Scene(), cam: new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1) };
-post.mat = new THREE.ShaderMaterial({
-  uniforms: { tDiffuse: { value: null }, uTexel: { value: new THREE.Vector2() }, uWarm: { value: 0.05 }, uGrain: { value: 0.035 } },
-  vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
-  fragmentShader: `uniform sampler2D tDiffuse; uniform vec2 uTexel; uniform float uWarm, uGrain; varying vec2 vUv;
-    const int R = 3;
-    void main(){
-      vec3 m0 = vec3(0.), m1 = vec3(0.), m2 = vec3(0.), m3 = vec3(0.), s0 = vec3(0.), s1 = vec3(0.), s2 = vec3(0.), s3 = vec3(0.);
-      for (int j = 0; j <= R; j++) for (int i = 0; i <= R; i++) {
-        vec2 o = vec2(float(i), float(j)) * uTexel;
-        vec3 a = texture2D(tDiffuse, vUv + vec2(-o.x, -o.y)).rgb; m0 += a; s0 += a * a;
-        vec3 b = texture2D(tDiffuse, vUv + vec2( o.x, -o.y)).rgb; m1 += b; s1 += b * b;
-        vec3 c = texture2D(tDiffuse, vUv + vec2( o.x,  o.y)).rgb; m2 += c; s2 += c * c;
-        vec3 d = texture2D(tDiffuse, vUv + vec2(-o.x,  o.y)).rgb; m3 += d; s3 += d * d;
-      }
-      float n = float((R + 1) * (R + 1));
-      vec3 col = m0 / n; vec3 v = s0 / n - col * col; float best = v.r + v.g + v.b;
-      vec3 mm = m1 / n; v = s1 / n - mm * mm; float sv = v.r + v.g + v.b; if (sv < best) { best = sv; col = mm; }
-      mm = m2 / n; v = s2 / n - mm * mm; sv = v.r + v.g + v.b; if (sv < best) { best = sv; col = mm; }
-      mm = m3 / n; v = s3 / n - mm * mm; sv = v.r + v.g + v.b; if (sv < best) { best = sv; col = mm; }
-      col *= vec3(1.0 + uWarm, 1.0, 1.0 - uWarm);
-      float g = fract(sin(dot(vUv * vec2(1234.5, 789.1), vec2(12.9898, 78.233))) * 43758.5453);
-      col += (g - 0.5) * uGrain * (col + 0.2);
-      gl_FragColor = vec4(max(col, 0.0), 1.0);
-      #include <tonemapping_fragment>
-      #include <colorspace_fragment>
-    }`,
-});
-post.scene.add(new THREE.Mesh(new THREE.PlaneGeometry(2, 2), post.mat));
-function renderPost() {
-  const w = renderer.domElement.width, h = renderer.domElement.height;
-  if (!post.rt || post.rt.width !== w || post.rt.height !== h) { if (post.rt) post.rt.dispose(); post.rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples: 4 }); }
-  renderer.setRenderTarget(post.rt); renderer.render(scene, camera); renderer.setRenderTarget(null);
-  post.mat.uniforms.tDiffuse.value = post.rt.texture; post.mat.uniforms.uTexel.value.set(1 / w, 1 / h);
-  renderer.render(post.scene, post.cam);
-}
+/* 路③：画风（Kuwahara）现在是合成后期（render/post.js）里的一个开关 uPaint；合成后期本身在 1 档以上常开：深度雾、暗角、调色、颗粒。 */
 /* 路①：图生三维出来的家具（tools/fal_image3d.py → assets/verify/*.glb，不入库），Shaded 材质当无光照用。
    按资产规范：按高度缩放、原点落地、放到槽位中心。「验证椅子」只放读书椅；「Rodin 家具」把烘焙的灰盒家具整组隐掉、五件全放。 */
 const VERIFY_SLOTS = {
@@ -624,7 +624,7 @@ function devStats() {
   if (devEl.hidden) return;
   const now = performance.now(); fpsN++; if (now - fpsAt > 500) { fpsShown = Math.round(fpsN * 1000 / (now - fpsAt)); fpsN = 0; fpsAt = now; }
   const i = renderer.info.render, dist = camera.position.distanceTo(rig.at);
-  devSt.innerHTML = [["帧率", fpsShown], ["draw call", i.calls], ["三角面", i.triangles.toLocaleString()], ["视场角", camera.fov.toFixed(1) + "°" + (DEV.wide ? "（对比：45°）" : "")], ["镜头距离", dist.toFixed(1) + " m"], ["景别", route], ["光", lightTarget + (lightT < 1 ? `（淡接 ${Math.round(lightT * 100)}%）` : "")], ["画布", renderer.domElement.width + " × " + renderer.domElement.height]].map(([k, v]) => `<b>${k}</b><span>${v}</span>`).join("");
+  devSt.innerHTML = [["帧率", fpsShown], ["档位", TIER + (composite ? "（合成后期开）" : "（无后期）")], ["表", T ? (T.problems.length ? `${T.problems.length} 处问题` : "七张已载") : "未载"], ["draw call", i.calls], ["三角面", i.triangles.toLocaleString()], ["视场角", camera.fov.toFixed(1) + "°" + (DEV.wide ? "（对比：45°）" : "")], ["镜头距离", dist.toFixed(1) + " m"], ["景别", route], ["光", lightTarget + (lightT < 1 ? `（淡接 ${Math.round(lightT * 100)}%）` : "")], ["画布", renderer.domElement.width + " × " + renderer.domElement.height]].map(([k, v]) => `<b>${k}</b><span>${v}</span>`).join("");
 }
 
 /* ============ 12. 开场 ============ */
@@ -640,6 +640,6 @@ function devStats() {
   /* 另外两套贴图在空闲时预载 */
   const idle = window.requestIdleCallback || ((f) => setTimeout(f, 1500));
   idle(() => { for (const l of cfg.lights) for (const g of ["shell", "furn"]) bakedTex(l, g); });
-  window.__yxlWorld = { renderer, scene, camera, go, route: () => route, setLight, info: () => renderer.info.render, hot, settled: () => rig.t >= 1 && lightT >= 1, dev: devToggle, DEV, verifyReady: () => Object.keys(VERIFY_SLOTS).every((k) => verifyObjs[k]) };
+  window.__yxlWorld = { renderer, scene, camera, go, route: () => route, setLight, info: () => renderer.info.render, hot, settled: () => rig.t >= 1 && lightT >= 1, dev: devToggle, DEV, verifyReady: () => Object.keys(VERIFY_SLOTS).every((k) => verifyObjs[k]), tables: T, tier: TIER, budget: TIER_BUDGET[TIER] };
   frame();
 }

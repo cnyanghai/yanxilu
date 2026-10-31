@@ -271,7 +271,8 @@
    },
    "neighbors": {
     "yard": "door"
-   }
+   },
+   "preset": "study"
   },
   {
    "id": "yard",
@@ -401,7 +402,8 @@
    },
    "neighbors": {
     "study": "door"
-   }
+   },
+   "preset": null
   }
  ],
  "units": "cm"

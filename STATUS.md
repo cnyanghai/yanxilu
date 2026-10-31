@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: M1 工具先行与骨架 第 1 天完成：关卡平面图（书房 4.5 × 3.5 九列七行、院子 7 × 9、三个对焦站）、GDD 1.0、七张表 + 书房预设 + 九张 Schema + tools/tables_check.py（通过）
-next: M1 第 2 到 3 天（技术总监）：world/ 拆成 data / sim / render 三层，rooms 与 vis 表替换 world.js 里的常量，合成后期一遍着色器，三档开关，Node 单测；画面不变
+stage: M1 第 2 天完成：数据层 tables.js、世界层 grid.js（单测通过）、渲染层 post.js 与 tiers.js；world.js 的光由 vis 表驱动、1 档以上走合成后期；回归通过（swiftshader 为 0 档，另用 ?tier=1 验过合成后期三种光无报错）。默认场景暂无桌椅（Rodin 件待第 3 天按预设加载）
+next: M1 第 3 天：按 presets/study.json 加载实体（Model 组件 → props 资产），机位与热区从 rooms 表来，路由即位置；资产入 world/packs/modern/；然后工具岗的资产导入命令与烘焙增量
 blocked_by: 用户看效果
 updated: 2026-10-30
 ---
@@ -65,6 +65,8 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-10-31 M1 第 2 天收尾：rooms 加 preset 字段避免 404；?tier=1 截图三种光验证合成后期；world_test 通过；提交
+- 2026-10-31 M1 第 2 天（技术总监）：表格式定稿为厘米；world/data/tables.js（loadTables、validate、visFor）、world/sim/grid.js（Grid、roomGrid、astar、canPlace）、world/render/{post,tiers}.js；world.js 导入三者，LIGHTS 常量换成 vis 表 + 雨天天气层 + bakeSet 别名（黎明借白天、黄昏借夜晚，待重烘四时段）、曝光随 vis、1 档以上走合成后期、工坊面板显示档位与表状态；world/package.json 声明模块让 Node 能测；sim_test 暴露格心半厘米问题 → 占地内缩 1 厘米
 - 2026-10-31 M1 第 1 天：studio/level/study-plan.md（平面图、对焦站、走点规则、检验）、studio/GDD.md、world/data/{objects,rooms,vis,props,items,economy,sound}.json、presets/study.json（实体-组件，模板 ^ 多实例 @ 删除 -）、schema/ 九张、tools/tables_check.py（Schema + 交叉引用 + 格子越界重叠）；首跑抓出 7 处错已修；ASSET-SPEC 房间改 4.5 × 3.5
 - 2026-10-30 十个代理回齐：refs/redalert-source.md、refs/openra.md、proposals/01 到 08；写 REVIEW-1（裁决表、七项冲突裁决、M0 到 M6 里程碑、七条待用户定、技术决定清单）；PRODUCTION-PLAN 顶部改为指向 REVIEW-1
 - 2026-10-30 用户定：摒弃自设限制，完全以暗黑 2 设计思路为基准，团队建制照暗黑 2，每岗提案再推进；红警用 EA 开源源码与 OpenRA 分析不下载游戏；授权 Claude 自行判断用代理。建 design/studio/（README 建制与流程、proposals/00 两份裁判页），克隆红警源码与 OpenRA 到本机临时目录，派 2 个读源码代理 + 8 个岗位分叉代理；01 首席设计师提案已回（核心循环、货币「墨」、舒适度公式、六张表、八个函数名）
