@@ -33,45 +33,13 @@
    "extends": "^fixed",
    "components": {
     "Transform": {
-     "pos": [
-      0.0,
-      0,
-      -1.5
-     ],
+     "x": 0,
+     "y": 0,
+     "z": -150,
      "rotY": 0
     },
     "Slot": {
-     "slot": "shelf_wall",
-     "cells": [
-      [
-       1,
-       0
-      ],
-      [
-       2,
-       0
-      ],
-      [
-       3,
-       0
-      ],
-      [
-       4,
-       0
-      ],
-      [
-       5,
-       0
-      ],
-      [
-       6,
-       0
-      ],
-      [
-       7,
-       0
-      ]
-     ]
+     "slot": "shelf_wall"
     },
     "Data": {
      "object": "bookshelf_wall"
@@ -87,41 +55,13 @@
    "extends": "^fixed",
    "components": {
     "Transform": {
-     "pos": [
-      -1.0,
-      0,
-      -0.25
-     ],
+     "x": -100,
+     "y": 0,
+     "z": -25,
      "rotY": 0
     },
     "Slot": {
-     "slot": "desk",
-     "cells": [
-      [
-       1,
-       2
-      ],
-      [
-       2,
-       2
-      ],
-      [
-       3,
-       2
-      ],
-      [
-       1,
-       3
-      ],
-      [
-       2,
-       3
-      ],
-      [
-       3,
-       3
-      ]
-     ]
+     "slot": "desk"
     },
     "Data": {
      "object": "desk"
@@ -137,21 +77,13 @@
    "extends": "^fixed",
    "components": {
     "Transform": {
-     "pos": [
-      -1.0,
-      0.78,
-      -0.5
-     ],
+     "x": -100,
+     "y": 78,
+     "z": -50,
      "rotY": 0
     },
     "Slot": {
-     "slot": "desk_card",
-     "cells": [
-      [
-       2,
-       2
-      ]
-     ]
+     "slot": "desk_card"
     },
     "Data": {
      "object": "card_today"
@@ -164,21 +96,13 @@
    "extends": "^fixed",
    "components": {
     "Transform": {
-     "pos": [
-      -1.5,
-      0.76,
-      -0.5
-     ],
+     "x": -150,
+     "y": 76,
+     "z": -50,
      "rotY": 0
     },
     "Slot": {
-     "slot": "desk_lamp",
-     "cells": [
-      [
-       1,
-       2
-      ]
-     ]
+     "slot": "desk_lamp"
     },
     "Data": {
      "object": "desk_lamp"
@@ -198,21 +122,13 @@
    "extends": "^fixed",
    "components": {
     "Transform": {
-     "pos": [
-      -1.0,
-      0,
-      0.5
-     ],
+     "x": -100,
+     "y": 0,
+     "z": 50,
      "rotY": 180
     },
     "Slot": {
-     "slot": "desk_chair",
-     "cells": [
-      [
-       2,
-       4
-      ]
-     ]
+     "slot": "desk_chair"
     },
     "Data": {
      "object": "desk_chair"
@@ -228,33 +144,13 @@
    "extends": "^fixed",
    "components": {
     "Transform": {
-     "pos": [
-      1.75,
-      0,
-      0.25
-     ],
+     "x": 175,
+     "y": 0,
+     "z": 25,
      "rotY": -120
     },
     "Slot": {
-     "slot": "armchair",
-     "cells": [
-      [
-       7,
-       3
-      ],
-      [
-       8,
-       3
-      ],
-      [
-       7,
-       4
-      ],
-      [
-       8,
-       4
-      ]
-     ]
+     "slot": "armchair"
     },
     "Data": {
      "object": "armchair"
@@ -270,21 +166,13 @@
    "extends": "^fixed",
    "components": {
     "Transform": {
-     "pos": [
-      2.22,
-      1.9,
-      -0.5
-     ],
+     "x": 222,
+     "y": 190,
+     "z": -50,
      "rotY": -90
     },
     "Slot": {
-     "slot": "wall_lamp",
-     "cells": [
-      [
-       8,
-       2
-      ]
-     ]
+     "slot": "wall_lamp"
     },
     "Data": {
      "object": "wall_lamp"
@@ -304,29 +192,13 @@
    "extends": "^fixed",
    "components": {
     "Transform": {
-     "pos": [
-      1.0,
-      0,
-      1.0
-     ],
+     "x": 100,
+     "y": 0,
+     "z": 100,
      "rotY": 180
     },
     "Slot": {
-     "slot": "notebook_rack",
-     "cells": [
-      [
-       5,
-       5
-      ],
-      [
-       6,
-       5
-      ],
-      [
-       7,
-       5
-      ]
-     ]
+     "slot": "notebook_rack"
     },
     "Data": {
      "object": "notebook_rack"
@@ -342,77 +214,13 @@
    "extends": "^fixed",
    "components": {
     "Transform": {
-     "pos": [
-      0.0,
-      0,
-      1.0
-     ],
+     "x": 0,
+     "y": 0,
+     "z": 100,
      "rotY": 0
     },
     "Slot": {
-     "slot": "rug",
-     "cells": [
-      [
-       2,
-       4
-      ],
-      [
-       3,
-       4
-      ],
-      [
-       4,
-       4
-      ],
-      [
-       5,
-       4
-      ],
-      [
-       6,
-       4
-      ],
-      [
-       2,
-       5
-      ],
-      [
-       3,
-       5
-      ],
-      [
-       4,
-       5
-      ],
-      [
-       5,
-       5
-      ],
-      [
-       6,
-       5
-      ],
-      [
-       2,
-       6
-      ],
-      [
-       3,
-       6
-      ],
-      [
-       4,
-       6
-      ],
-      [
-       5,
-       6
-      ],
-      [
-       6,
-       6
-      ]
-     ]
+     "slot": "rug"
     },
     "Data": {
      "object": "rug"
@@ -429,21 +237,13 @@
    "extends": "^fixed",
    "components": {
     "Transform": {
-     "pos": [
-      0.0,
-      0,
-      1.75
-     ],
+     "x": 0,
+     "y": 0,
+     "z": 150,
      "rotY": 0
     },
     "Slot": {
-     "slot": "door",
-     "cells": [
-      [
-       4,
-       6
-      ]
-     ]
+     "slot": "door"
     },
     "Data": {
      "object": "door"
@@ -453,5 +253,6 @@
     }
    }
   }
- ]
+ ],
+ "units": "cm"
 }

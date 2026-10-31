@@ -30,15 +30,16 @@ for e in T["vis"]["entries"]:
 for r in T["rooms"]["rooms"]:
     if r["defaultVis"] not in vis_ids: errs.append(f"rooms: {r['id']} 的 defaultVis {r['defaultVis']} 不在 vis 里")
     if r["id"] not in T["sound"]["rooms"]: errs.append(f"sound: 房间 {r['id']} 没有环境声")
-    g = r["grid"]; occ = {}
+    W_, D_ = r["size"]["w"], r["size"]["d"]; rects = []
     for s in r["slots"]:
         if s.get("fixed") and s["fixed"] not in obj_ids: errs.append(f"rooms: {r['id']}.{s['name']} 的 fixed {s['fixed']} 不在 objects 里")
-        for c, rr in s["cells"]:
-            if not (0 <= c < g["cols"] and 0 <= rr < g["rows"]): errs.append(f"rooms: {r['id']}.{s['name']} 格 {c},{rr} 越界")
-            key = (c, rr)
-            if s["type"] in ("floor",) and key in occ and occ[key] != s["name"]:
-                errs.append(f"rooms: {r['id']} 地面格 {c},{rr} 被 {occ[key]} 与 {s['name']} 重叠")
-            if s["type"] in ("floor",): occ[key] = s["name"]
+        x0, x1, z0, z1 = s["x"] - s["w"] / 2, s["x"] + s["w"] / 2, s["z"] - s["d"] / 2, s["z"] + s["d"] / 2
+        if x0 < -W_ / 2 - 1 or x1 > W_ / 2 + 1 or z0 < -D_ / 2 - 1 or z1 > D_ / 2 + 1: errs.append(f"rooms: {r['id']}.{s['name']} 越界 ({x0},{z0})-({x1},{z1})")
+        if s["type"] == "floor":
+            for (n2, a0, a1, b0, b1) in rects:
+                if x0 < a1 and x1 > a0 and z0 < b1 and z1 > b0: errs.append(f"rooms: {r['id']} 地面槽 {s['name']} 与 {n2} 重叠")
+            rects.append((s["name"], x0, x1, z0, z1))
+        if s["x"] % 1 or s["z"] % 1: errs.append(f"rooms: {r['id']}.{s['name']} 坐标不是整数厘米")
 for it in T["items"]["items"]:
     if it["object"] not in obj_ids: errs.append(f"items: {it['id']} 的 object {it['object']} 不存在")
     if it["comfortClass"] not in T["economy"]["comfort"]["classes"]: errs.append(f"items: {it['id']} 的 comfortClass 不在 economy.comfort.classes 里")
@@ -52,7 +53,9 @@ for n, p in presets.items():
         if "Slot" in comp:
             sl = slots.get(comp["Slot"]["slot"])
             if not sl: errs.append(f"presets/{n}: {e['id']} 的槽位 {comp['Slot']['slot']} 不在 rooms 里")
-            elif sorted(map(tuple, sl["cells"])) != sorted(map(tuple, comp["Slot"]["cells"])): errs.append(f"presets/{n}: {e['id']} 的格子与 rooms 槽位 {sl['name']} 不一致")
+            else:
+                t = comp["Transform"]
+                if abs(t["x"] - sl["x"]) > sl["w"] / 2 + 1 or abs(t["z"] - sl["z"]) > sl["d"] / 2 + 1: errs.append(f"presets/{n}: {e['id']} 的位置 ({t['x']},{t['z']}) 不在槽位 {sl['name']} 内")
 for k in T["sound"]["interactions"]:
     if k not in fns: errs.append(f"sound: 交互音 {k} 不是 objects.functions 里的函数")
 if errs:

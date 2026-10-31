@@ -3,7 +3,8 @@
  "type": "object",
  "required": [
   "format",
-  "items"
+  "items",
+  "units"
  ],
  "properties": {
   "format": {
@@ -14,29 +15,31 @@
    "items": {
     "type": "object",
     "required": [
+     "uid",
      "item",
      "x",
-     "y",
+     "z",
      "rot",
      "surface"
     ],
     "properties": {
+     "uid": {
+      "type": "string"
+     },
      "item": {
       "type": "string"
      },
      "x": {
       "type": "integer"
      },
+     "z": {
+      "type": "integer"
+     },
      "y": {
       "type": "integer"
      },
      "rot": {
-      "enum": [
-       0,
-       90,
-       180,
-       270
-      ]
+      "type": "number"
      },
      "surface": {
       "enum": [
@@ -59,6 +62,9 @@
     },
     "additionalProperties": false
    }
+  },
+  "units": {
+   "const": "cm"
   }
  }
 }

@@ -4,7 +4,8 @@
  "required": [
   "format",
   "functions",
-  "objects"
+  "objects",
+  "units"
  ],
  "properties": {
   "format": {
@@ -45,13 +46,21 @@
       "type": "string"
      },
      "footprint": {
-      "type": "array",
-      "items": {
-       "type": "integer",
-       "minimum": 0
-      },
-      "minItems": 2,
-      "maxItems": 2
+      "type": "object",
+      "required": [
+       "w",
+       "d"
+      ],
+      "properties": {
+       "w": {
+        "type": "integer",
+        "minimum": 0
+       },
+       "d": {
+        "type": "integer",
+        "minimum": 0
+       }
+      }
      },
      "states": {
       "type": "array",
@@ -106,6 +115,9 @@
      }
     }
    }
+  },
+  "units": {
+   "const": "cm"
   }
  }
 }

@@ -5,7 +5,8 @@
   "format",
   "room",
   "pack",
-  "entities"
+  "entities",
+  "units"
  ],
  "properties": {
   "format": {
@@ -40,10 +41,37 @@
       ],
       "propertyNames": {
        "pattern": "^-?[A-Z][A-Za-z]*(@[a-z_0-9]+)?$"
+      },
+      "properties": {
+       "Transform": {
+        "type": "object",
+        "required": [
+         "x",
+         "y",
+         "z"
+        ],
+        "properties": {
+         "x": {
+          "type": "integer"
+         },
+         "y": {
+          "type": "integer"
+         },
+         "z": {
+          "type": "integer"
+         },
+         "rotY": {
+          "type": "number"
+         }
+        }
+       }
       }
      }
     }
    }
+  },
+  "units": {
+   "const": "cm"
   }
  }
 }

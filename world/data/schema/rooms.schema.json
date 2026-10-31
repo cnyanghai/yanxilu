@@ -3,7 +3,8 @@
  "type": "object",
  "required": [
   "format",
-  "rooms"
+  "rooms",
+  "units"
  ],
  "properties": {
   "format": {
@@ -35,26 +36,28 @@
        "w",
        "d",
        "h"
-      ]
+      ],
+      "properties": {
+       "w": {
+        "type": "integer"
+       },
+       "d": {
+        "type": "integer"
+       },
+       "h": {
+        "type": "integer"
+       }
+      }
      },
      "grid": {
       "type": "object",
       "required": [
-       "cols",
-       "rows",
        "cell"
       ],
       "properties": {
-       "cols": {
-        "type": "integer",
-        "minimum": 1
-       },
-       "rows": {
-        "type": "integer",
-        "minimum": 1
-       },
        "cell": {
-        "type": "number"
+        "type": "integer",
+        "minimum": 1
        }
       }
      },
@@ -65,7 +68,10 @@
        "required": [
         "name",
         "type",
-        "cells"
+        "x",
+        "z",
+        "w",
+        "d"
        ],
        "properties": {
         "name": {
@@ -74,18 +80,19 @@
         "type": {
          "type": "string"
         },
-        "cells": {
-         "type": "array",
-         "items": {
-          "type": "array",
-          "items": {
-           "type": "integer",
-           "minimum": 0
-          },
-          "minItems": 2,
-          "maxItems": 2
-         },
-         "minItems": 1
+        "x": {
+         "type": "integer"
+        },
+        "z": {
+         "type": "integer"
+        },
+        "w": {
+         "type": "integer",
+         "minimum": 1
+        },
+        "d": {
+         "type": "integer",
+         "minimum": 1
         },
         "rot": {
          "type": "number"
@@ -109,6 +116,9 @@
      }
     }
    }
+  },
+  "units": {
+   "const": "cm"
   }
  }
 }

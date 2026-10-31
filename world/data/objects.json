@@ -22,10 +22,10 @@
    "name": "书墙",
    "kind": "fixed",
    "slotType": "wall",
-   "footprint": [
-    7,
-    1
-   ],
+   "footprint": {
+    "w": 350,
+    "d": 32
+   },
    "states": [
     {
      "name": "neutral",
@@ -55,10 +55,10 @@
    "name": "书",
    "kind": "data",
    "slotType": "cubby",
-   "footprint": [
-    0,
-    0
-   ],
+   "footprint": {
+    "w": 4,
+    "d": 22
+   },
    "states": [
     {
      "name": "on_shelf",
@@ -94,10 +94,10 @@
    "name": "笔记本架",
    "kind": "fixed",
    "slotType": "floor",
-   "footprint": [
-    3,
-    1
-   ],
+   "footprint": {
+    "w": 150,
+    "d": 45
+   },
    "states": [
     {
      "name": "neutral",
@@ -125,10 +125,10 @@
    "name": "笔记本",
    "kind": "data",
    "slotType": "rackslant",
-   "footprint": [
-    0,
-    0
-   ],
+   "footprint": {
+    "w": 18,
+    "d": 2
+   },
    "states": [
     {
      "name": "closed",
@@ -156,10 +156,10 @@
    "name": "案桌",
    "kind": "fixed",
    "slotType": "floor",
-   "footprint": [
-    3,
-    2
-   ],
+   "footprint": {
+    "w": 160,
+    "d": 70
+   },
    "states": [
     {
      "name": "neutral",
@@ -180,10 +180,10 @@
    "name": "今天的牌",
    "kind": "data",
    "slotType": "desktop",
-   "footprint": [
-    0,
-    0
-   ],
+   "footprint": {
+    "w": 6,
+    "d": 9
+   },
    "states": [
     {
      "name": "flat",
@@ -215,10 +215,10 @@
    "name": "台灯",
    "kind": "fixed",
    "slotType": "desktop",
-   "footprint": [
-    0,
-    0
-   ],
+   "footprint": {
+    "w": 15,
+    "d": 30
+   },
    "states": [
     {
      "name": "off",
@@ -251,10 +251,10 @@
    "name": "壁灯",
    "kind": "fixed",
    "slotType": "wallface",
-   "footprint": [
-    0,
-    0
-   ],
+   "footprint": {
+    "w": 15,
+    "d": 25
+   },
    "states": [
     {
      "name": "off",
@@ -286,10 +286,10 @@
    "name": "桌椅",
    "kind": "fixed",
    "slotType": "floor",
-   "footprint": [
-    1,
-    1
-   ],
+   "footprint": {
+    "w": 50,
+    "d": 50
+   },
    "states": [
     {
      "name": "neutral",
@@ -310,10 +310,10 @@
    "name": "读书椅",
    "kind": "fixed",
    "slotType": "floor",
-   "footprint": [
-    2,
-    2
-   ],
+   "footprint": {
+    "w": 85,
+    "d": 85
+   },
    "states": [
     {
      "name": "empty",
@@ -341,10 +341,10 @@
    "name": "地毯",
    "kind": "fixed",
    "slotType": "rug",
-   "footprint": [
-    5,
-    3
-   ],
+   "footprint": {
+    "w": 200,
+    "d": 150
+   },
    "states": [
     {
      "name": "neutral",
@@ -365,10 +365,10 @@
    "name": "盒",
    "kind": "data",
    "slotType": "shelf",
-   "footprint": [
-    0,
-    0
-   ],
+   "footprint": {
+    "w": 9,
+    "d": 24
+   },
    "states": [
     {
      "name": "sealed",
@@ -403,10 +403,10 @@
    "name": "袋",
    "kind": "data",
    "slotType": "shelf",
-   "footprint": [
-    0,
-    0
-   ],
+   "footprint": {
+    "w": 5,
+    "d": 20
+   },
    "states": [
     {
      "name": "sealed",
@@ -434,10 +434,10 @@
    "name": "门",
    "kind": "fixed",
    "slotType": "door",
-   "footprint": [
-    1,
-    0
-   ],
+   "footprint": {
+    "w": 90,
+    "d": 10
+   },
    "states": [
     {
      "name": "closed",
@@ -466,10 +466,10 @@
    "name": "猫",
    "kind": "shop",
    "slotType": "floor|shelf",
-   "footprint": [
-    1,
-    1
-   ],
+   "footprint": {
+    "w": 45,
+    "d": 25
+   },
    "states": [
     {
      "name": "lying",
@@ -499,10 +499,10 @@
    "name": "柴犬",
    "kind": "shop",
    "slotType": "floor",
-   "footprint": [
-    1,
-    1
-   ],
+   "footprint": {
+    "w": 40,
+    "d": 30
+   },
    "states": [
     {
      "name": "sitting",
@@ -528,10 +528,10 @@
    "name": "小鸟",
    "kind": "shop",
    "slotType": "shelf|sill",
-   "footprint": [
-    0,
-    0
-   ],
+   "footprint": {
+    "w": 10,
+    "d": 10
+   },
    "states": [
     {
      "name": "perched",
@@ -557,10 +557,10 @@
    "name": "植物",
    "kind": "shop",
    "slotType": "floor|desktop|sill|shelf|soil",
-   "footprint": [
-    1,
-    1
-   ],
+   "footprint": {
+    "w": 30,
+    "d": 30
+   },
    "states": [
     {
      "name": "stage0",
@@ -590,10 +590,10 @@
    "name": "信箱",
    "kind": "fixed",
    "slotType": "floor",
-   "footprint": [
-    1,
-    1
-   ],
+   "footprint": {
+    "w": 30,
+    "d": 30
+   },
    "states": [
     {
      "name": "empty",
@@ -621,10 +621,10 @@
    "name": "长椅",
    "kind": "fixed",
    "slotType": "floor",
-   "footprint": [
-    2,
-    1
-   ],
+   "footprint": {
+    "w": 120,
+    "d": 40
+   },
    "states": [
     {
      "name": "empty",
@@ -652,10 +652,10 @@
    "name": "树",
    "kind": "fixed",
    "slotType": "floor",
-   "footprint": [
-    2,
-    2
-   ],
+   "footprint": {
+    "w": 200,
+    "d": 200
+   },
    "states": [
     {
      "name": "neutral",
@@ -671,5 +671,6 @@
    "tier": 0,
    "model": "rodin:tree"
   }
- ]
+ ],
+ "units": "cm"
 }
