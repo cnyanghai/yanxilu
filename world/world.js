@@ -532,7 +532,7 @@ canvas.addEventListener("wheel", (e) => { e.preventDefault(); wheelAcc += e.delt
 function resize() { renderer.setSize(innerWidth, innerHeight, false); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); }
 addEventListener("resize", resize); resize();
 function frame() {
-  const dt = Math.min(0.05, clock.getDelta()), t = clock.elapsedTime;
+  const dt = Math.min(0.1, clock.getDelta()), t = clock.elapsedTime;   /* 低帧率机器上每帧最多推进 0.1 秒：软件渲染 4 帧时过渡也别慢十倍 */
   stepCamera(dt, t); applyLight(dt);
   if (performance.now() - wheelAt > 400) wheelAcc *= 0.9;
   if (!reduceMotion) for (const o of plant.children) if (o.userData.sway) { o.rotation.z = Math.sin(t * 0.9) * 0.018; o.rotation.x = Math.sin(t * 0.7 + 1.3) * 0.012; }

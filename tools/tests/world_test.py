@@ -23,17 +23,18 @@ async def shoot(pw, name, viewport, mobile):
     pg.on("console", lambda m: errs.append(m.text) if m.type == "error" else None)
     pg.on("pageerror", lambda e: errs.append(str(e)))
     await pg.goto(f"http://127.0.0.1:{PORT}/world/#/"); await pg.wait_for_function("window.__yxlWorld", timeout=15000)
-    stats = []
+    stats = []; t_route = time.time()
     for r in ROUTES:
         await pg.evaluate(f"window.__yxlWorld.go('{r}')"); await pg.wait_for_timeout(200)
-        await pg.wait_for_function("window.__yxlWorld.settled()", timeout=20000); await pg.wait_for_timeout(300)
+        await pg.wait_for_function("window.__yxlWorld.settled()", timeout=45000); await pg.wait_for_timeout(300)
         fn = os.path.join(OUT, f"{name}_{r.strip('/').replace('/', '-') or 'yard'}.png"); await pg.screenshot(path=fn)
         info = await pg.evaluate("(() => { const i = window.__yxlWorld.info(); return { calls: i.calls, tris: i.triangles, route: window.__yxlWorld.route() }; })()")
+        info["sec"] = round(time.time() - t_route, 1); t_route = time.time()
         stats.append((r, info))
     # 三种光各一张（站在书房里）
     for l in ("day", "rain", "night"):
         await pg.evaluate("window.__yxlWorld.go('/study')"); await pg.evaluate(f"window.__yxlWorld.setLight('{l}')"); await pg.wait_for_timeout(200)
-        await pg.wait_for_function("window.__yxlWorld.settled()", timeout=20000); await pg.wait_for_timeout(300)
+        await pg.wait_for_function("window.__yxlWorld.settled()", timeout=45000); await pg.wait_for_timeout(300)
         await pg.screenshot(path=os.path.join(OUT, f"{name}_light-{l}.png"))
     # Esc 退后一级
     await pg.evaluate("window.__yxlWorld.go('/study/desk/plant')"); await pg.wait_for_timeout(200)
@@ -51,7 +52,7 @@ async def main():
             for name, vp, mob in (("desktop", {"width": 1440, "height": 900}, False), ("mobile", {"width": 390, "height": 844}, True)):
                 stats, errs, back = await shoot(pw, name, vp, mob)
                 print(f"== {name}")
-                for r, i in stats: print(f"  {r:22s} route={i['route']:22s} calls={i['calls']:4d} tris={i['tris']}")
+                for r, i in stats: print(f"  {r:22s} route={i['route']:22s} calls={i['calls']:4d} tris={i['tris']:6d} {i['sec']:5.1f}s")
                 print(f"  Esc 后路由 = {back}  (应为 /study/desk)")
                 if back != "/study/desk": ok = False
                 if errs: ok = False; print("  控制台报错："); [print("   ", e[:300]) for e in errs[:10]]

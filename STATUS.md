@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: M1 第 3 天第一步：预设驱动的自由家具（presets/study.json → props 表 → packs/modern/furniture/*.gltf.json，Draco + 内嵌 JSON 以适配 Baba 静态类型），默认场景重新有了桌椅；1 档截图无报错
-next: 回归通过后提交；M1 第 3 天剩余：机位与热区从 rooms 表来、路由即位置；然后 study_scene.py 改 4.5 × 3.5 重烘让壳与表对齐；再工具岗的导入命令与烘焙增量
+stage: M1 第 3 天第一步完成并推送：预设驱动的自由家具进默认场景；tools/asset_shrink.py 把三件家具从 13.6 MB 压到 0.4 MB；回归通过（软件渲染每条路由 3 到 14 秒）
+next: M1 第 3 天剩余：机位与热区从 rooms 表来、路由即位置；study_scene.py 改 4.5 × 3.5 重烘对齐表；然后工具岗导入命令（接上 asset_shrink）与烘焙增量
 blocked_by: 用户看效果
 updated: 2026-10-30
 ---
@@ -65,6 +65,7 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-10-31 回归超时的根子：swiftshader 4 帧每秒，每帧步进上限 0.05 秒让 2 秒过渡走十几秒 → 上限放宽到 0.1 秒、测试等待 45 秒并打印每条路由耗时；tools/asset_shrink.py（glTF 内嵌贴图 PNG → JPEG，重建 buffer）三件家具 13.6 → 0.4 MB；回归通过
 - 2026-10-31 M1 第 3 天第一步：objects 加高度；props 指向 packs/modern/furniture/（Rodin 三件 Draco 后转 .gltf.json，约 13.6 MB，KTX2 后再减）；world.js 的 VERIFY_SLOTS 换成 loadPresetFurniture（按预设实体 + 占地宽深高缩放 + 原点落地）；桌椅模型里混进一把椅子加一个凳子（Rodin 第二版把参考图两件一起出了），占位先用
 - 2026-10-31 M1 第 2 天收尾：rooms 加 preset 字段避免 404；?tier=1 截图三种光验证合成后期；world_test 通过；提交
 - 2026-10-31 M1 第 2 天（技术总监）：表格式定稿为厘米；world/data/tables.js（loadTables、validate、visFor）、world/sim/grid.js（Grid、roomGrid、astar、canPlace）、world/render/{post,tiers}.js；world.js 导入三者，LIGHTS 常量换成 vis 表 + 雨天天气层 + bakeSet 别名（黎明借白天、黄昏借夜晚，待重烘四时段）、曝光随 vis、1 档以上走合成后期、工坊面板显示档位与表状态；world/package.json 声明模块让 Node 能测；sim_test 暴露格心半厘米问题 → 占地内缩 1 厘米
