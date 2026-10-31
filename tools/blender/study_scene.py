@@ -14,8 +14,10 @@ from mathutils import Vector
 
 W, D, H, T = 5.2, 4.2, 3.0, 0.24
 WIN = dict(y0=0.0, y1=1.2, z0=1.0, z1=2.3)
-WALL = dict(cx=-1.3, w=2.2, depth=0.32, shelves=4, shelf_h=0.56, y0=0.18)
-ARCH = dict(cx=1.55, w=1.8, depth=0.30, shelves=3, shelf_h=0.62, y0=0.18)
+# 2026-10-30 起格子家具按 design/ASSET-SPEC.md：书墙是 0.3 米见方的格子，档案架改成下层格子窝 + 斜面展示架（笔记本架的样子）
+WALL = dict(cx=-1.3, w=2.2, depth=0.32, shelves=8, shelf_h=0.31, y0=0.18, cols=7)
+ARCH = dict(cx=1.55, w=1.8, depth=0.45, shelves=2, shelf_h=0.36, y0=0.06, cols=4, slant=0.30)
+FREE_FURN = False   # 桌、桌椅、读书椅不再用灰盒：由图生三维的模型在运行时放进槽位（world.js 的 VERIFY_SLOTS）
 DESK = dict(x=0.1, y=0.75, w=1.6, d=0.70, h=0.76)
 PLANT = dict(x=DESK["x"] - 0.52, y=DESK["y"] - 0.02)
 LAMP = dict(x=DESK["x"] + 0.58, y=DESK["y"] - 0.12)
@@ -132,13 +134,28 @@ def build(with_items=True):
 
     # 书墙与档案架
     def shelf_unit(name, S):
-        cx, width, depth, shelves, shelf_h, y0 = S["cx"], S["w"], S["depth"], S["shelves"], S["shelf_h"], S["y0"]
-        Hh = y0 + shelves * shelf_h + 0.04; yb = D / 2 - depth / 2
+        """格子家具：厚板圆边（零件表第 1 件）、竖隔板分格、下沿一条踢脚。slant 不为 0 时上面加一块斜面展示板（笔记本架）。"""
+        cx, width, depth, shelves, shelf_h, y0, cols = S["cx"], S["w"], S["depth"], S["shelves"], S["shelf_h"], S["y0"], S["cols"]
+        Hh = y0 + shelves * shelf_h + 0.04; yb = D / 2 - depth / 2; side = 0.04; div = 0.025
         box(f"{name}_back", (width, 0.02, Hh), (cx, D / 2 - 0.01, Hh / 2), M["wood2"], "furn", 0.004)
-        box(f"{name}_l", (0.03, depth, Hh), (cx - width / 2 + 0.015, yb, Hh / 2), M["wood"], "furn", 0.006)
-        box(f"{name}_r", (0.03, depth, Hh), (cx + width / 2 - 0.015, yb, Hh / 2), M["wood"], "furn", 0.006)
-        box(f"{name}_top", (width, depth, 0.04), (cx, yb, Hh - 0.02), M["wood"], "furn", 0.006)
-        for i in range(shelves + 1): box(f"{name}_s{i}", (width - 0.06, depth, 0.03), (cx, yb, y0 + i * shelf_h - 0.015), M["wood"], "furn", 0.004)
+        box(f"{name}_l", (side, depth, Hh), (cx - width / 2 + side / 2, yb, Hh / 2), M["wood"], "furn", 0.02)
+        box(f"{name}_r", (side, depth, Hh), (cx + width / 2 - side / 2, yb, Hh / 2), M["wood"], "furn", 0.02)
+        box(f"{name}_top", (width, depth, 0.04), (cx, yb, Hh - 0.02), M["wood"], "furn", 0.02)
+        box(f"{name}_plinth", (width - 2 * side, depth - 0.02, y0 - 0.03), (cx, yb + 0.01, (y0 - 0.03) / 2), M["wood2"], "furn", 0.004)
+        for i in range(shelves + 1): box(f"{name}_s{i}", (width - 2 * side, depth, 0.03), (cx, yb, y0 + i * shelf_h - 0.015), M["wood"], "furn", 0.008)
+        inner = width - 2 * side; cell = (inner - (cols - 1) * div) / cols
+        for c in range(1, cols):
+            x = cx - inner / 2 + c * (cell + div) - div / 2
+            box(f"{name}_d{c}", (div, depth - 0.01, shelves * shelf_h), (x, yb, y0 + shelves * shelf_h / 2), M["wood"], "furn", 0.006)
+        if S.get("slant"):
+            # 斜面展示板：从顶板后沿向前下方倾斜，放笔记本
+            # 板长 L，绕 X 轴抬起 ang：上沿贴后墙、下沿在前；下沿一条小挡条防笔记本滑落
+            sl = S["slant"]; ang = math.radians(58); L = depth * 0.92
+            yc = D / 2 - 0.03 - (L / 2) * math.cos(ang); zc = Hh + (L / 2) * math.sin(ang)
+            box(f"{name}_slant", (width - 0.02, L, 0.03), (cx, yc, zc), M["wood"], "furn", 0.01, rot=(ang, 0, 0))
+            yf = yc - (L / 2) * math.cos(ang)
+            box(f"{name}_lip", (width - 0.02, 0.03, 0.06), (cx, yf - 0.005, Hh + 0.03), M["wood"], "furn", 0.006)
+            box(f"{name}_slback", (width, 0.03, sl), (cx, D / 2 - 0.015, Hh + sl / 2), M["wood2"], "furn", 0.006)
     shelf_unit("wall", WALL); shelf_unit("arch", ARCH)
     if with_items:
         for i in range(WALL["shelves"]):
@@ -159,20 +176,21 @@ def build(with_items=True):
 
     # 桌、桌椅、读书椅
     DX, DY, DW, DD, DH = DESK["x"], DESK["y"], DESK["w"], DESK["d"], DESK["h"]
-    box("desk_top", (DW, DD, 0.05), (DX, DY, DH - 0.025), M["wood"], "furn", 0.01)
-    box("desk_apron", (DW, 0.03, 0.12), (DX, DY - DD / 2 + 0.015, DH - 0.11), M["wood2"], "furn", 0.004)
-    for sx in (-1, 1):
-        for sy in (-1, 1): box(f"leg_{sx}_{sy}", (0.06, 0.06, DH - 0.05), (DX + sx * (DW / 2 - 0.08), DY + sy * (DD / 2 - 0.08), (DH - 0.05) / 2), M["wood2"], "furn", 0.004)
-    CY = DY + DD / 2 + 0.35
-    box("chair_seat", (0.46, 0.46, 0.05), (DX, CY, 0.45), M["paper2"], "furn", 0.01)
-    box("chair_back", (0.46, 0.04, 0.5), (DX, CY + 0.21, 0.72), M["wood2"], "furn", 0.008)
-    for sx in (-1, 1):
-        for sy in (-1, 1): box(f"cleg_{sx}_{sy}", (0.04, 0.04, 0.43), (DX + sx * 0.2, CY + sy * 0.2, 0.215), M["wood2"], "furn", 0.003)
-    AX, AY, AR = -1.55, -0.85, math.radians(40)
-    def rot_xy(x_, y_, cx, cy, a): dx, dy = x_ - cx, y_ - cy; return (cx + dx * math.cos(a) - dy * math.sin(a), cy + dx * math.sin(a) + dy * math.cos(a))
-    for nm, dims, off, z, m in [("arm_seat", (0.62, 0.62, 0.14), (0, 0), 0.36, M["shade"]), ("arm_back", (0.62, 0.12, 0.42), (0, 0.25), 0.64, M["shade"]),
-                                ("arm_l", (0.10, 0.62, 0.22), (-0.26, 0), 0.54, M["wood2"]), ("arm_r", (0.10, 0.62, 0.22), (0.26, 0), 0.54, M["wood2"]), ("arm_base", (0.58, 0.58, 0.28), (0, 0), 0.15, M["wood2"])]:
-        px_, py_ = rot_xy(AX + off[0], AY + off[1], AX, AY, AR); box(nm, dims, (px_, py_, z), m, "furn", 0.02, rot=(0, 0, AR))
+    if FREE_FURN:
+        box("desk_top", (DW, DD, 0.05), (DX, DY, DH - 0.025), M["wood"], "furn", 0.01)
+        box("desk_apron", (DW, 0.03, 0.12), (DX, DY - DD / 2 + 0.015, DH - 0.11), M["wood2"], "furn", 0.004)
+        for sx in (-1, 1):
+            for sy in (-1, 1): box(f"leg_{sx}_{sy}", (0.06, 0.06, DH - 0.05), (DX + sx * (DW / 2 - 0.08), DY + sy * (DD / 2 - 0.08), (DH - 0.05) / 2), M["wood2"], "furn", 0.004)
+        CY = DY + DD / 2 + 0.35
+        box("chair_seat", (0.46, 0.46, 0.05), (DX, CY, 0.45), M["paper2"], "furn", 0.01)
+        box("chair_back", (0.46, 0.04, 0.5), (DX, CY + 0.21, 0.72), M["wood2"], "furn", 0.008)
+        for sx in (-1, 1):
+            for sy in (-1, 1): box(f"cleg_{sx}_{sy}", (0.04, 0.04, 0.43), (DX + sx * 0.2, CY + sy * 0.2, 0.215), M["wood2"], "furn", 0.003)
+        AX, AY, AR = -1.55, -0.85, math.radians(40)
+        def rot_xy(x_, y_, cx, cy, a): dx, dy = x_ - cx, y_ - cy; return (cx + dx * math.cos(a) - dy * math.sin(a), cy + dx * math.sin(a) + dy * math.cos(a))
+        for nm, dims, off, z, m in [("arm_seat", (0.62, 0.62, 0.14), (0, 0), 0.36, M["shade"]), ("arm_back", (0.62, 0.12, 0.42), (0, 0.25), 0.64, M["shade"]),
+                                    ("arm_l", (0.10, 0.62, 0.22), (-0.26, 0), 0.54, M["wood2"]), ("arm_r", (0.10, 0.62, 0.22), (0.26, 0), 0.54, M["wood2"]), ("arm_base", (0.58, 0.58, 0.28), (0, 0), 0.15, M["wood2"])]:
+            px_, py_ = rot_xy(AX + off[0], AY + off[1], AX, AY, AR); box(nm, dims, (px_, py_, z), m, "furn", 0.02, rot=(0, 0, AR))
 
     # 桌上
     px, py = PLANT["x"], PLANT["y"]
@@ -280,8 +298,9 @@ def config():
     return dict(
         room=dict(w=W, d=D, h=H, t=T, back_z=round(-D / 2, 3), left_x=round(-W / 2, 3)),
         window=dict(x=round(-W / 2, 3), z0=round(-WIN["y1"], 3), z1=round(-WIN["y0"], 3), y0=WIN["z0"], y1=WIN["z1"]),
-        wall=dict(cx=WALL["cx"], w=WALL["w"], depth=WALL["depth"], shelves=WALL["shelves"], shelf_h=WALL["shelf_h"], y0=WALL["y0"], back_z=round(-D / 2, 3)),
-        archive=dict(cx=ARCH["cx"], w=ARCH["w"], depth=ARCH["depth"], shelves=ARCH["shelves"], shelf_h=ARCH["shelf_h"], y0=ARCH["y0"], back_z=round(-D / 2, 3)),
+        wall=dict(cx=WALL["cx"], w=WALL["w"], depth=WALL["depth"], shelves=WALL["shelves"], shelf_h=WALL["shelf_h"], y0=WALL["y0"], cols=WALL["cols"], side=0.04, div=0.025, back_z=round(-D / 2, 3)),
+        archive=dict(cx=ARCH["cx"], w=ARCH["w"], depth=ARCH["depth"], shelves=ARCH["shelves"], shelf_h=ARCH["shelf_h"], y0=ARCH["y0"], cols=ARCH["cols"], side=0.04, div=0.025, slant=ARCH.get("slant", 0), back_z=round(-D / 2, 3)),
+        free_furn=FREE_FURN,
         desk=dict(x=DESK["x"], z=round(-DESK["y"], 3), w=DESK["w"], d=DESK["d"], h=DESK["h"]),
         plant=dict(x=PLANT["x"], z=round(-PLANT["y"], 3), y=DESK["h"] + 0.16),
         lamp=dict(x=LAMP["x"], z=round(-LAMP["y"], 3), bulb=to_three((LAMP["x"] - 0.28, LAMP["y"], DESK["h"] + 0.53))),

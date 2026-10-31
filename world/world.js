@@ -134,6 +134,13 @@ function atlasCanvas(n, cellW, cellH, draw) {
 }
 
 /* ============ 3. 书 ============ */
+/* 格子家具的每一格：左沿 x0 与内宽 w（世界坐标）。没有 cols 的旧配置当一整格 */
+function cells(slot) {
+  const cols = slot.cols || 1, side = slot.side || 0.03, div = slot.div || 0;
+  const inner = slot.w - 2 * side, cw = (inner - (cols - 1) * div) / cols, out = [];
+  for (let c = 0; c < cols; c++) out.push({ x0: slot.cx - inner / 2 + c * (cw + div), w: cw });
+  return out;
+}
 const bookMeshes = [];
 const booksGroup = new THREE.Group(); house.add(booksGroup);
 {
@@ -147,17 +154,28 @@ const booksGroup = new THREE.Group(); house.add(booksGroup);
   const { mesh, off } = atlasInstanced(geom, n, atlas, 4, new THREE.MeshLambertMaterial({}));
   const dummy = new THREE.Object3D(), col = new THREE.Color();
   let rnd = 7; const R = () => (rnd = (rnd * 16807) % 2147483647) / 2147483647;
-  const perShelf = Math.ceil(n / slot.shelves); let i = 0;
+  /* 格子家具（ASSET-SPEC 第 3 节）：一格一格地填，书不跨隔板。cells(slot) 给出每格的左沿与宽。
+     书少格多的时候不从顶上一行填满往下排，而是按"每格约五本"算出要用几格，均匀撒在整面墙上，像住了人的架子 */
+  let i = 0;
   const zFront = slot.back_z + slot.depth; /* 架子前沿 */
+  const cellList = cells(slot), total = slot.shelves * cellList.length, want = Math.min(total, Math.max(1, Math.ceil(n / 5)));
+  const used = new Set(); for (let u = 0; u < want; u++) used.add(Math.floor(u * total / want + (u * 7919) % Math.max(1, Math.floor(total / want))));
   for (let s = 0; s < slot.shelves && i < n; s++) {
-    let x = -slot.w / 2 + 0.06; const yBase = slot.y0 + (slot.shelves - 1 - s) * slot.shelf_h;
-    for (let k = 0; k < perShelf && i < n; k++, i++) {
-      const b = BOOKS[i], bw = 0.028 + R() * 0.032, bh = 0.19 + R() * 0.08, bd = 0.15 + R() * 0.05, lean = R() < 0.12 && k > 0, out = b.state === "在读" ? 0.03 : 0;
-      dummy.position.set(slot.cx + x + bw / 2, yBase + bh / 2, zFront - bd / 2 - 0.04 + out);
-      dummy.rotation.set(0, 0, lean ? -0.12 : 0); dummy.scale.set(bw, bh, bd); dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix);
-      col.setHex(DOMAINS[b.dom].color); col.offsetHSL(0, 0, k % 2 ? 0.04 : -0.03); mesh.setColorAt(i, col); off.setXY(i, i / n, 1 / n);
-      bookMeshes.push({ i, b, pos: dummy.position.clone(), w: bw, h: bh, d: bd });
-      x += bw + 0.004 + (lean ? 0.02 : 0); if (x > slot.w - 0.1) break;
+    const yBase = slot.y0 + (slot.shelves - 1 - s) * slot.shelf_h;
+    for (let ci = 0; ci < cellList.length; ci++) {
+      const c = cellList[ci];
+      if (i >= n) break;
+      if (!used.has(s * cellList.length + ci)) continue;
+      let x = c.x0 + 0.015; const xEnd = c.x0 + c.w - 0.015; let k = 0;
+      while (i < n) {
+        const b = BOOKS[i], bw = 0.028 + R() * 0.032, bh = Math.min(slot.shelf_h - 0.06, 0.19 + R() * 0.08), bd = 0.15 + R() * 0.05, lean = R() < 0.12 && k > 0, out = b.state === "在读" ? 0.03 : 0;
+        if (x + bw > xEnd) break;
+        dummy.position.set(x + bw / 2, yBase + bh / 2, zFront - bd / 2 - 0.04 + out);
+        dummy.rotation.set(0, 0, lean ? -0.12 : 0); dummy.scale.set(bw, bh, bd); dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix);
+        col.setHex(DOMAINS[b.dom].color); col.offsetHSL(0, 0, k % 2 ? 0.04 : -0.03); mesh.setColorAt(i, col); off.setXY(i, i / n, 1 / n);
+        bookMeshes.push({ i, b, pos: dummy.position.clone(), w: bw, h: bh, d: bd });
+        x += bw + 0.004 + (lean ? 0.02 : 0); i++; k++;
+      }
     }
   }
   mesh.count = i; mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor.needsUpdate = true; off.needsUpdate = true;
@@ -165,8 +183,9 @@ const booksGroup = new THREE.Group(); house.add(booksGroup);
   /* 每层末尾平放两三本 */
   const flats = new THREE.InstancedMesh(new THREE.BoxGeometry(1, 1, 1), new THREE.MeshLambertMaterial({}), slot.shelves * 3);
   let fi = 0; const fc = new THREE.Color();
-  for (let s2 = 0; s2 < slot.shelves; s2++) {
-    const yBase = slot.y0 + (slot.shelves - 1 - s2) * slot.shelf_h, k = 2 + (s2 % 2); let yy = yBase, xx = slot.cx + slot.w / 2 - 0.26 - R() * 0.1;
+  for (let s2 = 0; s2 < slot.shelves; s2 += 2) {
+    const last = cells(slot).at(-1);
+    const yBase = slot.y0 + (slot.shelves - 1 - s2) * slot.shelf_h, k = 2 + (s2 % 2); let yy = yBase, xx = last.x0 + last.w / 2 + (R() - 0.5) * 0.04;
     for (let j = 0; j < k; j++, fi++) {
       const fw = 0.15 + R() * 0.04, fh = 0.028 + R() * 0.012, fd = 0.2 + R() * 0.03;
       dummy.position.set(xx + (R() - 0.5) * 0.02, yy + fh / 2, zFront - fd / 2 - 0.05); dummy.rotation.set(0, (R() - 0.5) * 0.12, 0); dummy.scale.set(fw, fh, fd); dummy.updateMatrix(); flats.setMatrixAt(fi, dummy.matrix);
@@ -199,16 +218,20 @@ const boxItems = [];
   });
   const { mesh, off } = atlasInstanced(geom, n, atlas, 4, new THREE.MeshLambertMaterial({}));
   const dummy = new THREE.Object3D(), col = new THREE.Color();
-  let x = -slot.w / 2 + 0.08, s = 0, i = 0; const zFront = slot.back_z + slot.depth;
+  /* 盒和袋也一格一格放（下层格子窝） */
+  let i = 0; const zFront = slot.back_z + slot.depth;
+  const cellList = cells(slot); let s = 0, ci = 0, x = cellList[0].x0 + 0.02;
   for (; i < n; i++) {
-    const it = items[i], bw = it.kind === "box" ? 0.085 : 0.045, bh = 0.3, bd = it.kind === "box" ? 0.24 : 0.2;
-    if (x + bw > slot.w / 2 - 0.08) { s++; x = -slot.w / 2 + 0.08; }
+    const it = items[i], bw = it.kind === "box" ? 0.085 : 0.045, bh = Math.min(0.3, slot.shelf_h - 0.05), bd = it.kind === "box" ? 0.24 : 0.2;
+    while (x + bw > cellList[ci].x0 + cellList[ci].w - 0.02) { ci++; if (ci >= cellList.length) { ci = 0; s++; } x = cellList[ci].x0 + 0.02; if (s >= slot.shelves) break; }
+    if (s >= slot.shelves) break;
     const yBase = slot.y0 + (slot.shelves - 1 - s) * slot.shelf_h;
-    dummy.position.set(slot.cx + x + bw / 2, yBase + bh / 2, zFront - bd / 2 - 0.03); dummy.rotation.set(0, 0, 0); dummy.scale.set(bw, bh, bd); dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix);
+    dummy.position.set(x + bw / 2, yBase + bh / 2, zFront - bd / 2 - 0.03); dummy.rotation.set(0, 0, 0); dummy.scale.set(bw, bh, bd); dummy.updateMatrix(); mesh.setMatrixAt(i, dummy.matrix);
     if (it.kind === "box") { col.setHex(DOMAINS[it.dom].color); col.offsetHSL(0, -0.05, 0.02); } else col.setHex(C.kraft);
     mesh.setColorAt(i, col); off.setXY(i, i / n, 1 / n);
     boxItems.push({ i, it, pos: dummy.position.clone(), w: bw, h: bh, d: bd }); x += bw + 0.02;
   }
+  mesh.count = i;
   mesh.instanceMatrix.needsUpdate = true; mesh.instanceColor.needsUpdate = true; off.needsUpdate = true;
   hotspot(mesh, "/study/archive/", "盒"); house.add(mesh);
 }
@@ -544,11 +567,10 @@ function renderPost() {
 /* 路①：图生三维出来的家具（tools/fal_image3d.py → assets/verify/*.glb，不入库），Shaded 材质当无光照用。
    按资产规范：按高度缩放、原点落地、放到槽位中心。「验证椅子」只放读书椅；「Rodin 家具」把烘焙的灰盒家具整组隐掉、五件全放。 */
 const VERIFY_SLOTS = {
-  chair: { h: 0.9, x: -1.55, z: 0.85, ry: -40 },
+  /* 读书椅放窗边的角落（地方感第 3 条：有光、能停）；桌椅在桌后；格子家具（书墙、档案架）由 Blender 建模烘焙，不走 Rodin */
+  chair: { h: 0.9, x: -1.85, z: -0.45, ry: 55 },
   deskchair: { h: 0.85, x: cfg.desk.x, z: cfg.desk.z - cfg.desk.d / 2 - 0.35, ry: 180 },
-  desk: { h: cfg.desk.h, w: cfg.desk.w, x: cfg.desk.x, z: cfg.desk.z, ry: 0 },
-  shelf: { h: cfg.wall.y0 + cfg.wall.shelves * cfg.wall.shelf_h + 0.04, x: cfg.wall.cx, z: cfg.wall.back_z + cfg.wall.depth / 2, ry: 0 },
-  rack: { h: 1.0, x: cfg.archive.cx, z: cfg.archive.back_z + 0.25, ry: 0 },
+  desk: { h: cfg.desk.h, w: cfg.desk.w, d: cfg.desk.d, x: cfg.desk.x, z: cfg.desk.z, ry: 0 },
 };
 const verifyObjs = {};
 async function loadVerify(name) {
@@ -557,7 +579,8 @@ async function loadVerify(name) {
   const gltf = await new GLTFLoader().loadAsync(`./assets/verify/${name}.glb`);
   const o = gltf.scene; o.rotation.y = THREE.MathUtils.degToRad(slot.ry);
   const box = new THREE.Box3().setFromObject(o); const size = box.getSize(new THREE.Vector3());
-  o.scale.setScalar(slot.w ? slot.w / size.x : slot.h / size.y); box.setFromObject(o);
+  /* 给了宽或深就按各轴分别缩放（桌子这类方块家具允许轻微拉伸），否则按高等比 */
+  const sy = slot.h / size.y; o.scale.set(slot.w ? slot.w / size.x : sy, sy, slot.d ? slot.d / size.z : sy); box.setFromObject(o);
   o.position.set(slot.x - (box.min.x + box.max.x) / 2, -box.min.y, slot.z - (box.min.z + box.max.z) / 2);
   /* Rodin 的 Shaded 材质和 kriss 一样：底色黑、画好明暗的贴图放在自发光里。拿它当无光照贴图用 */
   /* 壳的贴图是按 bake_scale 压暗烘的，再靠曝光提回来；Rodin 的贴图没压过，这里乘同一个系数，两者过同一道色调映射才一样亮 */
@@ -567,7 +590,8 @@ async function loadVerify(name) {
 }
 const loadChair = () => loadVerify("chair");
 function applyRodin() {
-  for (const m of shellMeshes()) if (m.name === "furn") m.visible = !DEV.rodin;
+  /* 烘焙里已经没有桌椅灰盒（study_scene.py 的 FREE_FURN=False）；旧烘焙还带着时才隐掉整组家具 */
+  if (cfg.free_furn !== false) for (const m of shellMeshes()) if (m.name === "furn") m.visible = !DEV.rodin;
   for (const n in VERIFY_SLOTS) loadVerify(n).then((o) => { o.visible = DEV.rodin || (n === "chair" && DEV.chair); }).catch((e) => console.warn("验证家具没加载到", n, e));
 }
 
@@ -616,6 +640,6 @@ function devStats() {
   /* 另外两套贴图在空闲时预载 */
   const idle = window.requestIdleCallback || ((f) => setTimeout(f, 1500));
   idle(() => { for (const l of cfg.lights) for (const g of ["shell", "furn"]) bakedTex(l, g); });
-  window.__yxlWorld = { renderer, scene, camera, go, route: () => route, setLight, info: () => renderer.info.render, hot, settled: () => rig.t >= 1 && lightT >= 1, dev: devToggle, DEV };
+  window.__yxlWorld = { renderer, scene, camera, go, route: () => route, setLight, info: () => renderer.info.render, hot, settled: () => rig.t >= 1 && lightT >= 1, dev: devToggle, DEV, verifyReady: () => Object.keys(VERIFY_SLOTS).every((k) => verifyObjs[k]) };
   frame();
 }

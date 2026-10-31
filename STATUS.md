@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: 阶段 3 验证第 2 天收尾：壳按色板重烘（去家具黑影）+ Rodin 五件 → 材质 3.5 / 整体感 3，对照墙 concepts/verify_day2.jpg；门未过
-next: 第 3 天：书墙 / 笔记本架 / 档案架由 Blender 按尺寸表建模烘焙并让书盒落格，读书椅放窗边角落，桌椅重出；再打分，材质与整体感都到 3.5 过门，第 5 天前不到回 A
+stage: 阶段 3 手绘复现验证第 3 天：格子家具烘焙、书盒落格、读书椅归位 → 对照 B 材质 3.5 / 整体感 3.5，Claude 判通过，等用户确认过门
+next: 用户确认验证过门 → 垂直切片正式开工：点地走路与格子寻路、跟随镜头、三个对焦站、角色（Rodin 02 四视图 → 绑骨）、接 S.data、壁灯 / 猫 / 光斑 / 更多书
 blocked_by: 用户看效果
 updated: 2026-10-30
 ---
@@ -60,6 +60,8 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-10-30 验证第 3 天：格子书墙与斜面档案架建模烘焙（两次重烘，斜面板旋转修正）、书盒逐格、读书椅窗边、桌子三轴缩放、桌椅重出仍是凳子；对照墙 concepts/verify_day3.jpg 打分 3.5 / 3.5，画法路线定稿记 ART-BIBLE 第 9 节；验证合计约 18 元
+- 2026-10-30 验证第 3 天开工：study_scene.py 格子家具（shelf_unit 加隔板、厚板圆边、斜面板）、FREE_FURN 关掉桌椅灰盒、config() 导出 cols/side/div/slant/free_furn；world.js 加 cells() 书盒逐格摆放、VERIFY_SLOTS 只剩桌椅与读书椅（椅放窗边 -1.85,-0.45）；Rodin 桌椅第二版（带靠背提示词，0.4 美元）；paint_verify 加 day3 步骤；重烘中
 - 2026-10-30 验证第 2 天收尾：去黑影重烘提交；对照墙存 concepts/verify_day2.jpg；图生图贴图路线排除、paint_ai 目录删除；打分 3.5 / 3
 - 2026-10-30 验证第 2 天：色板材质重烘三种光；四件家具 Rodin（1.6 美元）减面放入 assets/verify；Rodin Shaded 贴图在 emissiveMap、亮度乘 bake_scale 对齐；烘壳时隐家具去黑影（bake_study.py）重烘中；打分材质 3.5 整体感 3，记 ART-BIBLE 第 9 节；world_test 单独重跑通过
 - 2026-10-30 验证第 2 天开工：study_scene.py 加 srgb() 与 grain 参数，材质按六色色板重设（墙暖米白噪点、地板与木作波纹木纹、扶手椅墨青），后台重烘三种光；world.js 加 VERIFY_SLOTS / loadVerify / applyRodin 与「Rodin 家具」开关；paint_verify.py 加 day2 步骤；gltf-transform 要用 nvm 的 node 24（系统 18 跑不了），椅子 3.6 万面减到 2854 面；world_test 超时一次（与烘焙同时跑），待重验

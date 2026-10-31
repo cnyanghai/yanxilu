@@ -22,7 +22,13 @@ STEPS_DAY2 = [
     ("d2_rodin", "重烘 + Rodin 五件家具", ["rodin"]),
     ("d2_rodin_post", "重烘 + Rodin + 路③后期", ["rodin", "post"]),
 ]
+STEPS_DAY3 = [
+    ("d3_rodin", "第 3 天：格子家具烘焙 + 书盒落格 + Rodin 桌椅", ["rodin"]),
+    ("d3_rodin_post", "第 3 天 + 路③后期", ["rodin", "post"]),
+    ("d3_rodin_paint", "第 3 天 + 路②a 滤镜贴图", ["rodin", "paint"]),
+]
 if len(sys.argv) > 2 and sys.argv[2] == "day2": STEPS = STEPS_DAY2; SHEET = "compare_day2.jpg"
+elif len(sys.argv) > 2 and sys.argv[2] == "day3": STEPS = STEPS_DAY3; SHEET = "compare_day3.jpg"
 else: SHEET = "compare_day1.jpg"
 
 def wait_up():
@@ -46,7 +52,8 @@ async def run():
             for k in list(on - set(want)): await pg.evaluate(f"window.__yxlWorld.dev('{k}')"); on.discard(k)
             for k in want:
                 if k not in on: await pg.evaluate(f"window.__yxlWorld.dev('{k}')"); on.add(k)
-            await pg.wait_for_timeout(4000 if ("rodin" in want or "chair" in want or "paint" in want or "paintai" in want) else 600)
+            if "rodin" in want: await pg.wait_for_function("window.__yxlWorld.verifyReady()", timeout=60000)
+            await pg.wait_for_timeout(3000 if ("rodin" in want or "chair" in want or "paint" in want or "paintai" in want) else 600)
             await pg.screenshot(path=os.path.join(OUT, f"shot_{fn}.png"))
             info = await pg.evaluate("(() => { const i = window.__yxlWorld.info(); return [i.calls, i.triangles]; })()")
             print(f"  {fn:11s} {label:28s} calls={info[0]} tris={info[1]}")
