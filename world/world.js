@@ -566,34 +566,37 @@ function applyAltTex() {
 /* 路③：画风（Kuwahara）现在是合成后期（render/post.js）里的一个开关 uPaint；合成后期本身在 1 档以上常开：深度雾、暗角、调色、颗粒。 */
 /* 路①：图生三维出来的家具（tools/fal_image3d.py → assets/verify/*.glb，不入库），Shaded 材质当无光照用。
    按资产规范：按高度缩放、原点落地、放到槽位中心。「验证椅子」只放读书椅；「Rodin 家具」把烘焙的灰盒家具整组隐掉、五件全放。 */
-const VERIFY_SLOTS = {
-  /* 读书椅放窗边的角落（地方感第 3 条：有光、能停）；桌椅在桌后；格子家具（书墙、档案架）由 Blender 建模烘焙，不走 Rodin */
-  chair: { h: 0.9, x: -1.85, z: -0.45, ry: 55 },
-  deskchair: { h: 0.85, x: cfg.desk.x, z: cfg.desk.z - cfg.desk.d / 2 - 0.35, ry: 180 },
-  desk: { h: cfg.desk.h, w: cfg.desk.w, d: cfg.desk.d, x: cfg.desk.x, z: cfg.desk.z, ry: 0 },
-};
-const verifyObjs = {};
-async function loadVerify(name) {
-  if (verifyObjs[name]) return verifyObjs[name];
-  const slot = VERIFY_SLOTS[name];
-  const gltf = await new GLTFLoader().loadAsync(`./assets/verify/${name}.glb`);
-  const o = gltf.scene; o.rotation.y = THREE.MathUtils.degToRad(slot.ry);
-  const box = new THREE.Box3().setFromObject(o); const size = box.getSize(new THREE.Vector3());
-  /* 给了宽或深就按各轴分别缩放（桌子这类方块家具允许轻微拉伸），否则按高等比 */
-  const sy = slot.h / size.y; o.scale.set(slot.w ? slot.w / size.x : sy, sy, slot.d ? slot.d / size.z : sy); box.setFromObject(o);
-  o.position.set(slot.x - (box.min.x + box.max.x) / 2, -box.min.y, slot.z - (box.min.z + box.max.z) / 2);
-  /* Rodin 的 Shaded 材质和 kriss 一样：底色黑、画好明暗的贴图放在自发光里。拿它当无光照贴图用 */
-  /* 壳的贴图是按 bake_scale 压暗烘的，再靠曝光提回来；Rodin 的贴图没压过，这里乘同一个系数，两者过同一道色调映射才一样亮 */
+/* 预设驱动的自由家具（M1 第 3 天的第一步）：presets/<房>.json 里带 Model 组件的实体，按 props 表找到模型文件，
+   按 objects 表的占地（宽 × 深 × 高，厘米）缩放、原点落地、放到 Transform（厘米 → 米）。格子家具仍在烘焙的壳里。
+   Rodin 的 Shaded 材质把明暗画在自发光贴图里；壳的贴图按 bake_scale 压暗再靠曝光提回，这里乘同一个系数让两者一样亮（过渡期做法，正规接光见灯光师提案）。 */
+const presetObjs = {};
+async function loadPresetFurniture() {
+  if (!T || !T.presets.study) return;
   const k = cfg.bake_scale || 1;
-  o.traverse((m) => { if (m.isMesh) { const map = m.material.emissiveMap || m.material.map || null; m.material = new THREE.MeshBasicMaterial({ map, color: map ? new THREE.Color(k, k, k) : 0x244040 }); if (map) map.colorSpace = THREE.SRGBColorSpace; } });
-  o.name = "verify-" + name; o.visible = false; house.add(o); verifyObjs[name] = o; return o;
+  for (const e of T.presets.study.entities) {
+    const file = e.components.Model?.file, asset = file && T.props.assets[file];
+    if (!asset || !/\.(glb|gltf\.json)$/.test(asset.model || "")) continue;   /* shell:xxx、procedural:xxx 不在这里 */
+    try {
+      const dl = new DRACOLoader(); dl.setDecoderPath("../vendor/three/addons/libs/draco/gltf/");
+      const gl = new GLTFLoader(); gl.setDRACOLoader(dl);
+      const gltf = await gl.loadAsync("./" + asset.model);
+      const o = gltf.scene, t = e.components.Transform, obj = T.objects[e.components.Data?.object] || {}, fp = obj.footprint || {};
+      o.rotation.y = THREE.MathUtils.degToRad(t.rotY || 0);
+      const box = new THREE.Box3().setFromObject(o), size = box.getSize(new THREE.Vector3());
+      const sy = fp.h ? fp.h / 100 / size.y : 1;
+      const fit = asset.fit || "h";
+      o.scale.set(fit.includes("w") && fp.w ? fp.w / 100 / size.x : sy, sy, fit.includes("d") && fp.d ? fp.d / 100 / size.z : sy); box.setFromObject(o);
+      o.position.set(t.x / 100 - (box.min.x + box.max.x) / 2, t.y / 100 - box.min.y, t.z / 100 - (box.min.z + box.max.z) / 2);
+      o.traverse((m) => { if (m.isMesh) { const map = m.material.emissiveMap || m.material.map || null; m.material = new THREE.MeshBasicMaterial({ map, color: map ? new THREE.Color(k, k, k) : 0x244040 }); if (map) map.colorSpace = THREE.SRGBColorSpace; } });
+      o.name = "preset-" + e.id; house.add(o); presetObjs[e.id] = o;
+    } catch (err) { console.warn("预设家具没加载到", e.id, err); }
+  }
 }
-const loadChair = () => loadVerify("chair");
-function applyRodin() {
-  /* 烘焙里已经没有桌椅灰盒（study_scene.py 的 FREE_FURN=False）；旧烘焙还带着时才隐掉整组家具 */
-  if (cfg.free_furn !== false) for (const m of shellMeshes()) if (m.name === "furn") m.visible = !DEV.rodin;
-  for (const n in VERIFY_SLOTS) loadVerify(n).then((o) => { o.visible = DEV.rodin || (n === "chair" && DEV.chair); }).catch((e) => console.warn("验证家具没加载到", n, e));
-}
+let presetLoaded = false;
+const presetReady = loadPresetFurniture().then(() => { presetLoaded = true; });
+/* 旧的验证开关保留：「Rodin 家具」现在只是整组显隐；「验证椅子」不再单独加载 */
+const loadChair = async () => { await presetReady; return presetObjs.armchair || null; };
+function applyRodin() { for (const id in presetObjs) presetObjs[id].visible = DEV.rodin; }
 
 /* ============ 11b. 工坊：把技术做成开关 ============ */
 const devEl = document.getElementById("dev"), devSt = document.getElementById("devst"), devAtlas = document.getElementById("devatlas");
@@ -606,7 +609,7 @@ function devToggle(k) {
   if (k === "wire") { for (const g in shellMats) shellMats[g].wireframe = DEV.wire; flatMat.wireframe = DEV.wire; house.traverse((o) => { if (o.isMesh && o.material && o.material.isMeshLambertMaterial) o.material.wireframe = DEV.wire; }); }
   if (k === "unbaked") { for (const m of shellMeshes()) m.material = DEV.unbaked ? flatMat : shellMats[m.name]; hemi.intensity = DEV.unbaked ? 1.3 : LIGHTS[lightTarget].hemi[2]; }
   if (k === "paint" || k === "paintai") { if (k === "paint" && DEV.paint) DEV.paintai = false; if (k === "paintai" && DEV.paintai) DEV.paint = false; document.querySelectorAll("[data-dev]").forEach((b) => b.setAttribute("aria-pressed", String(!!DEV[b.dataset.dev]))); applyAltTex(); }
-  if (k === "chair") { loadChair().then((o) => { o.visible = DEV.chair || DEV.rodin; }).catch((e) => console.warn("验证椅子没加载到", e)); }
+  if (k === "chair") { loadChair().then((o) => { if (o) o.visible = DEV.chair || DEV.rodin; }).catch((e) => console.warn("验证椅子没加载到", e)); }
   if (k === "rodin") applyRodin();
   if (k === "hot") for (const o of hot) { if (!o.isInstancedMesh) { o.material.visible = DEV.hot; o.material.wireframe = true; o.material.color = new THREE.Color(0xF3D98A); } }
   if (k === "atlas") {
@@ -640,6 +643,6 @@ function devStats() {
   /* 另外两套贴图在空闲时预载 */
   const idle = window.requestIdleCallback || ((f) => setTimeout(f, 1500));
   idle(() => { for (const l of cfg.lights) for (const g of ["shell", "furn"]) bakedTex(l, g); });
-  window.__yxlWorld = { renderer, scene, camera, go, route: () => route, setLight, info: () => renderer.info.render, hot, settled: () => rig.t >= 1 && lightT >= 1, dev: devToggle, DEV, verifyReady: () => Object.keys(VERIFY_SLOTS).every((k) => verifyObjs[k]), tables: T, tier: TIER, budget: TIER_BUDGET[TIER] };
+  window.__yxlWorld = { renderer, scene, camera, go, route: () => route, setLight, info: () => renderer.info.render, hot, settled: () => rig.t >= 1 && lightT >= 1, dev: devToggle, DEV, verifyReady: () => presetLoaded, tables: T, tier: TIER, budget: TIER_BUDGET[TIER] };
   frame();
 }

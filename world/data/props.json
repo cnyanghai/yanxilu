@@ -9,38 +9,31 @@
     "assets/study_day_furn.jpg"
    ],
    "kind": "shell",
-   "status": "grey-bake-4.5x3.5-pending"
+   "status": "bake-5.2x4.2-pending-resize"
   },
   "desk": {
-   "model": "assets/verify/desk.glb",
+   "model": "packs/modern/furniture/desk.gltf.json",
    "tris": 2900,
    "tex": 1024,
    "kind": "furniture",
-   "status": "verify"
+   "status": "placeholder:rodin-shaded",
+   "fit": "wdh"
   },
   "deskchair": {
-   "model": "assets/verify/deskchair.glb",
+   "model": "packs/modern/furniture/deskchair.gltf.json",
    "tris": 2900,
    "tex": 1024,
    "kind": "furniture",
-   "status": "verify:stool"
+   "status": "placeholder:rodin-stool",
+   "fit": "h"
   },
   "chair": {
-   "model": "assets/verify/chair.glb",
+   "model": "packs/modern/furniture/chair.gltf.json",
    "tris": 2854,
    "tex": 1024,
    "kind": "furniture",
-   "status": "verify"
-  },
-  "shelf": {
-   "model": "assets/verify/shelf.glb",
-   "kind": "furniture",
-   "status": "rejected:grid-furniture-is-blender"
-  },
-  "rack": {
-   "model": "assets/verify/rack.glb",
-   "kind": "furniture",
-   "status": "rejected:grid-furniture-is-blender"
+   "status": "placeholder:rodin-shaded",
+   "fit": "h"
   }
  },
  "palette": {

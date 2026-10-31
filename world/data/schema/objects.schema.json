@@ -59,6 +59,10 @@
        "d": {
         "type": "integer",
         "minimum": 0
+       },
+       "h": {
+        "type": "integer",
+        "minimum": 0
        }
       }
      },
