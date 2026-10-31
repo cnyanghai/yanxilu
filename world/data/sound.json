@@ -1,0 +1,54 @@
+{
+ "format": 1,
+ "rules": {
+  "defaultMuted": true,
+  "unmuteOn": "toggleLamp",
+  "lufsMax": -18,
+  "noJingles": true,
+  "noAchievementSounds": true,
+  "noLoopingMelody": true
+ },
+ "rooms": {
+  "study": {
+   "dawn": "amb_study_birds_far",
+   "day": "amb_study_room_tone",
+   "dusk": "amb_study_evening",
+   "night": "amb_study_night_clock"
+  },
+  "yard": {
+   "day": "amb_yard_wind_birds",
+   "night": "amb_yard_crickets"
+  }
+ },
+ "emitters": [
+  {
+   "object": "desk_lamp",
+   "event": "hum_lamp_soft",
+   "when": "on"
+  },
+  {
+   "object": "tree",
+   "event": "wind_leaves_loop"
+  },
+  {
+   "object": "cat",
+   "event": "purr_loop",
+   "when": "looking"
+  }
+ ],
+ "interactions": {
+  "takeOut": "sfx_book_pull",
+  "putBack": "sfx_book_slide",
+  "openReader": "sfx_page_open",
+  "openNotebook": "sfx_notebook_open",
+  "toggleLamp": "sfx_switch",
+  "unseal": "sfx_paper_tear",
+  "openDoor": "sfx_door_wood",
+  "sit": "sfx_cushion",
+  "petCat": "sfx_purr_short",
+  "water": "sfx_water_pour",
+  "buy": "sfx_coin_soft",
+  "place": "sfx_place_wood"
+ },
+ "sources": "CC0 与自录为主，待填"
+}

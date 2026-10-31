@@ -1,0 +1,21 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "type": "object",
+ "required": [
+  "format",
+  "pack",
+  "assets"
+ ],
+ "properties": {
+  "assets": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "kind",
+     "status"
+    ]
+   }
+  }
+ }
+}

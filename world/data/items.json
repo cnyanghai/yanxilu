@@ -1,0 +1,114 @@
+{
+ "format": 1,
+ "currency": "ink",
+ "items": [
+  {
+   "id": "plant_monstera",
+   "name": "龟背竹",
+   "category": "plant",
+   "object": "plant",
+   "variant": "monstera",
+   "priceInk": 12,
+   "comfortClass": "plant",
+   "slotTypes": [
+    "floor"
+   ],
+   "card": "shop_plants.jpg#1"
+  },
+  {
+   "id": "plant_fig",
+   "name": "无花果",
+   "category": "plant",
+   "object": "plant",
+   "variant": "fig",
+   "priceInk": 15,
+   "comfortClass": "plant",
+   "slotTypes": [
+    "floor"
+   ],
+   "card": "shop_plants.jpg#2"
+  },
+  {
+   "id": "plant_pothos",
+   "name": "吊绿萝",
+   "category": "plant",
+   "object": "plant",
+   "variant": "pothos",
+   "priceInk": 8,
+   "comfortClass": "plant",
+   "slotTypes": [
+    "wallface",
+    "shelf"
+   ],
+   "card": "shop_plants.jpg#3"
+  },
+  {
+   "id": "plant_succulent",
+   "name": "多肉一盘",
+   "category": "plant",
+   "object": "plant",
+   "variant": "succulent",
+   "priceInk": 6,
+   "comfortClass": "plant",
+   "slotTypes": [
+    "sill",
+    "desktop",
+    "shelf"
+   ],
+   "card": "shop_plants.jpg#4"
+  },
+  {
+   "id": "plant_mint",
+   "name": "薄荷",
+   "category": "plant",
+   "object": "plant",
+   "variant": "mint",
+   "priceInk": 4,
+   "comfortClass": "plant",
+   "slotTypes": [
+    "desktop",
+    "sill",
+    "soil"
+   ],
+   "card": "shop_plants.jpg#5"
+  },
+  {
+   "id": "animal_cat",
+   "name": "猫",
+   "category": "animal",
+   "object": "cat",
+   "priceInk": 30,
+   "comfortClass": "animal",
+   "slotTypes": [
+    "floor",
+    "shelf"
+   ],
+   "card": "shop_animals.jpg#1"
+  },
+  {
+   "id": "animal_dog",
+   "name": "柴犬",
+   "category": "animal",
+   "object": "dog",
+   "priceInk": 30,
+   "comfortClass": "animal",
+   "slotTypes": [
+    "floor"
+   ],
+   "card": "shop_animals.jpg#2"
+  },
+  {
+   "id": "animal_bird",
+   "name": "小鸟",
+   "category": "animal",
+   "object": "bird",
+   "priceInk": 10,
+   "comfortClass": "animal",
+   "slotTypes": [
+    "shelf",
+    "sill"
+   ],
+   "card": "shop_animals.jpg#3"
+  }
+ ]
+}

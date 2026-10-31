@@ -1,0 +1,114 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "type": "object",
+ "required": [
+  "format",
+  "rooms"
+ ],
+ "properties": {
+  "format": {
+   "const": 1
+  },
+  "rooms": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "size",
+     "grid",
+     "slots",
+     "defaultVis"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "pattern": "^[a-z_]+$"
+     },
+     "name": {
+      "type": "string"
+     },
+     "size": {
+      "type": "object",
+      "required": [
+       "w",
+       "d",
+       "h"
+      ]
+     },
+     "grid": {
+      "type": "object",
+      "required": [
+       "cols",
+       "rows",
+       "cell"
+      ],
+      "properties": {
+       "cols": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "rows": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "cell": {
+        "type": "number"
+       }
+      }
+     },
+     "slots": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "name",
+        "type",
+        "cells"
+       ],
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "type": {
+         "type": "string"
+        },
+        "cells": {
+         "type": "array",
+         "items": {
+          "type": "array",
+          "items": {
+           "type": "integer",
+           "minimum": 0
+          },
+          "minItems": 2,
+          "maxItems": 2
+         },
+         "minItems": 1
+        },
+        "rot": {
+         "type": "number"
+        },
+        "fixed": {
+         "type": "string"
+        },
+        "shop": {
+         "type": "boolean"
+        }
+       },
+       "additionalProperties": false
+      }
+     },
+     "stations": {
+      "type": "object"
+     },
+     "defaultVis": {
+      "type": "string",
+      "pattern": "^[a-z_]+:(dawn|day|dusk|night)$"
+     }
+    }
+   }
+  }
+ }
+}

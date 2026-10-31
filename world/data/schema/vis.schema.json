@@ -1,0 +1,105 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "type": "object",
+ "required": [
+  "format",
+  "periods",
+  "entries"
+ ],
+ "properties": {
+  "format": {
+   "const": 1
+  },
+  "entries": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "room",
+     "period",
+     "exposure",
+     "key",
+     "fog",
+     "lut",
+     "unitLight",
+     "bakeSet"
+    ],
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "room": {
+      "type": "string"
+     },
+     "period": {
+      "enum": [
+       "dawn",
+       "day",
+       "dusk",
+       "night"
+      ]
+     },
+     "exposure": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 4
+     },
+     "key": {
+      "type": "object",
+      "required": [
+       "color",
+       "power"
+      ],
+      "properties": {
+       "color": {
+        "type": "string",
+        "pattern": "^#[0-9a-fA-F]{6}$"
+       },
+       "power": {
+        "type": "number",
+        "minimum": 0
+       }
+      }
+     },
+     "fog": {
+      "type": "object",
+      "required": [
+       "color",
+       "density"
+      ],
+      "properties": {
+       "color": {
+        "type": "string",
+        "pattern": "^#[0-9a-fA-F]{6}$"
+       },
+       "density": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 1
+       }
+      }
+     },
+     "lut": {
+      "type": "string"
+     },
+     "unitLight": {
+      "type": "object",
+      "required": [
+       "power",
+       "radius"
+      ]
+     },
+     "bakeSet": {
+      "enum": [
+       "dawn",
+       "day",
+       "dusk",
+       "night"
+      ]
+     }
+    }
+   }
+  }
+ }
+}

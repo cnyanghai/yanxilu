@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: 评审会一开完（design/studio/REVIEW-1.md）：八份提案与三份源码研究合成七表两文件、里程碑 M0 到 M6、七条待用户裁决；里程碑 M1 工具先行与骨架待开工
-next: 用户裁 studio/proposals/00 两份裁判页与 REVIEW-1 第 4 节七条 → M1 第 1 天：关卡平面图与 rooms 初版、GDD 一页与七表模板
+stage: M1 工具先行与骨架 第 1 天完成：关卡平面图（书房 4.5 × 3.5 九列七行、院子 7 × 9、三个对焦站）、GDD 1.0、七张表 + 书房预设 + 九张 Schema + tools/tables_check.py（通过）
+next: M1 第 2 到 3 天（技术总监）：world/ 拆成 data / sim / render 三层，rooms 与 vis 表替换 world.js 里的常量，合成后期一遍着色器，三档开关，Node 单测；画面不变
 blocked_by: 用户看效果
 updated: 2026-10-30
 ---
@@ -20,7 +20,7 @@ updated: 2026-10-30
 
 ## 当前阶段与下一步
 
-**当前里程碑：M0 概念收尾，M1 工具先行与骨架待开工。** 计划以 design/studio/REVIEW-1.md 为准；旧阶段表留在 PRODUCTION-PLAN 备查。 计划只看 `design/PRODUCTION-PLAN.md`（阶段表、门、预算、待办区），其他设计文档的"下一步"已作废。
+**当前里程碑：M1 工具先行与骨架（第 1 天完成）。** 计划以 design/studio/REVIEW-1.md 为准；旧阶段表留在 PRODUCTION-PLAN 备查。 计划只看 `design/PRODUCTION-PLAN.md`（阶段表、门、预算、待办区），其他设计文档的"下一步"已作废。
 
 1. 用户看 `design/ART-BIBLE.md` 第 1 节的主视觉提示词，点头后出两张，打分，两轮不像换方向。
 2. 进阶段 1 风格圣经：主视觉定稿（含书童、文竹、一组家具）、材质板、色板、三种光、零件表、禁止项、十条验收单；门是用户说"就是这个"。
@@ -28,6 +28,8 @@ updated: 2026-10-30
 
 ## 已定决策
 
+- 2026-10-30 用户「全部通过」：两份裁判页（支柱四根、第一个可玩版本五件事、里程碑时间盒约三个月到 Beta、现金上限 300 元、外请美术触发条件）与 REVIEW-1 第 4 节七条（货币「墨」与三个软增益与三道门、四时段加雨天、角色光圈仅黄昏夜晚、书房 4.5 × 3.5、HUD 四样贴边、默认静音点灯开声）
+- 2026-10-31 M1 第 1 天技术决定：表放 world/data/，Schema 放 world/data/schema/，校验脚本 tools/tables_check.py 进测试前置；院子地块 7 × 9 每格 1 米；门是 door 类型槽位；函数表十四个 —— Claude 定
 - 2026-10-30 评审会一（studio/REVIEW-1.md）：七表两文件（objects / rooms / vis / props / items / economy / sound + presets + placements）与组件 JSON 外形；三层四目录、七个组件、三档、1 档预算、合成后期、Rodin 正规接光、真显卡截图互斥、Python 拼接、Schema 校验前置、canPlace 纯函数、编辑器动作对象 —— Claude 定；房间 4.5 × 3.5、四时段加雨天、角色光圈仅夜晚、HUD 四样、默认静音、货币名与软增益与三道门、时间盒与预算与外请触发 —— 待用户定
 - 2026-10-30 规矩改为「博采众长：学各家（暗黑 2、炉石、魔兽、恶意不息、kriss）的机制、结构、表、流程、光与镜头；不把任何一家的资产放进仓库和产品；本机可读其文件研究」—— 用户定，写入 CLAUDE.md
 - 2026-10-30 采纳暗黑 2 的结构（D2R-DISSECTION 第 7 节）：一切是表（objects / rooms / vis / props）、交互物件三态状态机、vis 式光照记录、角色独立布光与光圈、每件独立贴图、墙段透明、硬件分档 —— Claude 定，技术决定
@@ -63,6 +65,7 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-10-31 M1 第 1 天：studio/level/study-plan.md（平面图、对焦站、走点规则、检验）、studio/GDD.md、world/data/{objects,rooms,vis,props,items,economy,sound}.json、presets/study.json（实体-组件，模板 ^ 多实例 @ 删除 -）、schema/ 九张、tools/tables_check.py（Schema + 交叉引用 + 格子越界重叠）；首跑抓出 7 处错已修；ASSET-SPEC 房间改 4.5 × 3.5
 - 2026-10-30 十个代理回齐：refs/redalert-source.md、refs/openra.md、proposals/01 到 08；写 REVIEW-1（裁决表、七项冲突裁决、M0 到 M6 里程碑、七条待用户定、技术决定清单）；PRODUCTION-PLAN 顶部改为指向 REVIEW-1
 - 2026-10-30 用户定：摒弃自设限制，完全以暗黑 2 设计思路为基准，团队建制照暗黑 2，每岗提案再推进；红警用 EA 开源源码与 OpenRA 分析不下载游戏；授权 Claude 自行判断用代理。建 design/studio/（README 建制与流程、proposals/00 两份裁判页），克隆红警源码与 OpenRA 到本机临时目录，派 2 个读源码代理 + 8 个岗位分叉代理；01 首席设计师提案已回（核心循环、货币「墨」、舒适度公式、六张表、八个函数名）
 - 2026-10-30 用户授权编译 CascLib → 读 D2R 封包 175,813 文件：导出 364 张表、vis 369 个、prop_palette、towne1 预设、门箱状态机、biome、LUT；统计贴图 1024² 为主 2.2 万张、8232 网格各 5 级 LOD；写 design/D2R-DISSECTION.md（8 节，采纳清单 14 条）；误导出的 9 GB 音效界面已删，导出物只在本机临时目录

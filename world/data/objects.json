@@ -1,0 +1,675 @@
+{
+ "format": 1,
+ "functions": [
+  "openReader",
+  "openNotebook",
+  "toggleLamp",
+  "unseal",
+  "takeOut",
+  "putBack",
+  "buy",
+  "place",
+  "openDoor",
+  "petCat",
+  "water",
+  "openMail",
+  "sit",
+  "openBox"
+ ],
+ "objects": [
+  {
+   "id": "bookshelf_wall",
+   "name": "书墙",
+   "kind": "fixed",
+   "slotType": "wall",
+   "footprint": [
+    7,
+    1
+   ],
+   "states": [
+    {
+     "name": "neutral",
+     "anim": "neutral"
+    }
+   ],
+   "operate": {
+    "fn": "takeOut",
+    "approach": "south"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "data": {
+    "coll": "books",
+    "layout": "cubbies"
+   },
+   "model": "procedural+shell",
+   "cubby": {
+    "cols": 7,
+    "rows": 8,
+    "size": 0.3
+   }
+  },
+  {
+   "id": "book",
+   "name": "书",
+   "kind": "data",
+   "slotType": "cubby",
+   "footprint": [
+    0,
+    0
+   ],
+   "states": [
+    {
+     "name": "on_shelf",
+     "anim": "on_shelf"
+    },
+    {
+     "name": "pulled",
+     "anim": "pulled"
+    },
+    {
+     "name": "open",
+     "anim": "open"
+    }
+   ],
+   "operate": {
+    "fn": "takeOut",
+    "approach": "station:shelf"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "data": {
+    "coll": "books"
+   },
+   "model": "procedural",
+   "next": {
+    "pulled": "openReader",
+    "open": "putBack"
+   }
+  },
+  {
+   "id": "notebook_rack",
+   "name": "笔记本架",
+   "kind": "fixed",
+   "slotType": "floor",
+   "footprint": [
+    3,
+    1
+   ],
+   "states": [
+    {
+     "name": "neutral",
+     "anim": "neutral"
+    }
+   ],
+   "operate": {
+    "fn": "openNotebook",
+    "approach": "north"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "data": {
+    "coll": "notebooks"
+   },
+   "model": "shell",
+   "cubby": {
+    "cols": 4,
+    "rows": 2
+   }
+  },
+  {
+   "id": "notebook",
+   "name": "笔记本",
+   "kind": "data",
+   "slotType": "rackslant",
+   "footprint": [
+    0,
+    0
+   ],
+   "states": [
+    {
+     "name": "closed",
+     "anim": "closed"
+    },
+    {
+     "name": "open",
+     "anim": "open"
+    }
+   ],
+   "operate": {
+    "fn": "openNotebook",
+    "approach": "station:rack"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "data": {
+    "coll": "notebooks"
+   },
+   "model": "procedural"
+  },
+  {
+   "id": "desk",
+   "name": "案桌",
+   "kind": "fixed",
+   "slotType": "floor",
+   "footprint": [
+    3,
+    2
+   ],
+   "states": [
+    {
+     "name": "neutral",
+     "anim": "neutral"
+    }
+   ],
+   "operate": {
+    "fn": "openNotebook",
+    "approach": "south"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "model": "rodin:desk"
+  },
+  {
+   "id": "card_today",
+   "name": "今天的牌",
+   "kind": "data",
+   "slotType": "desktop",
+   "footprint": [
+    0,
+    0
+   ],
+   "states": [
+    {
+     "name": "flat",
+     "anim": "flat"
+    },
+    {
+     "name": "lifted",
+     "anim": "lifted"
+    },
+    {
+     "name": "open",
+     "anim": "open"
+    }
+   ],
+   "operate": {
+    "fn": "openReader",
+    "approach": "station:desk"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "data": {
+    "coll": "cards"
+   },
+   "model": "procedural"
+  },
+  {
+   "id": "desk_lamp",
+   "name": "台灯",
+   "kind": "fixed",
+   "slotType": "desktop",
+   "footprint": [
+    0,
+    0
+   ],
+   "states": [
+    {
+     "name": "off",
+     "anim": "off"
+    },
+    {
+     "name": "on",
+     "anim": "on"
+    }
+   ],
+   "operate": {
+    "fn": "toggleLamp",
+    "approach": "station:desk"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "light": {
+    "type": "spot",
+    "color": "#ffd9a0",
+    "power": 3.0,
+    "angle": 70,
+    "distance": 4,
+    "shadow": true
+   },
+   "model": "rodin:desk_lamp"
+  },
+  {
+   "id": "wall_lamp",
+   "name": "壁灯",
+   "kind": "fixed",
+   "slotType": "wallface",
+   "footprint": [
+    0,
+    0
+   ],
+   "states": [
+    {
+     "name": "off",
+     "anim": "off"
+    },
+    {
+     "name": "on",
+     "anim": "on"
+    }
+   ],
+   "operate": {
+    "fn": "toggleLamp",
+    "approach": "H4"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "light": {
+    "type": "point",
+    "color": "#ffd0a0",
+    "power": 1.5,
+    "distance": 3,
+    "shadow": false
+   },
+   "model": "rodin:wall_lamp"
+  },
+  {
+   "id": "desk_chair",
+   "name": "桌椅",
+   "kind": "fixed",
+   "slotType": "floor",
+   "footprint": [
+    1,
+    1
+   ],
+   "states": [
+    {
+     "name": "neutral",
+     "anim": "neutral"
+    }
+   ],
+   "operate": {
+    "fn": "sit",
+    "approach": "self"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "model": "rodin:deskchair"
+  },
+  {
+   "id": "armchair",
+   "name": "读书椅",
+   "kind": "fixed",
+   "slotType": "floor",
+   "footprint": [
+    2,
+    2
+   ],
+   "states": [
+    {
+     "name": "empty",
+     "anim": "empty"
+    },
+    {
+     "name": "seated",
+     "anim": "seated"
+    }
+   ],
+   "operate": {
+    "fn": "sit",
+    "approach": "G5"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "model": "rodin:chair",
+   "effect": {
+    "sit": "focusTimer"
+   }
+  },
+  {
+   "id": "rug",
+   "name": "地毯",
+   "kind": "fixed",
+   "slotType": "rug",
+   "footprint": [
+    5,
+    3
+   ],
+   "states": [
+    {
+     "name": "neutral",
+     "anim": "neutral"
+    }
+   ],
+   "operate": {
+    "fn": "place",
+    "approach": "self"
+   },
+   "selectable": false,
+   "collision": true,
+   "tier": 0,
+   "model": "procedural"
+  },
+  {
+   "id": "box",
+   "name": "盒",
+   "kind": "data",
+   "slotType": "shelf",
+   "footprint": [
+    0,
+    0
+   ],
+   "states": [
+    {
+     "name": "sealed",
+     "anim": "sealed"
+    },
+    {
+     "name": "unsealed",
+     "anim": "unsealed"
+    },
+    {
+     "name": "open",
+     "anim": "open"
+    }
+   ],
+   "operate": {
+    "fn": "unseal",
+    "approach": "station:rack"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "data": {
+    "coll": "aboxes"
+   },
+   "model": "procedural",
+   "next": {
+    "unsealed": "openBox"
+   }
+  },
+  {
+   "id": "bag",
+   "name": "袋",
+   "kind": "data",
+   "slotType": "shelf",
+   "footprint": [
+    0,
+    0
+   ],
+   "states": [
+    {
+     "name": "sealed",
+     "anim": "sealed"
+    },
+    {
+     "name": "unsealed",
+     "anim": "unsealed"
+    }
+   ],
+   "operate": {
+    "fn": "unseal",
+    "approach": "station:rack"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "data": {
+    "coll": "clips"
+   },
+   "model": "procedural"
+  },
+  {
+   "id": "door",
+   "name": "门",
+   "kind": "fixed",
+   "slotType": "door",
+   "footprint": [
+    1,
+    0
+   ],
+   "states": [
+    {
+     "name": "closed",
+     "anim": "closed"
+    },
+    {
+     "name": "opening",
+     "anim": "opening"
+    },
+    {
+     "name": "open",
+     "anim": "open"
+    }
+   ],
+   "operate": {
+    "fn": "openDoor",
+    "approach": "E6"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "model": "shell"
+  },
+  {
+   "id": "cat",
+   "name": "猫",
+   "kind": "shop",
+   "slotType": "floor|shelf",
+   "footprint": [
+    1,
+    1
+   ],
+   "states": [
+    {
+     "name": "lying",
+     "anim": "lying"
+    },
+    {
+     "name": "rising",
+     "anim": "rising"
+    },
+    {
+     "name": "looking",
+     "anim": "looking"
+    }
+   ],
+   "operate": {
+    "fn": "petCat",
+    "approach": "adjacent"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "model": "rodin:cat",
+   "idle": "breathe"
+  },
+  {
+   "id": "dog",
+   "name": "柴犬",
+   "kind": "shop",
+   "slotType": "floor",
+   "footprint": [
+    1,
+    1
+   ],
+   "states": [
+    {
+     "name": "sitting",
+     "anim": "sitting"
+    },
+    {
+     "name": "wagging",
+     "anim": "wagging"
+    }
+   ],
+   "operate": {
+    "fn": "petCat",
+    "approach": "adjacent"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "model": "rodin:dog",
+   "idle": "wag"
+  },
+  {
+   "id": "bird",
+   "name": "小鸟",
+   "kind": "shop",
+   "slotType": "shelf|sill",
+   "footprint": [
+    0,
+    0
+   ],
+   "states": [
+    {
+     "name": "perched",
+     "anim": "perched"
+    },
+    {
+     "name": "tilting",
+     "anim": "tilting"
+    }
+   ],
+   "operate": {
+    "fn": "petCat",
+    "approach": "adjacent"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "model": "rodin:bird",
+   "idle": "tilt"
+  },
+  {
+   "id": "plant",
+   "name": "植物",
+   "kind": "shop",
+   "slotType": "floor|desktop|sill|shelf|soil",
+   "footprint": [
+    1,
+    1
+   ],
+   "states": [
+    {
+     "name": "stage0",
+     "anim": "stage0"
+    },
+    {
+     "name": "stage1",
+     "anim": "stage1"
+    },
+    {
+     "name": "stage2",
+     "anim": "stage2"
+    }
+   ],
+   "operate": {
+    "fn": "water",
+    "approach": "adjacent"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "model": "rodin:plant",
+   "growth": true
+  },
+  {
+   "id": "mailbox",
+   "name": "信箱",
+   "kind": "fixed",
+   "slotType": "floor",
+   "footprint": [
+    1,
+    1
+   ],
+   "states": [
+    {
+     "name": "empty",
+     "anim": "empty"
+    },
+    {
+     "name": "has_mail",
+     "anim": "has_mail"
+    }
+   ],
+   "operate": {
+    "fn": "openMail",
+    "approach": "south"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "model": "rodin:mailbox",
+   "data": {
+    "coll": "notes"
+   }
+  },
+  {
+   "id": "bench",
+   "name": "长椅",
+   "kind": "fixed",
+   "slotType": "floor",
+   "footprint": [
+    2,
+    1
+   ],
+   "states": [
+    {
+     "name": "empty",
+     "anim": "empty"
+    },
+    {
+     "name": "seated",
+     "anim": "seated"
+    }
+   ],
+   "operate": {
+    "fn": "sit",
+    "approach": "south"
+   },
+   "selectable": true,
+   "collision": true,
+   "tier": 0,
+   "model": "rodin:bench",
+   "effect": {
+    "sit": "focusTimer"
+   }
+  },
+  {
+   "id": "tree",
+   "name": "树",
+   "kind": "fixed",
+   "slotType": "floor",
+   "footprint": [
+    2,
+    2
+   ],
+   "states": [
+    {
+     "name": "neutral",
+     "anim": "neutral"
+    }
+   ],
+   "operate": {
+    "fn": "place",
+    "approach": "self"
+   },
+   "selectable": false,
+   "collision": true,
+   "tier": 0,
+   "model": "rodin:tree"
+  }
+ ]
+}

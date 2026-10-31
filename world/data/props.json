@@ -1,0 +1,54 @@
+{
+ "format": 1,
+ "pack": "modern",
+ "assets": {
+  "shell": {
+   "model": "assets/study.gltf.json",
+   "textures": [
+    "assets/study_day_shell.jpg",
+    "assets/study_day_furn.jpg"
+   ],
+   "kind": "shell",
+   "status": "grey-bake-4.5x3.5-pending"
+  },
+  "desk": {
+   "model": "assets/verify/desk.glb",
+   "tris": 2900,
+   "tex": 1024,
+   "kind": "furniture",
+   "status": "verify"
+  },
+  "deskchair": {
+   "model": "assets/verify/deskchair.glb",
+   "tris": 2900,
+   "tex": 1024,
+   "kind": "furniture",
+   "status": "verify:stool"
+  },
+  "chair": {
+   "model": "assets/verify/chair.glb",
+   "tris": 2854,
+   "tex": 1024,
+   "kind": "furniture",
+   "status": "verify"
+  },
+  "shelf": {
+   "model": "assets/verify/shelf.glb",
+   "kind": "furniture",
+   "status": "rejected:grid-furniture-is-blender"
+  },
+  "rack": {
+   "model": "assets/verify/rack.glb",
+   "kind": "furniture",
+   "status": "rejected:grid-furniture-is-blender"
+  }
+ },
+ "palette": {
+  "wall": "#f3ddb9",
+  "wood": "#987755",
+  "accent": "#182121",
+  "metal": "#dfaa6d",
+  "paper": "#e5c08e",
+  "dark": "#3f2814"
+ }
+}

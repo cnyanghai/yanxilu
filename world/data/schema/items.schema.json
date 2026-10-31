@@ -1,0 +1,50 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "type": "object",
+ "required": [
+  "format",
+  "currency",
+  "items"
+ ],
+ "properties": {
+  "items": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "category",
+     "object",
+     "priceInk",
+     "comfortClass",
+     "slotTypes"
+    ],
+    "properties": {
+     "priceInk": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "slotTypes": {
+      "type": "array",
+      "items": {
+       "enum": [
+        "wall",
+        "wallface",
+        "sill",
+        "floor",
+        "desktop",
+        "shelf",
+        "rug",
+        "soil",
+        "door",
+        "cubby",
+        "rackslant"
+       ]
+      }
+     }
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,62 @@
+{
+ "format": 1,
+ "currency": {
+  "id": "ink",
+  "name": "墨",
+  "unit": "滴",
+  "purchasable": false,
+  "expires": false,
+  "ranked": false
+ },
+ "events": {
+  "read_article": 1,
+  "annotate": 1,
+  "seal_box": 10,
+  "streak_7_days": 3
+ },
+ "comfort": {
+  "base_per_fixed_slot": 1,
+  "diversity_per_class": 2,
+  "classes": [
+   "plant",
+   "animal",
+   "lamp",
+   "textile",
+   "books"
+  ],
+  "variety_cap": 20,
+  "quality_per_sealed_box": 1,
+  "perks": [
+   {
+    "id": "calm_breath",
+    "name": "专注呼吸更慢",
+    "threshold": 20
+   },
+   {
+    "id": "warm_night",
+    "name": "夜读灯光更暖",
+    "threshold": 35
+   },
+   {
+    "id": "more_notes",
+    "name": "访客留言上限更高",
+    "threshold": 50
+   }
+  ],
+  "note": "只换软增益，不换数值不换速度"
+ },
+ "gates": {
+  "greenhouse": {
+   "metric": "books_read",
+   "gte": 30
+  },
+  "archive_room": {
+   "metric": "boxes_sealed",
+   "gte": 10
+  },
+  "mailbox": {
+   "metric": "visitors",
+   "gte": 1
+  }
+ }
+}

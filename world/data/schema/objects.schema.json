@@ -1,0 +1,111 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "type": "object",
+ "required": [
+  "format",
+  "functions",
+  "objects"
+ ],
+ "properties": {
+  "format": {
+   "const": 1
+  },
+  "functions": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "objects": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "name",
+     "kind",
+     "slotType",
+     "footprint",
+     "states",
+     "operate"
+    ],
+    "properties": {
+     "id": {
+      "type": "string",
+      "pattern": "^[a-z_]+$"
+     },
+     "kind": {
+      "enum": [
+       "fixed",
+       "data",
+       "shop"
+      ]
+     },
+     "slotType": {
+      "type": "string"
+     },
+     "footprint": {
+      "type": "array",
+      "items": {
+       "type": "integer",
+       "minimum": 0
+      },
+      "minItems": 2,
+      "maxItems": 2
+     },
+     "states": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+       "type": "object",
+       "required": [
+        "name",
+        "anim"
+       ]
+      }
+     },
+     "operate": {
+      "type": "object",
+      "required": [
+       "fn",
+       "approach"
+      ],
+      "properties": {
+       "fn": {
+        "type": "string"
+       },
+       "approach": {
+        "type": "string"
+       }
+      }
+     },
+     "light": {
+      "type": "object",
+      "required": [
+       "type",
+       "color",
+       "power"
+      ],
+      "properties": {
+       "type": {
+        "enum": [
+         "point",
+         "spot"
+        ]
+       },
+       "color": {
+        "type": "string",
+        "pattern": "^#[0-9a-fA-F]{6}$"
+       }
+      }
+     },
+     "tier": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 2
+     }
+    }
+   }
+  }
+ }
+}

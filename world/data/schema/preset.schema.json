@@ -1,0 +1,49 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "type": "object",
+ "required": [
+  "format",
+  "room",
+  "pack",
+  "entities"
+ ],
+ "properties": {
+  "format": {
+   "const": 1
+  },
+  "templates": {
+   "type": "object",
+   "propertyNames": {
+    "pattern": "^\\^"
+   }
+  },
+  "entities": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "components"
+    ],
+    "properties": {
+     "id": {
+      "type": "string"
+     },
+     "extends": {
+      "type": "string",
+      "pattern": "^\\^"
+     },
+     "components": {
+      "type": "object",
+      "required": [
+       "Transform"
+      ],
+      "propertyNames": {
+       "pattern": "^-?[A-Z][A-Za-z]*(@[a-z_0-9]+)?$"
+      }
+     }
+    }
+   }
+  }
+ }
+}
