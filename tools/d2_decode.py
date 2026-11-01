@@ -81,3 +81,19 @@ if __name__ == "__main__":
         fr = dc6(sys.argv[2], palette(sys.argv[3])); fr[0].save(sys.argv[4]); print(len(fr), "frames", fr[0].size)
     elif kind == "sprite":
         im = sprite(sys.argv[2]); im.save(sys.argv[3]); print(im.size)
+
+
+def texture(path):
+    """重制版 .texture（2026-11-01 从文件推出的格式）：
+    头 '<DE(' + 格式号 uint16（61 = BC3 线性，62 = BC3 sRGB；其余待遇到再记）+ width int32 @8 + height int32 @12 + mip 数 int32 @0x1c，
+    然后 mip 表 (size, offset) 各 int32，offset 相对各自表项位置；最稳的办法是 mip0 = 文件尾倒推全部 mip 大小之和。
+    块是标准 DXT5 / BC3，解码要 texture2ddecoder（pip 装；用户授权后装的）。"""
+    import texture2ddecoder as T
+    b = open(path, "rb").read(); fmt, = struct.unpack_from("<H", b, 4); w, h = struct.unpack_from("<ii", b, 8); mips, = struct.unpack_from("<i", b, 0x1C)
+    sizes = [struct.unpack_from("<i", b, 0x24 + i * 8)[0] for i in range(mips)]; start = len(b) - sum(sizes)
+    raw = T.decode_bc3(b[start:start + sizes[0]], w, h)
+    return Image.frombytes("RGBA", (w, h), raw, "raw", "RGBA"), fmt
+
+
+if __name__ == "__main__" and len(sys.argv) > 1 and sys.argv[1] == "texture":
+    im, fmt = texture(sys.argv[2]); im.save(sys.argv[3]); print(im.size, "format", fmt)

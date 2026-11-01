@@ -66,6 +66,7 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-11-01 用户授权装 texture2ddecoder → 重制版 .texture 格式推出来了：头 '<DE(' + 格式号（61 线性 / 62 sRGB）+ 宽高 + mip 数 + mip 表（offset 相对表项），块是 BC3 而非 BC7，mip0 从文件尾倒推；解出木箱三件套、野蛮人头部颜色与法线、帐篷、兵营柱墙，拼图发用户；解码并入 tools/d2_decode.py（texture 子命令）
 - 2026-11-01 用户要看暗黑 2 资产图：写 tools/d2_decode.py（DT1 瓦片、DC6 精灵、重制版 SpA1 sprite 的纯 Python 解码；.texture 是 BC7 自有格式，装解码库被权限拦下未解），解出城镇地砖 8 块、弓与头盔图标、长剑胸甲盔甲的背包精灵，拼图发给用户；解出的图只在 tools/out/d2assets 本机看，不入库
 - 2026-11-01 落进工具：asset_import.py（图片走 Rodin PBR → gltf-transform 减面到预算 → Shaded 自发光搬回 baseColor → 贴图 JPEG 1024 → 包根节点落地居中按占地缩放 → JSON glTF → packs/<包>/<类>/<id>/ 加定义 JSON → props 登记；偏差超 35% 提醒）重导 desk / deskchair / chair；tiles.json（地面块 6、墙段 6、屋顶 2）+ rooms.tiles（书房 9 × 7 地面网格与四边墙段含窗门、院子 7 × 9 含门楼竹篱石板路菜畦）+ Schema + 校验（网格尺寸、四边墙段正好覆盖一遍）；tables.js 与单测加载 tiles；1 档截图无报错
 - 2026-11-01 用户否了 NB2 白天图，要求深拆暗黑 2 的流程 / 图像 / 摆放 / 资产 / 动作 / 装备 → 从封包取 towne1.ds1（解析版本 18：57 × 41 格、2 墙层 1 地层 1 影层、9 个瓦片集、43 个物件）、floor.dt1（144 块 160 × 128 地砖）、帐篷目录（5 级 LOD + 布料 + 骨骼）、野蛮人（65 状态 440 动画 × 14 武器类、部件 lit / med / hvy 三档）、旧版 COF 150 个（模式 × 武器类）、长剑定义、armor.txt 外观列；写 D2R-DISSECTION 第 9 到 15 节
