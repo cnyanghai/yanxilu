@@ -272,7 +272,140 @@
    "neighbors": {
     "yard": "door"
    },
-   "preset": "study"
+   "preset": "study",
+   "tiles": {
+    "cell": 50,
+    "floor": [
+     [
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak"
+     ],
+     [
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak"
+     ],
+     [
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak"
+     ],
+     [
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak",
+      "oak"
+     ],
+     [
+      "oak",
+      "oak",
+      "rug",
+      "rug",
+      "rug",
+      "rug",
+      "rug",
+      "oak",
+      "oak"
+     ],
+     [
+      "oak",
+      "oak",
+      "rug",
+      "rug",
+      "rug",
+      "rug",
+      "rug",
+      "oak",
+      "oak"
+     ],
+     [
+      "oak",
+      "oak",
+      "rug",
+      "rug",
+      "rug",
+      "rug",
+      "rug",
+      "oak",
+      "oak"
+     ]
+    ],
+    "walls": [
+     {
+      "type": "plaster",
+      "side": "north",
+      "from": 0,
+      "to": 9
+     },
+     {
+      "type": "plaster",
+      "side": "east",
+      "from": 0,
+      "to": 7
+     },
+     {
+      "type": "plaster",
+      "side": "west",
+      "from": 0,
+      "to": 1
+     },
+     {
+      "type": "window",
+      "side": "west",
+      "from": 1,
+      "to": 3
+     },
+     {
+      "type": "plaster",
+      "side": "west",
+      "from": 3,
+      "to": 7
+     },
+     {
+      "type": "plaster",
+      "side": "south",
+      "from": 0,
+      "to": 4
+     },
+     {
+      "type": "door",
+      "side": "south",
+      "from": 4,
+      "to": 5
+     },
+     {
+      "type": "plaster",
+      "side": "south",
+      "from": 5,
+      "to": 9
+     }
+    ],
+    "roof": "tile_grey"
+   }
   },
   {
    "id": "yard",
@@ -403,7 +536,132 @@
    "neighbors": {
     "study": "door"
    },
-   "preset": null
+   "preset": null,
+   "tiles": {
+    "cell": 100,
+    "floor": [
+     [
+      "earth",
+      "earth",
+      "grass",
+      "grass",
+      "grass",
+      "grass",
+      "grass"
+     ],
+     [
+      "earth",
+      "earth",
+      "grass",
+      "grass",
+      "grass",
+      "grass",
+      "grass"
+     ],
+     [
+      "grass",
+      "earth",
+      "earth",
+      "earth",
+      "earth",
+      "earth",
+      "grass"
+     ],
+     [
+      "grass",
+      "earth",
+      "earth",
+      "earth",
+      "earth",
+      "earth",
+      "grass"
+     ],
+     [
+      "grass",
+      "earth",
+      "earth",
+      "earth",
+      "earth",
+      "earth",
+      "grass"
+     ],
+     [
+      "grass",
+      "earth",
+      "earth",
+      "slab",
+      "earth",
+      "earth",
+      "grass"
+     ],
+     [
+      "grass",
+      "grass",
+      "grass",
+      "slab",
+      "grass",
+      "soil",
+      "soil"
+     ],
+     [
+      "grass",
+      "grass",
+      "grass",
+      "slab",
+      "grass",
+      "soil",
+      "soil"
+     ],
+     [
+      "grass",
+      "grass",
+      "grass",
+      "slab",
+      "grass",
+      "grass",
+      "grass"
+     ]
+    ],
+    "walls": [
+     {
+      "type": "rammed",
+      "side": "north",
+      "from": 0,
+      "to": 7
+     },
+     {
+      "type": "rammed",
+      "side": "east",
+      "from": 0,
+      "to": 9
+     },
+     {
+      "type": "rammed",
+      "side": "west",
+      "from": 0,
+      "to": 9
+     },
+     {
+      "type": "rammed",
+      "side": "south",
+      "from": 0,
+      "to": 3
+     },
+     {
+      "type": "gate",
+      "side": "south",
+      "from": 3,
+      "to": 4
+     },
+     {
+      "type": "fence",
+      "side": "south",
+      "from": 4,
+      "to": 7
+     }
+    ],
+    "roof": null
+   }
   }
  ],
  "units": "cm"

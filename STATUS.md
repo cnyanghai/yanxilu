@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: 深拆暗黑 2 第二部分写完（design/D2R-DISSECTION.md 第 9 到 15 节）：两代流程、图像、DS1 摆放、资产目录、角色部件与状态机、装备三档与附着；对我们流程的八条修正
-next: 用户看第二部分；风格图的路线待重定（NB2 插画感不合用）；M1 继续：瓦片套件进 rooms、资产目录规范进导入命令
+stage: M1 工具：tools/asset_import.py 一条命令入库（减面、材质归位、贴图瘦身、原点落地、按占地缩放、目录 + 定义 JSON + 登记），三件家具已按新目录重导（每件约 200 KB、3000 面）；第八张表 tiles（瓦片集）与 rooms 的瓦片层（地面网格、墙段、屋顶）加 Schema 与校验
+next: M1 剩余：烘焙增量并行、真显卡截图、摆放编辑器最小版；营地切片前先做 tiles 的渲染（地面块按格铺、墙段拼、屋顶整层隐藏）与 study_scene 的 4.5 × 3.5 重烘
 blocked_by: 用户看效果
 updated: 2026-10-30
 ---
@@ -66,6 +66,7 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-11-01 落进工具：asset_import.py（图片走 Rodin PBR → gltf-transform 减面到预算 → Shaded 自发光搬回 baseColor → 贴图 JPEG 1024 → 包根节点落地居中按占地缩放 → JSON glTF → packs/<包>/<类>/<id>/ 加定义 JSON → props 登记；偏差超 35% 提醒）重导 desk / deskchair / chair；tiles.json（地面块 6、墙段 6、屋顶 2）+ rooms.tiles（书房 9 × 7 地面网格与四边墙段含窗门、院子 7 × 9 含门楼竹篱石板路菜畦）+ Schema + 校验（网格尺寸、四边墙段正好覆盖一遍）；tables.js 与单测加载 tiles；1 档截图无报错
 - 2026-11-01 用户否了 NB2 白天图，要求深拆暗黑 2 的流程 / 图像 / 摆放 / 资产 / 动作 / 装备 → 从封包取 towne1.ds1（解析版本 18：57 × 41 格、2 墙层 1 地层 1 影层、9 个瓦片集、43 个物件）、floor.dt1（144 块 160 × 128 地砖）、帐篷目录（5 级 LOD + 布料 + 骨骼）、野蛮人（65 状态 440 动画 × 14 武器类、部件 lit / med / hvy 三档）、旧版 COF 150 个（模式 × 武器类）、长剑定义、armor.txt 外观列；写 D2R-DISSECTION 第 9 到 15 节
 - 2026-11-01 Midjourney 无官方 API（只有违反条款的第三方壳）；写 3-Resources/media-toolkit/fal_image.py 通用端点脚本；Nano Banana 2 2K 出宋代院落白天两张（0.24 美元）存 concepts/song_court_day_nb2_*，结论按活分工：NB2 管布局与套件、gpt-image-2 管光；青绿山水色板取色石青 #073a67 天青 #6baec9 月白 #bedbe2 泥金 #c9a05a 靛 #1b3a6b，做天与皮不做地；夜景等引擎里出
 - 2026-10-31 宋代田园营地主视觉两张 + 套件表一张（1.13 元）存 concepts/song_camp_*；ART-BIBLE 第一版作废为参考，开第二版一节；讨论记录：地面是材质层 + 遮罩 + 印章贴花、草石散布实例、大件手摆

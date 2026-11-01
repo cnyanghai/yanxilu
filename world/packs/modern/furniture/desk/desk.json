@@ -1,0 +1,62 @@
+{
+ "format": 1,
+ "units": "cm",
+ "id": "desk",
+ "kind": "furniture",
+ "pack": "modern",
+ "object": "desk",
+ "components": {
+  "Model": {
+   "file": "desk.gltf.json",
+   "tris": 3000,
+   "textures": 1,
+   "maxTex": 1024
+  },
+  "Footprint": {
+   "w": 160,
+   "d": 70,
+   "h": 76
+  },
+  "ContactShadow": {
+   "w": 160,
+   "d": 70,
+   "opacity": 0.35
+  },
+  "Collider": {
+   "type": "box",
+   "w": 160,
+   "d": 70,
+   "h": 76
+  }
+ },
+ "import": {
+  "id": "desk",
+  "kind": "furniture",
+  "pack": "modern",
+  "source": "tools/out/verify/rodin_desk/model.glb",
+  "steps": [],
+  "tris": {
+   "before": 36380,
+   "after": 3000,
+   "budget": 3000
+  },
+  "shaded_fixed": 1,
+  "size_m": {
+   "raw": [
+    1.9,
+    1.201,
+    1.589
+   ],
+   "final": [
+    1.6,
+    0.76,
+    0.7
+   ],
+   "deviation": {
+    "w": 0.0,
+    "d": 0.0,
+    "h": 0.0
+   }
+  }
+ }
+}

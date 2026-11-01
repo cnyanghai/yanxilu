@@ -1,0 +1,93 @@
+{
+ "format": 1,
+ "units": "cm",
+ "note": "地面块按格铺（floor 层是材质编号网格），墙段沿格边拼（walls 层是线段列表），都来自 packs/<包>/tiles/ 的资产；镜头固定，墙段只做看得见的面",
+ "floor": {
+  "oak": {
+   "name": "橡木地板",
+   "material": "tile_floor_oak",
+   "tiling_cm": 100
+  },
+  "rug": {
+   "name": "地毯",
+   "material": "tile_rug_paper",
+   "tiling_cm": 200,
+   "overlay": true
+  },
+  "earth": {
+   "name": "夯土地",
+   "material": "tile_ground_earth",
+   "tiling_cm": 200
+  },
+  "grass": {
+   "name": "草地",
+   "material": "tile_ground_grass",
+   "tiling_cm": 200,
+   "scatter": "grass_clump"
+  },
+  "slab": {
+   "name": "石板路",
+   "material": "tile_path_slab",
+   "tiling_cm": 100
+  },
+  "soil": {
+   "name": "菜畦土",
+   "material": "tile_soil",
+   "tiling_cm": 100
+  }
+ },
+ "wall": {
+  "plaster": {
+   "name": "室内灰泥墙",
+   "segment": "wall_plaster_1m",
+   "h": 300,
+   "t": 24,
+   "nearLowered": true
+  },
+  "window": {
+   "name": "直棂窗段",
+   "segment": "wall_window_1m",
+   "h": 300,
+   "t": 24,
+   "nearLowered": false
+  },
+  "door": {
+   "name": "门段",
+   "segment": "wall_door_1m",
+   "h": 300,
+   "t": 24,
+   "nearLowered": false
+  },
+  "rammed": {
+   "name": "夯土院墙",
+   "segment": "yardwall_rammed_1m",
+   "h": 180,
+   "t": 40,
+   "nearLowered": true
+  },
+  "fence": {
+   "name": "竹篱",
+   "segment": "fence_bamboo_1m",
+   "h": 120,
+   "t": 6,
+   "nearLowered": false
+  },
+  "gate": {
+   "name": "门楼",
+   "segment": "yardgate_tiled",
+   "h": 260,
+   "t": 60,
+   "nearLowered": false
+  }
+ },
+ "roof": {
+  "tile_grey": {
+   "name": "青瓦悬山",
+   "hideWhenInside": true
+  },
+  "thatch": {
+   "name": "茅草",
+   "hideWhenInside": true
+  }
+ }
+}

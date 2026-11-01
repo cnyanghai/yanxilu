@@ -1,0 +1,62 @@
+{
+ "format": 1,
+ "units": "cm",
+ "id": "deskchair",
+ "kind": "furniture",
+ "pack": "modern",
+ "object": "desk_chair",
+ "components": {
+  "Model": {
+   "file": "deskchair.gltf.json",
+   "tris": 2998,
+   "textures": 1,
+   "maxTex": 1024
+  },
+  "Footprint": {
+   "w": 50,
+   "d": 50,
+   "h": 85
+  },
+  "ContactShadow": {
+   "w": 50,
+   "d": 50,
+   "opacity": 0.35
+  },
+  "Collider": {
+   "type": "box",
+   "w": 50,
+   "d": 50,
+   "h": 85
+  }
+ },
+ "import": {
+  "id": "deskchair",
+  "kind": "furniture",
+  "pack": "modern",
+  "source": "tools/out/verify/rodin_deskchair2/model.glb",
+  "steps": [],
+  "tris": {
+   "before": 37688,
+   "after": 2998,
+   "budget": 3000
+  },
+  "shaded_fixed": 1,
+  "size_m": {
+   "raw": [
+    0.981,
+    1.899,
+    1.032
+   ],
+   "final": [
+    0.439,
+    0.85,
+    0.462
+   ],
+   "deviation": {
+    "w": -0.122,
+    "d": -0.076,
+    "h": 0.0
+   }
+  }
+ }
+}

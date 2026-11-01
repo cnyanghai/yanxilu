@@ -11,7 +11,7 @@ def schema(name): return json.load(open(os.path.join(D, "schema", name + ".schem
 def check_schema(obj, sname, label):
     for e in sorted(Draft7Validator(schema(sname)).iter_errors(obj), key=lambda e: list(e.path)):
         errs.append(f"{label}: {'/'.join(map(str, e.path)) or '<root>'}: {e.message[:160]}")
-T = {n: load(n + ".json") for n in ("objects", "rooms", "vis", "props", "items", "economy", "sound")}
+T = {n: load(n + ".json") for n in ("objects", "rooms", "vis", "props", "items", "economy", "sound", "tiles")}
 for n, o in T.items(): check_schema(o, n, n + ".json")
 presets = {os.path.basename(p)[:-5]: json.load(open(p, encoding="utf-8")) for p in glob.glob(os.path.join(D, "presets", "*.json"))}
 for n, p in presets.items(): check_schema(p, "preset", f"presets/{n}.json")
@@ -40,6 +40,25 @@ for r in T["rooms"]["rooms"]:
                 if x0 < a1 and x1 > a0 and z0 < b1 and z1 > b0: errs.append(f"rooms: {r['id']} 地面槽 {s['name']} 与 {n2} 重叠")
             rects.append((s["name"], x0, x1, z0, z1))
         if s["x"] % 1 or s["z"] % 1: errs.append(f"rooms: {r['id']}.{s['name']} 坐标不是整数厘米")
+for r in T["rooms"]["rooms"]:
+    t = r.get("tiles")
+    if not t: errs.append(f"rooms: {r['id']} 没有瓦片层"); continue
+    cols, rows = round(r["size"]["w"] / t["cell"]), round(r["size"]["d"] / t["cell"])
+    if len(t["floor"]) != rows or any(len(row) != cols for row in t["floor"]): errs.append(f"rooms: {r['id']} 的 floor 网格应为 {cols} × {rows}")
+    for row in t["floor"]:
+        for k in row:
+            if k not in T["tiles"]["floor"]: errs.append(f"rooms: {r['id']} 的地面块 {k} 不在 tiles.floor 里")
+    for w in t["walls"]:
+        if w["type"] not in T["tiles"]["wall"]: errs.append(f"rooms: {r['id']} 的墙段 {w['type']} 不在 tiles.wall 里")
+        n = cols if w["side"] in ("north", "south") else rows
+        if not (0 <= w["from"] < w["to"] <= n): errs.append(f"rooms: {r['id']} 墙段 {w['type']} {w['side']} {w['from']}-{w['to']} 越界（上限 {n}）")
+    for side in ("north", "south", "east", "west"):
+        n = cols if side in ("north", "south") else rows; cov = [0] * n
+        for w in t["walls"]:
+            if w["side"] == side:
+                for i in range(w["from"], w["to"]): cov[i] += 1
+        if any(c != 1 for c in cov): errs.append(f"rooms: {r['id']} 的 {side} 墙段没有正好覆盖一遍（{cov}）")
+    if t.get("roof") and t["roof"] not in T["tiles"].get("roof", {}): errs.append(f"rooms: {r['id']} 的屋顶 {t['roof']} 不在 tiles.roof 里")
 for it in T["items"]["items"]:
     if it["object"] not in obj_ids: errs.append(f"items: {it['id']} 的 object {it['object']} 不存在")
     if it["comfortClass"] not in T["economy"]["comfort"]["classes"]: errs.append(f"items: {it['id']} 的 comfortClass 不在 economy.comfort.classes 里")
@@ -61,4 +80,4 @@ for k in T["sound"]["interactions"]:
 if errs:
     print(f"表校验失败：{len(errs)} 条"); [print("  -", e) for e in errs]; sys.exit(1)
 n_slots = sum(len(r["slots"]) for r in T["rooms"]["rooms"])
-print(f"表校验通过：objects {len(obj_ids)}，rooms {len(room_ids)}（槽位 {n_slots}），vis {len(vis_ids)}，items {len(T['items']['items'])}，presets {len(presets)}")
+print(f"表校验通过：objects {len(obj_ids)}，rooms {len(room_ids)}（槽位 {n_slots}，瓦片层齐），tiles 地面 {len(T['tiles']['floor'])} 墙段 {len(T['tiles']['wall'])}，vis {len(vis_ids)}，items {len(T['items']['items'])}，presets {len(presets)}")

@@ -113,6 +113,68 @@
      "defaultVis": {
       "type": "string",
       "pattern": "^[a-z_]+:(dawn|day|dusk|night)$"
+     },
+     "tiles": {
+      "type": "object",
+      "required": [
+       "cell",
+       "floor",
+       "walls"
+      ],
+      "properties": {
+       "cell": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "floor": {
+        "type": "array",
+        "items": {
+         "type": "array",
+         "items": {
+          "type": "string"
+         }
+        }
+       },
+       "walls": {
+        "type": "array",
+        "items": {
+         "type": "object",
+         "required": [
+          "type",
+          "side",
+          "from",
+          "to"
+         ],
+         "properties": {
+          "type": {
+           "type": "string"
+          },
+          "side": {
+           "enum": [
+            "north",
+            "south",
+            "east",
+            "west"
+           ]
+          },
+          "from": {
+           "type": "integer",
+           "minimum": 0
+          },
+          "to": {
+           "type": "integer",
+           "minimum": 1
+          }
+         }
+        }
+       },
+       "roof": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      }
      }
     }
    }

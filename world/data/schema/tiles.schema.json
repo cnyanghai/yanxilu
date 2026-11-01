@@ -1,0 +1,43 @@
+{
+ "$schema": "http://json-schema.org/draft-07/schema#",
+ "type": "object",
+ "required": [
+  "format",
+  "units",
+  "floor",
+  "wall"
+ ],
+ "properties": {
+  "format": {
+   "const": 1
+  },
+  "units": {
+   "const": "cm"
+  },
+  "floor": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "name",
+     "material"
+    ]
+   }
+  },
+  "wall": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "name",
+     "segment",
+     "h",
+     "t"
+    ]
+   }
+  },
+  "roof": {
+   "type": "object"
+  }
+ }
+}
