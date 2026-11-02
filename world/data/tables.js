@@ -1,6 +1,6 @@
 /* 数据层：七张表与预设的加载（design/studio/REVIEW-1.md 第 2 节；格式见 world/data/schema/README.md）。
    纯函数、不 import three；坐标一律厘米整数，这里提供 cm → 米的换算。运行时只读。 */
-export const TABLE_NAMES = ["objects", "rooms", "vis", "props", "items", "economy", "sound", "tiles"];
+export const TABLE_NAMES = ["objects", "rooms", "vis", "props", "items", "economy", "sound", "tiles", "characters"];
 
 export const m = (cm) => cm / 100;                       /* 厘米 → 米 */
 export const v3 = (p) => [m(p.x), m(p.y ?? 0), m(p.z)];  /* {x,y,z} 厘米 → [x,y,z] 米 */

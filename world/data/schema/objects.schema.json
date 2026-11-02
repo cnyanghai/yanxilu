@@ -74,7 +74,50 @@
        "required": [
         "name",
         "anim"
-       ]
+       ],
+       "properties": {
+        "name": {
+         "type": "string"
+        },
+        "anim": {
+         "type": "string"
+        },
+        "loop": {
+         "type": "boolean",
+         "description": "true 停住循环（Neutral / Opened），false 播一遍就转（Operating）——暗黑 2 的 loopCount 0 / 1"
+        },
+        "crossfade": {
+         "type": "number",
+         "minimum": 0,
+         "description": "进入这个状态的淡接秒数；物件默认 0.01，角色默认 0.2"
+        },
+        "audio": {
+         "type": "string"
+        },
+        "events": {
+         "type": "array",
+         "items": {
+          "type": "object",
+          "required": [
+           "t",
+           "kind"
+          ],
+          "properties": {
+           "t": {
+            "type": "number"
+           },
+           "kind": {
+            "enum": [
+             "sound",
+             "vfx",
+             "releasePoint",
+             "light"
+            ]
+           }
+          }
+         }
+        }
+       }
       }
      },
      "operate": {
@@ -116,6 +159,14 @@
       "type": "integer",
       "minimum": 0,
       "maximum": 2
+     },
+     "transitions": {
+      "type": "string",
+      "enum": [
+       "any",
+       "linear"
+      ],
+      "description": "any：任意态可转任意态（暗黑 2 物件与角色都是全连通）；linear：只按 states 顺序"
      }
     }
    }

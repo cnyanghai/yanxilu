@@ -64,15 +64,21 @@
    "states": [
     {
      "name": "on_shelf",
-     "anim": "on_shelf"
+     "anim": "on_shelf",
+     "loop": true,
+     "crossfade": 0.01
     },
     {
      "name": "pulled",
-     "anim": "pulled"
+     "anim": "pulled",
+     "loop": false,
+     "crossfade": 0.05
     },
     {
      "name": "open",
-     "anim": "open"
+     "anim": "open",
+     "loop": true,
+     "crossfade": 0.01
     }
    ],
    "operate": {
@@ -89,7 +95,8 @@
    "next": {
     "pulled": "openReader",
     "open": "putBack"
-   }
+   },
+   "transitions": "any"
   },
   {
    "id": "notebook_rack",
@@ -193,15 +200,21 @@
    "states": [
     {
      "name": "flat",
-     "anim": "flat"
+     "anim": "flat",
+     "loop": true,
+     "crossfade": 0.01
     },
     {
      "name": "lifted",
-     "anim": "lifted"
+     "anim": "lifted",
+     "loop": false,
+     "crossfade": 0.05
     },
     {
      "name": "open",
-     "anim": "open"
+     "anim": "open",
+     "loop": true,
+     "crossfade": 0.01
     }
    ],
    "operate": {
@@ -214,7 +227,8 @@
    "data": {
     "coll": "cards"
    },
-   "model": "procedural"
+   "model": "procedural",
+   "transitions": "any"
   },
   {
    "id": "desk_lamp",
@@ -384,15 +398,21 @@
    "states": [
     {
      "name": "sealed",
-     "anim": "sealed"
+     "anim": "sealed",
+     "loop": true,
+     "crossfade": 0.01
     },
     {
      "name": "unsealed",
-     "anim": "unsealed"
+     "anim": "unsealed",
+     "loop": false,
+     "crossfade": 0.05
     },
     {
      "name": "open",
-     "anim": "open"
+     "anim": "open",
+     "loop": true,
+     "crossfade": 0.01
     }
    ],
    "operate": {
@@ -408,7 +428,8 @@
    "model": "procedural",
    "next": {
     "unsealed": "openBox"
-   }
+   },
+   "transitions": "any"
   },
   {
    "id": "bag",
@@ -455,15 +476,21 @@
    "states": [
     {
      "name": "closed",
-     "anim": "closed"
+     "anim": "closed",
+     "loop": true,
+     "crossfade": 0.01
     },
     {
      "name": "opening",
-     "anim": "opening"
+     "anim": "opening",
+     "loop": false,
+     "crossfade": 0.01
     },
     {
      "name": "open",
-     "anim": "open"
+     "anim": "open",
+     "loop": true,
+     "crossfade": 0.01
     }
    ],
    "operate": {
@@ -473,7 +500,8 @@
    "selectable": true,
    "collision": true,
    "tier": 0,
-   "model": "shell"
+   "model": "shell",
+   "transitions": "any"
   },
   {
    "id": "cat",

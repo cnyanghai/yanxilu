@@ -254,3 +254,13 @@
 | night | 4.0 | .10 | .42 .45 1.0 | 4.5 | 47° / 52° | .70 | .30 .37 .50 | .15 |
 
 每个 vis 文件 = 一个后期实体（上表加 LUT default、泛光阈值 1.0、角色亮度 .4、物品亮度 2.0、玩家光 2000 衰减 5.5、单位光 500 衰减 5、风向风速）+ 8 盏方向光：世界主光（mask 9，唯一投影）、世界补光与背光（功率 0）、玩家主光 30 / 补光 4 / 背光 0（mask 68 / 4）、怪物补光 30 / 背光 4（mask 74 / 10）。俯角六个时段一律 47 度，只转方位：太阳从东（7°）走到西（52°）。复现与映射曲线见 studio/REHEARSAL.md 阶段三与 TECH-NOTES 卡十二。
+
+## 19. 角色状态机与动画时间线的数据（2026-11-01，barbarian_state_machine.json 与 combined.timelines 实读）
+
+- **状态机文件**：`type: AnimationStateMachine`，`unitType` UNIT_PLAYER / UNIT_OBJECT，三张表：`animations`（名 → 文件，野蛮人 440 条）、`states`（65 条：name、stateId、modeId、loopCount 0 停 1 播一遍、audioId、skillIndex、stepIndex、animationBindings、enterEvents / exitEvents 全空、exitBlendType）、`transitions`（每个状态一组，组里 65 条 to + crossfadeSeconds）。
+- **绑定**：`animationBindings` 的键是手持物类（hth 徒手、1hs / 1ht 单手剑 / 单手挥、2hs / 2ht 双手、1js / 1jt / 1ss / 1st 持盾变体、stf 杖、bow、xbw 弩、ht1 / ht2 双持），值是动画名数组；动画名 = `<类>_<模式>`。PMODE_NEUTRAL 等 20 个有名字的状态对应原版的 COF 模式，其余 45 个是技能序列（modeId 18 / 100）。
+- **转移**：全连通 4225 条，淡接 0.2 秒占 91%，其余 0 / 0.01 / 0.05 / 0.07 / 0.1 / 0.3。
+- **时间线**（combined.timelines，JSON）：每条动画一条，`duration`、`timeStep` 1/30、`animationEvents`：PlaySoundByCategory 329、PlaySoundById 289、SpawnFootprint 146、AnimationReleasePoint 31、ChangeEquipmentLayerWeight 20、StartUnitSkillStep 18、SpawnVFX 2、DisableTwoHandAttach 2；时长 0.23 到 7.47 秒，中位 0.63。
+- **物件**：宝箱 Neutral / Operating / Opened 三态三动画，淡接 0.01，全连通；门多一个备用态，淡接 0.2。
+- **文件**：`<角色>_state_machine.json` 与 `_shell.json`（37 态无动画表的低配壳）；`animation/combined.animations`（GR2 曲线，6.5 MB）与 `combined.timelines`；`skeleton/<角色>.skeleton`（GR2，167 骨）；部件 `<部位>_<档>_lod<n>.model` 各自带整副骨架。
+- 装配复现与对我们的表见 studio/REHEARSAL.md 阶段四；表的落点 `world/data/characters.json`。

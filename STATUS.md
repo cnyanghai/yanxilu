@@ -2,9 +2,9 @@
 type: status
 status: active
 cluster: product
-stage: 排练阶段三 光与后期完成并补了一轮：vis 六时段驱动光 + 土底草片印章贴花地面 + 后期；白天 3 夜晚 3.5 黎明 3 黄昏 3；vis 表加四列与映射曲线，技术卡十二；夜晚远地与环境遮蔽留给营地切片
-next: 排练阶段四 角色与交互：野蛮人骨骼 / 状态机 / 部件三档 / 动画按手持物绑，门与箱子的三态状态机；做完写《研习录生产流程 1.0》并删 tools/out/d2r_local。M1 剩余不变；院子重做光时把 world.js 切到 vis.mapping 的曲线
-blocked_by: 无
+stage: 排练四阶段全部完成（design/studio/REHEARSAL.md）；生产流程 1.0 草案在 design/studio/PIPELINE.md；第九张表 characters 加 Schema 登记，objects 三态加 loop / 淡接 / events
+next: 用户看阶段四的图与 PIPELINE 草案；然后用自己的第一批资产（一件家具 + 一个预制体 + 读书人角色）按 PIPELINE 走一遍，走通后删 tools/out/d2r_local；M1 剩余（tiles 渲染按'层 + 印章 + 贴花'改、4.5 × 3.5 重烘、真显卡截图、摆放编辑器）并入
+blocked_by: 用户看图与流程草案
 updated: 2026-11-01
 ---
 
@@ -66,6 +66,7 @@ updated: 2026-11-01
 
 ## 日志
 
+- 2026-11-01 排练阶段四：拆野蛮人状态机（65 态 440 动画 14 类手持物 4225 转移淡接 0.2）、时间线（278 条 30 帧 8 种事件，声音 618 脚印 146 释放点 31）、宝箱门三态；合成预制体把三档部件 21 件拼成三个人本机渲白天夜晚；写 characters.json 第九张表 + Schema（骨架 ≤ 80、部件三档、14 状态、6 手持物、绑定规则、转移默认 + 例外、时间线事件五种）并登记 tables.js；objects 的门盒牌书三态加 loop / crossfade，transitions any；PIPELINE.md 生产流程 1.0 草案七节；D2R-DISSECTION 第 19 节；tables_check 登记 characters 表校验通过，world_test 回归跑完再提交；四阶段对照图（本机 tools/out 下，不入库）均已发用户
 - 2026-11-01 阶段三补一轮（用户评图后）：地面底层换小路土层 + 草地层噪声成片 + 印章层、主光 1.1 环境 .4、环境图跟主光色 → 白天泛绿消失、光比 1.6、黎明暖黄昏蓝紫；夜晚死黑升到 43%（压环境光的代价）；白天 3 夜晚 3.5 黎明 3 黄昏 3；REHEARSAL 数字表改成三列，学到的加三条（底层是土、黎明靠色、必须有环境遮蔽）；一行内注释吞代码的低级错误耗了一轮
 - 2026-11-01 排练阶段三：vis 六时段导成紧凑表（俯角一律 47°、曝光恒 4.0、世界光只一盏主光 + IBL + 深度雾、角色另有 8 盏）；scene.html 改 vis 驱动 + 两层地面（草地层 + 印章 alpha 加噪声）+ 17 贴花 + 贴地网格 alpha 混合 + 合成后期；五轮调参：发现合成后期的深度雾在 swiftshader 下读不到深度（整图糊白，Composite 加 samples 选项）、vis 灯方向四元数指向太阳要翻、线性映射白天冲灰夜晚死黑 → 主光 √功率 IBL^0.4；定稿白天中位 57 跨度 61、夜晚死黑 38%；vis.json 加 ibl / characterShadow / characterBrightness / itemBrightness 与 mapping，vis.schema 同步；TECH-NOTES 卡十二；D2R-DISSECTION 第 18 节
 - 2026-11-01 排练阶段二：拆 towne1.json（1639 实体 16 组件、7 个预制体、105 特效 171 音源、墙透明全在藤蔓上、朝向与缩放分布）、pf_town_tent02（88 实体）与 pf_town_campfire01（147）、act1_outdoors 生物群系（10 地面层 + 杂物 + IBL）、vis 白天夜晚逐字段对照；写 scratchpad/d2r_prefab.py（解包 lod0 → 转换清单 → 贴图解包解码 → 场景清单，封包路径小写重试）与 d2r_local/scene.html（多实例、点灯、档位）；46 模型 84 贴图一次转完，帐篷预制体四张截图；preset.schema 加 9 个组件定义；D2R-DISSECTION 第 17 节

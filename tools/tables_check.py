@@ -11,7 +11,7 @@ def schema(name): return json.load(open(os.path.join(D, "schema", name + ".schem
 def check_schema(obj, sname, label):
     for e in sorted(Draft7Validator(schema(sname)).iter_errors(obj), key=lambda e: list(e.path)):
         errs.append(f"{label}: {'/'.join(map(str, e.path)) or '<root>'}: {e.message[:160]}")
-T = {n: load(n + ".json") for n in ("objects", "rooms", "vis", "props", "items", "economy", "sound", "tiles")}
+T = {n: load(n + ".json") for n in ("objects", "rooms", "vis", "props", "items", "economy", "sound", "tiles", "characters")}
 for n, o in T.items(): check_schema(o, n, n + ".json")
 presets = {os.path.basename(p)[:-5]: json.load(open(p, encoding="utf-8")) for p in glob.glob(os.path.join(D, "presets", "*.json"))}
 for n, p in presets.items(): check_schema(p, "preset", f"presets/{n}.json")

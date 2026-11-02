@@ -1,0 +1,207 @@
+{
+ "format": 1,
+ "units": "cm",
+ "note": "2026-11-01 排练阶段四定的外形：一副骨架、部件三档、状态 × 手持物绑动画、时间线事件、转移全连通带淡接。动画文件按 <手持物>_<状态> 命名，缺的回退到 hth（徒手）",
+ "holdables": [
+  "hth",
+  "book",
+  "cup",
+  "brush",
+  "lamp",
+  "tool"
+ ],
+ "skeletons": {
+  "humanoid": {
+   "file": "packs/common/skeletons/humanoid.gltf.json",
+   "bones": 60,
+   "height": 150,
+   "note": "标准人形，Mixamo 兼容命名；暗黑 2 野蛮人 167 骨太多，我们 60 以内"
+  }
+ },
+ "fps": 30,
+ "timelineEvents": [
+  "sound",
+  "footprint",
+  "releasePoint",
+  "vfx",
+  "equipLayer"
+ ],
+ "characters": [
+  {
+   "id": "reader",
+   "name": "读书人",
+   "skeleton": "humanoid",
+   "height": 150,
+   "parts": {
+    "head": {
+     "tiers": [
+      "base"
+     ]
+    },
+    "torso": {
+     "tiers": [
+      "lit",
+      "med",
+      "hvy"
+     ]
+    },
+    "larm": {
+     "tiers": [
+      "lit",
+      "med",
+      "hvy"
+     ]
+    },
+    "rarm": {
+     "tiers": [
+      "lit",
+      "med",
+      "hvy"
+     ]
+    },
+    "legs": {
+     "tiers": [
+      "lit",
+      "med",
+      "hvy"
+     ]
+    },
+    "special1": {
+     "tiers": [
+      "lit",
+      "med",
+      "hvy"
+     ],
+     "note": "披肩 / 腰带 / 书袋这类挂件"
+    }
+   },
+   "textures": {
+    "body": {
+     "alb": 1024,
+     "nrm": 1024,
+     "orm": 512
+    },
+    "wear": {
+     "alb": 1024,
+     "nrm": 1024,
+     "orm": 512,
+     "mask": 1024
+    }
+   },
+   "tris": {
+    "lod0": 8000,
+    "lod1": 2000
+   },
+   "states": [
+    {
+     "id": 0,
+     "name": "neutral",
+     "loop": true
+    },
+    {
+     "id": 1,
+     "name": "walk",
+     "loop": true
+    },
+    {
+     "id": 2,
+     "name": "run",
+     "loop": true
+    },
+    {
+     "id": 3,
+     "name": "town_neutral",
+     "loop": true,
+     "note": "院子里的待机，比 neutral 松"
+    },
+    {
+     "id": 4,
+     "name": "town_walk",
+     "loop": true
+    },
+    {
+     "id": 5,
+     "name": "sit_down",
+     "loop": false
+    },
+    {
+     "id": 6,
+     "name": "sit",
+     "loop": true
+    },
+    {
+     "id": 7,
+     "name": "stand_up",
+     "loop": false
+    },
+    {
+     "id": 8,
+     "name": "take",
+     "loop": false,
+     "releasePoint": 0.4,
+     "note": "取书 / 取牌，releasePoint 是手碰到东西的时刻"
+    },
+    {
+     "id": 9,
+     "name": "read",
+     "loop": true
+    },
+    {
+     "id": 10,
+     "name": "write",
+     "loop": true
+    },
+    {
+     "id": 11,
+     "name": "pet",
+     "loop": false
+    },
+    {
+     "id": 12,
+     "name": "water",
+     "loop": false
+    },
+    {
+     "id": 13,
+     "name": "look",
+     "loop": false,
+     "note": "张望"
+    }
+   ],
+   "bindings": {
+    "rule": "<holdable>_<state>",
+    "fallback": "hth"
+   },
+   "transitions": {
+    "default": {
+     "crossfade": 0.2
+    },
+    "exceptions": [
+     {
+      "from": "*",
+      "to": "take",
+      "crossfade": 0.05
+     },
+     {
+      "from": "sit_down",
+      "to": "sit",
+      "crossfade": 0.0
+     },
+     {
+      "from": "stand_up",
+      "to": "neutral",
+      "crossfade": 0.1
+     }
+    ]
+   },
+   "light": {
+    "key": "#fff6e8",
+    "keyPower": 1.0,
+    "fill": "#e6ecff",
+    "fillPower": 0.2,
+    "shadowDarkness": 0.9,
+    "note": "角色独立布光，数值在 vis.characterLight 里按时段给，这里是默认"
+   }
+  }
+ ]
+}
