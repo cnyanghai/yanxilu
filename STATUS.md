@@ -2,8 +2,8 @@
 type: status
 status: active
 cluster: product
-stage: 排练阶段二 预设摆放完成：towne1 / 两个预制体 / 生物群系 / vis 拆透，帐篷二号预制体 69 实例本机摆出白天夜晚；preset.schema 加 Prefab / Variation / Light / Vfx / Audio / Stamp / Decal 等组件定义；学到的十一条与编辑器动作清单在 REHEARSAL
-next: 排练阶段三 光与后期：把 act1_outdoors 六个时段的 vis 数值（主光、IBL、深度雾、角色影、亮度系数）搬进我们的 vis 表看效果，对比 LUT；然后阶段四 角色与交互。M1 剩余不变
+stage: 排练阶段三 光与后期完成：vis 六时段导表，场景页全按 vis 布光 + 两层地面印章贴花 + 后期，五轮重截；白天 3.5 夜晚 3.5（夜晚死黑 38% 差目标 8 个点）；vis 表加四列与映射曲线，技术卡十二
+next: 排练阶段四 角色与交互：野蛮人骨骼 / 状态机 / 部件三档 / 动画按手持物绑，门与箱子的三态状态机；做完写《研习录生产流程 1.0》并删 tools/out/d2r_local。M1 剩余不变；院子重做光时把 world.js 切到 vis.mapping 的曲线
 blocked_by: 无
 updated: 2026-11-01
 ---
@@ -66,6 +66,7 @@ updated: 2026-11-01
 
 ## 日志
 
+- 2026-11-01 排练阶段三：vis 六时段导成紧凑表（俯角一律 47°、曝光恒 4.0、世界光只一盏主光 + IBL + 深度雾、角色另有 8 盏）；scene.html 改 vis 驱动 + 两层地面（草地层 + 印章 alpha 加噪声）+ 17 贴花 + 贴地网格 alpha 混合 + 合成后期；五轮调参：发现合成后期的深度雾在 swiftshader 下读不到深度（整图糊白，Composite 加 samples 选项）、vis 灯方向四元数指向太阳要翻、线性映射白天冲灰夜晚死黑 → 主光 √功率 IBL^0.4；定稿白天中位 57 跨度 61、夜晚死黑 38%；vis.json 加 ibl / characterShadow / characterBrightness / itemBrightness 与 mapping，vis.schema 同步；TECH-NOTES 卡十二；D2R-DISSECTION 第 18 节
 - 2026-11-01 排练阶段二：拆 towne1.json（1639 实体 16 组件、7 个预制体、105 特效 171 音源、墙透明全在藤蔓上、朝向与缩放分布）、pf_town_tent02（88 实体）与 pf_town_campfire01（147）、act1_outdoors 生物群系（10 地面层 + 杂物 + IBL）、vis 白天夜晚逐字段对照；写 scratchpad/d2r_prefab.py（解包 lod0 → 转换清单 → 贴图解包解码 → 场景清单，封包路径小写重试）与 d2r_local/scene.html（多实例、点灯、档位）；46 模型 84 贴图一次转完，帐篷预制体四张截图；preset.schema 加 9 个组件定义；D2R-DISSECTION 第 17 节
 - 2026-11-01 用户放行转换器 → 权限文件只留 `python3 -I ~/.local/src/d2rconv/*`（dotnet 两条删了）；转换器补静态网格两行，加 run.py 把用户 site-packages 加回隔离模式；箱子 / 帐篷布 / 右臂转 glb；cascx 补解帐篷营地贴图 21 张；写本机看图页 view.html（去蒙皮按绑定姿势、藏占位材质、程序化环境图、白天夜晚两套灯）+ Playwright 截图；发现 texture2ddecoder 输出 BGRA（皮肤红蓝均值反了）修 d2_decode；金属度读对后要环境图；四格对照图发用户；学到的八条记 REHEARSAL，D2R-DISSECTION 第 16 节补贴图实测
 - 2026-11-01 排练立项（REHEARSAL.md 四阶段 + 五条护栏）：tables_check 加 d2r_local 守卫；按用户选的第二条加 dotnet 构建权限规则并编译 LSLib → 卡在 Windows 专用 GpLex / Gppg；再查 .model 段头发现 261 个样本 522 段全是 BitKnit2（类型 4），LSLib 解它要 granny2.dll 而 D2R 静态链接无 dll → LSLib 排除；搜到 WindyYam 的 MIT 纯 Python 转换器（自带 BitKnit2 纯净室解码），克隆到 ~/.local/src/d2rconv 并审阅，运行被分类器拦下等用户授权；.model 容器与顶点格式写入 D2R-DISSECTION 第 16 节，四条参考落位

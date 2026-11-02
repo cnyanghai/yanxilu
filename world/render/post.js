@@ -4,8 +4,8 @@
 import * as THREE from "three";
 
 export class Composite {
-  constructor(renderer) {
-    this.renderer = renderer; this.rt = null;
+  constructor(renderer, opts = {}) {
+    this.renderer = renderer; this.rt = null; this.samples = opts.samples ?? 4;   /* 软渲染（swiftshader）下多重采样的深度图读不出来，排练场景页传 0 */
     this.scene = new THREE.Scene(); this.cam = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1);
     this.mat = new THREE.ShaderMaterial({
       uniforms: {
@@ -62,7 +62,7 @@ export class Composite {
     const r = this.renderer, w = r.domElement.width, h = r.domElement.height;
     if (!this.rt || this.rt.width !== w || this.rt.height !== h) {
       if (this.rt) this.rt.dispose();
-      this.rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples: 4, depthTexture: new THREE.DepthTexture(w, h) });
+      this.rt = new THREE.WebGLRenderTarget(w, h, { type: THREE.HalfFloatType, samples: this.samples, depthTexture: new THREE.DepthTexture(w, h) });
       this.rt.depthTexture.format = THREE.DepthFormat; this.rt.depthTexture.type = THREE.UnsignedIntType;
     }
     r.setRenderTarget(this.rt); r.render(scene, camera); r.setRenderTarget(null);

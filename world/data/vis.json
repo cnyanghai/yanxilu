@@ -53,7 +53,11 @@
     "color": "#ffd9a0"
    },
    "localLights": {},
-   "bakeSet": "dawn"
+   "bakeSet": "dawn",
+   "ibl": 0.2,
+   "characterShadow": 0.9,
+   "characterBrightness": 0.4,
+   "itemBrightness": 2.0
   },
   {
    "id": "study:day",
@@ -101,7 +105,11 @@
     "color": "#ffd9a0"
    },
    "localLights": {},
-   "bakeSet": "day"
+   "bakeSet": "day",
+   "ibl": 0.2,
+   "characterShadow": 0.9,
+   "characterBrightness": 0.4,
+   "itemBrightness": 2.0
   },
   {
    "id": "study:dusk",
@@ -151,7 +159,11 @@
    "localLights": {
     "desk_lamp": 1.0
    },
-   "bakeSet": "dusk"
+   "bakeSet": "dusk",
+   "ibl": 0.33,
+   "characterShadow": 0.9,
+   "characterBrightness": 0.4,
+   "itemBrightness": 2.0
   },
   {
    "id": "study:night",
@@ -202,7 +214,11 @@
     "desk_lamp": 1.0,
     "wall_lamp": 0.8
    },
-   "bakeSet": "night"
+   "bakeSet": "night",
+   "ibl": 0.05,
+   "characterShadow": 0.7,
+   "characterBrightness": 0.4,
+   "itemBrightness": 2.0
   },
   {
    "id": "yard:day",
@@ -250,7 +266,11 @@
     "color": "#ffd9a0"
    },
    "localLights": {},
-   "bakeSet": "day"
+   "bakeSet": "day",
+   "ibl": 0.4,
+   "characterShadow": 0.9,
+   "characterBrightness": 0.4,
+   "itemBrightness": 2.0
   }
  ],
  "weather": {
@@ -264,5 +284,11 @@
  "transition": {
   "seconds": 2.5,
   "ease": "inOutCubic"
+ },
+ "mapping": {
+  "note": "2026-11-01 排练阶段三定的映射曲线（见 design/TECH-NOTES.md 卡十二）：主光强度 ∝ √power，环境光强度 ∝ ibl^0.4，曝光不随时段变；现 world.js 仍是线性乘子，院子重做光时切过去",
+  "keyPower": "sqrt",
+  "ibl": "pow0.4",
+  "exposureConstant": true
  }
 }

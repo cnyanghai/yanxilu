@@ -91,3 +91,11 @@
 - 在哪能看见：工坊面板「画风贴图·滤镜」「画风贴图·图生图」「画风后期」三个开关；`tools/tests/paint_verify.py` 出对照墙。
 - 换个做法会怎样：不做后期，全靠贴图，手机更省；后期开着每帧多一次全屏 64 次采样。
 - 想深究看什么：Kuwahara filter、Kyprianidis 的各向异性 Kuwahara；three.js 的 WebGLRenderTarget 与 tonemapping 顺序（渲到离屏图时不做色调映射，最后一遍才做）。
+
+## 十二、光照表的映射曲线、场景雾与合成后期的深度图（排练阶段三，2026-11-01）
+
+- 是什么：把暗黑 2 六个时段的 vis（主光功率 4 到 13.5、IBL .1 到 .65、深度雾色与密度）搬进我们的 three.js 时，用线性乘子白天冲灰、夜晚死黑；换成**主光强度 ∝ √功率、环境光强度 ∝ IBL^0.4、曝光不随时段变**后，白天中位 57 跨度 61 到 80，夜晚死黑从 94% 降到 36% 且帐内一盏灯不过曝。深度雾改在材质里做（`scene.fog = FogExp2`，密度 = 表值 × 0.006 每米），合成后期只管暗角与颗粒。
+- 为什么：他们的曝光六个时段都是 4.0，配 HDR 天空；亮暗全靠灯与 IBL 的量，低值段被色调曲线抬起，所以功率的差（3 倍）在画面上不是 3 倍。另外软渲染（swiftshader，测试用）下多重采样离屏图的深度纹理读不出来（全图当最远），合成里的深度雾会把整张图糊白；`Composite` 加了 `samples` 选项，排练场景页传 0；真显卡上是否同样待验。
+- 在哪能看见：排练的场景页（只在本机，位置见 studio/REHEARSAL.md 护栏第一条）；`world/data/vis.json` 的 `mapping` 字段与四个新列（ibl、characterShadow、characterBrightness、itemBrightness）。
+- 换个做法会怎样：保留线性乘子，每个时段手调一遍曝光，能调出来但表里的数字就失去物理意义，加新时段又要重调。
+- 想深究看什么：Filmic / ACES 曲线的低值段斜率；three.js 的 `environmentIntensity` 与 `HemisphereLight` 的叠加；WebGL2 多重采样深度纹理的解析（`WebGLRenderTarget.samples` 与 `depthTexture`）。
