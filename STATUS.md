@@ -2,9 +2,9 @@
 type: status
 status: active
 cluster: product
-stage: 排练（design/studio/REHEARSAL.md）阶段一 资产解包导入：护栏落地（tools/out/d2r_local 加校验守卫）；LSLib 路线排除（BitKnit2 要 granny2.dll，D2R 没带）；找到 WindyYam 的纯 Python 转换器（MIT），已审阅待运行
-next: 用户加一条权限规则放行 `python3 -I /home/cnyanghai/.local/src/d2rconv/*` 后：转箱子 / 帐篷 / 野蛮人右臂为 glb，配 BC3 解出的三件套在 three.js 本机渲一张；然后排练阶段二（towne1 预设摆放）。M1 剩余不变：tiles 渲染、4.5 × 3.5 重烘、烘焙增量并行、真显卡截图、摆放编辑器
-blocked_by: 用户加权限规则（运行外部克隆的 Python 转换器）
+stage: 排练（design/studio/REHEARSAL.md）阶段一 资产解包导入完成：箱子 / 帐篷布 / 野蛮人右臂三件 .model → glb，BC3 三件套，three.js 本机渲白天夜晚；学到的八条与对我们的改动记在 REHEARSAL
+next: 排练阶段二 预设摆放：读 towne1 的实体 JSON（变体、墙透明、灯、生物群系），在 rooms / presets 表里复刻罗格营地一角；顺手把阶段一的改动落进 asset_import / asset_shrink（ORM 半分辨率、定义 JSON 加 shader / doubleSided / backscatter、两档 LOD 命名）。M1 剩余不变
+blocked_by: 无
 updated: 2026-11-01
 ---
 
@@ -59,7 +59,6 @@ updated: 2026-11-01
 
 ## 未决问题
 
-- 排练要跑 `~/.local/src/d2rconv/d2r_model_to_glb.py`（外部 MIT 代码），自动模式分类器拦下；需要用户在 `.claude/settings.local.json` 加 `Bash(python3 -I /home/cnyanghai/.local/src/d2rconv/*)`。已加的 dotnet 两条规则因 LSLib 路线排除而无用，可删。
 - 第二种风格包选哪个。
 - 在制品：brain 已有 5 个进行中项目，研习录登记后是第 6 个，开工前要暂停一个。
 - 版本 2 的"走进别人的院子"与 2026-07 的"智慧树型社交"是否合并成一个愿景的两种形态。
@@ -67,6 +66,7 @@ updated: 2026-11-01
 
 ## 日志
 
+- 2026-11-01 用户放行转换器 → 权限文件只留 `python3 -I ~/.local/src/d2rconv/*`（dotnet 两条删了）；转换器补静态网格两行，加 run.py 把用户 site-packages 加回隔离模式；箱子 / 帐篷布 / 右臂转 glb；cascx 补解帐篷营地贴图 21 张；写本机看图页 view.html（去蒙皮按绑定姿势、藏占位材质、程序化环境图、白天夜晚两套灯）+ Playwright 截图；发现 texture2ddecoder 输出 BGRA（皮肤红蓝均值反了）修 d2_decode；金属度读对后要环境图；四格对照图发用户；学到的八条记 REHEARSAL，D2R-DISSECTION 第 16 节补贴图实测
 - 2026-11-01 排练立项（REHEARSAL.md 四阶段 + 五条护栏）：tables_check 加 d2r_local 守卫；按用户选的第二条加 dotnet 构建权限规则并编译 LSLib → 卡在 Windows 专用 GpLex / Gppg；再查 .model 段头发现 261 个样本 522 段全是 BitKnit2（类型 4），LSLib 解它要 granny2.dll 而 D2R 静态链接无 dll → LSLib 排除；搜到 WindyYam 的 MIT 纯 Python 转换器（自带 BitKnit2 纯净室解码），克隆到 ~/.local/src/d2rconv 并审阅，运行被分类器拦下等用户授权；.model 容器与顶点格式写入 D2R-DISSECTION 第 16 节，四条参考落位
 - 2026-11-01 用户授权装 texture2ddecoder → 重制版 .texture 格式推出来了：头 '<DE(' + 格式号（61 线性 / 62 sRGB）+ 宽高 + mip 数 + mip 表（offset 相对表项），块是 BC3 而非 BC7，mip0 从文件尾倒推；解出木箱三件套、野蛮人头部颜色与法线、帐篷、兵营柱墙，拼图发用户；解码并入 tools/d2_decode.py（texture 子命令）
 - 2026-11-01 用户要看暗黑 2 资产图：写 tools/d2_decode.py（DT1 瓦片、DC6 精灵、重制版 SpA1 sprite 的纯 Python 解码；.texture 是 BC7 自有格式，装解码库被权限拦下未解），解出城镇地砖 8 块、弓与头盔图标、长剑胸甲盔甲的背包精灵，拼图发给用户；解出的图只在 tools/out/d2assets 本机看，不入库

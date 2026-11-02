@@ -231,3 +231,4 @@
 - "一级 LOD 一个文件"而不是一个文件装五级：按需加载远近，正好对应我们"近 3000 面远 500 面"两个文件。
 - 贴图三件套的路径写在模型里（Textures 表），材质图是工具倾倒不是运行时用的：运行时靠定义 JSON 里的材质槽，与第 12 节一致。我们的 `<id>.json` 的 Model 组件照这个只记模型文件与贴图槽。
 - 解 BitKnit2 的开源实现（WindyYam 的 carbon_granny、pybg3、maclarian）都是纯净室写的，MIT 或同类许可；LSLib 不行，它要 granny2.dll。
+- 贴图三件套实测（2026-11-01 三件资产）：alb 1024 sRGB（格式 62）、nrm 1024 线性（61）、**orm 只有 512**（61）；角色另有 mask 1024。ORM 通道 R 遮蔽 / G 粗糙 / B 金属（帐篷布 B 恒 0）。材质记录着色器名：StandardMaterial、StandardColor（角色带 mask）、AlphaThresholdMaterial；布类双面并带 BackscatterTexture。复现图见 studio/REHEARSAL.md 阶段一。
