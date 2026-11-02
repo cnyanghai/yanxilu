@@ -62,6 +62,208 @@
          },
          "rotY": {
           "type": "number"
+         },
+         "rot": {
+          "type": "array",
+          "items": {
+           "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3,
+          "description": "绕 x、y、z 的度数；只绕 y 时用 rotY。照暗黑 2 预设：植被与杂物有倾斜"
+         },
+         "scale": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "等比缩放，默认 1；暗黑 2 预设里 60% 是 1，植被 0.5 到 0.8"
+         }
+        }
+       },
+       "Prefab": {
+        "type": "object",
+        "required": [
+         "file"
+        ],
+        "properties": {
+         "file": {
+          "type": "string",
+          "description": "packs/<包>/prefabs/<名>.json，实体表坐标相对本实体"
+         }
+        },
+        "description": "预制体放置：一顶帐篷 = 帆布 + 杆 + 木板 + 桶 + 草 + 泥地 + 灯，几十个实体打成一个包放一次（暗黑 2 PrefabPlacement）"
+       },
+       "Variation": {
+        "type": "object",
+        "required": [
+         "options"
+        ],
+        "properties": {
+         "options": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+           "type": "object",
+           "required": [
+            "model",
+            "weight"
+           ],
+           "properties": {
+            "model": {
+             "type": "string"
+            },
+            "weight": {
+             "type": "number",
+             "minimum": 0
+            }
+           }
+          }
+         },
+         "seed": {
+          "type": "integer"
+         }
+        },
+        "description": "按权重选一个模型（暗黑 2 ModelVariation）"
+       },
+       "Light": {
+        "type": "object",
+        "properties": {
+         "kind": {
+          "enum": [
+           "point",
+           "spot"
+          ]
+         },
+         "color": {
+          "type": "array",
+          "items": {
+           "type": "number"
+          },
+          "minItems": 3,
+          "maxItems": 3
+         },
+         "power": {
+          "type": "number"
+         },
+         "radius": {
+          "type": "integer",
+          "description": "厘米"
+         },
+         "angle": {
+          "type": "number"
+         },
+         "attenuation": {
+          "type": "number"
+         },
+         "shadow": {
+          "type": "boolean"
+         },
+         "fromObject": {
+          "type": "boolean"
+         }
+        }
+       },
+       "Vfx": {
+        "type": "object",
+        "required": [
+         "file"
+        ],
+        "properties": {
+         "file": {
+          "type": "string"
+         }
+        },
+        "description": "雾、薄霭、飞虫、篝火火焰这类粒子实体，单独摆（暗黑 2 一座城摆了 105 个）"
+       },
+       "Audio": {
+        "type": "object",
+        "required": [
+         "event"
+        ],
+        "properties": {
+         "event": {
+          "type": "string"
+         },
+         "randomDelay": {
+          "type": "number"
+         }
+        },
+        "description": "环境音源：风吹树、水声（暗黑 2 一座城 171 个）"
+       },
+       "Stamp": {
+        "type": "object",
+        "required": [
+         "mask",
+         "layer"
+        ],
+        "properties": {
+         "mask": {
+          "type": "string"
+         },
+         "layer": {
+          "type": "integer"
+         },
+         "strength": {
+          "type": "number"
+         }
+        },
+        "description": "地形印章：用遮罩把一块地改成某个地面层（河床、空地、篝火圈）"
+       },
+       "Decal": {
+        "type": "object",
+        "required": [
+         "alb"
+        ],
+        "properties": {
+         "alb": {
+          "type": "string"
+         },
+         "nrm": {
+          "type": "string"
+         },
+         "orm": {
+          "type": "string"
+         },
+         "fade": {
+          "type": "number"
+         }
+        },
+        "description": "投影贴花：鸟粪、污渍、压痕、车辙（暗黑 2 一顶帐篷 17 个）"
+       },
+       "Model": {
+        "type": "object",
+        "properties": {
+         "file": {
+          "type": "string"
+         },
+         "tier": {
+          "type": "integer"
+         },
+         "castShadow": {
+          "type": "boolean"
+         },
+         "floor": {
+          "type": "boolean",
+          "description": "贴地网格（压实泥、草皮、灰烬），与地面混合不投影，暗黑 2 的 floorModel"
+         },
+         "wallFade": {
+          "type": "boolean",
+          "description": "挡住角色时整段淡出（暗黑 2 WallTransparency）"
+         }
+        }
+       },
+       "Tier": {
+        "type": "object",
+        "properties": {
+         "visible": {
+          "type": "integer",
+          "minimum": -1,
+          "maximum": 3,
+          "description": "-1 永远显示，0 低档起，1 中档起……暗黑 2 的 visibilityTier"
+         },
+         "shadow": {
+          "type": "integer",
+          "minimum": -1,
+          "maximum": 3
          }
         }
        }
@@ -72,6 +274,14 @@
   },
   "units": {
    "const": "cm"
+  },
+  "prefabs": {
+   "type": "object",
+   "description": "可选：内联预制体 {名: {entities:[...]}}；外置的放 packs/<包>/prefabs/"
+  },
+  "dependencies": {
+   "type": "object",
+   "description": "可选：预载清单（模型、贴图、音效），由 tables_check 生成而不是手写"
   }
  }
 }

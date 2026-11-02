@@ -232,3 +232,12 @@
 - 贴图三件套的路径写在模型里（Textures 表），材质图是工具倾倒不是运行时用的：运行时靠定义 JSON 里的材质槽，与第 12 节一致。我们的 `<id>.json` 的 Model 组件照这个只记模型文件与贴图槽。
 - 解 BitKnit2 的开源实现（WindyYam 的 carbon_granny、pybg3、maclarian）都是纯净室写的，MIT 或同类许可；LSLib 不行，它要 granny2.dll。
 - 贴图三件套实测（2026-11-01 三件资产）：alb 1024 sRGB（格式 62）、nrm 1024 线性（61）、**orm 只有 512**（61）；角色另有 mask 1024。ORM 通道 R 遮蔽 / G 粗糙 / B 金属（帐篷布 B 恒 0）。材质记录着色器名：StandardMaterial、StandardColor（角色带 mask）、AlphaThresholdMaterial；布类双面并带 BackscatterTexture。复现图见 studio/REHEARSAL.md 阶段一。
+
+## 17. 预设与预制体的数据（2026-11-01，towne1.json 与 pf_town_tent02 / pf_town_campfire01 实读）
+
+- **预设**：`type: Preset`，顶部 `dependencies`（模型 363、贴图 954、骨骼 9、粒子 5、物理 20），`terrain`（一个带 terrain.model 的实体），`biomeFilename`，`perTileBiomeOverrides`，`specialTiles`，然后 `entities` 1639 个。实体只有 `name / id / components`。
+- **16 种组件**：Transform（位置英尺、四元数、缩放、inheritOnlyPosition）、Model（filename、visibleLayers、lightMask 19、shadowMask 3 或 0、ghostShadows、floorModel、terrainBlendMode）、ModelPlatformTier（visibilityTier、shadowTier，-1 到 3）、PhysicsBody（static、盒 fixture、filter "wall"）、WallTransparency（drawOrder、wallTileLocalCoord）、AudioEmitter、Vfx、ModelVariation（variations 带 weight）、PrefabPlacement（prefab 路径）、TerrainStamp（mask、stomp、biomeName、layerIndexR/G/B）、TerrainDecal（albedo/normal/orm、parallax、layerIndex）、SpotLight（color、power、angle、distance、attenuation、shadowCaster、lightMask）、PointLight（color、power、radius、attenuation）、Skeleton、PhysicsCloth、PhysicsPartialRagdoll、Terrain。
+- **预制体**：`type: Prefab`，同样的 dependencies + entities，坐标相对预制体原点。帐篷二号 88 个实体（模型 69、贴花 17、点灯 1、聚光占位 1、印章 1、布 2）；篝火 147 个（模型 144、贴花 2、印章 1，没有灯）。城里 7 个预制体全在整数或半整数坐标、朝向 0。
+- **生物群系**（act1_outdoors.json）：6 个时段的 vis 文件、IBL 立方图、瓦片遮罩、按画质档四套地形数据，每套 10 个地面层（path、moss、mud、grass、puddle、riverbank），每层 albedo / normal / orm / noise / 草贴图 / 杂物清单（模型、密度、缩放、下沉、随机转角）/ 噪声尺度 / 高度混合阈值 / 视差。
+- **vis**（act1_outdoors_day 对 night）：一个后期实体（曝光 4.0 不变；深度雾色白→蓝灰、密度 .5→.15；IBL .4→.1；角色影子 .9→.7；主光俯角 45→40；角色亮度系数 .4、物品亮度系数 2.0、玩家光 2000、单位光 500；LUT default）+ 8 个灯实体（主光功率 13.5→4.5、色 1 .94 .87→.42 .45 1；其余是分 lightMask 的补光、边光、角色光，功率 0 到 30）。
+- 复现图与对我们的改动见 studio/REHEARSAL.md 阶段二。
