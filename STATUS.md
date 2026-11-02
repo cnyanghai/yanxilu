@@ -2,7 +2,7 @@
 type: status
 status: active
 cluster: product
-stage: 排练阶段三 光与后期完成：vis 六时段导表，场景页全按 vis 布光 + 两层地面印章贴花 + 后期，五轮重截；白天 3.5 夜晚 3.5（夜晚死黑 38% 差目标 8 个点）；vis 表加四列与映射曲线，技术卡十二
+stage: 排练阶段三 光与后期完成并补了一轮：vis 六时段驱动光 + 土底草片印章贴花地面 + 后期；白天 3 夜晚 3.5 黎明 3 黄昏 3；vis 表加四列与映射曲线，技术卡十二；夜晚远地与环境遮蔽留给营地切片
 next: 排练阶段四 角色与交互：野蛮人骨骼 / 状态机 / 部件三档 / 动画按手持物绑，门与箱子的三态状态机；做完写《研习录生产流程 1.0》并删 tools/out/d2r_local。M1 剩余不变；院子重做光时把 world.js 切到 vis.mapping 的曲线
 blocked_by: 无
 updated: 2026-11-01
@@ -66,6 +66,7 @@ updated: 2026-11-01
 
 ## 日志
 
+- 2026-11-01 阶段三补一轮（用户评图后）：地面底层换小路土层 + 草地层噪声成片 + 印章层、主光 1.1 环境 .4、环境图跟主光色 → 白天泛绿消失、光比 1.6、黎明暖黄昏蓝紫；夜晚死黑升到 43%（压环境光的代价）；白天 3 夜晚 3.5 黎明 3 黄昏 3；REHEARSAL 数字表改成三列，学到的加三条（底层是土、黎明靠色、必须有环境遮蔽）；一行内注释吞代码的低级错误耗了一轮
 - 2026-11-01 排练阶段三：vis 六时段导成紧凑表（俯角一律 47°、曝光恒 4.0、世界光只一盏主光 + IBL + 深度雾、角色另有 8 盏）；scene.html 改 vis 驱动 + 两层地面（草地层 + 印章 alpha 加噪声）+ 17 贴花 + 贴地网格 alpha 混合 + 合成后期；五轮调参：发现合成后期的深度雾在 swiftshader 下读不到深度（整图糊白，Composite 加 samples 选项）、vis 灯方向四元数指向太阳要翻、线性映射白天冲灰夜晚死黑 → 主光 √功率 IBL^0.4；定稿白天中位 57 跨度 61、夜晚死黑 38%；vis.json 加 ibl / characterShadow / characterBrightness / itemBrightness 与 mapping，vis.schema 同步；TECH-NOTES 卡十二；D2R-DISSECTION 第 18 节
 - 2026-11-01 排练阶段二：拆 towne1.json（1639 实体 16 组件、7 个预制体、105 特效 171 音源、墙透明全在藤蔓上、朝向与缩放分布）、pf_town_tent02（88 实体）与 pf_town_campfire01（147）、act1_outdoors 生物群系（10 地面层 + 杂物 + IBL）、vis 白天夜晚逐字段对照；写 scratchpad/d2r_prefab.py（解包 lod0 → 转换清单 → 贴图解包解码 → 场景清单，封包路径小写重试）与 d2r_local/scene.html（多实例、点灯、档位）；46 模型 84 贴图一次转完，帐篷预制体四张截图；preset.schema 加 9 个组件定义；D2R-DISSECTION 第 17 节
 - 2026-11-01 用户放行转换器 → 权限文件只留 `python3 -I ~/.local/src/d2rconv/*`（dotnet 两条删了）；转换器补静态网格两行，加 run.py 把用户 site-packages 加回隔离模式；箱子 / 帐篷布 / 右臂转 glb；cascx 补解帐篷营地贴图 21 张；写本机看图页 view.html（去蒙皮按绑定姿势、藏占位材质、程序化环境图、白天夜晚两套灯）+ Playwright 截图；发现 texture2ddecoder 输出 BGRA（皮肤红蓝均值反了）修 d2_decode；金属度读对后要环境图；四格对照图发用户；学到的八条记 REHEARSAL，D2R-DISSECTION 第 16 节补贴图实测
