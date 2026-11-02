@@ -2,10 +2,10 @@
 type: status
 status: active
 cluster: product
-stage: M1 工具：tools/asset_import.py 一条命令入库（减面、材质归位、贴图瘦身、原点落地、按占地缩放、目录 + 定义 JSON + 登记），三件家具已按新目录重导（每件约 200 KB、3000 面）；第八张表 tiles（瓦片集）与 rooms 的瓦片层（地面网格、墙段、屋顶）加 Schema 与校验
-next: M1 剩余：烘焙增量并行、真显卡截图、摆放编辑器最小版；营地切片前先做 tiles 的渲染（地面块按格铺、墙段拼、屋顶整层隐藏）与 study_scene 的 4.5 × 3.5 重烘
-blocked_by: 用户看效果
-updated: 2026-10-30
+stage: 排练（design/studio/REHEARSAL.md）阶段一 资产解包导入：护栏落地（tools/out/d2r_local 加校验守卫）；LSLib 路线排除（BitKnit2 要 granny2.dll，D2R 没带）；找到 WindyYam 的纯 Python 转换器（MIT），已审阅待运行
+next: 用户加一条权限规则放行 `python3 -I /home/cnyanghai/.local/src/d2rconv/*` 后：转箱子 / 帐篷 / 野蛮人右臂为 glb，配 BC3 解出的三件套在 three.js 本机渲一张；然后排练阶段二（towne1 预设摆放）。M1 剩余不变：tiles 渲染、4.5 × 3.5 重烘、烘焙增量并行、真显卡截图、摆放编辑器
+blocked_by: 用户加权限规则（运行外部克隆的 Python 转换器）
+updated: 2026-11-01
 ---
 
 # 状态
@@ -59,6 +59,7 @@ updated: 2026-10-30
 
 ## 未决问题
 
+- 排练要跑 `~/.local/src/d2rconv/d2r_model_to_glb.py`（外部 MIT 代码），自动模式分类器拦下；需要用户在 `.claude/settings.local.json` 加 `Bash(python3 -I /home/cnyanghai/.local/src/d2rconv/*)`。已加的 dotnet 两条规则因 LSLib 路线排除而无用，可删。
 - 第二种风格包选哪个。
 - 在制品：brain 已有 5 个进行中项目，研习录登记后是第 6 个，开工前要暂停一个。
 - 版本 2 的"走进别人的院子"与 2026-07 的"智慧树型社交"是否合并成一个愿景的两种形态。
@@ -66,6 +67,7 @@ updated: 2026-10-30
 
 ## 日志
 
+- 2026-11-01 排练立项（REHEARSAL.md 四阶段 + 五条护栏）：tables_check 加 d2r_local 守卫；按用户选的第二条加 dotnet 构建权限规则并编译 LSLib → 卡在 Windows 专用 GpLex / Gppg；再查 .model 段头发现 261 个样本 522 段全是 BitKnit2（类型 4），LSLib 解它要 granny2.dll 而 D2R 静态链接无 dll → LSLib 排除；搜到 WindyYam 的 MIT 纯 Python 转换器（自带 BitKnit2 纯净室解码），克隆到 ~/.local/src/d2rconv 并审阅，运行被分类器拦下等用户授权；.model 容器与顶点格式写入 D2R-DISSECTION 第 16 节，四条参考落位
 - 2026-11-01 用户授权装 texture2ddecoder → 重制版 .texture 格式推出来了：头 '<DE(' + 格式号（61 线性 / 62 sRGB）+ 宽高 + mip 数 + mip 表（offset 相对表项），块是 BC3 而非 BC7，mip0 从文件尾倒推；解出木箱三件套、野蛮人头部颜色与法线、帐篷、兵营柱墙，拼图发用户；解码并入 tools/d2_decode.py（texture 子命令）
 - 2026-11-01 用户要看暗黑 2 资产图：写 tools/d2_decode.py（DT1 瓦片、DC6 精灵、重制版 SpA1 sprite 的纯 Python 解码；.texture 是 BC7 自有格式，装解码库被权限拦下未解），解出城镇地砖 8 块、弓与头盔图标、长剑胸甲盔甲的背包精灵，拼图发给用户；解出的图只在 tools/out/d2assets 本机看，不入库
 - 2026-11-01 落进工具：asset_import.py（图片走 Rodin PBR → gltf-transform 减面到预算 → Shaded 自发光搬回 baseColor → 贴图 JPEG 1024 → 包根节点落地居中按占地缩放 → JSON glTF → packs/<包>/<类>/<id>/ 加定义 JSON → props 登记；偏差超 35% 提醒）重导 desk / deskchair / chair；tiles.json（地面块 6、墙段 6、屋顶 2）+ rooms.tiles（书房 9 × 7 地面网格与四边墙段含窗门、院子 7 × 9 含门楼竹篱石板路菜畦）+ Schema + 校验（网格尺寸、四边墙段正好覆盖一遍）；tables.js 与单测加载 tiles；1 档截图无报错

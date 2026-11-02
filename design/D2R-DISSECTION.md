@@ -206,3 +206,28 @@
 | 装备：表决定部件档位，武器按插槽附着 | `items` 表加 `component / tier / holdable` 三列；手持物插槽表 | M2 |
 | 固定镜头只做看得见的面 | 屋顶独立层进屋整层隐藏；近侧院墙降矮；所有室内完整建 | 营地切片 |
 | 原版的"光画进精灵" | 烘焙为主、三盏实时光为辅不变 | 灯光第一轮 |
+
+## 16. `.model` 容器与顶点格式（2026-11-01，从文件与 WindyYam 的格式笔记对照）
+
+**容器**：Granny 2 的 GR2，版本 7，64 位小端。16 字节魔数，头 456 字节，8 个数据段（每段 44 字节头：压缩类型、文件内偏移、压缩后与解压后大小、对齐、16 位区与 8 位区起点、重定位表、混合封送表）。我们拆的 261 个样本里 522 个非空段**全部**是压缩类型 4 = BitKnit2（流以 `B1 75` 开头）。重定位表与混合封送表也各自 BitKnit2 压缩。CRC 是从段表起到文件尾的 CRC32。
+
+**内容**：根是 `FileInfo`，下面 ArtToolInfo（Maya 2018，UnitsPerMeter 3.28084，也就是英尺，Y 向上）、Textures（贴图路径表）、Materials（Maya 着色图的倾倒）、Skeletons、VertexDatas、TriTopologies、Meshes、Models、ExtendedData。动画不在这里，在同目录的 `.animations`；骨骼有独立的 `.skeleton`。一个 `.model` 文件就是一级 LOD（文件名 `_lod0` 到 `_lod4`）。
+
+**顶点布局**（每个网格一份）：
+
+| 成员 | 存法 | 还原 |
+|---|---|---|
+| 位置 | 4 × int16 | xyz ÷ 32767 × 网格 ExtendedData 里的 VertexScale（整模最大坐标），w 填充 |
+| 骨重 | 4 × uint8 | ÷ 255，四权和为 255 |
+| 骨索引 | 4 × uint8 | 查 Mesh.BoneBindings → 骨名 → 骨架 |
+| 法线 | 4 × int8 | ÷ 127 |
+| 切线 | 4 × int8 | xyz ÷ 127，w = ±127 是手性 |
+| UV0 | 2 × half | Maya 的 V 向上 |
+
+索引是 uint16 三角列表，按材质分组（MaterialIndex / TriFirst / TriCount）。每根骨带一个骨骼局部空间的包围盒（OBBMin / OBBMax），用于剔除与碰撞。
+
+**对我们的意思**：
+- 他们把顶点压到 16 字节位置 + 4 法线 + 4 切线 + 4 UV + 8 蒙皮 = 每顶点约 36 字节；我们走 glTF 用 Draco 或 meshopt 的量化（`gltf-transform quantize`），效果等价，不自造格式。
+- "一级 LOD 一个文件"而不是一个文件装五级：按需加载远近，正好对应我们"近 3000 面远 500 面"两个文件。
+- 贴图三件套的路径写在模型里（Textures 表），材质图是工具倾倒不是运行时用的：运行时靠定义 JSON 里的材质槽，与第 12 节一致。我们的 `<id>.json` 的 Model 组件照这个只记模型文件与贴图槽。
+- 解 BitKnit2 的开源实现（WindyYam 的 carbon_granny、pybg3、maclarian）都是纯净室写的，MIT 或同类许可；LSLib 不行，它要 granny2.dll。

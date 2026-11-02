@@ -77,6 +77,13 @@ for n, p in presets.items():
                 if abs(t["x"] - sl["x"]) > sl["w"] / 2 + 1 or abs(t["z"] - sl["z"]) > sl["d"] / 2 + 1: errs.append(f"presets/{n}: {e['id']} 的位置 ({t['x']},{t['z']}) 不在槽位 {sl['name']} 内")
 for k in T["sound"]["interactions"]:
     if k not in fns: errs.append(f"sound: 交互音 {k} 不是 objects.functions 里的函数")
+# 规矩：仓库里任何表、预设、包目录都不许引用本机的暗黑资产目录
+import subprocess
+tracked = subprocess.run(["git", "ls-files", "world", "design", "tools"], capture_output=True, text=True, cwd=ROOT).stdout.split()
+for fpath in tracked:
+    try: txt = open(os.path.join(ROOT, fpath), encoding="utf-8", errors="ignore").read()
+    except Exception: continue
+    if "d2r_local" in txt and not fpath.endswith(("tables_check.py", "REHEARSAL.md", "STATUS.md")): errs.append(f"{fpath}: 引用了本机暗黑资产目录 d2r_local，不许入库")
 if errs:
     print(f"表校验失败：{len(errs)} 条"); [print("  -", e) for e in errs]; sys.exit(1)
 n_slots = sum(len(r["slots"]) for r in T["rooms"]["rooms"])
