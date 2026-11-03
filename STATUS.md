@@ -2,7 +2,7 @@
 type: status
 status: active
 cluster: product
-stage: 书架网页（版本 1）在线稳定；2026-11-03 书墙加了「秘典」装帧可选项（画布程序化封面与书脊）；三维小世界在 yanxilu-world 仓库
+stage: 书架网页（版本 1）在线稳定；2026-11-03 书墙装帧四选一（布面精装 / 布面烫金 / 维多利亚 / 秘典，后三种画布程序化），书皮设计尺子在 docs/cover-masters.md；三维小世界在 yanxilu-world 仓库
 next: 等用户在线上看布面烫金与维多利亚并打分；过 4 分则换默认装帧并把图标库改成线描；版本 1 的待办按需：剪报与档案架的小修、与 yanxilu-world 共用的数据接口若有新集合在此登记；Baba 侧由用户跑一次命令把 /world 指到新仓库的克隆
 blocked_by: 无
 updated: 2026-11-03
@@ -12,6 +12,7 @@ updated: 2026-11-03
 
 ## 现在停在哪
 
+- 2026-11-03 书皮：跟企鹅布面经典学的「布面烫金」与「维多利亚」已上线为装帧可选项（提交 1ec8d67），四本标准书与实拍并排自评 4 / 3.5 分；等用户线上打分，过 4 分换默认并把图标库改线描。对照墙与十条尺子在 docs/cover-masters.md。
 - 版本 1：书架、档案架、卡牌与卡包在线，主版本在 https://baba.wogucloud.cn 。git 标签 `v1` 指向 2026-10-28 的 main。
 - 2026-11-02 拆分：`world/`、`room/`、`design/`、`studies/`、三维工具、three.js 都移到 `cnyanghai/yanxilu-world`（brain 里 `1-Projects/yanxilu-world`），历史两边都保留。本仓库的"已定决策"与"日志"里 2026-10-27 到 11-01 关于版本 2 的条目是拆分前的记录，之后的版本 2 进度只看那边的 STATUS.md。
 - 线上 `/world` 要等 Baba 另克隆 yanxilu-world 并在本克隆里放一个 `world` 链接（用户跑一次部署脚本里的命令），在那之前 `/world` 返回 404。
