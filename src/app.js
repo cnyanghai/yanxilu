@@ -753,7 +753,7 @@
   var READS = [["face", "封面朝外", "在读的书转过来，封面朝外立在这一格最前面"], ["pull", "抽出半截", "在读的书从书列里抽出一截，书签带从底下垂出来"], ["tilt", "往前倾", "在读的书顶部往外倾，露出书顶和夹在里面的书签"]];
   var FXS = [["pull", "抽出来", "书从书列里朝你抽出来，露出两边的封皮"], ["sheen", "烫金反光", "书浮起一点，一道光扫过书脊"], ["tilt", "往前倾", "书从顶上往外倾，露出书顶"], ["none", "不动", "只稍微浮起一点"]];
   /* 装帧：布面精装是原来的样子；秘典是画布画的皮革、星盘、刻木、黑皮四种封面（按领域分），书脊有竹节、包角、烫金题签，进度与状态长在五金上 */
-  var BINDINGS = [["cloth", "布面精装", "布面精装：名色布面、烫金线、贴签、拼布、色带"], ["grim", "秘典", "秘典：皮革与徽章、星盘铜书、符文木书、铭牌秘典四种封面按领域分；星盘指针是读到哪，宝石亮是这周读过，读完盖朱印"]];
+  var BINDINGS = [["cloth", "布面精装", "布面精装：名色布面、烫金线、贴签、拼布、色带"], ["foil", "布面烫金", "布面烫金：照企鹅布面经典的做法，一书一枚图标按网格重复、一种烫印色、书名右上竖排；图标从书名和「为什么读」里挑"], ["victorian", "维多利亚", "维多利亚：双线边框、角花、月桂环里一枚图标、宽字距书名，照 1880 到 1920 年的装饰布面书"], ["grim", "秘典", "秘典：皮革与徽章、星盘铜书、符文木书、铭牌秘典四种封面按领域分；星盘指针是读到哪，宝石亮是这周读过，读完盖朱印"]];
   var COLORS = [["named", "名色", "每个领域一个经典色系：勃艮第红、爱马仕橙、孔雀绿、普鲁士蓝、克莱因蓝……"], ["qinghua", "青花瓷", "钴蓝、霁蓝、天青、瓷白"], ["orange", "橙与驼", "爱马仕橙、驼色、象牙白、墨黑"], ["cloth", "布面", "原来的低饱和布色"]];
   var LOOK_KEY = "yanxilu-look", DECO_DEFAULT = ["globe", "glass", "vase", "succ", "pothos", "candle"];
   /* 默认：浮板 + 抽出半截 + 名色 + 烫金反光（2026-10-19 起）。以前存过的布置升级一次：这四样换成新默认，摆件和摆放位置保留 */
@@ -1148,6 +1148,179 @@ var GRIM = (function () {
   return { K: function (k) { K = k; }, leather: coverLeather, astro: coverAstro, wood: coverWood, black: coverBlack, spine: spine, mats: { GOLD: GOLD, SILVER: SILVER, BRONZE: BRONZE }, fbm: fbm, woodFill: wood, keyLight: keyLight, relief: relief, rr: rr };
 })();
 
+  /* ---------- 布面烫金 / 维多利亚（docs/cover-masters.md：跟企鹅布面经典与美国装饰布面书学的）---------- */
+var FOIL = (function () {
+  var FONT = '"Noto Serif SC","Songti SC","STSong",serif', K = 1;
+  function rng(seed) { var s = (seed | 0) || 1; return function () { s = (s + 0x6D2B79F5) | 0; var t = Math.imul(s ^ (s >>> 15), 1 | s); t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t; return ((t ^ (t >>> 14)) >>> 0) / 4294967296; }; }
+  function mk(w, h) { var c = document.createElement("canvas"); c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h)); return c; }
+  var NC = {};
+  function noise(w, h, seed) { var k = w + "x" + h + ":" + seed; if (NC[k]) return NC[k]; var c = mk(w, h), g = c.getContext("2d"), im = g.createImageData(c.width, c.height), r = rng(seed); for (var i = 0; i < im.data.length; i += 4) { var v = Math.floor(r() * 256); im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; } g.putImageData(im, 0, 0); return NC[k] = c; }
+  function fbm(w, h, seed, o) { o = o || {}; var c = mk(w, h), g = c.getContext("2d"); g.fillStyle = "#808080"; g.fillRect(0, 0, c.width, c.height); var oct = o.oct || 3, base = o.base || 4, amp = o.amp == null ? .6 : o.amp, ratio = o.ratio || 1; g.globalCompositeOperation = "overlay"; for (var i = 0; i < oct; i++) { var n = base << i, nw = Math.max(1, Math.round(ratio >= 1 ? n : n / ratio)), nh = Math.max(1, Math.round(ratio >= 1 ? n / ratio : n)); g.globalAlpha = amp / Math.pow(1.7, i); g.drawImage(noise(nw, nh, seed + i * 131), 0, 0, c.width, c.height); } return c; }
+  function lum(hex) { var c = [1, 3, 5].map(function (i) { var x = parseInt(hex.substr(i, 2), 16) / 255; return x <= 0.03928 ? x / 12.92 : Math.pow((x + 0.055) / 1.055, 2.4); }); return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]; }
+  /* ---------- 布 ---------- */
+  function cloth(g, x, y, w, h, color, seed) {
+    g.save(); g.fillStyle = color; g.fillRect(x, y, w, h);
+    g.globalCompositeOperation = "overlay";
+    var W2 = Math.round(w * K), H2 = Math.round(h * K), wv = mk(W2, H2), wg = wv.getContext("2d");
+    wg.drawImage(noise(Math.max(2, W2), 2, seed), 0, 0, W2, H2); wg.globalCompositeOperation = "overlay"; wg.globalAlpha = .9; wg.drawImage(noise(2, Math.max(2, H2), seed + 7), 0, 0, W2, H2); wg.globalAlpha = .6; wg.drawImage(noise(Math.max(2, W2), Math.max(2, H2), seed + 11), 0, 0, W2, H2);
+    g.globalAlpha = .085; g.drawImage(wv, x, y, w, h);   /* 经纬织纹：按设备像素生成，再缩回去，细而匀 */
+    var mt = mk(w, h), mg = mt.getContext("2d"); mg.filter = "blur(" + Math.max(2, w / 9) + "px)"; mg.drawImage(noise(9, 12, seed + 3), -w * .2, -h * .2, w * 1.4, h * 1.4); mg.filter = "none";
+    g.globalAlpha = .14; g.drawImage(mt, x, y);  /* 大块的布的不匀：模糊过的低频噪声 */
+    g.globalCompositeOperation = "source-over"; g.globalAlpha = 1;
+    var vg = g.createRadialGradient(x + w * .5, y + h * .45, Math.min(w, h) * .4, x + w * .5, y + h * .5, Math.max(w, h) * .85); vg.addColorStop(0, "rgba(0,0,0,0)"); vg.addColorStop(1, "rgba(0,0,0,.12)"); g.fillStyle = vg; g.fillRect(x, y, w, h);
+    g.restore();
+  }
+  /* 金属色：金或银；浅布上用墨色当"烫印色" */
+  var FOIL = { gold: "#C9A24E", goldHi: "#E8CC7A", silver: "#C9CCD2", ink: "#2A241E" };
+  function foilFor(clothHex, metal) { return lum(clothHex) > 0.17 ? "ink" : (metal || "gold"); }
+  /* 烫金的质感：平色，再用一点点噪声让它像压上去的 */
+  function foilPaint(g, x, y, w, h, key, fn) {
+    var m = mk(w, h), c = m.getContext("2d"); c.translate(-x, -y); c.fillStyle = "#fff"; c.strokeStyle = "#fff"; fn(c);
+    var t = mk(w, h), tg = t.getContext("2d"); tg.fillStyle = FOIL[key]; tg.fillRect(0, 0, w, h);
+    if (key !== "ink") { tg.globalCompositeOperation = "overlay"; tg.globalAlpha = .35; tg.drawImage(fbm(w, h, 99, { oct: 3, base: 6, amp: .7, ratio: .2 }), 0, 0); tg.globalAlpha = 1; var hg = tg.createLinearGradient(0, 0, w, h); hg.addColorStop(0, "rgba(255,255,255,.14)"); hg.addColorStop(.5, "rgba(255,255,255,0)"); hg.addColorStop(1, "rgba(0,0,0,.14)"); tg.fillStyle = hg; tg.fillRect(0, 0, w, h); }
+    tg.globalCompositeOperation = "destination-in"; tg.drawImage(m, 0, 0);
+    g.save(); g.shadowColor = "rgba(0,0,0,.35)"; g.shadowBlur = .6 * K; g.shadowOffsetX = .4 * K; g.shadowOffsetY = .6 * K; g.drawImage(t, x, y); g.restore();
+  }
+  /* ---------- 图标库：100 × 100 的格子里画，fill 或 stroke 已由调用方设好 ---------- */
+  function P(c, d) { c.fill(new Path2D(d)); }
+  function S(c, d, w) { c.lineWidth = w || 7; c.lineCap = "round"; c.lineJoin = "round"; c.stroke(new Path2D(d)); }
+  var ICONS = {
+    wave: function (c) { P(c, "M2 58 C16 34 32 34 46 54 C60 74 76 74 98 46 L98 64 C76 92 60 92 46 72 C32 52 16 52 2 76 Z"); P(c, "M2 30 C14 14 26 14 38 28 C50 42 62 42 80 24 L80 36 C62 54 50 54 38 40 C26 26 14 26 2 42 Z"); },
+    knight: function (c) { P(c, "M28 92 L74 92 L74 84 L66 80 C70 66 76 56 70 44 C66 36 58 28 54 22 L50 10 L46 22 L34 30 L24 48 L32 52 L40 46 C44 54 40 60 36 68 C32 76 30 80 28 84 Z"); c.save(); c.globalCompositeOperation = "destination-out"; c.beginPath(); c.arc(50, 36, 3.2, 0, 7); c.fill(); c.restore(); },
+    scales: function (c) { S(c, "M50 14 L50 86 M22 24 L78 24 M34 86 L66 86 M22 24 L10 56 M22 24 L34 56 M78 24 L66 56 M78 24 L90 56", 5); P(c, "M8 56 L36 56 C36 68 8 68 8 56 Z"); P(c, "M64 56 L92 56 C92 68 64 68 64 56 Z"); c.beginPath(); c.arc(50, 14, 6, 0, 7); c.fill(); },
+    candle: function (c) { P(c, "M38 44 L62 44 L62 90 L38 90 Z"); P(c, "M50 8 C58 20 62 26 62 34 C62 42 56 46 50 46 C44 46 38 42 38 34 C38 26 42 20 50 8 Z"); P(c, "M26 90 L74 90 L78 96 L22 96 Z"); c.save(); c.globalCompositeOperation = "destination-out"; P(c, "M50 24 C53 29 55 32 55 36 C55 40 52 42 50 42 C48 42 45 40 45 36 C45 32 47 29 50 24 Z"); c.restore(); },
+    compass: function (c) { P(c, "M50 2 L57 43 L98 50 L57 57 L50 98 L43 57 L2 50 L43 43 Z"); P(c, "M50 22 L54 46 L78 50 L54 54 L50 78 L46 54 L22 50 L46 46 Z"); c.lineWidth = 3; c.beginPath(); c.arc(50, 50, 30, 0, 7); c.stroke(); },
+    key: function (c) { c.lineWidth = 7; c.beginPath(); c.arc(30, 50, 16, 0, 7); c.stroke(); S(c, "M46 50 L92 50 M80 50 L80 64 M68 50 L68 60", 7); },
+    hourglass: function (c) { P(c, "M24 10 L76 10 L76 20 C76 36 56 44 56 50 C56 56 76 64 76 80 L76 90 L24 90 L24 80 C24 64 44 56 44 50 C44 44 24 36 24 20 Z"); c.save(); c.globalCompositeOperation = "destination-out"; P(c, "M32 18 L68 18 L68 22 C68 32 52 40 50 46 C48 40 32 32 32 22 Z"); P(c, "M32 86 L68 86 L68 82 C68 76 56 70 52 66 L48 66 C44 70 32 76 32 82 Z"); c.restore(); },
+    wheat: function (c) { S(c, "M50 98 L50 34", 6); var i; for (i = 0; i < 4; i++) { var y = 30 + i * 15; P(c, "M50 " + y + " C70 " + (y - 12) + " 82 " + (y + 4) + " 54 " + (y + 16) + " Z"); P(c, "M50 " + y + " C30 " + (y - 12) + " 18 " + (y + 4) + " 46 " + (y + 16) + " Z"); } P(c, "M50 4 C64 14 66 28 50 40 C34 28 36 14 50 4 Z"); },
+    gear: function (c) { var i, d = ""; for (i = 0; i < 8; i++) { var a = i * Math.PI / 4, a1 = a - .17, a2 = a + .17, b1 = a - .32, b2 = a + .32; d += (i ? "L" : "M") + (50 + Math.cos(b1) * 34).toFixed(1) + " " + (50 + Math.sin(b1) * 34).toFixed(1) + " L" + (50 + Math.cos(a1) * 46).toFixed(1) + " " + (50 + Math.sin(a1) * 46).toFixed(1) + " L" + (50 + Math.cos(a2) * 46).toFixed(1) + " " + (50 + Math.sin(a2) * 46).toFixed(1) + " L" + (50 + Math.cos(b2) * 34).toFixed(1) + " " + (50 + Math.sin(b2) * 34).toFixed(1) + " "; } P(c, d + "Z"); c.save(); c.globalCompositeOperation = "destination-out"; c.beginPath(); c.arc(50, 50, 12, 0, 7); c.fill(); c.restore(); },
+    ship: function (c) { P(c, "M8 66 L92 66 L80 86 L20 86 Z"); S(c, "M50 66 L50 14", 5); P(c, "M54 18 L84 60 L54 60 Z"); P(c, "M46 26 L24 60 L46 60 Z"); },
+    pine: function (c) { P(c, "M50 6 L72 36 L62 36 L80 60 L68 60 L88 84 L12 84 L32 60 L20 60 L38 36 L28 36 Z"); P(c, "M44 84 L56 84 L56 96 L44 96 Z"); },
+    coin: function (c) { c.beginPath(); c.arc(50, 50, 44, 0, 7); c.fill(); c.save(); c.globalCompositeOperation = "destination-out"; c.fillRect(37, 37, 26, 26); c.beginPath(); c.arc(50, 50, 38, 0, 7); c.lineWidth = 3; c.stroke(); c.restore(); },
+    mountain: function (c) { P(c, "M4 86 L36 30 L52 56 L64 40 L96 86 Z"); c.save(); c.globalCompositeOperation = "destination-out"; P(c, "M36 30 L42 40 L36 46 L30 40 Z"); c.restore(); },
+    leaf: function (c) { P(c, "M50 6 C86 24 90 66 50 94 C10 66 14 24 50 6 Z"); c.save(); c.globalCompositeOperation = "destination-out"; S(c, "M50 20 L50 90 M50 44 L34 32 M50 44 L66 32 M50 62 L32 50 M50 62 L68 50", 3.5); c.restore(); },
+    moon: function (c) { c.beginPath(); c.arc(50, 50, 42, 0, 7); c.fill(); c.save(); c.globalCompositeOperation = "destination-out"; c.beginPath(); c.arc(66, 42, 36, 0, 7); c.fill(); c.restore(); },
+    book: function (c) { P(c, "M8 22 C24 16 38 18 50 28 C62 18 76 16 92 22 L92 84 C76 78 62 80 50 90 C38 80 24 78 8 84 Z"); c.save(); c.globalCompositeOperation = "destination-out"; S(c, "M50 30 L50 88", 3); S(c, "M18 34 L40 38 M18 46 L40 50 M18 58 L40 62 M60 38 L82 34 M60 50 L82 46 M60 62 L82 58", 2.5); c.restore(); },
+    crown: function (c) { P(c, "M10 84 L10 36 L32 54 L50 20 L68 54 L90 36 L90 84 Z"); c.save(); c.globalCompositeOperation = "destination-out"; c.fillRect(10, 70, 80, 4); c.restore(); },
+    anchor: function (c) { c.lineWidth = 7; c.beginPath(); c.arc(50, 16, 9, 0, 7); c.stroke(); S(c, "M50 25 L50 92 M26 44 L74 44 M14 62 C18 84 36 92 50 92 C64 92 82 84 86 62 L74 66 M14 62 L26 66", 7); },
+    spiral: function (c) { var d = "M50 50", a, i; for (i = 0; i <= 120; i++) { a = i / 120 * Math.PI * 5; var r = 2 + i / 120 * 44; d += " L" + (50 + Math.cos(a) * r).toFixed(1) + " " + (50 + Math.sin(a) * r).toFixed(1); } S(c, d, 6); },
+    sun: function (c) { c.beginPath(); c.arc(50, 50, 22, 0, 7); c.fill(); var i; for (i = 0; i < 12; i++) { var a = i * Math.PI / 6; S(c, "M" + (50 + Math.cos(a) * 32) + " " + (50 + Math.sin(a) * 32) + " L" + (50 + Math.cos(a) * 46) + " " + (50 + Math.sin(a) * 46), 6); } },
+    bell: function (c) { P(c, "M50 8 C56 8 58 12 58 16 C74 22 78 40 78 56 L78 66 L90 78 L10 78 L22 66 L22 56 C22 40 26 22 42 16 C42 12 44 8 50 8 Z"); c.beginPath(); c.arc(50, 86, 8, 0, 7); c.fill(); },
+    lantern: function (c) { S(c, "M50 4 L50 14", 5); P(c, "M30 14 L70 14 L74 22 L26 22 Z"); P(c, "M28 24 L72 24 L78 70 L22 70 Z"); c.save(); c.globalCompositeOperation = "destination-out"; P(c, "M36 30 L64 30 L68 64 L32 64 Z"); c.restore(); S(c, "M50 30 L50 64", 4); P(c, "M24 72 L76 72 L72 80 L28 80 Z"); S(c, "M40 82 L40 96 M50 82 L50 98 M60 82 L60 96", 3); }
+  };
+  function drawIcon(c, name, cx, cy, size, flipX, flipY, outline) {
+    var f = ICONS[name] || ICONS.leaf; c.save(); c.translate(cx, cy); c.scale((flipX ? -1 : 1) * size / 100, (flipY ? -1 : 1) * size / 100); c.translate(-50, -50);
+    if (outline) { /* 只描边：先画实心到临时层再挖空 */ var m = mk(100, 100), mg = m.getContext("2d"); mg.fillStyle = "#fff"; mg.strokeStyle = "#fff"; f(mg); mg.globalCompositeOperation = "destination-out"; mg.save(); mg.translate(50, 50); mg.scale(.72, .72); mg.translate(-50, -50); mg.fillStyle = "#fff"; mg.strokeStyle = "#fff"; f(mg); mg.restore(); c.drawImage(m, 0, 0); }
+    else f(c); c.restore();
+  }
+  /* ---------- Day 的重复语法 ---------- */
+  function cells(x, y, w, h, s, grammar) {
+    var out = [], cols = Math.ceil(w / s) + 2, rows = Math.ceil(h / s) + 2, i, j;
+    for (j = -1; j < rows; j++) for (i = -1; i < cols; i++) {
+      var cx = x + i * s + s / 2, cy = y + j * s + s / 2, fx = false, fy = false;
+      if (grammar === "halfdrop") cx += (j % 2 ? s / 2 : 0);
+      if (grammar === "drop") cy += (i % 2 ? s / 2 : 0);
+      if (grammar === "turnover") { fx = !!(i % 2); }
+      if (grammar === "diamond") { cx += (j % 2 ? s / 2 : 0); if ((i + j) % 2) continue; }
+      if (cx < x - s || cx > x + w + s || cy < y - s || cy > y + h + s) continue;
+      out.push({ x: cx, y: cy, fx: fx, fy: fy });
+    }
+    return out;
+  }
+  /* 图案层：铺在 x,y,w,h 内。opts: icon, s（格距）, size（图标尺寸）, grammar, fillUntil（0 到 1，从下往上多少比例是实心）, key */
+  function pattern(g, x, y, w, h, o) {
+    var list = cells(x, y, w, h, o.s, o.grammar), cut = y + h * (1 - (o.fillUntil == null ? 1 : o.fillUntil)), sy = o.sy || o.s;
+    if (o.sy) list = cells(x, y, w, h, o.s, o.grammar).map(function (p) { return { x: p.x, y: y + (p.y - y) * (sy / o.s), fx: p.fx, fy: p.fy }; }).filter(function (p) { return p.y < y + h + sy; });
+    g.save(); g.beginPath(); g.rect(x, y, w, h); (o.holes || []).forEach(function (r) { g.rect(r[0], r[1], r[2], r[3]); }); g.clip("evenodd");
+    foilPaint(g, x, y, w, h, o.key, function (c) {
+      /* 连列：细直线（Great Expectations 式）或藤蔓（Jane Eyre 式） */
+      var cols = {}; list.forEach(function (p) { cols[Math.round(p.x)] = 1; });
+      if (o.link === "rules") { c.lineWidth = .7; Object.keys(cols).forEach(function (cx) { cx = +cx; var dx = o.s / 2; c.beginPath(); c.moveTo(cx - dx, y); c.lineTo(cx - dx, y + h); c.stroke(); }); }
+      if (o.link === "vine") { c.lineWidth = 1.1; Object.keys(cols).forEach(function (cx) { cx = +cx; c.beginPath(); var k; for (k = 0; k <= h; k += 4) { var px = cx + Math.sin((k + cx) / (o.sy || o.s) * Math.PI * 2) * o.s * .08; k ? c.lineTo(px, y + k) : c.moveTo(px, y + k); } c.stroke(); for (k = (o.sy || o.s) * .5; k < h; k += (o.sy || o.s)) { var lx = cx + Math.sin((k + cx) / (o.sy || o.s) * Math.PI * 2) * o.s * .08, ly = y + k; [-1, 1].forEach(function (d) { c.save(); c.translate(lx, ly); c.rotate(d * 1.1); c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(o.s * .06, -o.s * .06, o.s * .06, -o.s * .16, 0, -o.s * .2); c.bezierCurveTo(-o.s * .06, -o.s * .16, -o.s * .06, -o.s * .06, 0, 0); c.fill(); c.restore(); }); } }); }
+      list.forEach(function (p) { if (o.link === "vine") { /* 藤上图标后面留一块布 */ } drawIcon(c, o.icon, p.x, p.y, o.size, p.fx, p.fy, o.outline || p.y < cut); });
+    });
+    g.restore();
+  }
+  function rules(g, x, y, w, h, key, inset, gap) { foilPaint(g, x, y, w, h, key, function (c) { c.lineWidth = 1.1; c.strokeRect(x + inset, y + inset, w - 2 * inset, h - 2 * inset); c.lineWidth = .6; c.strokeRect(x + inset + gap, y + inset + gap, w - 2 * inset - 2 * gap, h - 2 * inset - 2 * gap); }); }
+  /* 题签窗：布色底、双线框、字 */
+  function titleWindow(g, cx, cy, w, h, clothHex, key, title, by, seed) {
+    cloth(g, cx - w / 2, cy - h / 2, w, h, clothHex, seed + 5);
+    rules(g, cx - w / 2, cy - h / 2, w, h, key, 3, 2.5);
+    var lines = title.length > 7 ? [title.slice(0, Math.ceil(title.length / 2)), title.slice(Math.ceil(title.length / 2))] : [title];
+    var ml = Math.max.apply(null, lines.map(function (l) { return l.length; })), fs = Math.min(h * (lines.length > 1 ? .3 : .42), (w - 28) / ml / 1.1);
+    foilPaint(g, cx - w / 2, cy - h / 2, w, h, key, function (c) {
+      c.font = "600 " + fs + "px " + FONT; c.textAlign = "center"; c.textBaseline = "middle";
+      var y0 = cy - (by ? fs * .25 : 0) - (lines.length - 1) * fs * .6;
+      lines.forEach(function (l, i) { c.save(); c.translate(cx, y0 + i * fs * 1.2); if (c.letterSpacing !== undefined) c.letterSpacing = Math.round(fs * .12) + "px"; c.fillText(l, Math.round(fs * .06), 0); c.restore(); });
+      if (by) { c.font = "600 " + Math.max(9, fs * .5) + "px " + FONT; if (c.letterSpacing !== undefined) c.letterSpacing = "1px"; c.fillText(by, cx, y0 + (lines.length - 1) * fs * 1.2 + fs * 1.02); }
+    });
+  }
+  /* ---------- 封面：布面烫金 ---------- */
+  var BOTANIC = { wheat: 1, leaf: 1, pine: 1 };
+  function cover(g, x, y, w, h, o) {
+    var key = o.key || foilFor(o.cloth, o.metal), m = w * .07;
+    cloth(g, x, y, w, h, o.cloth, o.seed || 1);
+    var link = o.link || (BOTANIC[o.icon] ? "vine" : "rules");
+    var fs = Math.min(w * .062, (h * .5) / Math.max(1, o.title.length) / 1.2), tx = x + w - m - fs * .95, pad = fs * .9;
+    var tBox = [tx - pad, y + m, pad * 2, fs * 1.2 * o.title.length + fs * .9], bs = Math.max(8, fs * .62), bBox = o.by ? [tx - pad, y + h - m - bs * 1.15 * o.by.length - bs * .4, pad * 2, bs * 1.15 * o.by.length + bs * .4] : null;
+    var pw = tx - pad - (x + m), ncol = Math.max(2, Math.round(pw / (w * .215))), cs = pw / ncol;
+    pattern(g, x + m, y + m, pw, h - 2 * m, { icon: o.icon, s: cs, sy: o.sy || cs * 1.2, size: o.size || cs * .6, grammar: o.grammar || "square", key: key, fillUntil: 1, outline: !!o.outline, link: link });
+    foilPaint(g, x, y, w, h, key, function (c) {
+      c.lineWidth = .9; c.strokeRect(x + m, y + m, w - 2 * m, h - 2 * m);
+      c.font = "500 " + fs + "px " + FONT; c.textAlign = "center"; c.textBaseline = "middle"; var i; for (i = 0; i < o.title.length; i++) c.fillText(o.title[i], tx, y + m + fs * .95 + i * fs * 1.2);
+      if (o.by) { c.font = "500 " + bs + "px " + FONT; for (i = 0; i < o.by.length; i++) c.fillText(o.by[i], tx, y + h - m - bs * .75 - (o.by.length - 1 - i) * bs * 1.15); }
+    });
+    edge(g, x, y, w, h, o.cloth);
+  }
+  function edge(g, x, y, w, h, clothHex) { g.save(); var sg = g.createLinearGradient(x, 0, x + 8, 0); sg.addColorStop(0, "rgba(0,0,0,.28)"); sg.addColorStop(1, "rgba(0,0,0,0)"); g.fillStyle = sg; g.fillRect(x, y, 8, h); var hg = g.createLinearGradient(x, 0, x + 12, 0); hg.addColorStop(0, "rgba(255,255,255,0)"); hg.addColorStop(.6, "rgba(255,255,255,.12)"); hg.addColorStop(1, "rgba(255,255,255,0)"); g.fillStyle = hg; g.fillRect(x + 4, y, 10, h); g.restore(); }
+  /* ---------- 封面：维多利亚（边框 + 中心花环 + 手绘感书名）---------- */
+  function scroll(c, cx, cy, s, fx, fy) { c.save(); c.translate(cx, cy); c.scale(fx * s, fy * s); c.lineWidth = 2.2 / s; c.lineCap = "round"; c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(30, -4, 46, 14, 40, 30); c.bezierCurveTo(36, 40, 24, 42, 22, 34); c.bezierCurveTo(21, 28, 28, 26, 30, 30); c.stroke(); c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(-4, 30, 14, 46, 30, 40); c.bezierCurveTo(40, 36, 42, 24, 34, 22); c.bezierCurveTo(28, 21, 26, 28, 30, 30); c.stroke(); /* 叶 */ c.beginPath(); c.moveTo(12, 4); c.bezierCurveTo(20, 0, 26, 6, 22, 14); c.bezierCurveTo(16, 12, 12, 8, 12, 4); c.fill(); c.beginPath(); c.moveTo(4, 12); c.bezierCurveTo(0, 20, 6, 26, 14, 22); c.bezierCurveTo(12, 16, 8, 12, 4, 12); c.fill(); c.restore(); }
+  /* 月桂花环：两条枝从底部向上，叶成对、尖朝上，顶端留口 */
+  function wreath(c, cx, cy, r) {
+    var n = 14, i, side, L = r * .3, W = r * .065;
+    for (side = -1; side <= 1; side += 2) for (i = 0; i < n; i++) {
+      var a = Math.PI / 2 + side * (0.25 + i * (Math.PI * 1.55 / n)), tx = cx + Math.cos(a) * r, ty = cy + Math.sin(a) * r, dir = a - side * Math.PI / 2;
+      [-1, 1].forEach(function (k) { c.save(); c.translate(tx, ty); c.rotate(dir + k * .5); c.beginPath(); c.moveTo(0, 0); c.bezierCurveTo(W * 1.2, -L * .3, W * 1.1, -L * .75, 0, -L); c.bezierCurveTo(-W * 1.1, -L * .75, -W * 1.2, -L * .3, 0, 0); c.fill(); c.restore(); });
+      c.beginPath(); c.arc(tx, ty, 1.3, 0, 7); c.fill();
+    }
+    c.lineWidth = 1.6; c.beginPath(); c.arc(cx, cy, r, Math.PI / 2 + .2, Math.PI / 2 - .2 + Math.PI * 2); c.stroke();
+    /* 底部打结：两道小弧 */ c.lineWidth = 1.2; c.beginPath(); c.arc(cx, cy + r, 4, 0, 7); c.stroke();
+  }
+  /* 角饰：双线交角处一枚菱形花加三点 */
+  function cornerFleuron(c, x, y, fx, fy, s) { c.save(); c.translate(x, y); c.scale(fx, fy); c.beginPath(); c.moveTo(0, -s); c.lineTo(s * .6, 0); c.lineTo(0, s); c.lineTo(-s * .6, 0); c.closePath(); c.fill(); c.lineWidth = .9; c.beginPath(); c.moveTo(s * 1.2, s * 1.2); c.lineTo(s * 2.6, s * 2.6); c.stroke(); c.beginPath(); c.arc(s * 3.1, s * 3.1, 1.3, 0, 7); c.fill(); c.restore(); }
+  function victorian(g, x, y, w, h, o) {
+    var key = o.key || foilFor(o.cloth, o.metal);
+    cloth(g, x, y, w, h, o.cloth, o.seed || 1);
+    var in1 = w * .06;
+    foilPaint(g, x, y, w, h, key, function (c) {
+      c.lineWidth = 2.4; c.strokeRect(x + in1, y + in1, w - 2 * in1, h - 2 * in1); c.lineWidth = .9; c.strokeRect(x + in1 + 5, y + in1 + 5, w - 2 * in1 - 10, h - 2 * in1 - 10);
+      /* 四角花饰 */ var s = w * .022, i0 = in1 + 12; cornerFleuron(c, x + i0, y + i0, 1, 1, s); cornerFleuron(c, x + w - i0, y + i0, -1, 1, s); cornerFleuron(c, x + i0, y + h - i0, 1, -1, s); cornerFleuron(c, x + w - i0, y + h - i0, -1, -1, s);
+      /* 中心月桂环与图标 */ var cx = x + w / 2, cy = y + h * .4, r = w * .19; wreath(c, cx, cy, r); drawIcon(c, o.icon, cx, cy, r * 1.05, false, false, false);
+      /* 书名：宽字距、上下饰线 */ var t = o.title, fs = Math.min(w * .085, (w - 60) / t.length / 1.25); c.font = "700 " + fs + "px " + FONT; c.textAlign = "center"; c.textBaseline = "middle"; if (c.letterSpacing !== undefined) c.letterSpacing = Math.round(fs * .25) + "px"; c.fillText(t, cx + fs * .12, y + h * .745);
+      c.lineWidth = 1; c.beginPath(); c.moveTo(cx - w * .26, y + h * .69); c.lineTo(cx + w * .26, y + h * .69); c.moveTo(cx - w * .26, y + h * .8); c.lineTo(cx + w * .26, y + h * .8); c.stroke(); c.beginPath(); c.arc(cx - w * .26, y + h * .69, 1.8, 0, 7); c.arc(cx + w * .26, y + h * .69, 1.8, 0, 7); c.fill(); c.beginPath(); c.arc(cx - w * .26, y + h * .8, 1.8, 0, 7); c.arc(cx + w * .26, y + h * .8, 1.8, 0, 7); c.fill();
+      if (o.by) { c.font = "500 " + Math.max(8, fs * .45) + "px " + FONT; if (c.letterSpacing !== undefined) c.letterSpacing = "1px"; c.fillText(o.by, cx, y + h * .86); }
+    });
+    edge(g, x, y, w, h, o.cloth);
+  }
+  /* ---------- 书脊 ---------- */
+  function spine(g, x, y, w, h, o) {
+    var key = o.key || foilFor(o.cloth, o.metal), pct = o.done ? 1 : (o.pct || 0);
+    cloth(g, x, y, w, h, o.cloth, o.seed || 1);
+    /* 书脊的弧：两侧略暗 */ g.save(); var cg = g.createLinearGradient(x, 0, x + w, 0); cg.addColorStop(0, "rgba(0,0,0,.35)"); cg.addColorStop(.18, "rgba(0,0,0,0)"); cg.addColorStop(.82, "rgba(0,0,0,0)"); cg.addColorStop(1, "rgba(0,0,0,.35)"); g.fillStyle = cg; g.fillRect(x, y, w, h); g.restore();
+    var size = Math.min(w * .7, 18), fs = Math.min(w * .62, 16, (h * .5 - 10) / (1.15 * Math.max(1, o.title.length)));
+    var top = y + h * .07, tH = fs * 1.15 * o.title.length + 14 + (o.by ? fs * .5 * o.by.length + 8 : 0), tY = top + 8;
+    /* 天头地脚双线 */ foilPaint(g, x, y, w, h, key, function (c) { c.lineWidth = 1.4; c.beginPath(); c.moveTo(x + 3, y + 5); c.lineTo(x + w - 3, y + 5); c.moveTo(x + 3, y + h - 5); c.lineTo(x + w - 3, y + h - 5); c.stroke(); c.lineWidth = .7; c.beginPath(); c.moveTo(x + 3, y + 8.5); c.lineTo(x + w - 3, y + 8.5); c.moveTo(x + 3, y + h - 8.5); c.lineTo(x + w - 3, y + h - 8.5); c.stroke(); });
+    /* 图案：题签以下一列，从下往上按进度实心 */ var py = tY + tH + 6, ph = y + h - 12 - py;
+    if (ph > size) pattern(g, x + 2, py, w - 4, ph, { icon: o.icon, s: size * 1.6, size: size, grammar: "square", key: key, fillUntil: pct, single: true });
+    /* 题签 */ foilPaint(g, x, y, w, h, key, function (c) { c.lineWidth = .8; c.strokeRect(x + 3, tY, w - 6, tH); c.font = "600 " + fs + "px " + FONT; c.textAlign = "center"; c.textBaseline = "middle"; var i; for (i = 0; i < o.title.length; i++) c.fillText(o.title[i], x + w / 2, tY + 8 + fs * .6 + i * fs * 1.15); if (o.by) { c.font = "500 " + fs * .5 + "px " + FONT; for (i = 0; i < o.by.length; i++) c.fillText(o.by[i], x + w / 2, tY + 8 + fs * 1.15 * o.title.length + 6 + fs * .3 + i * fs * .5); } });
+    if (o.done) { /* 朱印：方章，印泥色 */ g.save(); var r = Math.min(w * .3, 8); g.translate(x + w / 2, y + h - 22); g.fillStyle = "#B8352F"; g.globalAlpha = .9; g.fillRect(-r, -r, 2 * r, 2 * r); g.fillStyle = o.cloth; g.globalAlpha = 1; g.font = "700 " + Math.round(r * 1.3) + "px " + FONT; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("阅", 0, 1); g.restore(); }
+  }
+  return { K: function (k) { K = k; }, cover: cover, victorian: victorian, spine: spine, cloth: cloth, icons: Object.keys(ICONS), drawIcon: drawIcon, foilPaint: foilPaint, foilFor: foilFor, pattern: pattern };
+})();
+
+  /* 一本书的图标：先按书名和「为什么读」里的词挑，挑不到按书名散到图标库里 */
+  var ICON_WORDS = [[/周期|波|涛|潮|浪|海/, ["wave", "spiral", "moon"]], [/政治|战争|大国|博弈|战略|棋|霸权|秩序/, ["knight", "crown", "compass", "hourglass"]], [/证券|价值|估值|会计|财务|审计|公平|法/, ["scales", "coin", "key"]], [/期货|商品|大宗|农|粮|麦/, ["wheat", "ship", "sun"]], [/货币|债|资本|银行|金融|财富|钱|通胀/, ["coin", "scales", "gear"]], [/历史|时间|世纪|年代|兴衰/, ["hourglass", "crown", "pine"]], [/航海|贸易|航|船|海权/, ["ship", "anchor", "compass"]], [/哲学|思想|智慧|启蒙|灯/, ["lantern", "candle", "book"]], [/夜|梦|心理|月/, ["moon", "candle"]], [/地缘|地理|帝国|方向|罗盘|航线/, ["compass", "mountain", "ship"]], [/能源|石油|太阳|光|电/, ["sun", "gear"]], [/技术|机器|工业|制造|齿轮|系统/, ["gear", "key"]], [/山|地|矿|土/, ["mountain", "pine"]], [/植物|生长|生态|自然|森林|树/, ["pine", "leaf"]], [/读|书|文学|小说|诗/, ["book", "candle"]], [/王|权力|帝|君|皇/, ["crown", "knight"]], [/钥|密码|解|秘/, ["key", "lantern"]], [/钟|警|危机|崩溃|萧条|恐慌/, ["bell", "wave", "hourglass"]], [/锚|稳|定|港/, ["anchor"]], [/螺旋|循环|回归|轮回|复利/, ["spiral", "wave"]], [/叶|茶|药|草|医/, ["leaf"]], [/烛|信仰|宗教|神/, ["candle", "lantern"]]];
+  function bookIcon(it) { var t = (it.title || "") + " " + (it.why || ""), h = hashN(it.id), i; for (i = 0; i < ICON_WORDS.length; i++) if (ICON_WORDS[i][0].test(t)) { var L = ICON_WORDS[i][1]; return L[h % L.length]; } return FOIL.icons[h % FOIL.icons.length]; }
   var GRIM_KIND = { geo: "black", fin: "astro", cycle: "leather", fut: "wood", co: "leather" }, GRIM_KINDS = ["leather", "astro", "wood", "black"], GRIM_CACHE = {}, GRIM_N = 0;
   function mixHex(a, b, t) { var c = [1, 3, 5].map(function (i) { return Math.round(parseInt(a.substr(i, 2), 16) * (1 - t) + parseInt(b.substr(i, 2), 16) * t); }); return "#" + c.map(function (v) { return ("0" + v.toString(16)).slice(-2); }).join(""); }
   function grimKind(tid) { return GRIM_KIND[tid] || GRIM_KINDS[hashN(String(tid)) % 4]; }
@@ -1156,6 +1329,8 @@ var GRIM = (function () {
     var h0 = hashN(it.id), kind = grimKind(tid), state = bs.s === "doing" ? "doing" : bs.s === "done" || bs.s === "review" ? "done" : "";
     var b = LIB.books[it.id], prog = state === "doing" && b ? bs.done / Math.max(1, b.chapters.length) : 0;
     var pct = state === "doing" ? Math.max(0, Math.min(1, bs.epct || prog || bs.pct || 0)) : state === "done" ? 1 : 0;
+    var bd = LK().binding;
+    if (bd === "foil" || bd === "victorian") return { t: face ? "cover" : "spine", kind: bd, cloth: paint.hex, icon: bookIcon(it), grammar: ["square", "halfdrop", "turnover", "drop"][h0 % 4], title: it.title.replace(/（.*）$/, ""), by: face ? shortBy(it.by) : "", seed: (h0 % 97) + 1, pct: Math.round(pct * 100) / 100, done: state === "done" };
     var base = mixHex({ leather: "#4a1216", black: "#15121a", wood: "#3a2416", astro: "#d8ccab" }[kind], paint.hex, kind === "black" ? .18 : .3);
     var sp = { t: face ? "cover" : "spine", kind: kind, title: it.title.replace(/（.*）$/, ""), base: base, seed: (h0 % 97) + 1, pct: Math.round(pct * 100) / 100, done: state === "done" };
     if (face) { var lt = lastTouch(it.id); sp.by = shortBy(it.by); sp.lit = state === "doing" && !!lt && Date.now() - new Date(lt).getTime() < 7 * 86400000; sp.open = state !== ""; }
@@ -1176,8 +1351,9 @@ var GRIM = (function () {
         src = document.createElement("canvas"); src.width = Math.round(w * dpr); src.height = Math.round(h * dpr);
         var g = src.getContext("2d");
         try {
-          if (sp.t === "spine") { GRIM.K(dpr); g.scale(dpr, dpr); GRIM.spine(g, 0, 0, w, h, sp); }
-          else { var k = w / 270; GRIM.K(dpr * k); g.scale(dpr * k, dpr * k); (GRIM[sp.kind] || GRIM.leather)(g, 0, 0, 270, h / k, sp); }
+          var isCloth = sp.kind === "foil" || sp.kind === "victorian", LIBX = isCloth ? FOIL : GRIM;
+          if (sp.t === "spine") { LIBX.K(dpr); g.scale(dpr, dpr); LIBX.spine(g, 0, 0, w, h, sp); }
+          else { var k = w / 270; LIBX.K(dpr * k); g.scale(dpr * k, dpr * k); (isCloth ? (sp.kind === "victorian" ? FOIL.victorian : FOIL.cover) : (GRIM[sp.kind] || GRIM.leather))(g, 0, 0, 270, h / k, sp); }
         } catch (e) { return; }
         GRIM_CACHE[key] = src;
       }
@@ -1219,7 +1395,7 @@ var GRIM = (function () {
     var dimc = (shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim") + (S.shelfPick === it.id ? " picked" : "") + (ebookOf(it.id) ? " has-eb" : "");
     var tip = '《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (paint.name ? " · " + esc(paint.name) : "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "");
     var dust = state === "doing" ? dustDays(it.id) : 0;
-    if (LK().binding === "grim") {
+    if (LK().binding !== "cloth") {
       var gsp = grimSpec(it, tid, idx, bs, paint, state === "doing" && LK().read === "face"), vh = '<span class="vh">《' + esc(title) + "》</span>";
       if (gsp.t === "cover") return '<button type="button" class="cb face grim' + dimc + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + gsp.base + '" title="' + tip + '"' + grimAttr(gsp) + '><span class="cf-cv grim"><canvas class="gs" aria-hidden="true"></canvas>' + vh + '</span><i class="cf-ed" aria-hidden="true"></i>' + (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "") + "</button>";
       var gw = Math.max(w, 30), gh = h;
@@ -1506,7 +1682,7 @@ var GRIM = (function () {
       return '<div class="stg-cover film' + flip + '" style="--cl:' + clothOf("en", x.id) + '"><i class="sc-holes" aria-hidden="true"></i><span class="sc-kind">' + esc(x.type) + " · " + esc(String(x.year || "")) + '</span>' + coverTitle(x.title) + '<span class="sc-en">' + esc(x.en) + '</span><span class="sc-foot">' + (x.where === "local" ? "研习录跟读" : "Baba 英语") + "</span></div>";
     }
     var it = ITEMS[id], tid = it.home, pt = /^cfa-/.test(id) ? { hex: cfaPaint(0)[1], ink: cfaPaint(0)[2] || "" } : bookPaint(tid, id), base = pt.hex, light = lumHex(base) > 0.2, tname = domInfo(tid).name;
-    if (LK().binding === "grim") { var gsp = grimSpec(it, tid, 0, bookState(id), pt, true); return '<div class="stg-cover grim' + flip + '" style="--cl:' + gsp.base + '"' + grimAttr(gsp) + '><canvas class="gs" aria-hidden="true"></canvas><span class="vh">《' + esc(it.title) + "》" + esc(it.by || "") + "</span></div>"; }
+    if (LK().binding !== "cloth") { var gsp = grimSpec(it, tid, 0, bookState(id), pt, true); return '<div class="stg-cover grim' + flip + '" style="--cl:' + gsp.base + '"' + grimAttr(gsp) + '><canvas class="gs" aria-hidden="true"></canvas><span class="vh">《' + esc(it.title) + "》" + esc(it.by || "") + "</span></div>"; }
     return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + (pt.ink ? ";--tx:" + pt.ink : "") + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc(tname || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
   }
   /* 展台在书墙右边一栏，滚动时停在屏幕上 */
