@@ -4,8 +4,8 @@ status: active
 cluster: product
 stage: 排练四阶段全部完成（design/studio/REHEARSAL.md）；生产流程 1.0 草案在 design/studio/PIPELINE.md；第九张表 characters 加 Schema 登记，objects 三态加 loop / 淡接 / events
 next: 用户看阶段四的图与 PIPELINE 草案；然后用自己的第一批资产（一件家具 + 一个预制体 + 读书人角色）按 PIPELINE 走一遍，走通后删 tools/out/d2r_local；M1 剩余（tiles 渲染按'层 + 印章 + 贴花'改、4.5 × 3.5 重烘、真显卡截图、摆放编辑器）并入
-blocked_by: 用户看图与流程草案
-updated: 2026-11-01
+blocked_by: 用户定项目拆分的四条（两仓库 / 线上 world / 新项目名 / 在制品上限）
+updated: 2026-11-02
 ---
 
 # 状态
@@ -59,6 +59,7 @@ updated: 2026-11-01
 
 ## 未决问题
 
+- 2026-11-02 用户提出把项目拆成两个：书架网页（版本 1，仓库不变）与游戏（版本 2，新仓库 yanxilu-world 建议名）。待用户定：两仓库还是一仓库两目录、线上 /world 的过渡（Baba 需再克隆一份并放链接）、新项目名、brain 在制品 7 → 8 超上限先暂停哪两个（建议 ai-studio、马集镇）。定了一次做完。
 - 第二种风格包选哪个。
 - 在制品：brain 已有 5 个进行中项目，研习录登记后是第 6 个，开工前要暂停一个。
 - 版本 2 的"走进别人的院子"与 2026-07 的"智慧树型社交"是否合并成一个愿景的两种形态。
@@ -66,6 +67,7 @@ updated: 2026-11-01
 
 ## 日志
 
+- 2026-11-02 用户要求拆成两个对话项目；盘点结论：版本 1 与版本 2 代码互不引用可干净拆开，分配表与四个决定已交用户，未动手。tools/out 下的回归截图是测试产物不入库
 - 2026-11-01 排练阶段四：拆野蛮人状态机（65 态 440 动画 14 类手持物 4225 转移淡接 0.2）、时间线（278 条 30 帧 8 种事件，声音 618 脚印 146 释放点 31）、宝箱门三态；合成预制体把三档部件 21 件拼成三个人本机渲白天夜晚；写 characters.json 第九张表 + Schema（骨架 ≤ 80、部件三档、14 状态、6 手持物、绑定规则、转移默认 + 例外、时间线事件五种）并登记 tables.js；objects 的门盒牌书三态加 loop / crossfade，transitions any；PIPELINE.md 生产流程 1.0 草案七节；D2R-DISSECTION 第 19 节；tables_check 登记 characters 表校验通过，world_test 回归跑完再提交；四阶段对照图（本机 tools/out 下，不入库）均已发用户
 - 2026-11-01 阶段三补一轮（用户评图后）：地面底层换小路土层 + 草地层噪声成片 + 印章层、主光 1.1 环境 .4、环境图跟主光色 → 白天泛绿消失、光比 1.6、黎明暖黄昏蓝紫；夜晚死黑升到 43%（压环境光的代价）；白天 3 夜晚 3.5 黎明 3 黄昏 3；REHEARSAL 数字表改成三列，学到的加三条（底层是土、黎明靠色、必须有环境遮蔽）；一行内注释吞代码的低级错误耗了一轮
 - 2026-11-01 排练阶段三：vis 六时段导成紧凑表（俯角一律 47°、曝光恒 4.0、世界光只一盏主光 + IBL + 深度雾、角色另有 8 盏）；scene.html 改 vis 驱动 + 两层地面（草地层 + 印章 alpha 加噪声）+ 17 贴花 + 贴地网格 alpha 混合 + 合成后期；五轮调参：发现合成后期的深度雾在 swiftshader 下读不到深度（整图糊白，Composite 加 samples 选项）、vis 灯方向四元数指向太阳要翻、线性映射白天冲灰夜晚死黑 → 主光 √功率 IBL^0.4；定稿白天中位 57 跨度 61、夜晚死黑 38%；vis.json 加 ibl / characterShadow / characterBrightness / itemBrightness 与 mapping，vis.schema 同步；TECH-NOTES 卡十二；D2R-DISSECTION 第 18 节
