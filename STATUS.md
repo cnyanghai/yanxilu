@@ -59,6 +59,7 @@ updated: 2026-11-02
 
 ## 日志
 
+- 2026-11-02 拆分提交 ac6498a 已推送；build.py 重跑无差异；tools/out 产物与本地权限文件随游戏项目走
 - 2026-11-02 拆成两个项目：版本 2 全部移到 yanxilu-world（本地克隆保留全部历史，GitHub 仓库由用户建）；本仓库删 world / room / design / studies / vendor/three / 三维工具与测试，CLAUDE.md、README、STATUS 改为只管版本 1；tools/out 的本机产物随游戏项目走
 - 2026-11-02 用户要求拆成两个对话项目；盘点结论：版本 1 与版本 2 代码互不引用可干净拆开，分配表与四个决定已交用户，未动手。tools/out 下的回归截图是测试产物不入库
 - 2026-11-01 排练阶段四：拆野蛮人状态机（65 态 440 动画 14 类手持物 4225 转移淡接 0.2）、时间线（278 条 30 帧 8 种事件，声音 618 脚印 146 释放点 31）、宝箱门三态；合成预制体把三档部件 21 件拼成三个人本机渲白天夜晚；写 characters.json 第九张表 + Schema（骨架 ≤ 80、部件三档、14 状态、6 手持物、绑定规则、转移默认 + 例外、时间线事件五种）并登记 tables.js；objects 的门盒牌书三态加 loop / crossfade，transitions any；PIPELINE.md 生产流程 1.0 草案七节；D2R-DISSECTION 第 19 节；tables_check 登记 characters 表校验通过，world_test 回归跑完再提交；四阶段对照图（本机 tools/out 下，不入库）均已发用户
