@@ -753,7 +753,7 @@
   var READS = [["face", "封面朝外", "在读的书转过来，封面朝外立在这一格最前面"], ["pull", "抽出半截", "在读的书从书列里抽出一截，书签带从底下垂出来"], ["tilt", "往前倾", "在读的书顶部往外倾，露出书顶和夹在里面的书签"]];
   var FXS = [["pull", "抽出来", "书从书列里朝你抽出来，露出两边的封皮"], ["sheen", "烫金反光", "书浮起一点，一道光扫过书脊"], ["tilt", "往前倾", "书从顶上往外倾，露出书顶"], ["none", "不动", "只稍微浮起一点"]];
   /* 装帧：布面精装是原来的样子；秘典是画布画的皮革、星盘、刻木、黑皮四种封面（按领域分），书脊有竹节、包角、烫金题签，进度与状态长在五金上 */
-  var BINDINGS = [["cloth", "布面精装", "布面精装：名色布面、烫金线、贴签、拼布、色带"], ["foil", "布面烫金", "布面烫金：照企鹅布面经典的做法，一书一枚图标按网格重复、一种烫印色、书名右上竖排；图标从书名和「为什么读」里挑"], ["victorian", "维多利亚", "维多利亚：双线边框、角花、月桂环里一枚图标、宽字距书名，照 1880 到 1920 年的装饰布面书"], ["grim", "秘典", "秘典：皮革与徽章、星盘铜书、符文木书、铭牌秘典四种封面按领域分；星盘指针是读到哪，宝石亮是这周读过，读完盖朱印"]];
+  var BINDINGS = [["cloth", "布面精装", "布面精装：名色布面、烫金线、贴签、拼布、色带"], ["old", "老书皮", "老书皮：1840 到 1900 年代真书的封面扫描（公有领域），抹掉原书名，按原来的位置和颜色烫上这本书的名字；书脊取封面的一条，贴皮质书名签"], ["foil", "布面烫金", "布面烫金：照企鹅布面经典的做法，一书一枚图标按网格重复、一种烫印色、书名右上竖排；图标从书名和「为什么读」里挑"], ["victorian", "维多利亚", "维多利亚：双线边框、角花、月桂环里一枚图标、宽字距书名，照 1880 到 1920 年的装饰布面书"], ["grim", "秘典", "秘典：皮革与徽章、星盘铜书、符文木书、铭牌秘典四种封面按领域分；星盘指针是读到哪，宝石亮是这周读过，读完盖朱印"]];
   var COLORS = [["named", "名色", "每个领域一个经典色系：勃艮第红、爱马仕橙、孔雀绿、普鲁士蓝、克莱因蓝……"], ["qinghua", "青花瓷", "钴蓝、霁蓝、天青、瓷白"], ["orange", "橙与驼", "爱马仕橙、驼色、象牙白、墨黑"], ["cloth", "布面", "原来的低饱和布色"]];
   var LOOK_KEY = "yanxilu-look", DECO_DEFAULT = ["globe", "glass", "vase", "succ", "pothos", "candle"];
   /* 默认：浮板 + 抽出半截 + 名色 + 烫金反光（2026-10-19 起）。以前存过的布置升级一次：这四样换成新默认，摆件和摆放位置保留 */
@@ -1321,6 +1321,42 @@ var FOIL = (function () {
   /* 一本书的图标：先按书名和「为什么读」里的词挑，挑不到按书名散到图标库里 */
   var ICON_WORDS = [[/周期|波|涛|潮|浪|海/, ["wave", "spiral", "moon"]], [/政治|战争|大国|博弈|战略|棋|霸权|秩序/, ["knight", "crown", "compass", "hourglass"]], [/证券|价值|估值|会计|财务|审计|公平|法/, ["scales", "coin", "key"]], [/期货|商品|大宗|农|粮|麦/, ["wheat", "ship", "sun"]], [/货币|债|资本|银行|金融|财富|钱|通胀/, ["coin", "scales", "gear"]], [/历史|时间|世纪|年代|兴衰/, ["hourglass", "crown", "pine"]], [/航海|贸易|航|船|海权/, ["ship", "anchor", "compass"]], [/哲学|思想|智慧|启蒙|灯/, ["lantern", "candle", "book"]], [/夜|梦|心理|月/, ["moon", "candle"]], [/地缘|地理|帝国|方向|罗盘|航线/, ["compass", "mountain", "ship"]], [/能源|石油|太阳|光|电/, ["sun", "gear"]], [/技术|机器|工业|制造|齿轮|系统/, ["gear", "key"]], [/山|地|矿|土/, ["mountain", "pine"]], [/植物|生长|生态|自然|森林|树/, ["pine", "leaf"]], [/读|书|文学|小说|诗/, ["book", "candle"]], [/王|权力|帝|君|皇/, ["crown", "knight"]], [/钥|密码|解|秘/, ["key", "lantern"]], [/钟|警|危机|崩溃|萧条|恐慌/, ["bell", "wave", "hourglass"]], [/锚|稳|定|港/, ["anchor"]], [/螺旋|循环|回归|轮回|复利/, ["spiral", "wave"]], [/叶|茶|药|草|医/, ["leaf"]], [/烛|信仰|宗教|神/, ["candle", "lantern"]]];
   function bookIcon(it) { var t = (it.title || "") + " " + (it.why || ""), h = hashN(it.id), i; for (i = 0; i < ICON_WORDS.length; i++) if (ICON_WORDS[i][0].test(t)) { var L = ICON_WORDS[i][1]; return L[h % L.length]; } return FOIL.icons[h % FOIL.icons.length]; }
+  /* 老书皮：公有领域的老书封面扫描（vendor/covers，来源与授权见 vendor/covers/SOURCES.md），原书名已抹掉，书名用字叠上去。
+   * 每条：[编号, 高宽比, 题框 x, y, 宽, 高（占封面的比例）, 样式 s 烫字 / p 皮签, 字色, 竖排, 书脊取样位置, 深色] */
+  var OLDC = /*OLDC*/[[0,1.2773,0.2594,0.3798,0.4805,0.2801,"p","#4c4400",0,0.0,"#5b5408"],[1,1.5281,0.3051,0.355,0.4147,0.3007,"p","#460500",0,0.0,"#670c00"],[2,1.403,0.2952,0.3652,0.3997,0.2691,"p","#3b2f27",0,0.711,"#b25740"],[3,1.3141,0.3195,0.2996,0.3602,0.4001,"s","#ac825c",0,0.117,"#89593a"],[4,1.3371,0.3267,0.4285,0.3466,0.2449,"p","#3c2e24",0,0.797,"#483f3b"],[5,1.5518,0.3252,0.4361,0.3496,0.1492,"p","#0f0100",0,0.684,"#3a0500"],[6,1.3422,0.3297,0.3399,0.3398,0.2899,"p","#2a1f16",0,0.02,"#3d342e"],[7,1.6465,0.3398,0.4298,0.3092,0.2,"p","#5a4813",0,0.077,"#78622b"],[8,1.5468,0.3211,0.3747,0.3452,0.2506,"p","#5b4523",0,0.675,"#6c5832"],[10,1.6166,0.2876,0.3499,0.4249,0.3001,"p","#1b140d",0,0.795,"#3e523d"],[11,1.6418,0.262,0.2753,0.476,0.2745,"s","#fff0d6",0,0.75,"#7c5735"],[12,1.3394,0.255,0.2826,0.5514,0.3837,"s","#d29268",0,0.0,"#554936"],[14,1.52,0.3048,0.1341,0.3905,0.1441,"p","#4a4019",0,0.1,"#5e542b"],[15,1.2647,0.2899,0.3336,0.3874,0.2146,"p","#214e64",0,0.077,"#376477"],[16,1.5699,0.3086,0.4042,0.3703,0.2021,"p","#50461d",0,0.096,"#5e532a"],[17,1.5668,0.5521,0.0296,0.4381,0.21,"p","#322e19",0,0.254,"#413e38"],[18,1.572,0.3114,0.4019,0.3641,0.2065,"p","#2d392e",0,0.771,"#4b5137"],[19,1.6876,0.297,0.3571,0.4172,0.2452,"p","#12090a",0,0.0,"#221817"],[20,1.6167,0.2676,0.767,0.4791,0.1165,"p","#1c2619",0,0.753,"#2b382b"],[21,1.3984,0.2898,0.4,0.4297,0.2497,"p","#3b342e",0,0.723,"#584936"],[22,1.9295,0.2115,0.7009,0.5639,0.161,"s","#e9cea1",0,0.0,"#0c1414"],[23,1.3992,0.5424,0.0404,0.4576,0.4852,"p","#3c3427",1,0.0,"#4c4d4e"],[24,1.3992,0.3267,0.2648,0.408,0.4493,"s","#6b7f80",0,0.1,"#404852"],[25,1.5816,0.2823,0.3646,0.4354,0.2709,"p","#070006",0,0.761,"#141424"],[26,1.7043,0.0433,0.0299,0.9244,0.0897,"s","#a9947a",0,0.449,"#414248"],[27,1.5577,0.1645,0.0594,0.658,0.1203,"s","#d9ab75",0,0.373,"#2f3135"],[28,1.8183,0.2915,0.3636,0.4047,0.2424,"p","#362920",0,0.792,"#745f46"],[31,1.5258,0.1594,0.0297,0.6805,0.1603,"s","#dac48b",0,0.254,"#5f6346"],[33,1.4599,0.1788,0.07,0.68,0.25,"s","#5b4935",0,0.584,"#1a1f2f"],[34,1.5075,0.255,0.14,0.4899,0.15,"s","#d6ad60",0,0.0,"#852923"],[35,1.4134,0.139,0.05,0.7609,0.12,"s","#83804c",0,0.773,"#201c1c"],[37,1.432,0.2589,0.05,0.4809,0.13,"s","#261c14",0,0.267,"#1d1917"],[38,1.519,0.2,0.17,0.6,0.1,"s","#4e412d",0,0.0,"#142326"],[40,1.4085,0.2958,0.48,0.439,0.16,"s","#ac884b",0,0.04,"#44230c"],[41,1.4944,0.5791,0.23,0.3499,0.42,"s","#b89458",1,0.379,"#14100f"],[42,1.3699,0.2397,0.655,0.5594,0.055,"s","#bea45b",0,0.039,"#515434"],[43,1.2793,0.2399,0.15,0.6194,0.21,"s","#856c4d",0,0.038,"#111014"],[44,1.4218,0.1991,0.47,0.6801,0.21,"s","#2d2010",0,0.0,"#15130e"],[45,1.4337,0.2593,0.05,0.4803,0.11,"s","#171a15",0,0.421,"#1b1d19"],[46,1.4019,0.1495,0.06,0.7593,0.15,"s","#ba974c",0,0.794,"#5a4420"],[47,1.5209,0.4943,0.05,0.4525,0.3,"s","#7d8c55",1,0.285,"#252323"],[48,1.4218,0.0794,0.38,0.6197,0.1,"s","#b89553",0,0.796,"#363a1f"],[49,1.3393,0.0993,0.09,0.5502,0.09,"s","#876246",0,0.152,"#48311e"],[50,1.4337,0.0597,0.04,0.2593,0.5,"s","#d5c6ab",1,0.344,"#635c4d"],[51,1.4406,0.0492,0.06,0.2905,0.48,"s","#b7a78e",1,0.423,"#72553b"],[52,1.4286,0.3,0.385,0.4595,0.11,"s","#bfa05f",0,0.038,"#424424"],[53,1.444,0.1588,0.035,0.781,0.11,"s","#363028",0,0.712,"#252122"],[54,1.4545,0.2,0.115,0.6,0.12,"s","#444930",0,0.0,"#50542c"],[55,1.4184,0.0993,0.34,0.8404,0.18,"s","#ac914d",0,0.567,"#3f471b"],[56,1.4423,0.2596,0.7,0.4796,0.14,"s","#b89a53",0,0.75,"#1f1e16"],[57,1.4134,0.2391,0.12,0.5206,0.14,"s","#b19554",0,0.773,"#0f1713"],[58,1.3986,0.3998,0.355,0.2191,0.11,"s","#c49d5e",0,0.693,"#130405"],[59,1.4458,0.3795,0.355,0.2795,0.12,"s","#bba15d",0,0.771,"#201d0a"],[60,1.2466,0.3076,0.3997,0.4175,0.1999,"s","#ffffff",0,0.731,"#212020"],[61,1.4328,0.3655,0.4487,0.2689,0.1222,"p","#060100",0,0.647,"#200d03"],[62,1.4618,0.2504,0.4038,0.374,0.1924,"p","#270402",0,0.624,"#3c0903"]]/*OLDC*/;
+  var OLD_MAP = null, OLD_N = -1;
+  function oldCover(id) {
+    var ks = Object.keys(ITEMS).filter(function (k) { return ITEMS[k].kind === "book"; });
+    if (!OLD_MAP || OLD_N !== ks.length) {
+      OLD_MAP = {}; OLD_N = ks.length;
+      var order = OLDC.map(function (c, i) { return i; }).sort(function (a, b) { return hashN("oc" + OLDC[a][0]) - hashN("oc" + OLDC[b][0]); });
+      ks.sort(function (a, b) { return hashN(a) - hashN(b) || (a < b ? -1 : 1); }).forEach(function (k, i) { OLD_MAP[k] = OLDC[order[i % order.length]]; });
+    }
+    return OLD_MAP[id] || OLDC[hashN(id) % OLDC.length];
+  }
+  function oldURL(c) { return "vendor/covers/c" + ("0" + c[0]).slice(-2) + ".webp"; }
+  function oldGold(hex) { return lumHex(hex) < 0.25 ? "#d8b46a" : mixHex(hex, "#f0d48c", .25); }
+  /* 封面上的书名：在题框里找一行到三行（竖排是一列到三列）里字最大的排法，字号用容器宽度单位，封面多大都一样 */
+  function oldTitle(c, title, by) {
+    var t = title.replace(/（.*）$/, ""), main = t.split("：")[0], lat = isLatin(main), vert = !!c[8] && !lat;
+    var chars = lat ? main.split(/\s+/) : Array.from(main), n = lat ? main.length * 0.56 : chars.length;
+    var bw = c[4] * 100, bh = c[5] * c[1] * 100, best = { fs: 0, L: 1 };
+    for (var L = 1; L <= (lat ? 2 : 3); L++) {
+      var per = Math.ceil(n / L), fs = vert ? Math.min(bh / per * 0.9, bw / (L * 1.32)) : Math.min(bw / per * 0.9, bh / (L * 1.32));
+      if (fs > best.fs * 1.12) best = { fs: fs, L: L };
+    }
+    var fsz = Math.min(best.fs, c[6] === "p" ? 9 : 13), lines = [];
+    if (lat) lines = best.L === 1 ? [main] : [chars.slice(0, Math.ceil(chars.length / 2)).join(" "), chars.slice(Math.ceil(chars.length / 2)).join(" ")];
+    else { var pl = Math.ceil(chars.length / best.L); for (var i = 0; i < chars.length; i += pl) lines.push(chars.slice(i, i + pl).join("")); }
+    var dark = c[7] && lumHex(c[7]) < 0.3 && c[6] === "s", ink = c[6] === "p" ? "#dcb768" : dark ? c[7] : oldGold(c[7]);
+    var room = (vert ? bw - best.L * fsz * 1.32 : bh - best.L * fsz * 1.32) > fsz * 0.9 && by;
+    return '<span class="ob-t ob-' + c[6] + (vert ? " v" : "") + (dark ? " ink" : "") + '" style="left:' + (c[2] * 100).toFixed(1) + "%;top:" + (c[3] * 100).toFixed(1) + "%;width:" + bw.toFixed(1) + "%;height:" + (c[5] * 100).toFixed(1) + "%;--ink:" + ink + ";--obl:" + mixHex(c[10] || "#2a1a10", "#120c08", .5) + '">' +
+      '<b style="font-size:' + fsz.toFixed(2) + 'cqw">' + lines.map(function (l) { return "<span>" + esc(l) + "</span>"; }).join("") + "</b>" + (room ? '<small style="font-size:' + Math.max(3.2, fsz * 0.36).toFixed(2) + 'cqw">' + esc(by) + "</small>" : "") + "</span>";
+  }
+  function oldCoverHTML(it, cls, style, extra) {
+    var c = oldCover(it.id);
+    return '<span class="' + cls + ' old" style="--ob:url(' + oldURL(c) + ");--obd:" + (c[10] || "#2a1a10") + (style || "") + '">' + oldTitle(c, it.title, shortBy(it.by)) + '<i class="ob-sh" aria-hidden="true"></i>' + (extra || "") + "</span>";
+  }
   var GRIM_KIND = { geo: "black", fin: "astro", cycle: "leather", fut: "wood", co: "leather" }, GRIM_KINDS = ["leather", "astro", "wood", "black"], GRIM_CACHE = {}, GRIM_N = 0;
   function mixHex(a, b, t) { var c = [1, 3, 5].map(function (i) { return Math.round(parseInt(a.substr(i, 2), 16) * (1 - t) + parseInt(b.substr(i, 2), 16) * t); }); return "#" + c.map(function (v) { return ("0" + v.toString(16)).slice(-2); }).join(""); }
   function grimKind(tid) { return GRIM_KIND[tid] || GRIM_KINDS[hashN(String(tid)) % 4]; }
@@ -1395,6 +1431,19 @@ var FOIL = (function () {
     var dimc = (shelfMatch(bs.s === "review" ? "done" : bs.s) ? "" : " dim") + (S.shelfPick === it.id ? " picked" : "") + (ebookOf(it.id) ? " has-eb" : "");
     var tip = '《' + esc(title) + "》" + esc(it.by || "") + " · " + esc(STATUS_LABEL[bs.s] || "") + (paint.name ? " · " + esc(paint.name) : "") + (mins ? " · 学了 " + hrs(mins) + " 小时" : "") + (bs.epct ? " · 电子书读到 " + Math.round(bs.epct * 100) + "%" : "");
     var dust = state === "doing" ? dustDays(it.id) : 0;
+    if (LK().binding === "old") {
+      var oc = oldCover(it.id), ebi = ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "";
+      if (state === "doing" && LK().read === "face") {
+        var fh = Math.round(Math.max(176, Math.min(224, 138 * oc[1])));
+        return '<button type="button" class="cb face old' + dimc + '" data-act="pick" data-id="' + esc(it.id) + '" style="height:' + fh + 'px" title="' + tip + '">' + oldCoverHTML(it, "cf-cv", "", '<i class="cf-bar" style="--p:' + Math.round(rp * 100) + '%" aria-hidden="true"></i>') + '<i class="cf-ed" aria-hidden="true"></i>' + ebi + "</button>";
+      }
+      var ow = Math.max(w, 28), imgW = h / oc[1], ox = Math.max(0, Math.min(oc[9] * imgW, imgW - ow));
+      var lv = ["dk", "red", "blk", "paper", "bare", "dk", "grn"][Math.floor(h0 / 11) % 7], dkc = oc[10] || "#2a1a10";
+      if (lv === "bare") lv = "blk";   /* 直接烫金压在花纹上看不清，先都用皮签 */
+      var lab = { dk: mixHex(dkc, "#120c08", .45), red: "#5e1a14", blk: "#16110d", grn: "#1f3324", paper: "#e9dcc0", bare: "transparent" }[lv];
+      var bands = h0 % 3 !== 1 ? " bd" : "";
+      return '<button type="button" class="cb old lv-' + lv + bands + (state ? " " + state : "") + (dust ? " dusty" : "") + dimc + '" data-act="pick" data-id="' + esc(it.id) + '" style="--ob:url(' + oldURL(oc) + ");--obx:-" + Math.round(ox) + "px;--obd:" + (oc[10] || "#2a1a10") + ";--obl:" + lab + ";height:" + h + "px;width:" + ow + "px;--dp:" + Math.round(h * 0.64) + "px" + (state === "doing" ? ";--rp:" + Math.round(14 + 70 * rp) + "%" : "") + '" title="' + tip + (dust ? " · 搁了 " + dust + " 天了，扫一下灰" : "") + '"><i class="ob-sh" aria-hidden="true"></i><span class="ob-lab">' + t.replace(' class="cb-lab"', "").replace(/font-size:([\d.]+)px/g, function (m, v) { return "font-size:" + Math.max(8.5, Math.round(v * 8) / 10) + "px"; }) + "</span>" + (foot ? '<span class="ob-foot' + (withBy && !prog && state !== "done" ? " bare" : "") + '">' + foot + "</span>" : "") + rib + tail + "</button>";
+    }
     if (LK().binding !== "cloth") {
       var gsp = grimSpec(it, tid, idx, bs, paint, state === "doing" && LK().read === "face"), vh = '<span class="vh">《' + esc(title) + "》</span>";
       if (gsp.t === "cover") return '<button type="button" class="cb face grim' + dimc + '" data-act="pick" data-id="' + esc(it.id) + '" style="--cl:' + gsp.base + '" title="' + tip + '"' + grimAttr(gsp) + '><span class="cf-cv grim"><canvas class="gs" aria-hidden="true"></canvas>' + vh + '</span><i class="cf-ed" aria-hidden="true"></i>' + (ebookOf(it.id) ? '<i class="cb-eb" aria-hidden="true"></i>' : "") + "</button>";
@@ -1682,7 +1731,11 @@ var FOIL = (function () {
       return '<div class="stg-cover film' + flip + '" style="--cl:' + clothOf("en", x.id) + '"><i class="sc-holes" aria-hidden="true"></i><span class="sc-kind">' + esc(x.type) + " · " + esc(String(x.year || "")) + '</span>' + coverTitle(x.title) + '<span class="sc-en">' + esc(x.en) + '</span><span class="sc-foot">' + (x.where === "local" ? "研习录跟读" : "Baba 英语") + "</span></div>";
     }
     var it = ITEMS[id], tid = it.home, pt = /^cfa-/.test(id) ? { hex: cfaPaint(0)[1], ink: cfaPaint(0)[2] || "" } : bookPaint(tid, id), base = pt.hex, light = lumHex(base) > 0.2, tname = domInfo(tid).name;
-    if (LK().binding !== "cloth") { var gsp = grimSpec(it, tid, 0, bookState(id), pt, true); return '<div class="stg-cover grim' + flip + '" style="--cl:' + gsp.base + '"' + grimAttr(gsp) + '><canvas class="gs" aria-hidden="true"></canvas><span class="vh">《' + esc(it.title) + "》" + esc(it.by || "") + "</span></div>"; }
+    if (LK().binding === "old" && it.kind === "book") {
+      var sc = oldCover(id), sw = sc[1] > 1.4 ? Math.round(350 / sc[1]) : 250, sh = Math.round(sw * sc[1]);
+      return '<div class="stg-cover old-wrap' + flip + '">' + oldCoverHTML(it, "stg-ob", ";width:" + sw + "px;height:" + sh + "px") + '<span class="vh">《' + esc(it.title) + "》" + esc(it.by || "") + "</span></div>";
+    }
+    if (LK().binding !== "cloth" && LK().binding !== "old") { var gsp = grimSpec(it, tid, 0, bookState(id), pt, true); return '<div class="stg-cover grim' + flip + '" style="--cl:' + gsp.base + '"' + grimAttr(gsp) + '><canvas class="gs" aria-hidden="true"></canvas><span class="vh">《' + esc(it.title) + "》" + esc(it.by || "") + "</span></div>"; }
     return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + (pt.ink ? ";--tx:" + pt.ink : "") + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc(tname || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
   }
   /* 展台在书墙右边一栏，滚动时停在屏幕上 */
