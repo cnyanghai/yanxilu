@@ -1973,44 +1973,62 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 .cf-cv.grim{padding:0;background:#1a1410;overflow:hidden}
 .stg-cover.grim{padding:0;background:#1a1410;overflow:hidden;color:transparent}
 .wall.bind-grim .cb.grim.dusty::after{opacity:.6}
-/* 老书皮：真书封面扫描做底，书名叠在原书名的位置 */
+/* 老书皮：真书封面扫描做底，书名叠在原书名的位置。光从左上来：书脊是圆的（左暗、三分之一处一道亮、右暗），
+   书板有铰槽和厚度，烫字和皮签有压痕；--grain 是启动时生成的一小块颗粒，叠在布面和皮签上补回缩放丢掉的质感 */
 .lk-rd.rd-old{border-width:1.5px;border-radius:1px;background:linear-gradient(currentColor,currentColor) 50% 30%/60% 2px no-repeat,linear-gradient(currentColor,currentColor) 50% 70%/60% 1px no-repeat}
-.cb.old{background:var(--ob) var(--obx,0) 0/auto 100% no-repeat,var(--obd);padding:0;gap:0;justify-content:flex-start;box-shadow:2px 0 5px -1px rgba(25,15,6,.55),inset 0 1px 0 rgba(255,255,255,.12)}
-.ob-sh{position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:0;
-  background:linear-gradient(90deg,rgba(10,6,2,.5),rgba(10,6,2,.1) 14%,rgba(255,236,200,.13) 32%,rgba(255,236,200,0) 50%,rgba(10,6,2,.14) 78%,rgba(10,6,2,.55)),linear-gradient(rgba(10,6,2,.25),transparent 4%,transparent 96%,rgba(10,6,2,.3))}
+.cb.old{padding:0;gap:0;justify-content:flex-start;border-radius:3px 3px 0 0;
+  background:var(--grain,none) 0 0/96px 96px,
+    repeating-linear-gradient(0deg,rgba(255,255,255,.06) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.07) 0 1px,transparent 1px 3px),
+    linear-gradient(90deg,rgba(0,0,0,.7) 0,rgba(0,0,0,.3) 7%,rgba(0,0,0,0) 22%,rgba(255,255,255,.3) 36%,rgba(255,255,255,.06) 50%,rgba(0,0,0,0) 60%,rgba(0,0,0,.22) 82%,rgba(0,0,0,.62) 100%),
+    linear-gradient(rgba(0,0,0,.38),rgba(0,0,0,0) 5%,rgba(0,0,0,0) 94%,rgba(0,0,0,.42)),
+    var(--ob) var(--obx,0) 0/auto 100% no-repeat,var(--obd);
+  background-blend-mode:overlay,overlay,overlay,overlay,multiply,normal,normal;
+  box-shadow:3px 0 6px -1px rgba(25,15,6,.6),-1px 0 0 rgba(0,0,0,.35),inset 0 1px 0 rgba(255,255,255,.14),inset 1px 0 0 rgba(255,255,255,.08)}
+.ob-sh{position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:0}
 .cb.old .ob-lab{position:relative;z-index:1;margin-top:12%;max-width:calc(100% - 8px);box-sizing:border-box;padding:6px 3px;border-radius:1.5px;
-  background:linear-gradient(90deg,rgba(255,255,255,.07),rgba(0,0,0,.18)),var(--obl);
-  box-shadow:inset 0 0 0 1px rgba(224,186,112,.9),inset 0 0 0 2.5px var(--obl),inset 0 0 0 3.2px rgba(224,186,112,.55),0 1px 2px rgba(0,0,0,.55),0 0 0 .5px rgba(0,0,0,.4)}
-.cb.old .cb-t span{color:#e2bf72;text-shadow:0 1px 0 rgba(0,0,0,.6),0 -.5px 0 rgba(255,240,200,.25)}
-.cb.old.lv-paper .ob-lab{background:linear-gradient(rgba(255,255,255,.18),rgba(120,90,40,.12)),#e9dcc0;box-shadow:0 0 0 .5px rgba(60,40,15,.5),0 1px 2px rgba(0,0,0,.45),inset 0 0 6px rgba(140,100,40,.25)}
-.cb.old.lv-paper .ob-lab .cb-t span{color:#2a1f14;text-shadow:none;font-weight:600}
-.cb.old.lv-bare .ob-lab{background:none;box-shadow:none}
-.cb.old.lv-bare .ob-lab .cb-t span{text-shadow:0 1px 0 rgba(0,0,0,.8),0 0 4px rgba(0,0,0,.7)}
-.cb.old.bd .ob-sh::before,.cb.old.bd .ob-sh::after{content:"";position:absolute;left:0;right:0;height:5px;background:linear-gradient(rgba(214,176,98,.95),rgba(214,176,98,.95)) 0 0/100% 1.2px no-repeat,linear-gradient(rgba(214,176,98,.8),rgba(214,176,98,.8)) 0 100%/100% 1px no-repeat;filter:drop-shadow(0 1px 0 rgba(0,0,0,.5))}
+  background:var(--grain,none) 0 0/96px 96px,linear-gradient(90deg,rgba(255,255,255,.12),rgba(0,0,0,.2)),var(--obl);background-blend-mode:overlay,normal,normal;
+  box-shadow:inset 0 0 0 1px rgba(230,192,118,.95),inset 0 0 0 2.5px var(--obl),inset 0 0 0 3.2px rgba(230,192,118,.6),inset 0 4px 4px -3px rgba(255,255,255,.18),inset 0 -4px 4px -3px rgba(0,0,0,.35),0 1px 1.5px rgba(0,0,0,.7),0 -.5px 0 rgba(255,255,255,.14),0 0 0 .5px rgba(0,0,0,.45)}
+.cb.old .cb-t span{color:transparent;background:linear-gradient(168deg,#f6e2a6 0%,#d9b463 38%,#b8903c 60%,#ecd08a 100%);-webkit-background-clip:text;background-clip:text;
+  filter:drop-shadow(0 -.6px 0 rgba(0,0,0,.8)) drop-shadow(0 .7px 0 rgba(255,238,196,.25))}
+.cb.old.lv-paper .ob-lab{background:var(--grain,none) 0 0/96px 96px,linear-gradient(rgba(255,255,255,.2),rgba(120,90,40,.14)),#e9dcc0;background-blend-mode:overlay,normal,normal;
+  box-shadow:0 0 0 .5px rgba(60,40,15,.55),0 1px 2px rgba(0,0,0,.5),inset 0 0 7px rgba(140,100,40,.28),inset 0 1px 0 rgba(255,255,255,.5)}
+.cb.old.lv-paper .ob-lab .cb-t span{background:none;color:#2a1f14;filter:none;text-shadow:0 .5px 0 rgba(255,255,255,.45);font-weight:600}
+.cb.old.bd .ob-sh::before,.cb.old.bd .ob-sh::after{content:"";position:absolute;left:0;right:0;height:5px;
+  background:linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.45)) 0 0/100% 1px no-repeat,linear-gradient(#e6c47a,#e6c47a) 0 1px/100% 1.2px no-repeat,linear-gradient(rgba(255,245,220,.5),rgba(255,245,220,.5)) 0 2.2px/100% .6px no-repeat,
+    linear-gradient(rgba(0,0,0,.4),rgba(0,0,0,.4)) 0 3.6px/100% 1px no-repeat,linear-gradient(#d6b062,#d6b062) 0 4.3px/100% .8px no-repeat}
 .cb.old.bd .ob-sh::before{top:5%}.cb.old.bd .ob-sh::after{bottom:4%}
-.cb.old .ob-foot{position:relative;z-index:1;margin-top:auto;margin-bottom:9px;display:flex;justify-content:center;padding:3px 2px;border-radius:1.5px;background:var(--obl);box-shadow:inset 0 0 0 1px rgba(224,186,112,.7),0 1px 2px rgba(0,0,0,.5)}
+.cb.old .ob-foot{position:relative;z-index:1;margin-top:auto;margin-bottom:9px;display:flex;justify-content:center;padding:3px 2px;border-radius:1.5px;
+  background:var(--grain,none) 0 0/96px 96px,var(--obl);background-blend-mode:overlay,normal;box-shadow:inset 0 0 0 1px rgba(230,192,118,.75),0 1px 1.5px rgba(0,0,0,.6),0 -.5px 0 rgba(255,255,255,.12)}
 .cb.old .ob-foot .cb-dots,.cb.old .ob-foot .cb-seal,.cb.old .ob-foot .cb-by{margin:0}
 .cb.old .ob-foot .cb-dots i{border-color:#e2bf72}.cb.old .ob-foot .cb-dots i.d{background:#e2bf72}
 .cb.old .ob-foot .cb-by{writing-mode:vertical-rl;font-size:10px;color:#e2bf72;letter-spacing:.1em}
 .cb.old .ob-foot .cb-gauge{margin:0}
 .cb.old .ob-foot.bare{background:none;box-shadow:none}.cb.old .ob-foot.bare .cb-by{text-shadow:0 1px 0 rgba(0,0,0,.7),0 0 3px rgba(0,0,0,.6);font-weight:600}
-.cf-cv.old,.stg-ob{position:absolute;inset:0;padding:0;display:block;overflow:hidden;container-type:size;background:var(--ob) center/100% 100% no-repeat,var(--obd)}
+.cf-cv.old,.stg-ob{position:absolute;inset:0;padding:0;display:block;overflow:hidden;container-type:size;border-radius:2px 5px 5px 2px;
+  background:var(--grain,none) 0 0/96px 96px,
+    repeating-linear-gradient(0deg,rgba(255,255,255,.05) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.06) 0 1px,transparent 1px 3px),
+    linear-gradient(90deg,rgba(0,0,0,.55) 0,rgba(0,0,0,.14) 1.6%,rgba(255,255,255,.22) 3.4%,rgba(0,0,0,.26) 5.4%,rgba(0,0,0,0) 9%),
+    radial-gradient(130% 100% at 18% 8%,rgba(255,255,255,.16),rgba(255,255,255,0) 48%,rgba(0,0,0,.26) 100%),
+    var(--ob) center/100% 100% no-repeat,var(--obd);
+  background-blend-mode:overlay,overlay,overlay,overlay,overlay,normal,normal;
+  box-shadow:inset 1px 1px 0 rgba(255,255,255,.14),inset -1px -1px 0 rgba(0,0,0,.35),inset 0 0 0 1px rgba(0,0,0,.18),
+    1px 1px 0 #efe4c8,2px 2px 0 #c8b994,3px 3px 0 #efe4c8,4px 4px 0 #c8b994,5px 5px 0 #efe4c8,6px 6px 0 #bfb08c,9px 10px 16px -2px rgba(20,12,4,.55)}
 .cb.face.old{width:138px}
-.stg-cover.old-wrap{padding:0;background:none;box-shadow:none;display:flex;align-items:flex-end;justify-content:center;color:transparent}
-.stg-ob{position:relative;inset:auto;flex:none;border-radius:2px 6px 6px 2px;box-shadow:6px 8px 18px -6px rgba(20,12,4,.6),inset 3px 0 4px -2px rgba(0,0,0,.4)}
+.cf-cv.old{box-shadow:inset 1px 1px 0 rgba(255,255,255,.14),inset -1px -1px 0 rgba(0,0,0,.35),1px 1px 0 #efe4c8,2px 2px 0 #c8b994,3px 3px 0 #efe4c8,4px 4px 0 #bfb08c,7px 8px 12px -2px rgba(20,12,4,.5)}
+.stg-cover.old-wrap{padding:0 10px 10px 0;background:none;box-shadow:none;display:flex;align-items:flex-end;justify-content:center;color:transparent}
+.stg-ob{position:relative;inset:auto;flex:none}
 .ob-t{position:absolute;z-index:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.25em;box-sizing:border-box;text-align:center;pointer-events:none}
 .ob-t b{display:flex;flex-direction:column;align-items:center;font-family:'ZCOOL XiaoWei',var(--f-display);font-weight:400;line-height:1.22;letter-spacing:.08em;white-space:nowrap;
-  background:linear-gradient(175deg,color-mix(in srgb,var(--ink) 55%,#fff6dc) 0%,var(--ink) 45%,color-mix(in srgb,var(--ink) 70%,#3a2408) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
-  filter:drop-shadow(0 .06em 0 rgba(0,0,0,.45)) drop-shadow(0 -.02em 0 rgba(255,244,214,.3))}
-.ob-t.ink b{background:none;color:var(--ink);filter:drop-shadow(0 .04em 0 rgba(255,250,235,.25))}
+  background:linear-gradient(172deg,color-mix(in srgb,var(--ink) 50%,#fff8e0) 0%,var(--ink) 40%,color-mix(in srgb,var(--ink) 68%,#3a2408) 72%,color-mix(in srgb,var(--ink) 75%,#fff2c8) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
+  filter:drop-shadow(0 -.028em 0 rgba(0,0,0,.6)) drop-shadow(0 .04em 0 rgba(255,246,220,.3))}
+.ob-t.ink b{background:none;color:var(--ink);filter:drop-shadow(0 .04em 0 rgba(255,250,235,.3)) drop-shadow(0 -.015em 0 rgba(0,0,0,.25))}
 .ob-t.v b{flex-direction:row-reverse}.ob-t.v b span{writing-mode:vertical-rl}
 .ob-t small{font-family:var(--f-display);color:var(--ink);opacity:.85;letter-spacing:.2em;white-space:nowrap}
 .ob-t.ob-p{padding:.6em}
 .ob-t.ob-p::before{content:"";position:absolute;inset:0;z-index:-1;border-radius:2px;
-  background:radial-gradient(ellipse at 40% 35%,rgba(255,255,255,.1),transparent 60%),linear-gradient(rgba(0,0,0,.05),rgba(0,0,0,.25)),var(--obl);
-  box-shadow:inset 0 0 0 1px rgba(224,186,112,.9),inset 0 0 0 3px var(--obl),inset 0 0 0 4px rgba(224,186,112,.6),0 1px 3px rgba(0,0,0,.55)}
-.cf-cv.old .cf-bar{position:absolute;left:0;right:0;bottom:0;z-index:2}
-.cf-cv.old .ob-sh,.stg-ob .ob-sh{background:linear-gradient(90deg,rgba(10,6,2,.45),rgba(10,6,2,.08) 3%,rgba(255,236,200,.08) 6%,transparent 12%,transparent 94%,rgba(10,6,2,.2))}
+  background:var(--grain,none) 0 0/96px 96px,radial-gradient(ellipse at 35% 30%,rgba(255,255,255,.12),transparent 60%),linear-gradient(rgba(0,0,0,.04),rgba(0,0,0,.26)),var(--obl);background-blend-mode:overlay,normal,normal,normal;
+  box-shadow:inset 0 0 0 1px rgba(230,192,118,.95),inset 0 0 0 3px var(--obl),inset 0 0 0 4px rgba(230,192,118,.65),inset 0 6px 6px -4px rgba(255,255,255,.2),inset 0 -6px 6px -4px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.6),0 -.5px 0 rgba(255,255,255,.15)}
+.cf-cv.old .ob-sh,.stg-ob .ob-sh{display:none}
 .lk-sw{min-height:30px;display:inline-flex;align-items:center;gap:8px;padding:0 10px 0 4px;border:1px solid var(--rule);border-radius:16px;background:var(--paper);font-family:var(--f-ui);font-size:12.5px;color:var(--ink-2);cursor:pointer}
 .lk-sw i{position:relative;width:30px;height:18px;border-radius:9px;background:var(--rule-strong);transition:background .15s}
 .lk-sw i::after{content:"";position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.3);transition:transform .15s}
@@ -6049,7 +6067,15 @@ var FOIL = (function () {
   function bookIcon(it) { var t = (it.title || "") + " " + (it.why || ""), h = hashN(it.id), i; for (i = 0; i < ICON_WORDS.length; i++) if (ICON_WORDS[i][0].test(t)) { var L = ICON_WORDS[i][1]; return L[h % L.length]; } return FOIL.icons[h % FOIL.icons.length]; }
   /* 老书皮：公有领域的老书封面扫描（vendor/covers，来源与授权见 vendor/covers/SOURCES.md），原书名已抹掉，书名用字叠上去。
    * 每条：[编号, 高宽比, 题框 x, y, 宽, 高（占封面的比例）, 样式 s 烫字 / p 皮签, 字色, 竖排, 书脊取样位置, 深色] */
-  var OLDC = /*OLDC*/[[0,1.2773,0.2594,0.3798,0.4805,0.2801,"p","#4c4400",0,0.0,"#5b5408"],[1,1.5281,0.3051,0.355,0.4147,0.3007,"p","#460500",0,0.0,"#670c00"],[2,1.403,0.2952,0.3652,0.3997,0.2691,"p","#3b2f27",0,0.711,"#b25740"],[3,1.3141,0.3195,0.2996,0.3602,0.4001,"s","#ac825c",0,0.117,"#89593a"],[4,1.3371,0.3267,0.4285,0.3466,0.2449,"p","#3c2e24",0,0.797,"#483f3b"],[5,1.5518,0.3252,0.4361,0.3496,0.1492,"p","#0f0100",0,0.684,"#3a0500"],[6,1.3422,0.3297,0.3399,0.3398,0.2899,"p","#2a1f16",0,0.02,"#3d342e"],[7,1.6465,0.3398,0.4298,0.3092,0.2,"p","#5a4813",0,0.077,"#78622b"],[8,1.5468,0.3211,0.3747,0.3452,0.2506,"p","#5b4523",0,0.675,"#6c5832"],[10,1.6166,0.2876,0.3499,0.4249,0.3001,"p","#1b140d",0,0.795,"#3e523d"],[11,1.6418,0.262,0.2753,0.476,0.2745,"s","#fff0d6",0,0.75,"#7c5735"],[12,1.3394,0.255,0.2826,0.5514,0.3837,"s","#d29268",0,0.0,"#554936"],[14,1.52,0.3048,0.1341,0.3905,0.1441,"p","#4a4019",0,0.1,"#5e542b"],[15,1.2647,0.2899,0.3336,0.3874,0.2146,"p","#214e64",0,0.077,"#376477"],[16,1.5699,0.3086,0.4042,0.3703,0.2021,"p","#50461d",0,0.096,"#5e532a"],[17,1.5668,0.5521,0.0296,0.4381,0.21,"p","#322e19",0,0.254,"#413e38"],[18,1.572,0.3114,0.4019,0.3641,0.2065,"p","#2d392e",0,0.771,"#4b5137"],[19,1.6876,0.297,0.3571,0.4172,0.2452,"p","#12090a",0,0.0,"#221817"],[20,1.6167,0.2676,0.767,0.4791,0.1165,"p","#1c2619",0,0.753,"#2b382b"],[21,1.3984,0.2898,0.4,0.4297,0.2497,"p","#3b342e",0,0.723,"#584936"],[22,1.9295,0.2115,0.7009,0.5639,0.161,"s","#e9cea1",0,0.0,"#0c1414"],[23,1.3992,0.5424,0.0404,0.4576,0.4852,"p","#3c3427",1,0.0,"#4c4d4e"],[24,1.3992,0.3267,0.2648,0.408,0.4493,"s","#6b7f80",0,0.1,"#404852"],[25,1.5816,0.2823,0.3646,0.4354,0.2709,"p","#070006",0,0.761,"#141424"],[26,1.7043,0.0433,0.0299,0.9244,0.0897,"s","#a9947a",0,0.449,"#414248"],[27,1.5577,0.1645,0.0594,0.658,0.1203,"s","#d9ab75",0,0.373,"#2f3135"],[28,1.8183,0.2915,0.3636,0.4047,0.2424,"p","#362920",0,0.792,"#745f46"],[31,1.5258,0.1594,0.0297,0.6805,0.1603,"s","#dac48b",0,0.254,"#5f6346"],[33,1.4599,0.1788,0.07,0.68,0.25,"s","#5b4935",0,0.584,"#1a1f2f"],[34,1.5075,0.255,0.14,0.4899,0.15,"s","#d6ad60",0,0.0,"#852923"],[35,1.4134,0.139,0.05,0.7609,0.12,"s","#83804c",0,0.773,"#201c1c"],[37,1.432,0.2589,0.05,0.4809,0.13,"s","#261c14",0,0.267,"#1d1917"],[38,1.519,0.2,0.17,0.6,0.1,"s","#4e412d",0,0.0,"#142326"],[40,1.4085,0.2958,0.48,0.439,0.16,"s","#ac884b",0,0.04,"#44230c"],[41,1.4944,0.5791,0.23,0.3499,0.42,"s","#b89458",1,0.379,"#14100f"],[42,1.3699,0.2397,0.655,0.5594,0.055,"s","#bea45b",0,0.039,"#515434"],[43,1.2793,0.2399,0.15,0.6194,0.21,"s","#856c4d",0,0.038,"#111014"],[44,1.4218,0.1991,0.47,0.6801,0.21,"s","#2d2010",0,0.0,"#15130e"],[45,1.4337,0.2593,0.05,0.4803,0.11,"s","#171a15",0,0.421,"#1b1d19"],[46,1.4019,0.1495,0.06,0.7593,0.15,"s","#ba974c",0,0.794,"#5a4420"],[47,1.5209,0.4943,0.05,0.4525,0.3,"s","#7d8c55",1,0.285,"#252323"],[48,1.4218,0.0794,0.38,0.6197,0.1,"s","#b89553",0,0.796,"#363a1f"],[49,1.3393,0.0993,0.09,0.5502,0.09,"s","#876246",0,0.152,"#48311e"],[50,1.4337,0.0597,0.04,0.2593,0.5,"s","#d5c6ab",1,0.344,"#635c4d"],[51,1.4406,0.0492,0.06,0.2905,0.48,"s","#b7a78e",1,0.423,"#72553b"],[52,1.4286,0.3,0.385,0.4595,0.11,"s","#bfa05f",0,0.038,"#424424"],[53,1.444,0.1588,0.035,0.781,0.11,"s","#363028",0,0.712,"#252122"],[54,1.4545,0.2,0.115,0.6,0.12,"s","#444930",0,0.0,"#50542c"],[55,1.4184,0.0993,0.34,0.8404,0.18,"s","#ac914d",0,0.567,"#3f471b"],[56,1.4423,0.2596,0.7,0.4796,0.14,"s","#b89a53",0,0.75,"#1f1e16"],[57,1.4134,0.2391,0.12,0.5206,0.14,"s","#b19554",0,0.773,"#0f1713"],[58,1.3986,0.3998,0.355,0.2191,0.11,"s","#c49d5e",0,0.693,"#130405"],[59,1.4458,0.3795,0.355,0.2795,0.12,"s","#bba15d",0,0.771,"#201d0a"],[60,1.2466,0.3076,0.3997,0.4175,0.1999,"s","#ffffff",0,0.731,"#212020"],[61,1.4328,0.3655,0.4487,0.2689,0.1222,"p","#060100",0,0.647,"#200d03"],[62,1.4618,0.2504,0.4038,0.374,0.1924,"p","#270402",0,0.624,"#3c0903"]]/*OLDC*/;
+  /* 一小块颗粒（96 像素见方，中灰 ±，固定随机数），以 overlay 叠在老书皮的布面和皮签上，补回缩放丢掉的质感 */
+  (function () {
+    try {
+      var c = document.createElement("canvas"); c.width = c.height = 96; var g = c.getContext("2d"), im = g.createImageData(96, 96), d = im.data, r = 7;
+      for (var i = 0; i < d.length; i += 4) { r = (r * 16807) % 2147483647; var v = 128 + (r / 2147483647 - .5) * 150; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 60; }
+      g.putImageData(im, 0, 0); document.documentElement.style.setProperty("--grain", "url(" + c.toDataURL("image/png") + ")");
+    } catch (e) {}
+  })();
+  var OLDC = /*OLDC*/[[0,1.2773,0.2594,0.3798,0.4805,0.2801,"p","#4c4400",0,0.0,"#5b5408"],[1,1.5281,0.3051,0.355,0.4147,0.3007,"p","#460500",0,0.0,"#670c00"],[2,1.403,0.2952,0.3652,0.3997,0.2691,"p","#3b2f27",0,0.711,"#b25740"],[4,1.3371,0.3267,0.4285,0.3466,0.2449,"p","#3c2e24",0,0.797,"#483f3b"],[5,1.5518,0.3252,0.4361,0.3496,0.1492,"p","#0f0100",0,0.684,"#3a0500"],[6,1.3422,0.3297,0.3399,0.3398,0.2899,"p","#2a1f16",0,0.02,"#3d342e"],[7,1.6465,0.3398,0.4298,0.3092,0.2,"p","#5a4813",0,0.077,"#78622b"],[8,1.5468,0.3211,0.3747,0.3452,0.2506,"p","#5b4523",0,0.675,"#6c5832"],[10,1.6166,0.2876,0.3499,0.4249,0.3001,"p","#1b140d",0,0.795,"#3e523d"],[11,1.6418,0.262,0.2753,0.476,0.2745,"s","#fff0d6",0,0.75,"#7c5735"],[14,1.52,0.3048,0.1341,0.3905,0.1441,"p","#4a4019",0,0.1,"#5e542b"],[15,1.2647,0.2899,0.3336,0.3874,0.2146,"p","#214e64",0,0.077,"#376477"],[16,1.5699,0.3086,0.4042,0.3703,0.2021,"p","#50461d",0,0.096,"#5e532a"],[17,1.5668,0.5521,0.0296,0.4381,0.21,"p","#322e19",0,0.254,"#413e38"],[18,1.572,0.3114,0.4019,0.3641,0.2065,"p","#2d392e",0,0.771,"#4b5137"],[19,1.6876,0.297,0.3571,0.4172,0.2452,"p","#12090a",0,0.0,"#221817"],[20,1.6167,0.2676,0.767,0.4791,0.1165,"p","#1c2619",0,0.753,"#2b382b"],[21,1.3984,0.2898,0.4,0.4297,0.2497,"p","#3b342e",0,0.723,"#584936"],[22,1.9295,0.2115,0.7009,0.5639,0.161,"s","#e9cea1",0,0.0,"#0c1414"],[23,1.3992,0.5424,0.0404,0.4576,0.4852,"p","#3c3427",1,0.0,"#4c4d4e"],[25,1.5816,0.2823,0.3646,0.4354,0.2709,"p","#070006",0,0.761,"#141424"],[26,1.7043,0.0433,0.0299,0.9244,0.0897,"s","#a9947a",0,0.449,"#414248"],[27,1.5577,0.1645,0.0594,0.658,0.1203,"s","#d9ab75",0,0.373,"#2f3135"],[28,1.8183,0.2915,0.3636,0.4047,0.2424,"p","#362920",0,0.792,"#745f46"],[31,1.5258,0.1594,0.0297,0.6805,0.1603,"s","#dac48b",0,0.254,"#5f6346"],[33,1.4599,0.1788,0.07,0.68,0.25,"s","#5b4935",0,0.584,"#1a1f2f"],[34,1.5075,0.255,0.14,0.4899,0.15,"s","#d6ad60",0,0.0,"#852923"],[35,1.4134,0.139,0.05,0.7609,0.12,"s","#83804c",0,0.773,"#201c1c"],[37,1.432,0.2589,0.05,0.4809,0.13,"s","#261c14",0,0.267,"#1d1917"],[38,1.519,0.2,0.17,0.6,0.1,"s","#4e412d",0,0.0,"#142326"],[40,1.4085,0.2958,0.48,0.439,0.16,"s","#ac884b",0,0.04,"#44230c"],[41,1.4944,0.5791,0.23,0.3499,0.42,"s","#b89458",1,0.379,"#14100f"],[42,1.3699,0.2397,0.655,0.5594,0.055,"s","#bea45b",0,0.039,"#515434"],[43,1.2793,0.2399,0.15,0.6194,0.21,"s","#856c4d",0,0.038,"#111014"],[44,1.4218,0.1991,0.47,0.6801,0.21,"s","#2d2010",0,0.0,"#15130e"],[45,1.4337,0.2593,0.05,0.4803,0.11,"s","#171a15",0,0.421,"#1b1d19"],[46,1.4019,0.1495,0.06,0.7593,0.15,"s","#ba974c",0,0.794,"#5a4420"],[47,1.5209,0.4943,0.05,0.4525,0.3,"s","#7d8c55",1,0.285,"#252323"],[48,1.4218,0.0794,0.38,0.6197,0.1,"s","#b89553",0,0.796,"#363a1f"],[49,1.3393,0.0993,0.09,0.5502,0.09,"s","#876246",0,0.152,"#48311e"],[50,1.4337,0.0597,0.04,0.2593,0.5,"s","#d5c6ab",1,0.344,"#635c4d"],[51,1.4406,0.0492,0.06,0.2905,0.48,"s","#b7a78e",1,0.423,"#72553b"],[52,1.4286,0.3,0.385,0.4595,0.11,"s","#bfa05f",0,0.038,"#424424"],[53,1.444,0.1588,0.035,0.781,0.11,"s","#363028",0,0.712,"#252122"],[54,1.4545,0.2,0.115,0.6,0.12,"s","#444930",0,0.0,"#50542c"],[55,1.4184,0.0993,0.34,0.8404,0.18,"s","#ac914d",0,0.567,"#3f471b"],[56,1.4423,0.2596,0.7,0.4796,0.14,"s","#b89a53",0,0.75,"#1f1e16"],[57,1.4134,0.2391,0.12,0.5206,0.14,"s","#b19554",0,0.773,"#0f1713"],[58,1.3986,0.3998,0.355,0.2191,0.11,"s","#c49d5e",0,0.693,"#130405"],[59,1.4458,0.3795,0.355,0.2795,0.12,"s","#bba15d",0,0.771,"#201d0a"],[60,1.2466,0.3076,0.3997,0.4175,0.1999,"s","#ffffff",0,0.731,"#212020"],[61,1.4328,0.3655,0.4487,0.2689,0.1222,"p","#060100",0,0.647,"#200d03"],[62,1.4618,0.2504,0.4038,0.374,0.1924,"p","#270402",0,0.624,"#3c0903"]]/*OLDC*/;
   var OLD_MAP = null, OLD_N = -1;
   function oldCover(id) {
     var ks = Object.keys(ITEMS).filter(function (k) { return ITEMS[k].kind === "book"; });

@@ -11,7 +11,6 @@ CC BY 2.0 的图（大多是波士顿公共图书馆 Boston Public Library 拍�
 | c00 | [Atalanta in Calydon - Upper cover (c68i2) (cropped).jpg](https://commons.wikimedia.org/wiki/File:Atalanta_in_Calydon_-_Upper_cover_(c68i2)_(cropped).jpg) | CC0 | The Doves Bindery |
 | c01 | [The revolt of Islam- - Upper cover (c68i10).jpg](https://commons.wikimedia.org/wiki/File:The_revolt_of_Islam-_-_Upper_cover_(c68i10).jpg) | CC0 | The Doves Bindery |
 | c02 | [C188a701 02.jpg](https://commons.wikimedia.org/wiki/File:C188a701_02.jpg) | CC0 | Publishers' bindings |
-| c03 | [C188a614 01.jpg](https://commons.wikimedia.org/wiki/File:C188a614_01.jpg) | CC0 | Publishers' bindings |
 | c04 | [C188a663 02.jpg](https://commons.wikimedia.org/wiki/File:C188a663_02.jpg) | CC0 | Publishers' bindings |
 | c05 | [The Book of Common Prayer - Upper cover (Davis152).jpg](https://commons.wikimedia.org/wiki/File:The_Book_of_Common_Prayer_-_Upper_cover_(Davis152).jpg) | CC0 | Embossed binding |
 | c06 | [C188a663 01.jpg](https://commons.wikimedia.org/wiki/File:C188a663_01.jpg) | CC0 | Publishers' bindings |
@@ -19,7 +18,6 @@ CC BY 2.0 的图（大多是波士顿公共图书馆 Boston Public Library 拍�
 | c08 | [Ambition et sagesse. -With plates.- - Upper cover (C109AAA4).jpg](https://commons.wikimedia.org/wiki/File:Ambition_et_sagesse._-With_plates.-_-_Upper_cover_(C109AAA4).jpg) | CC0 | Ambition et sagesse (1854) |
 | c10 | [L’abeille institutrice ou anthologie hébraïque, grecque, latine, française et étrangère 2nd edn - Twy156 - IMG 3473.jpg](https://commons.wikimedia.org/wiki/File:L%E2%80%99abeille_institutrice_ou_anthologie_h%C3%A9bra%C3%AFque,_grecque,_latine,_fran%C3%A7aise_et_%C3%A9trang%C3%A8re_2nd_edn_-_Twy156_-_IMG_3473.jpg) | CC0 | Formerly Michael Twyman Collection |
 | c11 | [Julien, ou mensonge - Twy91 - IMG 3090.jpg](https://commons.wikimedia.org/wiki/File:Julien,_ou_mensonge_-_Twy91_-_IMG_3090.jpg) | CC0 | Formerly Michael Twyman Collection |
-| c12 | [C188a701 01.jpg](https://commons.wikimedia.org/wiki/File:C188a701_01.jpg) | CC0 | Publishers' bindings |
 | c14 | [Histoire de l'Inde ancienne et moderne ... Quatrie?me edition. (pp. 236. Tours, 1853.) - - Upper cover (C129i19).jpg](https://commons.wikimedia.org/wiki/File:Histoire_de_l%27Inde_ancienne_et_moderne_..._Quatrie%3Fme_edition._(pp._236._Tours,_1853.)_-_-_Upper_cover_(C129i19).jpg) | CC0 | Cartonnages romantiques |
 | c15 | [C188a635 02.jpg](https://commons.wikimedia.org/wiki/File:C188a635_02.jpg) | CC0 | Publishers' bindings |
 | c16 | [Histoire de l'Inde ancienne et moderne ... Quatrie?me edition. (pp. 236. Tours, 1853.) - - Lower cover (C129i19).jpg](https://commons.wikimedia.org/wiki/File:Histoire_de_l%27Inde_ancienne_et_moderne_..._Quatrie%3Fme_edition._(pp._236._Tours,_1853.)_-_-_Lower_cover_(C129i19).jpg) | CC0 | Cartonnages romantiques |
@@ -30,7 +28,6 @@ CC BY 2.0 的图（大多是波士顿公共图书馆 Boston Public Library 拍�
 | c21 | [C188a676 02.jpg](https://commons.wikimedia.org/wiki/File:C188a676_02.jpg) | CC0 | Publishers' bindings |
 | c22 | [De' ragguagli di Parnaso- Centuria prima-seconda MET i19511814-cb.jpg](https://commons.wikimedia.org/wiki/File:De%27_ragguagli_di_Parnaso-_Centuria_prima-seconda_MET_i19511814-cb.jpg) | CC0 | Embossed binding |
 | c23 | [Shadows and firefliesa book of verse - BL 11607aaa25 1 upper cover and spine by Guthrie.jpg](https://commons.wikimedia.org/wiki/File:Shadows_and_firefliesa_book_of_verse_-_BL_11607aaa25_1_upper_cover_and_spine_by_Guthrie.jpg) | CC0 | Publishers' bindings |
-| c24 | [C188a645 02.jpg](https://commons.wikimedia.org/wiki/File:C188a645_02.jpg) | CC0 | Publishers' bindings |
 | c25 | [A marriage of shadows and other poems - BL 011653f18 upper cover and spine.jpg](https://commons.wikimedia.org/wiki/File:A_marriage_of_shadows_and_other_poems_-_BL_011653f18_upper_cover_and_spine.jpg) | CC0 | Publishers' bindings |
 | c26 | [Dante Gabriel Rossetti An illustrated memorial of his art and life - BL KTC39b11 upper cover.jpg](https://commons.wikimedia.org/wiki/File:Dante_Gabriel_Rossetti_An_illustrated_memorial_of_his_art_and_life_-_BL_KTC39b11_upper_cover.jpg) | CC0 | Publishers' bindings |
 | c27 | [Tales of the Birds by William Warde Fowler - embossed cover.jpg](https://commons.wikimedia.org/wiki/File:Tales_of_the_Birds_by_William_Warde_Fowler_-_embossed_cover.jpg) | Public domain | Embossed binding |
