@@ -3025,14 +3025,12 @@ var FOIL = (function () {
       return '<div class="tier' + (empty ? " empty" : "") + '">' + row.map(function (c) { return c[0] === "+" ? trayHTML(c[1]) : archBayHTML(c[0], c[1]); }).join("") + "</div>";
     }).join("");
     var legend = Object.keys(KINDS).filter(function (k) { return k !== "剪报" || clipsOn(); }).map(function (k) { return '<span style="--k:var(' + KINDS[k] + ')"><i aria-hidden="true"></i>' + k + "</span>"; }).join("");
-    var nItems = REPORTS.length + (clipsOn() ? clipList().length : 0);
     var rules = [["一", "一个问题一盒", "新资料先问：它在回答哪个问题？已经有这个问题，就装进那一盒；是新问题才立新卷，点「＋ 新档案盒」自己就能立。卷号跟书架用同一套索书号。"],
       ["二", "盒里按件编号", "每件是档案、数据、计划、纪要、剪报之一，色签露在盒顶。件越多盒越厚，一眼看出这一盒是查资料多，还是做数据多。"],
       ["三", "零散的先进收件匣", "一次性的小分析、没分领域的剪报不急着立卷；分了领域还没装盒的剪报装在那一格的剪报夹（档案袋）里，点开拆封。攒到两件讲同一件事，再一起装盒。"],
       ["四", "线网上一盒一个地标", "地图上只画课题，不画单件，地标下面写着件数。资料再多，地标也只随课题增长。"]];
     return '<div class="view shelf archive-v">' + bannerHTML() +
-      '<header class="phead"><div><p class="eyebrow">' + (5 + cust.length) + " 个方向 · " + TOPICS.length + " 个课题 · " + nItems + ' 件资料</p><h1>书架<span class="h1-sub">档案架</span></h1>' +
-      '<p class="lede">书挂在书墙上；自己做的研究、剪下来的好文章按课题装进档案盒，这里是完整的档案架。一个课题一盒，盒里按件编号，资料再多也只是盒子变厚、盒子变多。</p>' + shelfSeg("archive") +
+      '<header class="phead arch-head"><div>' + shelfSeg("archive") +
       '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", TOPICS.length) + chip("doing", "在做", cnt("doing")) + chip("yearly", "要年更", cnt("yearly")) + chip("closed", "已结卷", cnt("closed")) +
       (S.canEdit ? '<button type="button" class="chipbtn chip-new" data-act="abox-new">＋ 新档案盒</button>' : "") + "</div></div>" +
       '<div class="arch-side"><div class="k-legend"><span class="kl-h">盒顶的色签</span>' + legend + "</div>" +
