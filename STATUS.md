@@ -72,6 +72,7 @@ updated: 2026-11-03
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
+- 2026-11-05 用户不会开第二个 Blender，Claude 从 WSL 拉起：启动脚本 C:\Users\cnyan\blender_mcp\yanxilu\start_mcp_9877.py（插件服务起在 9877，load_post 保持端口），本仓库 tools/blender/mcp_call.py 默认连 9877（--port 可改）；确认 9877 是空场景、9876 是另一会话的 376 物体场景。窗口里建笔记本架第一版（tools/blender/web_props/rack.py：两侧板、22 度斜面、挡条、底板、黄铜牌、橡木材质、左上暖光、正面略俯机位、地面接影），三次截图迭代（木色、机位、地面），存 yanxilu_props.blend；等用户看截图点评。
 - 2026-11-05 页头与层距：shelfHTML 页头重排（details 下拉筛选、shelfSeg 本数包进 small）、wallLegend 包进 details；CSS：.wall / .wall-row / .wm-in 余量、.wall .wm 归零 section 边距、.w-filt 样式、手机隐藏 small。用户问两个会话共用桌面 Blender 会不会冲突 → 会（同一场景），定为第二个窗口另一端口。
 - 2026-11-04 用户对六步样稿表态（五步同意、平放有问、Blender 必须桌面版），记入决策与记忆；下一步先做页头与层距（纯 CSS / JS，不涉 Blender）。
 - 2026-11-04 晚 书架六步样稿：docs/shelf-mock-steps.html（生成脚本在会话草稿区）与 docs/mock/ 下的现状裁片，六张图二到六已发用户；第一张「光与木」的 Blender 对比渲染在跑（tools/blender/shelf_test.py，前两次因父子变换与无降噪器失败，第三次按世界坐标摆放）。审视稿补了「要不要用 Blender」一节：静物与光照层走 Blender 预渲染，数据驱动的书盒牌走 CSS。Blender 第四次渲对（几何与光影成立、材质未到位），第一张三联图已发；六张样稿全部发用户，等选先做哪步。
