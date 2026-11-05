@@ -1,7 +1,7 @@
 ---
 type: references
 project: yanxilu
-last_scan: 2026-10-29
+last_scan: 2026-11-04
 ---
 
 # 已有方案与参考
@@ -22,6 +22,7 @@ last_scan: 2026-10-29
 | 2026-10-28 | GitHub | three.js room portfolio / isometric room threejs / react-three-fiber room / my-room-in-3d / threlte / needle-engine / babylon.js / awesome threejs / gaussian splatting web viewer / 3d-portfolio topic | 房间类成品多是作品集，可用的只有 Bruno Simon 和 flo-bit 两个；引擎层 three.js 一家独大 |
 | 2026-10-28 | WebSearch | kriss.ai case study；3D room scroll-driven websites；Rooms.xyz；Bruno Simon baked lighting；three.js 国内移动端 glTF Draco KTX2；AI 3D 生成 Tripo Meshy Hunyuan3D | 国内微信浏览器 WebGL 的专项资料没搜到，要自己实测 |
 | 2026-10-28 | brain 查重 | three.js / webgl / spline | 只有 3DGS 商业图景对话和微缩IP的 Godot 丹房原型沾边，没有重复项目 |
+| 2026-11-04 | WebSearch + GitHub | 最受欢迎的笔记产品与设计模式：Notion / Obsidian / OneNote / Apple Notes / Bear / Capacities / Tana / Heptabase / Logseq / flomo / 语雀 / 思源 / memos；Goodnotes / Notability 拟物笔记本；每日笔记与快速捕捉模式 | 结论归成五种流派，见下面「笔记本设计调研」一节 |
 
 ## 条目
 
@@ -69,6 +70,28 @@ last_scan: 2026-10-29
 
 | 维基共享资源 Publishers' bindings 分类、波士顿公共图书馆的惠特曼装帧（Sarah Wyman Whitman Bindings at the Boston Public Library，CC BY 2.0）、大英图书馆与 Michael Twyman 收藏的维多利亚出版商装帧（CC0） https://commons.wikimedia.org/wiki/Category:Publishers%27_bindings | 2500 多张 1840 到 1910 年代出版商装帧的正面照片，大多标了公有领域或 CC0，惠特曼那批 245 张是 CC BY 2.0 | 插画级书皮的现成来源：真书的画质，代码只叠书名与状态；按授权署名、逐张记来源即可放进公开仓库 | 原书名是英文，要抹或用皮签盖；只有封面没有书脊；画的内容和我们的书对不上 | 采纳（2026-11-03 做成「老书皮」装帧，56 张，来源见 vendor/covers/SOURCES.md） |
 <!-- 结论四选一：采纳 / 借鉴 / 仅参考 / 排除 -->
+
+## 笔记本设计调研（2026-11-04，为书架里加笔记本做的查前作业）
+
+用户规模（可信度有限，多是行业博客转述）：Notion 2024 年 9 月官宣 1 亿注册用户；Obsidian 约 150 万用户；Apple Notes 据称月活 3.5 亿但没有一手来源；flomo 自称百万用户。开源星数（2026-11-04 GitHub）：AppFlowy 7.8 万、AFFiNE 7.4 万、memos 6.4 万、Joplin 5.7 万、思源 4.7 万、Logseq 4.5 万、Trilium 3.9 万。
+
+五种流派，每种一个代表：
+
+| 流派 | 代表 | 组织模型 | 为什么受欢迎 | 对研习录 | 结论 |
+|---|---|---|---|---|---|
+| 本·分区·页（实体笔记本的层级） | OneNote、Goodnotes、Notability、印象笔记 | 笔记本 → 分区 → 页，Goodnotes 连纸张和封面都照实体选 | 和人对纸质笔记本的经验一致，不用学；多本并存，一科一本 | 和书房隐喻、三维版"笔记本架上多本笔记本"的决定天然一致；层级不要超过两层（本、页），分区交给领域和盒 | 采纳骨架 |
+| 每日笔记 + 双链（无文件夹） | Obsidian、Logseq、Roam、Reflect | 打开就是今天这一页；页之间用 [[链接]] 和标签，反向链接自动汇总；不建文件夹 | 输入零摩擦，整理推迟到回顾；链接比归类省心（Maggie Appleton 的"每日笔记页"文章把它称为"无摩擦输入 + 日后可寻"问题最流行的解法） | 每日页做随手本的默认页；链接对象不是别的笔记而是书房里已有的实体（书、盒、牌、线网站点），回链显示在展台和桌面上 | 采纳 |
+| 卡片流（微博式短记 + 回顾） | flomo、memos、Google Keep | 一条一张卡，无标题、极简格式、多级标签；桌面小组件、微信入口；"每日回顾"把旧卡推回眼前 | 记录门槛最低；"记录更多、轻整理、常回顾"；不做长文 | "记一笔"快捷入口照此做：一个框、回车即存、不离开当前页；回顾机制可接到首页的复习入口 | 借鉴入口与回顾 |
+| 块编辑器 + 数据库（全能工作区） | Notion、AppFlowy、AFFiNE、语雀、思源 | 一切是块，页面可当数据库，模板社区大 | 团队知识库与结构化数据强 | 太重：单人学习笔记不需要数据库与多视图；研习录的结构化数据（书、盒、进度）已有自己的集合 | 排除 |
+| 卡片 + 白板 / 对象类型 | Heptabase、Capacities、Tana | 卡片铺在无限白板上摆出结构；或先定对象类型（书、人、项目）再填属性 | 研究写作时能"先摊开再看出结构"；对象模型适合有固定实体的领域 | 白板在手机上不可用；对象类型这一点我们已经天然具备（书、盒、牌就是类型），不必再造 | 仅参考 |
+
+两个跨流派的共识：
+- 快速捕捉是所有产品的短板（Logseq 社区帖直言"几乎每个笔记产品都忽视了好的快速捕捉，Notion 除外"），做好了就是差异点。
+- 整理推迟：先落到一个地方（今天的页或收件匣），周回顾时再归位。研习录已有"零散的先进收件匣"这条归档规矩，笔记照同一条走。
+
+拟物的分寸：Goodnotes 坚持"笔记本 → 纸页"模型并让用户选封面与纸张，被评价为好学；Pratt 的设计评论也指出它的工具栏拟物图标过重、占空间。研习录的做法：外壳（书架上的本子、封面、题签、翻页）拟物，纸面内部是干净的文本编辑器，不画拟物工具栏。
+
+来源：Zapier / ClickUp / Storyflow 等 2026 年榜单（https://zapier.com/blog/best-note-taking-apps/ 、https://storyflow.so/blog/best-note-taking-apps-2026 ）；Notion 1 亿用户公告（https://www.notion.so/blog/100-million-of-you ）；Maggie Appleton「Daily Notes」（https://maggieappleton.com/daily-notes ）；Logseq 快速捕捉讨论（https://discuss.logseq.com/t/native-quick-capture-clipper/4037 ）；flomo App Store 介绍与少数派评测（https://sspai.com/post/64472 ）；Pratt 对 Goodnotes 的设计评论（https://ixd.prattsi.org/2026/02/design-critique-goodnotes-ipad-app-2/ ）；Heptabase 评测（https://dev.to/pickuma/heptabase-review-visual-note-taking-for-thinking-through-problems-5daa ）；Tiago Forte 笔记工具调查（Notion 28% 居首，样本是"第二大脑"实践者）。
 
 ## 待看
 
