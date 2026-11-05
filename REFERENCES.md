@@ -93,6 +93,9 @@ last_scan: 2026-11-04
 
 来源：Zapier / ClickUp / Storyflow 等 2026 年榜单（https://zapier.com/blog/best-note-taking-apps/ 、https://storyflow.so/blog/best-note-taking-apps-2026 ）；Notion 1 亿用户公告（https://www.notion.so/blog/100-million-of-you ）；Maggie Appleton「Daily Notes」（https://maggieappleton.com/daily-notes ）；Logseq 快速捕捉讨论（https://discuss.logseq.com/t/native-quick-capture-clipper/4037 ）；flomo App Store 介绍与少数派评测（https://sspai.com/post/64472 ）；Pratt 对 Goodnotes 的设计评论（https://ixd.prattsi.org/2026/02/design-critique-goodnotes-ipad-app-2/ ）；Heptabase 评测（https://dev.to/pickuma/heptabase-review-visual-note-taking-for-thinking-through-problems-5daa ）；Tiago Forte 笔记工具调查（Notion 28% 居首，样本是"第二大脑"实践者）。
 
+| https://polyhaven.com/textures 与 https://ambientcg.com | CC0 实拍材质库（灰泥、橡木、亚麻等，带法线与粗糙度图） | 书墙墙面、书架板、笔记本架的底材：取 512 像素一张做底，CSS 混合叠光，和老书皮同一条路 | 要控制体积与国内可达性，图要自带进 vendor | 采纳（书架光与材质一轮时用） |
+| https://github.com/lxgw/LxgwWenKai | 霞鹜文楷，OFL 授权的开源楷体 | 房间里的小字与笔记本正文的手写感；可自带进 vendor/fonts，按用字做子集 | 全字库大，必须子集化 | 借鉴（字体一项时试） |
+
 ## 待看
 
 - 微信内置浏览器（X5 内核）的 WebGL 2 内存上限与 KTX2 支持情况：没搜到资料，第 1 步做完直接在用户手机上实测。
