@@ -23,6 +23,7 @@ updated: 2026-11-03
 - 线上 `/world` 要等 Baba 另克隆 yanxilu-world 并在本克隆里放一个 `world` 链接（用户跑一次部署脚本里的命令），在那之前 `/world` 返回 404。
 
 ## 已定决策
+- 2026-11-05 用户发五张书房场景参考并对分析说 ok：书架要做成「场」。方向以暗学院拱形深木书柜加烛光（图 1、4）为主、借图 2 的暖度；不走奇幻（3）与大树（5）。做法：空书柜的画加代码摆的书，书柜按拱顶 / 格层 / 底座 / 立柱模块化，用生图定气质、Blender 窗口建模块并渲图。推翻审视稿里「不做整面墙的插画背景」一条。
 - 2026-11-04 用户看完六步样稿：页头与层距、展台与笔记本架、书的生动、动效连贯、字体五步都同意；「光与木」未单独表态（待确认按 Blender 路线做）。书的生动有一问：读完的书多了不能都横放 → Claude 建议：平放只表示"这一格最近读完的"，每格至多一摞、至多三本，其余读完的仍竖放盖阅印（现有做法），待用户点头。
 - 2026-11-04 用户立规矩（所有项目）：用 Blender 做的设计一律在桌面版窗口里做，边做边截图看，保证设计可控；无头渲染只出成品。已记入记忆 feedback_blender_desktop，驱动方式用 yanxilu-world 的 tools/blender/mcp_call.py。
 - 2026-11-04 用户在三案样稿里选「甲 矮月历」：月历全宽、行高减半、月份与箭头并一行并写「写了 n 天」，下面列这个月写过的页带一行预览。已按样稿上线。
@@ -72,6 +73,7 @@ updated: 2026-11-03
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
+- 2026-11-05 五张场景参考分析与结论记入 REFERENCES；下一步出概念图（先报模型、单价、提示词）。
 - 2026-11-05 用户选「先拉参考墙」：从维基共享（按分类）与 Poly Haven 拉 58 张、剔到 30 张拼成参考墙（本机 tools/out/refwall.jpg，不入库；大都会搜索接口已下线 410），四个方向，已发用户等圈选；来源落 REFERENCES。
 - 2026-11-05 用户看了笔记本架第一版说太丑。原因：没有参考、没定样式与比例，直接堆板；木纹是程序生成的。停手查现成：Poly Haven（CC0）没有斜面展示架或书托，但有可用的真木纹（oak_veneer_01 到 05、mocha_oak_veneer、dark_wood）、灰泥（plaster_grey_04、plastered_wall_02）、亚麻与皮革，以及可借形的家具（chinese_console_table、chinese_cabinet、painted_wooden_shelves、katana_stand_01）和摆件（brass_candleholders、mantel_clock_01、ceramic_vase、fancy_picture_frame）。下一步先定样式参考再建，等用户选路。
 - 2026-11-05 用户不会开第二个 Blender，Claude 从 WSL 拉起：启动脚本 C:\Users\cnyan\blender_mcp\yanxilu\start_mcp_9877.py（插件服务起在 9877，load_post 保持端口），本仓库 tools/blender/mcp_call.py 默认连 9877（--port 可改）；确认 9877 是空场景、9876 是另一会话的 376 物体场景。窗口里建笔记本架第一版（tools/blender/web_props/rack.py：两侧板、22 度斜面、挡条、底板、黄铜牌、橡木材质、左上暖光、正面略俯机位、地面接影），三次截图迭代（木色、机位、地面），存 yanxilu_props.blend；等用户看截图点评。
