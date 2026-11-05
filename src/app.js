@@ -4221,16 +4221,18 @@ var FOIL = (function () {
       cells.push('<button type="button" class="np-d' + cls + '" data-act="np-day" data-d="' + ds + '" aria-label="' + esc(npDayLabel(ds)) + (has[ds] ? "，写过" : "") + '"' + (ds === day ? ' aria-current="date"' : "") + ">" + d + "</button>");
     }
     var pm = mo === 1 ? (y - 1) + "-12" : y + "-" + pad(mo - 1), nm = mo === 12 ? (y + 1) + "-01" : y + "-" + pad(mo + 1);
-    return '<div class="np-mnav"><button type="button" class="np-mb" data-act="np-month" data-m="' + pm + '" aria-label="上个月">‹</button><h2>' + y + " 年 " + mo + ' 月</h2><button type="button" class="np-mb" data-act="np-month" data-m="' + nm + '" aria-label="下个月">›</button></div>' +
+    var nw = days.filter(function (d) { return d.slice(0, 7) === ym; }).length;
+    return '<div class="np-mnav"><h2>' + y + " 年 " + mo + " 月 <small>" + (nw ? "写了 " + nw + " 天" : "还没写") + '</small></h2><span class="np-arr"><button type="button" class="np-mb" data-act="np-month" data-m="' + pm + '" aria-label="上个月">‹</button><button type="button" class="np-mb" data-act="np-month" data-m="' + nm + '" aria-label="下个月">›</button></span></div>' +
       '<div class="np-cal" role="grid" aria-label="这个月哪些天写过">' + cells.join("") + "</div>";
   }
+  var NP_MONTHS = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
   function notesHTML() {
     var day = npRouteDay(), ym = S.npMonth || day.slice(0, 7), pg = npGet(day), days = npDays(), text = pg ? String(pg.text || "") : "", td = today();
     var prev = days.filter(function (d) { return d < day; }).pop() || null, next = days.filter(function (d) { return d > day; })[0] || null;
     var editing = S.canEdit && S.npEdit === day;
-    var recent = days.slice().reverse().slice(0, 8).map(function (d) {
-      var p = npGet(d), ents = npEntries(p.text);
-      return '<li><button type="button" class="np-toc-b' + (d === day ? " cur" : "") + '" data-act="np-day" data-d="' + d + '"><span>' + esc(npDayLabel(d)) + "</span><em>" + ents.length + " 段</em></button></li>";
+    var recent = days.filter(function (d) { return d.slice(0, 7) === ym; }).reverse().map(function (d) {
+      var p = npGet(d), ents = npEntries(p.text), pv = String(p.text).replace(/^\d{1,2}:\d{2}[ \u3000\t]+/gm, "").replace(/\$[^$]*\$/g, "公式").replace(/[*_`#>]+/g, "").replace(/\s+/g, " ").trim().slice(0, 60);
+      return '<li><button type="button" class="np-toc-b' + (d === day ? " cur" : "") + '" data-act="np-day" data-d="' + d + '"><span>' + esc(npDayLabel(d)) + "</span><em>" + ents.length + " 段 · " + npWords(p.text) + ' 字</em><small class="np-pv">' + esc(pv) + "</small></button></li>";
     }).join("");
     var rows = Math.max(8, text.split("\n").length + 2);
     var body = editing
@@ -4247,8 +4249,8 @@ var FOIL = (function () {
       '<button type="button" class="nbk-b' + (true ? " cur" : "") + '" data-act="np-day" data-d="' + td + '" style="--nc:#2F4A4F" title="随手本：一天一页，记一笔都落在这里"><small>' + days.length + " 页</small><i>随手本</i></button>" +
       (S.canEdit ? '<button type="button" class="nbk-b ghost" data-act="nb-new"><span>＋ 新本子</span></button>' : "") +
       '</div><div class="nr-legs" aria-hidden="true"><i></i><i></i></div></section>' +
-      '<section class="nbk" aria-label="随手本"><div class="nbk-l"><p class="eyebrow">随手本</p>' + npCalHTML(ym, day, days) +
-      (recent ? '<ul class="np-toc">' + recent + "</ul>" : '<p class="meta np-none">还没有写过的页。</p>') + "</div>" +
+      '<section class="nbk" aria-label="随手本"><div class="nbk-l"><p class="eyebrow">随手本 · ' + NP_MONTHS[+ym.slice(5, 7) - 1] + "</p>" + npCalHTML(ym, day, days) +
+      (recent ? '<ul class="np-toc">' + recent + "</ul>" : '<p class="meta np-none">这个月还没有写过的页。</p>') + "</div>" +
       '<div class="nbk-r"><p class="eyebrow np-eye"><span>' + (day === td ? "今天" : day > td ? "以后" : "那天") + '</span><span class="np-dnav">' +
       '<button type="button" class="linkbtn" data-act="np-day" data-d="' + (prev || "") + '"' + (prev ? "" : " disabled") + ">‹ 前一页</button>" +
       (day !== td ? '<button type="button" class="linkbtn" data-act="np-day" data-d="' + td + '">今天</button>' : "") +
