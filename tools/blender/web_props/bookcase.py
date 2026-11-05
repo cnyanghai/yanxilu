@@ -69,13 +69,13 @@ def plain(name, color, rough=0.5, metal=0.0, emit=None):
     b.inputs["Base Color"].default_value = (*color, 1); b.inputs["Roughness"].default_value = rough; b.inputs["Metallic"].default_value = metal
     if emit: b.inputs["Emission Color"].default_value = (*emit[0], 1); b.inputs["Emission Strength"].default_value = emit[1]
     return m
-OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.40, 0.26, 0.145, 1), rough_mul=0.7, contrast=0.4, coat=0.3, sat=0.9)      # 暖栗色
-OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.24, 0.155, 0.085, 1), rough_mul=0.95, contrast=0.35, sat=0.85)  # 柜内背板更深
+OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.19, 0.115, 0.06, 1), rough_mul=0.7, contrast=0.45, coat=0.2, sat=1.0)      # 暖栗色
+OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.11, 0.068, 0.035, 1), rough_mul=0.95, contrast=0.4, sat=1.0)  # 柜内背板更深
 PLASTER = pbr("yx_plaster", "grey_plaster", scale=0.5, tint=(0.92, 0.60, 0.26, 1), rough_mul=1.0, contrast=-0.25, sat=0.5)   # 赭黄灰泥
 BRASS = plain("yx_brass", (0.85, 0.66, 0.30), 0.32, 1.0)
 WAX = plain("yx_wax", (0.80, 0.74, 0.62), 0.6)
 FLAME = plain("yx_flame", (1.0, 0.75, 0.35), 0.5, emit=((1.0, 0.62, 0.22), 8.0))
-FLOOR = pbr("yx_floor", "mocha_oak_veneer", scale=0.6, tint=(0.30, 0.20, 0.12, 1), rough_mul=0.6, sat=0.8)
+FLOOR = pbr("yx_floor", "mocha_oak_veneer", scale=0.6, tint=(0.16, 0.10, 0.055, 1), rough_mul=0.6, sat=0.9)
 
 # ---------- 造型工具 ----------
 def box(name, size, loc, m, rot=(0, 0, 0), bevel=0.004):
@@ -210,13 +210,13 @@ if sc.world is None: sc.world = bpy.data.worlds.new("yx_world")
 sc.world.use_nodes = True; bg = sc.world.node_tree.nodes.get("Background")
 if bg: bg.inputs["Color"].default_value = (0.4, 0.3, 0.2, 1); bg.inputs["Strength"].default_value = 0.03
 H_TOTAL = z_arch_top + 0.45
-bpy.ops.object.camera_add(location=(0, -6.6, H_TOTAL * 0.5)); cam = bpy.context.object; cam.name = "yx_cam"
+bpy.ops.object.camera_add(location=(0, -7.1, H_TOTAL * 0.55)); cam = bpy.context.object; cam.name = "yx_cam"
 cam.data.type = "PERSP"; cam.data.lens = 50; cam.rotation_euler = (math.radians(90), 0, 0); sc.camera = cam
 sc.render.resolution_x = 1500; sc.render.resolution_y = 1000; sc.render.film_transparent = False
 for area in bpy.context.screen.areas:
     if area.type == "VIEW_3D":
         sp = area.spaces[0]; sp.shading.type = "MATERIAL"; sp.region_3d.view_perspective = "CAMERA"; sp.overlay.show_overlays = False
-print("bookcase v10: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
+print("bookcase v11: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
 sc.render.filepath = r"C:\Users\cnyan\blender_mcp\yanxilu\shots\case_render.png"
 bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=r"C:\Users\cnyan\blender_mcp\yanxilu\yanxilu_props.blend")
