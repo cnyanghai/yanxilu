@@ -4217,7 +4217,7 @@ var FOIL = (function () {
     var cells = ["一", "二", "三", "四", "五", "六", "日"].map(function (w) { return "<b>" + w + "</b>"; });
     for (var i = 0; i < lead; i++) cells.push("<span></span>");
     for (var d = 1; d <= n; d++) {
-      var ds = ym + "-" + pad(d), cls = (ds === day ? " cur" : "") + (ds === td ? " today" : "") + (has[ds] ? " dot" : "");
+      var ds = ym + "-" + pad(d), cls = (ds === day ? " np-cur" : "") + (ds === td ? " np-today" : "") + (has[ds] ? " np-dot" : "");
       cells.push('<button type="button" class="np-d' + cls + '" data-act="np-day" data-d="' + ds + '" aria-label="' + esc(npDayLabel(ds)) + (has[ds] ? "，写过" : "") + '"' + (ds === day ? ' aria-current="date"' : "") + ">" + d + "</button>");
     }
     var pm = mo === 1 ? (y - 1) + "-12" : y + "-" + pad(mo - 1), nm = mo === 12 ? (y + 1) + "-01" : y + "-" + pad(mo + 1);

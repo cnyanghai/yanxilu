@@ -47,7 +47,7 @@ with sync_playwright() as p:
     check("今天这一页有 1 段", ents.count() == 1, str(ents.count()))
     check("段首有时间", bool(pg.locator(".np-ent time").first.text_content().strip()))
     check("正文在", stamp in (pg.locator(".np-paper").text_content() or ""))
-    check("日历今天有墨点", pg.locator(".np-d.today.dot").count() == 1)
+    check("日历今天有墨点", pg.locator(".np-d.np-today.np-dot").count() == 1)
     check("架上页数为 1", "1 页" in (pg.locator(".nbk-b").first.text_content() or ""))
 
     # 4 刷新后还在（mock 内存持久）
@@ -68,10 +68,12 @@ with sync_playwright() as p:
 
     # 6 日历翻月再翻回；前一页按钮在只有一页时禁用
     pg.click('.np-mb[aria-label="上个月"]'); pg.wait_for_timeout(300)
-    check("翻到上个月，今天不在格里", pg.locator(".np-d.today").count() == 0)
+    check("翻到上个月，今天不在格里", pg.locator(".np-d.np-today").count() == 0)
     pg.click('.np-mb[aria-label="下个月"]'); pg.wait_for_timeout(300)
-    check("翻回来", pg.locator(".np-d.today").count() == 1)
+    check("翻回来", pg.locator(".np-d.np-today").count() == 1)
     check("前一页禁用", pg.locator('.np-dnav button:has-text("前一页")').is_disabled())
+    hs = pg.evaluate("Array.from(document.querySelectorAll('.np-d')).map(e => Math.round(e.getBoundingClientRect().height))")
+    check("日历格子一样高", max(hs) - min(hs) <= 1, str(sorted(set(hs))))
 
     # 7 点昨天：空页，地址带日期；点「今天」回来
     y = (datetime.date.today() - datetime.timedelta(days=1)).isoformat()

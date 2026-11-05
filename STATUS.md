@@ -67,6 +67,7 @@ updated: 2026-11-03
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
+- 2026-11-04 用户指出日历行距不齐：格子类名 today 撞了首页今日路线卡的全局 .today（40px 上边距、网格）。日历格子类名改为 np-cur / np-today / np-dot，测试加「格子等高」一条。
 - 2026-11-04 笔记本架第一版：app.js 加 notesHTML / jotHTML / npSave / jotSave 等，路由 notes 与 notes-日期，COLLS 加 nbooks / pages，顶栏铅笔钮，键盘 N 与纸条内回车 / Esc，输入自动保存，focusout 退出编辑；page.html 加架子、对开、日历、纸条样式与两档断点；mock 的 COLLS 加两集合；新测试 notes_test.py；README / CLAUDE.md / 设计稿同步。
 - 2026-11-04 笔记本设计稿第一稿与样稿图（docs/notebook-design.md、notebook-mock.html / .png），未写代码。
 - 2026-11-04 笔记本查前作业：主流笔记产品归成五种流派（本分区页 / 每日笔记加双链 / 卡片流 / 块加数据库 / 卡片加白板），结论与来源在 REFERENCES.md「笔记本设计调研」；等用户看后定设计。
