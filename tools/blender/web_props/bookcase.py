@@ -33,10 +33,10 @@ except Exception as e: print("GPU 设置失败", e)
 sc.cycles.samples = 160; sc.cycles.use_denoising = True
 try: sc.cycles.denoiser = "OPTIX"
 except Exception: pass
-sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - High Contrast"; sc.view_settings.exposure = -0.5
+sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - High Contrast"; sc.view_settings.exposure = -0.3
 
 # ---------- 材质 ----------
-def pbr(name, base, scale=1.0, tint=(1, 1, 1, 1), rough_mul=1.0, proj="BOX", contrast=0.0, coat=0.0, sat=1.0):
+def pbr(name, base, scale=1.0, tint=(1, 1, 1, 1), rough_mul=1.0, proj="BOX", contrast=0.0, coat=0.0, sat=1.0, nrm=1.4):
     """Poly Haven 一套图：diffuse / nor_gl / rough / ao，物体坐标盒投影，不用展 UV。"""
     m = bpy.data.materials.new(name); m.use_nodes = True; nt = m.node_tree; b = nt.nodes["Principled BSDF"]
     tc = nt.nodes.new("ShaderNodeTexCoord"); mp = nt.nodes.new("ShaderNodeMapping"); mp.inputs["Scale"].default_value = (scale, scale, scale)
@@ -59,9 +59,9 @@ def pbr(name, base, scale=1.0, tint=(1, 1, 1, 1), rough_mul=1.0, proj="BOX", con
     if r:
         mm = nt.nodes.new("ShaderNodeMath"); mm.operation = "MULTIPLY"; mm.inputs[1].default_value = rough_mul
         nt.links.new(r.outputs["Color"], mm.inputs[0]); nt.links.new(mm.outputs["Value"], b.inputs["Roughness"])
-    if "Coat Weight" in b.inputs and coat: b.inputs["Coat Weight"].default_value = coat; b.inputs["Coat Roughness"].default_value = 0.25
+    if "Coat Weight" in b.inputs and coat: b.inputs["Coat Weight"].default_value = coat; b.inputs["Coat Roughness"].default_value = 0.18
     if nn:
-        nm = nt.nodes.new("ShaderNodeNormalMap"); nm.inputs["Strength"].default_value = 1.4
+        nm = nt.nodes.new("ShaderNodeNormalMap"); nm.inputs["Strength"].default_value = nrm
         nt.links.new(nn.outputs["Color"], nm.inputs["Color"]); nt.links.new(nm.outputs["Normal"], b.inputs["Normal"])
     return m
 def plain(name, color, rough=0.5, metal=0.0, emit=None):
@@ -69,12 +69,13 @@ def plain(name, color, rough=0.5, metal=0.0, emit=None):
     b.inputs["Base Color"].default_value = (*color, 1); b.inputs["Roughness"].default_value = rough; b.inputs["Metallic"].default_value = metal
     if emit: b.inputs["Emission Color"].default_value = (*emit[0], 1); b.inputs["Emission Strength"].default_value = emit[1]
     return m
-OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.17, 0.095, 0.048, 1), rough_mul=0.7, contrast=0.5, coat=0.2, sat=1.05)      # 暖栗色
-OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.15, 0.085, 0.042, 1), rough_mul=0.95, contrast=0.45, sat=1.05)  # 柜内背板更深
-PLASTER = pbr("yx_plaster", "grey_plaster", scale=0.32, tint=(0.95, 0.63, 0.28, 1), rough_mul=1.0, contrast=-0.45, sat=0.45)   # 赭黄灰泥
-BRASS = plain("yx_brass", (0.85, 0.66, 0.30), 0.32, 1.0)
+OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.15, 0.082, 0.040, 1), rough_mul=0.65, contrast=0.85, coat=0.3, sat=1.1, nrm=2.2)      # 暖栗色
+OAK_L = pbr("yx_oak_light", "mocha_oak_veneer", scale=1.1, tint=(0.26, 0.15, 0.075, 1), rough_mul=0.6, contrast=0.85, coat=0.35, sat=1.1, nrm=2.2)
+OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.13, 0.072, 0.035, 1), rough_mul=0.9, contrast=0.8, sat=1.1, nrm=2.2)  # 柜内背板更深
+PLASTER = pbr("yx_plaster", "grey_plaster", scale=0.7, tint=(0.92, 0.58, 0.23, 1), rough_mul=1.0, contrast=-0.4, sat=0.45, nrm=4.5)   # 赭黄灰泥
+BRASS = plain("yx_brass", (0.78, 0.58, 0.26), 0.48, 1.0)
 WAX = plain("yx_wax", (0.80, 0.74, 0.62), 0.6)
-FLAME = plain("yx_flame", (1.0, 0.75, 0.35), 0.5, emit=((1.0, 0.62, 0.22), 8.0))
+FLAME = plain("yx_flame", (1.0, 0.75, 0.35), 0.5, emit=((1.0, 0.62, 0.22), 14.0))
 FLOOR = pbr("yx_floor", "mocha_oak_veneer", scale=0.6, tint=(0.16, 0.10, 0.055, 1), rough_mul=0.6, sat=0.9)
 
 # ---------- 造型工具 ----------
@@ -162,66 +163,82 @@ for k in range(1, N_SHELF):
     z = z_plinth + k * PITCH
     box("yx_shelf_%d" % k, (WI, DEPTH - 0.02, SH_T), (0, DEPTH / 2, z - SH_T / 2), OAK)
     box("yx_lip_%d" % k, (WI, 0.022, 0.075), (0, -0.001, z - 0.0375), OAK, bevel=0.004)
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.007, depth=WI, location=(0, -0.014, z - 0.004), rotation=(0, math.pi / 2, 0)); bdd = bpy.context.object; bdd.name = "yx_bead_lip_%d" % k; bdd.data.materials.append(OAK)
     box("yx_plate_%d" % k, (0.14, 0.004, 0.03), (0, -0.014, z - 0.0375), BRASS, bevel=0.001)
 box("yx_plate_0", (0.14, 0.004, 0.03), (0, YF - 0.004, PLINTH_H - 0.025), BRASS, bevel=0.001)
 # 立柱：柱础、柱身带凹槽、柱头（颈线 + 雕花板 + 玫瑰花 + 涡卷 + 顶板），上面是檐口块（带齿与冠线），蜡烛在檐口块上
 for sx in (-1, 1):
     x = sx * (WI / 2 + UP_T + PIL_W / 2); z0 = z_plinth
-    box("yx_pil_base_%d" % (sx > 0), (PIL_W + 0.05, PIL_D + 0.05, 0.12), (x, YF / 2, z0 + 0.06), OAK)
-    box("yx_pil_base2_%d" % (sx > 0), (PIL_W + 0.02, PIL_D + 0.02, 0.05), (x, YF / 2, z0 + 0.145), OAK)
+    box("yx_pil_base_%d" % (sx > 0), (PIL_W + 0.05, PIL_D + 0.05, 0.12), (x, YF / 2, z0 + 0.06), OAK_L)
+    box("yx_pil_base2_%d" % (sx > 0), (PIL_W + 0.02, PIL_D + 0.02, 0.05), (x, YF / 2, z0 + 0.145), OAK_L)
     hs = z_spring - CAP_H - z0 - 0.17
-    box("yx_pil_%d" % (sx > 0), (PIL_W, PIL_D, hs), (x, YF / 2, z0 + 0.17 + hs / 2), OAK)
-    for f_ in range(5):
-        box("yx_flute_%d_%d" % (sx > 0, f_), (0.018, 0.012, hs - 0.14), (x - PIL_W / 2 + PIL_W * (f_ + 1) / 6, YF - 0.003, z0 + 0.17 + hs / 2), OAK_D, bevel=0.002)
+    box("yx_pil_%d" % (sx > 0), (PIL_W, PIL_D, hs), (x, YF / 2, z0 + 0.17 + hs / 2), OAK_L)
+    for f_ in range(7):
+        box("yx_flute_%d_%d" % (sx > 0, f_), (0.013, 0.022, hs - 0.14), (x - PIL_W / 2 + PIL_W * (f_ + 1) / 8, YF + 0.004, z0 + 0.17 + hs / 2), OAK_D, bevel=0.002)
+    box("yx_pil_band_%d" % (sx > 0), (PIL_W + 0.02, PIL_D + 0.02, 0.025), (x, YF / 2, z0 + 0.17 + 0.05), OAK_L)
+    box("yx_pil_band2_%d" % (sx > 0), (PIL_W + 0.02, PIL_D + 0.02, 0.025), (x, YF / 2, z0 + 0.17 + hs - 0.05), OAK_L)
     zc0 = z0 + 0.17 + hs
-    box("yx_neck_%d" % (sx > 0), (PIL_W + 0.03, PIL_D + 0.03, 0.03), (x, YF / 2, zc0 + 0.015), OAK)
-    box("yx_capblk_%d" % (sx > 0), (PIL_W + 0.02, PIL_D + 0.02, CAP_H - 0.09), (x, YF / 2, zc0 + 0.03 + (CAP_H - 0.09) / 2), OAK)
+    box("yx_neck_%d" % (sx > 0), (PIL_W + 0.03, PIL_D + 0.03, 0.03), (x, YF / 2, zc0 + 0.015), OAK_L)
+    box("yx_capblk_%d" % (sx > 0), (PIL_W + 0.02, PIL_D + 0.02, CAP_H - 0.09), (x, YF / 2, zc0 + 0.03 + (CAP_H - 0.09) / 2), OAK_L)
     box("yx_cappanel_%d" % (sx > 0), (PIL_W - 0.04, 0.012, CAP_H - 0.15), (x, YF - 0.016, zc0 + 0.03 + (CAP_H - 0.09) / 2), OAK_D, bevel=0.002)
-    bpy.ops.mesh.primitive_torus_add(major_radius=0.04, minor_radius=0.011, location=(x, YF - 0.024, zc0 + 0.03 + (CAP_H - 0.09) / 2), rotation=(math.pi / 2, 0, 0)); t = bpy.context.object; t.name = "yx_rosette_%d" % (sx > 0); t.data.materials.append(OAK)
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.02, location=(x, YF - 0.026, zc0 + 0.03 + (CAP_H - 0.09) / 2)); sp_ = bpy.context.object; sp_.name = "yx_rosette_c_%d" % (sx > 0); sp_.data.materials.append(OAK)
+    bpy.ops.mesh.primitive_torus_add(major_radius=0.04, minor_radius=0.011, location=(x, YF - 0.024, zc0 + 0.03 + (CAP_H - 0.09) / 2), rotation=(math.pi / 2, 0, 0)); t = bpy.context.object; t.name = "yx_rosette_%d" % (sx > 0); t.data.materials.append(OAK_L)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.02, location=(x, YF - 0.026, zc0 + 0.03 + (CAP_H - 0.09) / 2)); sp_ = bpy.context.object; sp_.name = "yx_rosette_c_%d" % (sx > 0); sp_.data.materials.append(OAK_L)
     for vx in (-1, 1):
-        bpy.ops.mesh.primitive_cylinder_add(radius=0.03, depth=0.05, location=(x + vx * (PIL_W / 2 - 0.01), YF - 0.02, zc0 + CAP_H - 0.09), rotation=(0, math.pi / 2, 0)); v = bpy.context.object; v.name = "yx_volute_%d_%d" % (sx > 0, vx > 0); v.data.materials.append(OAK)
-    box("yx_abacus_%d" % (sx > 0), (PIL_W + 0.08, PIL_D + 0.08, 0.05), (x, YF / 2, z_spring - 0.025), OAK)
+        bpy.ops.mesh.primitive_cylinder_add(radius=0.03, depth=0.05, location=(x + vx * (PIL_W / 2 - 0.01), YF - 0.02, zc0 + CAP_H - 0.09), rotation=(0, math.pi / 2, 0)); v = bpy.context.object; v.name = "yx_volute_%d_%d" % (sx > 0, vx > 0); v.data.materials.append(OAK_L)
+    box("yx_abacus_%d" % (sx > 0), (PIL_W + 0.08, PIL_D + 0.08, 0.05), (x, YF / 2, z_spring - 0.025), OAK_L)
+    for bi in range(7):  # 珠饰一圈
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.012, location=(x - PIL_W / 2 + PIL_W * (bi + 0.5) / 7, YF - 0.04, z_spring - 0.062)); bd = bpy.context.object; bd.name = "yx_bead_%d_%d" % (sx > 0, bi); bd.data.materials.append(OAK_L)
     # 檐口块：从起脚线到 ENT_H；齿一排在块的中段，冠线压顶
-    box("yx_ent_%d" % (sx > 0), (PIL_W + 0.12, PIL_D + 0.10, ENT_H), (x, YF / 2, z_spring + ENT_H / 2), OAK)
-    dentils_line("yx_dent_%d" % (sx > 0), x - PIL_W / 2 - 0.03, x + PIL_W / 2 + 0.03, YF - 0.065, z_spring + ENT_H - CROWN - DENT * 0.6 - 0.02, OAK, size=DENT * 0.8, gap=0.035, depth=0.045)
-    box("yx_crown_%d" % (sx > 0), (PIL_W + 0.20, PIL_D + 0.18, CROWN), (x, YF / 2, z_spring + ENT_H - CROWN / 2), OAK)
+    box("yx_ent_%d" % (sx > 0), (PIL_W + 0.12, PIL_D + 0.10, ENT_H), (x, YF / 2, z_spring + ENT_H / 2), OAK_L)
+    dentils_line("yx_dent_%d" % (sx > 0), x - PIL_W / 2 - 0.03, x + PIL_W / 2 + 0.03, YF - 0.065, z_spring + ENT_H - CROWN - DENT * 0.6 - 0.02, OAK_L, size=0.034, gap=0.026, depth=0.045)
+    box("yx_crown_%d" % (sx > 0), (PIL_W + 0.20, PIL_D + 0.18, CROWN), (x, YF / 2, z_spring + ENT_H - CROWN / 2), OAK_L)
     cz = z_spring + ENT_H
     bpy.ops.mesh.primitive_cylinder_add(radius=0.07, depth=0.02, location=(x, YF / 2, cz + 0.01)); cs = bpy.context.object; cs.name = "yx_cstick_%d" % (sx > 0); cs.data.materials.append(BRASS)
     bpy.ops.mesh.primitive_cylinder_add(radius=0.028, depth=0.07, location=(x, YF / 2, cz + 0.055)); cs2 = bpy.context.object; cs2.name = "yx_cstick2_%d" % (sx > 0); cs2.data.materials.append(BRASS)
     bpy.ops.mesh.primitive_cylinder_add(radius=0.045, depth=0.015, location=(x, YF / 2, cz + 0.095)); cs3 = bpy.context.object; cs3.name = "yx_cstick3_%d" % (sx > 0); cs3.data.materials.append(BRASS)
     bpy.ops.mesh.primitive_cylinder_add(radius=0.017, depth=0.14, location=(x, YF / 2, cz + 0.17)); cw = bpy.context.object; cw.name = "yx_candle_%d" % (sx > 0); cw.data.materials.append(WAX)
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.012, location=(x, YF / 2, cz + 0.255)); fl = bpy.context.object; fl.name = "yx_flame_%d" % (sx > 0); fl.scale = (0.6, 0.6, 1.4); fl.data.materials.append(FLAME)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.016, location=(x, YF / 2, cz + 0.26)); fl = bpy.context.object; fl.name = "yx_flame_%d" % (sx > 0); fl.scale = (0.55, 0.55, 1.5); fl.data.materials.append(FLAME)
     bpy.ops.object.light_add(type="POINT", location=(x, YF / 2 - 0.05, cz + 0.28)); pl = bpy.context.object; pl.name = "yx_candlelight_%d" % (sx > 0)
     pl.data.energy = 70; pl.data.color = (1.0, 0.62, 0.28); pl.data.shadow_soft_size = 0.04
 # 拱：拱圈 + 内圈细线 + 齿带 + 冠线，一条檐口绕着拱走，拱顶就是柜顶，上面露墙
-arc_ring("yx_arch", R_ARCH, a0, a1, ARCH_T, PIL_D + 0.02, (0, YF, zc), OAK)
+arc_ring("yx_arch", R_ARCH, a0, a1, ARCH_T, PIL_D + 0.02, (0, YF, zc), OAK_L)
 arc_ring("yx_arch_inner", R_ARCH - 0.035, a0, a1, 0.035, PIL_D - 0.02, (0, YF + 0.02, zc), OAK_D)
 arc_ring("yx_arch_dentback", R_DENT, a0, a1, DENT + 0.015, PIL_D - 0.03, (0, YF + 0.03, zc), OAK_D)   # 齿后面的暗底
-dentils("yx_adent", R_DENT + DENT * 0.55, a0, a1, YF - 0.015, zc, OAK, size=DENT * 0.8, gap=0.035, depth=0.045)
-arc_ring("yx_arch_crown", R_CROWN, a0, a1, CROWN, PIL_D + 0.08, (0, YF - 0.06, zc), OAK)
+dentils("yx_adent", R_DENT + DENT * 0.55, a0, a1, YF - 0.015, zc, OAK_L, size=0.034, gap=0.026, depth=0.045)
+arc_ring("yx_arch_crown", R_CROWN, a0, a1, CROWN, PIL_D + 0.08, (0, YF - 0.06, zc), OAK_L)
 
 # ---------- 光与机位：左上一束强暖光打在墙上，四角压暗，柜内靠蜡烛和弱补光 ----------
 # 主光：近、小、斜。离墙近（y=-1.0，墙在 y=0.35），在左上角外侧，往右下照；衰减快，左上亮、右下暗
-bpy.ops.object.light_add(type="AREA", location=(-2.6, -1.0, 4.0)); k = bpy.context.object; k.name = "yx_key"
-k.data.energy = 620; k.data.size = 1.5; k.data.color = (1.0, 0.72, 0.40); k.data.spread = math.radians(100)
-k.rotation_euler = (math.radians(58), 0, math.radians(-52))
+bpy.ops.object.light_add(type="AREA", location=(-2.9, -2.3, 4.1)); k = bpy.context.object; k.name = "yx_key"
+k.data.energy = 210; k.data.size = 2.0; k.data.color = (1.0, 0.60, 0.26); k.data.spread = math.radians(100)
+k.rotation_euler = (math.radians(52), 0, math.radians(-44))
 # 右上一点点回光，让右边柱头不死黑
 bpy.ops.object.light_add(type="AREA", location=(3.2, -1.4, 3.6)); k2 = bpy.context.object; k2.name = "yx_key2"
-k2.data.energy = 110; k2.data.size = 1.5; k2.data.color = (1.0, 0.66, 0.34); k2.rotation_euler = (math.radians(55), 0, math.radians(48))
+k2.data.energy = 120; k2.data.size = 1.8; k2.data.color = (1.0, 0.62, 0.30); k2.rotation_euler = (math.radians(55), 0, math.radians(48))
 bpy.ops.object.light_add(type="AREA", location=(0.6, -3.6, 1.4)); f = bpy.context.object; f.name = "yx_fill"
-f.data.energy = 45; f.data.size = 3.0; f.data.color = (1.0, 0.85, 0.7); f.rotation_euler = (math.radians(80), 0, math.radians(8))
+f.data.energy = 85; f.data.size = 2.0; f.data.color = (1.0, 0.82, 0.66); f.rotation_euler = (math.radians(80), 0, math.radians(8))
 if sc.world is None: sc.world = bpy.data.worlds.new("yx_world")
 sc.world.use_nodes = True; bg = sc.world.node_tree.nodes.get("Background")
-if bg: bg.inputs["Color"].default_value = (0.4, 0.3, 0.2, 1); bg.inputs["Strength"].default_value = 0.03
+if bg: bg.inputs["Color"].default_value = (0.4, 0.3, 0.2, 1); bg.inputs["Strength"].default_value = 0.14
 H_TOTAL = z_arch_top + 0.45
-bpy.ops.object.camera_add(location=(0, -7.1, H_TOTAL * 0.55)); cam = bpy.context.object; cam.name = "yx_cam"
+bpy.ops.object.camera_add(location=(0, -6.5, H_TOTAL * 0.55)); cam = bpy.context.object; cam.name = "yx_cam"
 cam.data.type = "PERSP"; cam.data.lens = 50; cam.rotation_euler = (math.radians(90), 0, 0); sc.camera = cam
 sc.render.resolution_x = 1500; sc.render.resolution_y = 1000; sc.render.film_transparent = False
 for area in bpy.context.screen.areas:
     if area.type == "VIEW_3D":
         sp = area.spaces[0]; sp.shading.type = "MATERIAL"; sp.region_3d.view_perspective = "CAMERA"; sp.overlay.show_overlays = False
-print("bookcase v14: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
+print("bookcase v19: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
+# 合成：烛光光晕 + 轻暗角
+try:
+    sc.use_nodes = True; nt = sc.node_tree
+    for n in list(nt.nodes): nt.nodes.remove(n)
+    rl = nt.nodes.new("CompositorNodeRLayers"); gl = nt.nodes.new("CompositorNodeGlare"); gl.glare_type = "FOG_GLOW"; gl.threshold = 1.2; gl.size = 7; gl.mix = -0.3
+    el = nt.nodes.new("CompositorNodeEllipseMask"); el.width = 1.25; el.height = 1.15
+    bl = nt.nodes.new("CompositorNodeBlur"); bl.filter_type = "GAUSS"; bl.size_x = 400; bl.size_y = 400; bl.use_relative = False
+    mx = nt.nodes.new("CompositorNodeMixRGB"); mx.blend_type = "MULTIPLY"; mx.inputs["Fac"].default_value = 0.18
+    cmp = nt.nodes.new("CompositorNodeComposite")
+    nt.links.new(rl.outputs["Image"], gl.inputs["Image"]); nt.links.new(gl.outputs["Image"], mx.inputs[1]); nt.links.new(el.outputs["Mask"], bl.inputs["Image"]); nt.links.new(bl.outputs["Image"], mx.inputs[2]); nt.links.new(mx.outputs["Image"], cmp.inputs["Image"])
+except Exception as e: print("compositor fail", e)
 sc.render.filepath = r"C:\Users\cnyan\blender_mcp\yanxilu\shots\case_render.png"
 bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=r"C:\Users\cnyan\blender_mcp\yanxilu\yanxilu_props.blend")
