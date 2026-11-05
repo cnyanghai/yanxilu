@@ -13,11 +13,11 @@ BAY0 = 0.57          # 最下层（底座顶到第一块搁板上沿）
 PITCH = 0.483        # 其余层距
 N_SHELF = 4          # 搁板数（蓝本 4 块 + 底座顶）
 SH_T = 0.054         # 搁板前沿厚
-SPRING_UP = 0.12     # 顶层搁板上沿到拱起脚
-RISE = 0.838         # 拱矢高（内沿），两次叠图各校一次
-ARCH_T = 0.06        # 拱圈
-DENT_B = 0.05        # 齿带
-CROWN = 0.05         # 冠线
+SPRING_UP = 0.124    # 起脚（弦）相对顶层搁板上沿，按蓝本内沿拟合圆
+RISE = 0.671         # 拱矢高（内沿），拟合圆半径 1.321
+ARCH_T = 0.14        # 拱圈（内沿细线 + 平带），蓝本拱带全厚约 0.28
+DENT_B = 0.075       # 齿带
+CROWN = 0.065        # 冠线（两级）
 CAP_H = 0.50         # 柱头（起脚线往上，到檐口底）
 ENT_H = 0.14         # 檐口块（蜡烛平台）
 PX_PER_M = 295.2; IMG_W, IMG_H = 1536, 1024
@@ -67,7 +67,8 @@ C = WI / 2; R = (C * C + RISE * RISE) / (2 * RISE); zc = z_spring - (R - RISE)
 a0 = math.asin((R - RISE) / R); a1 = math.pi - a0
 YF = -PIL_D
 total_w = WI + 2 * UP_T + 2 * PIL_W
-z_cap_top = z_spring + CAP_H; z_ent_top = z_cap_top + ENT_H
+z_capb = shelves[-1] + 0.115     # 柱头底在顶层搁板上 0.115（蓝本 y300）
+z_cap_top = z_capb + CAP_H; z_ent_top = z_cap_top + ENT_H
 z_arch_top = zc + R + ARCH_T + DENT_B + CROWN
 
 box("yx_wall", (8.0, 0.02, 5.0), (0, DEPTH + 0.011, 2.5), WALL)
@@ -90,8 +91,8 @@ box("yx_plate_base", (0.19, 0.004, 0.04), (0, YF - 0.004, PLINTH_H - 0.025), BR)
 for sx in (-1, 1):
     x = sx * (WI / 2 + UP_T + PIL_W / 2)
     box("yx_pil_base_%d" % (sx > 0), (PIL_W + 0.05, PIL_D + 0.05, 0.14), (x, YF / 2, z_base + 0.07), CLAY)
-    box("yx_pil_%d" % (sx > 0), (PIL_W - 0.04, PIL_D, z_spring - z_base - 0.14), (x, YF / 2, z_base + 0.14 + (z_spring - z_base - 0.14) / 2), CLAY)
-    box("yx_cap_%d" % (sx > 0), (PIL_W, PIL_D + 0.02, CAP_H), (x, YF / 2, z_spring + CAP_H / 2), CLAY)
+    box("yx_pil_%d" % (sx > 0), (PIL_W - 0.04, PIL_D, z_capb - z_base - 0.14), (x, YF / 2, z_base + 0.14 + (z_capb - z_base - 0.14) / 2), CLAY)
+    box("yx_cap_%d" % (sx > 0), (PIL_W, PIL_D + 0.02, CAP_H), (x, YF / 2, z_capb + CAP_H / 2), CLAY)
     box("yx_ent_%d" % (sx > 0), (PIL_W + 0.08, PIL_D + 0.08, ENT_H), (x, YF / 2, z_cap_top + ENT_H / 2), CLAY)
     bpy.ops.mesh.primitive_cylinder_add(radius=0.03, depth=0.16, location=(x, YF / 2, z_ent_top + 0.08)); c = bpy.context.object; c.name = "yx_candle_%d" % (sx > 0); c.data.materials.append(CLAY)
 # 拱：拱圈 + 齿带 + 冠线（一圈薄边），拱肩填实到檐口顶
