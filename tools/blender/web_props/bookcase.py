@@ -11,7 +11,7 @@ SH_T = 0.045          # 搁板厚
 DEPTH = 0.34          # 柜深
 UP_T = 0.06           # 侧立板厚
 PLINTH_H = 0.52       # 底座高（带门板的矮柜）
-PIL_W = 0.17          # 立柱宽
+PIL_W = 0.21          # 立柱宽
 PIL_D = 0.12          # 立柱凸出深度
 ARCH_T = 0.12         # 拱圈宽
 
@@ -33,7 +33,7 @@ except Exception as e: print("GPU 设置失败", e)
 sc.cycles.samples = 160; sc.cycles.use_denoising = True
 try: sc.cycles.denoiser = "OPTIX"
 except Exception: pass
-sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - Medium High Contrast"; sc.view_settings.exposure = -0.3
+sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - Medium High Contrast"; sc.view_settings.exposure = -0.55
 
 # ---------- 材质 ----------
 def pbr(name, base, scale=1.0, tint=(1, 1, 1, 1), rough_mul=1.0, proj="BOX", contrast=0.0, coat=0.0, sat=1.0):
@@ -61,7 +61,7 @@ def pbr(name, base, scale=1.0, tint=(1, 1, 1, 1), rough_mul=1.0, proj="BOX", con
         nt.links.new(r.outputs["Color"], mm.inputs[0]); nt.links.new(mm.outputs["Value"], b.inputs["Roughness"])
     if "Coat Weight" in b.inputs and coat: b.inputs["Coat Weight"].default_value = coat; b.inputs["Coat Roughness"].default_value = 0.25
     if nn:
-        nm = nt.nodes.new("ShaderNodeNormalMap"); nm.inputs["Strength"].default_value = 0.8
+        nm = nt.nodes.new("ShaderNodeNormalMap"); nm.inputs["Strength"].default_value = 1.4
         nt.links.new(nn.outputs["Color"], nm.inputs["Color"]); nt.links.new(nm.outputs["Normal"], b.inputs["Normal"])
     return m
 def plain(name, color, rough=0.5, metal=0.0, emit=None):
@@ -69,8 +69,8 @@ def plain(name, color, rough=0.5, metal=0.0, emit=None):
     b.inputs["Base Color"].default_value = (*color, 1); b.inputs["Roughness"].default_value = rough; b.inputs["Metallic"].default_value = metal
     if emit: b.inputs["Emission Color"].default_value = (*emit[0], 1); b.inputs["Emission Strength"].default_value = emit[1]
     return m
-OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.19, 0.115, 0.06, 1), rough_mul=0.7, contrast=0.45, coat=0.2, sat=1.0)      # 暖栗色
-OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.11, 0.068, 0.035, 1), rough_mul=0.95, contrast=0.4, sat=1.0)  # 柜内背板更深
+OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.21, 0.105, 0.05, 1), rough_mul=0.7, contrast=0.5, coat=0.2, sat=1.25)      # 暖栗色
+OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.12, 0.062, 0.03, 1), rough_mul=0.95, contrast=0.45, sat=1.2)  # 柜内背板更深
 PLASTER = pbr("yx_plaster", "grey_plaster", scale=0.5, tint=(0.92, 0.60, 0.26, 1), rough_mul=1.0, contrast=-0.25, sat=0.5)   # 赭黄灰泥
 BRASS = plain("yx_brass", (0.85, 0.66, 0.30), 0.32, 1.0)
 WAX = plain("yx_wax", (0.80, 0.74, 0.62), 0.6)
@@ -123,7 +123,8 @@ def dentils_line(prefix, x0, x1, y, z, m, size=0.05, gap=0.045, depth=0.04):
 # ---------- 尺寸推算 ----------
 z_plinth = PLINTH_H
 CAP_H = 0.34                                          # 柱头高（颈线 + 雕花板 + 顶板）
-z_spring = z_plinth + N_SHELF * PITCH + CAP_H         # 拱起脚线 = 柱头顶
+TOP_BAY = 0.36                                        # 最上一层搁板到拱起脚的距离（拱洞两侧的净高）
+z_spring = z_plinth + (N_SHELF - 1) * PITCH + TOP_BAY # 拱起脚线 = 柱头顶 = 顶层搁板 + TOP_BAY
 C = WI / 2; RISE = 0.40
 R_ARCH = (C * C + RISE * RISE) / (2 * RISE); zc = z_spring - (R_ARCH - RISE)
 a0 = math.asin((R_ARCH - RISE) / R_ARCH); a1 = math.pi - a0
@@ -149,7 +150,7 @@ for k in range(3):
     box("yx_plinth_knob_%d" % k, (0.025, 0.02, 0.025), (px + pw / 2 - 0.06, YF - 0.024, (PLINTH_H - 0.05) / 2 + 0.02), BRASS, bevel=0.001)
 box("yx_plinth_foot", (total_w + 0.02, DEPTH + PIL_D + 0.02, 0.08), (0, (DEPTH - PIL_D) / 2, 0.04), OAK_D)
 # 背板（竖板）到起脚线，拱洞填充
-nb = 8; bw = WI / nb
+nb = 16; bw = WI / nb
 for i in range(nb):
     box("yx_back_%d" % i, (bw - 0.004, 0.02, z_spring - z_plinth), (-WI / 2 + bw * (i + 0.5), DEPTH - 0.01, (z_spring + z_plinth) / 2), OAK_D, bevel=0.002)
 arc_fill("yx_back_arch", R_ARCH - 0.001, a0, a1, z_spring - zc, 0.02, (0, DEPTH - 0.02, zc), OAK_D)
@@ -161,8 +162,8 @@ for k in range(1, N_SHELF):
     z = z_plinth + k * PITCH
     box("yx_shelf_%d" % k, (WI, DEPTH - 0.02, SH_T), (0, DEPTH / 2, z - SH_T / 2), OAK)
     box("yx_lip_%d" % k, (WI, 0.022, 0.075), (0, -0.001, z - 0.0375), OAK, bevel=0.004)
-    box("yx_plate_%d" % k, (0.09, 0.004, 0.02), (0, -0.014, z - 0.0375), BRASS, bevel=0.001)
-box("yx_plate_0", (0.09, 0.004, 0.02), (0, YF - 0.004, PLINTH_H - 0.025), BRASS, bevel=0.001)
+    box("yx_plate_%d" % k, (0.14, 0.004, 0.03), (0, -0.014, z - 0.0375), BRASS, bevel=0.001)
+box("yx_plate_0", (0.14, 0.004, 0.03), (0, YF - 0.004, PLINTH_H - 0.025), BRASS, bevel=0.001)
 # 立柱：柱础、柱身带凹槽、柱头（颈线 + 雕花板 + 玫瑰花 + 涡卷 + 顶板），上面是檐口块（带齿与冠线），蜡烛在檐口块上
 for sx in (-1, 1):
     x = sx * (WI / 2 + UP_T + PIL_W / 2); z0 = z_plinth
@@ -192,7 +193,7 @@ for sx in (-1, 1):
     bpy.ops.mesh.primitive_cylinder_add(radius=0.017, depth=0.14, location=(x, YF / 2, cz + 0.17)); cw = bpy.context.object; cw.name = "yx_candle_%d" % (sx > 0); cw.data.materials.append(WAX)
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.012, location=(x, YF / 2, cz + 0.255)); fl = bpy.context.object; fl.name = "yx_flame_%d" % (sx > 0); fl.scale = (0.6, 0.6, 1.4); fl.data.materials.append(FLAME)
     bpy.ops.object.light_add(type="POINT", location=(x, YF / 2 - 0.05, cz + 0.28)); pl = bpy.context.object; pl.name = "yx_candlelight_%d" % (sx > 0)
-    pl.data.energy = 30; pl.data.color = (1.0, 0.62, 0.28); pl.data.shadow_soft_size = 0.04
+    pl.data.energy = 70; pl.data.color = (1.0, 0.62, 0.28); pl.data.shadow_soft_size = 0.04
 # 拱：拱圈 + 内圈细线 + 齿带 + 冠线，一条檐口绕着拱走，拱顶就是柜顶，上面露墙
 arc_ring("yx_arch", R_ARCH, a0, a1, ARCH_T, PIL_D + 0.02, (0, YF, zc), OAK)
 arc_ring("yx_arch_inner", R_ARCH - 0.035, a0, a1, 0.035, PIL_D - 0.02, (0, YF + 0.02, zc), OAK_D)
@@ -201,11 +202,13 @@ dentils("yx_adent", R_DENT + DENT * 0.55, a0, a1, YF - 0.015, zc, OAK, size=DENT
 arc_ring("yx_arch_crown", R_CROWN, a0, a1, CROWN, PIL_D + 0.08, (0, YF - 0.06, zc), OAK)
 
 # ---------- 光与机位：左上一束强暖光打在墙上，四角压暗，柜内靠蜡烛和弱补光 ----------
-bpy.ops.object.light_add(type="AREA", location=(-2.2, -2.0, 3.9)); k = bpy.context.object; k.name = "yx_key"
-k.data.energy = 620; k.data.size = 1.3; k.data.color = (1.0, 0.72, 0.40); k.data.spread = math.radians(70)
-k.rotation_euler = (math.radians(42), 0, math.radians(-30))
+bpy.ops.object.light_add(type="AREA", location=(-3.4, -3.0, 4.6)); k = bpy.context.object; k.name = "yx_key"
+k.data.energy = 2600; k.data.size = 3.2; k.data.color = (1.0, 0.70, 0.38); k.data.spread = math.radians(110)
+k.rotation_euler = (math.radians(48), 0, math.radians(-40))
+bpy.ops.object.light_add(type="AREA", location=(3.0, -2.6, 4.0)); k2 = bpy.context.object; k2.name = "yx_key2"
+k2.data.energy = 500; k2.data.size = 2.5; k2.data.color = (1.0, 0.66, 0.34); k2.rotation_euler = (math.radians(50), 0, math.radians(38))
 bpy.ops.object.light_add(type="AREA", location=(0.6, -3.6, 1.4)); f = bpy.context.object; f.name = "yx_fill"
-f.data.energy = 55; f.data.size = 3.0; f.data.color = (1.0, 0.88, 0.74); f.rotation_euler = (math.radians(80), 0, math.radians(8))
+f.data.energy = 25; f.data.size = 3.0; f.data.color = (1.0, 0.85, 0.7); f.rotation_euler = (math.radians(80), 0, math.radians(8))
 if sc.world is None: sc.world = bpy.data.worlds.new("yx_world")
 sc.world.use_nodes = True; bg = sc.world.node_tree.nodes.get("Background")
 if bg: bg.inputs["Color"].default_value = (0.4, 0.3, 0.2, 1); bg.inputs["Strength"].default_value = 0.03
@@ -216,7 +219,7 @@ sc.render.resolution_x = 1500; sc.render.resolution_y = 1000; sc.render.film_tra
 for area in bpy.context.screen.areas:
     if area.type == "VIEW_3D":
         sp = area.spaces[0]; sp.shading.type = "MATERIAL"; sp.region_3d.view_perspective = "CAMERA"; sp.overlay.show_overlays = False
-print("bookcase v11: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
+print("bookcase v12: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
 sc.render.filepath = r"C:\Users\cnyan\blender_mcp\yanxilu\shots\case_render.png"
 bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=r"C:\Users\cnyan\blender_mcp\yanxilu\yanxilu_props.blend")
