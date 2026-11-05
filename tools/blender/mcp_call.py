@@ -11,7 +11,7 @@ port = int(os.environ.get("BLENDER_MCP_PORT", "9877"))
 if "--port" in args:
     i = args.index("--port"); port = int(args[i + 1]); del args[i:i + 2]
 
-def call(t, params, timeout=180):
+def call(t, params, timeout=int(os.environ.get("BLENDER_MCP_TIMEOUT", "900"))):
     s = socket.create_connection(("127.0.0.1", port), timeout=timeout)
     s.sendall(json.dumps({"type": t, "params": params}).encode()); buf = b""
     while True:
