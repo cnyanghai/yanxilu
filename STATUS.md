@@ -73,6 +73,7 @@ updated: 2026-11-03
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
+- 2026-11-05 概念图三张（gpt-image-2 中档 3:2，每张 0.376 元，合计 1.13 元）存 concepts/shelf-scene/：A 暗学院深胡桃拱形空书柜、B 同构图暖栗木蜜色光、C 整间书房（左窗右壁炉、地板、皮椅）。三张都按要求把格子留空、光从左上来；已发用户等选。
 - 2026-11-05 五张场景参考分析与结论记入 REFERENCES；下一步出概念图（先报模型、单价、提示词）。
 - 2026-11-05 用户选「先拉参考墙」：从维基共享（按分类）与 Poly Haven 拉 58 张、剔到 30 张拼成参考墙（本机 tools/out/refwall.jpg，不入库；大都会搜索接口已下线 410），四个方向，已发用户等圈选；来源落 REFERENCES。
 - 2026-11-05 用户看了笔记本架第一版说太丑。原因：没有参考、没定样式与比例，直接堆板；木纹是程序生成的。停手查现成：Poly Haven（CC0）没有斜面展示架或书托，但有可用的真木纹（oak_veneer_01 到 05、mocha_oak_veneer、dark_wood）、灰泥（plaster_grey_04、plastered_wall_02）、亚麻与皮革，以及可借形的家具（chinese_console_table、chinese_cabinet、painted_wooden_shelves、katana_stand_01）和摆件（brass_candleholders、mantel_clock_01、ceramic_vase、fancy_picture_frame）。下一步先定样式参考再建，等用户选路。
