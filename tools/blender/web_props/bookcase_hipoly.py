@@ -80,6 +80,40 @@ def beads_line(prefix, x0, x1, y, z, m, r=0.009):
     n = max(1, int((x1 - x0) / (r * 2.2)))
     for i in range(n + 1):
         bpy.ops.mesh.primitive_uv_sphere_add(radius=r, segments=16, ring_count=8, location=(x0 + (x1 - x0) * i / n, y, z)); o = bpy.context.object; o.name = "%s_%d" % (prefix, i); finish(o, m, 0, True)
+def volute(name, loc, m, a=0.0075, b=0.115, turns=2.2, r0=0.011, flip=False):
+    """涡卷：对数螺线 r = a·e^(bθ) 在 XZ 平面，扫一个由粗到细的圆截面。loc 是螺线中心。"""
+    bm = bmesh.new(); N = 90; rings = []
+    th_max = turns * 2 * math.pi
+    for i in range(N + 1):
+        th = th_max * i / N; rr = a * math.exp(b * th)
+        sgn = -1 if flip else 1
+        cx, cz = sgn * rr * math.cos(th), rr * math.sin(th)
+        # 切向与法向（在 XZ 平面），截面圆在法向与 Y 方向张成的平面里
+        th2 = th + 1e-3; rr2 = a * math.exp(b * th2); tx, tz = sgn * rr2 * math.cos(th2) - cx, rr2 * math.sin(th2) - cz
+        L = math.hypot(tx, tz) or 1; nx, nz = -tz / L, tx / L
+        rad = r0 * (0.35 + 0.65 * i / N)
+        ring = [bm.verts.new((cx + nx * rad * math.cos(ph), rad * math.sin(ph), cz + nz * rad * math.cos(ph))) for ph in [2 * math.pi * k / 12 for k in range(12)]]
+        rings.append(ring)
+    for i in range(N):
+        for k in range(12): bm.faces.new((rings[i][k], rings[i][(k + 1) % 12], rings[i + 1][(k + 1) % 12], rings[i + 1][k]))
+    bm.faces.new(rings[0][::-1]); bm.faces.new(rings[-1])
+    o = mesh_from_bm(name, bm, m, loc=loc, bevel=0, smooth=True)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=r0 * 0.5, segments=16, ring_count=8, location=(loc[0], loc[1], loc[2])); e = bpy.context.object; e.name = name + "_eye"; finish(e, m, 0, True)
+    return o
+def rosette(name, loc, m, R_out=0.082):
+    """玫瑰花：外八瓣 + 内八瓣（错 22.5 度）+ 中心花蕊 + 一圈凹槽底盘。"""
+    bpy.ops.mesh.primitive_cylinder_add(radius=R_out + 0.012, depth=0.006, vertices=64, location=(loc[0], loc[1] + 0.003, loc[2]), rotation=(math.pi / 2, 0, 0)); d = bpy.context.object; d.name = name + "_disc"; finish(d, m, 0.002, True)
+    for ring, n, rlen, rwid, thick, off, ang0 in ((0, 4, R_out + 0.012, 0.070, 0.018, 0.016, 0.0), (1, 4, R_out * 0.74, 0.050, 0.014, 0.014, math.pi / 4)):
+        for i in range(n):
+            ang = ang0 + 2 * math.pi * i / n
+            cx = loc[0] + (off + rlen / 2) * math.cos(ang); cz = loc[2] + (off + rlen / 2) * math.sin(ang)
+            bpy.ops.mesh.primitive_uv_sphere_add(radius=0.5, segments=20, ring_count=12, location=(cx, loc[1] - thick / 2 - (0.004 if ring else 0), cz))
+            o = bpy.context.object; o.name = "%s_petal_%d_%d" % (name, ring, i); o.scale = (rlen / 2 * 1.0, thick / 2, rwid / 2); o.rotation_euler = (0, -ang, 0)
+            bpy.ops.object.transform_apply(scale=True, rotation=True); finish(o, m, 0, True)
+            # 叶面中线凹槽：一条细圆柱压进叶面（深色不需要，灰模靠阴影）
+            bpy.ops.mesh.primitive_cylinder_add(radius=0.003, depth=rlen * 0.7, vertices=10, location=(cx, loc[1] - thick - 0.0005 - (0.004 if ring else 0), cz), rotation=(0, math.pi / 2 - ang, 0)); v = bpy.context.object; v.name = "%s_vein_%d_%d" % (name, ring, i); finish(v, m, 0, True)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.017, segments=24, ring_count=12, location=(loc[0], loc[1] - 0.016, loc[2])); c = bpy.context.object; c.name = name + "_boss"; finish(c, m, 0, True)
+    torus(name + "_bossring", 0.022, 0.004, (loc[0], loc[1] - 0.014, loc[2]), (math.pi / 2, 0, 0), m)
 def torus(name, R, r, loc, rot, m, seg=48):
     bpy.ops.mesh.primitive_torus_add(major_radius=R, minor_radius=r, major_segments=seg, minor_segments=12, location=loc, rotation=rot); o = bpy.context.object; o.name = name; return finish(o, m, 0, True)
 
@@ -159,9 +193,14 @@ for sx in (-1, 1):
     beads_line("yx_neckbead_%d" % (sx > 0), x - SHAFT_W / 2 + 0.01, x + SHAFT_W / 2 - 0.01, YF - 0.012, zs1 + 0.03, CLAY)
     box("yx_capblk_%d" % (sx > 0), (PIL_W - 0.01, PIL_D + 0.01, CAP_H - 0.06 - 0.09), (x, YF / 2, z_capb + 0.045 + (CAP_H - 0.15) / 2), CLAY)
     box("yx_capfield_%d" % (sx > 0), (PIL_W - 0.07, 0.012, CAP_H - 0.23), (x, YF - 0.011, z_capb + 0.045 + (CAP_H - 0.15) / 2 + 0.03), CLAY_D, bevel=0.002)
-    box("yx_HOLD_rosette_%d" % (sx > 0), (PIL_W - 0.11, 0.03, CAP_H - 0.29), (x, YF - 0.02, z_capb + 0.045 + (CAP_H - 0.15) / 2 + 0.03), HOLD, bevel=0.004)      # 雕花占位：图生三维替换
-    torus("yx_HOLD_volute_%d_0" % (sx > 0), 0.028, 0.012, (x - PIL_W / 2 + 0.03, YF - 0.012, z_capb + 0.07), (0, math.pi / 2, 0), HOLD)                           # 涡卷占位
-    torus("yx_HOLD_volute_%d_1" % (sx > 0), 0.028, 0.012, (x + PIL_W / 2 - 0.03, YF - 0.012, z_capb + 0.07), (0, math.pi / 2, 0), HOLD)
+    rosette("yx_rosette_%d" % (sx > 0), (x, YF - 0.012, z_capb + 0.045 + (CAP_H - 0.15) / 2 + 0.03), CLAY, R_out=(PIL_W - 0.11) / 2)
+    volute("yx_volute_%d_0" % (sx > 0), (x - PIL_W / 2 + 0.045, YF - 0.016, z_capb + 0.075), CLAY, flip=False)
+    volute("yx_volute_%d_1" % (sx > 0), (x + PIL_W / 2 - 0.045, YF - 0.016, z_capb + 0.075), CLAY, flip=True)
+    # 涡卷之间的叶形垫块（简化的莨苕）
+    for li in range(5):  # 涡卷之间的叶扇（简化莨苕）
+        ang = math.radians(50 + 20 * li); ll = 0.055 if li in (1, 2, 3) else 0.045
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.5, segments=16, ring_count=10, location=(x + ll / 2 * math.cos(ang), YF - 0.012, z_capb + 0.03 + ll / 2 * math.sin(ang)))
+        lf = bpy.context.object; lf.name = "yx_leaf_%d_%d" % (sx > 0, li); lf.scale = (ll / 2, 0.007, 0.011); lf.rotation_euler = (0, -ang, 0); bpy.ops.object.transform_apply(scale=True, rotation=True); finish(lf, CLAY, 0, True)
     sweep_line("yx_abacus_%d" % (sx > 0), ABACUS_PROFILE, x - PIL_W / 2 - 0.03, x + PIL_W / 2 + 0.03, CLAY, z0=z_cap_top - 0.06, y0=YF - 0.01)
     box("yx_abacus_fill_%d" % (sx > 0), (PIL_W + 0.06, PIL_D + 0.02, 0.06), (x, YF / 2 + 0.005, z_cap_top - 0.03), CLAY, bevel=0.002)
     # 檐口块（蜡烛平台）：扫掠截面 + 齿 + 填块
