@@ -102,10 +102,10 @@ ARCH_PROFILE = [(0, 0.02), (0, -0.098), (0.004, -0.112), (0.011, -0.12), (0.019,
 ENT_PROFILE = [(0.02, 0), (-0.19, 0), (-0.19, 0.012), (-0.168, 0.018), (-0.152, 0.03), (-0.134, 0.046), (-0.128, 0.056), (-0.128, 0.07),
     (-0.078, 0.07), (-0.078, 0.12), (-0.118, 0.12), (-0.118, 0.14), (0.02, 0.14)]
 # 搁板前沿：y 深度，z 自搁板上沿向下
-NOSE_PROFILE = [(0.012, 0), (-0.004, 0), (-0.008, -0.004), (-0.013, -0.012), (-0.019, -0.022), (-0.017, -0.034), (-0.009, -0.041),
-    (-0.015, -0.047), (-0.009, -0.054), (0.012, -0.054)]
+NOSE_PROFILE = [(0.012, 0), (-0.006, 0), (-0.013, -0.003), (-0.021, -0.01), (-0.027, -0.02), (-0.028, -0.032), (-0.02, -0.038),
+    (-0.016, -0.044), (-0.023, -0.052), (-0.016, -0.06), (-0.006, -0.062), (0.012, -0.062)]
 # 柱础（横向绕柱一圈：先按前脸直线做，侧面用同样截面）：y 深度，z 高
-BASE_PROFILE = [(0.0, 0), (-0.05, 0), (-0.05, 0.06), (-0.042, 0.066), (-0.034, 0.08), (-0.028, 0.096), (-0.034, 0.108), (-0.024, 0.118), (-0.016, 0.126), (0.0, 0.126)]
+BASE_PROFILE = [(y * 1.4, z * 1.4) for y, z in [(0.0, 0), (-0.05, 0), (-0.05, 0.06), (-0.042, 0.066), (-0.034, 0.08), (-0.028, 0.096), (-0.034, 0.108), (-0.024, 0.118), (-0.016, 0.126), (0.0, 0.126)]]
 # 柱头顶板（两级冠）：y 深度，z 高
 ABACUS_PROFILE = [(0.0, 0), (-0.02, 0), (-0.03, 0.01), (-0.04, 0.026), (-0.05, 0.038), (-0.058, 0.046), (-0.058, 0.06), (0.0, 0.06)]
 
@@ -121,16 +121,18 @@ for k in range(3):   # 三块起线门板
     box("yx_door_field_%d" % k, (pw - 0.12, 0.012, ph - 0.12), (px, YF - 0.018, 0.09 + ph / 2 + 0.03), CLAY, bevel=0.006)
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.014, location=(px + pw / 2 - 0.07, YF - 0.03, 0.09 + ph / 2 + 0.03)); kn = bpy.context.object; kn.name = "yx_knob_%d" % k; finish(kn, BR, 0, True)
 # ---------- 背板（16 块竖板，板缝有倒角）、拱洞填充、侧板 ----------
+DARK = plain("yx_gapdark", (0.10, 0.09, 0.08))
+box("yx_back_board", (WI, 0.006, z_spring - z_base), (0, DEPTH - 0.003, (z_spring + z_base) / 2), DARK, bevel=0)  # 只到起脚，拱洞由 back_arch 封
 nb = 16; bw = WI / nb
-for i in range(nb): box("yx_back_%d" % i, (bw - 0.003, 0.02, z_spring - z_base), (-WI / 2 + bw * (i + 0.5), DEPTH - 0.01, (z_spring + z_base) / 2), CLAY_D, bevel=0.0025)
+for i in range(nb): box("yx_back_%d" % i, (bw - 0.004, 0.02, z_spring - z_base), (-WI / 2 + bw * (i + 0.5), DEPTH - 0.012, (z_spring + z_base) / 2), CLAY_D, bevel=0.0015)
 arc_fill("yx_back_arch", R - 0.001, a0, a1, z_spring - zc, 0.02, (0, DEPTH - 0.02, zc), CLAY_D)
 for sx in (-1, 1): box("yx_upright_%d" % (sx > 0), (UP_T, DEPTH, z_spring - z_base), (sx * (WI / 2 + UP_T / 2), DEPTH / 2, (z_spring + z_base) / 2), CLAY)
 # ---------- 搁板：板身 + 扫掠前沿 + 黄铜牌 ----------
 for k, z in enumerate(shelves):
     box("yx_shelf_%d" % k, (WI, DEPTH - 0.02, 0.03), (0, DEPTH / 2, z - 0.015), CLAY, bevel=0.002)
     sweep_line("yx_nose_%d" % k, NOSE_PROFILE, -WI / 2, WI / 2, CLAY, z0=z, y0=0.0)
-    box("yx_plate_%d" % k, (0.19, 0.003, 0.038), (0, -0.021, z - 0.027), BR, bevel=0.001)
-box("yx_plate_base", (0.19, 0.003, 0.038), (0, YF - 0.004, PLINTH_H - 0.03), BR, bevel=0.001)
+    pl_ = box("yx_plate_%d" % k, (0.16, 0.003, 0.026), (0, -0.03, z - 0.03), BR, bevel=0); md_ = pl_.modifiers.new("round", "BEVEL"); md_.width = 0.009; md_.segments = 5; md_.limit_method = "ANGLE"
+pl_ = box("yx_plate_base", (0.16, 0.003, 0.026), (0, YF - 0.004, PLINTH_H - 0.032), BR, bevel=0); md_ = pl_.modifiers.new("round", "BEVEL"); md_.width = 0.009; md_.segments = 5; md_.limit_method = "ANGLE"
 # ---------- 立柱 ----------
 SHAFT_W = PIL_W - 0.04; FL_N = 7; FL_R = 0.011
 for sx in (-1, 1):
@@ -138,9 +140,9 @@ for sx in (-1, 1):
     # 柱础：方墩 + 扫掠线脚（前脸）+ 两侧同截面
     box("yx_pil_plinth_%d" % (sx > 0), (PIL_W + 0.05, PIL_D + 0.05, 0.06), (x, YF / 2, z0 + 0.03), CLAY)
     sweep_line("yx_pil_base_%d" % (sx > 0), BASE_PROFILE, x - PIL_W / 2 - 0.01, x + PIL_W / 2 + 0.01, CLAY, z0=z0 + 0.06, y0=YF - 0.005)
-    box("yx_pil_base_fill_%d" % (sx > 0), (PIL_W + 0.02, PIL_D, 0.126), (x, YF / 2 + 0.005, z0 + 0.06 + 0.063), CLAY, bevel=0.002)
+    box("yx_pil_base_fill_%d" % (sx > 0), (PIL_W + 0.02, PIL_D, 0.176), (x, YF / 2 + 0.005, z0 + 0.06 + 0.088), CLAY, bevel=0.002)
     # 柱身：带 7 道半圆凹槽的截面拉伸
-    zs0 = z0 + 0.06 + 0.126; zs1 = z_capb - 0.06
+    zs0 = z0 + 0.06 + 0.176; zs1 = z_capb - 0.06
     poly = [(x - SHAFT_W / 2, YF + PIL_D), (x - SHAFT_W / 2, YF)]
     for f_ in range(FL_N):
         cx_ = x - SHAFT_W / 2 + SHAFT_W * (f_ + 1) / (FL_N + 1)
@@ -170,7 +172,7 @@ for sx in (-1, 1):
     for i, (rr, hh) in enumerate(((0.07, 0.02), (0.026, 0.07), (0.045, 0.014))):
         zz = z_ent_top + sum(h for _, h in ((0.07, 0.02), (0.026, 0.07), (0.045, 0.014))[:i]) + hh / 2
         bpy.ops.mesh.primitive_cylinder_add(radius=rr, depth=hh, vertices=48, location=(x, YF / 2, zz)); c = bpy.context.object; c.name = "yx_cstick_%d_%d" % (sx > 0, i); finish(c, BR, 0.002, True)
-    bpy.ops.mesh.primitive_cylinder_add(radius=0.017, depth=0.15, vertices=32, location=(x, YF / 2, z_ent_top + 0.104 + 0.075)); c = bpy.context.object; c.name = "yx_candle_%d" % (sx > 0); finish(c, CLAY, 0, True)
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.022, depth=0.17, vertices=32, location=(x, YF / 2, z_ent_top + 0.104 + 0.085)); c = bpy.context.object; c.name = "yx_candle_%d" % (sx > 0); finish(c, CLAY, 0, True)
 # ---------- 拱：扫掠拱带 + 齿 + 拱肩 ----------
 ARCH_Y = 0.08   # 拱带整体后退：蓝本里柱头与檐口压在拱带前面
 ab = sweep_arc("yx_archband", ARCH_PROFILE, R, zc, a0, a1, CLAY); ab.location.y += ARCH_Y
