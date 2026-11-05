@@ -72,6 +72,7 @@ updated: 2026-11-03
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
+- 2026-11-05 用户选「先拉参考墙」：从维基共享（按分类）与 Poly Haven 拉 58 张、剔到 30 张拼成参考墙（本机 tools/out/refwall.jpg，不入库；大都会搜索接口已下线 410），四个方向，已发用户等圈选；来源落 REFERENCES。
 - 2026-11-05 用户看了笔记本架第一版说太丑。原因：没有参考、没定样式与比例，直接堆板；木纹是程序生成的。停手查现成：Poly Haven（CC0）没有斜面展示架或书托，但有可用的真木纹（oak_veneer_01 到 05、mocha_oak_veneer、dark_wood）、灰泥（plaster_grey_04、plastered_wall_02）、亚麻与皮革，以及可借形的家具（chinese_console_table、chinese_cabinet、painted_wooden_shelves、katana_stand_01）和摆件（brass_candleholders、mantel_clock_01、ceramic_vase、fancy_picture_frame）。下一步先定样式参考再建，等用户选路。
 - 2026-11-05 用户不会开第二个 Blender，Claude 从 WSL 拉起：启动脚本 C:\Users\cnyan\blender_mcp\yanxilu\start_mcp_9877.py（插件服务起在 9877，load_post 保持端口），本仓库 tools/blender/mcp_call.py 默认连 9877（--port 可改）；确认 9877 是空场景、9876 是另一会话的 376 物体场景。窗口里建笔记本架第一版（tools/blender/web_props/rack.py：两侧板、22 度斜面、挡条、底板、黄铜牌、橡木材质、左上暖光、正面略俯机位、地面接影），三次截图迭代（木色、机位、地面），存 yanxilu_props.blend；等用户看截图点评。
 - 2026-11-05 页头与层距：shelfHTML 页头重排（details 下拉筛选、shelfSeg 本数包进 small）、wallLegend 包进 details；CSS：.wall / .wall-row / .wm-in 余量、.wall .wm 归零 section 边距、.w-filt 样式、手机隐藏 small。用户问两个会话共用桌面 Blender 会不会冲突 → 会（同一场景），定为第二个窗口另一端口。

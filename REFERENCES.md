@@ -23,6 +23,7 @@ last_scan: 2026-11-04
 | 2026-10-28 | WebSearch | kriss.ai case study；3D room scroll-driven websites；Rooms.xyz；Bruno Simon baked lighting；three.js 国内移动端 glTF Draco KTX2；AI 3D 生成 Tripo Meshy Hunyuan3D | 国内微信浏览器 WebGL 的专项资料没搜到，要自己实测 |
 | 2026-10-28 | brain 查重 | three.js / webgl / spline | 只有 3DGS 商业图景对话和微缩IP的 Godot 丹房原型沾边，没有重复项目 |
 | 2026-11-04 | WebSearch + GitHub | 最受欢迎的笔记产品与设计模式：Notion / Obsidian / OneNote / Apple Notes / Bear / Capacities / Tana / Heptabase / Logseq / flomo / 语雀 / 思源 / memos；Goodnotes / Notability 拟物笔记本；每日笔记与快速捕捉模式 | 结论归成五种流派，见下面「笔记本设计调研」一节 |
+| 2026-11-05 | Commons API + Poly Haven API | 笔记本架与展台的参考墙：分类 Bookrests、Qur'an stands、Bookstands、Lecterns、Analogions、Bookwheel、Writing slopes、Display stands、Magazine stands、Chinese furniture in the MET；Poly Haven 模型 chinese_console_table、chinese_cabinet、painted_wooden_shelves、katana_stand_01、modern_wooden_cabinet、drawer_cabinet、brass_candleholders、mantel_clock_01 | 拼成 30 张的参考墙（本机 tools/out/refwall.jpg，不入库），四个方向：中式条案与柜 / 书托与经架 / 西式读经台与读写台 / 现代陈列架；等用户圈方向 |
 
 ## 条目
 
@@ -95,6 +96,9 @@ last_scan: 2026-11-04
 
 | https://polyhaven.com/textures 与 https://ambientcg.com | CC0 实拍材质库（灰泥、橡木、亚麻等，带法线与粗糙度图） | 书墙墙面、书架板、笔记本架的底材：取 512 像素一张做底，CSS 混合叠光，和老书皮同一条路 | 要控制体积与国内可达性，图要自带进 vendor | 采纳（书架光与材质一轮时用） |
 | https://github.com/lxgw/LxgwWenKai | 霞鹜文楷，OFL 授权的开源楷体 | 房间里的小字与笔记本正文的手写感；可自带进 vendor/fonts，按用字做子集 | 全字库大，必须子集化 | 借鉴（字体一项时试） |
+| 维基共享「Bookrests」「Qur'an stands」「Bookstands」分类 | 各式书托、X 形折叠经架（rehal）、大都会黑漆螺钿书托的实拍 | 斜面书托的结构语言：两片交叉、一道挡条、镂空牙板；展台与笔记本架都可借 | 多是伊斯兰与教堂器物，纹样不能照搬，只取结构与比例 | 借鉴（结构） |
+| 维基共享「Analogions」「Adjustable reading and writing table MET 1983.433」「Writing slopes」 | 东正教斜顶诵经台、十八世纪可调读写台、斜面写字匣 | 斜顶箱体的比例、黄铜件与木的搭配 | 过于教堂气，整体不用 | 仅参考 |
+| Poly Haven 模型 chinese_console_table / chinese_cabinet / katana_stand_01 / brass_candleholders / mantel_clock_01（CC0） | 高质量扫描模型，可直接进 Blender | 条案与柜的明式线条可作本项目木器的语言；刀架是斜托的现成范本；烛台与座钟可直接当摆件 | 体积大（扫描网格），进网页要减面或只渲成图 | 采纳（摆件直接用；家具借线条） |
 
 ## 待看
 
