@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>笔记本架 · 样稿</title>
+<link rel="stylesheet" href="../vendor/fonts/fonts.css">
+<style>
+:root{--paper:#F2EEE5;--leaf:#FBF9F4;--ink:#24211E;--ink-2:#4A443D;--ink-3:#6E675E;--rule:#DED6C6;--rule-strong:#BCAF93;--wood:#6B4F3A;--wood-2:#3A322C;--brass:#B08D4A;
+--f-ui:"Barlow","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;--f-display:"Noto Serif SC","Songti SC",serif;--f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;--f-num:"Barlow Condensed","Barlow",sans-serif}
+@media (prefers-color-scheme:dark){:root{--paper:#171513;--leaf:#201D1A;--ink:#EDE6DA;--ink-2:#CBC2B4;--ink-3:#A0978A;--rule:#38322B;--rule-strong:#5C5348;--wood:#4A382A;--wood-2:#1C1814}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.7}
+.wrap{max-width:1240px;margin:0 auto;padding:22px 32px 60px}
+.seg{display:flex;align-items:center;gap:4px}
+.seg a{font-family:var(--f-ui);font-size:14px;padding:6px 16px;border-radius:999px;color:var(--ink-3);text-decoration:none}
+.seg a.cur{background:var(--ink);color:var(--paper);font-weight:700}
+.head{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}
+.jot{display:inline-flex;align-items:center;gap:8px;font-family:var(--f-ui);font-size:14px;padding:7px 16px;border:1px solid var(--rule-strong);border-radius:999px;background:var(--leaf);color:var(--ink)}
+.jot kbd{font:12px var(--f-num);border:1px solid var(--rule-strong);border-radius:4px;padding:0 5px;color:var(--ink-3)}
+/* 架子 */
+.rack{position:relative;height:250px;margin:0 0 40px;perspective:900px}
+.rack .board{position:absolute;left:0;right:0;bottom:30px;height:150px;background:linear-gradient(180deg,#7A5B43,#5E4532);border-radius:4px;transform:rotateX(14deg);transform-origin:bottom;box-shadow:inset 0 2px 0 rgba(255,255,255,.12),0 18px 30px -12px rgba(0,0,0,.55)}
+.rack .lip{position:absolute;left:0;right:0;bottom:22px;height:14px;background:linear-gradient(180deg,#4A3627,#2E2117);border-radius:2px}
+.rack .leg{position:absolute;bottom:0;width:18px;height:26px;background:#2E2117}
+.rack .leg.l{left:38px}.rack .leg.r{right:38px}
+.books{position:absolute;left:60px;right:60px;bottom:38px;display:flex;gap:34px;align-items:flex-end}
+.nb{position:relative;width:132px;height:176px;border-radius:3px 7px 7px 3px;transform:rotateX(8deg) rotateZ(-1deg);transform-origin:bottom;box-shadow:inset 3px 0 0 rgba(255,255,255,.08),inset -2px 0 0 rgba(0,0,0,.18),0 10px 14px -6px rgba(0,0,0,.5),6px 0 0 -2px #EDE4D0,8px 0 0 -2px #D9CDB3;background-image:repeating-linear-gradient(0deg,rgba(255,255,255,.04) 0 1px,transparent 1px 3px),repeating-linear-gradient(90deg,rgba(0,0,0,.05) 0 1px,transparent 1px 3px)}
+.nb::before{content:"";position:absolute;left:12px;top:0;bottom:0;width:1px;background:rgba(0,0,0,.25)}
+.nb i{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);min-width:74px;padding:3px 10px;background:linear-gradient(180deg,#D4B26A,#9C7A3A);color:#2A1E0C;border-radius:2px;font:600 12px/1.5 var(--f-display);letter-spacing:.14em;text-align:center;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 2px rgba(0,0,0,.4)}
+.nb small{position:absolute;right:8px;top:8px;font:11px var(--f-num);color:rgba(255,255,255,.55)}
+.nb.ghost{background:rgba(255,255,255,.06);border:1.5px dashed rgba(255,235,200,.55);box-shadow:none}
+.nb.ghost::before{display:none}
+.nb.ghost span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:rgba(255,235,200,.75);font:14px var(--f-ui);letter-spacing:.1em}
+.nb.lift{transform:rotateX(8deg) rotateZ(-1deg) translateY(-10px)}
+/* 翻开 */
+.spread{display:grid;grid-template-columns:1fr 1fr;background:#FBF6EA;color:#2A2622;border-radius:6px;box-shadow:0 1px 0 #E8DFC9,0 2px 0 #DDD3BC,0 3px 0 #D2C7AF,0 22px 40px -18px rgba(0,0,0,.55);position:relative;min-height:560px}
+.spread::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:48px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,rgba(0,0,0,.10) 46%,rgba(0,0,0,.16) 50%,rgba(0,0,0,.10) 54%,transparent);pointer-events:none}
+.page{padding:36px 44px 28px}
+.page.l{border-right:1px solid #E8DFC9}
+.eyebrow{font:13px var(--f-ui);letter-spacing:.12em;color:#8A8378;margin:0 0 6px}
+h1{font:600 28px/1.2 var(--f-display);margin:0 0 4px;letter-spacing:.06em}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;font:13px var(--f-num);text-align:center;margin:16px 0 22px;color:#5A544B}
+.cal b{font-weight:600;color:#8A8378}
+.cal span{position:relative;padding:5px 0;border-radius:6px}
+.cal span.dot::after{content:"";position:absolute;left:50%;bottom:1px;width:5px;height:5px;border-radius:50%;background:#2A2622;transform:translateX(-50%)}
+.cal span.today{background:#2A2622;color:#FBF6EA}
+.toc{list-style:none;margin:0;padding:0;border-top:1px solid #E8DFC9}
+.toc li{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #E8DFC9;font-size:14px}
+.toc li em{font-style:normal;color:#8A8378;font:13px var(--f-num)}
+.entry{display:grid;grid-template-columns:52px 1fr;gap:12px;padding:14px 0;border-bottom:1px dashed #E3D9C2}
+.entry time{font:14px var(--f-num);color:#8A8378;padding-top:3px}
+.entry p{margin:0 0 6px}
+.entry p:last-child{margin:0}
+.lk{display:inline-flex;align-items:center;gap:6px;padding:1px 8px 1px 5px;border-radius:4px;background:#F1EADA;border:1px solid #E3D9C2;text-decoration:none;color:#2A2622;font-size:14px;line-height:1.5}
+.lk i{width:5px;height:15px;border-radius:1px;background:#6A1C2A}
+.lk.box i{width:12px;height:9px;background:#0E6A65;border-radius:1px}
+.q{margin:6px 0;padding-left:12px;border-left:3px solid #D2C7AF;color:#5A544B}
+.math{font-family:"Times New Roman",serif;font-style:italic;padding:2px 0}
+.foot{display:flex;justify-content:space-between;align-items:center;margin-top:22px;font:13px var(--f-ui);color:#8A8378}
+.foot .btns a{margin-left:14px;color:#2A2622;text-decoration:none;border-bottom:1px solid #BCAF93}
+.cursor{display:inline-block;width:1px;height:1em;background:#2A2622;vertical-align:-2px;margin-left:1px}
+/* 记一笔 */
+.note{position:fixed;right:40px;bottom:40px;width:380px;background:#FFF9E6;color:#2A2622;padding:16px 18px 12px;border-radius:3px;box-shadow:0 1px 0 #E6D9A8 inset,0 24px 40px -14px rgba(0,0,0,.55);transform:rotate(-1deg)}
+.note::before{content:"";position:absolute;left:50%;top:-10px;width:70px;height:20px;transform:translateX(-50%) rotate(1.5deg);background:rgba(220,205,160,.6);border-left:1px solid rgba(0,0,0,.08);border-right:1px solid rgba(0,0,0,.08)}
+.note .to{font:12px var(--f-ui);letter-spacing:.1em;color:#8A8378;display:flex;justify-content:space-between}
+.note .to b{color:#2A2622}
+.note .ta{margin:10px 0 8px;min-height:78px;font-size:15px;line-height:1.7;background:repeating-linear-gradient(180deg,transparent 0 25px,#EADFBE 25px 26px);}
+.note .hint{display:flex;justify-content:space-between;font:12px var(--f-ui);color:#8A8378}
+.note .hint kbd{font:11px var(--f-num);border:1px solid #D9CDA5;border-radius:3px;padding:0 4px}
+.cap{font:13px var(--f-ui);color:var(--ink-3);letter-spacing:.06em;margin:0 0 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="head">
+    <nav class="seg"><a>书墙 · 38 本</a><a>档案架 · 2 卷 4 件 · 剪报 5</a><a class="cur">笔记本架 · 3 本</a></nav>
+    <span class="jot">✎ 记一笔 <kbd>N</kbd></span>
+  </div>
+
+  <p class="cap">笔记本架 · 斜面展示架，布面封皮，黄铜题签，书口按页数变厚</p>
+  <div class="rack">
+    <div class="board"></div><div class="lip"></div><div class="leg l"></div><div class="leg r"></div>
+    <div class="books">
+      <div class="nb lift" style="background-color:#2F4A4F"><small>41 页</small><i>随手本</i></div>
+      <div class="nb" style="background-color:#D9CBB0;box-shadow:inset 3px 0 0 rgba(255,255,255,.3),inset -2px 0 0 rgba(0,0,0,.12),0 10px 14px -6px rgba(0,0,0,.4),4px 0 0 -2px #EDE4D0,6px 0 0 -2px #D9CDB3"><small style="color:rgba(0,0,0,.45)">自动</small><i>摘抄册</i></div>
+      <div class="nb" style="background-color:#7A4A2E"><small>6 页</small><i>做市商研习</i></div>
+      <div class="nb" style="background-color:#5C6B52"><small>2 页</small><i>周期笔记</i></div>
+      <div class="nb ghost"><span>＋ 新本子</span></div>
+    </div>
+  </div>
+
+  <p class="cap">翻开随手本 · 左页目录，右页今天</p>
+  <div class="spread">
+    <div class="page l">
+      <p class="eyebrow">随手本 · 二〇二六年</p>
+      <h1>十一月</h1>
+      <div class="cal">
+        <b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><b>日</b>
+        <span></span><span></span><span></span><span></span><span></span><span></span><span class="dot">1</span>
+        <span class="dot">2</span><span class="dot">3</span><span class="today">4</span><span>5</span><span>6</span><span>7</span><span>8</span>
+        <span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
+        <span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span>
+        <span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span>
+        <span>30</span>
+      </div>
+      <ul class="toc">
+        <li><span>十一月三日 · 周二</span><em>3 段 · 已装 1 盒</em></li>
+        <li><span>十一月二日 · 周一</span><em>1 段</em></li>
+        <li><span>十一月一日 · 周日</span><em>5 段</em></li>
+        <li><span>十月三十一日 · 周六</span><em>2 段</em></li>
+        <li><span>十月二十九日 · 周四</span><em>4 段</em></li>
+      </ul>
+    </div>
+    <div class="page r">
+      <p class="eyebrow">今天</p>
+      <h1>十一月四日 <span style="font-size:.6em;color:#8A8378;font-weight:400;letter-spacing:.1em">周三</span></h1>
+      <div class="entry"><time>08:12</time><div><p>读 <a class="lk"><i></i>大国政治的悲剧</a> 第三章：陆权与海权的"水的阻隔力"。他把这当作大国不敢跨海投送全部陆军的理由，和 1941 年日本的选择对得上。</p><p class="q">想到：这条能不能解释台海的"不对称"？先记下，周复盘时再想。</p></div></div>
+      <div class="entry"><time>11:40</time><div><p>做市报价的库存惩罚项，书上写法：</p><p class="math">r(s, t) = s − q · γ · σ² · (T − t)</p><p>和 <a class="lk box"><i></i>期货做市商</a> 盒里那张"盈亏方程"的牌是一回事，只是符号不同。</p></div></div>
+      <div class="entry"><time>14:32</time><div><p>库存周期三年一轮的说法，和涛动周期录里的基钦周期是同一个东西。找一组螺纹钢库存数据验一下<span class="cursor"></span></p></div></div>
+      <div class="foot"><span>3 段 · 212 字 · 改于 14:32</span><span class="btns"><a>装进档案盒</a><a>链到一本书</a></span></div>
+    </div>
+  </div>
+</div>
+
+<div class="note">
+  <div class="to"><span>记一笔 → 随手本 · 今天</span><b>记到《大国政治的悲剧》 开</b></div>
+  <div class="ta">攻势现实主义的三个前提里，第二条"没人能确知别人的意图"最可疑：情报和制度都在<span class="cursor"></span></div>
+  <div class="hint"><span><kbd>回车</kbd> 存　<kbd>Shift</kbd>+<kbd>回车</kbd> 换行　<kbd>Esc</kbd> 收起</span><span>《 链书　「 链盒</span></div>
+</div>
+</body>
+</html>
