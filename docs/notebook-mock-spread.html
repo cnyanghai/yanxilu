@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>随手本对开 · 三案样稿</title>
+<link rel="stylesheet" href="../vendor/fonts/fonts.css">
+<style>
+:root{--f-ui:"Barlow","Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;--f-display:"Noto Serif SC","Songti SC",serif;--f-body:"Noto Sans SC","PingFang SC","Microsoft YaHei",sans-serif;--f-num:"Barlow Condensed","Barlow",sans-serif}
+*{box-sizing:border-box}
+body{margin:0;background:#F2EEE5;color:#24211E;font-family:var(--f-body);font-size:15px;line-height:1.7}
+.case{width:1320px;margin:0 auto;padding:26px 0 40px}
+.cap{font:13px var(--f-ui);color:#6E675E;letter-spacing:.06em;margin:0 0 10px}
+.cap b{font-size:15px;color:#24211E;margin-right:10px}
+.nbk{display:grid;grid-template-columns:1fr 1fr;position:relative;background:#FBF6EA;color:#2A2622;border-radius:6px;box-shadow:0 1px 0 #E8DFC9,0 2px 0 #DDD3BC,0 3px 0 #D2C7AF,0 22px 40px -18px rgba(0,0,0,.55);min-height:560px}
+.nbk::before{content:"";position:absolute;left:50%;top:0;bottom:0;width:48px;transform:translateX(-50%);background:linear-gradient(90deg,transparent,rgba(0,0,0,.10) 46%,rgba(0,0,0,.16) 50%,rgba(0,0,0,.10) 54%,transparent);pointer-events:none}
+.l,.r{padding:34px 44px 26px;min-width:0}
+.l{border-right:1px solid #E8DFC9}
+.eye{font:13px var(--f-ui);letter-spacing:.12em;color:#8A8378;margin:0 0 6px;display:flex;justify-content:space-between}
+.eye .nav{letter-spacing:0}.eye .nav span{margin-left:14px;color:#5A544B;border-bottom:1px solid #BCAF93}
+h1{font:600 28px/1.2 var(--f-display);margin:0 0 6px;letter-spacing:.06em}
+h1 small{font-size:.6em;color:#8A8378;font-weight:400;letter-spacing:.1em}
+.ent{display:grid;grid-template-columns:52px 1fr;gap:12px;padding:12px 0;border-bottom:1px dashed #E3D9C2}
+.ent time{font:14px var(--f-num);color:#8A8378;padding-top:4px}
+.ent p{margin:0 0 6px}.ent p:last-child{margin:0}
+.q{margin:6px 0;padding-left:12px;border-left:3px solid #D2C7AF;color:#5A544B}
+.foot{display:flex;justify-content:space-between;margin:18px 0 0;font:13px var(--f-ui);color:#8A8378}
+/* 列表 */
+.toc{list-style:none;margin:0;padding:0;border-top:1px solid #E8DFC9}
+.toc li{display:grid;grid-template-columns:1fr auto;gap:0 12px;padding:9px 0;border-bottom:1px solid #E8DFC9;font-size:14px}
+.toc li.cur span{font-weight:700}
+.toc li em{font:13px var(--f-num);font-style:normal;color:#8A8378}
+.toc li small{grid-column:1/-1;color:#8A8378;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* 甲：全宽矮月历 */
+.calA{display:grid;grid-template-columns:repeat(7,1fr);gap:0 4px;font:13px var(--f-num);text-align:center;color:#5A544B;margin:6px 0 16px}
+.calA b{font-weight:600;color:#8A8378;font-size:12px;padding:2px 0 6px}
+.calA span{position:relative;padding:4px 0 7px;border-radius:5px;line-height:1.2}
+.calA .dot::after{content:"";position:absolute;left:50%;bottom:2px;width:4px;height:4px;border-radius:50%;background:#2A2622;transform:translateX(-50%)}
+.calA .cur{background:#2A2622;color:#FBF6EA}.calA .cur.dot::after{background:#FBF6EA}
+.calA .today{box-shadow:inset 0 0 0 1px #BCAF93}
+.mhead{display:flex;align-items:baseline;justify-content:space-between;margin:0}
+.mhead h2{font:600 18px/1.2 var(--f-display);margin:0;letter-spacing:.08em}
+.mhead .arr{font:14px var(--f-ui);color:#8A8378}.mhead .arr i{display:inline-grid;place-items:center;width:24px;height:24px;border:1px solid #E3D9C2;border-radius:50%;font-style:normal;margin-left:6px}
+/* 乙：周历条 */
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin:8px 0 6px}
+.week span{position:relative;display:flex;flex-direction:column;align-items:center;padding:8px 0 10px;border-radius:8px;border:1px solid #E8DFC9;font:12px var(--f-ui);color:#8A8378;line-height:1.2}
+.week span b{font:600 20px/1.1 var(--f-num);color:#2A2622;margin-top:3px}
+.week .dot::after{content:"";position:absolute;left:50%;bottom:4px;width:4px;height:4px;border-radius:50%;background:#2A2622;transform:translateX(-50%)}
+.week .cur{background:#2A2622;border-color:#2A2622;color:#D9CDB3}.week .cur b{color:#FBF6EA}.week .cur.dot::after{background:#FBF6EA}
+.week .off b{color:#BCAF93}
+.wmeta{display:flex;justify-content:space-between;font:13px var(--f-ui);color:#8A8378;margin:0 0 14px}
+.wmeta span{border-bottom:1px solid #BCAF93;color:#5A544B}
+/* 丙：日期带 */
+.strip{display:flex;gap:4px;margin:0 0 14px;padding:0 0 12px;border-bottom:1px solid #E8DFC9;overflow:hidden}
+.strip span{position:relative;flex:none;width:34px;text-align:center;font:12px var(--f-num);color:#8A8378;padding:4px 0 8px;border-radius:5px;line-height:1.2}
+.strip span b{display:block;font-weight:500;font-size:14px;color:#5A544B}
+.strip .dot::after{content:"";position:absolute;left:50%;bottom:2px;width:4px;height:4px;border-radius:50%;background:#2A2622;transform:translateX(-50%)}
+.strip .cur{background:#2A2622;color:#D9CDB3}.strip .cur b{color:#FBF6EA}.strip .cur.dot::after{background:#FBF6EA}
+.strip .more{width:auto;padding:4px 8px 8px;color:#5A544B;border:1px solid #E3D9C2;margin-left:auto;align-self:flex-start}
+.prev{opacity:.92}
+.prev h1{font-size:22px}
+.prev .ent{font-size:14px}
+.ro-hint{font:12px var(--f-ui);color:#8A8378;margin:14px 0 0;text-align:right}
+</style>
+</head>
+<body>
+
+<section class="case" id="a">
+<p class="cap"><b>甲 · 全宽矮月历</b>月历还是左页上半，但只占原来一半的高度：数字排成一行行，不做大格子。下面是本月写过的页，每页带一行预览。改动最小。</p>
+<div class="nbk">
+ <div class="l">
+  <p class="eye"><span>随手本 · 十一月</span></p>
+  <div class="mhead"><h2>2026 年 11 月 <small style="font:13px var(--f-ui);color:#8A8378;letter-spacing:0">写了 4 天</small></h2><span class="arr"><i>‹</i><i>›</i></span></div>
+  <div class="calA"><b>一</b><b>二</b><b>三</b><b>四</b><b>五</b><b>六</b><b>日</b>
+   <span></span><span></span><span></span><span></span><span></span><span></span><span class="dot">1</span>
+   <span class="dot">2</span><span class="dot">3</span><span class="cur dot">4</span><span>5</span><span>6</span><span>7</span><span>8</span>
+   <span>9</span><span>10</span><span>11</span><span>12</span><span>13</span><span>14</span><span>15</span>
+   <span>16</span><span>17</span><span>18</span><span>19</span><span>20</span><span>21</span><span>22</span>
+   <span>23</span><span>24</span><span>25</span><span>26</span><span>27</span><span>28</span><span>29</span>
+   <span>30</span></div>
+  <ul class="toc">
+   <li class="cur"><span>11月4日 · 周三</span><em>3 段 · 212 字</em><small>读大国政治的悲剧第三章：陆权与海权的"水的阻隔力"……</small></li>
+   <li><span>11月3日 · 周二</span><em>2 段 · 96 字</em><small>做市报价的库存惩罚项和盒里"盈亏方程"那张牌是一回事……</small></li>
+   <li><span>11月2日 · 周一</span><em>1 段 · 40 字</em><small>螺纹钢库存三年一轮，找数据验一下</small></li>
+   <li><span>11月1日 · 周日</span><em>4 段 · 318 字</em><small>周复盘：这周 CFA 进度落后两课，英语线正点……</small></li>
+  </ul>
+ </div>
+ <div class="r">
+  <p class="eye"><span>今天</span><span class="nav"><span>‹ 前一页</span><span>后一页 ›</span></span></p>
+  <h1>11月4日 <small>周三</small></h1>
+  <div class="ent"><time>08:12</time><div><p>读《大国政治的悲剧》第三章：陆权与海权的"水的阻隔力"。他把这当作大国不敢跨海投送全部陆军的理由，和 1941 年日本的选择对得上。</p><p class="q">想到：这条能不能解释台海的"不对称"？先记下，周复盘时再想。</p></div></div>
+  <div class="ent"><time>11:40</time><div><p>做市报价的库存惩罚项，书上写法是报价中点减去库存乘以风险厌恶乘以方差乘以剩余时间。和「期货做市商」盒里那张"盈亏方程"的牌是一回事，只是符号不同。</p></div></div>
+  <div class="ent"><time>14:32</time><div><p>库存周期三年一轮的说法，和涛动周期录里的基钦周期是同一个东西。找一组螺纹钢库存数据验一下。</p></div></div>
+  <p class="foot"><span>3 段 · 212 字 · 改于 14:32</span><span></span></p>
+ </div>
+</div>
+</section>
+
+<section class="case" id="b">
+<p class="cap"><b>乙 · 周历条</b>左页顶上只放本周七天一条，写过的有墨点，点「整月」才展开月历。下面大部分版面给本月写过的页，预览两行。日历几乎不占地方，翻周用两边箭头。</p>
+<div class="nbk">
+ <div class="l">
+  <p class="eye"><span>随手本 · 本周</span></p>
+  <div class="week">
+   <span class="dot">周一<b>2</b></span><span class="dot">周二<b>3</b></span><span class="cur dot">周三<b>4</b></span><span>周四<b>5</b></span><span class="off">周五<b>6</b></span><span class="off">周六<b>7</b></span><span class="off">周日<b>8</b></span>
+  </div>
+  <p class="wmeta"><span>‹ 上周</span><span>整月</span><span>下周 ›</span></p>
+  <ul class="toc">
+   <li class="cur"><span>11月4日 · 周三</span><em>3 段 · 212 字</em><small>读大国政治的悲剧第三章：陆权与海权的"水的阻隔力"。他把这当作大国不敢跨海投送全部陆军的理由……</small></li>
+   <li><span>11月3日 · 周二</span><em>2 段 · 96 字</em><small>做市报价的库存惩罚项和盒里"盈亏方程"那张牌是一回事，只是符号不同。</small></li>
+   <li><span>11月2日 · 周一</span><em>1 段 · 40 字</em><small>螺纹钢库存三年一轮，找数据验一下。</small></li>
+   <li><span>11月1日 · 周日</span><em>4 段 · 318 字</em><small>周复盘：这周 CFA 进度落后两课，英语线正点；下周把 SQL 窗口函数补上……</small></li>
+   <li><span>10月29日 · 周四</span><em>2 段 · 120 字</em><small>书皮三轮不达标的根本原因：生产方式不对，不是手艺不够。</small></li>
+   <li><span>10月28日 · 周三</span><em>1 段 · 58 字</em><small>kriss.ai 的房间是烘焙好的，不是实时光。</small></li>
+  </ul>
+ </div>
+ <div class="r">
+  <p class="eye"><span>今天</span><span class="nav"><span>‹ 前一页</span><span>后一页 ›</span></span></p>
+  <h1>11月4日 <small>周三</small></h1>
+  <div class="ent"><time>08:12</time><div><p>读《大国政治的悲剧》第三章：陆权与海权的"水的阻隔力"。他把这当作大国不敢跨海投送全部陆军的理由，和 1941 年日本的选择对得上。</p><p class="q">想到：这条能不能解释台海的"不对称"？先记下，周复盘时再想。</p></div></div>
+  <div class="ent"><time>11:40</time><div><p>做市报价的库存惩罚项，书上写法是报价中点减去库存乘以风险厌恶乘以方差乘以剩余时间。和「期货做市商」盒里那张"盈亏方程"的牌是一回事，只是符号不同。</p></div></div>
+  <div class="ent"><time>14:32</time><div><p>库存周期三年一轮的说法，和涛动周期录里的基钦周期是同一个东西。找一组螺纹钢库存数据验一下。</p></div></div>
+  <p class="foot"><span>3 段 · 212 字 · 改于 14:32</span><span></span></p>
+ </div>
+</div>
+</section>
+
+<section class="case" id="c">
+<p class="cap"><b>丙 · 左页前一页，右页日期带</b>左页放上一页有字的那天的正文（点一下翻过去），像真日记。换天靠右页标题下一条最近两周的日期带，再早的点「日历」弹出整月。没有页签。</p>
+<div class="nbk">
+ <div class="l prev">
+  <p class="eye"><span>前一页</span></p>
+  <h1>11月3日 <small>周二</small></h1>
+  <div class="ent"><time>09:05</time><div><p>做市报价的库存惩罚项和「期货做市商」盒里"盈亏方程"那张牌是一回事，只是符号不同。把两处的符号统一一下，免得下次又对不上。</p></div></div>
+  <div class="ent"><time>21:40</time><div><p>今天英语线正点，CFA 落后一课。明早先补 CFA。</p></div></div>
+  <p class="ro-hint">点一下翻到这一页</p>
+ </div>
+ <div class="r">
+  <p class="eye"><span>今天</span><span class="nav"><span>‹ 前一页</span><span>后一页 ›</span></span></p>
+  <h1>11月4日 <small>周三</small></h1>
+  <div class="strip">
+   <span>一<b>26</b></span><span>二<b>27</b></span><span class="dot">三<b>28</b></span><span class="dot">四<b>29</b></span><span>五<b>30</b></span><span>六<b>31</b></span><span class="dot">日<b>1</b></span>
+   <span class="dot">一<b>2</b></span><span class="dot">二<b>3</b></span><span class="cur dot">三<b>4</b></span><span>四<b>5</b></span><span>五<b>6</b></span><span>六<b>7</b></span><span>日<b>8</b></span>
+   <span class="more">日历</span>
+  </div>
+  <div class="ent"><time>08:12</time><div><p>读《大国政治的悲剧》第三章：陆权与海权的"水的阻隔力"。他把这当作大国不敢跨海投送全部陆军的理由，和 1941 年日本的选择对得上。</p><p class="q">想到：这条能不能解释台海的"不对称"？先记下，周复盘时再想。</p></div></div>
+  <div class="ent"><time>11:40</time><div><p>做市报价的库存惩罚项，书上写法是报价中点减去库存乘以风险厌恶乘以方差乘以剩余时间。和「期货做市商」盒里那张"盈亏方程"的牌是一回事，只是符号不同。</p></div></div>
+  <div class="ent"><time>14:32</time><div><p>库存周期三年一轮的说法，和涛动周期录里的基钦周期是同一个东西。找一组螺纹钢库存数据验一下。</p></div></div>
+  <p class="foot"><span>3 段 · 212 字 · 改于 14:32</span><span></span></p>
+ </div>
+</div>
+</section>
+
+</body>
+</html>
