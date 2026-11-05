@@ -60,8 +60,8 @@ def plain(name, color, rough=0.5, metal=0.0, emit=None):
     b.inputs["Base Color"].default_value = (*color, 1); b.inputs["Roughness"].default_value = rough; b.inputs["Metallic"].default_value = metal
     if emit: b.inputs["Emission Color"].default_value = (*emit[0], 1); b.inputs["Emission Strength"].default_value = emit[1]
     return m
-OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.0, tint=(0.33, 0.21, 0.12, 1), rough_mul=0.62, contrast=0.45, coat=0.18)      # 暖栗色
-OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.0, tint=(0.18, 0.11, 0.06, 1), rough_mul=0.85, contrast=0.35)  # 柜内背板更深
+OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.0, tint=(0.27, 0.165, 0.09, 1), rough_mul=0.58, contrast=0.5, coat=0.25)      # 暖栗色
+OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.0, tint=(0.15, 0.09, 0.05, 1), rough_mul=0.85, contrast=0.4)  # 柜内背板更深
 PLASTER = pbr("yx_plaster", "plaster_grey_04", scale=0.8, tint=(1.0, 0.72, 0.36, 1), rough_mul=1.0, contrast=-0.3)   # 赭黄灰泥
 BRASS = plain("yx_brass", (0.85, 0.66, 0.30), 0.32, 1.0)
 WAX = plain("yx_wax", (0.80, 0.74, 0.62), 0.6)
@@ -183,25 +183,11 @@ arc_ring("yx_arch", R_ARCH, a0, a1, ARCH_T, PIL_D + 0.02, (0, YF, zc), OAK)
 arc_ring("yx_arch_inner", R_ARCH - 0.035, a0, a1, 0.035, PIL_D - 0.02, (0, YF + 0.02, zc), OAK_D)
 dentils("yx_adent", R_ARCH + ARCH_T + 0.025, a0, a1, YF - 0.01, zc, OAK, size=0.04, gap=0.04, depth=0.035)
 arc_ring("yx_arch_fascia", R_ARCH + ARCH_T + 0.05, a0, a1, 0.08, PIL_D + 0.03, (0, YF - 0.01, zc), OAK)  # 弧形压条，把齿夹在拱圈和压条之间
-# 拱肩：拱圈两侧到檐口的三角填板（让拱并进柜顶而不是架在上面）
-for sx in (-1, 1):
-    bm = bmesh.new(); xs = sx * C; xe = sx * (C + UP_T)
-    pts = [(xs, 0, z_spring), (xe, 0, z_spring), (xe, 0, z_top - 0.16), (sx * 0.0 + xs * 0.0 + (0 if False else xs * 0.0), 0, 0)]
-    # 用弧外沿取样做肩的斜边
-    poly = [bm.verts.new((xe, 0, z_spring)), bm.verts.new((xe, 0, z_top - 0.16))]
-    n = 24
-    for i in range(n + 1):
-        a = (a1 if sx < 0 else a0) + ((math.pi / 2) - (a1 if sx < 0 else a0)) * i / n
-        poly.append(bm.verts.new(((R_ARCH + ARCH_T) * math.cos(a), 0, zc + (R_ARCH + ARCH_T) * math.sin(a))))
-    top = [bm.verts.new((0, 0, z_top - 0.16))]
-    verts = poly + top
-    try:
-        bm.faces.new(verts if sx > 0 else verts[::-1])
-        bmesh.ops.recalc_face_normals(bm, faces=bm.faces)
-        r = bmesh.ops.extrude_face_region(bm, geom=bm.faces[:]); bmesh.ops.translate(bm, verts=[g for g in r["geom"] if isinstance(g, bmesh.types.BMVert)], vec=(0, PIL_D - 0.01, 0))
-        mesh_obj("yx_spandrel_%d" % (sx > 0), bm, (0, YF + 0.005, 0), OAK, bevel=0)
-    except Exception as e:
-        print("spandrel fail", e); bm.free()
+# 拱肩：整块板减去拱洞（布尔），填实拱圈两侧到柜顶
+sp = box("yx_spandrel", (WI + 2 * UP_T, PIL_D - 0.02, z_top - z_spring), (0, YF / 2 + 0.01, (z_top + z_spring) / 2), OAK, bevel=0)
+bpy.ops.mesh.primitive_cylinder_add(radius=R_ARCH + ARCH_T + 0.13, depth=1.0, location=(0, YF / 2, zc), rotation=(math.pi / 2, 0, 0)); cut = bpy.context.object; cut.name = "yx_cut"
+cut.display_type = "WIRE"; cut.hide_render = True
+bo = sp.modifiers.new("cut", "BOOLEAN"); bo.operation = "DIFFERENCE"; bo.object = cut; bo.solver = "EXACT"
 # 顶部横檐：整宽一条冠线压在拱肩与檐口块上
 box("yx_top_fascia", (total_w + 0.10, PIL_D + 0.10, 0.07), (0, YF / 2, z_top - 0.035), OAK)
 box("yx_top_crown", (total_w + 0.16, PIL_D + 0.16, 0.05), (0, YF / 2, z_top + 0.025), OAK)
@@ -222,7 +208,7 @@ sc.render.resolution_x = 1500; sc.render.resolution_y = 1300; sc.render.film_tra
 for area in bpy.context.screen.areas:
     if area.type == "VIEW_3D":
         sp = area.spaces[0]; sp.shading.type = "RENDERED"; sp.region_3d.view_perspective = "CAMERA"; sp.overlay.show_overlays = False
-print("bookcase v4: shelves", N_SHELF, "top", round(z_top, 2), "width", round(total_w, 2))
+print("bookcase v7: shelves", N_SHELF, "top", round(z_top, 2), "width", round(total_w, 2))
 sc.eevee.taa_render_samples = 64
 sc.render.filepath = r"C:\Users\cnyan\blender_mcp\yanxilu\shots\case_render.png"
 bpy.ops.render.render(write_still=True)
