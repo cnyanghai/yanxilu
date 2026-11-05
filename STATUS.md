@@ -69,11 +69,11 @@ updated: 2026-11-03
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
-- 2026-11-04 晚 书架六步样稿：docs/shelf-mock-steps.html（生成脚本在会话草稿区）与 docs/mock/ 下的现状裁片，六张图二到六已发用户；第一张「光与木」的 Blender 对比渲染在跑（tools/blender/shelf_test.py，前两次因父子变换与无降噪器失败，第三次按世界坐标摆放）。审视稿补了「要不要用 Blender」一节：静物与光照层走 Blender 预渲染，数据驱动的书盒牌走 CSS。待渲完发第一张并提交。
+- 2026-11-04 晚 书架六步样稿：docs/shelf-mock-steps.html（生成脚本在会话草稿区）与 docs/mock/ 下的现状裁片，六张图二到六已发用户；第一张「光与木」的 Blender 对比渲染在跑（tools/blender/shelf_test.py，前两次因父子变换与无降噪器失败，第三次按世界坐标摆放）。审视稿补了「要不要用 Blender」一节：静物与光照层走 Blender 预渲染，数据驱动的书盒牌走 CSS。Blender 第四次渲对（几何与光影成立、材质未到位），第一张三联图已发；六张样稿全部发用户，等选先做哪步。
 - 2026-11-04 用户要以顶级网站设计师视角审视书架 → 写 docs/shelf-design-review.md：十一条问题（四种材质语言、墙面与书架板的贴图感、页头两行与层距空白、书太整齐、老书皮脊、展台是白卡、档案架空格、笔记本架最弱、字体、动效连贯、色弱）与六步顺序（光与木 → 页头与层距 → 展台与笔记本架 → 书的生动 → 动效 → 字体）；REFERENCES 落位 Poly Haven / ambientCG 与霞鹜文楷。等用户定先做哪几步。
 - 2026-11-04 甲案上线：npCalHTML 月份头改为标题加「写了 n 天」加右侧两枚 24 像素箭头；日历行高压到 185（原约 330）；左页列表改为本月写过的页，带预览与字数；notes_test 通过。
 - 2026-11-04 对开三案静态样稿 docs/notebook-mock-spread.html（甲 全宽矮月历加带预览的页列表 / 乙 本周一条周历加页列表、整月可展开 / 丙 左页前一页正文、右页标题下两周日期带、整月弹出），三张图已发用户，等选。
-- 2026-11-04 用户看了缩小后的日历说不好，回退（revert 8d22dd8）。线上回到日历修好行距的原版（c885938 的样子）。随手本对开按甲案改好。书架审美提升的审视稿 docs/shelf-design-review.md 已写，等用户定顺序。
+- 2026-11-04 用户看了缩小后的日历说不好，回退（revert 8d22dd8）。线上回到日历修好行距的原版（c885938 的样子）。随手本对开按甲案改好。书架审美提升：审视稿与六步样稿（docs/shelf-design-review.md、docs/shelf-mock-steps.html）都已给用户，含 Blender 对比；等用户定先做哪步、Blender 路线是否采纳。
 - 2026-11-04 用户：方案乙这个版本不好，先回退 → git revert 55e750e，重建生成物无差异，notes_test 旧版通过。教训：对开这种看得见的改版，先出样稿给用户看，不要用真页面代替样稿。
 - 2026-11-04 用户指出日历行距不齐：格子类名 today 撞了首页今日路线卡的全局 .today（40px 上边距、网格）。日历格子类名改为 np-cur / np-today / np-dot，测试加「格子等高」一条。
 - 2026-11-04 笔记本架第一版：app.js 加 notesHTML / jotHTML / npSave / jotSave 等，路由 notes 与 notes-日期，COLLS 加 nbooks / pages，顶栏铅笔钮，键盘 N 与纸条内回车 / Esc，输入自动保存，focusout 退出编辑；page.html 加架子、对开、日历、纸条样式与两档断点；mock 的 COLLS 加两集合；新测试 notes_test.py；README / CLAUDE.md / 设计稿同步。

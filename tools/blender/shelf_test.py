@@ -18,7 +18,7 @@ sc.render.engine = "CYCLES"; sc.cycles.samples = SAMPLES; sc.cycles.use_denoisin
 sc.cycles.device = "CPU"
 sc.render.resolution_x = W; sc.render.resolution_y = H; sc.render.resolution_percentage = 100
 sc.render.image_settings.file_format = "PNG"; sc.render.filepath = OUT
-sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - Base Contrast"; sc.view_settings.exposure = -0.45
+sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - Base Contrast"; sc.view_settings.exposure = -0.95
 
 def mat(name, color, rough=0.6, bump=None, grain=None):
     m = bpy.data.materials.new(name); m.use_nodes = True
@@ -118,7 +118,7 @@ for j, (w2, h2) in enumerate([(0.050, 0.240), (0.044, 0.228), (0.038, 0.216)]):
 
 # 灯：左上一盏暖的主光，右侧一盏弱的补光，世界光很低
 bpy.ops.object.light_add(type="AREA", location=(-1.4, -1.6, 2.1)); key = bpy.context.object
-key.data.energy = 150; key.data.size = 1.2; key.data.color = (1.0, 0.93, 0.82)
+key.data.energy = 170; key.data.size = 1.2; key.data.color = (1.0, 0.93, 0.82)
 key.rotation_euler = (math.radians(52), 0, math.radians(-38))
 bpy.ops.object.light_add(type="AREA", location=(1.6, -2.0, 1.1)); fill = bpy.context.object
 fill.data.energy = 40; fill.data.size = 2.0; fill.data.color = (0.9, 0.93, 1.0)
@@ -127,8 +127,8 @@ world = bpy.data.worlds.new("w"); sc.world = world; world.use_nodes = True
 world.node_tree.nodes["Background"].inputs["Color"].default_value = (0.55, 0.52, 0.47, 1); world.node_tree.nodes["Background"].inputs["Strength"].default_value = 0.12
 
 # 相机：正面略高一点，能看到板的上沿和书顶
-bpy.ops.object.camera_add(location=(0, -3.1, SHELF_Z + 0.26)); cam = bpy.context.object
-cam.rotation_euler = (math.radians(87), 0, 0); cam.data.lens = 55; sc.camera = cam
+bpy.ops.object.camera_add(location=(-0.52, -2.05, SHELF_Z + 0.22)); cam = bpy.context.object
+cam.rotation_euler = (math.radians(87), 0, 0); cam.data.lens = 50; sc.camera = cam
 
 for ob in bpy.data.objects:
     if ob.type == 'MESH' and ob.name.startswith(('book', 'flat', 'plank')): print('POS', ob.name, [round(v, 3) for v in ob.location], [round(v, 3) for v in ob.dimensions])
