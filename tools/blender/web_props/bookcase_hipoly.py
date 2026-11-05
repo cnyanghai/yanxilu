@@ -219,8 +219,7 @@ dentils_arc("yx_adent", R + 0.175, a0, a1, -0.10 + ARCH_Y, zc, CLAY, size=0.034,
 sp = box("yx_spandrel", (WI + 2 * UP_T + 2 * PIL_W - 0.02, PIL_D - 0.01, z_ent_top - z_spring), (0, YF / 2 + 0.005, (z_ent_top + z_spring) / 2), CLAY, bevel=0)
 bpy.ops.mesh.primitive_cylinder_add(radius=R + ARCH_BAND - 0.002, depth=1.0, vertices=128, location=(0, YF / 2, zc), rotation=(math.pi / 2, 0, 0)); cut = bpy.context.object; cut.name = "yx_cut"; cut.display_type = "WIRE"; cut.hide_render = True
 bo = sp.modifiers.new("cut", "BOOLEAN"); bo.operation = "DIFFERENCE"; bo.object = cut; bo.solver = "EXACT"
-# 拱肩与檐口齐平的顶部横冠线（从左檐口到右檐口）
-sweep_line("yx_top_crown", [(0.02, 0), (-0.128, 0), (-0.134, 0.006), (-0.152, 0.018), (-0.168, 0.034), (-0.19, 0.046), (-0.19, 0.058), (0.02, 0.058)], -(WI / 2 + UP_T + PIL_W), (WI / 2 + UP_T + PIL_W), CLAY, z0=z_ent_top - 0.058, y0=YF)
+# （蓝本拱顶之上是墙，没有横贯的顶冠线，2026-11-06 去掉）
 
 # ---------- 光与机位 ----------
 bpy.ops.object.light_add(type="SUN", location=(0, -3, 5)); sun = bpy.context.object; sun.name = "yx_sun"; sun.data.energy = 2.5; sun.data.angle = math.radians(8); sun.rotation_euler = (math.radians(52), 0, math.radians(-38))
