@@ -4209,7 +4209,7 @@ var FOIL = (function () {
   }
   function npDayLabel(d) { return cnDate(d) + " · " + WD[new Date(d + "T12:00:00").getDay()]; }
   function npRouteDay() { var m = /^notes-(\d{4}-\d{2}-\d{2})$/.exec(S.route); return m ? m[1] : today(); }
-  function npGo(d) { S.npMonth = null; S.npEdit = null; var h = d === today() ? "#notes" : "#notes-" + d; if (location.hash === h) render(); else location.hash = h; }
+  function npGo(d) { S.npEdit = null; var h = d === today() ? "#notes" : "#notes-" + d; if (location.hash === h) render(); else location.hash = h; }
   function npCalHTML(ym, day, days) {
     var y = +ym.slice(0, 4), mo = +ym.slice(5, 7), first = new Date(y, mo - 1, 1), n = new Date(y, mo, 0).getDate();
     var lead = (first.getDay() + 6) % 7, has = {}, td = today();
@@ -4224,14 +4224,53 @@ var FOIL = (function () {
     return '<div class="np-mnav"><button type="button" class="np-mb" data-act="np-month" data-m="' + pm + '" aria-label="上个月">‹</button><h2>' + y + " 年 " + mo + ' 月</h2><button type="button" class="np-mb" data-act="np-month" data-m="' + nm + '" aria-label="下个月">›</button></div>' +
       '<div class="np-cal" role="grid" aria-label="这个月哪些天写过">' + cells.join("") + "</div>";
   }
-  function notesHTML() {
-    var day = npRouteDay(), ym = S.npMonth || day.slice(0, 7), pg = npGet(day), days = npDays(), text = pg ? String(pg.text || "") : "", td = today();
-    var prev = days.filter(function (d) { return d < day; }).pop() || null, next = days.filter(function (d) { return d > day; })[0] || null;
-    var editing = S.canEdit && S.npEdit === day;
-    var recent = days.slice().reverse().slice(0, 8).map(function (d) {
-      var p = npGet(d), ents = npEntries(p.text);
-      return '<li><button type="button" class="np-toc-b' + (d === day ? " cur" : "") + '" data-act="np-day" data-d="' + d + '"><span>' + esc(npDayLabel(d)) + "</span><em>" + ents.length + " 段</em></button></li>";
+  var NP_MONTHS = ["一月", "二月", "三月", "四月", "五月", "六月", "七月", "八月", "九月", "十月", "十一月", "十二月"];
+  /* 书口的月份页签：一年十二个，写过的月份颜色深一点，当前月是墨色 */
+  function npTabsHTML(year, curYm, days) {
+    var has = {}; days.forEach(function (d) { has[d.slice(0, 7)] = 1; });
+    return '<nav class="nbk-tabs" aria-label="按月翻">' + NP_MONTHS.map(function (n, i) {
+      var ym = year + "-" + pad(i + 1), cls = (ym === curYm ? " cur" : "") + (has[ym] ? " has" : "");
+      return '<button type="button" class="nbk-tab' + cls + '" data-act="np-toc" data-m="' + ym + '" title="' + year + " 年" + n + (has[ym] ? "，写过" : "") + '"' + (ym === curYm ? ' aria-current="true"' : "") + "><span>" + n + "</span></button>";
+    }).join("") + "</nav>";
+  }
+  function npHeadHTML() {
+    return '<div class="view shelf notes-v">' + bannerHTML() +
+      '<header class="phead arch-head"><div>' + shelfSeg("notes") + "</div>" +
+      (S.canEdit ? '<button type="button" class="btn ghost np-jot" data-act="jot">✎ 记一笔 <kbd>N</kbd></button>' : "") + "</header>";
+  }
+  function npRackHTML(days, td) {
+    return '<section class="nrack" aria-label="笔记本架"><div class="nr-board" aria-hidden="true"></div><div class="nr-books">' +
+      '<button type="button" class="nbk-b cur" data-act="np-day" data-d="' + td + '" style="--nc:#2F4A4F" title="随手本：一天一页，记一笔都落在这里"><small>' + days.length + " 页</small><i>随手本</i></button>" +
+      (S.canEdit ? '<button type="button" class="nbk-b ghost" data-act="nb-new"><span>＋ 新本子</span></button>' : "") +
+      '</div><div class="nr-legs" aria-hidden="true"><i></i><i></i></div></section>';
+  }
+  /* 目录页：左页这个月的日历，右页这个月写过的页 */
+  function npTocHTML(ym, days, td) {
+    var list = days.filter(function (d) { return d.slice(0, 7) === ym; }).reverse();
+    var rows = list.map(function (d) {
+      var p = npGet(d), ents = npEntries(p.text), pv = String(p.text).replace(/^\d{1,2}:\d{2}[ \u3000\t]+/gm, "").replace(/\$[^$]*\$/g, "公式").replace(/[*_`#>]+/g, "").replace(/\s+/g, " ").trim().slice(0, 60);
+      return '<li><button type="button" class="np-toc-b" data-act="np-day" data-d="' + d + '"><span>' + esc(npDayLabel(d)) + "</span><em>" + ents.length + " 段 · " + npWords(p.text) + ' 字</em><small class="np-pv">' + esc(pv) + "</small></button></li>";
     }).join("");
+    return '<div class="nbk-l"><p class="eyebrow">随手本 · 目录</p>' + npCalHTML(ym, "", days) + "</div>" +
+      '<div class="nbk-r"><p class="eyebrow np-eye"><span>这个月</span><span class="np-dnav"><button type="button" class="linkbtn" data-act="np-day" data-d="' + td + '">回到今天</button></span></p>' +
+      "<h1>" + (+ym.slice(0, 4)) + " 年 " + (+ym.slice(5, 7)) + " 月 <small>" + list.length + " 页</small></h1>" +
+      (rows ? '<ul class="np-toc">' + rows + "</ul>" : '<p class="np-none">这个月还没有写过。点日历里的一天就能开始。</p>') + "</div>";
+  }
+  /* 对开：左页是上一页有字的那天（点一下翻过去），右页是这一天 */
+  function npSpreadHTML(day, days, td) {
+    var pg = npGet(day), text = pg ? String(pg.text || "") : "";
+    var prev = days.filter(function (d) { return d < day; }).pop() || null, next = days.filter(function (d) { return d > day; })[0] || null;
+    var editing = S.canEdit && S.npEdit === day, ym = day.slice(0, 7);
+    var left;
+    if (prev) {
+      var pp = npGet(prev);
+      left = '<div class="nbk-l np-prev" data-act="np-day" data-d="' + prev + '" role="link" tabindex="0" title="翻到这一页"><p class="eyebrow">前一页</p>' +
+        "<h1>" + esc(cnDate(prev)) + " <small>" + esc(WD[new Date(prev + "T12:00:00").getDay()]) + "</small></h1>" +
+        '<div class="np-paper ro">' + npRender(pp.text) + "</div>" +
+        '<p class="np-foot"><span>' + npEntries(pp.text).length + " 段 · " + npWords(pp.text) + " 字</span><span>点一下翻到这一页</span></p></div>";
+    } else {
+      left = '<div class="nbk-l np-blank"><p class="eyebrow">前一页</p><p class="np-none">这本子里没有更早的页。</p></div>';
+    }
     var rows = Math.max(8, text.split("\n").length + 2);
     var body = editing
       ? '<textarea id="np-ta" class="np-ta" data-np="' + day + '" rows="' + rows + '" placeholder="写在这一页上。以 14:32 这样的时间开头的一段，会排成带时间的一笔。" aria-label="' + esc(npDayLabel(day)) + ' 这一页">' + esc(text) + "</textarea>"
@@ -4239,22 +4278,20 @@ var FOIL = (function () {
         ? '<div class="np-paper" ' + (S.canEdit ? 'data-act="np-edit" role="button" tabindex="0" title="点纸面编辑"' : "") + ">" + npRender(text) + "</div>"
         : '<div class="np-paper empty" ' + (S.canEdit ? 'data-act="np-edit" role="button" tabindex="0"' : "") + "><p>" + (S.canEdit ? "这一页还是空的。点这里开始写，或者在任何页面按 <kbd>N</kbd> 记一笔。" : "这一页还是空的。") + "</p></div>";
     var nE = npEntries(text).length, nW = npWords(text), mt = pg && pg.m ? (function (d) { return isNaN(d) ? "" : pad(d.getHours()) + ":" + pad(d.getMinutes()); })(new Date(pg.m)) : "";
-    var foot = text ? '<span>' + nE + " 段 · " + nW + " 字" + (mt ? " · 改于 " + esc(mt) : "") + "</span>" : "<span></span>";
-    return '<div class="view shelf notes-v">' + bannerHTML() +
-      '<header class="phead arch-head"><div>' + shelfSeg("notes") + "</div>" +
-      (S.canEdit ? '<button type="button" class="btn ghost np-jot" data-act="jot">✎ 记一笔 <kbd>N</kbd></button>' : "") + "</header>" +
-      '<section class="nrack" aria-label="笔记本架"><div class="nr-board" aria-hidden="true"></div><div class="nr-books">' +
-      '<button type="button" class="nbk-b' + (true ? " cur" : "") + '" data-act="np-day" data-d="' + td + '" style="--nc:#2F4A4F" title="随手本：一天一页，记一笔都落在这里"><small>' + days.length + " 页</small><i>随手本</i></button>" +
-      (S.canEdit ? '<button type="button" class="nbk-b ghost" data-act="nb-new"><span>＋ 新本子</span></button>' : "") +
-      '</div><div class="nr-legs" aria-hidden="true"><i></i><i></i></div></section>' +
-      '<section class="nbk" aria-label="随手本"><div class="nbk-l"><p class="eyebrow">随手本</p>' + npCalHTML(ym, day, days) +
-      (recent ? '<ul class="np-toc">' + recent + "</ul>" : '<p class="meta np-none">还没有写过的页。</p>') + "</div>" +
-      '<div class="nbk-r"><p class="eyebrow np-eye"><span>' + (day === td ? "今天" : day > td ? "以后" : "那天") + '</span><span class="np-dnav">' +
+    var foot = text ? "<span>" + nE + " 段 · " + nW + " 字" + (mt ? " · 改于 " + esc(mt) : "") + "</span>" : "<span></span>";
+    var right = '<div class="nbk-r"><p class="eyebrow np-eye"><span>' + (day === td ? "今天" : day > td ? "以后" : "那天") + '</span><span class="np-dnav">' +
       '<button type="button" class="linkbtn" data-act="np-day" data-d="' + (prev || "") + '"' + (prev ? "" : " disabled") + ">‹ 前一页</button>" +
       (day !== td ? '<button type="button" class="linkbtn" data-act="np-day" data-d="' + td + '">今天</button>' : "") +
       '<button type="button" class="linkbtn" data-act="np-day" data-d="' + (next || "") + '"' + (next ? "" : " disabled") + ">后一页 ›</button></span></p>" +
-      "<h1>" + esc(cnDate(day)) + " <small>" + esc(WD[new Date(day + "T12:00:00").getDay()]) + "</small></h1>" + body +
-      '<p class="np-foot">' + foot + '<span class="np-st" id="np-st">' + (editing ? "编辑中" : "") + "</span></p></div></section></div>";
+      '<h1><button type="button" class="np-h1b" data-act="np-toc" data-m="' + ym + '" title="翻到这个月的目录">' + esc(cnDate(day)) + "</button> <small>" + esc(WD[new Date(day + "T12:00:00").getDay()]) + "</small></h1>" + body +
+      '<p class="np-foot">' + foot + '<span class="np-st" id="np-st">' + (editing ? "编辑中" : "") + "</span></p></div>";
+    return left + right;
+  }
+  function notesHTML() {
+    var tm = /^notes-m-(\d{4}-\d{2})$/.exec(S.route), day = npRouteDay(), days = npDays(), td = today();
+    var ym = tm ? tm[1] : day.slice(0, 7);
+    return npHeadHTML() + npRackHTML(days, td) +
+      '<section class="nbk' + (tm ? " nbk-toc" : "") + '" aria-label="随手本">' + (tm ? npTocHTML(ym, days, td) : npSpreadHTML(day, days, td)) + npTabsHTML(ym.slice(0, 4), ym, days) + "</section></div>";
   }
   /* 记一笔：一张纸条，回车存，Esc 收起（草稿留在 S.jotDraft） */
   function jotHTML() {
@@ -5577,7 +5614,7 @@ var FOIL = (function () {
     ROUTES["b-" + b] = 1;
     Object.keys(LIB.books[b].deep || {}).forEach(function (n) { ROUTES["r-" + b + "-" + n] = 1; });
   });
-  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] || /^notes-\d{4}-\d{2}-\d{2}$/.test(h) || (PLAN && /^l-(\d{4}-\d{2}-\d{2}|[a-z]+-\d{2})$/.test(h)) ? h : "home"; }
+  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] || /^notes-(\d{4}-\d{2}-\d{2}|m-\d{4}-\d{2})$/.test(h) || (PLAN && /^l-(\d{4}-\d{2}-\d{2}|[a-z]+-\d{2})$/.test(h)) ? h : "home"; }
 
   function render(scrollTop) {
     syncMyBooks(); syncBoxes();
@@ -5785,7 +5822,7 @@ var FOIL = (function () {
     if (act === "cmdk") { ckOpen(); return; }
     if (act === "jot") { if (S.jotOpen) jotClose(true); else jotOpen(); return; }
     if (act === "np-day") { var nd = t.getAttribute("data-d"); if (nd) npGo(nd); return; }
-    if (act === "np-month") { S.npMonth = t.getAttribute("data-m"); render(); return; }
+    if (act === "np-month" || act === "np-toc") { S.npEdit = null; var nh = "#notes-m-" + t.getAttribute("data-m"); if (location.hash === nh) render(); else location.hash = nh; return; }
     if (act === "np-edit") { if (!S.canEdit) return; S.npEdit = npRouteDay(); render(); var nta = document.getElementById("np-ta"); if (nta) { nta.focus(); nta.selectionStart = nta.selectionEnd = nta.value.length; } return; }
     if (act === "nb-new") { toast("主题本下一版再做；先把随手本用起来。"); return; }
     if (act === "mk-open") { markOpen(t.getAttribute("data-id")); return; }
