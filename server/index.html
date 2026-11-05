@@ -2485,6 +2485,24 @@ html.clip-mode main{padding:18px 18px 40px}
   .jot{width:100%;transform:none;animation:none}.jot::before{display:none}
 }
 @media (max-width:560px){.nbk-b{width:84px;height:116px}.np-ent{grid-template-columns:44px 1fr;gap:8px}.nrack{height:170px}}
+
+/* 场景：拱形书柜（vendor/scene/arch/）。图按 --sc-w 宽的像素比例拉伸到墙宽；行高 = 墙宽 × 格层比；书按 --bz 缩放进格层 */
+.wall.scene-arch{gap:0;padding:0;border-radius:8px;overflow:hidden;background:url(vendor/scene/arch/wall.webp) center/cover #6b4a26;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.wall.scene-arch .sc-top{width:100%;aspect-ratio:var(--sc-w) / var(--sc-top);background:url(vendor/scene/arch/top.webp) center/100% 100% no-repeat}
+.wall.scene-arch .sc-base{width:100%;aspect-ratio:var(--sc-w) / var(--sc-base);background:url(vendor/scene/arch/base.webp) center/100% 100% no-repeat}
+.wall.scene-arch .wall-row{position:relative;box-sizing:border-box;width:100%;aspect-ratio:var(--sc-w) / var(--sc-bay);padding:0 var(--sc-pad);gap:0 14px;flex-wrap:nowrap;align-items:flex-end;overflow:visible;background:url(vendor/scene/arch/bay.webp) center/100% 100% no-repeat}
+.wall.scene-arch.measuring .wall-row{aspect-ratio:auto}
+.wall.scene-arch .wm{margin-top:0;min-width:0}
+.wall.scene-arch .wm-in{zoom:var(--bz,.7);padding:8px 10px 0}
+.wall.scene-arch .wm-board{height:0;padding:0;background:none;box-shadow:none;border-radius:0}
+.wall.scene-arch .wm-lab{position:absolute;left:12px;bottom:-15px;z-index:4;color:#E6D2A0;font-size:10px;letter-spacing:.06em;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+.wall.scene-arch .wm-lab b{color:#F0DFB0}
+.wall.scene-arch .wm-plus{position:absolute;right:10px;bottom:-16px;z-index:4;background:rgba(230,210,160,.25);color:#F0DFB0}
+.wall.scene-arch .wm.ghost .wm-in{border-color:rgba(230,210,160,.35)}
+.wall.scene-arch .wm-add{background:rgba(0,0,0,.25);color:#E6D2A0;border-color:rgba(230,210,160,.4)}
+.wall.scene-arch .wm-add small{color:#C9B482}
+.wall.scene-arch .wm-empty{color:#C9B482}
+.lk-rd.rd-arch{border-radius:7px 7px 0 0;border-width:2px 1.5px 1.5px}
 </style>
 
 <header class="topbar" id="rail"></header>
@@ -5746,9 +5764,13 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   /* 装帧：布面精装是原来的样子；秘典是画布画的皮革、星盘、刻木、黑皮四种封面（按领域分），书脊有竹节、包角、烫金题签，进度与状态长在五金上 */
   var BINDINGS = [["cloth", "布面精装", "布面精装：名色布面、烫金线、贴签、拼布、色带"], ["old", "老书皮", "老书皮：1840 到 1900 年代真书的封面扫描（公有领域），抹掉原书名，按原来的位置和颜色烫上这本书的名字；书脊取封面的一条，贴皮质书名签"], ["foil", "布面烫金", "布面烫金：照企鹅布面经典的做法，一书一枚图标按网格重复、一种烫印色、书名右上竖排；图标从书名和「为什么读」里挑"], ["victorian", "维多利亚", "维多利亚：双线边框、角花、月桂环里一枚图标、宽字距书名，照 1880 到 1920 年的装饰布面书"], ["grim", "秘典", "秘典：皮革与徽章、星盘铜书、符文木书、铭牌秘典四种封面按领域分；星盘指针是读到哪，宝石亮是这周读过，读完盖朱印"]];
   var COLORS = [["named", "名色", "每个领域一个经典色系：勃艮第红、爱马仕橙、孔雀绿、普鲁士蓝、克莱因蓝……"], ["qinghua", "青花瓷", "钴蓝、霁蓝、天青、瓷白"], ["orange", "橙与驼", "爱马仕橙、驼色、象牙白、墨黑"], ["cloth", "布面", "原来的低饱和布色"]];
+  /* 场景：素墙是原来的亚麻墙加浮板；拱形书柜是按概念图 B 在 Blender 里按专业流程建的胡桃木拱形嵌墙书柜（docs/bookcase-production.md），
+   * 渲成拱顶 / 格层 / 底座 / 墙面四张图（vendor/scene/arch/），网页上有几行书就叠几个格层，书、摆件照旧由数据摆进格子。窄屏不用。 */
+  var SCENES = [["none", "素墙", "原来的浅色亚麻墙与浮板"], ["arch", "拱形书柜", "胡桃木拱形嵌墙书柜：灰泥墙、烛光、齿状檐口、雕花柱头，按蓝本在 Blender 里建的；书照旧摆进格子"]];
+  var SC_DIM = { arch: { w: 2246, top: 996, bay: 436, base: 373, pad: 14 } };  /* 出图 704 像素/米，总宽 3.19 米；柱内缘占 13.9% */
   var LOOK_KEY = "yanxilu-look", DECO_DEFAULT = ["globe", "glass", "vase", "succ", "pothos", "candle"];
   /* 默认：浮板 + 抽出半截 + 名色 + 烫金反光（2026-10-19 起）。以前存过的布置升级一次：这四样换成新默认，摆件和摆放位置保留 */
-  var LOOK_V = 2, LOOK_DEF = { read: "pull", fx: "sheen", color: "named", binding: "cloth" };
+  var LOOK_V = 2, LOOK_DEF = { read: "pull", fx: "sheen", color: "named", binding: "cloth", scene: "none" };
   function lookGet() {
     var v = {};
     try { v = JSON.parse(window.localStorage.getItem(LOOK_KEY) || "{}") || {}; } catch (e) { v = {}; }
@@ -5759,6 +5781,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     return { v: LOOK_V, read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : LOOK_DEF.read, motion: v.motion !== false, dust: v.dust !== false, tod: v.tod !== false,
       fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : LOOK_DEF.fx, binding: BINDINGS.some(function (r) { return r[0] === v.binding; }) ? v.binding : LOOK_DEF.binding, color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : LOOK_DEF.color,
+      scene: SCENES.some(function (r) { return r[0] === v.scene; }) ? v.scene : LOOK_DEF.scene,
       deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice(),
       place: (function () { var o = {}, p = v.place && typeof v.place === "object" ? v.place : {}; Object.keys(p).forEach(function (k) { if (DECO[k] && typeof p[k] === "string") o[k] = p[k]; }); return o; })() };
   }
@@ -5769,7 +5792,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
   /* 时辰：书墙跟着一天的光走（清晨微凉、黄昏偏暖、夜里暗下来） */
   function todName() { var h = new Date().getHours(); return h >= 5 && h < 8 ? "dawn" : h >= 8 && h < 16 ? "day" : h >= 16 && h < 19 ? "dusk" : "night"; }
-  function wallClass() { var L = LK(); return "wall hang-" + hangGet() + " read-" + L.read + " fx-" + L.fx + " pal-" + L.color + " bind-" + L.binding + (L.tod ? " tod-" + todName() : "") + (REDUCE || !L.motion ? " still" : ""); }
+  function sceneOn() { var L = LK(); return L.scene !== "none" && window.innerWidth >= 900 ? L.scene : ""; }
+  function wallClass() { var L = LK(); return "wall hang-" + hangGet() + " read-" + L.read + " fx-" + L.fx + " pal-" + L.color + " bind-" + L.binding + (L.tod ? " tod-" + todName() : "") + (REDUCE || !L.motion ? " still" : "") + (sceneOn() ? " scene-" + sceneOn() : ""); }
   setInterval(function () { var wl = document.querySelector(".wall"); if (wl && wl.className !== "wall measuring" && wl.className.indexOf("measuring") < 0) { var c = wallClass(); if (wl.className !== c) wl.className = c; } }, 600000);
   /* ---------- 书的颜色 ----------
    * 名色：每个领域一个经典色系，同一格里相邻两本一定不同色；青花瓷、橙与驼：全墙一套色；布面：原来的低饱和布色（按书名散开）。
@@ -6556,7 +6580,8 @@ var FOIL = (function () {
   /* 先把所有格子排成一排交给页面，再由 wallPack() 按实际宽度分排 */
   function wallHTML() {
     var keys = domList().concat(["en", "+"]);
-    return '<section class="' + wallClass() + '" aria-label="书墙"><div class="wall-row">' + keys.map(wallModule).join("") + "</div></section>";
+    var sc = sceneOn(), d = sc && SC_DIM[sc], st = d ? ' style="--sc-w:' + d.w + ";--sc-top:" + d.top + ";--sc-bay:" + d.bay + ";--sc-base:" + d.base + ";--sc-pad:" + d.pad + '%"' : "";
+    return '<section class="' + wallClass() + '" aria-label="书墙"' + st + ">" + (sc ? '<div class="sc-top" aria-hidden="true"></div>' : "") + '<div class="wall-row">' + keys.map(wallModule).join("") + "</div>" + (sc ? '<div class="sc-base" aria-hidden="true"></div>' : "") + "</section>";
   }
   /* ---------- 书墙排版：按每一格实际多宽，动态排成几排 ----------
    * 1. 量出每一格（一个领域）不换行时有多宽；比一整排还宽的，按书拆成几段，后面几段的标签写“续”。
@@ -6587,10 +6612,19 @@ var FOIL = (function () {
       PLAN.forEach(function (d) { var k = d[0] === "succ" ? "en" : d[1], m = k && row0.querySelector('.wm[data-wm="' + k + '"]'); if (m && d[0] !== "pothos") addDeco(m, d[0]); });
       return;
     }
+    var scn = sceneOn();
+    if (scn) {
+      /* 格层的高跟着墙宽走（图是固定比例），书按格层净高缩放：先复位量出书的自然高，再定 --bz */
+      wall.style.setProperty("--bz", "1");
+      var rowH = wall.clientWidth * SC_DIM[scn].bay / SC_DIM[scn].w, tall = 0;
+      row0.querySelectorAll(".wm-in > *").forEach(function (c) { tall = Math.max(tall, c.getBoundingClientRect().height); });
+      var bz = Math.max(0.45, Math.min(1, (rowH - 16) / ((tall || 250) + 12)));
+      wall.style.setProperty("--bz", String(Math.round(bz * 1000) / 1000));
+    }
     var mods = Array.prototype.slice.call(row0.children), ghost = row0.querySelector(".wm.ghost");
     wall.style.minHeight = wall.getBoundingClientRect().height + "px";  /* 量的时候整面墙会缩成一排，先撑住高度，免得页面滚动位置被挤掉 */
     wall.classList.add("measuring");
-    var cs = getComputedStyle(wall), W = wall.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    var cs = getComputedStyle(wall), rcs = getComputedStyle(row0), W = wall.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - parseFloat(rcs.paddingLeft) - parseFloat(rcs.paddingRight);
     var gap = parseFloat(getComputedStyle(row0).columnGap) || 18, ghostW = ghost ? ghost.getBoundingClientRect().width : 0;
     var items = [];
     mods.forEach(function (m) {
@@ -6650,7 +6684,8 @@ var FOIL = (function () {
     wall.classList.remove("measuring");
     var frag = document.createDocumentFragment();
     rows.forEach(function (row) { var div = document.createElement("div"); div.className = "wall-row"; row.els.forEach(function (x) { div.appendChild(x.el); }); frag.appendChild(div); });
-    wall.removeChild(row0); wall.appendChild(frag);
+    var scBase = wall.querySelector(".sc-base");
+    wall.removeChild(row0); if (scBase) wall.insertBefore(frag, scBase); else wall.appendChild(frag);
     wall.style.minHeight = "";
     document.querySelectorAll(".lk-it").forEach(function (t) {
       var k = t.getAttribute("data-d"); t.classList.toggle("off", LK().deco.indexOf(k) >= 0 && !wall.querySelector(".d-" + k)); });
@@ -6689,6 +6724,7 @@ var FOIL = (function () {
     return '<div class="look-pop" role="dialog" aria-label="书墙的布置">' +
       '<section class="lk-sec"><h3>挂法</h3>' + radios(HANGS, h, "hang", "data-h", true) + "</section>" +
       '<section class="lk-sec"><h3>在读的书</h3>' + radios(READS, L.read, "look-read", "data-v", false) + "</section>" +
+      '<section class="lk-sec"><h3>场景</h3>' + radios(SCENES, L.scene, "look-scene", "data-v", false) + (window.innerWidth < 900 ? '<p class="meta">窄屏上只有素墙。</p>' : "") + "</section>" +
       '<section class="lk-sec"><h3>装帧</h3>' + radios(BINDINGS, L.binding, "look-binding", "data-v", false) + "</section>" +
       '<section class="lk-sec"><h3>书的颜色</h3>' + radios(COLORS, L.color, "look-color", "data-v", false, true) + "</section>" +
       '<section class="lk-sec"><h3>指到一本书时</h3>' + radios(FXS, L.fx, "look-fx", "data-v", false) + "</section>" +
@@ -10762,6 +10798,7 @@ var FOIL = (function () {
     if (act === "look-fx") { lookSet({ fx: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-color") { lookSet({ color: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-binding") { lookSet({ binding: t.getAttribute("data-v") }); render(); return; }
+    if (act === "look-scene") { lookSet({ scene: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-motion") { lookSet({ motion: !LK().motion }); render(); return; }
     if (act === "look-dust") { lookSet({ dust: !LK().dust }); render(); return; }
     if (act === "look-tod") { lookSet({ tod: !LK().tod }); render(); return; }

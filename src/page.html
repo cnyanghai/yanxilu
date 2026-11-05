@@ -2477,6 +2477,24 @@ html.clip-mode main{padding:18px 18px 40px}
   .jot{width:100%;transform:none;animation:none}.jot::before{display:none}
 }
 @media (max-width:560px){.nbk-b{width:84px;height:116px}.np-ent{grid-template-columns:44px 1fr;gap:8px}.nrack{height:170px}}
+
+/* 场景：拱形书柜（vendor/scene/arch/）。图按 --sc-w 宽的像素比例拉伸到墙宽；行高 = 墙宽 × 格层比；书按 --bz 缩放进格层 */
+.wall.scene-arch{gap:0;padding:0;border-radius:8px;overflow:hidden;background:url(vendor/scene/arch/wall.webp) center/cover #6b4a26;box-shadow:0 30px 60px -30px rgba(0,0,0,.6)}
+.wall.scene-arch .sc-top{width:100%;aspect-ratio:var(--sc-w) / var(--sc-top);background:url(vendor/scene/arch/top.webp) center/100% 100% no-repeat}
+.wall.scene-arch .sc-base{width:100%;aspect-ratio:var(--sc-w) / var(--sc-base);background:url(vendor/scene/arch/base.webp) center/100% 100% no-repeat}
+.wall.scene-arch .wall-row{position:relative;box-sizing:border-box;width:100%;aspect-ratio:var(--sc-w) / var(--sc-bay);padding:0 var(--sc-pad);gap:0 14px;flex-wrap:nowrap;align-items:flex-end;overflow:visible;background:url(vendor/scene/arch/bay.webp) center/100% 100% no-repeat}
+.wall.scene-arch.measuring .wall-row{aspect-ratio:auto}
+.wall.scene-arch .wm{margin-top:0;min-width:0}
+.wall.scene-arch .wm-in{zoom:var(--bz,.7);padding:8px 10px 0}
+.wall.scene-arch .wm-board{height:0;padding:0;background:none;box-shadow:none;border-radius:0}
+.wall.scene-arch .wm-lab{position:absolute;left:12px;bottom:-15px;z-index:4;color:#E6D2A0;font-size:10px;letter-spacing:.06em;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+.wall.scene-arch .wm-lab b{color:#F0DFB0}
+.wall.scene-arch .wm-plus{position:absolute;right:10px;bottom:-16px;z-index:4;background:rgba(230,210,160,.25);color:#F0DFB0}
+.wall.scene-arch .wm.ghost .wm-in{border-color:rgba(230,210,160,.35)}
+.wall.scene-arch .wm-add{background:rgba(0,0,0,.25);color:#E6D2A0;border-color:rgba(230,210,160,.4)}
+.wall.scene-arch .wm-add small{color:#C9B482}
+.wall.scene-arch .wm-empty{color:#C9B482}
+.lk-rd.rd-arch{border-radius:7px 7px 0 0;border-width:2px 1.5px 1.5px}
 </style>
 
 <header class="topbar" id="rail"></header>
