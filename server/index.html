@@ -1302,7 +1302,19 @@ a.stp:focus-visible{outline:2px solid var(--indigo);outline-offset:4px;border-ra
 .hg-rope{background:linear-gradient(currentColor,currentColor) 3px 0/1.5px 9px no-repeat,linear-gradient(currentColor,currentColor) 13px 0/1.5px 9px no-repeat,linear-gradient(currentColor,currentColor) 0 9px/100% 3px no-repeat}
 .hg-niche{border:2px solid currentColor;border-bottom-width:3px;border-radius:9px 9px 1px 1px}
 /* 书架页：一行工具条 + 书墙 | 展台 */
-.w-head{display:flex;flex-wrap:wrap;align-items:center;gap:12px 22px;margin:0 0 20px}
+.w-head{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin:0 0 16px}
+.w-filt{position:relative}
+.w-filt summary{list-style:none;cursor:pointer}
+.w-filt summary::-webkit-details-marker{display:none}
+.w-filt .segn{font-family:var(--f-num);font-size:13px;color:var(--ink-3)}
+.w-filt[open] summary .lk-caret{transform:translateY(1px) rotate(225deg)}
+.w-filt-pop{position:absolute;right:0;top:calc(100% + 8px);z-index:20;flex-direction:column;align-items:stretch;gap:4px;min-width:170px;padding:8px;background:var(--leaf);border:1px solid var(--rule);border-radius:12px;box-shadow:0 18px 36px -16px rgba(0,0,0,.35)}
+.w-filt-pop .chipbtn{border:0;background:none;text-align:left;justify-content:space-between;display:flex;min-height:34px}
+.w-filt-pop .chipbtn[aria-pressed="true"]{background:var(--ink);color:var(--paper)}
+.w-lg-d{margin-top:10px}
+.w-lg-d summary{cursor:pointer;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3);list-style:none;display:inline-block;padding:2px 0;border-bottom:1px dashed var(--rule-strong)}
+.w-lg-d summary::-webkit-details-marker{display:none}
+.w-lg-d[open] summary{margin-bottom:6px}
 .w-head h1{margin:0;font-size:34px;letter-spacing:.1em;line-height:1.1}
 .w-head .shelf-seg{margin-top:0}
 .w-tools{margin-left:auto;display:flex;flex-wrap:wrap;align-items:center;justify-content:flex-end;gap:10px 14px}
@@ -1374,13 +1386,14 @@ label.linkbtn.eb-up{position:relative}
 .stg-cover.flip{animation:daisflip .6s cubic-bezier(.2,.8,.2,1)}
 .stg-box.flip{animation:daisrise .5s cubic-bezier(.2,.8,.2,1)}
 /* 书墙 */
-.wall{position:relative;display:flex;flex-direction:column;gap:46px;padding:46px 16px 30px;border-radius:0 0 8px 8px;
+.wall{position:relative;display:flex;flex-direction:column;gap:24px;padding:22px 16px 24px;border-radius:0 0 8px 8px;
   background:radial-gradient(70% 40% at 50% 0%,var(--wall-light),transparent 70%),var(--linen-bg),var(--linen);box-shadow:inset 0 14px 16px -12px rgba(60,40,20,.35)}
-.wall-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:52px 18px}
+.wall-row{display:flex;flex-wrap:wrap;align-items:flex-end;gap:24px 18px}
+.wall .wm{margin-top:8px}
 .wall.measuring .wall-row{flex-wrap:nowrap}
 .wall.measuring .wm{flex:none;width:max-content}
 .wm{position:relative;flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
-.wm-in{position:relative;z-index:3;display:flex;align-items:flex-end;gap:3px;min-height:250px;padding:40px 14px 0}
+.wm-in{position:relative;z-index:3;display:flex;align-items:flex-end;gap:3px;min-height:0;padding:24px 14px 0}
 .wm-fill{flex:1 1 0;min-width:10px}
 .wm-board{position:relative;z-index:2;display:flex;align-items:center;gap:12px;box-sizing:border-box;height:20px;padding:0 10px 0 16px;background:var(--oak);border-radius:2px;box-shadow:0 14px 16px -10px rgba(40,28,14,.45),0 2px 0 rgba(110,78,40,.25)}
 .wm-lab{position:relative;min-width:0;display:inline-flex;align-items:center;gap:7px;font-family:var(--f-ui);font-size:11px;letter-spacing:.04em;color:var(--oak-ink);white-space:nowrap;text-decoration:none}
@@ -2300,8 +2313,9 @@ svg.fold,svg.fold-mini{display:block;width:100%;min-width:1080px;height:auto;fon
   .w-tools{margin-left:0;justify-content:flex-start}
   .w-main{grid-template-columns:minmax(0,1fr)}
   .dais-col{position:static;max-height:none;scroll-margin-top:84px}
-  .wall{padding:44px 12px 24px;gap:40px}
-  .wall-row{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:40px}
+  .wall{padding:22px 12px 20px;gap:22px}
+  .wall-row{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:22px}
+  .shelf-seg a small{display:none}
   .wm-in{overflow-x:auto;overflow-y:hidden;padding-bottom:34px;scrollbar-width:thin}
   .wm-board{margin-top:-34px}
   .d-pothos{display:none}
@@ -6754,8 +6768,8 @@ var FOIL = (function () {
     a.onfinish = done; a.oncancel = done;
   }
   function wallLegend() {
-    return '<div class="w-legend" aria-hidden="true"><span><i class="lg-b"></i>立着：还没读</span><span><i class="lg-b doing"></i>抽出半截、夹书签：在读</span>' +
-      '<span><i class="lg-b thin"></i><i class="lg-b thick"></i>书脊越厚，花的时间越多</span><span><i class="lg-b done"></i>盖章：读完</span><span><i class="lg-film"></i>蓝布面盒：电影或剧</span><span><i class="lg-bk"></i>藤筐：练习与专题</span></div>';
+    return '<details class="w-lg-d"><summary>怎么看这面墙</summary><div class="w-legend"><span><i class="lg-b"></i>立着：还没读</span><span><i class="lg-b doing"></i>抽出半截、夹书签：在读</span>' +
+      '<span><i class="lg-b thin"></i><i class="lg-b thick"></i>书脊越厚，花的时间越多</span><span><i class="lg-b done"></i>盖章：读完</span><span><i class="lg-film"></i>蓝布面盒：电影或剧</span><span><i class="lg-bk"></i>藤筐：练习与专题</span></div></details>';
   }
   /* ---------- 电子书：给书架上的书挂一个 PDF 或 EPUB ----------
    * claude.ai 版：文件用 assets 能力存在这个研习录自己的存储里（只有你能打开，换设备也在）。
@@ -7984,10 +7998,10 @@ var FOIL = (function () {
   function shelfSeg(cur) {
     var nBooks = allItems().filter(function (id) { return ITEMS[id].kind === "book"; }).length;
     var mkN = allMarks().length;
-    return '<nav class="seg shelf-seg" aria-label="书架里的几件家具"><a href="#shelf"' + (cur === "shelf" ? ' aria-current="page"' : "") + ">书墙 · " + nBooks + " 本</a>" +
-      '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "") + "</a>" +
-      '<a href="#notes"' + (cur === "notes" ? ' aria-current="page"' : "") + ">笔记本架 · 1 本</a>" +
-      (mkN ? '<a href="#marks"' + (cur === "marks" ? ' aria-current="page"' : "") + ">摘抄册 · " + mkN + " 条</a>" : "") + "</nav>";
+    return '<nav class="seg shelf-seg" aria-label="书架里的几件家具"><a href="#shelf"' + (cur === "shelf" ? ' aria-current="page"' : "") + ">书墙<small> · " + nBooks + " 本</small></a>" +
+      '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架<small> · " + TOPICS.length + " 卷 " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "") + "</small></a>" +
+      '<a href="#notes"' + (cur === "notes" ? ' aria-current="page"' : "") + ">笔记本架<small> · 1 本</small></a>" +
+      (mkN ? '<a href="#marks"' + (cur === "marks" ? ' aria-current="page"' : "") + ">摘抄册<small> · " + mkN + " 条</small></a>" : "") + "</nav>";
   }
   function archiveHTML() {
     var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null;
@@ -8478,7 +8492,7 @@ var FOIL = (function () {
     var f = S.shelfF || "all";
     function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="shelf-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
     return '<div class="view shelf wallv">' + bannerHTML() +
-      '<header class="w-head"><h1>书架</h1>' + shelfSeg("shelf") + (S.canEdit ? '<button type="button" class="btn small w-add" data-act="add-book">＋ 加一本书</button>' : "") + '<div class="w-tools"><div class="chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div>" + lookHTML() + "</div></header>" +
+      '<header class="w-head">' + shelfSeg("shelf") + '<div class="w-tools"><details class="w-filt"><summary class="look-btn" aria-label="只看哪些书">' + ({ all: "全部", doing: "在读", done: "读完", todo: "还没读" }[f] || "全部") + ' <span class="segn">' + ({ all: nAll, doing: cnt.doing || 0, done: cnt.done || 0, todo: cnt.todo || 0 }[f]) + '</span><i class="lk-caret" aria-hidden="true"></i></summary><div class="w-filt-pop chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></details>" + lookHTML() + (S.canEdit ? '<button type="button" class="btn small w-add" data-act="add-book">＋ 加一本书</button>' : "") + "</div></header>" +
       '<div class="w-main"><div class="w-left">' + wallHTML() + wallLegend() + hiddenListHTML() + "</div>" + stageHTML() + "</div>" + addSheetHTML() + domSheetHTML() + "</div>";
   }
 

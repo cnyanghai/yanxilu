@@ -1778,8 +1778,8 @@ var FOIL = (function () {
     a.onfinish = done; a.oncancel = done;
   }
   function wallLegend() {
-    return '<div class="w-legend" aria-hidden="true"><span><i class="lg-b"></i>立着：还没读</span><span><i class="lg-b doing"></i>抽出半截、夹书签：在读</span>' +
-      '<span><i class="lg-b thin"></i><i class="lg-b thick"></i>书脊越厚，花的时间越多</span><span><i class="lg-b done"></i>盖章：读完</span><span><i class="lg-film"></i>蓝布面盒：电影或剧</span><span><i class="lg-bk"></i>藤筐：练习与专题</span></div>';
+    return '<details class="w-lg-d"><summary>怎么看这面墙</summary><div class="w-legend"><span><i class="lg-b"></i>立着：还没读</span><span><i class="lg-b doing"></i>抽出半截、夹书签：在读</span>' +
+      '<span><i class="lg-b thin"></i><i class="lg-b thick"></i>书脊越厚，花的时间越多</span><span><i class="lg-b done"></i>盖章：读完</span><span><i class="lg-film"></i>蓝布面盒：电影或剧</span><span><i class="lg-bk"></i>藤筐：练习与专题</span></div></details>';
   }
   /* ---------- 电子书：给书架上的书挂一个 PDF 或 EPUB ----------
    * claude.ai 版：文件用 assets 能力存在这个研习录自己的存储里（只有你能打开，换设备也在）。
@@ -3008,10 +3008,10 @@ var FOIL = (function () {
   function shelfSeg(cur) {
     var nBooks = allItems().filter(function (id) { return ITEMS[id].kind === "book"; }).length;
     var mkN = allMarks().length;
-    return '<nav class="seg shelf-seg" aria-label="书架里的几件家具"><a href="#shelf"' + (cur === "shelf" ? ' aria-current="page"' : "") + ">书墙 · " + nBooks + " 本</a>" +
-      '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "") + "</a>" +
-      '<a href="#notes"' + (cur === "notes" ? ' aria-current="page"' : "") + ">笔记本架 · 1 本</a>" +
-      (mkN ? '<a href="#marks"' + (cur === "marks" ? ' aria-current="page"' : "") + ">摘抄册 · " + mkN + " 条</a>" : "") + "</nav>";
+    return '<nav class="seg shelf-seg" aria-label="书架里的几件家具"><a href="#shelf"' + (cur === "shelf" ? ' aria-current="page"' : "") + ">书墙<small> · " + nBooks + " 本</small></a>" +
+      '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架<small> · " + TOPICS.length + " 卷 " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "") + "</small></a>" +
+      '<a href="#notes"' + (cur === "notes" ? ' aria-current="page"' : "") + ">笔记本架<small> · 1 本</small></a>" +
+      (mkN ? '<a href="#marks"' + (cur === "marks" ? ' aria-current="page"' : "") + ">摘抄册<small> · " + mkN + " 条</small></a>" : "") + "</nav>";
   }
   function archiveHTML() {
     var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null;
@@ -3502,7 +3502,7 @@ var FOIL = (function () {
     var f = S.shelfF || "all";
     function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="shelf-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
     return '<div class="view shelf wallv">' + bannerHTML() +
-      '<header class="w-head"><h1>书架</h1>' + shelfSeg("shelf") + (S.canEdit ? '<button type="button" class="btn small w-add" data-act="add-book">＋ 加一本书</button>' : "") + '<div class="w-tools"><div class="chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div>" + lookHTML() + "</div></header>" +
+      '<header class="w-head">' + shelfSeg("shelf") + '<div class="w-tools"><details class="w-filt"><summary class="look-btn" aria-label="只看哪些书">' + ({ all: "全部", doing: "在读", done: "读完", todo: "还没读" }[f] || "全部") + ' <span class="segn">' + ({ all: nAll, doing: cnt.doing || 0, done: cnt.done || 0, todo: cnt.todo || 0 }[f]) + '</span><i class="lk-caret" aria-hidden="true"></i></summary><div class="w-filt-pop chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></details>" + lookHTML() + (S.canEdit ? '<button type="button" class="btn small w-add" data-act="add-book">＋ 加一本书</button>' : "") + "</div></header>" +
       '<div class="w-main"><div class="w-left">' + wallHTML() + wallLegend() + hiddenListHTML() + "</div>" + stageHTML() + "</div>" + addSheetHTML() + domSheetHTML() + "</div>";
   }
 
