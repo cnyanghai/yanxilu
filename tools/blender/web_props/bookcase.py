@@ -6,11 +6,11 @@ import bpy, bmesh, math, os
 TEX = r"C:\Users\cnyan\blender_mcp\yanxilu\tex"
 N_SHELF = 5           # 格层数（网页按实际层数拼）
 WI = 2.3              # 柜内净宽
-PITCH = 0.42          # 层距
+PITCH = 0.44          # 层距
 SH_T = 0.045          # 搁板厚
 DEPTH = 0.34          # 柜深
 UP_T = 0.06           # 侧立板厚
-PLINTH_H = 0.26       # 底座高
+PLINTH_H = 0.52       # 底座高（带门板的矮柜）
 PIL_W = 0.17          # 立柱宽
 PIL_D = 0.12          # 立柱凸出深度
 ARCH_T = 0.12         # 拱圈宽
@@ -69,13 +69,13 @@ def plain(name, color, rough=0.5, metal=0.0, emit=None):
     b.inputs["Base Color"].default_value = (*color, 1); b.inputs["Roughness"].default_value = rough; b.inputs["Metallic"].default_value = metal
     if emit: b.inputs["Emission Color"].default_value = (*emit[0], 1); b.inputs["Emission Strength"].default_value = emit[1]
     return m
-OAK = pbr("yx_oak", "dark_wood", scale=0.9, tint=(0.62, 0.52, 0.40, 1), rough_mul=0.8, contrast=0.1, coat=0.25, sat=0.45)      # 暖栗色
-OAK_D = pbr("yx_oak_dark", "dark_wood", scale=0.9, tint=(0.42, 0.35, 0.28, 1), rough_mul=1.0, contrast=0.05, sat=0.4)  # 柜内背板更深
-PLASTER = pbr("yx_plaster", "grey_plaster", scale=0.5, tint=(0.95, 0.70, 0.38, 1), rough_mul=1.0, contrast=-0.2, sat=0.6)   # 赭黄灰泥
+OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.40, 0.26, 0.145, 1), rough_mul=0.7, contrast=0.4, coat=0.3, sat=0.9)      # 暖栗色
+OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.24, 0.155, 0.085, 1), rough_mul=0.95, contrast=0.35, sat=0.85)  # 柜内背板更深
+PLASTER = pbr("yx_plaster", "grey_plaster", scale=0.5, tint=(0.92, 0.60, 0.26, 1), rough_mul=1.0, contrast=-0.25, sat=0.5)   # 赭黄灰泥
 BRASS = plain("yx_brass", (0.85, 0.66, 0.30), 0.32, 1.0)
 WAX = plain("yx_wax", (0.80, 0.74, 0.62), 0.6)
 FLAME = plain("yx_flame", (1.0, 0.75, 0.35), 0.5, emit=((1.0, 0.62, 0.22), 8.0))
-FLOOR = pbr("yx_floor", "dark_wood", scale=0.6, tint=(0.5, 0.42, 0.34, 1), rough_mul=0.6, sat=0.5)
+FLOOR = pbr("yx_floor", "mocha_oak_veneer", scale=0.6, tint=(0.30, 0.20, 0.12, 1), rough_mul=0.6, sat=0.8)
 
 # ---------- 造型工具 ----------
 def box(name, size, loc, m, rot=(0, 0, 0), bevel=0.004):
@@ -143,7 +143,11 @@ box("yx_skirting", (7.0, 0.03, 0.10), (0, DEPTH - 0.015, 0.05), OAK_D, bevel=0.0
 box("yx_plinth", (total_w, DEPTH + PIL_D, PLINTH_H - 0.05), (0, (DEPTH - PIL_D) / 2, (PLINTH_H - 0.05) / 2), OAK)
 box("yx_plinth_cap", (total_w + 0.05, DEPTH + PIL_D + 0.05, 0.05), (0, (DEPTH - PIL_D) / 2, PLINTH_H - 0.025), OAK)
 for k in range(3):
-    box("yx_plinth_panel_%d" % k, (WI / 3 - 0.08, 0.012, PLINTH_H - 0.13), (-WI / 3 + WI / 3 * k, YF - 0.006, (PLINTH_H - 0.05) / 2), OAK_D, bevel=0.003)
+    px = -WI / 3 + WI / 3 * k; pw = WI / 3 - 0.10
+    box("yx_plinth_frame_%d" % k, (pw, 0.014, PLINTH_H - 0.16), (px, YF - 0.007, (PLINTH_H - 0.05) / 2 + 0.02), OAK, bevel=0.003)
+    box("yx_plinth_panel_%d" % k, (pw - 0.10, 0.010, PLINTH_H - 0.26), (px, YF - 0.012, (PLINTH_H - 0.05) / 2 + 0.02), OAK_D, bevel=0.002)
+    box("yx_plinth_knob_%d" % k, (0.025, 0.02, 0.025), (px + pw / 2 - 0.06, YF - 0.024, (PLINTH_H - 0.05) / 2 + 0.02), BRASS, bevel=0.001)
+box("yx_plinth_foot", (total_w + 0.02, DEPTH + PIL_D + 0.02, 0.08), (0, (DEPTH - PIL_D) / 2, 0.04), OAK_D)
 # 背板（竖板）到起脚线，拱洞填充
 nb = 8; bw = WI / nb
 for i in range(nb):
@@ -198,21 +202,21 @@ arc_ring("yx_arch_crown", R_CROWN, a0, a1, CROWN, PIL_D + 0.08, (0, YF - 0.06, z
 
 # ---------- 光与机位：左上一束强暖光打在墙上，四角压暗，柜内靠蜡烛和弱补光 ----------
 bpy.ops.object.light_add(type="AREA", location=(-2.2, -2.0, 3.9)); k = bpy.context.object; k.name = "yx_key"
-k.data.energy = 750; k.data.size = 0.9; k.data.color = (1.0, 0.78, 0.48); k.data.spread = math.radians(70)
+k.data.energy = 620; k.data.size = 1.3; k.data.color = (1.0, 0.72, 0.40); k.data.spread = math.radians(70)
 k.rotation_euler = (math.radians(42), 0, math.radians(-30))
 bpy.ops.object.light_add(type="AREA", location=(0.6, -3.6, 1.4)); f = bpy.context.object; f.name = "yx_fill"
-f.data.energy = 90; f.data.size = 3.0; f.data.color = (1.0, 0.9, 0.8); f.rotation_euler = (math.radians(80), 0, math.radians(8))
+f.data.energy = 55; f.data.size = 3.0; f.data.color = (1.0, 0.88, 0.74); f.rotation_euler = (math.radians(80), 0, math.radians(8))
 if sc.world is None: sc.world = bpy.data.worlds.new("yx_world")
 sc.world.use_nodes = True; bg = sc.world.node_tree.nodes.get("Background")
-if bg: bg.inputs["Color"].default_value = (0.4, 0.3, 0.2, 1); bg.inputs["Strength"].default_value = 0.06
+if bg: bg.inputs["Color"].default_value = (0.4, 0.3, 0.2, 1); bg.inputs["Strength"].default_value = 0.03
 H_TOTAL = z_arch_top + 0.45
-bpy.ops.object.camera_add(location=(0, -7.4, H_TOTAL * 0.5)); cam = bpy.context.object; cam.name = "yx_cam"
+bpy.ops.object.camera_add(location=(0, -6.6, H_TOTAL * 0.5)); cam = bpy.context.object; cam.name = "yx_cam"
 cam.data.type = "PERSP"; cam.data.lens = 50; cam.rotation_euler = (math.radians(90), 0, 0); sc.camera = cam
 sc.render.resolution_x = 1500; sc.render.resolution_y = 1000; sc.render.film_transparent = False
 for area in bpy.context.screen.areas:
     if area.type == "VIEW_3D":
         sp = area.spaces[0]; sp.shading.type = "MATERIAL"; sp.region_3d.view_perspective = "CAMERA"; sp.overlay.show_overlays = False
-print("bookcase v9: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
+print("bookcase v10: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
 sc.render.filepath = r"C:\Users\cnyan\blender_mcp\yanxilu\shots\case_render.png"
 bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=r"C:\Users\cnyan\blender_mcp\yanxilu\yanxilu_props.blend")
