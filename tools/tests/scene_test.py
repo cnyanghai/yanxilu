@@ -51,7 +51,19 @@ with sync_playwright() as p:
     m = b.new_context(viewport={"width": 390, "height": 844}); m.add_cookies([{"name": "sid", "value": "u1", "url": BASE}])
     mp = m.new_page(); mp.goto(BASE + "/#shelf"); mp.wait_for_timeout(1500)
     mp.evaluate("""() => { const k='yanxilu-look', o=JSON.parse(localStorage.getItem(k)||'{}'); o.scene='arch'; localStorage.setItem(k, JSON.stringify(o)); }"""); mp.reload(); mp.wait_for_timeout(1500)
-    check("窄屏不用场景", mp.locator(".wall.scene-arch").count() == 0)
+    check("窄屏用手机版场景", mp.locator(".wall.scene-arch-m").count() == 1 and mp.locator(".wall.scene-arch").count() == 0)
+    loaded_m = mp.evaluate("""() => Promise.all(['top','bay','base'].map(n => new Promise(r => { const i = new Image(); i.onload = () => r([n, i.naturalWidth]); i.onerror = () => r([n, 0]); i.src = 'vendor/scene/arch-m/' + n + '.webp'; })))""")
+    check("手机版三张图加载", all(w > 0 for _, w in loaded_m), str(loaded_m))
+    mi = mp.evaluate("""() => { const w = document.querySelector('.wall.scene-arch-m'); const wms = [...w.querySelectorAll('.wm:not(.ghost)')];
+      return { wallW: Math.round(w.getBoundingClientRect().width), bz: getComputedStyle(w).getPropertyValue('--bz'), scrollW: document.documentElement.scrollWidth, innerW: innerWidth,
+        wms: wms.map(m => { const r = m.getBoundingClientRect(); const cbs = [...m.querySelectorAll('.cb')]; const tops = cbs.map(c => c.getBoundingClientRect().top); const bots = cbs.map(c => c.getBoundingClientRect().bottom);
+          return { h: Math.round(r.height), n: cbs.length, above: tops.length ? Math.round(Math.min(...tops) - r.top) : null, below: bots.length ? Math.round(Math.max(...bots) - r.bottom) : null }; }) }; }""")
+    print("mobile", mi)
+    expm = round(mi["wallW"] * 634 / 1239)
+    check("手机格层高 = 墙宽 × 比", all(abs(x["h"] - expm) <= 3 for x in mi["wms"]), "期望 %d" % expm)
+    check("手机书不冒顶、立在格层底", all((x["above"] is None or x["above"] >= 0) and (x["below"] is None or abs(x["below"]) <= 3) for x in mi["wms"]))
+    check("手机不横向溢出", mi["scrollW"] <= mi["innerW"] + 1)
+    mp.screenshot(path=os.path.join(OUT, "scene-arch-m.png"), full_page=True)
     # 收拾：恢复默认
     pg.evaluate("""() => { const k='yanxilu-look', o=JSON.parse(localStorage.getItem(k)||'{}'); o.scene='none'; localStorage.setItem(k, JSON.stringify(o)); }""")
     b.close()

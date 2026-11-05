@@ -759,7 +759,7 @@
   /* 场景：素墙是原来的亚麻墙加浮板；拱形书柜是按概念图 B 在 Blender 里按专业流程建的胡桃木拱形嵌墙书柜（docs/bookcase-production.md），
    * 渲成拱顶 / 格层 / 底座 / 墙面四张图（vendor/scene/arch/），网页上有几行书就叠几个格层，书、摆件照旧由数据摆进格子。窄屏不用。 */
   var SCENES = [["none", "素墙", "原来的浅色亚麻墙与浮板"], ["arch", "拱形书柜", "胡桃木拱形嵌墙书柜：灰泥墙、烛光、齿状檐口、雕花柱头，按蓝本在 Blender 里建的；书照旧摆进格子"]];
-  var SC_DIM = { arch: { w: 2246, top: 996, bay: 436, base: 373, pad: 14 } };  /* 出图 704 像素/米，总宽 3.19 米；柱内缘占 13.9% */
+  var SC_DIM = { arch: { w: 2246, top: 996, bay: 436, base: 373, pad: 14, dir: "arch" }, "arch-m": { w: 1239, top: 646, bay: 634, base: 373, pad: 21, dir: "arch-m" } };  /* 桌面：704 像素/米，总宽 3.19 米，柱内缘 13.9%；手机：窄高单格柜，内净宽 1 米、层距 0.9 */
   var LOOK_KEY = "yanxilu-look", DECO_DEFAULT = ["globe", "glass", "vase", "succ", "pothos", "candle"];
   /* 默认：浮板 + 抽出半截 + 名色 + 烫金反光（2026-10-19 起）。以前存过的布置升级一次：这四样换成新默认，摆件和摆放位置保留 */
   var LOOK_V = 2, LOOK_DEF = { read: "pull", fx: "sheen", color: "named", binding: "cloth", scene: "none" };
@@ -784,7 +784,7 @@
   }
   /* 时辰：书墙跟着一天的光走（清晨微凉、黄昏偏暖、夜里暗下来） */
   function todName() { var h = new Date().getHours(); return h >= 5 && h < 8 ? "dawn" : h >= 8 && h < 16 ? "day" : h >= 16 && h < 19 ? "dusk" : "night"; }
-  function sceneOn() { var L = LK(); return L.scene !== "none" && window.innerWidth >= 900 ? L.scene : ""; }
+  function sceneOn() { var L = LK(); return L.scene === "none" ? "" : window.innerWidth >= 900 ? L.scene : L.scene + "-m"; }
   function wallClass() { var L = LK(); return "wall hang-" + hangGet() + " read-" + L.read + " fx-" + L.fx + " pal-" + L.color + " bind-" + L.binding + (L.tod ? " tod-" + todName() : "") + (REDUCE || !L.motion ? " still" : "") + (sceneOn() ? " scene-" + sceneOn() : ""); }
   setInterval(function () { var wl = document.querySelector(".wall"); if (wl && wl.className !== "wall measuring" && wl.className.indexOf("measuring") < 0) { var c = wallClass(); if (wl.className !== c) wl.className = c; } }, 600000);
   /* ---------- 书的颜色 ----------
@@ -1572,7 +1572,7 @@ var FOIL = (function () {
   /* 先把所有格子排成一排交给页面，再由 wallPack() 按实际宽度分排 */
   function wallHTML() {
     var keys = domList().concat(["en", "+"]);
-    var sc = sceneOn(), d = sc && SC_DIM[sc], st = d ? ' style="--sc-w:' + d.w + ";--sc-top:" + d.top + ";--sc-bay:" + d.bay + ";--sc-base:" + d.base + ";--sc-pad:" + d.pad + '%"' : "";
+    var sc = sceneOn(), d = sc && SC_DIM[sc], st = d ? ' style="--sc-w:' + d.w + ";--sc-top:" + d.top + ";--sc-bay:" + d.bay + ";--sc-base:" + d.base + ";--sc-pad:" + d.pad + "%;--sc-dir:" + d.dir + '"' : "";
     return '<section class="' + wallClass() + '" aria-label="书墙"' + st + ">" + (sc ? '<div class="sc-top" aria-hidden="true"></div>' : "") + '<div class="wall-row">' + keys.map(wallModule).join("") + "</div>" + (sc ? '<div class="sc-base" aria-hidden="true"></div>' : "") + "</section>";
   }
   /* ---------- 书墙排版：按每一格实际多宽，动态排成几排 ----------
@@ -1600,6 +1600,12 @@ var FOIL = (function () {
     LK().deco.forEach(function (k) { var tgt = LK().place[k], m = tgt && row0.querySelector('.wm[data-wm="' + tgt + '"]:not(.ghost)'); if (m && DECO[k]) { addDeco(m, k); pinned[k] = 1; } });
     PLAN = PLAN.filter(function (d) { return !pinned[d[0]]; });
     var narrow = window.matchMedia && window.matchMedia("(max-width:1100px)").matches;
+    if (narrow && sceneOn()) {
+      wall.style.setProperty("--bz", "1");
+      var rowHm = wall.clientWidth * SC_DIM[sceneOn()].bay / SC_DIM[sceneOn()].w, tallm = 0;
+      row0.querySelectorAll(".wm-in > *").forEach(function (c) { tallm = Math.max(tallm, c.getBoundingClientRect().height); });
+      wall.style.setProperty("--bz", String(Math.round(Math.max(0.5, Math.min(1, (rowHm - 14) / ((tallm || 250) + 10))) * 1000) / 1000));
+    }
     if (narrow) {
       PLAN.forEach(function (d) { var k = d[0] === "succ" ? "en" : d[1], m = k && row0.querySelector('.wm[data-wm="' + k + '"]'); if (m && d[0] !== "pothos") addDeco(m, d[0]); });
       return;
@@ -1716,7 +1722,7 @@ var FOIL = (function () {
     return '<div class="look-pop" role="dialog" aria-label="书墙的布置">' +
       '<section class="lk-sec"><h3>挂法</h3>' + radios(HANGS, h, "hang", "data-h", true) + "</section>" +
       '<section class="lk-sec"><h3>在读的书</h3>' + radios(READS, L.read, "look-read", "data-v", false) + "</section>" +
-      '<section class="lk-sec"><h3>场景</h3>' + radios(SCENES, L.scene, "look-scene", "data-v", false) + (window.innerWidth < 900 ? '<p class="meta">窄屏上只有素墙。</p>' : "") + "</section>" +
+      '<section class="lk-sec"><h3>场景</h3>' + radios(SCENES, L.scene, "look-scene", "data-v", false) + "</section>" +
       '<section class="lk-sec"><h3>装帧</h3>' + radios(BINDINGS, L.binding, "look-binding", "data-v", false) + "</section>" +
       '<section class="lk-sec"><h3>书的颜色</h3>' + radios(COLORS, L.color, "look-color", "data-v", false, true) + "</section>" +
       '<section class="lk-sec"><h3>指到一本书时</h3>' + radios(FXS, L.fx, "look-fx", "data-v", false) + "</section>" +

@@ -2495,6 +2495,20 @@ html.clip-mode main{padding:18px 18px 40px}
 .wall.scene-arch .wm-add small{color:#C9B482}
 .wall.scene-arch .wm-empty{color:#C9B482}
 .lk-rd.rd-arch{border-radius:7px 7px 0 0;border-width:2px 1.5px 1.5px}
+
+/* 手机场景：窄高单格柜（vendor/scene/arch-m/），每个领域格子就是一个格层，书在格层里横向滑 */
+.wall.scene-arch-m{gap:0;padding:0;border-radius:8px;overflow:hidden;background:url(vendor/scene/arch/wall.webp) center/cover #6b4a26}
+.wall.scene-arch-m .sc-top{width:100%;aspect-ratio:var(--sc-w) / var(--sc-top);background:url(vendor/scene/arch-m/top.webp) center/100% 100% no-repeat}
+.wall.scene-arch-m .sc-base{width:100%;aspect-ratio:var(--sc-w) / var(--sc-base);background:url(vendor/scene/arch-m/base.webp) center/100% 100% no-repeat}
+.wall.scene-arch-m .wall-row{flex-direction:column;flex-wrap:nowrap;align-items:stretch;gap:0;padding:0}
+.wall.scene-arch-m .wm{position:relative;box-sizing:border-box;width:100%;margin:0;aspect-ratio:var(--sc-w) / var(--sc-bay);padding:0 var(--sc-pad);display:flex;flex-direction:column;justify-content:flex-end;background:url(vendor/scene/arch-m/bay.webp) center/100% 100% no-repeat}
+.wall.scene-arch-m .wm-in{zoom:var(--bz,.8);padding:6px 6px 0;overflow-x:auto;overflow-y:hidden;scrollbar-width:none}
+.wall.scene-arch-m .wm-board{height:0;padding:0;margin:0;background:none;box-shadow:none;border-radius:0}
+.wall.scene-arch-m .wm-lab{position:absolute;left:8px;bottom:-14px;z-index:4;color:#E6D2A0;font-size:10px;text-shadow:0 1px 2px rgba(0,0,0,.8)}
+.wall.scene-arch-m .wm-lab b{color:#F0DFB0}
+.wall.scene-arch-m .wm-plus{position:absolute;right:6px;bottom:-15px;z-index:4;background:rgba(230,210,160,.25);color:#F0DFB0}
+.wall.scene-arch-m .wm.ghost{aspect-ratio:auto;padding:14px var(--sc-pad)}
+.wall.scene-arch-m .wm-add{background:rgba(0,0,0,.25);color:#E6D2A0;border-color:rgba(230,210,160,.4)}
 </style>
 
 <header class="topbar" id="rail"></header>
