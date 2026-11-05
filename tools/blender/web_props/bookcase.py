@@ -25,7 +25,7 @@ for im in list(bpy.data.images):
     if im.users == 0: bpy.data.images.remove(im)
 sc = bpy.context.scene
 sc.render.engine = "BLENDER_EEVEE_NEXT"
-sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - Medium High Contrast"
+sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - Medium High Contrast"; sc.view_settings.exposure = -0.35
 
 # ---------- 材质 ----------
 def pbr(name, base, scale=1.0, tint=(1, 1, 1, 1), rough_mul=1.0, proj="BOX", contrast=0.0, coat=0.0):
@@ -62,7 +62,7 @@ def plain(name, color, rough=0.5, metal=0.0, emit=None):
     return m
 OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.0, tint=(0.33, 0.21, 0.12, 1), rough_mul=0.62, contrast=0.45, coat=0.18)      # 暖栗色
 OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.0, tint=(0.18, 0.11, 0.06, 1), rough_mul=0.85, contrast=0.35)  # 柜内背板更深
-PLASTER = pbr("yx_plaster", "plaster_grey_04", scale=0.8, tint=(0.95, 0.74, 0.44, 1), rough_mul=1.0, contrast=-0.2)   # 赭黄灰泥
+PLASTER = pbr("yx_plaster", "plaster_grey_04", scale=0.8, tint=(1.0, 0.72, 0.36, 1), rough_mul=1.0, contrast=-0.3)   # 赭黄灰泥
 BRASS = plain("yx_brass", (0.85, 0.66, 0.30), 0.32, 1.0)
 WAX = plain("yx_wax", (0.80, 0.74, 0.62), 0.6)
 FLAME = plain("yx_flame", (1.0, 0.75, 0.35), 0.5, emit=((1.0, 0.62, 0.22), 8.0))
@@ -113,12 +113,12 @@ def dentils_line(prefix, x0, x1, y, z, m, size=0.05, gap=0.045, depth=0.04):
 
 # ---------- 尺寸推算 ----------
 z_plinth = PLINTH_H
-z_spring = z_plinth + N_SHELF * PITCH          # 拱起脚线（最上一层的顶）
+z_spring = z_plinth + N_SHELF * PITCH + 0.36   # 拱起脚线 = 柱头顶（最上一层顶再加柱头高 0.36，这一段是拱洞里的高格）
 C = WI / 2; RISE = 0.42                        # 扁弧拱：半弦 C、矢高 RISE
 R_ARCH = (C * C + RISE * RISE) / (2 * RISE); zc = z_spring - (R_ARCH - RISE)  # 圆心
 a0 = math.asin((R_ARCH - RISE) / R_ARCH); a1 = math.pi - a0
 total_w = WI + 2 * UP_T + 2 * PIL_W
-z_top = z_spring + RISE + ARCH_T + 0.16          # 柜顶（檐口上沿）
+z_top = z_spring + RISE + ARCH_T + 0.13 + 0.12   # 柜顶：起脚 + 矢高 + 拱圈 + 压条 + 顶檐
 YF = -PIL_D                                      # 立柱与拱的前脸
 
 # 墙与地
@@ -134,11 +134,11 @@ for k in range(3):
 # 背板：竖板 + 拱洞填充
 nb = 8; bw = WI / nb
 for i in range(nb):
-    box("yx_back_%d" % i, (bw - 0.004, 0.02, N_SHELF * PITCH), (-WI / 2 + bw * (i + 0.5), DEPTH - 0.01, z_plinth + N_SHELF * PITCH / 2), OAK_D, bevel=0.002)
+    box("yx_back_%d" % i, (bw - 0.004, 0.02, z_spring - z_plinth), (-WI / 2 + bw * (i + 0.5), DEPTH - 0.01, (z_spring + z_plinth) / 2), OAK_D, bevel=0.002)
 arc_fill("yx_back_arch", R_ARCH - 0.001, a0, a1, z_spring - zc, 0.02, (0, DEPTH - 0.02, zc), OAK_D)
 # 两侧立板
 for sx in (-1, 1):
-    box("yx_upright_%d" % (sx > 0), (UP_T, DEPTH, N_SHELF * PITCH + RISE), (sx * (WI / 2 + UP_T / 2), DEPTH / 2, z_plinth + (N_SHELF * PITCH + RISE) / 2), OAK)
+    box("yx_upright_%d" % (sx > 0), (UP_T, DEPTH, z_spring - z_plinth + RISE), (sx * (WI / 2 + UP_T / 2), DEPTH / 2, (z_spring + z_plinth + RISE) / 2), OAK)
 # 搁板：板 + 前沿线脚 + 黄铜牌
 for k in range(1, N_SHELF):
     z = z_plinth + k * PITCH
@@ -149,10 +149,10 @@ box("yx_plate_0", (0.08, 0.004, 0.018), (0, YF - 0.004, PLINTH_H - 0.025), BRASS
 # 立柱：通高到檐口；柱础、凹槽、雕花柱头（方板 + 玫瑰花 + 涡卷）
 for sx in (-1, 1):
     x = sx * (WI / 2 + UP_T + PIL_W / 2)
-    z0 = z_plinth; z1 = z_top - 0.16                     # 柱身到檐口底
+    z0 = z_plinth; z1 = z_spring                          # 柱身到起脚线（柱头顶）
     box("yx_pil_base_%d" % (sx > 0), (PIL_W + 0.05, PIL_D + 0.05, 0.12), (x, YF / 2, z0 + 0.06), OAK)
     box("yx_pil_base2_%d" % (sx > 0), (PIL_W + 0.02, PIL_D + 0.02, 0.05), (x, YF / 2, z0 + 0.145), OAK)
-    hs = z1 - z0 - 0.17 - 0.40
+    hs = z1 - z0 - 0.17 - 0.36
     box("yx_pil_%d" % (sx > 0), (PIL_W, PIL_D, hs), (x, YF / 2, z0 + 0.17 + hs / 2), OAK)
     for f_ in range(5):
         box("yx_flute_%d_%d" % (sx > 0, f_), (0.02, 0.012, hs - 0.14), (x - PIL_W / 2 + PIL_W * (f_ + 1) / 6, YF - 0.003, z0 + 0.17 + hs / 2), OAK_D, bevel=0.002)
@@ -165,16 +165,18 @@ for sx in (-1, 1):
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.022, location=(x, YF - 0.026, zc0 + 0.14)); sp_ = bpy.context.object; sp_.name = "yx_rosette_c_%d" % (sx > 0); sp_.data.materials.append(OAK)
     for vx in (-1, 1):  # 涡卷：两个横放的小圆柱
         bpy.ops.mesh.primitive_cylinder_add(radius=0.035, depth=0.06, location=(x + vx * (PIL_W / 2 - 0.02), YF - 0.02, zc0 + 0.30), rotation=(0, math.pi / 2, 0)); v = bpy.context.object; v.name = "yx_volute_%d_%d" % (sx > 0, vx > 0); v.data.materials.append(OAK)
-    box("yx_abacus_%d" % (sx > 0), (PIL_W + 0.08, PIL_D + 0.08, 0.05), (x, YF / 2, zc0 + 0.25 + 0.025 + 0.06), OAK)
+    box("yx_abacus_%d" % (sx > 0), (PIL_W + 0.08, PIL_D + 0.08, 0.05), (x, YF / 2, z_spring - 0.025), OAK)
     # 檐口块（柱子上方）：带齿与冠线，蜡烛放在上面
-    box("yx_ent_%d" % (sx > 0), (PIL_W + 0.10, PIL_D + 0.10, 0.16), (x, YF / 2, z_top - 0.08), OAK)
+    box("yx_ent_%d" % (sx > 0), (PIL_W + 0.10, PIL_D + 0.10, z_top - z_spring), (x, YF / 2, (z_top + z_spring) / 2), OAK)
     box("yx_crown_%d" % (sx > 0), (PIL_W + 0.16, PIL_D + 0.16, 0.05), (x, YF / 2, z_top + 0.025), OAK)
     dentils_line("yx_dent_%d" % (sx > 0), x - PIL_W / 2 - 0.02, x + PIL_W / 2 + 0.02, YF - 0.06, z_top - 0.10, OAK)
     cz = z_top + 0.05
-    bpy.ops.mesh.primitive_cylinder_add(radius=0.05, depth=0.025, location=(x, YF / 2, cz + 0.012)); cs = bpy.context.object; cs.name = "yx_cstick_%d" % (sx > 0); cs.data.materials.append(BRASS)
-    bpy.ops.mesh.primitive_cylinder_add(radius=0.016, depth=0.20, location=(x, YF / 2, cz + 0.125)); cw = bpy.context.object; cw.name = "yx_candle_%d" % (sx > 0); cw.data.materials.append(WAX)
-    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.013, location=(x, YF / 2, cz + 0.24)); fl = bpy.context.object; fl.name = "yx_flame_%d" % (sx > 0); fl.scale = (0.6, 0.6, 1.4); fl.data.materials.append(FLAME)
-    bpy.ops.object.light_add(type="POINT", location=(x, YF / 2 - 0.06, cz + 0.27)); pl = bpy.context.object; pl.name = "yx_candlelight_%d" % (sx > 0)
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.075, depth=0.02, location=(x, YF / 2, cz + 0.01)); cs = bpy.context.object; cs.name = "yx_cstick_%d" % (sx > 0); cs.data.materials.append(BRASS)
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.03, depth=0.07, location=(x, YF / 2, cz + 0.055)); cs2 = bpy.context.object; cs2.name = "yx_cstick2_%d" % (sx > 0); cs2.data.materials.append(BRASS)
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.05, depth=0.015, location=(x, YF / 2, cz + 0.095)); cs3 = bpy.context.object; cs3.name = "yx_cstick3_%d" % (sx > 0); cs3.data.materials.append(BRASS)
+    bpy.ops.mesh.primitive_cylinder_add(radius=0.018, depth=0.15, location=(x, YF / 2, cz + 0.175)); cw = bpy.context.object; cw.name = "yx_candle_%d" % (sx > 0); cw.data.materials.append(WAX)
+    bpy.ops.mesh.primitive_uv_sphere_add(radius=0.013, location=(x, YF / 2, cz + 0.265)); fl = bpy.context.object; fl.name = "yx_flame_%d" % (sx > 0); fl.scale = (0.6, 0.6, 1.4); fl.data.materials.append(FLAME)
+    bpy.ops.object.light_add(type="POINT", location=(x, YF / 2 - 0.06, cz + 0.29)); pl = bpy.context.object; pl.name = "yx_candlelight_%d" % (sx > 0)
     pl.data.energy = 60; pl.data.color = (1.0, 0.62, 0.28); pl.data.shadow_soft_size = 0.06
 # 扁弧拱：拱圈（宽 ARCH_T）、内圈细线、拱外沿一圈齿、拱与柜顶之间的拱肩填实
 arc_ring("yx_arch", R_ARCH, a0, a1, ARCH_T, PIL_D + 0.02, (0, YF, zc), OAK)
@@ -207,9 +209,9 @@ dentils_line("yx_tdent", -(C + UP_T), (C + UP_T), YF - 0.06, z_top - 0.10, OAK)
 
 # ---------- 光与机位 ----------
 bpy.ops.object.light_add(type="AREA", location=(-2.6, -2.4, 3.6)); k = bpy.context.object; k.name = "yx_key"
-k.data.energy = 480; k.data.size = 2.2; k.data.color = (1.0, 0.90, 0.74); k.rotation_euler = (math.radians(50), 0, math.radians(-42))
+k.data.energy = 560; k.data.size = 2.0; k.data.color = (1.0, 0.86, 0.64); k.rotation_euler = (math.radians(50), 0, math.radians(-42))
 bpy.ops.object.light_add(type="AREA", location=(2.8, -3.0, 1.6)); f = bpy.context.object; f.name = "yx_fill"
-f.data.energy = 60; f.data.size = 3.0; f.data.color = (0.95, 0.9, 0.85); f.rotation_euler = (math.radians(72), 0, math.radians(42))
+f.data.energy = 35; f.data.size = 3.0; f.data.color = (0.95, 0.9, 0.85); f.rotation_euler = (math.radians(72), 0, math.radians(42))
 if sc.world is None: sc.world = bpy.data.worlds.new("yx_world")
 sc.world.use_nodes = True; bg = sc.world.node_tree.nodes.get("Background")
 if bg: bg.inputs["Color"].default_value = (0.5, 0.42, 0.30, 1); bg.inputs["Strength"].default_value = 0.12
