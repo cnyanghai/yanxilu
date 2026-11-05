@@ -33,7 +33,7 @@ except Exception as e: print("GPU 设置失败", e)
 sc.cycles.samples = 160; sc.cycles.use_denoising = True
 try: sc.cycles.denoiser = "OPTIX"
 except Exception: pass
-sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - High Contrast"; sc.view_settings.exposure = -0.3
+sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - High Contrast"; sc.view_settings.exposure = -0.5
 
 # ---------- 材质 ----------
 def pbr(name, base, scale=1.0, tint=(1, 1, 1, 1), rough_mul=1.0, proj="BOX", contrast=0.0, coat=0.0, sat=1.0, nrm=1.4):
@@ -69,10 +69,10 @@ def plain(name, color, rough=0.5, metal=0.0, emit=None):
     b.inputs["Base Color"].default_value = (*color, 1); b.inputs["Roughness"].default_value = rough; b.inputs["Metallic"].default_value = metal
     if emit: b.inputs["Emission Color"].default_value = (*emit[0], 1); b.inputs["Emission Strength"].default_value = emit[1]
     return m
-OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.15, 0.082, 0.040, 1), rough_mul=0.65, contrast=0.85, coat=0.3, sat=1.1, nrm=2.2)      # 暖栗色
-OAK_L = pbr("yx_oak_light", "mocha_oak_veneer", scale=1.1, tint=(0.26, 0.15, 0.075, 1), rough_mul=0.6, contrast=0.85, coat=0.35, sat=1.1, nrm=2.2)
-OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.13, 0.072, 0.035, 1), rough_mul=0.9, contrast=0.8, sat=1.1, nrm=2.2)  # 柜内背板更深
-PLASTER = pbr("yx_plaster", "grey_plaster", scale=0.7, tint=(0.92, 0.58, 0.23, 1), rough_mul=1.0, contrast=-0.4, sat=0.45, nrm=4.5)   # 赭黄灰泥
+OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.17, 0.092, 0.045, 1), rough_mul=0.65, contrast=1.0, coat=0.3, sat=1.1, nrm=3.0)      # 暖栗色
+OAK_L = pbr("yx_oak_light", "mocha_oak_veneer", scale=1.1, tint=(0.42, 0.25, 0.12, 1), rough_mul=0.6, contrast=0.9, coat=0.35, sat=1.1, nrm=3.0)
+OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.10, 0.056, 0.028, 1), rough_mul=0.95, contrast=1.0, sat=1.1, nrm=3.0)  # 柜内背板更深
+PLASTER = pbr("yx_plaster", "grey_plaster", scale=0.95, tint=(0.95, 0.55, 0.18, 1), rough_mul=1.0, contrast=-0.25, sat=0.5, nrm=5.5)   # 赭黄灰泥
 BRASS = plain("yx_brass", (0.78, 0.58, 0.26), 0.48, 1.0)
 WAX = plain("yx_wax", (0.80, 0.74, 0.62), 0.6)
 FLAME = plain("yx_flame", (1.0, 0.75, 0.35), 0.5, emit=((1.0, 0.62, 0.22), 14.0))
@@ -175,6 +175,11 @@ for sx in (-1, 1):
     box("yx_pil_%d" % (sx > 0), (PIL_W, PIL_D, hs), (x, YF / 2, z0 + 0.17 + hs / 2), OAK_L)
     for f_ in range(7):
         box("yx_flute_%d_%d" % (sx > 0, f_), (0.013, 0.022, hs - 0.14), (x - PIL_W / 2 + PIL_W * (f_ + 1) / 8, YF + 0.004, z0 + 0.17 + hs / 2), OAK_D, bevel=0.002)
+    for f_ in range(6):  # 槽与槽之间的亮棱
+        box("yx_fillet_%d_%d" % (sx > 0, f_), (0.006, 0.006, hs - 0.14), (x - PIL_W / 2 + PIL_W * (f_ + 1.5) / 8, YF - 0.006, z0 + 0.17 + hs / 2), OAK_L, bevel=0.001)
+    box("yx_pil_panel_%d" % (sx > 0), (PIL_W - 0.05, 0.010, 0.16), (x, YF - 0.012, z0 + 0.17 + 0.14), OAK_D, bevel=0.002)  # 柱脚嵌板
+    for bi in range(8):  # 颈线珠饰
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.009, location=(x - PIL_W / 2 + PIL_W * (bi + 0.5) / 8, YF - 0.03, z0 + 0.17 + hs + 0.015)); nb_ = bpy.context.object; nb_.name = "yx_neckbead_%d_%d" % (sx > 0, bi); nb_.data.materials.append(OAK_L)
     box("yx_pil_band_%d" % (sx > 0), (PIL_W + 0.02, PIL_D + 0.02, 0.025), (x, YF / 2, z0 + 0.17 + 0.05), OAK_L)
     box("yx_pil_band2_%d" % (sx > 0), (PIL_W + 0.02, PIL_D + 0.02, 0.025), (x, YF / 2, z0 + 0.17 + hs - 0.05), OAK_L)
     zc0 = z0 + 0.17 + hs
@@ -182,6 +187,9 @@ for sx in (-1, 1):
     box("yx_capblk_%d" % (sx > 0), (PIL_W + 0.02, PIL_D + 0.02, CAP_H - 0.09), (x, YF / 2, zc0 + 0.03 + (CAP_H - 0.09) / 2), OAK_L)
     box("yx_cappanel_%d" % (sx > 0), (PIL_W - 0.04, 0.012, CAP_H - 0.15), (x, YF - 0.016, zc0 + 0.03 + (CAP_H - 0.09) / 2), OAK_D, bevel=0.002)
     bpy.ops.mesh.primitive_torus_add(major_radius=0.04, minor_radius=0.011, location=(x, YF - 0.024, zc0 + 0.03 + (CAP_H - 0.09) / 2), rotation=(math.pi / 2, 0, 0)); t = bpy.context.object; t.name = "yx_rosette_%d" % (sx > 0); t.data.materials.append(OAK_L)
+    for pi_ in range(8):  # 八瓣花
+        ang = pi_ * math.pi / 4
+        bpy.ops.mesh.primitive_uv_sphere_add(radius=0.014, location=(x + 0.058 * math.cos(ang), YF - 0.022, zc0 + 0.03 + (CAP_H - 0.09) / 2 + 0.058 * math.sin(ang))); pt = bpy.context.object; pt.name = "yx_petal_%d_%d" % (sx > 0, pi_); pt.scale = (1.0, 0.6, 1.6); pt.rotation_euler = (0, -ang, 0); pt.data.materials.append(OAK_L)
     bpy.ops.mesh.primitive_uv_sphere_add(radius=0.02, location=(x, YF - 0.026, zc0 + 0.03 + (CAP_H - 0.09) / 2)); sp_ = bpy.context.object; sp_.name = "yx_rosette_c_%d" % (sx > 0); sp_.data.materials.append(OAK_L)
     for vx in (-1, 1):
         bpy.ops.mesh.primitive_cylinder_add(radius=0.03, depth=0.05, location=(x + vx * (PIL_W / 2 - 0.01), YF - 0.02, zc0 + CAP_H - 0.09), rotation=(0, math.pi / 2, 0)); v = bpy.context.object; v.name = "yx_volute_%d_%d" % (sx > 0, vx > 0); v.data.materials.append(OAK_L)
@@ -210,13 +218,16 @@ arc_ring("yx_arch_crown", R_CROWN, a0, a1, CROWN, PIL_D + 0.08, (0, YF - 0.06, z
 # ---------- 光与机位：左上一束强暖光打在墙上，四角压暗，柜内靠蜡烛和弱补光 ----------
 # 主光：近、小、斜。离墙近（y=-1.0，墙在 y=0.35），在左上角外侧，往右下照；衰减快，左上亮、右下暗
 bpy.ops.object.light_add(type="AREA", location=(-2.9, -2.3, 4.1)); k = bpy.context.object; k.name = "yx_key"
-k.data.energy = 210; k.data.size = 2.0; k.data.color = (1.0, 0.60, 0.26); k.data.spread = math.radians(100)
+k.data.energy = 150; k.data.size = 2.0; k.data.color = (1.0, 0.60, 0.26); k.data.spread = math.radians(100)
 k.rotation_euler = (math.radians(52), 0, math.radians(-44))
+# 专打柜子正面的窄光：立柱、搁板前沿、线脚受光，墙两侧少受
+bpy.ops.object.light_add(type="AREA", location=(-1.2, -4.2, 2.4)); kf = bpy.context.object; kf.name = "yx_front"
+kf.data.energy = 22; kf.data.size = 1.0; kf.data.color = (1.0, 0.72, 0.42); kf.data.spread = math.radians(50); kf.rotation_euler = (math.radians(84), 0, math.radians(-16))
 # 右上一点点回光，让右边柱头不死黑
 bpy.ops.object.light_add(type="AREA", location=(3.2, -1.4, 3.6)); k2 = bpy.context.object; k2.name = "yx_key2"
 k2.data.energy = 120; k2.data.size = 1.8; k2.data.color = (1.0, 0.62, 0.30); k2.rotation_euler = (math.radians(55), 0, math.radians(48))
 bpy.ops.object.light_add(type="AREA", location=(0.6, -3.6, 1.4)); f = bpy.context.object; f.name = "yx_fill"
-f.data.energy = 85; f.data.size = 2.0; f.data.color = (1.0, 0.82, 0.66); f.rotation_euler = (math.radians(80), 0, math.radians(8))
+f.data.energy = 55; f.data.size = 2.0; f.data.color = (1.0, 0.82, 0.66); f.rotation_euler = (math.radians(80), 0, math.radians(8))
 if sc.world is None: sc.world = bpy.data.worlds.new("yx_world")
 sc.world.use_nodes = True; bg = sc.world.node_tree.nodes.get("Background")
 if bg: bg.inputs["Color"].default_value = (0.4, 0.3, 0.2, 1); bg.inputs["Strength"].default_value = 0.14
@@ -227,7 +238,7 @@ sc.render.resolution_x = 1500; sc.render.resolution_y = 1000; sc.render.film_tra
 for area in bpy.context.screen.areas:
     if area.type == "VIEW_3D":
         sp = area.spaces[0]; sp.shading.type = "MATERIAL"; sp.region_3d.view_perspective = "CAMERA"; sp.overlay.show_overlays = False
-print("bookcase v19: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
+print("bookcase v22: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
 # 合成：烛光光晕 + 轻暗角
 try:
     sc.use_nodes = True; nt = sc.node_tree
