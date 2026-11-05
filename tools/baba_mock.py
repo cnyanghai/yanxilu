@@ -7,7 +7,7 @@ from email.policy import default as email_default
 S = os.path.dirname(os.path.abspath(__file__))
 YXL = os.environ.get("YXL") or os.path.dirname(S)  # 仓库根目录；也可以用环境变量 YXL 指定
 EMBED = open(os.path.join(S, "embed.js")).read()
-COLLS = ["progress","notes","journal","cards","study","film","ebooks","mybooks","hidden","reading","marks","domains","lessons"]
+COLLS = ["progress","notes","journal","cards","study","film","ebooks","mybooks","hidden","reading","marks","domains","lessons","nbooks","pages"]
 USERS = {"u1": {"id": "u1", "name": "测试用户", "phone": "13800000000", "paid": False}}
 DOCS = {}   # (uid, coll, id) -> data
 FILES = {}  # id -> (uid, type, name, bytes)

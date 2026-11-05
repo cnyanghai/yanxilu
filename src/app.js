@@ -9,7 +9,7 @@
   var LESSON_SNAP = window.YXL_LESSONS || {};
   /* 有课程页的线：电影、SQL、Python、CFA、地缘、周复盘 */
   var COURSES = PLAN ? ["film", "sql", "py", "cfa", "geo", "rev"].filter(function (k) { return PLAN.lessons[k]; }) : [];
-  var COLLS = ["progress", "notes", "journal", "cards", "study", "film", "ebooks", "mybooks", "hidden", "reading", "marks", "domains", "clips", "aboxes", "aboxoff"];
+  var COLLS = ["progress", "notes", "journal", "cards", "study", "film", "ebooks", "mybooks", "hidden", "reading", "marks", "domains", "clips", "aboxes", "aboxoff", "nbooks", "pages"];
   var STATUS = [["todo", "未开始"], ["doing", "进行中"], ["done", "已完成"], ["review", "已内化"]];
   var STATUS_LABEL = {}; STATUS.forEach(function (s) { STATUS_LABEL[s[0]] = s[1]; });
   var MARK = { done: "阅", review: "熟" };
@@ -322,7 +322,7 @@
     journal: '<svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 20c-1.5-2-1.5-5 0-7s1.5-5 0-7M17 18c-1.5-2-1.5-5 0-7s1.5-5 0-7"></path></svg>'
   };
   function railHTML() {
-    var r = S.route, sec = /^[lc]-/.test(r) ? "home" : r === "shelf" || r === "archive" || r === "marks" || /^[tbr]-/.test(r) ? "shelf" : r;
+    var r = S.route, sec = /^[lc]-/.test(r) ? "home" : r === "shelf" || r === "archive" || r === "marks" || /^notes/.test(r) || /^[tbr]-/.test(r) ? "shelf" : r;
     function it(id, label, extra) { return '<a href="#' + id + '"' + (sec === id ? ' aria-current="page"' : "") + ">" + ICON[id] + "<span>" + label + "</span>" + (extra || "") + "</a>"; }
     var mode = S.mode === "db" ? (S.canEdit ? ["db", "云端记录"] : ["db", "只读浏览"]) : S.mode === "local" ? ["local", "公开阅读版"] : ["", "正在连接"];
     var modeH = '<span class="mode ' + mode[0] + '"><i></i>' + mode[1] + "</span>";
@@ -332,9 +332,10 @@
         : '<a class="mode login" href="' + esc(SRV.loginHref()) + '"><i></i>登录</a>';
     }
     var srch = '<button type="button" class="tb-srch" data-act="cmdk" title="全站搜索（Ctrl + K）" aria-label="全站搜索"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><line x1="13.4" y1="13.4" x2="17.6" y2="17.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>';
+    var jotB = '<button type="button" class="tb-jot" data-act="jot" title="记一笔（N）：随手记一句，落到随手本今天这一页" aria-label="记一笔"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M3 17l1-4L14 3l3 3L7 16l-4 1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 5l3 3" stroke="currentColor" stroke-width="1.8"/></svg><span>记一笔</span></button>';
     return '<div class="tb-in"><a class="brand" href="#home" aria-label="研习录，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>研习录</b></a>' +
       '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + it("shelf", "书架") + it("journal", "足迹") + "</nav>" +
-      srch + modeH + "</div>";
+      srch + jotB + modeH + "</div>";
   }
 
   /* ---------- 专题（独立页面，新标签页打开；按 reportGroups 分组） ---------- */
@@ -3009,6 +3010,7 @@ var FOIL = (function () {
     var mkN = allMarks().length;
     return '<nav class="seg shelf-seg" aria-label="书架里的几件家具"><a href="#shelf"' + (cur === "shelf" ? ' aria-current="page"' : "") + ">书墙 · " + nBooks + " 本</a>" +
       '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架 · " + TOPICS.length + " 卷 " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "") + "</a>" +
+      '<a href="#notes"' + (cur === "notes" ? ' aria-current="page"' : "") + ">笔记本架 · 1 本</a>" +
       (mkN ? '<a href="#marks"' + (cur === "marks" ? ' aria-current="page"' : "") + ">摘抄册 · " + mkN + " 条</a>" : "") + "</nav>";
   }
   function archiveHTML() {
@@ -4171,6 +4173,115 @@ var FOIL = (function () {
       (ms.length ? '<p class="meta mkb-print"><button type="button" class="linkbtn" data-act="mk-print">打印这一册，或存成 PDF</button></p>' : "") + "</div>";
   }
 
+  /* ---------- 书架：笔记本架（随手本一天一页；「记一笔」从任何页面落到今天这一页） ----------
+   * 设计稿 docs/notebook-design.md。数据和三维版（yanxilu-world）共用：
+   * nbooks：一本笔记本 { name, color, kind, order, t }；随手本固定 id nb-daily，不存也视为存在（第一版只有它）。
+   * pages：一页 { nb, date, text, t, m }；随手本一天一页，文档 id np-d-YYYY-MM-DD。
+   * 页正文是纯文本（讲义那套 Markdown 子集）。以 HH:MM 开头的段落是「记一笔」落下的一段，渲染时时间排在左栏。 */
+  var NB_DAILY = "nb-daily";
+  function npId(date) { return "np-d-" + date; }
+  function npGet(date) { return (S.data.pages || {})[npId(date)] || null; }
+  function npDays() {
+    var o = S.data.pages || {};
+    return Object.keys(o).filter(function (k) { var p = o[k]; return p && p.nb === NB_DAILY && p.date && String(p.text || "").trim(); })
+      .map(function (k) { return o[k].date; }).sort();
+  }
+  function npBlocks(text) { return String(text || "").replace(/\r/g, "").split(/\n[ \t　]*\n+/).map(function (b) { return b.replace(/^\n+|\n+$/g, ""); }).filter(function (b) { return b.trim(); }); }
+  function npEntries(text) { return npBlocks(text).map(function (b) { var m = /^(\d{1,2}:\d{2})[ 　\t]+([\s\S]*)$/.exec(b); return m ? { t: m[1], s: m[2] } : { t: "", s: b }; }); }
+  function npWords(text) { return String(text || "").replace(/\s+/g, "").length; }
+  function npSave(date, text) {
+    var id = npId(date), old = npGet(date), now = new Date().toISOString();
+    if (!String(text || "").trim()) return old ? del("pages", id) : Promise.resolve();
+    if (old && old.text === text) return Promise.resolve();
+    return put("pages", id, { nb: NB_DAILY, date: date, text: text, t: (old && old.t) || now, m: now });
+  }
+  /* 记一笔：追加到今天这一页的末尾，段首带时间 */
+  function jotSave(text) {
+    text = String(text || "").replace(/\s+$/, "").replace(/^\s+/, "");
+    if (!text) return Promise.resolve(false);
+    var d = today(), old = npGet(d), body = (old && String(old.text || "").trim() ? String(old.text).replace(/\s+$/, "") + "\n\n" : "") + hhmm() + "　" + text;
+    return npSave(d, body).then(function () { return true; });
+  }
+  function npRender(text) {
+    return npEntries(text).map(function (e) {
+      return '<div class="np-ent' + (e.t ? "" : " bare") + '"><time>' + esc(e.t) + '</time><div class="np-body">' + mdHTML(e.s) + "</div></div>";
+    }).join("");
+  }
+  function npDayLabel(d) { return cnDate(d) + " · " + WD[new Date(d + "T12:00:00").getDay()]; }
+  function npRouteDay() { var m = /^notes-(\d{4}-\d{2}-\d{2})$/.exec(S.route); return m ? m[1] : today(); }
+  function npGo(d) { S.npMonth = null; S.npEdit = null; var h = d === today() ? "#notes" : "#notes-" + d; if (location.hash === h) render(); else location.hash = h; }
+  function npCalHTML(ym, day, days) {
+    var y = +ym.slice(0, 4), mo = +ym.slice(5, 7), first = new Date(y, mo - 1, 1), n = new Date(y, mo, 0).getDate();
+    var lead = (first.getDay() + 6) % 7, has = {}, td = today();
+    days.forEach(function (d) { has[d] = 1; });
+    var cells = ["一", "二", "三", "四", "五", "六", "日"].map(function (w) { return "<b>" + w + "</b>"; });
+    for (var i = 0; i < lead; i++) cells.push("<span></span>");
+    for (var d = 1; d <= n; d++) {
+      var ds = ym + "-" + pad(d), cls = (ds === day ? " cur" : "") + (ds === td ? " today" : "") + (has[ds] ? " dot" : "");
+      cells.push('<button type="button" class="np-d' + cls + '" data-act="np-day" data-d="' + ds + '" aria-label="' + esc(npDayLabel(ds)) + (has[ds] ? "，写过" : "") + '"' + (ds === day ? ' aria-current="date"' : "") + ">" + d + "</button>");
+    }
+    var pm = mo === 1 ? (y - 1) + "-12" : y + "-" + pad(mo - 1), nm = mo === 12 ? (y + 1) + "-01" : y + "-" + pad(mo + 1);
+    return '<div class="np-mnav"><button type="button" class="np-mb" data-act="np-month" data-m="' + pm + '" aria-label="上个月">‹</button><h2>' + y + " 年 " + mo + ' 月</h2><button type="button" class="np-mb" data-act="np-month" data-m="' + nm + '" aria-label="下个月">›</button></div>' +
+      '<div class="np-cal" role="grid" aria-label="这个月哪些天写过">' + cells.join("") + "</div>";
+  }
+  function notesHTML() {
+    var day = npRouteDay(), ym = S.npMonth || day.slice(0, 7), pg = npGet(day), days = npDays(), text = pg ? String(pg.text || "") : "", td = today();
+    var prev = days.filter(function (d) { return d < day; }).pop() || null, next = days.filter(function (d) { return d > day; })[0] || null;
+    var editing = S.canEdit && S.npEdit === day;
+    var recent = days.slice().reverse().slice(0, 8).map(function (d) {
+      var p = npGet(d), ents = npEntries(p.text);
+      return '<li><button type="button" class="np-toc-b' + (d === day ? " cur" : "") + '" data-act="np-day" data-d="' + d + '"><span>' + esc(npDayLabel(d)) + "</span><em>" + ents.length + " 段</em></button></li>";
+    }).join("");
+    var rows = Math.max(8, text.split("\n").length + 2);
+    var body = editing
+      ? '<textarea id="np-ta" class="np-ta" data-np="' + day + '" rows="' + rows + '" placeholder="写在这一页上。以 14:32 这样的时间开头的一段，会排成带时间的一笔。" aria-label="' + esc(npDayLabel(day)) + ' 这一页">' + esc(text) + "</textarea>"
+      : text
+        ? '<div class="np-paper" ' + (S.canEdit ? 'data-act="np-edit" role="button" tabindex="0" title="点纸面编辑"' : "") + ">" + npRender(text) + "</div>"
+        : '<div class="np-paper empty" ' + (S.canEdit ? 'data-act="np-edit" role="button" tabindex="0"' : "") + "><p>" + (S.canEdit ? "这一页还是空的。点这里开始写，或者在任何页面按 <kbd>N</kbd> 记一笔。" : "这一页还是空的。") + "</p></div>";
+    var nE = npEntries(text).length, nW = npWords(text), mt = pg && pg.m ? (function (d) { return isNaN(d) ? "" : pad(d.getHours()) + ":" + pad(d.getMinutes()); })(new Date(pg.m)) : "";
+    var foot = text ? '<span>' + nE + " 段 · " + nW + " 字" + (mt ? " · 改于 " + esc(mt) : "") + "</span>" : "<span></span>";
+    return '<div class="view shelf notes-v">' + bannerHTML() +
+      '<header class="phead arch-head"><div>' + shelfSeg("notes") + "</div>" +
+      (S.canEdit ? '<button type="button" class="btn ghost np-jot" data-act="jot">✎ 记一笔 <kbd>N</kbd></button>' : "") + "</header>" +
+      '<section class="nrack" aria-label="笔记本架"><div class="nr-board" aria-hidden="true"></div><div class="nr-books">' +
+      '<button type="button" class="nbk-b' + (true ? " cur" : "") + '" data-act="np-day" data-d="' + td + '" style="--nc:#2F4A4F" title="随手本：一天一页，记一笔都落在这里"><small>' + days.length + " 页</small><i>随手本</i></button>" +
+      (S.canEdit ? '<button type="button" class="nbk-b ghost" data-act="nb-new"><span>＋ 新本子</span></button>' : "") +
+      '</div><div class="nr-legs" aria-hidden="true"><i></i><i></i></div></section>' +
+      '<section class="nbk" aria-label="随手本"><div class="nbk-l"><p class="eyebrow">随手本</p>' + npCalHTML(ym, day, days) +
+      (recent ? '<ul class="np-toc">' + recent + "</ul>" : '<p class="meta np-none">还没有写过的页。</p>') + "</div>" +
+      '<div class="nbk-r"><p class="eyebrow np-eye"><span>' + (day === td ? "今天" : day > td ? "以后" : "那天") + '</span><span class="np-dnav">' +
+      '<button type="button" class="linkbtn" data-act="np-day" data-d="' + (prev || "") + '"' + (prev ? "" : " disabled") + ">‹ 前一页</button>" +
+      (day !== td ? '<button type="button" class="linkbtn" data-act="np-day" data-d="' + td + '">今天</button>' : "") +
+      '<button type="button" class="linkbtn" data-act="np-day" data-d="' + (next || "") + '"' + (next ? "" : " disabled") + ">后一页 ›</button></span></p>" +
+      "<h1>" + esc(cnDate(day)) + " <small>" + esc(WD[new Date(day + "T12:00:00").getDay()]) + "</small></h1>" + body +
+      '<p class="np-foot">' + foot + '<span class="np-st" id="np-st">' + (editing ? "编辑中" : "") + "</span></p></div></section></div>";
+  }
+  /* 记一笔：一张纸条，回车存，Esc 收起（草稿留在 S.jotDraft） */
+  function jotHTML() {
+    if (!S.jotOpen) return "";
+    return '<div class="jot-wrap"><form id="jot-form" class="jot" role="dialog" aria-modal="true" aria-label="记一笔"><p class="jot-to"><span>记一笔 → 随手本 · 今天</span><b>' + hhmm() + "</b></p>" +
+      '<textarea id="jot-ta" rows="3" placeholder="想到什么就写下来…" aria-label="这一笔">' + esc(S.jotDraft || "") + "</textarea>" +
+      '<p class="jot-hint"><span><kbd>回车</kbd> 存　<kbd>Shift + 回车</kbd> 换行　<kbd>Esc</kbd> 收起</span><button type="submit" class="btn small">记下</button></p></form></div>';
+  }
+  function jotOpen() {
+    if (!S.canEdit) { toast(S.mode === "db" ? "只读浏览，不能记" : "正在连接，稍等一下"); return; }
+    S.jotOpen = true; render();
+    var ta = document.getElementById("jot-ta"); if (ta) { ta.focus(); ta.selectionStart = ta.selectionEnd = ta.value.length; }
+  }
+  function jotClose(keep) { var ta = document.getElementById("jot-ta"); S.jotDraft = keep && ta ? ta.value : ""; S.jotOpen = false; render(); }
+  function jotSubmit() {
+    var ta = document.getElementById("jot-ta"); if (!ta) return;
+    if (!ta.value.trim()) { toast("先写一句"); ta.focus(); return; }
+    jotSave(ta.value).then(function () { toast("记到今天的随手本了"); });
+    S.jotDraft = ""; S.jotOpen = false; S.npEdit = null; render();
+  }
+  var npTimer = 0;
+  function npFlush() {
+    var ta = document.getElementById("np-ta"); if (!ta) return;
+    clearTimeout(npTimer); npTimer = 0;
+    npSave(ta.getAttribute("data-np"), ta.value).then(function () { var st = document.getElementById("np-st"); if (st) st.textContent = "已保存 " + hhmm(); });
+  }
+
   /* ---------- 全站搜索（Ctrl+K 命令面板） ---------- */
   var CK = null;
   function ckItems() {
@@ -4180,6 +4291,8 @@ var FOIL = (function () {
     add("页面", "书墙", "书架", { h: "shelf" });
     add("页面", "档案架", "研究课题与剪报", { h: "archive" });
     add("页面", "足迹", "经折集章册 · 打卡", { h: "journal" });
+    add("页面", "笔记本架", "随手本 · 记一笔", { h: "notes" });
+    Object.keys(S.data.pages || {}).forEach(function (k) { var p = S.data.pages[k]; if (p && p.nb === NB_DAILY && p.date && String(p.text || "").trim()) add("笔记", "随手本 · " + npDayLabel(p.date), String(p.text).replace(/\s+/g, " ").slice(0, 90), { h: p.date === today() ? "notes" : "notes-" + p.date }); });
     if (allMarks().length) add("页面", "摘抄册", "划线与批注", { h: "marks" });
     COURSES.forEach(function (k) { add("页面", subjName(k) + " 课程页", k === "film" ? "跟读播放器" : "全部课程与讲义", { h: "c-" + k }); });
     allItems().forEach(function (id) { var it = ITEMS[id]; if (!isHidden(id)) add("书", it.title, (it.by || "") + (it.home ? " · " + domInfo(it.home).name : ""), { pick: id }); });
@@ -4208,7 +4321,7 @@ var FOIL = (function () {
     var el = document.createElement("div");
     el.className = "ck"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-label", "全站搜索");
     el.innerHTML = '<div class="ck-panel"><div class="ck-bar"><span class="ck-ic" aria-hidden="true">找</span>' +
-      '<input class="ck-in" type="search" autocomplete="off" spellcheck="false" placeholder="搜书、剪报、档案盒、讲义、精读、足迹、划线……" aria-label="全站搜索"></div>' +
+      '<input class="ck-in" type="search" autocomplete="off" spellcheck="false" placeholder="搜书、剪报、档案盒、笔记、讲义、精读、足迹、划线……" aria-label="全站搜索"></div>' +
       '<div class="ck-res" role="listbox" aria-label="搜索结果"></div><p class="ck-foot">↑ ↓ 选中 · 回车打开 · Esc 关闭</p></div>';
     document.body.appendChild(el);
     CK = { el: el, all: ckItems(), hits: [], sel: 0 };
@@ -5457,14 +5570,14 @@ var FOIL = (function () {
   }
 
   /* ---------- 主渲染 ---------- */
-  var ROUTES = { home: 1, shelf: 1, archive: 1, journal: 1, clip: 1, marks: 1 };
+  var ROUTES = { home: 1, shelf: 1, archive: 1, journal: 1, clip: 1, marks: 1, notes: 1 };
   COURSES.forEach(function (k) { ROUTES["c-" + k] = 1; });
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
   Object.keys(LIB.books).forEach(function (b) {
     ROUTES["b-" + b] = 1;
     Object.keys(LIB.books[b].deep || {}).forEach(function (n) { ROUTES["r-" + b + "-" + n] = 1; });
   });
-  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] || (PLAN && /^l-(\d{4}-\d{2}-\d{2}|[a-z]+-\d{2})$/.test(h)) ? h : "home"; }
+  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] || /^notes-\d{4}-\d{2}-\d{2}$/.test(h) || (PLAN && /^l-(\d{4}-\d{2}-\d{2}|[a-z]+-\d{2})$/.test(h)) ? h : "home"; }
 
   function render(scrollTop) {
     syncMyBooks(); syncBoxes();
@@ -5479,12 +5592,13 @@ var FOIL = (function () {
     else if (/^c-/.test(r)) html = courseHTML(r.slice(2));
     else if (r === "shelf") html = shelfHTML();
     else if (r === "archive") html = archiveHTML();
+    else if (/^notes/.test(r)) html = notesHTML();
     else if (r === "marks") html = marksPageHTML();
     else if (r === "clip") html = clipPageHTML();
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
-    $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML() + keysHTML());
+    $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML());
     document.body.classList.toggle("desk-on", !!document.querySelector(".ydesk"));
     wallPack(); grimHydrate();
     if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);
@@ -5583,13 +5697,25 @@ var FOIL = (function () {
   /* ? 弹出快捷键单 */
   function keysHTML() {
     if (!S.keysOpen) return "";
-    var rows = [["Ctrl / Cmd + K", "全站搜索"], ["← →（书墙上）", "在书与书之间移动，回车上展台"], ["← →（阅读器）", "上一部分 / 下一部分，手机上左右滑"],
+    var rows = [["Ctrl / Cmd + K", "全站搜索"], ["N", "记一笔：落到随手本今天这一页"], ["← →（书墙上）", "在书与书之间移动，回车上展台"], ["← →（阅读器）", "上一部分 / 下一部分，手机上左右滑"],
       ["Esc", "关掉阅读器、弹层、小窗"], ["空格（跟读播放器）", "播放 / 暂停这一句"], ["← → r（跟读播放器）", "上一句 / 下一句 / 重播"], ["h · k（跟读播放器）", "换字幕显示 · 标记背熟"], ["?", "打开 / 收起这张单子"]];
     return '<div class="add-sheet" role="dialog" aria-modal="true" aria-labelledby="ks-h"><div class="add-card ks-card"><h2 id="ks-h">快捷键</h2><table class="ks-t">' +
       rows.map(function (r) { return "<tr><td><kbd>" + esc(r[0]) + "</kbd></td><td>" + esc(r[1]) + "</td></tr>"; }).join("") +
       '</table><div class="btns"><button type="button" class="btn small" data-act="keys-close">知道了</button></div></div></div>';
   }
   document.addEventListener("keydown", function (e) {
+    if (e.target && e.target.id === "jot-ta") {
+      if (e.key === "Enter" && !e.shiftKey && !e.isComposing) { e.preventDefault(); jotSubmit(); }
+      else if (e.key === "Escape") { e.preventDefault(); jotClose(true); }
+      return;
+    }
+    if (e.key === "Escape" && S.jotOpen) { jotClose(true); return; }
+    if (e.target && e.target.id === "np-ta" && e.key === "Escape") { e.preventDefault(); e.target.blur(); return; }
+    if ((e.key === "n" || e.key === "N") && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      var tg0 = e.target, tag0 = tg0 && tg0.tagName;
+      if (tag0 === "INPUT" || tag0 === "TEXTAREA" || tag0 === "SELECT" || (tg0 && tg0.isContentEditable) || RD || CK || S.jotOpen) return;
+      e.preventDefault(); jotOpen(); return;
+    }
     if (e.key !== "?" || e.ctrlKey || e.metaKey || e.altKey) return;
     var tg = e.target, tag = tg && tg.tagName;
     if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || (tg && tg.isContentEditable) || RD || CK) return;
@@ -5607,6 +5733,7 @@ var FOIL = (function () {
     var pop = document.getElementById("mpop");
     if (pop && !pop.hidden && !e.target.closest("#mpop") && !e.target.closest('[data-act="mst"],[data-act="mgs"],[data-act="mhub"],[data-act="mlm"]')) closePop();
     if (S.lookOpen && e.target.closest && !e.target.closest(".look")) { S.lookOpen = false; render(); }
+    if (S.jotOpen && e.target.closest && !e.target.closest(".jot") && !e.target.closest('[data-act="jot"]')) { jotClose(true); }
     var hlm = RD && RD.kind === "pdf" && e.target.closest && e.target.closest(".rd mark.yx-hl");
     if (hlm && window.getSelection().isCollapsed) { rdPop(hlm.getAttribute("data-mk")); return; }
     var t = e.target.closest("[data-act]"); if (!t) return;
@@ -5656,6 +5783,11 @@ var FOIL = (function () {
     if (act === "ritual") { ritualOpen(t.getAttribute("data-d")); return; }
     if (act === "review") { reviewOpen(); return; }
     if (act === "cmdk") { ckOpen(); return; }
+    if (act === "jot") { if (S.jotOpen) jotClose(true); else jotOpen(); return; }
+    if (act === "np-day") { var nd = t.getAttribute("data-d"); if (nd) npGo(nd); return; }
+    if (act === "np-month") { S.npMonth = t.getAttribute("data-m"); render(); return; }
+    if (act === "np-edit") { if (!S.canEdit) return; S.npEdit = npRouteDay(); render(); var nta = document.getElementById("np-ta"); if (nta) { nta.focus(); nta.selectionStart = nta.selectionEnd = nta.value.length; } return; }
+    if (act === "nb-new") { toast("主题本下一版再做；先把随手本用起来。"); return; }
     if (act === "mk-open") { markOpen(t.getAttribute("data-id")); return; }
     if (act === "mk-f") { (S.mkFilter = S.mkFilter || { t: "all", c: "" }).t = t.getAttribute("data-f"); render(); return; }
     if (act === "mk-fc") { var mcf = S.mkFilter = S.mkFilter || { t: "all", c: "" }, mc = t.getAttribute("data-c"); mcf.c = mcf.c === mc ? "" : mc; render(); return; }
@@ -5874,6 +6006,11 @@ var FOIL = (function () {
   document.addEventListener("input", function (e) {
     var t = e.target;
     if (t.id === "arch-q") { S.archQ = t.value.trim().toLowerCase(); applyArchFilter(); return; }
+    if (t.id === "np-ta") {
+      var st0 = document.getElementById("np-st"); if (st0) st0.textContent = "编辑中";
+      t.rows = Math.max(8, t.value.split("\n").length + 2);
+      clearTimeout(npTimer); npTimer = setTimeout(npFlush, 800); return;
+    }
     if (!t.hasAttribute || !t.hasAttribute("data-note")) return;
     var id = t.getAttribute("data-note"), ind = document.getElementById("ns-" + id);
     if (ind) ind.textContent = "编辑中";
@@ -5883,8 +6020,15 @@ var FOIL = (function () {
       p.then(function () { var i2 = document.getElementById("ns-" + id); if (i2) i2.textContent = "已保存 " + hhmm(); });
     }, 800);
   });
+  document.addEventListener("focusout", function (e) {
+    if (!e.target || e.target.id !== "np-ta") return;
+    npFlush(); if (!document.hasFocus()) return;
+    S.npEdit = null;
+    setTimeout(function () { if (document.getElementById("np-ta")) render(); }, 120);
+  });
   document.addEventListener("submit", function (e) {
     if (e.target.id === "add-form") { e.preventDefault(); addSave(e.target); return; }
+    if (e.target.id === "jot-form") { e.preventDefault(); jotSubmit(); return; }
     if (e.target.id === "dom-form") { e.preventDefault(); domSave(e.target); return; }
     if (e.target.id === "box-form") { e.preventDefault(); boxSave(e.target); return; }
     if (e.target.id === "ritual-form") { e.preventDefault(); ritualSave(e.target); return; }
