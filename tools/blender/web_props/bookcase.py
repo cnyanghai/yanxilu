@@ -33,7 +33,7 @@ except Exception as e: print("GPU 设置失败", e)
 sc.cycles.samples = 160; sc.cycles.use_denoising = True
 try: sc.cycles.denoiser = "OPTIX"
 except Exception: pass
-sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - Medium High Contrast"; sc.view_settings.exposure = -0.55
+sc.view_settings.view_transform = "AgX"; sc.view_settings.look = "AgX - High Contrast"; sc.view_settings.exposure = -0.7
 
 # ---------- 材质 ----------
 def pbr(name, base, scale=1.0, tint=(1, 1, 1, 1), rough_mul=1.0, proj="BOX", contrast=0.0, coat=0.0, sat=1.0):
@@ -69,9 +69,9 @@ def plain(name, color, rough=0.5, metal=0.0, emit=None):
     b.inputs["Base Color"].default_value = (*color, 1); b.inputs["Roughness"].default_value = rough; b.inputs["Metallic"].default_value = metal
     if emit: b.inputs["Emission Color"].default_value = (*emit[0], 1); b.inputs["Emission Strength"].default_value = emit[1]
     return m
-OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.21, 0.105, 0.05, 1), rough_mul=0.7, contrast=0.5, coat=0.2, sat=1.25)      # 暖栗色
-OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.12, 0.062, 0.03, 1), rough_mul=0.95, contrast=0.45, sat=1.2)  # 柜内背板更深
-PLASTER = pbr("yx_plaster", "grey_plaster", scale=0.5, tint=(0.92, 0.60, 0.26, 1), rough_mul=1.0, contrast=-0.25, sat=0.5)   # 赭黄灰泥
+OAK = pbr("yx_oak", "mocha_oak_veneer", scale=1.1, tint=(0.17, 0.095, 0.048, 1), rough_mul=0.7, contrast=0.5, coat=0.2, sat=1.05)      # 暖栗色
+OAK_D = pbr("yx_oak_dark", "mocha_oak_veneer", scale=1.1, tint=(0.10, 0.055, 0.028, 1), rough_mul=0.95, contrast=0.45, sat=1.05)  # 柜内背板更深
+PLASTER = pbr("yx_plaster", "grey_plaster", scale=0.5, tint=(0.95, 0.62, 0.27, 1), rough_mul=1.0, contrast=-0.15, sat=0.55)   # 赭黄灰泥
 BRASS = plain("yx_brass", (0.85, 0.66, 0.30), 0.32, 1.0)
 WAX = plain("yx_wax", (0.80, 0.74, 0.62), 0.6)
 FLAME = plain("yx_flame", (1.0, 0.75, 0.35), 0.5, emit=((1.0, 0.62, 0.22), 8.0))
@@ -202,13 +202,15 @@ dentils("yx_adent", R_DENT + DENT * 0.55, a0, a1, YF - 0.015, zc, OAK, size=DENT
 arc_ring("yx_arch_crown", R_CROWN, a0, a1, CROWN, PIL_D + 0.08, (0, YF - 0.06, zc), OAK)
 
 # ---------- 光与机位：左上一束强暖光打在墙上，四角压暗，柜内靠蜡烛和弱补光 ----------
-bpy.ops.object.light_add(type="AREA", location=(-3.4, -3.0, 4.6)); k = bpy.context.object; k.name = "yx_key"
-k.data.energy = 2600; k.data.size = 3.2; k.data.color = (1.0, 0.70, 0.38); k.data.spread = math.radians(110)
-k.rotation_euler = (math.radians(48), 0, math.radians(-40))
-bpy.ops.object.light_add(type="AREA", location=(3.0, -2.6, 4.0)); k2 = bpy.context.object; k2.name = "yx_key2"
-k2.data.energy = 500; k2.data.size = 2.5; k2.data.color = (1.0, 0.66, 0.34); k2.rotation_euler = (math.radians(50), 0, math.radians(38))
+# 主光：近、小、斜。离墙近（y=-1.0，墙在 y=0.35），在左上角外侧，往右下照；衰减快，左上亮、右下暗
+bpy.ops.object.light_add(type="AREA", location=(-2.6, -1.0, 4.0)); k = bpy.context.object; k.name = "yx_key"
+k.data.energy = 900; k.data.size = 1.1; k.data.color = (1.0, 0.70, 0.38); k.data.spread = math.radians(100)
+k.rotation_euler = (math.radians(58), 0, math.radians(-52))
+# 右上一点点回光，让右边柱头不死黑
+bpy.ops.object.light_add(type="AREA", location=(3.2, -1.4, 3.6)); k2 = bpy.context.object; k2.name = "yx_key2"
+k2.data.energy = 110; k2.data.size = 1.5; k2.data.color = (1.0, 0.66, 0.34); k2.rotation_euler = (math.radians(55), 0, math.radians(48))
 bpy.ops.object.light_add(type="AREA", location=(0.6, -3.6, 1.4)); f = bpy.context.object; f.name = "yx_fill"
-f.data.energy = 25; f.data.size = 3.0; f.data.color = (1.0, 0.85, 0.7); f.rotation_euler = (math.radians(80), 0, math.radians(8))
+f.data.energy = 18; f.data.size = 3.0; f.data.color = (1.0, 0.85, 0.7); f.rotation_euler = (math.radians(80), 0, math.radians(8))
 if sc.world is None: sc.world = bpy.data.worlds.new("yx_world")
 sc.world.use_nodes = True; bg = sc.world.node_tree.nodes.get("Background")
 if bg: bg.inputs["Color"].default_value = (0.4, 0.3, 0.2, 1); bg.inputs["Strength"].default_value = 0.03
@@ -219,7 +221,7 @@ sc.render.resolution_x = 1500; sc.render.resolution_y = 1000; sc.render.film_tra
 for area in bpy.context.screen.areas:
     if area.type == "VIEW_3D":
         sp = area.spaces[0]; sp.shading.type = "MATERIAL"; sp.region_3d.view_perspective = "CAMERA"; sp.overlay.show_overlays = False
-print("bookcase v12: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
+print("bookcase v13: shelves", N_SHELF, "arch top", round(z_arch_top, 2), "width", round(total_w, 2))
 sc.render.filepath = r"C:\Users\cnyan\blender_mcp\yanxilu\shots\case_render.png"
 bpy.ops.render.render(write_still=True)
 bpy.ops.wm.save_as_mainfile(filepath=r"C:\Users\cnyan\blender_mcp\yanxilu\yanxilu_props.blend")
