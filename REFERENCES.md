@@ -25,6 +25,7 @@ last_scan: 2026-11-04
 | 2026-11-04 | WebSearch + GitHub | 最受欢迎的笔记产品与设计模式：Notion / Obsidian / OneNote / Apple Notes / Bear / Capacities / Tana / Heptabase / Logseq / flomo / 语雀 / 思源 / memos；Goodnotes / Notability 拟物笔记本；每日笔记与快速捕捉模式 | 结论归成五种流派，见下面「笔记本设计调研」一节 |
 | 2026-11-05 | Commons API + Poly Haven API | 笔记本架与展台的参考墙：分类 Bookrests、Qur'an stands、Bookstands、Lecterns、Analogions、Bookwheel、Writing slopes、Display stands、Magazine stands、Chinese furniture in the MET；Poly Haven 模型 chinese_console_table、chinese_cabinet、painted_wooden_shelves、katana_stand_01、modern_wooden_cabinet、drawer_cabinet、brass_candleholders、mantel_clock_01 | 拼成 30 张的参考墙（本机 tools/out/refwall.jpg，不入库），四个方向：中式条案与柜 / 书托与经架 / 西式读经台与读写台 / 现代陈列架；等用户圈方向 |
 | 2026-11-06 | Commons 分类 + WebSearch | 档案架与档案盒参考：Card catalogs、Pigeonholes、Document boxes、Scroll cases、Archive boxes、Hollinger box、Archives storage、Type cases、Filing cabinets、China cabinets；Hollinger / Solander 盒与档案馆上架方式；Zotero / DEVONthink / Are.na / Obsidian canvas 的集合界面 | 27 张参考墙（本机 tools/out/refwall-archive.jpg），结论在 docs/archive-design.md 第三节 |
+| 2026-11-06 | WebSearch | 卡怎么存放：mymind（无文件夹只搜索）、Raindrop（收藏夹加标签）、Are.na（block 多 channel）、Milanote / Kosmik / Muse（空间板）、Luhmann 卡片盒（文献卡与想法卡两盒、固定编号加索引） | 结论在 docs/archive-design.md 第五节第 2 小节：借 Are.na 的引卡、Luhmann 的两盒分工、空间板做工作面；mymind 与 Raindrop 排除 |
 
 ## 条目
 
@@ -103,6 +104,10 @@ last_scan: 2026-11-04
 | 用户 2026-11-05 发来的五张书房场景图（本机会话图片 10 到 14，不入库） | 1 暗学院拱形书柜加蜡烛窗壁炉（摄影背景布商品图）；2 土墙拱形书柜配秋叶（插画）；3 水晶洞穴图书馆（奇幻插画）；4 深木书柜皮面书黄铜铭牌（摄影背景布）；5 大树书架（概念插画） | 共同点：整个场而非一面墙、低调多点暖光、深色厚重雕木、皮面烫金一族书、有一个锚（拱 / 树 / 壁炉）。研习录借 1 与 4 的深木拱形书柜与烛光，借 2 的暖度 | 1 与 4 的书是画死的，研习录的书要由数据生成；3 是奇幻题材与研习内容冲突；5 的曲枝无法程序化摆书 | 采纳方向（1、4 为主，2 调暖）；做法定为「空书柜的画 + 代码摆的书」，书柜按拱顶 / 格层 / 底座 / 立柱模块化，由 Blender 渲出 |
 | 维基共享「Card catalogs」「Archive boxes」「Hollinger box」「Pigeonholes」「Document boxes」 | 卡片目录柜、档案盒上架、霍林格盒、鸽笼格、便携文书匣的实拍 | 档案架的密度与统一（同规格小抽屉加黄铜标牌）、收件匣用鸽笼格、打开一盒像文书匣翻开、盒子形制（灰板、包边、前脸标签、绳扣） | 档案馆是金属货架与灰盒，气质偏库房，只借形制不借材质 | 借鉴（档案架设计研究） |
 | Are.na channels / blocks（Pratt 设计评论与官方文档） | 一个 block 可连到多个 channel；卡片按 channel 成列 | "一件两盒"的产品问题；卡片列的排法 | 极简到乏味，我们要的是房间 | 仅参考 |
+| mymind（wondertools、fabric.so 对比） | 没有文件夹、标签，一个卡流，自动标注加搜索；免费 50 张 | "不归位也能活"的态度，用于没归位的卡 | 没有课题这个意义，是收藏不是研究 | 排除（只借态度） |
+| Raindrop | 收藏夹树加标签，导出开放 | 无 | 就是文件夹，和现在的盒一样 | 排除 |
+| Milanote / Kosmik / Muse | 空间板：卡随手摆、位置即意义、板里嵌板；Kosmik 带浏览器与剪藏 | 线索板作为研究册里的一页 | 要用户自己摆，手机难，卡多了乱 | 借鉴（设想丙） |
+| Luhmann 卡片盒（ernestchiang 综述、zettelkasten.de 论坛） | 两只独立的盒：文献卡与想法卡；不按主题分格，固定编号加关键词索引 | 存放用一只卡片柜，剪报（文献）与研究（想法）分段；引卡解决一卡多处 | 他的索引靠编号，我们靠搜索与分隔签 | 采纳思路（设想丁） |
 
 ## 待看
 

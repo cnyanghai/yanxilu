@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>卡放哪儿 · 六种存放形式示意</title>
+<style>
+:root{--paper:#f3ead8;--ink:#2b2520;--mute:#7a6a58;--kraft:#c9a46c;--kraft2:#b28b53;--wood:#6b4a2e;--wood2:#8a6340;--card:#fbf6ea;--line:#d8c9ad;--cork:#c89a62;--tab:#e9dcc0;--seal:#8a3b2a}
+*{box-sizing:border-box}
+body{margin:0;background:#e8dfcd;color:var(--ink);font:15px/1.5 "Noto Serif CJK SC","Source Han Serif SC","Songti SC",serif;padding:28px}
+h1{font-size:22px;margin:0 0 4px;font-weight:600}
+.sub{color:var(--mute);margin:0 0 18px;font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.p{background:var(--paper);border:1px solid #d9ccb2;border-radius:6px;padding:14px 14px 10px;min-height:380px;display:flex;flex-direction:column}
+.p h2{font-size:16px;margin:0;font-weight:600}
+.p h2 small{font-weight:400;color:var(--mute);font-size:12px;margin-left:8px}
+.p .note{font-size:12px;color:var(--mute);margin:6px 0 0;line-height:1.5}
+.sk{flex:1;position:relative;margin:10px 0 6px;min-height:250px}
+.cardf{position:absolute;background:var(--card);border:1px solid #cdbb9a;border-radius:2px;box-shadow:0 1px 2px rgba(60,40,20,.18);padding:4px 5px;font-size:9px;line-height:1.3;color:#3a2f26;overflow:hidden}
+.cardf b{display:block;font-weight:600;font-size:9.5px;margin-bottom:2px}
+.cardf i{position:absolute;right:3px;top:2px;font-style:normal;font-size:8px;color:#fff;background:#6b5a46;padding:0 3px;border-radius:2px}
+.cardf u{position:absolute;right:4px;bottom:3px;width:7px;height:7px;border-radius:50%;background:#9a8d7a;text-decoration:none}
+.cardf u.r{background:#3d6b7a}.cardf u.n{background:#b7a992;border:1px dashed #6b5a46;width:6px;height:6px}.cardf u.au{background:#a8822c}
+.ln{height:4px;background:#c9bda6;border-radius:2px;margin:5px 0}
+.ln.s{width:60%}.ln.m{width:80%}
+/* 甲 卷宗 */
+.folder{position:absolute;left:6px;top:28px;width:150px;height:200px;background:var(--kraft);border:1px solid var(--kraft2);border-radius:3px;box-shadow:2px 3px 0 #a37c45}
+.folder:before{content:"卷 07";position:absolute;left:10px;top:-16px;background:var(--kraft);border:1px solid var(--kraft2);border-bottom:0;padding:0 8px;font-size:10px;border-radius:3px 3px 0 0}
+.folder .lab{position:absolute;left:18px;top:30px;width:112px;height:70px;background:var(--card);border:1px solid #cdbb9a;padding:6px;font-size:9px}
+.folder .lab b{display:block;font-size:10px;margin-bottom:3px}
+.folder .seal{position:absolute;right:14px;bottom:14px;width:30px;height:30px;border:2px solid var(--seal);color:var(--seal);border-radius:3px;font-size:11px;line-height:26px;text-align:center;transform:rotate(-8deg)}
+.folder .btn{position:absolute;left:66px;bottom:52px;width:12px;height:12px;border-radius:50%;background:#7a5a36}
+.folder .btn:after{content:"";position:absolute;left:4px;top:4px;width:46px;height:3px;background:#3a2a1a;transform:rotate(-30deg);transform-origin:left}
+.open{position:absolute;left:170px;top:28px;width:206px;height:200px;display:flex;gap:4px}
+.open .pg{flex:1;background:var(--card);border:1px solid #cdbb9a;padding:8px 7px;font-size:9px;position:relative}
+.open .pg h4{margin:0 0 4px;font-size:10px;font-weight:600}
+.open .pg .ans{font-size:8.5px;color:#4a3f33;margin-top:6px}
+.open .pg.r{background:var(--kraft);border-color:var(--kraft2)}
+.open .pg.r .cardf{left:14px;width:84px;height:60px}
+.open .pg.r .prong{position:absolute;left:10px;top:8px;width:60px;height:5px;border:1.5px solid #6b5a46;border-bottom:0;border-radius:3px 3px 0 0}
+/* 乙 研究册 */
+.book{position:absolute;left:8px;top:20px;right:8px;height:224px;display:flex;background:var(--wood);padding:6px;border-radius:4px}
+.book .pg{flex:1;background:var(--card);position:relative;padding:12px 10px;font-size:9px}
+.book .pg.l{border-radius:3px 0 0 3px;box-shadow:inset -8px 0 10px -8px rgba(0,0,0,.35)}
+.book .pg.r{border-radius:0 3px 3px 0;box-shadow:inset 8px 0 10px -8px rgba(0,0,0,.35)}
+.book .cardf{transform:rotate(-2deg)}
+.tape{position:absolute;width:16px;height:7px;background:rgba(255,235,190,.85);border:1px solid rgba(160,130,80,.4);transform:rotate(-40deg)}
+.hand{font-family:"KaiTi","STKaiti","Noto Serif CJK SC",serif;color:#3b3a7a;font-size:9.5px;line-height:1.5}
+.pgno{position:absolute;bottom:4px;font-size:8px;color:var(--mute)}
+/* 丙 线索板 */
+.cork{position:absolute;inset:8px 6px 18px;background:var(--cork);background-image:radial-gradient(rgba(90,55,20,.18) 1px,transparent 1.5px);background-size:7px 7px;border:8px solid var(--wood);border-radius:2px}
+.pin{position:absolute;width:9px;height:9px;border-radius:50%;background:#3a3a3a;box-shadow:0 1px 1px rgba(0,0,0,.5);z-index:3}
+.cork svg{position:absolute;inset:0;width:100%;height:100%;z-index:2}
+.big{position:absolute;background:#f6e9a8;border:1px solid #d9c56a;padding:6px 7px;font-size:9px;line-height:1.35;box-shadow:0 2px 3px rgba(0,0,0,.25);transform:rotate(1.5deg);z-index:1}
+.big b{display:block;font-size:10px}
+/* 丁 卡片柜 */
+.drawer{position:absolute;left:8px;right:8px;top:60px;height:140px;background:var(--wood2);border:3px solid var(--wood);border-radius:3px;overflow:visible}
+.drawer .cards{position:absolute;left:8px;right:8px;bottom:6px;height:110px;background:repeating-linear-gradient(90deg,#f6efdf 0 3px,#d9ccb0 3px 4px);border:1px solid #9a7a55}
+.div{position:absolute;bottom:6px;width:2px;height:132px;background:#7a4f2a}
+.div span{position:absolute;left:-1px;top:-18px;background:var(--tab);border:1px solid #9a8a6a;font-size:9px;line-height:1;padding:3px 5px;white-space:nowrap;border-radius:2px 2px 0 0}
+.div.first span{background:#e5d2b0}
+.pull{position:absolute;bottom:40px;width:72px;height:96px;z-index:3;box-shadow:0 3px 6px rgba(0,0,0,.35)}
+.ref{position:absolute;bottom:18px;width:56px;height:54px;font-size:8px;background:#efe6d2;border-style:dashed}
+.handle{position:absolute;left:50%;bottom:-16px;width:60px;height:10px;margin-left:-30px;background:#a8822c;border-radius:5px;border:1px solid #6b5420}
+.plate{position:absolute;right:16px;top:-26px;background:#a8822c;border:1px solid #6b5420;font-size:9px;padding:1px 8px;color:#2b2520;border-radius:2px}
+/* 戊 牌册 */
+.binder{position:absolute;left:30px;right:10px;top:12px;height:230px;background:var(--card);border:1px solid #cdbb9a;padding:12px 10px 10px 18px}
+.rings{position:absolute;left:-8px;top:10px;bottom:10px;width:16px;display:flex;flex-direction:column;justify-content:space-around}
+.rings i{width:16px;height:10px;border:2px solid #777;border-radius:8px;background:#ddd}
+.nine{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;height:100%}
+.nine .cardf{position:static;height:auto;background:rgba(251,246,234,.9);outline:2px solid rgba(255,255,255,.7)}
+.nine .cardf.e{background:rgba(255,255,255,.25);border-style:dashed}
+/* 己 托盘 */
+.tray{position:absolute;left:30px;right:30px;height:46px;border:2px solid #4a3a2a;border-top:0;background:rgba(255,255,255,.35)}
+.tray:before{content:attr(data-l);position:absolute;left:-2px;top:-20px;font-size:10px;background:var(--tab);border:1px solid #9a8a6a;padding:0 6px;border-radius:2px 2px 0 0}
+.tray .pile{position:absolute;left:14px;right:14px;bottom:2px;height:0}
+.tray .pile i{position:absolute;left:0;right:0;height:5px;background:var(--card);border:1px solid #cdbb9a}
+.legend{margin-top:16px;font-size:12px;color:var(--mute)}
+</style></head><body>
+<h1>卡放哪儿 · 六种存放形式示意</h1>
+<p class="sub">只画形式，不画美术。每张卡 = 一篇文章或一篇研究；卡面统一：题签、类型角标、右下宝石（学到哪一步）。配合 docs/archive-design.md 第五节读。</p>
+<div class="grid">
+
+<section class="p"><h2>甲 卷宗<small>一个课题一本，封面卷宗签，翻开左卷首右证据</small></h2>
+<div class="sk">
+  <div class="folder"><div class="lab"><b>康波为什么总是六十年</b>问题 · 7 件 · 在做</div><div class="btn"></div><div class="seal">年更</div></div>
+  <div class="open">
+    <div class="pg"><h4>卷首</h4><div class="ln m"></div><div class="ln s"></div><div class="ans">现在的答案：<div class="ln"></div><div class="ln m"></div><div class="ln"></div><div class="ln s"></div></div></div>
+    <div class="pg r"><div class="prong"></div>
+      <div class="cardf" style="top:16px"><b>长波与技术革命</b>知乎回答<i>剪</i><u class="r"></u></div>
+      <div class="cardf" style="top:42px;left:22px"><b>资本回报率的周期</b>公众号<i>剪</i><u class="n"></u></div>
+      <div class="cardf" style="top:68px;left:30px"><b>1870 到 1930 的价格</b>数据<i>数</i><u class="au"></u></div>
+      <div class="cardf" style="top:94px;left:38px"><b>康波断代表</b>档案<i>档</i><u class="r"></u></div>
+    </div>
+  </div>
+</div>
+<p class="note">答案在卷首、待立卷一摞，离现在最近。一卡不能在两卷，卡之间没有关系。</p></section>
+
+<section class="p"><h2>乙 研究册<small>卡贴在页上，旁边写批注和答案，和笔记本同架</small></h2>
+<div class="sk">
+  <div class="book">
+    <div class="pg l">
+      <div class="cardf" style="left:12px;top:14px;width:86px;height:64px"><b>长波与技术革命</b>知乎回答 · 12 分<i>剪</i><u class="r"></u></div>
+      <span class="tape" style="left:6px;top:10px"></span><span class="tape" style="left:92px;top:70px"></span>
+      <div class="hand" style="position:absolute;left:106px;top:16px;width:60px">他把周期归到技术，我觉得漏了信用</div>
+      <div class="hand" style="position:absolute;left:12px;top:92px;right:10px">现在的答案（第三稿）：六十年不是定数，是两代人忘记上一次危机所需的时间……</div>
+      <div class="ln" style="position:absolute;left:12px;right:10px;bottom:30px"></div><div class="ln s" style="position:absolute;left:12px;bottom:20px"></div>
+      <span class="pgno" style="left:12px">康波 · 第 3 页</span>
+    </div>
+    <div class="pg r">
+      <div class="cardf" style="left:10px;top:12px;width:78px;height:54px"><b>1870 到 1930 的价格</b>数据<i>数</i><u class="au"></u></div>
+      <span class="tape" style="left:4px;top:8px"></span>
+      <div class="cardf" style="left:10px;top:80px;width:78px;height:54px"><b>资本回报率的周期</b>公众号<i>剪</i><u class="n"></u></div>
+      <span class="tape" style="left:4px;top:76px"></span>
+      <div class="hand" style="position:absolute;left:98px;top:14px;right:8px">这张卡也贴在「货币」那一册（复印，原件在柜里）</div>
+      <div class="hand" style="position:absolute;left:98px;top:86px;right:8px">还没读</div>
+      <span class="pgno" style="right:12px">第 4 页</span>
+    </div>
+  </div>
+</div>
+<p class="note">读写同页，答案越写越长；一卡多册靠复印。手机就是翻页。</p></section>
+
+<section class="p"><h2>丙 线索板<small>一个课题一块板，图钉、拉线、便签；答案是中间那张大便签</small></h2>
+<div class="sk">
+  <div class="cork">
+    <svg viewBox="0 0 360 230" preserveAspectRatio="none"><g stroke="#3a2a1a" stroke-width="1.2" fill="none"><path d="M70 50 L170 110"/><path d="M290 48 L190 112"/><path d="M60 180 L170 128"/><path d="M300 178 L200 128"/><path d="M70 50 L290 48" stroke-dasharray="3 3"/></g></svg>
+    <div class="cardf" style="left:22px;top:22px;width:84px;height:52px;transform:rotate(-3deg)"><b>长波与技术革命</b>知乎回答<i>剪</i><u class="r"></u></div><span class="pin" style="left:60px;top:18px"></span>
+    <div class="cardf" style="left:248px;top:20px;width:84px;height:52px;transform:rotate(2deg)"><b>康波断代表</b>档案<i>档</i><u class="r"></u></div><span class="pin" style="left:286px;top:16px"></span>
+    <div class="cardf" style="left:14px;top:154px;width:84px;height:52px;transform:rotate(1deg)"><b>资本回报率的周期</b>公众号<i>剪</i><u class="n"></u></div><span class="pin" style="left:54px;top:150px"></span>
+    <div class="cardf" style="left:256px;top:152px;width:84px;height:52px;transform:rotate(-2deg)"><b>1870 到 1930 的价格</b>数据<i>数</i><u class="au"></u></div><span class="pin" style="left:296px;top:148px"></span>
+    <div class="big" style="left:128px;top:86px;width:118px"><b>现在的答案</b>六十年不是定数，是两代人忘记上一次危机的时间；技术只是扳机。</div><span class="pin" style="left:184px;top:82px"></span>
+    <div class="cardf" style="left:140px;top:14px;width:70px;height:34px;background:#f6e9a8;border-color:#d9c56a;font-size:8px">便签：查 1929 的信贷数据</div>
+  </div>
+</div>
+<p class="note">研究感最强，卡之间的关系看得见；要自己摆，50 张以上乱，手机只能看。宜作研究册里的一页。</p></section>
+
+<section class="p"><h2>丁 卡片柜<small>所有卡立在一只长抽屉里，分隔签分段，最前一段是没归位</small></h2>
+<div class="sk">
+  <div class="drawer">
+    <span class="plate">卡片柜 · 一</span>
+    <div class="cards"></div>
+    <div class="div first" style="left:10px"><span>没归位 6</span></div>
+    <div class="div" style="left:86px"><span>康波 7</span></div>
+    <div class="div" style="left:176px"><span>货币 12</span></div>
+    <div class="div" style="left:262px"><span>地缘 4</span></div>
+    <div class="cardf pull" style="left:104px"><b>康波断代表</b>档案 · 自己写的<i>档</i><u class="r"></u><div class="ln" style="margin-top:14px"></div><div class="ln m"></div><div class="ln s"></div></div>
+    <div class="cardf ref" style="left:196px"><b>引 → 康波 03</b>资本回报率的周期<u class="n"></u></div>
+    <div class="handle"></div>
+  </div>
+  <div style="position:absolute;left:8px;top:14px;font-size:10px;color:var(--mute)">分隔签那张导卡写问题与现在的答案；「引」卡只有题签，指向原件</div>
+</div>
+<p class="note">找得到、放得下、同一套木器；一卡多处靠引卡。看不见卡面，答案的位置小。</p></section>
+
+<section class="p"><h2>戊 牌册<small>一个课题一页九宫格，牌面朝上，多了翻页</small></h2>
+<div class="sk">
+  <div class="binder"><div class="rings"><i></i><i></i><i></i><i></i></div>
+    <div class="nine">
+      <div class="cardf"><b>长波与技术革命</b>知乎回答<i>剪</i><u class="r"></u></div>
+      <div class="cardf"><b>康波断代表</b>档案<i>档</i><u class="r"></u></div>
+      <div class="cardf"><b>资本回报率的周期</b>公众号<i>剪</i><u class="n"></u></div>
+      <div class="cardf"><b>1870 到 1930 的价格</b>数据<i>数</i><u class="au"></u></div>
+      <div class="cardf"><b>熊彼特原文摘录</b>网页<i>剪</i><u class="n"></u></div>
+      <div class="cardf"><b>三轮康波对照</b>计划<i>计</i><u class="r"></u></div>
+      <div class="cardf"><b>利率与长波</b>知乎回答<i>剪</i><u class="n"></u></div>
+      <div class="cardf e">空袋</div><div class="cardf e">空袋</div>
+    </div>
+  </div>
+</div>
+<p class="note">展示性最好、牌的身份最清楚；答案没地方写，像收藏。只借「牌面朝上」。</p></section>
+
+<section class="p"><h2>己 桌面堆<small>不分课题，卡按状态堆三摞，课题只是卡上的标签</small></h2>
+<div class="sk">
+  <div class="tray" data-l="待读 12" style="top:40px"><div class="pile"><i style="bottom:0"></i><i style="bottom:4px;left:2px"></i><i style="bottom:8px;left:-1px"></i><i style="bottom:12px;left:3px"></i><i style="bottom:16px"></i><i style="bottom:20px;left:1px"></i></div></div>
+  <div class="tray" data-l="读过 30" style="top:118px"><div class="pile"><i style="bottom:0"></i><i style="bottom:4px;left:2px"></i><i style="bottom:8px"></i><i style="bottom:12px;left:1px"></i><i style="bottom:16px;left:-2px"></i><i style="bottom:20px"></i><i style="bottom:24px;left:2px"></i><i style="bottom:28px"></i><i style="bottom:32px;left:1px"></i></div></div>
+  <div class="tray" data-l="批过 8" style="top:196px"><div class="pile"><i style="bottom:0"></i><i style="bottom:4px;left:1px"></i><i style="bottom:8px"></i><i style="bottom:12px;left:2px"></i></div></div>
+  <div class="cardf" style="right:0;top:60px;width:70px;height:58px;transform:rotate(3deg)"><b>利率与长波</b>标签：康波 · 货币<i>剪</i><u class="n"></u></div>
+</div>
+<p class="note">零整理成本，没归位的卡最自然；但「课题」没了，答案和关系都没地方。只借它做没归位那一段的样子。</p></section>
+
+</div>
+<p class="legend">右下圆点：灰 没读 / 青 读了 / 金 写了批注（虚线框 = 没读，颜色之外另有形状）。建议：存放用丁，使用用乙，丙作为册里的一页。</p>
+</body></html>
