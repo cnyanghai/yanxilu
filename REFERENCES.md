@@ -27,6 +27,7 @@ last_scan: 2026-11-04
 | 2026-11-06 | Commons 分类 + WebSearch | 档案架与档案盒参考：Card catalogs、Pigeonholes、Document boxes、Scroll cases、Archive boxes、Hollinger box、Archives storage、Type cases、Filing cabinets、China cabinets；Hollinger / Solander 盒与档案馆上架方式；Zotero / DEVONthink / Are.na / Obsidian canvas 的集合界面 | 27 张参考墙（本机 tools/out/refwall-archive.jpg），结论在 docs/archive-design.md 第三节 |
 | 2026-11-06 | WebSearch | 卡怎么存放：mymind（无文件夹只搜索）、Raindrop（收藏夹加标签）、Are.na（block 多 channel）、Milanote / Kosmik / Muse（空间板）、Luhmann 卡片盒（文献卡与想法卡两盒、固定编号加索引） | 结论在 docs/archive-design.md 第五节第 2 小节：借 Are.na 的引卡、Luhmann 的两盒分工、空间板做工作面；mymind 与 Raindrop 排除 |
 | 2026-11-06 | 用户给的三张图 + Pinterest + WebSearch + Steam | 奇幻风 UI：魔法觉醒日记本、ROVAI 使命板、挂夹抽屉；Pinterest「游戏ui」搜索页；图书管理员整理游戏；UI 生产流水线（手绘 / AI 辅助 / 九宫格 / border-image） | 结论在 docs/archive-design.md 第六节：形式定为挂夹抽屉 → 夹子 → 活页对开；生产用生图加切片，不用 Blender |
+| 2026-11-06 | 用户给的四张风格图 + Pinterest「游戏 书架」 | 绘本厚涂的定调图：Legendary Journey 海报、永恒之柱式日志界面、Cresendo 宝箱概念表、皮面魔法书；Pinterest 书架搜索页 | 结论在 docs/ui-system-plan.md 第一节：色板五色、书即界面、概念表当样式图、写实物只取形制 |
 
 ## 条目
 
@@ -109,6 +110,8 @@ last_scan: 2026-11-04
 | Raindrop | 收藏夹树加标签，导出开放 | 无 | 就是文件夹，和现在的盒一样 | 排除 |
 | Milanote / Kosmik / Muse | 空间板：卡随手摆、位置即意义、板里嵌板；Kosmik 带浏览器与剪藏 | 线索板作为研究册里的一页 | 要用户自己摆，手机难，卡多了乱 | 借鉴（设想丙） |
 | Luhmann 卡片盒（ernestchiang 综述、zettelkasten.de 论坛） | 两只独立的盒：文献卡与想法卡；不按主题分格，固定编号加关键词索引 | 存放用一只卡片柜，剪报（文献）与研究（想法）分段；引卡解决一卡多处 | 他的索引靠编号，我们靠搜索与分隔签 | 采纳思路（设想丁） |
+| 四张风格图（用户提供：Legendary Journey 海报 / 永恒之柱式日志 / Cresendo 宝箱概念表 / 皮面魔法书） | 米纸橄榄栗红黄铜墨褐五色、深褐描边厚涂、纸纹；翻开的书作界面；概念表格式；皮铜护角搭扣 | 风格圣经的底、七种屏幕模板里的「翻开的书」、英雄物件的样式图格式 | 第四张是写实照片，只取形制不取画法 | 采纳（定调） |
+| Pinterest 搜索「游戏 书架」（用户给的链接） | 单件家具画在深底、概念表正交视图、桌面场景一盏暖光、日志对开 | 阶段 0 选图来源；书柜场景重出的画法 | 只在本机看 | 借鉴 |
 | 《哈利波特：魔法觉醒》日记本系统（微博 Natas_77 三屏截图，用户提供） | 桌上翻开的活页相册：左页卡袋（编号、日期、空袋虚影）、右页选中卡的详情与蜡封；桌上并排的夹子封面写进度，未解锁的只有描边 | 档案夹与对开页的整个形式；进度写封面；空位画虚影 | 游戏资产有版权，只学形式与做法，不用它的图 | 采纳（形式蓝本） |
 | ROVAI 使命板（用户提供） | 木框软木板上九张羊皮纸任务卡：蜡封徽记、编号、标题、一句话、状态章 | 卡要像实物（毛边、污渍、封蜡、章）；一屏九张 | 任务板语义是待办，不是档案 | 借鉴（卡的物件感） |
 | 挂夹文件抽屉简笔图（用户提供） | 抽屉里一排挂夹，顶上标签 | 存放单位改为夹；抽屉代替格柜 | 太简，只取结构 | 采纳（结构） |
