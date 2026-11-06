@@ -1,122 +1,117 @@
-# 研习录奇幻界面 · 风格圣经（第二稿：月夜墓场）
+# 研习录奇幻界面 · 风格圣经（第三稿：紫夜墓场）
 
-一页纸，全站所有零件、场景和生图提示词都从这里取词。蓝图见 `ui-system-plan.md`，进场动效见 `ui-scene-motion.md`，工具见 `tools/ui/README.md`。
-第一稿（2026-11-06 上午）是书房旧纸橄榄栗红一路；同日晚用户定主题为**墓地一套、三区共用、首页是独立的墓场进场页**，本稿按此重写，色板待三件试笔过门后对图校正。
+一页纸，全站所有零件、场景和生图提示词都从这里取词。蓝图见 `ui-system-plan.md`，进场动效见 `ui-scene-motion.md`，工具见 `tools/ui/README.md`，提示词登记在 `ui-prompts.md`。
+第一稿是书房旧纸橄榄一路；第二稿（2026-11-06 晚）按"墓地一套"写成温和的蓝夜墓场，第一轮试笔六张照它出了图；用户随即发来三张图（紫夜毒绿墓场、黑哥特尖拱书架、蓝夜刻字碑林）说"我印象中的首页"，气质比第二稿重得多。本稿按这三张重写：**紫夜、毒绿幽光、黑哥特木、烛光琥珀**。色板待第二轮试笔过门后对图校正。
 
 ## 一、一句话
 
-月夜墓场里的书房。夜靛的天、一弯残月、贴地的薄雾；碑石、枯木、铁、骨、旧纸；冷的幽灵蓝对暖的灯笼琥珀。画成绘本厚涂：笔触看得见、边缘柔、深靛描边、纸纹。**温和不恐怖**：骷髅是书童，幽灵是书的魂，墓碑是书架和档案柜，一切圆润、安静、可爱。
+紫夜的墓场。风暴般的紫云、黑的枯枝从画面顶上压下来、贴地的毒绿雾、灰蓝的碑、黑铁黑木的哥特尖拱，碑上的眼和幽灵发绿光，烛火发琥珀光，远处山上一座亮着窗的宅子。画法是**厚涂加墨线**：大笔触的硬边色块、石头和树木有墨色描边、剪影强、纸纹淡。**阴森但不血腥**：没有血、没有伤，骷髅是书童和书架的饰物，幽灵是书的魂，一切干净、可读。
 
-## 二、色板（待校正：试笔过门后对图取色）
+## 二、色板（待校正：第二轮试笔过门后对图取色）
 
 | 名 | 用处 | 中 | 浅 | 深 |
 |---|---|---|---|---|
-| 夜靛 | 天空、页面底、暗部 | `#1C2347` | `#2A3468` | `#10142B` |
-| 碑石灰 | 墓碑、石板、框、底座 | `#6F7388` | `#959AB0` | `#474A5C` |
-| 骨白 | 骷髅、纸面、正文底、月 | `#E9E2CC` | `#F4EFE0` | `#CBC3A8` |
-| 枯木褐 | 枯树、木件、格层板、书脊之一 | `#5B4836` | `#7C664D` | `#3B2D20` |
-| 幽蓝 | 幽灵、未读、冷光、月光边 | `#8FD0FF` | `#C9EBFF` | `#4D9BD1` |
-| 灯笼琥珀 | 在读、选中、暖光、黄铜 | `#F0B54A` | `#FFD98D` | `#B07D2A` |
-| 幽紫 | 只做点缀：封蜡、符文、魔法书的光 | `#8A6BD0` | `#B79CF0` | `#5C4494` |
-| 墨靛 | 描边、字、刻字槽 | `#141A33` | `#2B3356` | `#0B0E1F` |
+| 紫夜 | 天空、云、页面底 | `#4A2E6B` | `#7A4FA6` | `#2A1840` |
+| 墨黑 | 枯树、哥特木、铁、剪影、描边 | `#120C1A` | `#241A30` | `#07040B` |
+| 碑灰蓝 | 墓碑、石板、框 | `#5C6382` | `#8C93AE` | `#3A3F58` |
+| 骨白 | 骷髅、纸面、正文底、刻字高光 | `#E6DFC8` | `#F2EDDC` | `#C7BFA4` |
+| 毒绿幽光 | 幽灵、碑眼、雾、未读、汇聚粒子 | `#5CF08E` | `#B8FFCC` | `#2E9E5A` |
+| 烛光琥珀 | 烛火、灯笼、在读、选中 | `#F0B54A` | `#FFD98D` | `#B07D2A` |
+| 皮面三色 | 书皮与本子封面：栗褐 / 墨绿 / 靛蓝，都压暗 | `#5A3A2E` / `#2E4A3A` / `#2A3558` | 各提一档 | 各压一档 |
 
-- 描边统一用墨靛深档 `#0B0E1F`，不透明度 85%，不用纯黑也不用褐。
-- 阴影偏夜靛，高光偏骨白；暖光只出现在灯笼照到的地方。
-- **色弱规则**：意义只放在「幽蓝对琥珀」这一对冷暖上（红绿色弱分得清蓝黄）；幽紫永远不承担意义；红和绿不进色板。
-- 整体是暗底：页面底是夜靛，纸面和正文区是骨白，二者对比 ≥ 12:1。
+- 描边统一用墨黑深档 `#07040B`，不透明度 90%；碑与树的轮廓线粗，内部结构线细。
+- 整体是暗底：页面底紫夜深档，画面里只有两样东西饱和：绿光与烛光。其余全部压灰压暗。
+- 纸面与正文区仍是骨白，和暗底对比 ≥ 12:1。
+- **色弱规则**（用户重度色弱，这条压过一切审美）：紫与绿是**气氛**，不是意义。状态、对错、开关一律不靠绿光对琥珀光来分（红绿色弱看绿和琥珀会接近），只靠形状、明暗、文字与印。绿光只出现在"幽灵、碑眼、雾"这三处，琥珀只出现在"烛火、灯笼"，两者永远不并排承担相反的意思。红不进色板。
 
 ## 三、线
 
-- 深靛描边，外轮廓粗、内部结构线细，约物件边长的 1.5% 到 2%，1x 下约 2 到 3 像素；转角略粗，线有呼吸，暗部可用色块代替线。
-- 幽灵、雾、光不描边，用柔边与叠加。
-- 不用均匀的矢量线，不用像素风，不用写实无线。
+- 墨黑描边：碑、树、木、铁、骨都描；云、雾、光、幽灵不描，用硬边色块和柔光。
+- 外轮廓约物件边长的 2%，1x 下约 3 像素；转角与暗部加粗，受光面可断线。
+- 云是大笔触的硬边色块（参考图一），不是渐变。
 
 ## 四、光
 
-- **两盏光，各司其职**：月光是环境（冷、从上方来，给石头、骨和雾一道幽蓝的边），灯笼是注意力（暖、近处、一处）。看哪里，灯笼就在哪里：在读的书、选中的碑、递过来的本子。
-- 厚涂三档：固有色、暗部、高光，外加月光的一道冷边。不画渐变，用笔触衔接。
-- 投影短、软、偏夜靛；地上的物件底下一圈雾代替长影。
+- **两盏光**：绿光是幽灵与地气（碑眼、雾、汇聚的书魂，从下面来），烛光是注意力（在读的书、选中的碑、递过来的本子，从近处来）。月光只做天空的明暗，不打到物件上。
+- 剪影优先：树、碑、宅子先是黑影，再在受光面给一两档亮。
+- 投影融进雾里，不画长影。
 
 ## 五、材质与物件语言
 
 | 材质 | 画法要点 | 用在 |
 |---|---|---|
-| 碑石 | 风化的棱、一两道裂、苔点、刻字槽里更深一档 | 墓碑书架、档案碑、祭坛、框、碑额 |
-| 骨 | 圆润无锋、骨白加冷灰暗部 | 骷髅书童、骨质小件（笔架、书立） |
-| 枯木 | 扭、裂、无叶或残叶、油亮的棱 | 枯树、格层板、木牌、栅门柱 |
-| 铁 | 锈斑、铆钉、链、栅、锁 | 铁门、灯笼架、锁链（封存）、HUD 件 |
-| 旧纸 | 纸纹、毛边、淡折痕、边角微黄 | 卡、页面、卷轴、本子纸面 |
-| 蜡与符文 | 厚、指压痕、幽紫微光 | 封印、状态印、魔法书 |
-| 雾 | 贴地的带状、半透明、慢 | 地面、进场、投影替身 |
-| 幽光 | 柔边光点加拖尾 | 幽灵、未读的书、汇聚粒子 |
+| 碑石 | 风化棱、裂、苔点、刻字面是一块略平的浅板、字刻进去深一档 | 档案碑（碑面刻夹名）、首页三碑、祭坛 |
+| 哥特木 | 黑、尖拱、窗花格、雕饰、铁件 | 书架（参考图二）、框、HUD 件 |
+| 铁 | 黑铁、锈、铆钉、链、栅、烛台 | 铁门、烛台、锁链（封存）、挂饰 |
+| 骨 | 骨白加冷灰暗部、关节圆润 | 骷髅手臂（笔记本）、书架两侧的挂饰骷髅、小件 |
+| 皮面书 | 栗褐 / 墨绿 / 靛蓝皮、烫金细线、书口泛黄 | 书脊与封面（由数据生成）、本子封面 |
+| 旧纸 | 纸纹、毛边、折痕 | 卡、页面、卷轴 |
+| 蜡与符文 | 厚、指压痕、绿或琥珀微光 | 封印、状态印 |
+| 雾 | 贴地带状、半透明、带绿、慢 | 地面、进场、投影替身 |
+| 幽光 | 柔边光点加拖尾、绿 | 幽灵、未读、碑眼、汇聚粒子 |
 
-每件大物件至少有碑石、枯木、铁中的两种，用一处铁件或灯笼做视觉锚点。书皮、卡、本子仍是旧纸与布面，只是放在碑石里、照着冷光。
+饰物词汇（参考图二）：烛台与黑蜡烛、乌鸦、挂着的小骷髅、怀表、枯花、小铭牌。书架两侧各一支烛，烛亮即"在读的书在这一架"。
 
 ## 六、纸纹与正文可读性
 
-- 全站一张纸纹叠加图，4% 到 6% 不透明度。正文区（阅读器、翻开的书、本子纸面）一律骨白平纸、墨靛字，对比 ≥ 7:1，字号 ≥ 16 像素，行长 32 到 40 字。
-- 花饰、裂纹、苔点只在边角和碑额，不进正文；文字不压厚涂纹理，要压先垫纸。
-- 暗底上的小字（碑上的计数、HUD）用骨白，字号 ≥ 14 像素，加一圈夜靛描边保证在雾和光上也读得清。
+- 全站一张纸纹叠加图，4% 到 6%。正文区（阅读器、翻开的书、本子纸面、卡面）一律骨白平纸、墨黑字，对比 ≥ 7:1，字号 ≥ 16 像素。
+- 暗底上的小字（碑上的刻名、计数、HUD）用骨白加墨黑描边，字号 ≥ 14 像素；刻字用内阴影做凿痕。
+- 绿雾和紫云上不放字。
 
 ## 七、字
 
-- 自带三款照旧：Noto Serif SC（标题，加 0.06em 字距有刻字感）、Noto Sans SC（正文）、Barlow 与 Barlow Condensed（界面与数字）；Ma Shan Zheng 做题签与印。
-- 待定：正文换不换霞鹜文楷。碑上的刻字可用 SVG 文字加内阴影做出凿痕，不另找字体。
+照旧三款自带加 Ma Shan Zheng。碑上的刻名用 Noto Serif SC 加 0.08em 字距加内阴影；标题可用骨白衬线（参考图二的 Gothic Bookshelf 那种气质）。待定：正文换不换霞鹜文楷。
 
 ## 八、状态语言（不靠颜色）
 
 | 状态 | 形 | 字 |
 |---|---|---|
 | 没读 | 幽灵：书脊半透明、微微浮着、一点幽光 | 未 |
-| 在读 | 灯笼点在它旁边，暖光圈 | 读 |
-| 读完 | 碑石上刻了字（书脊落实、题签刻入） | 完 |
+| 在读 | 旁边的烛点着（暖光圈），书脊落实 | 读 |
+| 读完 | 书脊落实加书口一道烫金线、题签刻入 | 完 |
 | 写了批注 | 纸条从书口伸出 | 批 |
-| 结卷引用 | 链环（一卡多夹的「引」） | 引 |
-| 封存 | 铁锁加蜡封，整只夹子合上 | 封 |
-| 待归位 | 沙漏，夹子敞口纸角伸出 | 待 |
+| 结卷引用 | 链环 | 引 |
+| 封存 | 铁锁加蜡封，碑面合上 | 封 |
+| 待归位 | 沙漏，碑面敞开纸角伸出 | 待 |
 
 ## 九、动效词汇
 
-进场三段见 `ui-scene-motion.md`（升起 / 长出 / 爬出，汇聚，落定；全长 3.5 秒、短版 0.8 秒、点一下跳过）。
-常用词汇八个：幽灵汇聚、灯笼点亮、翻开（书 / 碑面 / 本子）、盖印、落土、雾流、幽光呼吸、递过来。
-时长 180 到 420 毫秒，缓出；雾流与幽光呼吸是仅有的常驻动效；`prefers-reduced-motion` 时全部关掉只留状态变化。
+进场三段见 `ui-scene-motion.md`（钻出 / 长出 / 伸出，汇聚，落定；全长 3.5 秒、短版 0.8 秒、点一下跳过）。
+常用词汇八个：幽灵汇聚、烛点亮、翻开（书 / 碑面 / 本子）、卡片圆弧摆开、盖印、落土、雾流、碑眼睁开。
+时长 180 到 420 毫秒，缓出；雾流与碑眼眨是仅有的常驻动效；`prefers-reduced-motion` 时全部关掉只留状态变化。
 
 ## 十、生图提示词前导（每次调用都原样带上，再接零件各自的后缀）
 
 ```
-Storybook fantasy game UI concept art, thick gouache painterly style with visible brush strokes, soft painted edges,
-deep-indigo outlines (never black, never brown), subtle paper grain. Night graveyard theme: deep indigo night sky,
-crescent moon, low drifting fog, weathered grey tombstones, bare twisted trees, old iron. Two lights only: cool
-moonlight from above (ghost-blue rim light) and one warm amber lantern glow. Muted desaturated palette: night indigo,
-tombstone grey, bone white, dead-wood brown, ghost blue, lantern amber; no pure red, no pure green. Gentle and cozy,
-not horror: friendly, rounded shapes. No text, no letters, no watermark, no photorealism, no 3D render look,
-no flat vector, no pixel art.
+Dark gothic fantasy game concept art, stylized digital painting with bold hard-edged brush shapes and ink-dark
+outlines on stone, wood and trees, strong silhouettes, subtle paper grain. Night graveyard: deep violet-purple
+storm sky with swirling painted clouds, black bare twisted tree branches framing the top, low toxic-green fog on
+the ground, weathered grey-blue tombstones, black gothic ironwork and wood. Only two light sources: eerie green
+ghost-glow (from tombstone eyes, fog and spirits) and warm amber candlelight. Palette: violet night, black,
+grey-blue stone, bone white, ghost green, candle amber; no red. Moody and mysterious but clean and readable,
+not gory. No text, no letters, no watermark, no photorealism, no 3D render look, no flat vector, no pixel art.
 ```
 
 后缀按零件类型：
-- 场景背景：`wide establishing shot …, full-bleed scene`（不要洋红底），桌面 3:2、手机 2:3 各出一张。
-- 材质瓷砖：`seamless texture swatch of <材质>, fills the whole frame, even cool lighting`。
-- 框与角花：`one ornamental stone corner piece / one carved stone panel frame, front view, symmetric, resting flat`。
+- 场景背景：`… full-bleed scene`（不要洋红底），桌面 3:2、手机 2:3 各出一张。
+- 材质瓷砖：`seamless texture swatch of <材质>, fills the whole frame, even dim lighting`。
+- 框与角花：`one black gothic carved corner piece / one pointed-arch panel frame, front view, symmetric, resting flat`。
 - 小件与图标表：`a sheet of N <小件> in a neat grid, same scale, same lighting, generous spacing`。
-- 英雄物件与角色：`front view, single object/character, feet on the ground` 加 `Isolated on a solid flat magenta #FF00FF background, nothing touching the edges`；带本机样式图走 edit 端点。
+- 英雄物件：`front view, single object` 加 `Isolated on a solid flat magenta #FF00FF background, nothing touching the edges`；带本机样式图走 edit 端点。
 
 ## 十一、命名与登记
 
-`vendor/ui/scenes/<场景>-desk.webp` 与 `-phone.webp`（背景与雾层）、`vendor/ui/tiles/<材质>.webp`、`vendor/ui/frames/<框名>.png`、`vendor/ui/icons/<名>.svg`、`vendor/ui/props/<物件>@1x.webp` 与 `@2x.webp`、`vendor/ui/char/skeleton/<动作>.webp`（雪碧图）。
-`vendor/ui/kit.json` 每件一条：`file`、`w`、`h`、`slice`（九宫格四边）、`anchor`（落地点）、`frames`（雪碧图帧数与帧率）、`prompt`（提示词编号，正文在 `docs/ui-prompts.md`）、`date`。
+`vendor/ui/scenes/`、`tiles/`、`frames/`、`icons/`、`props/`、`arms/`（骷髅手臂三态）、`kit.json`（字段见上一稿：`file`、`w`、`h`、`slice`、`anchor`、`frames`、`prompt`、`date`）。
 
-## 十二、阶段 0 的门：三件试笔
+## 十二、阶段 0 的门：第二轮试笔
+
+第一轮（P001 到 P003，温和蓝夜）不作数，留作对照。第二轮四件：
 
 | 件 | 定什么 | 比例 | 张数与价 |
 |---|---|---|---|
-| 甲 首页墓场背景 | 整个主题的气质：天、月、雾、碑、树、铁门、一盏灯笼 | 3:2 | 2 张，中档 0.376 元一张 |
-| 乙 墓碑书架 | 英雄家具的形制：碑形、碑额、三层格、土堆底座 | 2:3 洋红底 | 2 张 |
-| 丙 骷髅书童 | 角色的样子（之后在 Blender 里照它建模） | 2:3 洋红底 | 2 张 |
+| 甲 首页墓场背景 | 紫夜、绿雾、前景三碑带碑眼、山上的宅子、枯枝压顶 | 3:2 | 2 张，中档 0.376 元一张 |
+| 乙 哥特尖拱书架 | 黑木尖拱、窗花格、两侧烛台、顶上乌鸦、从土里钻出 | 2:3 洋红底 | 2 张 |
+| 丙 档案碑 | 碑面一块平的空板留着刻夹名、雕顶、苔、一点绿光 | 2:3 洋红底 | 2 张 |
+| 丁 骷髅手臂 | 一只骨臂从土里伸出、手握一本皮面本子举给观者 | 2:3 洋红底 | 2 张 |
 
-六张约 2.3 元；过门后英雄件用高档（1.498 元一张）重出。
-通过条件：`tools/ui/wall.py` 把三件混进 Pinterest 收藏里的游戏截图与三维道具图中，明度、彩度、描边密度、饱和四项落在参考范围内；用户看墙猜不出哪几张是我们的；骷髅看着温和不吓人。
-
-提示词（前导之后接）：
-- 甲：`Wide establishing shot of a small hillside graveyard at night used as a game title screen: a wrought-iron gate in the foreground left, a bare twisted tree on the right, three large arched tombstones with blank faces standing in a row in the middle ground (left, center, right), a winding path between them, one lit lantern on a wooden post beside the path, fog along the ground, crescent moon upper right, empty sky at the top. 3:2 landscape, full-bleed scene.`
-- 乙：`A single bookcase shaped like a tall arched tombstone: weathered grey stone with a carved rounded top and a blank carved band across the top for a name, three open shelves cut into the stone, a mound of earth and grass at the base, a small iron lantern hook on one side, a few cracks and moss spots. Shelves are empty. Front view, resting flat. Isolated on a solid flat magenta #FF00FF background, nothing touching the edges.`
-- 丙：`A small friendly skeleton librarian standing and holding a closed notebook with both hands in front of its chest: slightly oversized round skull, soft rounded bones, calm kind expression, a tattered dark-indigo scholar's cloak over the shoulders, bone-white with cool blue shading and a warm amber touch on one side from a lantern. Full body, front view, feet on the ground, neutral idle pose. Isolated on a solid flat magenta #FF00FF background, nothing touching the edges.`
+八张约 3 元。通过条件：`tools/ui/wall.py` 把四件混进 `tools/out/ui/refs/` 的三张用户图与 Pinterest 游戏截图里，明度、彩度、描边密度、饱和落在参考范围内；用户看墙猜不出哪几张是我们的；首页有"压顶的枯枝和远处的宅子"。

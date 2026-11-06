@@ -124,6 +124,7 @@ last_scan: 2026-11-04
 | Juice it or lose it（Jonasson 与 Purho，2012） https://gamejuice.pages.dev/articles/juice-it-or-lose-it-lessons | 先做静态能玩的版本，再一层层加缓动、粒子、震屏、声音 | 阶段 6 动效的工作方法：一次加一层、真机看一遍 | 游戏的震屏粒子对阅读工具要克制 | 采纳（方法） |
 | Duolingo 口型博客 https://blog.duolingo.com/world-character-visemes 与 Rive 角色动画用例 https://rive.app/use-cases/character-animation | 角色在 Rive 里做，一个文件装美术、骨骼、动画、状态机；二十多个通用嘴形拼口型 | 若以后有角色或有状态的动画，走 Rive；运行时要自带进 vendor | 研习录眼下没有角色 | 仅参考 |
 | Lottie、Rive、CSS 三选一 https://www.pkgpulse.com/guides/lottie-vs-rive-vs-css-animations-web-animation-formats-2026 | 播放型用 Lottie、状态机型用 Rive、界面过渡用 CSS | 研习录动效首选 CSS 与 Web Animations API，粒子用 canvas | 不引 CDN | 采纳（选型） |
+| 用户 2026-11-06 晚发来的三张图（本机 tools/out/ui/refs/，不入库） | 1 紫夜墓场：风暴紫云、黑枯枝压顶、前景墓碑睁绿眼、毒绿雾、山上亮窗的宅子（AI 风格化数字绘）；2 Gothic Bookshelf：黑木尖拱窗花格书架、两侧烛台、挂饰骷髅、乌鸦、皮面旧书（AI 写实摄影风）；3 蓝夜碑林：刻字墓碑、墨线描边、雾、枯树（AI，文字乱码） | 1 定首页的构图与色（紫夜加毒绿光）；2 定书架的形制（尖拱、窗花格、烛台、乌鸦、骷髅饰物）；3 定档案碑的样子（碑面刻夹名、碑林、雾）与墨线描边的画法 | 2 是写实照片风，只取形制按厚涂加墨线重画；3 的文字是乱码不能用；紫与绿对红绿色弱是气氛不是意义 | 采纳（圣经第三稿据此重写；第二轮试笔的蓝本；盲测对照墙用） |
 
 ## 待看
 
