@@ -1,0 +1,125 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>月夜墓场蓝图（线框）</title>
+<style>
+  body { margin: 0; background: #10142b; }
+  svg { display: block; font-family: system-ui, "Noto Sans SC", sans-serif; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+(() => {
+const W = 1600, H = 1180;
+const LINE = '#e9e2cc', DIM = '#8f95b0', BLUE = '#8fd0ff', AMBER = '#f0b54a', BG = '#10142b', PANEL = '#161c3a';
+let out = '';
+const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const T = (x, y, s, { size = 14, fill = LINE, anchor = 'start', weight = 400, op = 1 } = {}) => out += `<text x="${x}" y="${y}" font-size="${size}" fill="${fill}" text-anchor="${anchor}" font-weight="${weight}" opacity="${op}">${esc(s)}</text>`;
+const R = (x, y, w, h, { stroke = LINE, fill = 'none', dash = '', r = 4, sw = 1.5 } = {}) => out += `<rect x="${x}" y="${y}" width="${w}" height="${h}" rx="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-dasharray="${dash}"/>`;
+const L = (x1, y1, x2, y2, { stroke = LINE, dash = '', sw = 1.5 } = {}) => out += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${stroke}" stroke-width="${sw}" stroke-dasharray="${dash}"/>`;
+const P = (d, { stroke = LINE, fill = 'none', dash = '', sw = 1.5, op = 1 } = {}) => out += `<path d="${d}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" stroke-dasharray="${dash}" opacity="${op}"/>`;
+const C = (x, y, r, { stroke = LINE, fill = 'none', sw = 1.5, op = 1 } = {}) => out += `<circle cx="${x}" cy="${y}" r="${r}" fill="${fill}" stroke="${stroke}" stroke-width="${sw}" opacity="${op}"/>`;
+const ARROW = (x1, y1, x2, y2, { stroke = DIM, dash = '' } = {}) => { L(x1, y1, x2, y2, { stroke, dash }); const a = Math.atan2(y2 - y1, x2 - x1); P(`M${x2},${y2} L${x2 - 10 * Math.cos(a - .4)},${y2 - 10 * Math.sin(a - .4)} M${x2},${y2} L${x2 - 10 * Math.cos(a + .4)},${y2 - 10 * Math.sin(a + .4)}`, { stroke }); };
+const BOX = (x, y, w, h, title, sub, { stroke = LINE, dash = '' } = {}) => { R(x, y, w, h, { stroke, dash, fill: PANEL }); T(x + w / 2, y + 26, title, { size: 16, anchor: 'middle', weight: 600 }); if (sub) sub.split('\n').forEach((s, i) => T(x + w / 2, y + 46 + i * 16, s, { size: 12, fill: DIM, anchor: 'middle' })); };
+const TOMB = (x, y, w, h, { stroke = LINE, fill = 'none', dash = '' } = {}) => P(`M${x},${y + h} L${x},${y + w / 2} A${w / 2},${w / 2} 0 0 1 ${x + w},${y + w / 2} L${x + w},${y + h} Z`, { stroke, fill, dash });
+const MOON = (x, y, r) => { C(x, y, r, { stroke: LINE, fill: BG }); C(x + r * .45, y - r * .3, r * .85, { stroke: 'none', fill: BG }); C(x, y, r, { stroke: LINE }); };
+const TREE = (x, y, h) => P(`M${x},${y} L${x},${y - h * .55} L${x - h * .18},${y - h * .8} M${x},${y - h * .55} L${x + h * .2},${y - h * .9} M${x + h * .08},${y - h * .7} L${x + h * .25},${y - h * .72} M${x - h * .06},${y - h * .35} L${x - h * .22},${y - h * .5}`, { stroke: LINE, sw: 2 });
+const FOG = (x, y, w) => { for (let i = 0; i < 3; i++) P(`M${x + i * 30},${y - i * 6} q${w / 4},-10 ${w / 2},0 t${w / 2},0`, { stroke: BLUE, op: .35, dash: '3 5' }); };
+const LANTERN = (x, y, label) => { L(x, y, x, y - 46); R(x - 7, y - 60, 14, 16, { stroke: AMBER, fill: AMBER }); C(x, y - 52, 18, { stroke: AMBER, op: .4 }); if (label) T(x + 12, y - 48, label, { size: 11, fill: AMBER }); };
+const GHOST = (x, y) => { C(x, y, 5, { stroke: BLUE, fill: BLUE, op: .9 }); C(x - 9, y + 6, 3, { stroke: 'none', fill: BLUE, op: .5 }); C(x - 16, y + 11, 2, { stroke: 'none', fill: BLUE, op: .3 }); };
+const HUD = (x, y, w, h) => { const items = ['灯笼 布置', '放大镜 搜索', '羽毛笔 记一笔', '印 打卡']; items.forEach((s, i) => { const px = i < 2 ? x + 10 + i * 96 : x + w - 10 - (3 - i) * 96 - 86; R(px, y + 8, 86, 20, { stroke: DIM, r: 10 }); T(px + 43, y + 22, s, { size: 11, fill: DIM, anchor: 'middle' }); }); };
+const FRAME = (x, y, w, h, title, note) => { R(x, y, w, h, { stroke: DIM, fill: '#0d1126', r: 6 }); T(x, y - 8, title, { size: 15, weight: 600 }); if (note) T(x + w, y - 8, note, { size: 11, fill: DIM, anchor: 'end' }); };
+const SKEL = (x, y, label, open) => { C(x, y - 96, 12, { stroke: LINE }); L(x, y - 84, x, y - 30); L(x - 12, y - 62, x + 12, y - 62); L(x - 12, y - 50, x + 12, y - 50); L(x - 8, y - 30, x - 10, y); L(x + 8, y - 30, x + 10, y); L(x - 14, y - 74, x - 24, y - 52); L(x + 14, y - 74, x + 24, y - 52); L(x - 24, y - 52, x - 10, y - 42); L(x + 24, y - 52, x + 10, y - 42); R(x - 16, y - 58, 32, 24, { stroke: AMBER, fill: open ? AMBER : 'none' }); T(x, y + 16, label, { size: 11, fill: DIM, anchor: 'middle' }); };
+const SPREAD = (x, y, w, h, l, r) => { R(x, y, w, h, { stroke: LINE, fill: '#e9e2cc' }); L(x + w / 2, y, x + w / 2, y + h, { stroke: '#8f95b0' }); T(x + w / 4, y + 18, l, { size: 11, fill: '#141a33', anchor: 'middle', weight: 600 }); T(x + w * 3 / 4, y + 18, r, { size: 11, fill: '#141a33', anchor: 'middle', weight: 600 }); for (let i = 0; i < 4; i++) L(x + w / 2 + 12, y + 32 + i * 10, x + w - 12, y + 32 + i * 10, { stroke: '#8f95b0', sw: 1 }); for (let i = 0; i < 6; i++) R(x + 10 + (i % 3) * (w / 6 - 6), y + 28 + Math.floor(i / 3) * 30, w / 6 - 12, 24, { stroke: '#8f95b0', fill: '#f4efe0', r: 2, sw: 1 }); };
+
+out += `<rect width="${W}" height="${H}" fill="${BG}"/>`;
+T(40, 40, '研习录 · 月夜墓场 蓝图（线框，不是美术）', { size: 22, weight: 700 });
+T(40, 62, '首页是独立的墓场进场页；三个场共用墓地主题；每个场一段进场戏（3.5 秒，短版 0.8 秒，点一下跳过）；内容由数据长出。', { size: 13, fill: DIM });
+
+// —— 一、导航图 ——
+T(40, 100, '一、怎么走', { size: 16, weight: 600 });
+BOX(40, 120, 190, 96, '首页：墓场', '三座碑 = 三个入口\n灯笼 = 继续上次');
+BOX(360, 110, 170, 64, '书架场', '墓碑书架升起');
+BOX(360, 190, 170, 64, '档案场', '小碑长出');
+BOX(360, 270, 170, 64, '笔记场', '骷髅爬出');
+BOX(640, 110, 190, 64, '展台：祭坛上翻开', '目录 → 精读');
+BOX(640, 190, 190, 64, '档案夹对开', '左卡袋 右详情');
+BOX(640, 270, 190, 64, '本子对开', '左日历 右今天');
+BOX(940, 110, 150, 64, '阅读器', '骨白平纸');
+BOX(940, 190, 150, 64, '牌', '卡放大 正反面');
+BOX(940, 270, 150, 64, '印册', '打卡 刻在石板');
+ARROW(230, 150, 360, 142); ARROW(230, 168, 360, 222); ARROW(230, 186, 360, 302);
+ARROW(530, 142, 640, 142); ARROW(530, 222, 640, 222); ARROW(530, 302, 640, 302);
+ARROW(830, 142, 940, 142); ARROW(830, 222, 940, 222); ARROW(830, 302, 940, 302);
+ARROW(830, 160, 940, 290, { dash: '4 4' });
+R(40, 240, 190, 60, { stroke: DIM, dash: '4 4', fill: PANEL }); T(135, 264, '贴边 HUD（每页都有）', { size: 12, anchor: 'middle' }); T(135, 284, '灯笼 放大镜 羽毛笔 印', { size: 11, fill: DIM, anchor: 'middle' });
+T(40, 330, '退出一律"放回去"：书回格、碑面合上、本子递回。切换条退役，三个场之间走首页或灯笼菜单。', { size: 12, fill: DIM });
+// 手机
+R(1200, 100, 150, 250, { stroke: LINE, r: 14 }); T(1275, 92, '手机首页（竖）', { size: 12, fill: DIM, anchor: 'middle' });
+MOON(1330, 125, 9); FOG(1210, 330, 130);
+[['书架', 150], ['档案柜', 215], ['笔记本', 280]].forEach(([n, y]) => { TOMB(1245, y, 60, 52); T(1275, y + 36, n, { size: 11, anchor: 'middle' }); });
+LANTERN(1222, 330, ''); T(1275, 344, '继续上次', { size: 10, fill: AMBER, anchor: 'middle' });
+R(1380, 100, 190, 250, { stroke: DIM, dash: '4 4', r: 6, fill: PANEL });
+T(1475, 126, '手机规则', { size: 13, anchor: 'middle', weight: 600 });
+['同一片墓场竖着看', '一屏一座碑，左右滑', '进场戏同一套，家具更窄', '粒子上限减半', '首页可下滑直接进上次的场'].forEach((s, i) => T(1392, 150 + i * 20, '· ' + s, { size: 11, fill: DIM }));
+
+// —— 二、四个屏 ——
+T(40, 385, '二、四个屏的线框', { size: 16, weight: 600 });
+// 首页
+const fx = 40, fy = 410, fw = 740, fh = 340;
+FRAME(fx, fy, fw, fh, '首页：墓场（进场页）', '桌面 3:2');
+MOON(fx + 660, fy + 60, 22);
+TREE(fx + 620, fy + 270, 150);
+P(`M${fx + 20},${fy + 270} L${fx + 20},${fy + 170} M${fx + 60},${fy + 270} L${fx + 60},${fy + 160} M${fx + 20},${fy + 170} L${fx + 60},${fy + 160} M${fx + 30},${fy + 270} L${fx + 30},${fy + 175} M${fx + 40},${fy + 270} L${fx + 40},${fy + 172} M${fx + 50},${fy + 270} L${fx + 50},${fy + 168}`, { stroke: LINE }); T(fx + 40, fy + 150, '铁栅门', { size: 11, fill: DIM, anchor: 'middle' });
+[['书架', 180], ['档案柜', 330], ['笔记本', 480]].forEach(([n, x], i) => { TOMB(fx + x, fy + 130, 110, 120, { fill: PANEL }); T(fx + x + 55, fy + 165, n, { size: 15, anchor: 'middle', weight: 600 }); T(fx + x + 55, fy + 185, '碑额刻字', { size: 10, fill: DIM, anchor: 'middle' }); T(fx + x + 55, fy + 230, i === 0 ? '45 本' : i === 1 ? '12 夹' : '3 本', { size: 11, fill: DIM, anchor: 'middle' }); });
+P(`M${fx + 300},${fy + 320} q60,-40 120,-60 t120,-30`, { stroke: DIM, dash: '6 4' });
+LANTERN(fx + 150, fy + 300, '继续上次');
+FOG(fx + 80, fy + 262, 600);
+L(fx + 10, fy + 270, fx + fw - 10, fy + 270, { stroke: DIM });
+T(fx + fw / 2, fy + 50, '研 习 录', { size: 20, anchor: 'middle', weight: 700, op: .9 }); T(fx + fw / 2, fy + 70, '标题区（空天）', { size: 10, fill: DIM, anchor: 'middle' });
+HUD(fx, fy + fh - 36, fw, 36);
+T(fx + 110, fy + fh - 44, '点一座碑：镜头推过去，接那个场的进场戏；灯笼「继续上次」一键回到上回那本或那页', { size: 11, fill: DIM });
+
+// 书架场
+const sx = 820, sy = 410, sw = 740, sh = 340;
+FRAME(sx, sy, sw, sh, '书架场：墓碑书架（每个领域一座，横向一列）', '终态');
+MOON(sx + 700, sy + 50, 16);
+[['手艺', 40], ['历史', 300], ['文学', 560]].forEach(([n, x], i) => {
+  const tx = sx + x, ty = sy + 70, tw = 200, th = 200; TOMB(tx, ty, tw, th, { fill: PANEL });
+  R(tx + 30, ty + 30, tw - 60, 22, { stroke: DIM, r: 2 }); T(tx + tw / 2, ty + 46, n + '（碑额）', { size: 11, anchor: 'middle' });
+  for (let r = 0; r < 2; r++) { const gy = ty + 70 + r * 60; L(tx + 20, gy + 48, tx + tw - 20, gy + 48, { stroke: DIM }); for (let k = 0; k < 7; k++) { const bx = tx + 28 + k * 21, hh = 30 + ((k * 7 + r * 3) % 14); const ghost = (k + r) % 3 === 0; if (ghost) { R(bx, gy + 48 - hh, 14, hh, { stroke: BLUE, dash: '2 3', r: 1 }); GHOST(bx + 7, gy + 48 - hh - 8); } else R(bx, gy + 48 - hh, 14, hh, { stroke: LINE, fill: '#2a3468', r: 1 }); } }
+  P(`M${tx - 10},${ty + th} q${tw / 2 + 10},-18 ${tw + 20},0`, { stroke: DIM }); T(tx + tw / 2, ty + th + 14, '土堆底座', { size: 10, fill: DIM, anchor: 'middle' });
+  if (i === 1) LANTERN(tx + tw + 8, ty + 150, '在读');
+});
+FOG(sx + 60, sy + 282, 640);
+T(sx + 10, sy + 306, '虚线书脊加光点 = 未读（幽灵）  灯笼 = 在读  落实的书脊 = 读完（刻进碑）  点书：抽出放大到祭坛上翻开', { size: 11, fill: DIM });
+HUD(sx, sy + sh - 36, sw, 36);
+
+// 档案场
+const ax = 40, ay = 800, aw = 740, ah = 340;
+FRAME(ax, ay, aw, ah, '档案场：小碑一列，碑面是档案夹封面', '一座翻开');
+[6, 3, 9, 2, 5].forEach((n, i) => { const tx = ax + 30 + i * 100, ty = ay + 150, tw = 76, th = 110; TOMB(tx, ty, tw, th, { fill: PANEL }); T(tx + tw / 2, ty + 48, '夹 ' + (i + 1), { size: 11, anchor: 'middle' }); T(tx + tw / 2, ty + 72, n + ' 篇', { size: 13, anchor: 'middle', weight: 600 }); if (i === 4) { T(tx + tw / 2, ty + 92, '封', { size: 10, fill: DIM, anchor: 'middle' }); R(tx + tw / 2 - 6, ty + 96, 12, 8, { stroke: DIM, r: 1 }); } });
+FOG(ax + 40, ay + 262, 500); L(ax + 10, ay + 260, ax + aw - 10, ay + 260, { stroke: DIM });
+SPREAD(ax + 540, ay + 60, 190, 150, '左页 卡袋', '右页 选中卡');
+ARROW(ax + 468, ay + 200, ax + 540, ay + 150, { dash: '4 4' }); T(ax + 300, ay + 290, '点碑：碑面翻开成活页对开；「封」= 铁锁加蜡封', { size: 11, fill: DIM });
+for (let i = 0; i < 4; i++) R(ax + 560 + i * 44, ay + 20, 18, 24, { stroke: LINE, fill: '#e9e2cc', r: 2 }); T(ax + 640, ay + 14, '进场：卡飞入碑，计数跳动', { size: 10, fill: DIM, anchor: 'middle' });
+HUD(ax, ay + ah - 36, aw, 36);
+
+// 笔记场
+const nx = 820, ny = 800, nw = 740, nh = 340;
+FRAME(nx, ny, nw, nh, '笔记场：骷髅书童各捧一本', '随手本最前');
+[['随手本', 90, true], ['摘抄册', 230, false], ['读书札记', 370, false], ['＋ 新本子', 510, false]].forEach(([n, x, open]) => SKEL(nx + x, ny + 250, n, open));
+FOG(nx + 40, ny + 262, 640); L(nx + 10, ny + 260, nx + nw - 10, ny + 260, { stroke: DIM });
+SPREAD(nx + 560, ny + 60, 170, 130, '左页 日历', '右页 今天');
+ARROW(nx + 106, ny + 190, nx + 560, ny + 130, { dash: '4 4' }); T(nx + 20, ny + 40, '点一本：骷髅把本子递到前面，翻开成对开', { size: 11, fill: DIM });
+T(nx + 10, ny + 300, '闲时轻微起伏、偶尔歪头；记一笔（N）落到随手本今天这一页', { size: 11, fill: DIM });
+HUD(nx, ny + nh - 36, nw, 36);
+
+T(40, H - 14, 'docs/ui-blueprint.html · 2026-11-06 · 圣经 ui-style-bible.md · 进场戏 ui-scene-motion.md · 计划 ui-system-plan.md', { size: 11, fill: DIM });
+document.getElementById('root').innerHTML = `<svg id="bp" xmlns="http://www.w3.org/2000/svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">${out}</svg>`;
+})();
+</script>
+</body>
+</html>
