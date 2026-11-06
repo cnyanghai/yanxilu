@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>进场动效灰盒原型</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0b0d16; color: #cfd3e6; font: 14px/1.5 system-ui, "Noto Sans SC", sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #23273a; }
+  header b { margin-right: 8px; }
+  button { background: #1c2136; color: #e4e7f5; border: 1px solid #343a58; border-radius: 6px; padding: 5px 12px; cursor: pointer; font: inherit; }
+  button.on { background: #3b4270; border-color: #6a74b5; }
+  #t { font-variant-numeric: tabular-nums; margin-left: auto; opacity: .8; }
+  main { padding: 12px 16px; }
+  canvas { display: block; width: 100%; max-width: 960px; background: #000; border-radius: 8px; }
+  p.note { max-width: 960px; opacity: .75; }
+  #board canvas { max-width: 1400px; }
+</style>
+</head>
+<body>
+<header>
+  <b>灰盒原型</b>
+  <button data-seq="shelf">书架</button>
+  <button data-seq="archive">档案柜</button>
+  <button data-seq="notes">笔记本</button>
+  <span style="width:12px"></span>
+  <button id="replay">重放</button>
+  <button id="short">短版 0.8 秒</button>
+  <button id="half">半速</button>
+  <span id="t">t = 0.00 s</span>
+</header>
+<main>
+  <canvas id="c" width="960" height="540"></canvas>
+  <p class="note">只有形状与时间，没有美术。点画面一下跳到终态；终态后点一本书看打开。地址加 <code>?seq=shelf&amp;t=1.2</code> 定格某一刻，<code>?board=1</code> 出分镜图。</p>
+</main>
+<script>
+(() => {
+const W = 960, H = 540, GROUND = 440;
+const q = new URLSearchParams(location.search);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, u) => a + (b - a) * u;
+const easeOutCubic = u => 1 - Math.pow(1 - u, 3);
+const easeInOutSine = u => -(Math.cos(Math.PI * u) - 1) / 2;
+const easeOutBack = u => { const c = 1.7; return 1 + (c + 1) * Math.pow(u - 1, 3) + c * Math.pow(u - 1, 2); };
+const seg = (t, a, d) => clamp((t - a) / d);
+function rng(seed) { let s = seed >>> 0; return () => { s += 0x6D2B79F5; let r = Math.imul(s ^ (s >>> 15), 1 | s); r ^= r + Math.imul(r ^ (r >>> 7), 61 | r); return ((r ^ (r >>> 14)) >>> 0) / 4294967296; }; }
+
+// 固定的场景数据（有种子，截图可复现）
+const R = rng(7);
+const STARS = Array.from({ length: 90 }, () => ({ x: R() * W, y: R() * 300, r: R() * 1.2 + .3, a: R() * .6 + .3 }));
+const FAR = Array.from({ length: 9 }, (_, i) => ({ x: 40 + i * 110 + R() * 40, w: 26 + R() * 14, h: 30 + R() * 26 }));
+const NB = Number(q.get('n') || 21);
+const BOOKS = Array.from({ length: NB }, (_, k) => ({ k, h: 46 + R() * 26, hue: [215, 20, 40, 140, 30][k % 5], sat: 28 + R() * 20, edge: R(), s2: R() }));
+const TOMBS = [6, 3, 9, 2, 5].map((n, i) => ({ n, x: 130 + i * 175, w: 110 + (i % 2) * 14, h: 150 + (i % 3) * 18, cards: Array.from({ length: n }, () => ({ e: R(), s: R() })) }));
+const SKELS = Array.from({ length: 4 }, (_, i) => ({ x: 170 + i * 205, hue: [40, 215, 20, 140][i], j: R() }));
+
+function edgePoint(e, s) { // 从画面边缘或地面出发的点
+  if (e < .33) return { x: -30, y: 80 + s * 300 };
+  if (e < .66) return { x: W + 30, y: 80 + s * 300 };
+  return { x: 60 + s * (W - 120), y: GROUND + 20 };
+}
+
+function background(ctx, t, shake) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, '#0d1230'); g.addColorStop(.6, '#141a3a'); g.addColorStop(1, '#0a0c18');
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.save(); ctx.translate(shake.x, shake.y);
+  for (const s of STARS) { ctx.globalAlpha = s.a; ctx.fillStyle = '#dfe4ff'; ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#e8e2c6'; ctx.beginPath(); ctx.arc(820, 90, 34, 0, 7); ctx.fill();
+  ctx.fillStyle = '#141a3a'; ctx.beginPath(); ctx.arc(834, 80, 30, 0, 7); ctx.fill();
+  // 远处的墓碑剪影与雾
+  ctx.fillStyle = '#0e1226';
+  for (const f of FAR) { ctx.beginPath(); ctx.moveTo(f.x, GROUND); ctx.lineTo(f.x, GROUND - f.h + f.w / 2); ctx.arc(f.x + f.w / 2, GROUND - f.h + f.w / 2, f.w / 2, Math.PI, 0); ctx.lineTo(f.x + f.w, GROUND); ctx.fill(); }
+  for (let i = 0; i < 4; i++) { ctx.globalAlpha = .10; ctx.fillStyle = '#8f98c8'; ctx.beginPath(); ctx.ellipse(200 + i * 220 + Math.sin(t * .4 + i) * 30, GROUND - 10 - i * 6, 260, 26, 0, 0, 7); ctx.fill(); }
+  ctx.globalAlpha = 1;
+  ctx.fillStyle = '#0c0f1a'; ctx.fillRect(-20, GROUND, W + 40, H - GROUND + 20);
+  ctx.strokeStyle = '#2a3050'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-20, GROUND + 1); ctx.lineTo(W + 20, GROUND + 1); ctx.stroke();
+  ctx.restore();
+}
+
+function dirt(ctx, t, t0, cx, cy, n, spread, seed) {
+  const r = rng(seed);
+  for (let i = 0; i < n; i++) {
+    const b = t0 + r() * .5, life = .7 + r() * .4, u = (t - b) / life; const vx = (r() - .5) * spread, vy = -(80 + r() * 160), x0 = cx + (r() - .5) * spread;
+    if (u < 0 || u > 1) continue; const tt = u * life;
+    ctx.globalAlpha = (1 - u) * .9; ctx.fillStyle = '#5a4a3a'; ctx.beginPath(); ctx.arc(x0 + vx * tt, cy + vy * tt + 420 * tt * tt, 2 + r() * 2, 0, 7); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function tombShape(ctx, x, y, w, h) { ctx.beginPath(); ctx.moveTo(x, y + h); ctx.lineTo(x, y + w / 2); ctx.arc(x + w / 2, y + w / 2, w / 2, Math.PI, 0); ctx.lineTo(x + w, y + h); ctx.closePath(); }
+
+function wisp(ctx, x, y, a, trail) { // 幽灵：光点加拖尾
+  for (let i = trail.length - 1; i >= 0; i--) { const p = trail[i]; ctx.globalAlpha = a * (1 - i / trail.length) * .35; ctx.fillStyle = '#bfd8ff'; ctx.beginPath(); ctx.arc(p.x, p.y, 7 - i, 0, 7); ctx.fill(); }
+  ctx.globalAlpha = a; const g = ctx.createRadialGradient(x, y, 0, x, y, 14); g.addColorStop(0, '#ffffff'); g.addColorStop(.4, '#bfe0ff'); g.addColorStop(1, 'rgba(160,200,255,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 14, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+}
+
+// —— 书架：墓碑书架颤抖升起，幽灵凝成书 ——
+const SHELF = { x: 270, w: 420, h: 370, rows: 3, cols: 7 };
+function slotOf(k) { const row = Math.floor(k / SHELF.cols), col = k % SHELF.cols; const innerX = SHELF.x + 26, innerW = SHELF.w - 52, cw = innerW / SHELF.cols; const rowY = GROUND - SHELF.h + 58 + row * 100 + 90; return { x: innerX + col * cw + cw / 2, y: rowY, cw }; }
+function renderShelf(ctx, t, short) {
+  const shake = (!short && t < .3) ? { x: Math.sin(t * 80) * 3 * (1 - t / .3), y: Math.cos(t * 70) * 2 * (1 - t / .3) } : { x: 0, y: 0 };
+  background(ctx, t, shake);
+  const p = short ? 1 : easeOutCubic(seg(t, .3, 1.3));
+  const settle = (!short && t > 3.4) ? Math.sin((t - 3.4) * 18) * 3 * Math.max(0, 1 - (t - 3.4) / .4) : 0;
+  const dy = (1 - p) * (SHELF.h + 10) + settle, tremble = short ? 0 : Math.sin(t * 60) * 7 * (1 - p);
+  ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, GROUND); ctx.clip(); ctx.translate(tremble + shake.x, dy + shake.y);
+  const top = GROUND - SHELF.h;
+  ctx.fillStyle = '#2a2d3e'; tombShape(ctx, SHELF.x, top, SHELF.w, SHELF.h); ctx.fill(); ctx.strokeStyle = '#4a4f6a'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.fillStyle = '#1a1c28'; ctx.fillRect(SHELF.x + 18, top + 50, SHELF.w - 36, SHELF.h - 70);
+  ctx.fillStyle = '#3b3f58'; for (let r = 0; r < SHELF.rows; r++) ctx.fillRect(SHELF.x + 18, top + 58 + r * 100 + 90, SHELF.w - 36, 8);
+  ctx.fillStyle = '#6a6f8a'; ctx.font = 'bold 16px system-ui'; ctx.textAlign = 'center'; ctx.fillText('书 架', SHELF.x + SHELF.w / 2, top + 36);
+  // 书：到位后出现
+  const ghostStart = short ? 0 : 1.6, gap = short ? .012 : .04, dur = short ? .5 : 1.0;
+  for (const b of BOOKS) { const arrive = ghostStart + b.k * gap + dur, u = seg(t, arrive, .25); if (u <= 0) continue; const s = slotOf(b.k); ctx.globalAlpha = u; ctx.fillStyle = `hsl(${b.hue} ${b.sat}% 32%)`; ctx.fillRect(s.x - 10, s.y - b.h, 20, b.h); ctx.fillStyle = `hsl(${b.hue} ${b.sat}% 50%)`; ctx.fillRect(s.x - 10, s.y - b.h + 8, 20, 2); ctx.fillRect(s.x - 10, s.y - 10, 20, 2); ctx.globalAlpha = 1; const f = 1 - seg(t, arrive, .35); if (f > 0) { ctx.globalAlpha = f * .8; ctx.fillStyle = '#cfe4ff'; ctx.beginPath(); ctx.arc(s.x, s.y - b.h / 2, 16 * (1 + (1 - f)), 0, 7); ctx.fill(); ctx.globalAlpha = 1; } }
+  ctx.restore();
+  if (!short) dirt(ctx, t, .3, SHELF.x + SHELF.w / 2, GROUND, 60, SHELF.w + 40, 11);
+  // 幽灵
+  for (const b of BOOKS) { const dep = ghostStart + b.k * gap, u = (t - dep) / dur; if (u < 0 || u > 1) continue; const from = edgePoint(b.edge, b.s2), s = slotOf(b.k), to = { x: s.x, y: s.y - b.h / 2 + dy }; const trail = []; for (let i = 0; i < 6; i++) { const uu = clamp(u - i * .04), e = easeInOutSine(uu); const x = lerp(from.x, to.x, e), y = lerp(from.y, to.y, e) + Math.sin(uu * 9 + b.k) * 22 * (1 - uu); trail.push({ x, y }); } wisp(ctx, trail[0].x, trail[0].y, clamp(u * 4) * clamp((1 - u) * 6 + .2), trail.slice(1)); }
+  return short ? .8 : 3.8;
+}
+function hitBook(x, y) { for (const b of BOOKS) { const s = slotOf(b.k); if (Math.abs(x - s.x) < 11 && y < s.y && y > s.y - b.h) return b; } return null; }
+function renderOpen(ctx, b, u) { // 点开一本书：抽出、放大、翻开
+  const s = slotOf(b.k); const e = easeOutCubic(clamp(u / .5)); const cx = lerp(s.x, W / 2, e), cy = lerp(s.y - b.h / 2, 250, e), sc = lerp(1, 3.2, e);
+  ctx.fillStyle = `rgba(0,0,0,${.55 * e})`; ctx.fillRect(0, 0, W, H);
+  const w = 20 * sc, h = b.h * sc; ctx.save(); ctx.translate(cx, cy);
+  const o = clamp((u - .5) / .5); // 翻开：封面向左转，露出两页
+  ctx.fillStyle = '#e8dcc0'; if (o > 0) { ctx.fillRect(-w * 2.2 * o, -h / 2, w * 2.2 * o, h); ctx.fillRect(0, -h / 2, w * 2.2 * o, h); ctx.strokeStyle = '#b9a98a'; ctx.strokeRect(-w * 2.2 * o, -h / 2, w * 4.4 * o, h); }
+  ctx.fillStyle = `hsl(${b.hue} ${b.sat}% 32%)`; ctx.fillRect(-w / 2 - w * 2.2 * o * 0, -h / 2, w * (1 - o * .9) + 2, h);
+  ctx.restore();
+}
+
+// —— 档案柜：墓碑长出，卡飞入 ——
+function renderArchive(ctx, t, short) {
+  const shake = (!short && t < .3) ? { x: Math.sin(t * 80) * 3 * (1 - t / .3), y: 0 } : { x: 0, y: 0 };
+  background(ctx, t, shake);
+  const counts = TOMBS.map(() => 0);
+  TOMBS.forEach((tb, i) => { const st = short ? 0 : .3 + i * .25, g = short ? 1 : easeOutBack(seg(t, st, .7)); if (g <= 0) return; ctx.save(); ctx.translate(tb.x + tb.w / 2, GROUND); ctx.scale(1, g); ctx.translate(-tb.w / 2, 0); ctx.fillStyle = '#2a2d3e'; tombShape(ctx, 0, -tb.h, tb.w, tb.h); ctx.fill(); ctx.strokeStyle = '#4a4f6a'; ctx.lineWidth = 3; ctx.stroke(); ctx.fillStyle = '#1a1c28'; ctx.fillRect(14, -tb.h + tb.w / 2 + 6, tb.w - 28, tb.h - tb.w / 2 - 30); ctx.fillStyle = '#8a8fab'; ctx.font = '13px system-ui'; ctx.textAlign = 'center'; ctx.fillText('档案夹 ' + (i + 1), tb.w / 2, -tb.h + tb.w / 2 - 6); ctx.restore(); if (!short) dirt(ctx, t, st, tb.x + tb.w / 2, GROUND, 24, tb.w + 30, 20 + i); });
+  const start = short ? 0 : 1.8, dur = short ? .5 : .9; let idx = 0;
+  TOMBS.forEach((tb, i) => tb.cards.forEach((c, j) => { const dep = start + idx * (short ? .012 : .045), u = (t - dep) / dur; idx++; if (u > 1) { counts[i]++; return; } if (u < 0) return; const from = c.e < .5 ? { x: 80 + c.s * (W - 160), y: -20 } : (c.e < .75 ? { x: -20, y: 60 + c.s * 200 } : { x: W + 20, y: 60 + c.s * 200 }); const to = { x: tb.x + tb.w / 2, y: GROUND - tb.h / 2 - 10 }; const e = easeInOutSine(u); const x = lerp(from.x, to.x, e) + Math.sin(u * 7 + j) * 30 * (1 - u), y = lerp(from.y, to.y, e); ctx.save(); ctx.translate(x, y); ctx.rotate((1 - u) * 6 + j); ctx.globalAlpha = clamp((1 - u) * 5); ctx.fillStyle = '#e3d6b4'; ctx.fillRect(-9, -12, 18, 24); ctx.strokeStyle = '#8a7a56'; ctx.strokeRect(-9, -12, 18, 24); ctx.restore(); ctx.globalAlpha = 1; }));
+  TOMBS.forEach((tb, i) => { const st = short ? 0 : .3 + i * .25; if (t < st + .5) return; ctx.fillStyle = '#d8dcf0'; ctx.font = 'bold 22px system-ui'; ctx.textAlign = 'center'; ctx.fillText(String(counts[i]), tb.x + tb.w / 2, GROUND - tb.h / 2 + 4); ctx.fillStyle = '#6a6f8a'; ctx.font = '11px system-ui'; ctx.fillText('篇', tb.x + tb.w / 2, GROUND - tb.h / 2 + 20); });
+  return short ? .8 : 3.5;
+}
+
+// —— 笔记本：骷髅爬出，手捧本子 ——
+function renderNotes(ctx, t, short) {
+  background(ctx, t, { x: 0, y: 0 });
+  SKELS.forEach((s, i) => {
+    const st = short ? 0 : .4 + i * .45, u = short ? 1 : seg(t, st, 1.1); if (u <= 0 && !short) { if (t > st - .25) { const hu = seg(t, st - .25, .25); ctx.strokeStyle = '#cfd3e6'; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(s.x + 20, GROUND); ctx.lineTo(s.x + 24, GROUND - 26 * hu); ctx.stroke(); } return; }
+    const rise = easeOutCubic(u), bob = (u >= 1) ? Math.sin(t * 2 + s.j * 6) * 3 : 0, tilt = (u >= 1) ? Math.sin(t * .9 + s.j * 4) * .06 : Math.sin(t * 30) * .05 * (1 - u);
+    const bodyH = 150; ctx.save(); ctx.beginPath(); ctx.rect(0, 0, W, GROUND); ctx.clip(); ctx.translate(s.x, GROUND + bodyH * (1 - rise) + bob); ctx.rotate(tilt);
+    ctx.strokeStyle = '#cfd3e6'; ctx.lineWidth = 5; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(0, -96); ctx.stroke(); // 脊
+    for (let r = 0; r < 4; r++) { ctx.beginPath(); ctx.moveTo(-16, -40 - r * 12); ctx.lineTo(16, -40 - r * 12); ctx.stroke(); } // 肋
+    ctx.beginPath(); ctx.moveTo(-12, 0); ctx.lineTo(-10, -30); ctx.moveTo(12, 0); ctx.lineTo(10, -30); ctx.stroke(); // 腿
+    ctx.beginPath(); ctx.moveTo(-18, -90); ctx.lineTo(-34, -60); ctx.lineTo(-18, -44); ctx.moveTo(18, -90); ctx.lineTo(34, -60); ctx.lineTo(18, -44); ctx.stroke(); // 臂
+    ctx.fillStyle = '#e4e7f5'; ctx.beginPath(); ctx.arc(0, -116, 18, 0, 7); ctx.fill(); ctx.fillStyle = '#1a1c28'; ctx.beginPath(); ctx.arc(-6, -120, 4, 0, 7); ctx.arc(6, -120, 4, 0, 7); ctx.fill();
+    ctx.fillStyle = `hsl(${s.hue} 35% 38%)`; ctx.fillRect(-22, -62, 44, 34); ctx.strokeStyle = `hsl(${s.hue} 35% 60%)`; ctx.lineWidth = 2; ctx.strokeRect(-22, -62, 44, 34); ctx.fillStyle = '#e8dcc0'; ctx.fillRect(-14, -52, 28, 3); ctx.fillRect(-14, -44, 20, 3);
+    ctx.fillStyle = '#8a8fab'; ctx.font = '12px system-ui'; ctx.textAlign = 'center'; ctx.fillText(i === 0 ? '随手本' : '本子 ' + (i + 1), 0, 18);
+    ctx.restore();
+    if (!short) dirt(ctx, t, st, s.x, GROUND, 20, 90, 40 + i);
+  });
+  return short ? .8 : 3.5;
+}
+
+const SEQS = { shelf: renderShelf, archive: renderArchive, notes: renderNotes };
+const NAMES = { shelf: '书架', archive: '档案柜', notes: '笔记本' };
+
+// —— 分镜图 ——
+if (q.get('board')) {
+  document.querySelector('header').style.display = 'none'; document.querySelector('p.note').style.display = 'none';
+  const times = [0.15, 0.9, 1.6, 2.4, 3.8], cols = times.length, cw = 320, ch = 180, pad = 10, cap = 22;
+  const c = document.getElementById('c'); c.width = cols * (cw + pad) + pad; c.height = 3 * (ch + cap + pad) + pad + 30; const ctx = c.getContext('2d');
+  ctx.fillStyle = '#0b0d16'; ctx.fillRect(0, 0, c.width, c.height); ctx.fillStyle = '#cfd3e6'; ctx.font = 'bold 15px system-ui'; ctx.fillText('进场动效分镜（灰盒，全长约 3.5 到 3.8 秒）', pad, 22);
+  const off = document.createElement('canvas'); off.width = W; off.height = H; const octx = off.getContext('2d');
+  Object.keys(SEQS).forEach((k, row) => times.forEach((tt, col) => { octx.clearRect(0, 0, W, H); SEQS[k](octx, tt, false); const x = pad + col * (cw + pad), y = 34 + row * (ch + cap + pad); ctx.drawImage(off, x, y, cw, ch); ctx.strokeStyle = '#2a3050'; ctx.strokeRect(x + .5, y + .5, cw, ch); ctx.fillStyle = '#9aa0c0'; ctx.font = '12px system-ui'; ctx.fillText(`${NAMES[k]} · ${tt.toFixed(1)} 秒`, x, y + ch + 15); }));
+  return;
+}
+
+// —— 播放 ——
+const c = document.getElementById('c'), ctx = c.getContext('2d'); const tEl = document.getElementById('t');
+let seq = q.get('seq') || 'shelf', short = q.get('short') === '1', speed = 1, t0 = performance.now(), frozen = q.has('t') ? Number(q.get('t')) : null, done = false, open = null;
+const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function restart() { t0 = performance.now(); done = false; open = null; }
+function frame(now) {
+  let t = frozen !== null ? frozen : (now - t0) / 1000 * speed; if (reduce) t = 99; if (done) t = 99;
+  ctx.clearRect(0, 0, W, H); const len = SEQS[seq](ctx, t, short); if (t >= len) done = true;
+  if (open) { const u = clamp((now - open.t0) / 1000 / .9); renderOpen(ctx, open.b, u); }
+  tEl.textContent = `t = ${Math.min(t, len).toFixed(2)} s / ${len} s`;
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+document.querySelectorAll('[data-seq]').forEach(b => { b.classList.toggle('on', b.dataset.seq === seq); b.onclick = () => { seq = b.dataset.seq; document.querySelectorAll('[data-seq]').forEach(x => x.classList.toggle('on', x === b)); restart(); }; });
+document.getElementById('replay').onclick = restart;
+document.getElementById('short').onclick = e => { short = !short; e.target.classList.toggle('on', short); restart(); };
+document.getElementById('half').onclick = e => { speed = speed === 1 ? .5 : 1; e.target.classList.toggle('on', speed !== 1); restart(); };
+c.addEventListener('click', ev => { const r = c.getBoundingClientRect(); const x = (ev.clientX - r.left) * W / r.width, y = (ev.clientY - r.top) * H / r.height; if (!done) { done = true; return; } if (open) { open = null; return; } if (seq === 'shelf') { const b = hitBook(x, y); if (b) open = { b, t0: performance.now() }; } });
+})();
+</script>
+</body>
+</html>
