@@ -26,6 +26,7 @@ last_scan: 2026-11-04
 | 2026-11-05 | Commons API + Poly Haven API | 笔记本架与展台的参考墙：分类 Bookrests、Qur'an stands、Bookstands、Lecterns、Analogions、Bookwheel、Writing slopes、Display stands、Magazine stands、Chinese furniture in the MET；Poly Haven 模型 chinese_console_table、chinese_cabinet、painted_wooden_shelves、katana_stand_01、modern_wooden_cabinet、drawer_cabinet、brass_candleholders、mantel_clock_01 | 拼成 30 张的参考墙（本机 tools/out/refwall.jpg，不入库），四个方向：中式条案与柜 / 书托与经架 / 西式读经台与读写台 / 现代陈列架；等用户圈方向 |
 | 2026-11-06 | Commons 分类 + WebSearch | 档案架与档案盒参考：Card catalogs、Pigeonholes、Document boxes、Scroll cases、Archive boxes、Hollinger box、Archives storage、Type cases、Filing cabinets、China cabinets；Hollinger / Solander 盒与档案馆上架方式；Zotero / DEVONthink / Are.na / Obsidian canvas 的集合界面 | 27 张参考墙（本机 tools/out/refwall-archive.jpg），结论在 docs/archive-design.md 第三节 |
 | 2026-11-06 | WebSearch | 卡怎么存放：mymind（无文件夹只搜索）、Raindrop（收藏夹加标签）、Are.na（block 多 channel）、Milanote / Kosmik / Muse（空间板）、Luhmann 卡片盒（文献卡与想法卡两盒、固定编号加索引） | 结论在 docs/archive-design.md 第五节第 2 小节：借 Are.na 的引卡、Luhmann 的两盒分工、空间板做工作面；mymind 与 Raindrop 排除 |
+| 2026-11-06 | 用户给的三张图 + Pinterest + WebSearch + Steam | 奇幻风 UI：魔法觉醒日记本、ROVAI 使命板、挂夹抽屉；Pinterest「游戏ui」搜索页；图书管理员整理游戏；UI 生产流水线（手绘 / AI 辅助 / 九宫格 / border-image） | 结论在 docs/archive-design.md 第六节：形式定为挂夹抽屉 → 夹子 → 活页对开；生产用生图加切片，不用 Blender |
 
 ## 条目
 
@@ -108,6 +109,13 @@ last_scan: 2026-11-04
 | Raindrop | 收藏夹树加标签，导出开放 | 无 | 就是文件夹，和现在的盒一样 | 排除 |
 | Milanote / Kosmik / Muse | 空间板：卡随手摆、位置即意义、板里嵌板；Kosmik 带浏览器与剪藏 | 线索板作为研究册里的一页 | 要用户自己摆，手机难，卡多了乱 | 借鉴（设想丙） |
 | Luhmann 卡片盒（ernestchiang 综述、zettelkasten.de 论坛） | 两只独立的盒：文献卡与想法卡；不按主题分格，固定编号加关键词索引 | 存放用一只卡片柜，剪报（文献）与研究（想法）分段；引卡解决一卡多处 | 他的索引靠编号，我们靠搜索与分隔签 | 采纳思路（设想丁） |
+| 《哈利波特：魔法觉醒》日记本系统（微博 Natas_77 三屏截图，用户提供） | 桌上翻开的活页相册：左页卡袋（编号、日期、空袋虚影）、右页选中卡的详情与蜡封；桌上并排的夹子封面写进度，未解锁的只有描边 | 档案夹与对开页的整个形式；进度写封面；空位画虚影 | 游戏资产有版权，只学形式与做法，不用它的图 | 采纳（形式蓝本） |
+| ROVAI 使命板（用户提供） | 木框软木板上九张羊皮纸任务卡：蜡封徽记、编号、标题、一句话、状态章 | 卡要像实物（毛边、污渍、封蜡、章）；一屏九张 | 任务板语义是待办，不是档案 | 借鉴（卡的物件感） |
+| 挂夹文件抽屉简笔图（用户提供） | 抽屉里一排挂夹，顶上标签 | 存放单位改为夹；抽屉代替格柜 | 太简，只取结构 | 采纳（结构） |
+| Pinterest 搜索「游戏ui」（用户给的链接，Chrome 里看） | 手绘羊皮纸零件表、木框面板、记录员档案卡页、活页相册、任务卡等 | 风格圣经的选图来源；零件表的构成 | 需要登录浏览，WebFetch 不行；图只在本机看 | 借鉴（选十张进风格圣经） |
+| Steam《图书管理员：整理魔法图书馆吧！》（ArtRising，2026-04-30） | 第一人称三维，把 3072 本书归位，整排归好解锁能力，特别好评两万五千条 | "归位"本身当玩法；暖木加彩窗的三维图书馆 | 三维实时，不是绘制 UI | 仅参考（三维那边与归位反馈） |
+| ZSS Fantasy RPG UI Kit（itch 开发日志） | 自述 AI 生成底纹加大量手工覆盖修瑕分层，交付分层 PSD 与九宫格 PNG | 我们零件表的生产方式与交付物 | 风格偏欧美重彩 | 采纳（流程） |
+| LayerDiffuse（runware 博客）、rangy.ai 透明 PNG 指南、leanrada 9-slicer | 直接出透明通道的生图；单色底批量生成再抠；九宫格切片与 CSS 生成器 | 抠底与切片的工具 | 国内可用性待试 | 借鉴（工具） |
 
 ## 待看
 
