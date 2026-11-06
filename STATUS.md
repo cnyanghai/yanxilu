@@ -11,6 +11,7 @@ updated: 2026-11-03
 # 状态
 
 ## 现在停在哪
+- 2026-11-06 用户要设计档案架、档案盒与打开后的页面 → 研究稿 docs/archive-design.md：现状三层（架 / 盒 / 桌面）、九条设计问题、参考墙 27 张、五个方向（同一套木器的卡片目录柜式矮柜 / 盒子即文书匣 / 牌面朝上 / 件不出房间 / 手机一列抽屉）。等用户选方向，再出概念图（先报价）→ Blender 专业流程 → 进网页。
 - 2026-11-06 手机版场景上线：窄高单格柜三张图 vendor/scene/arch-m/（80 KB），窄屏自动切，每个领域一个格层、书横向滑；scene_test 含手机五项通过，notes / desk 无回归。桌面与手机两套都是布置里的可选项，默认仍素墙，等用户线上看、定默认。
 - 2026-11-06 阶段 6 完成：书墙「场景」可选项「拱形书柜」上线（布置 → 场景，默认仍是素墙，窄屏不用），四张模块图 vendor/scene/arch/ 共 316 KB，有几行书叠几个格层，书与摆件照旧由数据摆；scene_test 十一项与三套旧测试通过。书柜六阶段全部走完（docs/bookcase-production.md），验收里的盲测缺真照片未做。下一步：用户在线上看场景、决定是否改默认；按同一流程做展台书托、笔记本架、档案架、摆件；行数多时的墙面热点与格层高度两档。
 - 2026-11-05 深夜 书架场景：按概念图 B 在 Blender 窗口（9877）里建了拱形嵌墙书柜（tools/blender/web_props/bookcase.py，参数化：5 层、净宽 2.3、层距 0.42；底座、竖板背板、搁板加黄铜牌、带凹槽立柱与柱头、檐口、拱圈与拱心石、两支蜡烛带点光；真木纹 Poly Haven mocha_oak_veneer 与灰泥 plaster_grey_04 盒投影，缩放已烘进网格；EEVEE 静帧渲到 shots/case_render.png，场景存 yanxilu_props.blend）。三轮截图迭代（墙挡住柜体、贴图被拉成一整块、机位裁切）。第七版已发用户过目（结构与蓝本对齐），下一步分模块渲透明底图进网页。
@@ -78,6 +79,7 @@ updated: 2026-11-03
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
+- 2026-11-06 档案架设计研究：截现状七张、读数据与代码、拉参考墙、写 docs/archive-design.md，REFERENCES 落位。
 - 2026-11-06 手机版场景：export_m.py（窄柜参数）出三张，曝光 +0.35；app.js sceneOn 窄屏返回 arch-m、SC_DIM 加 arch-m、窄屏分支算 --bz；page.html .wall.scene-arch-m；scene_test 手机五项。
 - 2026-11-06 阶段 6：export_all 出拱顶 / 格层 / 底座 / 墙（704 与 352 像素/米），comp_grade 保留透明通道转 WebP；app.js 加 SCENES / sceneOn / SC_DIM、布置「场景」、wallHTML 拱顶底座、wallPack 的 --bz 与行插入；page.html .wall.scene-arch；scene_test.py。MCP 卡死一次重开窗口。README / CLAUDE.md 同步。
 - 2026-11-06 阶段 5：Blender 合成器落分层通道；合成器调色第一轮压黑，改用外部 comp_grade.py（numpy）三轮，五区量值与蓝本差 ≤ 0.08、细节密度持平；做盲测格子发用户。
