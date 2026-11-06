@@ -119,6 +119,11 @@ last_scan: 2026-11-04
 | Steam《图书管理员：整理魔法图书馆吧！》（ArtRising，2026-04-30） | 第一人称三维，把 3072 本书归位，整排归好解锁能力，特别好评两万五千条 | "归位"本身当玩法；暖木加彩窗的三维图书馆 | 三维实时，不是绘制 UI | 仅参考（三维那边与归位反馈） |
 | ZSS Fantasy RPG UI Kit（itch 开发日志） | 自述 AI 生成底纹加大量手工覆盖修瑕分层，交付分层 PSD 与九宫格 PNG | 我们零件表的生产方式与交付物 | 风格偏欧美重彩 | 采纳（流程） |
 | LayerDiffuse（runware 博客）、rangy.ai 透明 PNG 指南、leanrada 9-slicer | 直接出透明通道的生图；单色底批量生成再抠；九宫格切片与 CSS 生成器 | 抠底与切片的工具 | 国内可用性待试 | 借鉴（工具） |
+| Pinterest 收藏页 https://www.pinterest.com/yanghaihy/_pins/ （用户 2026-11-06 钉的十三张，只在本机看） | 壁炉小屋微缩场景、两张手游书与任务板实机截图、Polycount 书柜灰模、AI 悬赏板、兽人悬赏板三维道具、猴岛传说菜单、树根与葡萄藤书架、三维魔法书、三张 AI 魔法书与概念表 | 逐张的做法判断与用处在 docs/ui-craft-and-pipeline.md 第一节；结论：六张标了 AI、两张疑似、三张游戏截图、两张三维道具，好看在材质、形体、光三件事上 | 文字全是乱码的不能照搬；树根书架不能按数据摆书 | 采纳（第 4 张书封当标签加翻开的书、第 12 / 13 张的概念表版式为阶段 0 样式图格式；第 2 / 7 张任务板与木牌菜单为屏幕参考） |
+| GDC 2015《Hearthstone: How to Create an Immersive User Interface》 https://www.gdcvault.com/play/1022036/ | 炉石界面设计演讲：「我们的游戏就是界面」「沉浸先于实用」，界面当桌上实物做，画完切零件进引擎再加粒子与声 | 研习录"一间书房"的根据；每件东西是实物、能戳会响 | 炉石是 Unity 三维场景，我们是网页 | 采纳（原则） |
+| Juice it or lose it（Jonasson 与 Purho，2012） https://gamejuice.pages.dev/articles/juice-it-or-lose-it-lessons | 先做静态能玩的版本，再一层层加缓动、粒子、震屏、声音 | 阶段 6 动效的工作方法：一次加一层、真机看一遍 | 游戏的震屏粒子对阅读工具要克制 | 采纳（方法） |
+| Duolingo 口型博客 https://blog.duolingo.com/world-character-visemes 与 Rive 角色动画用例 https://rive.app/use-cases/character-animation | 角色在 Rive 里做，一个文件装美术、骨骼、动画、状态机；二十多个通用嘴形拼口型 | 若以后有角色或有状态的动画，走 Rive；运行时要自带进 vendor | 研习录眼下没有角色 | 仅参考 |
+| Lottie、Rive、CSS 三选一 https://www.pkgpulse.com/guides/lottie-vs-rive-vs-css-animations-web-animation-formats-2026 | 播放型用 Lottie、状态机型用 Rive、界面过渡用 CSS | 研习录动效首选 CSS 与 Web Animations API，粒子用 canvas | 不引 CDN | 采纳（选型） |
 
 ## 待看
 
