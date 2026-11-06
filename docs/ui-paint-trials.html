@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><title>研习录奇幻界面 · 材质试笔（SVG 滤镜）</title>
+<link rel="stylesheet" href="../vendor/fonts/fonts.css">
+<style>
+body{margin:0;background:#15100c;font-family:"Noto Serif SC",serif;color:#d8c49a}
+.sheet{width:1600px;margin:0 auto;padding:20px 0 40px}
+h1{font-size:24px;margin:0 20px 4px;font-weight:600;letter-spacing:.1em}
+.sub{margin:0 20px 16px;font-size:13px;color:#9c8a66}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin:0 20px}
+figure{margin:0}
+figcaption{font-size:13px;color:#9c8a66;margin-top:6px;letter-spacing:.05em}
+svg{display:block}
+text{font-family:"Noto Serif SC",serif}
+</style></head><body><div class="sheet">
+<h1>材质试笔 · 四件</h1>
+<p class="sub">这回不描边、不平涂：皮和木用光照滤镜起凹凸，边角用噪声磨损，黄铜用多段渐变加高光，底子压暗、灯光打暖。看的是"像不像画出来的东西"。</p>
+<div class="grid" id="g"></div>
+</div>
+<script>
+let uid=0;const id=()=>'f'+(uid++);
+// ---------- 材质滤镜 ----------
+function matFilter(k,{bf='0.06',oct=4,seed=3,scale=3,spec=0.6,dark=0.55,light='#fff'}){return `<filter id="${k}" x="-2%" y="-2%" width="104%" height="104%" color-interpolation-filters="sRGB">
+<feTurbulence type="fractalNoise" baseFrequency="${bf}" numOctaves="${oct}" seed="${seed}" result="n"/>
+<feDiffuseLighting in="n" surfaceScale="${scale}" diffuseConstant="1" lighting-color="${light}" result="d"><feDistantLight azimuth="225" elevation="48"/></feDiffuseLighting>
+<feComponentTransfer in="d" result="d2"><feFuncR type="linear" slope="${dark}" intercept="${1-dark}"/><feFuncG type="linear" slope="${dark}" intercept="${1-dark}"/><feFuncB type="linear" slope="${dark}" intercept="${1-dark}"/></feComponentTransfer>
+<feBlend in="SourceGraphic" in2="d2" mode="multiply" result="m"/>
+<feSpecularLighting in="n" surfaceScale="${scale}" specularConstant="${spec}" specularExponent="22" lighting-color="#fff2d0" result="s"><feDistantLight azimuth="225" elevation="40"/></feSpecularLighting>
+<feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/>
+<feBlend in="m" in2="s2" mode="screen" result="o"/>
+<feComposite in="o" in2="SourceAlpha" operator="in"/></filter>`}
+// 内阴影（缝里的脏与暗）
+function innerShadow(k,{sd=10,dx=4,dy=6,color='#000',op=.75}){return `<filter id="${k}" x="-10%" y="-10%" width="120%" height="120%"><feComponentTransfer in="SourceAlpha" result="inv"><feFuncA type="table" tableValues="1 0"/></feComponentTransfer><feGaussianBlur in="inv" stdDeviation="${sd}" result="b"/><feOffset in="b" dx="${dx}" dy="${dy}" result="o"/><feFlood flood-color="${color}" flood-opacity="${op}" result="c"/><feComposite in="c" in2="o" operator="in" result="s"/><feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="s2"/></feMerge></filter>`}
+// 磨损：边带 × 噪声 → 露出浅色底
+function worn(k,{r=6,bf='0.08',thr=0.55,color='#c8a070',op=.7,seed=9}){return `<filter id="${k}" x="-2%" y="-2%" width="104%" height="104%" color-interpolation-filters="sRGB"><feMorphology in="SourceAlpha" operator="erode" radius="${r}" result="er"/><feComposite in="SourceAlpha" in2="er" operator="out" result="band"/><feTurbulence type="fractalNoise" baseFrequency="${bf}" numOctaves="3" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  3 3 3 0 -${thr*4.5}" result="nm"/><feComposite in="nm" in2="band" operator="in" result="wm"/><feFlood flood-color="${color}" flood-opacity="${op}"/><feComposite in2="wm" operator="in" result="w"/><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" seed="4" result="g"/><feColorMatrix in="g" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .18 0" result="gm"/><feComposite in="gm" in2="SourceAlpha" operator="in" result="g2"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="w"/><feMergeNode in="g2"/></feMerge></filter>`}
+function dropShadow(k,{sd=12,dx=8,dy=14,op=.7}){return `<filter id="${k}" x="-20%" y="-20%" width="140%" height="150%"><feDropShadow dx="${dx}" dy="${dy}" stdDeviation="${sd}" flood-color="#000" flood-opacity="${op}"/></filter>`}
+function stains(k,{bf='0.012',seed=5,op=.35,color='#5a3a14'}){return `<filter id="${k}" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="fractalNoise" baseFrequency="${bf}" numOctaves="3" seed="${seed}" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  2.2 0 0 0 -0.9" result="a"/><feGaussianBlur in="a" stdDeviation="6" result="ab"/><feFlood flood-color="${color}" flood-opacity="${op}"/><feComposite in2="ab" operator="in" result="st"/><feComposite in="st" in2="SourceAlpha" operator="in" result="st2"/><feTurbulence type="fractalNoise" baseFrequency="0.7" numOctaves="2" seed="11" result="g"/><feColorMatrix in="g" type="matrix" values="0 0 0 0 .2  0 0 0 0 .12  0 0 0 0 .05  0 0 0 .22 0" result="gm"/><feComposite in="gm" in2="SourceAlpha" operator="in" result="g2"/><feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="st2"/><feMergeNode in="g2"/></feMerge></filter>`}
+function emboss(k,{sd=1.2,strength=1}){return `<filter id="${k}" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur in="SourceAlpha" stdDeviation="${sd}" result="b"/><feSpecularLighting in="b" surfaceScale="4" specularConstant="${strength}" specularExponent="18" lighting-color="#ffe9b0" result="s"><feDistantLight azimuth="225" elevation="35"/></feSpecularLighting><feComposite in="s" in2="SourceAlpha" operator="in" result="s2"/><feOffset in="SourceAlpha" dx="1.5" dy="2" result="sh"/><feFlood flood-color="#000" flood-opacity=".55"/><feComposite in2="sh" operator="in" result="sh2"/><feComposite in="sh2" in2="SourceAlpha" operator="out" result="sh3"/><feMerge><feMergeNode in="sh3"/><feMergeNode in="SourceGraphic"/><feMergeNode in="s2"/></feMerge></filter>`}
+function glowF(k,sd=18){return `<filter id="${k}" x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur stdDeviation="${sd}"/></filter>`}
+const GOLD=`<linearGradient id="gold" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#F3D889"/><stop offset=".22" stop-color="#B98A34"/><stop offset=".45" stop-color="#E9C565"/><stop offset=".62" stop-color="#8F651E"/><stop offset=".82" stop-color="#D9B256"/><stop offset="1" stop-color="#6E4C14"/></linearGradient>
+<linearGradient id="goldV" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#F0D07A"/><stop offset=".5" stop-color="#A47A2A"/><stop offset="1" stop-color="#5E4010"/></linearGradient>
+<linearGradient id="goldH" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6E4C14"/><stop offset=".3" stop-color="#E9C565"/><stop offset=".55" stop-color="#9A6F22"/><stop offset=".8" stop-color="#F3D889"/><stop offset="1" stop-color="#7A5518"/></linearGradient>
+<radialGradient id="warm" cx=".5" cy=".4" r=".7"><stop offset="0" stop-color="#F0B760" stop-opacity=".55"/><stop offset=".5" stop-color="#B07A30" stop-opacity=".18"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient>
+<radialGradient id="vig" cx=".5" cy=".5" r=".75"><stop offset=".55" stop-color="#000" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".75"/></radialGradient>
+<radialGradient id="candle" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#FFD98A" stop-opacity=".95"/><stop offset=".35" stop-color="#F0A848" stop-opacity=".45"/><stop offset="1" stop-color="#F0A848" stop-opacity="0"/></radialGradient>
+<linearGradient id="leatherSheen" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".18"/><stop offset=".4" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".35"/></linearGradient>
+<linearGradient id="woodDark" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a2c16"/><stop offset=".5" stop-color="#2e1a0c"/><stop offset="1" stop-color="#1c0f06"/></linearGradient>`;
+function DEFS(){return `<defs>${GOLD}
+${matFilter('leather',{bf:'0.035',oct:5,seed:3,scale:1.5,spec:.35,dark:.42})}
+${matFilter('leatherFine',{bf:'0.1',oct:4,seed:8,scale:1.1,spec:.3,dark:.42})}
+${matFilter('wood',{bf:'0.008 0.22',oct:3,seed:2,scale:1.8,spec:.3,dark:.42})}
+${matFilter('woodFine',{bf:'0.012 0.35',oct:4,seed:6,scale:1.6,spec:.3,dark:.45})}
+${matFilter('cloth',{bf:'0.3',oct:2,seed:5,scale:1.1,spec:.12,dark:.38})}
+${matFilter('parch',{bf:'0.5',oct:2,seed:7,scale:.8,spec:.08,dark:.2})}
+${matFilter('metal',{bf:'0.2',oct:2,seed:9,scale:.8,spec:1.4,dark:.3})}
+${matFilter('wax',{bf:'0.08',oct:2,seed:12,scale:2.5,spec:1.2,dark:.5})}
+${innerShadow('ao',{sd:12,dx:3,dy:5,op:.8})}${innerShadow('aoS',{sd:5,dx:2,dy:3,op:.7})}${innerShadow('aoDeep',{sd:26,dx:8,dy:12,op:.95})}
+${worn('wornLeather',{r:7,bf:'0.07',thr:.52,color:'#c69a62',op:.55,seed:9})}${worn('wornKraft',{r:5,bf:'0.09',thr:.5,color:'#e3cf9c',op:.5,seed:4})}${worn('wornDark',{r:6,bf:'0.08',thr:.55,color:'#000',op:.35,seed:6})}
+${dropShadow('shadow',{sd:14,dx:10,dy:18,op:.75})}${dropShadow('shadowS',{sd:5,dx:3,dy:5,op:.7})}${dropShadow('shadowM',{sd:8,dx:5,dy:9,op:.7})}
+${stains('stain',{bf:'0.012',seed:5,op:.42})}${stains('stain2',{bf:'0.02',seed:17,op:.3,color:'#4a2a10'})}
+${emboss('emb',{sd:1.2,strength:1.1})}${emboss('embS',{sd:.8,strength:.9})}${glowF('glow',18)}${glowF('glowS',6)}
+<filter id="wob" x="-4%" y="-4%" width="108%" height="108%"><feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="5" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3" xChannelSelector="R" yChannelSelector="G"/></filter>
+<filter id="scratch" x="0" y="0" width="100%" height="100%" color-interpolation-filters="sRGB"><feTurbulence type="turbulence" baseFrequency="0.9 0.015" numOctaves="1" seed="21" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 1  0 0 0 0 .92  0 0 0 0 .7  0 0 0 2.4 -1.75" result="s"/><feComposite in="s" in2="SourceAlpha" operator="in"/></filter>
+<pattern id="stitch" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M1 5h5" stroke="#E6C77A" stroke-width="1.6" stroke-linecap="round" opacity=".85"/><path d="M1 6.5h5" stroke="#000" stroke-width="1.2" stroke-linecap="round" opacity=".5"/></pattern>
+</defs>`}
+// ---------- 花饰 ----------
+// 角花：一只卷草，画在 0,0 为角、向右下伸
+const SCROLL=`M4 4 C40 2 70 6 92 22 C104 32 106 48 96 56 C86 64 72 58 72 48 C72 40 80 36 86 40 M4 4 C2 40 6 70 22 92 C32 104 48 106 56 96 C64 86 58 72 48 72 C40 72 36 80 40 86 M20 20 C34 26 46 36 52 52 M30 10 c6 0 10 4 10 10 M10 30 c0 6 4 10 10 10`;
+function cornerFlourish(x,y,q,s=1,w=4){return `<g transform="translate(${x} ${y}) rotate(${q*90}) scale(${s})" filter="url(#embS)"><path d="${SCROLL}" fill="none" stroke="url(#gold)" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/><circle cx="86" cy="42" r="4.5" fill="url(#gold)"/><circle cx="42" cy="86" r="4.5" fill="url(#gold)"/><circle cx="52" cy="52" r="5" fill="url(#gold)"/><circle cx="14" cy="14" r="3" fill="url(#gold)"/></g>`}
+// 边线纹样：双线夹一排菱形
+function borderOrn(x,y,w,h,inset){return `<g filter="url(#embS)"><rect x="${x+inset}" y="${y+inset}" width="${w-2*inset}" height="${h-2*inset}" fill="none" stroke="url(#gold)" stroke-width="3"/><rect x="${x+inset+8}" y="${y+inset+8}" width="${w-2*inset-16}" height="${h-2*inset-16}" fill="none" stroke="url(#gold)" stroke-width="1.4"/></g>`}
+function rivet(x,y,r=5){return `<g filter="url(#shadowS)"><circle cx="${x}" cy="${y}" r="${r}" fill="url(#gold)"/><circle cx="${x-r*.3}" cy="${y-r*.3}" r="${r*.38}" fill="#FFF0C0" opacity=".85"/><circle cx="${x}" cy="${y}" r="${r}" fill="none" stroke="#3a2608" stroke-width="1" opacity=".6"/></g>`}
+// 黄铜包角：带镂空的 L 形，雕纹，三颗铆钉
+function brassCorner(x,y,q,s=60){const t=s*.4;return `<g transform="translate(${x} ${y}) rotate(${q*90})" filter="url(#shadowM)"><path d="M0 0h${s}q6 0 6 6v${t-6}q0 6 -6 6h${-(s-t-10)}q-10 0 -10 10v${s-t-10}q0 6 -6 6h${-(t-6)}q-6 0 -6 -6z" fill="url(#gold)" stroke="#3a2608" stroke-width="1.2"/><path d="M6 6h${s-8}v${t-12}h${-(s-t-16)}q-10 0 -10 10v${s-t-16}h${-(t-12)}z" fill="none" stroke="#FFF0C0" stroke-width="1.2" opacity=".55"/><path d="M${t*.5} ${t*.5}q${s*.25} ${-t*.1} ${s*.5} ${t*.2}M${t*.5} ${t*.5}q${-t*.1} ${s*.25} ${t*.2} ${s*.5}" fill="none" stroke="#5a3a0a" stroke-width="1.6" opacity=".7"/>${rivet(t*.5,t*.5,4)}${rivet(s-10,t*.5,3.5)}${rivet(t*.5,s-10,3.5)}</g>`}
+function seal(x,y,r,ch){return `<g filter="url(#shadowS)"><path d="M${x-r} ${y}q${r*.1} ${-r*1.1} ${r} ${-r}t${r} ${r}q${-r*.2} ${r*1.15} ${-r} ${r}t${-r} ${-r}z" fill="#8E2F2B" filter="url(#wax)"/><circle cx="${x}" cy="${y}" r="${r*.66}" fill="none" stroke="#5E1D1A" stroke-width="1.8" opacity=".9"/><circle cx="${x}" cy="${y}" r="${r*.66}" fill="none" stroke="#C86A60" stroke-width="1" opacity=".5" transform="translate(-1 -1)"/><text x="${x}" y="${y+r*.32}" text-anchor="middle" font-size="${r*.9}" fill="#5E1D1A" font-weight="600">${ch}</text><ellipse cx="${x-r*.4}" cy="${y-r*.5}" rx="${r*.25}" ry="${r*.15}" fill="#D98A80" opacity=".7" transform="rotate(-30 ${x-r*.4} ${y-r*.5})"/></g>`}
+function goldText(x,y,t,size,anchor='middle',ls='.12em'){return `<g filter="url(#embS)"><text x="${x}" y="${y}" text-anchor="${anchor}" font-size="${size}" fill="url(#goldH)" letter-spacing="${ls}" font-weight="600">${t}</text></g>`}
+// ---------- 件 1：皮面书 ----------
+function pieceBook(){const W=760,H=520,x=200,y=20,w=380,h=480;let s=`<rect width="${W}" height="${H}" fill="#1a120c"/><rect width="${W}" height="${H}" fill="url(#warm)"/>`;
+// 桌面木纹
+s+=`<rect width="${W}" height="${H}" fill="#3a2414" filter="url(#wood)" opacity=".9"/><rect width="${W}" height="${H}" fill="url(#vig)"/>`;
+// 书页侧（右边露出的书口）
+s+=`<g filter="url(#shadow)"><rect x="${x+8}" y="${y+10}" width="${w}" height="${h}" rx="6" fill="#d9c391"/><rect x="${x+8}" y="${y+10}" width="${w}" height="${h}" rx="6" fill="url(#leatherSheen)"/>`;for(let i=0;i<22;i++)s+=`<path d="M${x+w+2} ${y+14+i*21.5}h4" stroke="#a88a52" stroke-width="1.2" opacity=".6"/>`;s+=`</g>`;
+// 封面皮
+s+=`<g filter="url(#ao)"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="#4a1a12" filter="url(#leather)"/></g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="url(#leatherSheen)"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="#4a1a12" filter="url(#wornLeather)" opacity=".7" style="mix-blend-mode:screen"/><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="7" fill="#000" filter="url(#scratch)" opacity=".35"/>`;
+// 书脊（左侧带 5 道凸棱）
+s+=`<rect x="${x}" y="${y}" width="46" height="${h}" rx="7" fill="#3f160f" filter="url(#leatherFine)"/><rect x="${x+40}" y="${y+6}" width="4" height="${h-12}" fill="#000" opacity=".45" filter="url(#glowS)"/>`;for(let i=0;i<5;i++){const by=y+40+i*((h-80)/4);s+=`<rect x="${x+2}" y="${by-7}" width="42" height="14" rx="5" fill="#6a2c1e" filter="url(#emb)"/><rect x="${x+6}" y="${by-5}" width="34" height="2" fill="url(#gold)" opacity=".9"/>`}
+// 压花边框与角花
+s+=borderOrn(x+46,y,w-46,h,22);s+=cornerFlourish(x+78,y+34,0,.55,4)+cornerFlourish(x+w-32,y+34,1,.55,4)+cornerFlourish(x+w-32,y+h-34,2,.55,4)+cornerFlourish(x+78,y+h-34,3,.55,4);
+// 中央徽章
+const cx=x+46+(w-46)/2,cy=y+h/2;s+=`<g filter="url(#shadowM)"><circle cx="${cx}" cy="${cy}" r="74" fill="url(#gold)" filter="url(#metal)"/><circle cx="${cx}" cy="${cy}" r="66" fill="none" stroke="#3a2608" stroke-width="1.2" opacity=".7"/><circle cx="${cx}" cy="${cy}" r="58" fill="#3f160f" filter="url(#leatherFine)"/><circle cx="${cx}" cy="${cy}" r="58" fill="none" stroke="url(#gold)" stroke-width="3"/></g>`;
+for(let i=0;i<12;i++){const a=i*30*Math.PI/180;s+=`<circle cx="${cx+Math.cos(a)*70}" cy="${cy+Math.sin(a)*70}" r="2.6" fill="#5a3a0a" opacity=".7"/>`}
+s+=goldText(cx,cy+20,'研',58,'middle','0')+`<path d="M${cx-30} ${cy+34}h60" stroke="url(#gold)" stroke-width="2.4" filter="url(#embS)"/><path d="M${cx-18} ${cy-50}q18 -10 36 0" fill="none" stroke="url(#gold)" stroke-width="2" filter="url(#embS)"/>`;
+// 四个黄铜包角
+s+=brassCorner(x+46,y,0,64)+brassCorner(x+w,y,1,64)+brassCorner(x+w,y+h,2,64)+brassCorner(x+46,y+h,3,64);
+// 搭扣带
+s+=`<g filter="url(#shadowM)"><rect x="${x+w-10}" y="${cy-20}" width="60" height="40" rx="6" fill="#3f160f" filter="url(#leatherFine)"/><rect x="${x+w-10}" y="${cy-20}" width="60" height="40" fill="url(#stitch)" opacity=".8"/><path d="M${x+w+26} ${cy-26}h22q10 0 10 10v32q0 10 -10 10h-22z" fill="url(#gold)" filter="url(#metal)" stroke="#3a2608" stroke-width="1"/><rect x="${x+w+34}" y="${cy-10}" width="14" height="20" rx="3" fill="#1a0c06" opacity=".8"/>${rivet(x+w+2,cy,4)}</g>`;
+// 高光：左上一抹反光
+s+=`<ellipse cx="${x+120}" cy="${y+80}" rx="90" ry="40" fill="#fff" opacity=".07" filter="url(#glow)" transform="rotate(-25 ${x+120} ${y+80})"/>`;
+return {w:W,h:H,s,cap:'件 1 · 皮面书：鞣皮凹凸、磨白的棱、压花双线与卷草角花、黄铜包角与徽章、搭扣带'}}
+// ---------- 件 2：翻开的日志面板 ----------
+function pieceJournal(){const W=760,H=520;let s=`<rect width="${W}" height="${H}" fill="#120d09"/><rect width="${W}" height="${H}" fill="url(#warm)" opacity=".6"/>`;
+const x=40,y=28,w=640,h=464;
+// 外框：深木 + 金线
+s+=`<g filter="url(#shadow)"><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="#2a160a" filter="url(#woodFine)"/></g><rect x="${x}" y="${y}" width="${w}" height="${h}" rx="4" fill="url(#leatherSheen)" opacity=".6"/>`;
+s+=`<g filter="url(#embS)"><rect x="${x+7}" y="${y+7}" width="${w-14}" height="${h-14}" fill="none" stroke="url(#gold)" stroke-width="2.4"/><rect x="${x+13}" y="${y+13}" width="${w-26}" height="${h-26}" fill="none" stroke="url(#gold)" stroke-width="1"/></g>`;
+// 羊皮纸
+const px=x+22,py=y+22,pw=w-44,ph=h-44;s+=`<g filter="url(#aoDeep)"><rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="#E2CFA2" filter="url(#parch)"/></g><rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="#E2CFA2" filter="url(#stain)" style="mix-blend-mode:multiply" opacity=".75"/><rect x="${px}" y="${py}" width="${pw}" height="${ph}" fill="url(#vig)" opacity=".35"/>`;
+// 四角卷草 + 中缝
+s+=cornerFlourish(px+14,py+14,0,.5,3.2)+cornerFlourish(px+pw-14,py+14,1,.5,3.2)+cornerFlourish(px+pw-14,py+ph-14,2,.5,3.2)+cornerFlourish(px+14,py+ph-14,3,.5,3.2);
+s+=`<path d="M${px+pw*.42} ${py+20}v${ph-40}" stroke="#5a3a14" stroke-width="1.2" opacity=".5"/><path d="M${px+pw*.42+3} ${py+20}v${ph-40}" stroke="#fff" stroke-width="1" opacity=".25"/>`;
+// 左栏：标题与条目
+s+=goldText(px+pw*.21,py+54,'卷 三',26,'middle','.3em')+`<path d="M${px+40} ${py+70}h${pw*.42-80}" stroke="#7a5a1e" stroke-width="1.4"/><path d="M${px+pw*.21-14} ${py+70}l14 -6l14 6l-14 6z" fill="url(#gold)" filter="url(#embS)"/>`;
+const items=['为什么老师傅看一眼就知道','一篇讲手感的文章','三份数据','一段剪报','读完的两篇','待归位'];items.forEach((t,i)=>{const iy=py+104+i*44;s+=`<g filter="url(#embS)"><path d="M${px+34} ${iy-5}l5 -5l5 5l-5 5z" fill="${i<4?'url(#gold)':'none'}" stroke="url(#gold)" stroke-width="1.2"/></g><text x="${px+52}" y="${iy}" font-size="14.5" fill="${i===0?'#2e1a06':'#4a2e10'}" font-weight="${i===0?600:400}">${t}</text>`;if(i===0)s+=`<rect x="${px+26}" y="${iy-20}" width="${pw*.42-52}" height="30" fill="#8a5a1e" opacity=".12"/>`});
+// 右栏：正文
+const rx=px+pw*.47;s+=`<text x="${rx}" y="${py+58}" font-size="19" fill="#2e1a08" font-weight="600" letter-spacing=".06em">为什么老师傅看一眼就知道</text><text x="${rx}" y="${py+80}" font-size="11.5" fill="#6a4a1e">档案 · 知乎 · 读完 12 分钟 · 2026.11.06</text>`;
+s+=`<path d="M${rx} ${py+92}h${pw*.5-10}" stroke="#7a5a1e" stroke-width="1"/><path d="M${rx+pw*.25-40} ${py+92}q20 -8 40 0q-20 8 -40 0z" fill="url(#gold)" filter="url(#embS)"/>`;
+for(let i=0;i<13;i++)s+=`<path d="M${rx} ${py+118+i*19}h${pw*.5-14-(i%4)*28-(i===12?120:0)}" stroke="#3a2608" stroke-width="2.4" opacity=".55" stroke-linecap="round"/>`;
+s+=`<text x="${rx}" y="${py+ph-92}" font-size="12.5" fill="#4a2e10" style="font-family:'Ma Shan Zheng','Noto Serif SC'">批注：这里说的其实是手上的记忆。</text>`+seal(px+pw-58,py+ph-56,22,'引');
+// 书签签（伸出右侧的三枚皮签）
+['书墙','档案','本子'].forEach((t,i)=>{const ty=y+70+i*62;s+=`<g filter="url(#shadowM)"><path d="M${x+w-6} ${ty}h54q8 0 8 8v30q0 8 -8 8h-54z" fill="${i===1?'#7A2E2A':'#4a1c14'}" filter="url(#leatherFine)"/><path d="M${x+w+2} ${ty+6}h40" stroke="#fff" stroke-width="1" opacity=".2"/>${rivet(x+w+44,ty+23,3.5)}</g><text x="${x+w+22}" y="${ty+28}" text-anchor="middle" font-size="13" fill="#F0D07A" letter-spacing=".1em">${t}</text>`});
+// 丝带
+s+=`<g filter="url(#shadowM)"><path d="M${px+pw*.42-10} ${py-6}v${ph+40}l10 -12l10 12v${-(ph+40)}z" fill="#7A2E2A" filter="url(#cloth)"/><path d="M${px+pw*.42-6} ${py}v${ph+30}" stroke="#fff" stroke-width="1" opacity=".18"/></g>`;
+return {w:W,h:H,s,cap:'件 2 · 翻开的日志：深木金线外框、羊皮纸渍与暗角、卷草角花、金饰分隔、皮质书签签、丝带与蜡封'}}
+// ---------- 件 3：档案夹 ----------
+function pieceFolder(){const W=760,H=520;let s=`<rect width="${W}" height="${H}" fill="#1a120c"/><rect width="${W}" height="${H}" fill="#3a2414" filter="url(#wood)" opacity=".9"/><rect width="${W}" height="${H}" fill="url(#warm)" opacity=".7"/><rect width="${W}" height="${H}" fill="url(#vig)"/>`;
+const x=150,y=70,w=460,h=380;
+// 夹着的纸
+s+=`<g filter="url(#shadow)"><rect x="${x+16}" y="${y-14}" width="${w-40}" height="${h}" rx="3" fill="#E6D4A6" filter="url(#parch)" transform="rotate(-2 ${x+w/2} ${y+h})"/><rect x="${x+26}" y="${y-6}" width="${w-50}" height="${h}" rx="3" fill="#D9C48F" filter="url(#parch)" transform="rotate(1.5 ${x+w/2} ${y+h})"/></g>`;
+// 背板与签
+s+=`<g filter="url(#shadow)"><path d="M${x} ${y+30}v${h-36}q0 6 6 6h${w-12}q6 0 6 -6v${-(h-36)}h${-(w*.55)}l-8 -22h${-(w*.4)}q-6 0 -6 6z" fill="#7c6a42" filter="url(#cloth)"/></g>`;
+s+=goldText(x+w*.22,y+23,'卷 三',17,'middle','.25em');
+// 前板：亚麻布面
+s+=`<g filter="url(#ao)"><rect x="${x}" y="${y+44}" width="${w}" height="${h-44}" rx="5" fill="#8e7a4e" filter="url(#cloth)"/></g><rect x="${x}" y="${y+44}" width="${w}" height="${h-44}" rx="5" fill="url(#leatherSheen)" opacity=".7"/><rect x="${x}" y="${y+44}" width="${w}" height="${h-44}" rx="5" fill="#8e7a4e" filter="url(#wornKraft)" opacity=".7" style="mix-blend-mode:screen"/><rect x="${x}" y="${y+44}" width="${w}" height="${h-44}" rx="5" fill="#000" filter="url(#stain2)" opacity=".35"/>`;
+// 皮脊
+s+=`<rect x="${x+w-70}" y="${y+40}" width="70" height="${h-36}" rx="5" fill="#4a1c14" filter="url(#leather)"/><rect x="${x+w-70}" y="${y+40}" width="70" height="${h-36}" fill="url(#leatherSheen)"/><rect x="${x+w-66}" y="${y+46}" width="62" height="${h-48}" fill="none" stroke="url(#stitch)" stroke-width="3" opacity=".9"/><path d="M${x+w-70} ${y+40}v${h-36}" stroke="#000" stroke-width="6" opacity=".5" filter="url(#glowS)"/>`;
+// 黄铜包角（左两个）与皮脊铆钉
+s+=brassCorner(x,y+44,0,54)+brassCorner(x,y+h,3,54);for(let i=0;i<4;i++)s+=rivet(x+w-35,y+70+i*((h-90)/3),5);
+// 标签牌：黄铜框 + 羊皮纸
+const lx=x+50,ly=y+110,lw=260,lh=104;s+=`<g filter="url(#shadowM)"><rect x="${lx-8}" y="${ly-8}" width="${lw+16}" height="${lh+16}" rx="6" fill="url(#gold)" filter="url(#metal)" stroke="#3a2608" stroke-width="1"/><rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" rx="2" fill="#D9C48F" filter="url(#parch)"/><rect x="${lx}" y="${ly}" width="${lw}" height="${lh}" rx="2" fill="#D9C48F" filter="url(#stain)" style="mix-blend-mode:multiply"/>${rivet(lx-1,ly-1,3.5)}${rivet(lx+lw+1,ly-1,3.5)}${rivet(lx-1,ly+lh+1,3.5)}${rivet(lx+lw+1,ly+lh+1,3.5)}</g>`;
+s+=`<text x="${lx+18}" y="${ly+34}" font-size="19" fill="#2e1a08" font-weight="600" letter-spacing=".05em">为什么老师傅看一眼就知道</text><path d="M${lx+18} ${ly+48}h${lw-36}" stroke="#7a5a1e" stroke-width="1"/><text x="${lx+18}" y="${ly+72}" font-size="13" fill="#5a3c18">读了 4 / 6 · 立卷 2026.10.30</text><text x="${lx+18}" y="${ly+92}" font-size="12" fill="#5a3c18">档案 3 · 剪报 2 · 数据 1</text>`;
+// 墨印章（圆戳，略歪）
+s+=`<g transform="rotate(-12 ${x+340} ${y+300})" opacity=".8"><circle cx="${x+340}" cy="${y+300}" r="38" fill="none" stroke="#5E1D1A" stroke-width="3" stroke-dasharray="40 3 10 2 60 4"/><circle cx="${x+340}" cy="${y+300}" r="30" fill="none" stroke="#5E1D1A" stroke-width="1.2"/><text x="${x+340}" y="${y+306}" text-anchor="middle" font-size="18" fill="#5E1D1A" font-weight="600">在 读</text></g>`;
+// 丝带与蜡封
+s+=`<g filter="url(#shadowM)"><path d="M${x-20} ${y+252}q${w/2} 26 ${w+40} -10l0 18q${-w/2} 36 ${-(w+40)} 10z" fill="#7A2E2A" filter="url(#cloth)"/><path d="M${x-10} ${y+258}q${w/2} 24 ${w+20} -8" stroke="#fff" stroke-width="1" opacity=".2" fill="none"/></g>`+seal(x+w-35,y+252,26,'封');
+// 灯光：右上一盏灯的暖光
+s+=`<ellipse cx="${W-60}" cy="60" rx="220" ry="180" fill="url(#candle)" opacity=".45" style="mix-blend-mode:screen"/>`;
+return {w:W,h:H,s,cap:'件 3 · 档案夹：亚麻布面前板、皮脊缝线、黄铜包角与铆钉、黄铜框羊皮纸签、墨戳、丝带与蜡封，夹着的纸露边'}}
+// ---------- 件 4：书柜一格 ----------
+function pieceShelf(){const W=760,H=520;let s=`<rect width="${W}" height="${H}" fill="#0f0a07"/>`;
+// 柜体：深橡木，凹槽
+s+=`<rect x="0" y="0" width="${W}" height="${H}" fill="#3e2412" filter="url(#wood)"/>`;
+const ix=70,iy=90,iw=620,ih=330;// 内凹
+s+=`<g filter="url(#aoDeep)"><rect x="${ix}" y="${iy}" width="${iw}" height="${ih}" fill="#2a160a" filter="url(#woodFine)"/></g><rect x="${ix}" y="${iy}" width="${iw}" height="${ih}" fill="url(#vig)" opacity=".6"/>`;
+// 上檐线脚与金嵌线
+s+=`<g filter="url(#shadowM)"><rect x="40" y="56" width="${W-80}" height="34" rx="3" fill="#3a2110" filter="url(#woodFine)"/><rect x="40" y="56" width="${W-80}" height="34" fill="url(#leatherSheen)"/><path d="M48 64h${W-96}" stroke="url(#gold)" stroke-width="2" filter="url(#embS)"/><path d="M48 82h${W-96}" stroke="url(#gold)" stroke-width="1" opacity=".8"/></g>`;
+for(let i=0;i<10;i++)s+=`<path d="M${70+i*68} 70q10 -6 20 0t20 0" fill="none" stroke="#5a3a1a" stroke-width="1.6" opacity=".8" filter="url(#embS)"/>`;
+// 搁板
+s+=`<g filter="url(#shadowM)"><rect x="${ix-10}" y="${iy+ih-2}" width="${iw+20}" height="26" rx="3" fill="#4a2a12" filter="url(#woodFine)"/><rect x="${ix-10}" y="${iy+ih-2}" width="${iw+20}" height="6" fill="#fff" opacity=".12"/><rect x="${ix-10}" y="${iy+ih+18}" width="${iw+20}" height="6" fill="#000" opacity=".5"/></g>`;
+// 黄铜牌
+s+=`<g filter="url(#shadowS)"><rect x="${W/2-60}" y="${iy+ih+4}" width="120" height="18" rx="3" fill="url(#gold)" filter="url(#metal)" stroke="#3a2608" stroke-width=".8"/>${rivet(W/2-52,iy+ih+13,2.6)}${rivet(W/2+52,iy+ih+13,2.6)}</g><text x="${W/2}" y="${iy+ih+17}" text-anchor="middle" font-size="11" fill="#2e1a06" letter-spacing=".3em" font-weight="600">手 艺</text>`;
+// 书：皮脊、鎏金带、压花题签
+const books=[['#5a2419',38,250,'手感'],['#2f3a22',30,236,'匠人'],['#6e4a1e',44,262,'木工'],['#3b2a1e',28,228,''],['#7A2E2A',36,246,'刀法'],['#44381e',40,256,'老师傅'],['#2a1e2e',32,240,''],['#8a5a26',46,266,'手艺史'],['#4a1c14',34,244,'纪要']];let bx=ix+22;
+books.forEach(([c,bw,bh,t],i)=>{const by=iy+ih-2-bh,lean=i===6?-9:0;s+=`<g transform="rotate(${lean} ${bx+bw/2} ${iy+ih-2})" filter="url(#shadowS)"><rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="3" fill="${c}" filter="url(#leatherFine)"/><rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="3" fill="url(#leatherSheen)"/><rect x="${bx}" y="${by}" width="${bw}" height="${bh}" rx="3" fill="${c}" filter="url(#wornDark)" opacity=".8"/>`;
+for(let k=0;k<5;k++){const ry=by+bh*.12+k*bh*.19;s+=`<rect x="${bx+1}" y="${ry}" width="${bw-2}" height="7" rx="2" fill="${c}" filter="url(#emb)"/><rect x="${bx+3}" y="${ry+2}" width="${bw-6}" height="2" fill="url(#gold)" opacity=".9"/>`}
+if(t){s+=`<rect x="${bx+4}" y="${by+bh*.3}" width="${bw-8}" height="${bh*.3}" rx="2" fill="#D9C48F" filter="url(#parch)" opacity=".92"/><rect x="${bx+4}" y="${by+bh*.3}" width="${bw-8}" height="${bh*.3}" fill="none" stroke="url(#gold)" stroke-width="1"/><text x="${bx+bw/2}" y="${by+bh*.45}" font-size="${Math.min(13,bw*.34)}" fill="#3a2208" text-anchor="middle" style="writing-mode:tb" letter-spacing=".15em">${t}</text>`}
+s+=`<rect x="${bx}" y="${by}" width="${bw*.18}" height="${bh}" fill="#fff" opacity=".07"/><rect x="${bx+bw*.82}" y="${by}" width="${bw*.18}" height="${bh}" fill="#000" opacity=".3"/></g>`;bx+=bw+3;if(i===2)bx+=6;if(i===5)bx+=10});
+// 书后的尘与蜡烛暖光
+s+=`<ellipse cx="${ix+iw-40}" cy="${iy+60}" rx="260" ry="200" fill="url(#candle)" opacity=".75" style="mix-blend-mode:screen"/><ellipse cx="${ix+iw-40}" cy="${iy+60}" rx="60" ry="50" fill="url(#candle)" opacity=".5" style="mix-blend-mode:screen"/>`;
+// 烛台在格子右端
+s+=`<g filter="url(#shadowM)" transform="translate(${ix+iw-60} ${iy+ih-2})"><ellipse cx="0" cy="0" rx="22" ry="6" fill="url(#gold)" filter="url(#metal)"/><rect x="-4" y="-26" width="8" height="26" fill="url(#gold)"/><ellipse cx="0" cy="-26" rx="12" ry="4" fill="url(#gold)"/><rect x="-8" y="-96" width="16" height="70" rx="2" fill="#E8D8A8" filter="url(#parch)"/><path d="M-6 -96q0 -4 6 -8q6 4 6 8z" fill="#E8D8A8"/><path d="M0 -100q-8 -14 0 -30q8 14 0 30z" fill="#FFD36A" filter="url(#glowS)"/><path d="M0 -104q-3 -7 0 -14q3 7 0 14z" fill="#FFF4C8"/></g>`;
+// 侧柱与前缘的暗
+s+=`<rect x="0" y="0" width="70" height="${H}" fill="url(#woodDark)" opacity=".55"/><rect x="${W-70}" y="0" width="70" height="${H}" fill="url(#woodDark)" opacity=".55"/><rect width="${W}" height="${H}" fill="url(#vig)" opacity=".45"/>`;
+return {w:W,h:H,s,cap:'件 4 · 书柜一格：深橡木凹槽与线脚、金嵌线、搁板黄铜牌、九本皮脊书（鎏金带、压花题签、磨损）、烛光与尘'}}
+const g=document.getElementById('g');[pieceBook,pieceJournal,pieceFolder,pieceShelf].forEach((f,i)=>{const p=f();const fig=document.createElement('figure');fig.id='p'+(i+1);fig.innerHTML=`<svg xmlns="http://www.w3.org/2000/svg" width="${p.w}" height="${p.h}" viewBox="0 0 ${p.w} ${p.h}">${DEFS()}<g filter="url(#wob)">${p.s}</g></svg><figcaption>${p.cap}</figcaption>`;g.appendChild(fig)});
+</script></body></html>
