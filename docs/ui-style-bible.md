@@ -74,6 +74,15 @@
 | 封存 | 铁锁加蜡封，碑面合上 | 封 |
 | 待归位 | 沙漏，碑面敞开纸角伸出 | 待 |
 
+## 八之二、排布：错落
+
+同类物件站成一排是最呆的（用户 2026-11-06 看灰盒时指出）。规则：
+- **不等**：同类物件三种变体轮着用，高矮宽窄不同；间距不等，差 20% 到 40%。
+- **前后两排**：后排缩到 0.75 到 0.8、底边抬高、脚下雾更浓、整体压暗一档；前排清楚。一屏前排至多五件、后排至多四件。
+- **歪**：每件歪 3 到 8 度，左右交替，不整齐。
+- **主角在前**：随手本的那只手、在读的那一架、最近动过的那座碑，站最前、最大、最亮（烛在它旁边）。
+- **稳**：错落由物件的编号做种子算出来，同一件东西每次进来都站在同一个位置，不乱跳。
+
 ## 九、动效词汇
 
 进场三段见 `ui-scene-motion.md`（钻出 / 长出 / 伸出，汇聚，落定；全长 3.5 秒、短版 0.8 秒、点一下跳过）。
@@ -92,12 +101,12 @@ grey-blue stone, bone white, ghost green, candle amber; no red. Moody and myster
 not gory. No text, no letters, no watermark, no photorealism, no 3D render look, no flat vector, no pixel art.
 ```
 
-后缀按零件类型：
-- 场景背景：`… full-bleed scene`（不要洋红底），桌面 3:2、手机 2:3 各出一张。
+后缀按零件类型（**不再用洋红底**：接口有 `background: transparent`，脚本加 `--bg transparent` 直接出透明底 PNG；给人看的一律先贴到场景底上再看，不看抠底原图）：
+- 场景背景：`… full-bleed scene`，桌面 3:2、手机 2:3 各出一张。
 - 材质瓷砖：`seamless texture swatch of <材质>, fills the whole frame, even dim lighting`。
-- 框与角花：`one black gothic carved corner piece / one pointed-arch panel frame, front view, symmetric, resting flat`。
-- 小件与图标表：`a sheet of N <小件> in a neat grid, same scale, same lighting, generous spacing`。
-- 英雄物件：`front view, single object` 加 `Isolated on a solid flat magenta #FF00FF background, nothing touching the edges`；带本机样式图走 edit 端点。
+- 框与角花：`one black gothic carved corner piece / one pointed-arch panel frame, front view, symmetric, resting flat, transparent background`。
+- 小件与零件表：`a sheet of N different <小件> side by side, different heights and shapes, same scale, same lighting, generous spacing, transparent background`，`cut.py --split` 拆开。同一种东西一次出三个变体，排布时才有错落。
+- 英雄物件：`front view, single object, feet on the ground, transparent background`；带本机样式图或场景图走 edit 端点。
 
 ## 十一、命名与登记
 
@@ -105,13 +114,13 @@ not gory. No text, no letters, no watermark, no photorealism, no 3D render look,
 
 ## 十二、阶段 0 的门：第二轮试笔
 
-第一轮（P001 到 P003，温和蓝夜）不作数，留作对照。第二轮四件：
+第一轮（P001 到 P003，温和蓝夜）不作数，留作对照。第二轮四件，**透明底直出，给人看的先贴到甲上**：
 
-| 件 | 定什么 | 比例 | 张数与价 |
+| 件 | 定什么 | 比例与底 | 张数与价 |
 |---|---|---|---|
-| 甲 首页墓场背景 | 紫夜、绿雾、前景三碑带碑眼、山上的宅子、枯枝压顶 | 3:2 | 2 张，中档 0.376 元一张 |
-| 乙 哥特尖拱书架 | 黑木尖拱、窗花格、两侧烛台、顶上乌鸦、从土里钻出 | 2:3 洋红底 | 2 张 |
-| 丙 档案碑 | 碑面一块平的空板留着刻夹名、雕顶、苔、一点绿光 | 2:3 洋红底 | 2 张 |
-| 丁 骷髅手臂 | 一只骨臂从土里伸出、手握一本皮面本子举给观者 | 2:3 洋红底 | 2 张 |
+| 甲 首页墓场背景 | 紫夜、绿雾、前景三碑带碑眼、山上的宅子、枯枝压顶 | 3:2，场景 | 2 张，中档 0.376 元一张 |
+| 乙 哥特尖拱书架 | 黑木尖拱、窗花格、两侧烛台、顶上乌鸦、从土里钻出 | 2:3，透明底 | 2 张 |
+| 丙 档案碑三种 | 一张表三座不同高矮形状的碑，碑面各留一块空板刻夹名 | 3:2，透明底 | 2 张 |
+| 丁 骷髅手臂三种 | 一张表三只长短角度不同的骨臂，各抓一本不同的本子 | 3:2，透明底 | 2 张 |
 
-八张约 3 元。通过条件：`tools/ui/wall.py` 把四件混进 `tools/out/ui/refs/` 的三张用户图与 Pinterest 游戏截图里，明度、彩度、描边密度、饱和落在参考范围内；用户看墙猜不出哪几张是我们的；首页有"压顶的枯枝和远处的宅子"。
+八张约 3 元。通过条件：乙丙丁贴到甲上排成错落的一屏，`tools/ui/wall.py` 把它混进 `tools/out/ui/refs/` 的三张用户图与 Pinterest 游戏截图里，明度、彩度、描边密度、饱和落在参考范围内；用户看墙猜不出哪张是我们的。
