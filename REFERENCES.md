@@ -125,6 +125,7 @@ last_scan: 2026-11-04
 | Duolingo 口型博客 https://blog.duolingo.com/world-character-visemes 与 Rive 角色动画用例 https://rive.app/use-cases/character-animation | 角色在 Rive 里做，一个文件装美术、骨骼、动画、状态机；二十多个通用嘴形拼口型 | 若以后有角色或有状态的动画，走 Rive；运行时要自带进 vendor | 研习录眼下没有角色 | 仅参考 |
 | Lottie、Rive、CSS 三选一 https://www.pkgpulse.com/guides/lottie-vs-rive-vs-css-animations-web-animation-formats-2026 | 播放型用 Lottie、状态机型用 Rive、界面过渡用 CSS | 研习录动效首选 CSS 与 Web Animations API，粒子用 canvas | 不引 CDN | 采纳（选型） |
 | 用户 2026-11-06 晚发来的三张图（本机 tools/out/ui/refs/，不入库） | 1 紫夜墓场：风暴紫云、黑枯枝压顶、前景墓碑睁绿眼、毒绿雾、山上亮窗的宅子（AI 风格化数字绘）；2 Gothic Bookshelf：黑木尖拱窗花格书架、两侧烛台、挂饰骷髅、乌鸦、皮面旧书（AI 写实摄影风）；3 蓝夜碑林：刻字墓碑、墨线描边、雾、枯树（AI，文字乱码） | 1 定首页的构图与色（紫夜加毒绿光）；2 定书架的形制（尖拱、窗花格、烛台、乌鸦、骷髅饰物）；3 定档案碑的样子（碑面刻夹名、碑林、雾）与墨线描边的画法 | 2 是写实照片风，只取形制按厚涂加墨线重画；3 的文字是乱码不能用；紫与绿对红绿色弱是气氛不是意义 | 采纳（圣经第三稿据此重写；第二轮试笔的蓝本；盲测对照墙用） |
+| 用户 2026-11-06 晚发来的第四张图：Welcome to Sleepy Hollow 铁门（本机 tools/out/ui/refs/user-gate-sleepy-hollow.jpg，不入库） | 竖构图：前景一道黑铁墓园大门框住画面，拱上一块发橙光的字牌，门柱顶石像鬼、门上魔鬼脸浮雕、枯藤缠柱，门扇开着；中景裂开的石板路进雾林；远景枯林；红橙加青的风暴天（AI 数字绘，带生图水印） | 首页改成这种构图：门是前景、路和路牌是中景、林与宅是远景，三层对比递减，字牌给站名；用户说三碑首页碑太大太多、层次不够 | 只取构图与层次，不用它的红橙天和魔鬼脸（圣经：紫夜、温和不恐怖，暖光只有烛光琥珀）；有版权与水印，只在本机看 | 采纳（构图；首页改墓园大门，P011） |
 
 ## 待看
 
