@@ -2736,6 +2736,11 @@ html.yx-scene .nbk-r h1{animation:yx-stamp .35s cubic-bezier(.2,1.4,.4,1) both}
 @keyframes yx-fog{from{transform:translateX(0)}to{transform:translateX(22%)}}
 .yx-shelf.still .yx-cab::after,.yx-arch.still .yx-cab::after,.yx-notes.still .yx-cab::after{animation:none;display:none}
 @media (prefers-reduced-motion:reduce){.yx-cab::after{animation:none;display:none}.yx-flip{transition:none}.yx-fan.arc .yx-card-btn{animation:none}}
+
+/* 独立 App「邮差」的导航图标 */
+.yx-nav-ico{width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
+.yx-brand-ico{width:30px;height:30px;object-fit:contain}
+@media (max-width:720px){.yx-nav-ico{width:26px;height:26px}}
 </style>
 
 <header class="topbar" id="rail"></header>

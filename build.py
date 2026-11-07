@@ -45,7 +45,19 @@ server = full.replace("\n<script>\n" + data.strip(), "\n<script>\n" + shim.strip
 assert server != full
 (root / "server").mkdir(exist_ok=True)
 (root / "server/index.html").write_text(server, encoding="utf-8")
-print("dist/artifact.html", len(body.encode()), "bytes; index.html", len(full.encode()), "bytes; server/index.html", len(server.encode()), "bytes")
+# 独立 App「邮差」：youchai/index.html = 服务器版 + window.YXL_APP 标记，资源路径改成 ../，自己的 manifest 与图标；
+# Baba 的通配路由按目录名在 /youchai 访问，装成 PWA 就是独立 App（起页大门、导航三条、墓园场景固定）
+app_html = server.replace("\n<script>\n" + shim.strip(), "\n<script>window.YXL_APP = \"youchai\";</script>\n<script>\n" + shim.strip(), 1)
+assert app_html != server
+app_html = (app_html.replace('href="vendor/', 'href="../vendor/').replace('src="vendor/', 'src="../vendor/').replace("url(vendor/", "url(../vendor/")
+            .replace('<link rel="manifest" href="../vendor/pwa/manifest.json">', '<link rel="manifest" href="manifest.json">')
+            .replace('<link rel="apple-touch-icon" href="../vendor/pwa/icon-192.png">', '<link rel="apple-touch-icon" href="icon-192.png">')
+            .replace('<link rel="icon" href="../vendor/pwa/icon-192.png" type="image/png">', '<link rel="icon" href="icon-192.png" type="image/png">')
+            .replace("<title>研习录</title>", "<title>邮差</title>", 1))
+app_html = app_html.replace("</head>", '<meta name="theme-color" content="#0D141A">\n</head>', 1)
+(root / "youchai").mkdir(exist_ok=True)
+(root / "youchai/index.html").write_text(app_html, encoding="utf-8")
+print("dist/artifact.html", len(body.encode()), "bytes; index.html", len(full.encode()), "bytes; server/index.html", len(server.encode()), "bytes; youchai/index.html", len(app_html.encode()), "bytes")
 
 # Service Worker：版本号跟着页面内容走，页面一变缓存整个换新
 import hashlib

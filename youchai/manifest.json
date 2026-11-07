@@ -1,0 +1,32 @@
+{
+  "name": "邮差",
+  "short_name": "邮差",
+  "description": "可以养的书房：书架、档案架、笔记本",
+  "lang": "zh-CN",
+  "scope": "./",
+  "start_url": "./#gate",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0D141A",
+  "theme_color": "#0D141A",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

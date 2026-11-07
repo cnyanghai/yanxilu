@@ -86,7 +86,8 @@ class H(BaseHTTPRequestHandler):
             return self.send(200, open(YXL + "/sw.js", "rb").read(), "text/javascript; charset=utf-8", {"cache-control": "no-cache"})
         if p in ("/room", "/room/"): p = "/room/index.html"
         if p in ("/world", "/world/"): p = "/world/index.html"
-        if p.startswith("/vendor/") or p.startswith("/reports/") or p.startswith("/room/") or p.startswith("/world/"):
+        if p in ("/youchai", "/youchai/"): p = "/youchai/index.html"
+        if p.startswith("/vendor/") or p.startswith("/reports/") or p.startswith("/room/") or p.startswith("/world/") or p.startswith("/youchai/"):
             f = os.path.normpath(YXL + p)
             if not f.startswith(YXL + "/") or not os.path.isfile(f): return self.send(404, "nf", "text/plain")
             return self.send(200, open(f, "rb").read(), TYPES.get(os.path.splitext(f)[1], "application/octet-stream"))

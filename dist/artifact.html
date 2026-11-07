@@ -2736,6 +2736,11 @@ html.yx-scene .nbk-r h1{animation:yx-stamp .35s cubic-bezier(.2,1.4,.4,1) both}
 @keyframes yx-fog{from{transform:translateX(0)}to{transform:translateX(22%)}}
 .yx-shelf.still .yx-cab::after,.yx-arch.still .yx-cab::after,.yx-notes.still .yx-cab::after{animation:none;display:none}
 @media (prefers-reduced-motion:reduce){.yx-cab::after{animation:none;display:none}.yx-flip{transition:none}.yx-fan.arc .yx-card-btn{animation:none}}
+
+/* 独立 App「邮差」的导航图标 */
+.yx-nav-ico{width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
+.yx-brand-ico{width:30px;height:30px;object-fit:contain}
+@media (max-width:720px){.yx-nav-ico{width:26px;height:26px}}
 </style>
 
 <header class="topbar" id="rail"></header>
@@ -5109,6 +5114,8 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   var MARK = { done: "阅", review: "熟" };
   var BOX_DAYS = [0, 1, 3, 7, 16, 35];
   var LS_KEY = "yanxilu-local-v1";
+  /* 独立 App「邮差」：youchai/index.html 里 build.py 注入 window.YXL_APP = "youchai"。场景固定墓园、起页大门、导航只留书架 / 档案架 / 笔记本、品牌「邮差」，数据与主站同一份 */
+  var APP = window.YXL_APP === "youchai";
   var REDUCE = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
   var CN = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
 
@@ -5427,6 +5434,13 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     var srch = '<button type="button" class="tb-srch" data-act="cmdk" title="全站搜索（Ctrl + K）" aria-label="全站搜索"><svg viewBox="0 0 20 20" width="17" height="17" aria-hidden="true"><circle cx="9" cy="9" r="5.5" fill="none" stroke="currentColor" stroke-width="2"/><line x1="13.4" y1="13.4" x2="17.6" y2="17.6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>';
     var jotB = '<button type="button" class="tb-jot" data-act="jot" title="记一笔（N）：随手记一句，落到随手本今天这一页" aria-label="记一笔"><svg viewBox="0 0 20 20" width="16" height="16" aria-hidden="true"><path d="M3 17l1-4L14 3l3 3L7 16l-4 1z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 5l3 3" stroke="currentColor" stroke-width="1.8"/></svg><span>记一笔</span></button>';
+    if (APP) {
+      var asec = /^(shelf|[tbr]-)/.test(r) ? "shelf" : /^(archive|clip|marks)/.test(r) ? "archive" : /^notes/.test(r) ? "notes" : r;
+      function ait(id, label, ico) { return '<a href="#' + id + '"' + (asec === id ? ' aria-current="page"' : "") + '><img class="yx-nav-ico" src="' + YX.dir + "icons/" + ico + '.webp" alt=""><span>' + label + "</span></a>"; }
+      return '<div class="tb-in"><a class="brand" href="#gate" aria-label="邮差，回到大门"><img class="yx-brand-ico" src="' + YX.dir + 'icons/gate.webp" alt=""><b>邮差</b></a>' +
+        '<nav class="mainnav" aria-label="主导航">' + ait("shelf", "书架", "book") + ait("archive", "档案架", "card") + ait("notes", "笔记本", "notebook") + "</nav>" +
+        srch + jotB + modeH + "</div>";
+    }
     return '<div class="tb-in"><a class="brand" href="#home" aria-label="研习录，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>研习录</b></a>' +
       '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + it("shelf", "书架") + it("journal", "足迹") + "</nav>" +
       srch + jotB + modeH + "</div>";
@@ -5867,7 +5881,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     return { v: LOOK_V, read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : LOOK_DEF.read, motion: v.motion !== false, sound: v.sound === true, dust: v.dust !== false, tod: v.tod !== false,
       fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : LOOK_DEF.fx, binding: BINDINGS.some(function (r) { return r[0] === v.binding; }) ? v.binding : LOOK_DEF.binding, color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : LOOK_DEF.color,
-      scene: SCENES.some(function (r) { return r[0] === v.scene; }) ? v.scene : LOOK_DEF.scene,
+      scene: APP ? "youchai" : SCENES.some(function (r) { return r[0] === v.scene; }) ? v.scene : LOOK_DEF.scene,
       deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice(),
       place: (function () { var o = {}, p = v.place && typeof v.place === "object" ? v.place : {}; Object.keys(p).forEach(function (k) { if (DECO[k] && typeof p[k] === "string") o[k] = p[k]; }); return o; })() };
   }
@@ -10702,7 +10716,7 @@ var FOIL = (function () {
   /* ---------- 邮差奇幻界面（第四稿青橙墓园，docs/ui-style-bible.md）：首页大门 #gate 与书架场「墓园宽柜」 ----------
    * 场景图与零件在 vendor/ui/（kit.json 记坐标），这里抄成常量 YX。宽柜内部一律按场景像素排，整块用 zoom 缩放；
    * 手机按格层切开竖排，一层一条横着滑。书按编号稳定挑一根书脊零件，题签竖排叠上去，状态用形与光：没读是幽灵、在读书口一线橙、读完一线金。 */
-  var YX = { dir: "vendor/ui/", scene: { w: 1536, h: 1024 }, rows: [{"plaque":[250,437,343,473],"feet":462,"cavity":62},{"plaque":[250,522,343,558],"feet":552,"cavity":78},{"plaque":[250,607,343,643],"feet":637,"cavity":73},{"plaque":[250,702,343,738],"feet":732,"cavity":83},{"plaque":[250,792,343,828],"feet":822,"cavity":78}], inner: [362, 1300],
+  var YX = { dir: (window.YXL_APP ? "../" : "") + "vendor/ui/", scene: { w: 1536, h: 1024 }, rows: [{"plaque":[250,437,343,473],"feet":462,"cavity":62},{"plaque":[250,522,343,558],"feet":552,"cavity":78},{"plaque":[250,607,343,643],"feet":637,"cavity":73},{"plaque":[250,702,343,738],"feet":732,"cavity":83},{"plaque":[250,792,343,828],"feet":822,"cavity":78}], inner: [362, 1300],
     gate: { w: 1024, h: 1536, plate: [250, 300, 770, 420], boards: [[315,870,448,905,4],[307,922,445,958,-2],[330,975,440,1018,3]] },
     arch: { panels: [[150,470,330,700],[460,380,620,690],[800,470,985,730],[1125,470,1310,730]], band: [350, 420] },
     notes: { books: [[235,450,350,520,-3],[462,290,580,360,4],[555,530,680,600,2],[812,430,925,500,-6],[1042,320,1160,390,-3],[1262,540,1380,610,2]], band: [170, 430] },
@@ -10917,7 +10931,7 @@ var FOIL = (function () {
     return '<section class="yx-gate" aria-label="邮差"><div class="yx-gate-img"><img class="yx-gate-bg" src="' + YX.dir + 'scenes/home.webp" alt="">' +
       '<img class="yx-gate-title" src="' + YX.dir + 'text/youchai.webp" alt="邮差" style="' + pc(g.plate) + '">' +
       boards.map(function (b, i) { var r = g.boards[i]; return '<a class="yx-board" href="#' + b[0] + '" style="' + pc(r) + ";transform:rotate(" + (-r[4]) + 'deg)"><img src="' + YX.dir + "text/" + b[0] + '.webp" alt="' + b[1] + '"></a>'; }).join("") +
-      '</div><div class="yx-gate-acts">' + (last ? '<a class="yx-btn glow" href="#' + esc(last) + '">继续上次</a>' : "") + '<a class="yx-btn ghost" href="#home">旧首页</a></div></section>';
+      '</div><div class="yx-gate-acts">' + (last ? '<a class="yx-btn glow" href="#' + esc(last) + '">继续上次</a>' : "") + (APP ? "" : '<a class="yx-btn ghost" href="#home">旧首页</a>') + "</div></section>";
   }
 
   /* ---------- 主渲染 ---------- */
@@ -10928,7 +10942,7 @@ var FOIL = (function () {
     ROUTES["b-" + b] = 1;
     Object.keys(LIB.books[b].deep || {}).forEach(function (n) { ROUTES["r-" + b + "-" + n] = 1; });
   });
-  function readHash() { var h = (location.hash || "").slice(1); return ROUTES[h] || /^notes-\d{4}-\d{2}-\d{2}$/.test(h) || (PLAN && /^l-(\d{4}-\d{2}-\d{2}|[a-z]+-\d{2})$/.test(h)) ? h : "home"; }
+  function readHash() { var h = (location.hash || "").slice(1); if (APP && (!h || h === "home")) return "gate"; return ROUTES[h] || /^notes-\d{4}-\d{2}-\d{2}$/.test(h) || (PLAN && /^l-(\d{4}-\d{2}-\d{2}|[a-z]+-\d{2})$/.test(h)) ? h : (APP ? "gate" : "home"); }
 
   function render(scrollTop) {
     syncMyBooks(); syncBoxes();
@@ -11442,7 +11456,7 @@ var FOIL = (function () {
 
   /* ---------- 手机装成 App：注册 Service Worker（只在自己的网站和 GitHub Pages 上） ---------- */
   if ("serviceWorker" in navigator && (ON_SERVER || /\.github\.io$/.test(location.hostname))) {
-    window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () { /* 注册不上就当普通网页 */ }); });
+    window.addEventListener("load", function () { navigator.serviceWorker.register(APP ? "../sw.js" : "sw.js").catch(function () { /* 注册不上就当普通网页 */ }); });
   }
 
   /* ---------- 启动 ---------- */
