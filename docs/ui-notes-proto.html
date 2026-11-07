@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>笔记本打开 · 灰盒原型（手机）</title>
+<link rel="stylesheet" href="../vendor/fonts/fonts.css">
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0b0d12; color: #d9d2e6; font: 14px/1.5 system-ui, "Noto Sans SC", sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #1e2436; }
+  button { background: #1c2029; color: #e8e2f2; border: 1px solid #3a4258; border-radius: 6px; padding: 5px 12px; cursor: pointer; font: inherit; }
+  button.on { background: #2e6b7a; border-color: #8fc4cc; }
+  #t { font-variant-numeric: tabular-nums; margin-left: auto; opacity: .8; }
+  main { padding: 12px 16px; display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  canvas { display: block; background: #000; border-radius: 18px; }
+  p.note { max-width: 420px; opacity: .75; }
+  .pre { font-family: "Ma Shan Zheng", serif; position: absolute; left: -9999px; }
+</style>
+</head>
+<body>
+<header>
+  <b>笔记本打开 · 手机灰盒</b>
+  <button id="replay">重放</button>
+  <button id="short">短版 0.3 秒</button>
+  <button id="half">半速</button>
+  <button id="note">记一笔</button>
+  <span id="t">t = 0.00 s</span>
+</header>
+<main>
+  <canvas id="c" width="390" height="844"></canvas>
+  <p class="note">只有形状与时间，手写字是真的（vendor/fonts 的 Ma Shan Zheng）。0 到 0.42 秒骨臂把本子举到中央，到 0.9 秒翻开成今天这一页。页上：点底部写入条或按「记一笔」加一笔（落笔有墨点）；左右四分之一翻到前一天 / 后一天；点中间收起石尺；底尺左端「合上」递回。地址加 <code>?t=0.7</code> 定格，<code>?board=1</code> 出分镜图。</p>
+  <span class="pre">预加载马善政</span>
+</main>
+<script>
+(() => {
+const W = 390, H = 844;
+const q = new URLSearchParams(location.search);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, u) => a + (b - a) * u;
+const eo = u => 1 - Math.pow(1 - clamp(u), 3);
+const eio = u => -(Math.cos(Math.PI * clamp(u)) - 1) / 2;
+const BONE = '#EFE8D6', INK = '#1C1A17', STONE = '#5C6382', ORANGE = '#E8762B', RUST = '#B04E1E', PAPER = '#EDE6D2';
+const HAND = '"Ma Shan Zheng", "LXGW WenKai", serif';
+const st = { chrome: true, day: 0, notes: [['09:12', '早上把宽柜的书脊零件贴上去了，书和柜子终于是一个世界的东西。'], ['14:40', '卡片的材质定羊皮纸：旧纸、铁包角、蜡封位。'], ['21:05', '手写字就用马善政，笔画有提按，像真写的。']], ink: null };
+
+function arm(ctx, x, baseY, rise, bookW, bookH, lift) {
+  // 骨臂：从地里伸出，手举本子
+  ctx.save(); ctx.strokeStyle = '#d8d0b8'; ctx.lineWidth = 14; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x, baseY); ctx.lineTo(x - 10, baseY - rise * .55); ctx.lineTo(x + 6, baseY - rise); ctx.stroke();
+  ctx.fillStyle = '#56342a'; ctx.strokeStyle = '#1e120c'; ctx.lineWidth = 3;
+  const bx = x + 6 - bookW / 2, by = baseY - rise - bookH + 10;
+  ctx.fillRect(bx, by, bookW, bookH); ctx.strokeRect(bx, by, bookW, bookH);
+  ctx.fillStyle = '#d9cfb2'; ctx.fillRect(bx + bookW * .2, by + bookH * .3, bookW * .6, bookH * .14);
+  ctx.fillStyle = INK; ctx.font = `bold ${Math.round(bookW * .11)}px serif`; ctx.textAlign = 'center'; ctx.fillText('随手本', bx + bookW / 2, by + bookH * .4);
+  ctx.restore();
+}
+function scene(ctx, dim) {
+  ctx.fillStyle = '#0b0d12'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#17202b'; ctx.fillRect(0, 0, W, 520); ctx.fillStyle = '#1a1814'; ctx.fillRect(0, 700, W, H - 700);
+  ctx.fillStyle = STONE; ctx.fillRect(0, 0, W, 44); ctx.fillStyle = BONE; ctx.font = '16px serif'; ctx.textAlign = 'center'; ctx.fillText('笔记本', W / 2, 28);
+  if (dim) { ctx.fillStyle = `rgba(0,0,0,${dim})`; ctx.fillRect(0, 0, W, H); }
+}
+function ruler(ctx, y, left, right, mid) {
+  ctx.fillStyle = STONE; ctx.fillRect(0, y, W, 28); ctx.fillStyle = BONE; ctx.font = '12px serif';
+  ctx.textAlign = 'left'; ctx.fillText(left, 14, y + 18); ctx.textAlign = 'right'; ctx.fillText(right, W - 14, y + 18);
+  if (mid) { ctx.textAlign = 'center'; ctx.fillText(mid, W / 2, y + 18); }
+}
+function stamp(ctx, cx, cy, r, a, b) {
+  ctx.save(); ctx.strokeStyle = RUST; ctx.lineWidth = 3; ctx.strokeRect(cx - r, cy - r, r * 2, r * 2); ctx.lineWidth = 1.5; ctx.strokeRect(cx - r + 5, cy - r + 5, r * 2 - 10, r * 2 - 10);
+  ctx.fillStyle = RUST; ctx.font = `${Math.round(r * .62)}px "LiSu", serif`; ctx.textAlign = 'center'; ctx.fillText(a, cx, cy - r * .12); ctx.fillText(b, cx, cy + r * .55); ctx.restore();
+}
+function wrap(ctx, text, x, y, maxw, lh) {
+  let line = '';
+  for (const ch of text) { if (ctx.measureText(line + ch).width > maxw) { ctx.fillText(line, x, y); y += lh; line = ch; } else line += ch; }
+  ctx.fillText(line, x, y); return y + lh;
+}
+function page(ctx, u) {
+  ctx.save(); ctx.globalAlpha = u; ctx.fillStyle = PAPER; ctx.fillRect(0, 0, W, H);
+  const days = ['11 月 6 日 · 周五', '11 月 5 日 · 周四', '11 月 4 日 · 周三'];
+  const notes = st.day === 0 ? st.notes : (st.day === 1 ? [['22:10', '昨天只记了一笔：三场各出一张，骨臂那张最像。']] : [['08:30', '书从架上点开的流程定了，手机单页。'], ['12:00', '封面八本够用。'], ['19:20', '纸纹去暗角。'], ['23:40', '桌面才对开。']]);
+  stamp(ctx, W - 48, 70, 24, '十一月', ['初六', '初五', '初四'][st.day]);
+  ctx.fillStyle = INK; ctx.font = `20px ${HAND}`; ctx.textAlign = 'left'; let y = 120;
+  notes.forEach(([tm, txt], i) => { y = wrap(ctx, txt, 24, y, W - 48, 36); ctx.font = '11px serif'; ctx.fillStyle = '#8c8270'; ctx.textAlign = 'right'; ctx.fillText(tm, W - 24, y - 26); ctx.textAlign = 'left'; ctx.fillStyle = INK; ctx.font = `20px ${HAND}`; y += 10; });
+  if (st.ink) { const v = clamp((performance.now() - st.ink) / 180); ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(24 + 6, y - 20, 4 + 6 * (1 - v), 0, 7); ctx.globalAlpha = u * (1 - v * .6); ctx.fill(); ctx.globalAlpha = u; if (v >= 1) st.ink = null; }
+  // 写入条
+  ctx.fillStyle = '#e4dcc8'; ctx.fillRect(0, H - 84, W, 56); ctx.fillStyle = '#aaa08c'; ctx.fillRect(0, H - 84, W, 1.5);
+  ctx.fillStyle = ORANGE; ctx.beginPath(); ctx.arc(30, H - 56, 14, 0, 7); ctx.fill(); ctx.fillStyle = '#140c08'; ctx.font = '14px serif'; ctx.textAlign = 'center'; ctx.fillText('✎', 30, H - 51);
+  ctx.fillStyle = '#8c8270'; ctx.font = `15px ${HAND}`; ctx.textAlign = 'left'; ctx.fillText('记一笔…', 56, H - 51);
+  if (st.chrome) { ruler(ctx, 0, '随手本', days[st.day]); ruler(ctx, H - 28, '合上', '', '← 前一天 · 后一天 →'); }
+  ctx.restore();
+}
+// 时间轴：0-0.42 骨臂举本到中央；0.42-0.6 封面停一下；0.6-0.9 翻开成页
+function render(ctx, t, short) {
+  const T = short ? [0.15, 0.22, 0.3] : [0.42, 0.6, 0.9];
+  ctx.clearRect(0, 0, W, H);
+  if (t < T[1]) {
+    const u = eio(t / T[0]); scene(ctx, 0.7 * u);
+    const bw = lerp(150, W * .7, u), bh = bw * 1.4; const rise = lerp(230, 420, u);
+    arm(ctx, lerp(W / 2 + 10, W / 2, u), lerp(700, 760, u), rise, bw, bh, u);
+    if (u >= 1) { ruler(ctx, 600, '今天 11 月 6 日', '已记 3 笔'); ctx.fillStyle = ORANGE; ctx.fillRect(40, 660, 190, 48); ctx.fillStyle = '#140c08'; ctx.font = 'bold 16px serif'; ctx.textAlign = 'center'; ctx.fillText('翻开今天', 135, 690); ctx.strokeStyle = '#8c93ae'; ctx.strokeRect(250, 660, 100, 48); ctx.fillStyle = BONE; ctx.fillText('日历', 300, 690); }
+  } else if (t < T[2]) {
+    const u = eio((t - T[1]) / (T[2] - T[1])); scene(ctx, 0.7);
+    if (u < .5) { const bw = W * .7, bh = bw * 1.4; ctx.save(); ctx.translate(W / 2 - bw / 2, 0); ctx.scale(Math.max(.02, 1 - u * 2), 1); ctx.translate(-(W / 2 - bw / 2), 0); arm(ctx, W / 2, 760, 420, bw, bh, 1); ctx.restore(); }
+    else page(ctx, (u - .5) * 2);
+  } else page(ctx, 1);
+  return T[2];
+}
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+let short = q.get('short') === '1', speed = 1, t0 = performance.now(), frozen = q.has('t') ? Number(q.get('t')) : null, closing = null;
+function go() {
+if (q.get('board')) {
+  const times = [0.0, 0.2, 0.42, 0.6, 0.75, 0.9];
+  const cw = 195, ch = 422, pad = 14; c.width = pad + (times.length + 2) * (cw + pad); c.height = ch + 60; c.style.width = c.width + 'px'; c.style.borderRadius = '8px';
+  const off = document.createElement('canvas'); off.width = W; off.height = H; const octx = off.getContext('2d');
+  ctx.fillStyle = '#0b0d12'; ctx.fillRect(0, 0, c.width, c.height); ctx.fillStyle = '#d9d2e6'; ctx.font = '14px system-ui'; ctx.fillText('笔记本打开 · 手机灰盒分镜（骨臂举本 0.42 秒 → 封面 0.6 秒 → 翻开 0.9 秒 → 今天这一页；后两格：记了一笔、翻到前一天）', pad, 22);
+  const shots = times.map(tt => ({ t: tt, label: `${tt.toFixed(2)} 秒`, pre: () => { st.day = 0; } }));
+  shots.push({ t: 1, label: '记了一笔', pre: () => { st.day = 0; st.notes = st.notes.concat([['23:58', '刚记的这一笔，落笔有墨点。']]); } });
+  shots.push({ t: 1, label: '翻到前一天', pre: () => { st.day = 1; } });
+  shots.forEach((s, i) => { s.pre(); octx.clearRect(0, 0, W, H); render(octx, s.t, false); const x = pad + i * (cw + pad), y = 34; ctx.drawImage(off, x, y, cw, ch); ctx.strokeStyle = '#3a4258'; ctx.strokeRect(x + .5, y + .5, cw, ch); ctx.fillStyle = '#b8b0c8'; ctx.font = '12px system-ui'; ctx.fillText(s.label, x, y + ch + 16); });
+  return;
+}
+function frame(now) {
+  let t = frozen !== null ? frozen : (now - t0) / 1000 * speed;
+  if (closing) { const u = clamp((now - closing) / 300); t = Math.max(0, (short ? 0.3 : 0.9) * (1 - u)); if (u >= 1) { closing = null; t0 = now; } }
+  render(ctx, t, short); document.getElementById('t').textContent = `t = ${t.toFixed(2)} s`;
+  if (frozen === null) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+}
+const restart = () => { t0 = performance.now(); frozen = null; st.chrome = true; st.day = 0; requestAnimationFrame(frame => {}); go(); };
+document.getElementById('replay').onclick = () => { t0 = performance.now(); frozen = null; st.chrome = true; st.day = 0; };
+document.getElementById('short').onclick = e => { short = !short; e.target.classList.toggle('on', short); t0 = performance.now(); };
+document.getElementById('half').onclick = e => { speed = speed === 1 ? .5 : 1; e.target.classList.toggle('on', speed !== 1); t0 = performance.now(); };
+document.getElementById('note').onclick = () => { st.notes = st.notes.concat([['23:58', '刚记的这一笔，落笔有墨点。']]); st.ink = performance.now(); };
+c.addEventListener('click', e => {
+  const r = c.getBoundingClientRect(); const x = (e.clientX - r.left) * W / r.width, y = (e.clientY - r.top) * H / r.height;
+  const t = (performance.now() - t0) / 1000 * speed; if (t < (short ? 0.3 : 0.9)) { t0 = performance.now() - (short ? 300 : 900) / speed; return; }
+  if (y > H - 28 && x < 70) { closing = performance.now(); return; }
+  if (y > H - 84 && y < H - 28) { st.notes = st.notes.concat([['23:58', '刚记的这一笔，落笔有墨点。']]); st.ink = performance.now(); return; }
+  if (x < W / 4) st.day = Math.min(2, st.day + 1); else if (x > W * 3 / 4) st.day = Math.max(0, st.day - 1); else st.chrome = !st.chrome;
+});
+document.fonts ? document.fonts.load('20px "Ma Shan Zheng"').then(go, go) : go();
+})();
+</script>
+</body>
+</html>
