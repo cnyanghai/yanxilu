@@ -5848,8 +5848,8 @@ var FOIL = (function () {
     } else if (name === "archive") {
       var stones = yxStones(), P = YX.arch.panels;
       stones.slice(0, P.length).forEach(function (st, j) {
-        var p = P[j], Ln = String(st.name).length, fs = Ln <= 4 ? 32 : Ln <= 8 ? 26 : Ln <= 12 ? 21 : 17;
-        items += '<button type="button" class="yx-stone' + (st.folder ? " folder" : "") + '" data-act="abox" data-t="' + esc(st.t) + '" style="left:' + p[0] + "px;top:" + p[1] + "px;width:" + (p[2] - p[0]) + "px;height:" + (p[3] - p[1]) + "px;--i:" + (n++) + '"><span class="yx-stone-n" style="font-size:' + fs + 'px">' + esc(st.name) + '</span><span class="yx-stone-s">' + esc(st.sub) + "</span></button>";
+        var p = P[j], Ln = String(st.name).length;
+        items += '<button type="button" class="yx-stone' + (st.folder ? " folder" : "") + '" data-act="abox" data-t="' + esc(st.t) + '" style="left:' + p[0] + "px;top:" + p[1] + "px;width:" + (p[2] - p[0]) + "px;height:" + (p[3] - p[1]) + "px;--i:" + (n++) + ";--lab:" + (Ln <= 4 ? 1 : Ln <= 8 ? .82 : .68) + '"><span class="yx-stone-n">' + esc(st.name) + '</span><span class="yx-stone-s">' + esc(st.sub) + "</span></button>";
         anchors.push({ x: (p[0] + p[2]) / 2, y: (p[1] + p[3]) / 2 - 40 });
       });
       if (!stones.length) items += '<span class="yx-plaque" style="left:560px;top:560px;width:420px;height:60px">档案架还是空的</span>';
@@ -5873,19 +5873,17 @@ var FOIL = (function () {
     var W = stage.clientWidth, H = stage.clientHeight;
     world.style.transition = anim && !REDUCE ? "transform .42s cubic-bezier(.22,.9,.3,1)" : "none";
     world.style.transform = "translate(" + Math.round(W / 2 - CAM.cx * CAM.s) + "px," + Math.round(H / 2 - CAM.cy * CAM.s) + "px) scale(" + CAM.s.toFixed(4) + ")";
+    world.style.setProperty("--s", CAM.s.toFixed(4)); world.classList.toggle("far", CAM.s < 0.45);
   }
   function yxCamPreset(stage) {
     var W = stage.clientWidth, H = stage.clientHeight, name = stage.getAttribute("data-scene"), L = yxLayer(name), b = L.box, narrow = W < 900, A = S.yxAnchors || [];
-    if (!narrow || name === "shelf" && !S.yxZoomed) {
-      /* 整座家具完整放进屏里：桌面按整个世界 contain；手机按家具的包围盒适配宽度 */
-      var s = narrow ? Math.min((W - 16) / (b[2] - b[0]), (H - 40) / (b[3] - b[1])) : Math.min(W / YX.scene.w, H / YX.scene.h);
-      CAM = { s: s, cx: narrow ? (b[0] + b[2]) / 2 : YX.scene.w / 2, cy: narrow ? (b[1] + b[3]) / 2 : YX.scene.h / 2, zoomed: false };
-    } else if (name === "shelf") {
+    if (!narrow || !(name === "shelf" && S.yxZoomed)) {
+      /* 整座家具完整放进屏里：桌面按整个世界 contain；手机按家具的包围盒适配宽度（三个场都整座可见，字按屏幕尺寸另画） */
+      var s = narrow ? Math.min((W - 12) / (b[2] - b[0]), (H - 120) / (b[3] - b[1])) : Math.min(W / YX.scene.w, H / YX.scene.h);
+      CAM = { s: s, cx: narrow ? (b[0] + b[2]) / 2 : YX.scene.w / 2, cy: narrow ? (b[1] + b[3]) / 2 + 20 : YX.scene.h / 2, zoomed: false };
+    } else {
       var a = A.filter(function (x) { return x.row === S.yxZoomRow; })[0] || A[0] || { x: 600, y: 500 };
       CAM = { s: W / 430, cx: a.x, cy: a.y, zoomed: true };
-    } else {
-      var a2 = A[S.yxPanIx || 0] || { x: 768, y: 512 }, s2 = name === "archive" ? 0.72 * W / 180 : 0.62 * W / 120;
-      CAM = { s: s2, cx: a2.x, cy: a2.y, zoomed: false };
     }
   }
   function yxStageMount() {
@@ -5910,7 +5908,7 @@ var FOIL = (function () {
       if (sx === null) return; var dx = e.clientX - sx, dy = e.clientY - sy;
       if (!moved && Math.abs(dx) + Math.abs(dy) < 8) return;
       moved = true; var W = stage.clientWidth, H = stage.clientHeight, name = stage.getAttribute("data-scene");
-      var canPan = W < 900 && (name !== "shelf" || CAM.zoomed); if (!canPan) return;
+      var canPan = W < 900 && CAM.zoomed; if (!canPan) return;
       CAM.cx = Math.max(W / 2 / CAM.s, Math.min(YX.scene.w - W / 2 / CAM.s, c0.cx - dx / CAM.s));
       if (name === "shelf") CAM.cy = Math.max(H / 2 / CAM.s, Math.min(YX.scene.h - H / 2 / CAM.s, c0.cy - dy / CAM.s));
       yxCam(stage, world, false);
@@ -5919,7 +5917,7 @@ var FOIL = (function () {
       if (sx === null) return; sx = null;
       if (!moved) return; movedAt = Date.now();
       var name = stage.getAttribute("data-scene"), A = S.yxAnchors || [];
-      if (name !== "shelf" && A.length) { var best = 0, bd = 1e9; A.forEach(function (a, i) { var d = Math.abs(a.x - CAM.cx); if (d < bd) { bd = d; best = i; } }); S.yxPanIx = best; yxCamPreset(stage); yxCam(stage, world, true); }
+      void name; void A;
     };
     stage.addEventListener("pointerup", up); stage.addEventListener("pointercancel", up); stage.addEventListener("pointerleave", up);
     stage.addEventListener("click", function (e) { if (Date.now() - movedAt < 350) { e.stopPropagation(); e.preventDefault(); } }, true);

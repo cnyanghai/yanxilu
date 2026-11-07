@@ -2782,6 +2782,18 @@ html.yx-app-scene[data-narrow="1"] .yx-world:not(.zoomed) .yx-rowhit{display:blo
 .yx-sheet-bar{display:flex;justify-content:flex-end;max-width:980px;margin:0 auto 8px}
 .yx-sheet .phead,.yx-sheet .yx-notes,.yx-sheet .nrack,.yx-sheet .banner{display:none}
 .yx-sheet .view{padding:0}
+
+/* 舞台上的字按屏幕尺寸画：世界缩小时字不跟着缩（--s 是镜头比例，--L 是屏幕上的基准字号） */
+.yx-stage{--L:18px}
+@media (max-width:900px){.yx-stage{--L:13px}}
+.yx-stage .yx-world .yx-stone-n{font-size:calc(var(--L) * var(--lab,1) * 1.5 / var(--s,1));line-height:1.2;white-space:normal;overflow:visible;max-width:calc(150px / var(--s,1))}
+.yx-stage .yx-world .yx-stone-s{font-size:calc(var(--L) * .85 / var(--s,1))}
+.yx-stage .yx-world .yx-stone{gap:calc(6px / var(--s,1));padding:0}
+.yx-stage .yx-world .yx-nb-n{font-size:calc(var(--L) * 1.4 / var(--s,1))}
+.yx-stage .yx-world .yx-nb-s{font-size:calc(var(--L) * .85 / var(--s,1))}
+.yx-stage .yx-world .yx-plaque{font-size:calc(var(--L) * .9 / var(--s,1));overflow:visible;white-space:nowrap}
+.yx-stage .yx-world.far .yx-book .yx-t{display:none}
+.yx-stage .yx-world:not(.far) .yx-plaque{font-size:18px}
 </style>
 
 <header class="topbar" id="rail"></header>
