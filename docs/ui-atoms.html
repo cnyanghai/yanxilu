@@ -18,7 +18,7 @@
   .tile { width: 150px; height: 110px; border: 2px solid var(--yx-iron-700); box-shadow: var(--yx-shadow-soft); position: relative; }
   .tile b { position: absolute; left: 0; right: 0; bottom: 0; padding: 3px 8px; background: rgba(13,20,26,.8); font: 12px var(--yx-font-ui); color: var(--yx-mist-300); }
   .icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 10px; }
-  .icons div { height: 84px; border: 1px dashed var(--yx-mist-600); border-radius: var(--yx-radius-m); display: flex; align-items: center; justify-content: center; font: 13px var(--yx-font-ui); color: var(--yx-mist-300); background: rgba(13,20,26,.5); }
+  .icons div { height: 110px; flex-direction: column; text-align: center; line-height: 1.6; border: 1px dashed var(--yx-mist-600); border-radius: var(--yx-radius-m); display: flex; align-items: center; justify-content: center; font: 13px var(--yx-font-ui); color: var(--yx-mist-300); background: rgba(13,20,26,.5); }
   .page-demo { width: min(360px, 100%); height: 300px; overflow: hidden; border: 2px solid var(--yx-iron-900); box-shadow: var(--yx-shadow); }
   @media (max-width: 600px) { h1 { font-size: 30px; } .tile { width: calc(50% - 7px); } .yx-input { width: 100%; } }
 </style>
@@ -34,7 +34,11 @@
     <div class="tile yx-tile-iron"><b>iron · 铁牌锈面</b></div>
     <div class="tile yx-tile-parchment"><b>parchment · 纸纹</b></div>
     <div class="tile yx-tile-sky"><b>sky · 风暴夜</b></div>
-    <div class="tile yx-tile-wood"><b>wood · 柜背板</b></div>
+    <div class="tile yx-tile-wood"><b>wood · 柜背板（备用）</b></div>
+    <div class="tile yx-tile-leather"><b>leather · 皮</b></div>
+    <div class="tile yx-tile-cloth"><b>cloth · 青布</b></div>
+    <div class="tile yx-tile-wood2"><b>wood2 · 黑橡木</b></div>
+    <div class="tile yx-tile-bone"><b>bone · 骨</b></div>
   </div>
 
   <h2>二、框</h2>
@@ -69,19 +73,19 @@
     <img class="yx-seal" src="../vendor/ui/seals/s04.webp" alt="结卷"><span class="yx-chip">结卷 · 方印</span>
   </div>
 
-  <h2>四、卷轴弹窗（卷轴零件待出，先用纸板加铁牌当头）</h2>
+  <h2>四、卷轴弹窗（真卷轴九宫格，字排在空白纸上）</h2>
   <div class="yx-scroll">
-    <div class="yx-ironplate head">合上这本书？</div>
-    <div class="yx-panel body"><i></i>
-      <p>读到第 12 页。合上后书回到架上，下次从这里接着读。</p>
-      <div class="acts"><span class="yx-btn ghost">再读会儿</span><span class="yx-btn glow">合上</span></div>
-    </div>
+    <h3>合上这本书？</h3>
+    <p>读到第 12 页。合上后书回到架上，下次从这里接着读。</p>
+    <div class="acts"><span class="yx-btn ghost">再读会儿</span><span class="yx-btn glow">合上</span></div>
   </div>
 
-  <h2>五、图标二十（待出零件表，占位）</h2>
+  <h2>五、图标二十（P033，铁与骨的小件）</h2>
   <div class="icons">
-    <div>书</div><div>卡</div><div>本子</div><div>烛</div><div>乌鸦</div><div>灯笼</div><div>羽毛笔</div><div>蜡封</div><div>沙漏</div><div>放大镜</div>
-    <div>齿轮</div><div>日历</div><div>书签</div><div>链环</div><div>钥匙</div><div>大门</div><div>碑</div><div>卷轴</div><div>信箱</div><div>骨手</div>
+    <div><img class="yx-icon l" src="../vendor/ui/icons/book.webp" alt="书"><br>书</div><div><img class="yx-icon l" src="../vendor/ui/icons/card.webp" alt="卡"><br>卡</div><div><img class="yx-icon l" src="../vendor/ui/icons/notebook.webp" alt="本子"><br>本子</div><div><img class="yx-icon l" src="../vendor/ui/icons/candle.webp" alt="烛"><br>烛</div><div><img class="yx-icon l" src="../vendor/ui/icons/raven.webp" alt="乌鸦"><br>乌鸦</div>
+    <div><img class="yx-icon l" src="../vendor/ui/icons/lantern.webp" alt="灯笼"><br>灯笼</div><div><img class="yx-icon l" src="../vendor/ui/icons/quill.webp" alt="羽毛笔"><br>羽毛笔</div><div><img class="yx-icon l" src="../vendor/ui/icons/seal.webp" alt="蜡封"><br>蜡封</div><div><img class="yx-icon l" src="../vendor/ui/icons/hourglass.webp" alt="沙漏"><br>沙漏</div><div><img class="yx-icon l" src="../vendor/ui/icons/magnifier.webp" alt="放大镜"><br>放大镜</div>
+    <div><img class="yx-icon l" src="../vendor/ui/icons/gear.webp" alt="齿轮"><br>齿轮</div><div><img class="yx-icon l" src="../vendor/ui/icons/calendar.webp" alt="日历"><br>日历</div><div><img class="yx-icon l" src="../vendor/ui/icons/bookmark.webp" alt="书签"><br>书签</div><div><img class="yx-icon l" src="../vendor/ui/icons/chain.webp" alt="链环"><br>链环</div><div><img class="yx-icon l" src="../vendor/ui/icons/key.webp" alt="钥匙"><br>钥匙</div>
+    <div><img class="yx-icon l" src="../vendor/ui/icons/gate.webp" alt="大门"><br>大门</div><div><img class="yx-icon l" src="../vendor/ui/icons/tombstone.webp" alt="碑"><br>碑</div><div><img class="yx-icon l" src="../vendor/ui/icons/scroll.webp" alt="卷轴"><br>卷轴</div><div><img class="yx-icon l" src="../vendor/ui/icons/mailbox.webp" alt="信箱"><br>信箱</div><div><img class="yx-icon l" src="../vendor/ui/icons/bonehand.webp" alt="骨手"><br>骨手</div>
   </div>
 </main>
 </body>

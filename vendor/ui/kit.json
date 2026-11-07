@@ -797,9 +797,167 @@
      "name": "结卷（方印）"
     }
    ]
+  },
+  "icons": {
+   "prompt": "P033",
+   "note": "图标二十，铁与骨小件；按表上顺序命名，叠字前核对名字对不对",
+   "items": [
+    {
+     "file": "icons/book.webp",
+     "w": 236,
+     "h": 229,
+     "name": "书",
+     "bytes": 16202
+    },
+    {
+     "file": "icons/card.webp",
+     "w": 182,
+     "h": 216,
+     "name": "卡",
+     "bytes": 12360
+    },
+    {
+     "file": "icons/notebook.webp",
+     "w": 227,
+     "h": 238,
+     "name": "本子",
+     "bytes": 14902
+    },
+    {
+     "file": "icons/candle.webp",
+     "w": 172,
+     "h": 221,
+     "name": "烛",
+     "bytes": 9400
+    },
+    {
+     "file": "icons/raven.webp",
+     "w": 174,
+     "h": 242,
+     "name": "乌鸦",
+     "bytes": 11428
+    },
+    {
+     "file": "icons/lantern.webp",
+     "w": 140,
+     "h": 244,
+     "name": "灯笼",
+     "bytes": 12300
+    },
+    {
+     "file": "icons/quill.webp",
+     "w": 176,
+     "h": 219,
+     "name": "羽毛笔",
+     "bytes": 6736
+    },
+    {
+     "file": "icons/seal.webp",
+     "w": 172,
+     "h": 182,
+     "name": "蜡封",
+     "bytes": 8702
+    },
+    {
+     "file": "icons/hourglass.webp",
+     "w": 140,
+     "h": 212,
+     "name": "沙漏",
+     "bytes": 11754
+    },
+    {
+     "file": "icons/magnifier.webp",
+     "w": 186,
+     "h": 211,
+     "name": "放大镜",
+     "bytes": 9164
+    },
+    {
+     "file": "icons/gear.webp",
+     "w": 207,
+     "h": 193,
+     "name": "齿轮",
+     "bytes": 14424
+    },
+    {
+     "file": "icons/calendar.webp",
+     "w": 198,
+     "h": 201,
+     "name": "日历",
+     "bytes": 12816
+    },
+    {
+     "file": "icons/bookmark.webp",
+     "w": 131,
+     "h": 200,
+     "name": "书签",
+     "bytes": 7152
+    },
+    {
+     "file": "icons/chain.webp",
+     "w": 203,
+     "h": 172,
+     "name": "链环",
+     "bytes": 8978
+    },
+    {
+     "file": "icons/key.webp",
+     "w": 228,
+     "h": 182,
+     "name": "钥匙",
+     "bytes": 8610
+    },
+    {
+     "file": "icons/gate.webp",
+     "w": 159,
+     "h": 225,
+     "name": "大门",
+     "bytes": 15650
+    },
+    {
+     "file": "icons/tombstone.webp",
+     "w": 194,
+     "h": 230,
+     "name": "碑",
+     "bytes": 13250
+    },
+    {
+     "file": "icons/scroll.webp",
+     "w": 217,
+     "h": 201,
+     "name": "卷轴",
+     "bytes": 9850
+    },
+    {
+     "file": "icons/mailbox.webp",
+     "w": 193,
+     "h": 243,
+     "name": "信箱",
+     "bytes": 13264
+    },
+    {
+     "file": "icons/bonehand.webp",
+     "w": 203,
+     "h": 219,
+     "name": "骨手",
+     "bytes": 14380
+    }
+   ]
+  },
+  "scroll": {
+   "prompt": "P032",
+   "note": "卷轴整件；九宫格切线见 frames.scroll",
+   "items": [
+    {
+     "file": "scroll/scroll.webp",
+     "w": 1076,
+     "h": 981,
+     "bytes": 188746
+    }
+   ]
   }
  },
- "total_bytes": 3833068,
+ "total_bytes": 4518696,
  "tiles": {
   "stone": {
    "file": "tiles/stone.webp",
@@ -835,6 +993,30 @@
    "bytes": 6344,
    "src": "P029 柜背板 (560,560,718,638)，源只有 78 像素，偏糊",
    "avg": "#13161a"
+  },
+  "leather": {
+   "file": "tiles/leather.webp",
+   "size": 512,
+   "bytes": 65004,
+   "src": "P034 材质四格 leather"
+  },
+  "cloth": {
+   "file": "tiles/cloth.webp",
+   "size": 512,
+   "bytes": 63340,
+   "src": "P034 材质四格 cloth"
+  },
+  "wood2": {
+   "file": "tiles/wood2.webp",
+   "size": 512,
+   "bytes": 47868,
+   "src": "P034 材质四格 wood2"
+  },
+  "bone": {
+   "file": "tiles/bone.webp",
+   "size": 512,
+   "bytes": 60802,
+   "src": "P034 材质四格 bone"
   }
  },
  "frames": {
@@ -865,6 +1047,20 @@
    "repeat": "stretch",
    "src": "P023 祭坛边雕带 (200,820,1300,900)",
    "css": "border-image:url(frames/stoneruler.webp) 0 40 0 40 fill / 0 40px stretch"
+  },
+  "scroll": {
+   "file": "scroll/scroll.webp",
+   "w": 1076,
+   "h": 981,
+   "slice": [
+    135,
+    300,
+    291,
+    200
+   ],
+   "repeat": "stretch",
+   "src": "P032 卷轴整件",
+   "css": "border-image:url(scroll/scroll.webp) 135 300 291 200 fill / 68px 150px 146px 100px stretch（按 0.5 画边）"
   }
  },
  "tokens": "tokens.css",

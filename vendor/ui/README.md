@@ -27,5 +27,5 @@
 
 - `tokens.css`：颜色、字、形、影、光、时长，只放数值。
 - `atoms.css`：瓷砖类（`.yx-tile-*`、`.yx-night`）、框（`.yx-ironplate`、`.yx-ruler`）、羊皮纸板（`.yx-panel`）、阅读页（`.yx-page`，`.night` 夜读）、控件（`.yx-btn glow|stone|ghost`、`.yx-input`、`.yx-toggle`、`.yx-tabs`、`.yx-seal`、`.yx-chip`）、卷轴弹窗（`.yx-scroll`）。图片路径相对本目录。
-- `tiles/`：五块无缝瓷砖（石、铁、纸、天、木），`frames/`：铁牌九宫格与石尺三切，切线在 `kit.json`。
+- `tiles/`：九块无缝瓷砖（石、铁、纸、天、木、皮、青布、黑橡木、骨），`frames/`：铁牌九宫格与石尺三切，`scroll/`：卷轴九宫格，`icons/`：图标二十，切线与名字在 `kit.json`。
 - 样子看 `docs/ui-atoms.html`。
