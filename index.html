@@ -2689,6 +2689,23 @@ html.yx-dark .k-legend,html.yx-dark .eyebrow,html.yx-dark .meta,html.yx-dark .li
 html.yx-dark .btn{background:#324D5B;color:#EFE8D6;border-color:#0D141A}html.yx-dark .btn.ghost{background:transparent;color:#EFE8D6;border-color:#647277}
 html.yx-dark .arules{color:#EFE8D6}html.yx-dark .arule{background:rgba(13,20,26,.55);border-color:#324D5B}
 @media (max-width:720px){html.yx-dark .mainnav{background:#0D141A;border-top-color:#324D5B}html.yx-dark .mainnav a[aria-current="page"]{background:transparent;color:#FFD48A}}
+
+/* 阶段 5：新场景下其余的页（书页、旧首页、线网、足迹、摘抄、课程、文章）一律做成夜底上的一张羊皮纸页，壳保持暗色 */
+html.yx-scene .view:not(.shelf){--paper:#EFE8D6;--leaf:#E6DCC2;--ink:#1C1A17;--ink-2:#3A3129;--ink-3:#5A5046;--rule:#CDBFA0;--rule-strong:#A89670;--indigo:#2E6B7A;--indigo-wash:#DCE7EA;--seal:#B04E1E;--seal-wash:#F1E0CE;--map-bg:#E6DCC2;
+  background:#EFE8D6 url(vendor/ui/tiles/parchment.webp) 0 0/512px;color:#1C1A17;padding:28px 32px 44px;border-radius:4px;box-shadow:0 2px 0 #C9BFA6,0 24px 44px -16px rgba(0,0,0,.7);box-sizing:border-box}
+html.yx-scene .view:not(.shelf) .eyebrow{color:#B04E1E}
+html.yx-scene .view:not(.shelf) h1,html.yx-scene .view:not(.shelf) h2{color:#1C1A17}
+html.yx-scene .view:not(.shelf) .tabs{background:#3a3f58 url(vendor/ui/frames/stoneruler.webp) center/100% 100% no-repeat;border-bottom:0;padding:0 8px;border-radius:2px}
+html.yx-scene .view:not(.shelf) .tabs button{color:#A9C6CC;border-bottom-width:3px}
+html.yx-scene .view:not(.shelf) .tabs button:hover{color:#EFE8D6}
+html.yx-scene .view:not(.shelf) .tabs button[aria-selected="true"]{color:#FFD48A;border-bottom-color:#E8762B}
+html.yx-scene .view:not(.shelf) .btn{background:#324D5B;color:#EFE8D6;border-color:#0D141A}
+html.yx-scene .view:not(.shelf) .btn.ghost{background:transparent;color:#1C1A17;border-color:#A89670}
+html.yx-scene .view:not(.shelf) .linkbtn{color:#5A5046}
+html.yx-scene .view:not(.shelf) .meta{color:#5A5046}
+html.yx-scene .view:not(.shelf) a{color:#2E6B7A}
+html.yx-scene .view.reader{padding-left:28px;padding-right:28px}
+@media (max-width:720px){html.yx-scene .view:not(.shelf){padding:18px 16px 36px;border-radius:0}}
 </style>
 
 <header class="topbar" id="rail"></header>
@@ -10840,7 +10857,7 @@ var FOIL = (function () {
     document.documentElement.classList.toggle("clip-mode", S.route === "clip");
     document.documentElement.classList.toggle("gate-mode", S.route === "gate");
     document.documentElement.classList.toggle("yx-scene", LK().scene === "youchai"); yxNightApply();
-    document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai" && /^(gate|shelf|archive|notes)/.test(S.route));
+    document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai");
     if (S.route !== "gate" && S.route !== "home") { try { localStorage.setItem("yx-last", S.route); } catch (e0) { /* 忽略 */ } }
     $("#rail").innerHTML = railHTML();
     var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);

@@ -5793,7 +5793,7 @@ var FOIL = (function () {
     document.documentElement.classList.toggle("clip-mode", S.route === "clip");
     document.documentElement.classList.toggle("gate-mode", S.route === "gate");
     document.documentElement.classList.toggle("yx-scene", LK().scene === "youchai"); yxNightApply();
-    document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai" && /^(gate|shelf|archive|notes)/.test(S.route));
+    document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai");
     if (S.route !== "gate" && S.route !== "home") { try { localStorage.setItem("yx-last", S.route); } catch (e0) { /* 忽略 */ } }
     $("#rail").innerHTML = railHTML();
     var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);
