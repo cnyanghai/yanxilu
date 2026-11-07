@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>书从架上点开 · 灰盒原型（手机）</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0b0d12; color: #d9d2e6; font: 14px/1.5 system-ui, "Noto Sans SC", sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #1e2436; }
+  button { background: #1c2029; color: #e8e2f2; border: 1px solid #3a4258; border-radius: 6px; padding: 5px 12px; cursor: pointer; font: inherit; }
+  button.on { background: #2e6b7a; border-color: #8fc4cc; }
+  #t { font-variant-numeric: tabular-nums; margin-left: auto; opacity: .8; }
+  main { padding: 12px 16px; display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  canvas { display: block; background: #000; border-radius: 18px; }
+  p.note { max-width: 420px; opacity: .75; }
+</style>
+</head>
+<body>
+<header>
+  <b>书从架上点开 · 手机灰盒</b>
+  <button id="replay">重放</button>
+  <button id="short">短版 0.3 秒</button>
+  <button id="half">半速</button>
+  <button id="night">夜读</button>
+  <span id="t">t = 0.00 s</span>
+</header>
+<main>
+  <canvas id="c" width="390" height="844"></canvas>
+  <p class="note">只有形状与时间，没有美术。0 到 0.18 秒书脊弹出，到 0.5 秒飞到中央成封面，到 0.9 秒翻开成单页阅读。阅读页里：点两侧翻页，点中间收起或显示两条石尺，点底尺左端「合上」反向放回架上。地址加 <code>?t=0.7</code> 定格，<code>?board=1</code> 出分镜图，<code>?short=1</code> 短版。</p>
+</main>
+<script>
+(() => {
+const W = 390, H = 844;
+const q = new URLSearchParams(location.search);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, u) => a + (b - a) * u;
+const eo = u => 1 - Math.pow(1 - clamp(u), 3);
+const eio = u => -(Math.cos(Math.PI * clamp(u)) - 1) / 2;
+const BONE = '#EFE8D6', INK = '#1C1A17', STONE = '#5C6382', ORANGE = '#E8762B', TEAL = '#1E3A4A', WOOD = '#2a2420';
+const night = { on: false };
+
+// 架上：两层格，每层 14 本
+const SHELVES = [{ y: 300, h: 110 }, { y: 440, h: 110 }];
+const BOOKS = [];
+let seed = 7; const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
+SHELVES.forEach((s, si) => { let x = 24; while (x < W - 40) { const w = 16 + Math.floor(rnd() * 14), h = s.h * (0.66 + rnd() * 0.28); BOOKS.push({ x, w, h, s: si, hue: rnd() }); x += w + 2 + Math.floor(rnd() * 3); } });
+const PICK = 6;
+
+function spine(ctx, b, x, y, w, h, dim) {
+  ctx.fillStyle = dim ? '#1a1814' : `hsl(${20 + b.hue * 180}, ${25 + b.hue * 20}%, ${18 + b.hue * 16}%)`;
+  ctx.fillRect(x, y - h, w, h);
+  ctx.strokeStyle = '#07040b'; ctx.lineWidth = 1.5; ctx.strokeRect(x + .5, y - h + .5, w - 1, h - 1);
+  if (!dim) { ctx.fillStyle = 'rgba(230,220,190,.7)'; ctx.fillRect(x + 3, y - h * .72, w - 6, h * .4); }
+}
+function shelfScene(ctx, pop) {
+  ctx.fillStyle = '#0b0d12'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#17202b'; ctx.fillRect(0, 0, W, 240);                 // 天与墓园（略）
+  ctx.fillStyle = WOOD; ctx.fillRect(8, 250, W - 16, 330);
+  SHELVES.forEach(s => { ctx.fillStyle = '#0e0c0a'; ctx.fillRect(16, s.y - s.h, W - 32, s.h); ctx.fillStyle = '#3a2f26'; ctx.fillRect(12, s.y, W - 24, 10); });
+  ctx.fillStyle = STONE; ctx.fillRect(0, 0, W, 44); ctx.fillStyle = BONE; ctx.font = '16px serif'; ctx.textAlign = 'center'; ctx.fillText('书架 · 手艺', W / 2, 28);
+  BOOKS.forEach((b, i) => { const s = SHELVES[b.s]; const dim = pop > 0 && i !== PICK && b.s === BOOKS[PICK].s; if (i === PICK) return; spine(ctx, b, b.x, s.y, b.w, b.h, dim); });
+  const b = BOOKS[PICK], s = SHELVES[b.s];
+  ctx.save(); ctx.translate(0, 0); const sc = 1 + pop * .18; const cx = b.x + b.w / 2;
+  ctx.translate(cx, s.y); ctx.scale(sc, sc); ctx.translate(-cx, -s.y);
+  ctx.shadowColor = 'rgba(0,0,0,.6)'; ctx.shadowBlur = 10 * pop; spine(ctx, b, b.x, s.y + 6 * pop, b.w, b.h, false); ctx.restore();
+  return b;
+}
+function cover(ctx, cx, cy, w, h, alpha) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.fillStyle = '#56342a'; ctx.fillRect(cx - w / 2, cy - h / 2, w, h);
+  ctx.strokeStyle = '#1e120c'; ctx.lineWidth = 3; ctx.strokeRect(cx - w / 2, cy - h / 2, w, h);
+  ctx.strokeStyle = '#b89650'; ctx.lineWidth = 1.5; ctx.strokeRect(cx - w / 2 + 10, cy - h / 2 + 10, w - 20, h - 20);
+  ctx.fillStyle = '#ffd98d'; ctx.font = `bold ${Math.round(w * .16)}px serif`; ctx.textAlign = 'center'; ctx.fillText('书  名', cx, cy - h * .08);
+  ctx.fillStyle = '#d6c4a0'; ctx.font = `${Math.round(w * .07)}px serif`; ctx.fillText('作者', cx, cy + h * .08);
+  ctx.restore();
+}
+function ruler(ctx, y, left, right, mid) {
+  ctx.fillStyle = night.on ? '#2a2d3a' : STONE; ctx.fillRect(0, y, W, 28); ctx.fillStyle = BONE; ctx.font = '12px serif';
+  ctx.textAlign = 'left'; ctx.fillText(left, 14, y + 18); ctx.textAlign = 'right'; ctx.fillText(right, W - 14, y + 18);
+  if (mid) { ctx.textAlign = 'center'; ctx.fillText(mid, W / 2, y + 18); }
+}
+function page(ctx, u, chrome, pageNo) {
+  const paper = night.on ? '#16141A' : BONE, ink = night.on ? '#CFC8B6' : INK;
+  ctx.save(); ctx.globalAlpha = u; ctx.fillStyle = paper; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = ink; ctx.font = '18px serif'; ctx.textAlign = 'left';
+  const lh = 18 * 1.75; let y = 70;
+  for (let i = 0; i < 24; i++) { const len = 18 + ((i * 7 + pageNo) % 5); ctx.fillRect(20, y - 13, Math.min(W - 40, len * 17.2), 14 * (i % 9 === 8 ? 0 : 1)); y += lh; if (i % 9 === 8) y += 8; }
+  if (chrome) { ruler(ctx, 0, '书名', '卷一 · 章名'); ruler(ctx, H - 28, '合上', '', `第 ${pageNo} 页 / 共 96 页`); ctx.fillStyle = ORANGE; ctx.fillRect(0, H - 31, W * (pageNo / 96), 3); }
+  ctx.restore();
+}
+// 时间轴：0-0.18 弹出；0.18-0.5 飞到中央成封面；0.5-0.9 翻开成页
+function render(ctx, t, short, st) {
+  const T = short ? [0.05, 0.15, 0.3] : [0.18, 0.5, 0.9];
+  ctx.clearRect(0, 0, W, H);
+  if (t < T[1]) {
+    const pop = eo(t / T[0]); const b = shelfScene(ctx, pop);
+    if (t > T[0]) {
+      const u = eio((t - T[0]) / (T[1] - T[0]));
+      ctx.fillStyle = `rgba(0,0,0,${0.7 * u})`; ctx.fillRect(0, 0, W, H);
+      const s = SHELVES[b.s]; const w = lerp(b.w, W * .7, u), h = lerp(b.h, W * .7 * 1.5, u);
+      cover(ctx, lerp(b.x + b.w / 2, W / 2, u), lerp(s.y - b.h / 2, 380, u), w, h, 1);
+    }
+  } else if (t < T[2]) {
+    const u = eio((t - T[1]) / (T[2] - T[1]));
+    shelfScene(ctx, 1); ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.fillRect(0, 0, W, H);
+    if (u < .5) { // 封面停一下再翻：封面绕左边翻开
+      const w = W * .7, h = w * 1.5; ctx.save(); ctx.translate(W / 2 - w / 2, 380); ctx.scale(Math.max(.02, 1 - u * 2), 1); ctx.translate(-(W / 2 - w / 2), -380); cover(ctx, W / 2, 380, w, h, 1); ctx.restore();
+      ruler(ctx, 600, '读到 37%', '上次 3 天前');
+    } else { page(ctx, (u - .5) * 2, false, 12); }
+  } else { page(ctx, 1, st.chrome, st.page); }
+  return T[2];
+}
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+const st = { chrome: true, page: 12 };
+let short = q.get('short') === '1', speed = 1, t0 = performance.now(), frozen = q.has('t') ? Number(q.get('t')) : null, closing = null;
+if (q.get('board')) {
+  const times = [0.0, 0.18, 0.35, 0.5, 0.7, 0.9, 1.2];
+  const cw = 195, ch = 422, pad = 14; c.width = pad + times.length * (cw + pad); c.height = ch + 60; c.style.width = c.width + 'px'; c.style.borderRadius = '8px';
+  const off = document.createElement('canvas'); off.width = W; off.height = H; const octx = off.getContext('2d');
+  ctx.fillStyle = '#0b0d12'; ctx.fillRect(0, 0, c.width, c.height); ctx.fillStyle = '#d9d2e6'; ctx.font = '14px system-ui'; ctx.fillText('书从架上点开 · 手机灰盒分镜（弹出 0.18 秒 → 封面 0.5 秒 → 翻开 0.9 秒 → 阅读页）', pad, 22);
+  times.forEach((tt, i) => { octx.clearRect(0, 0, W, H); render(octx, tt, false, st); const x = pad + i * (cw + pad), y = 34; ctx.drawImage(off, x, y, cw, ch); ctx.strokeStyle = '#3a4258'; ctx.strokeRect(x + .5, y + .5, cw, ch); ctx.fillStyle = '#b8b0c8'; ctx.font = '12px system-ui'; ctx.fillText(`${tt.toFixed(2)} 秒`, x, y + ch + 16); });
+  return;
+}
+function frame(now) {
+  let t = frozen !== null ? frozen : (now - t0) / 1000 * speed;
+  if (closing) { const u = clamp((now - closing) / 300); t = Math.max(0, (short ? 0.3 : 0.9) * (1 - u)); if (u >= 1) { closing = null; t0 = now; } }
+  render(ctx, t, short, st); document.getElementById('t').textContent = `t = ${t.toFixed(2)} s`;
+  if (frozen === null) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+const restart = () => { t0 = performance.now(); frozen = null; st.chrome = true; st.page = 12; requestAnimationFrame(frame); };
+document.getElementById('replay').onclick = restart;
+document.getElementById('short').onclick = e => { short = !short; e.target.classList.toggle('on', short); restart(); };
+document.getElementById('half').onclick = e => { speed = speed === 1 ? .5 : 1; e.target.classList.toggle('on', speed !== 1); restart(); };
+document.getElementById('night').onclick = e => { night.on = !night.on; e.target.classList.toggle('on', night.on); };
+c.addEventListener('click', e => {
+  const r = c.getBoundingClientRect(); const x = (e.clientX - r.left) * W / r.width, y = (e.clientY - r.top) * H / r.height;
+  const t = (performance.now() - t0) / 1000 * speed; if (t < (short ? 0.3 : 0.9)) { t0 = performance.now() - (short ? 300 : 900) / speed; return; }
+  if (y > H - 28 && x < 70) { closing = performance.now(); return; }
+  if (x < W / 4) st.page = Math.max(1, st.page - 1); else if (x > W * 3 / 4) st.page = Math.min(96, st.page + 1); else st.chrome = !st.chrome;
+});
+})();
+</script>
+</body>
+</html>
