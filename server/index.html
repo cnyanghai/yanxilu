@@ -11258,6 +11258,7 @@ var FOIL = (function () {
     document.documentElement.classList.toggle("yx-scene", LK().scene === "youchai"); yxNightApply();
     document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai");
     document.documentElement.classList.toggle("yx-app", APP); document.documentElement.classList.toggle("yx-app-scene", APP && /^(shelf|archive|notes)/.test(S.route));
+    if (S.route !== "shelf") S.yxZoomed = false;
     if (S.route !== "gate" && S.route !== "home") { try { localStorage.setItem("yx-last", S.route); } catch (e0) { /* 忽略 */ } }
     $("#rail").innerHTML = railHTML();
     var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);
