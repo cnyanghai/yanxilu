@@ -1017,6 +1017,13 @@
    "size": 512,
    "bytes": 60802,
    "src": "P034 材质四格 bone"
+  },
+  "night": {
+   "file": "tiles/night.webp",
+   "size": 512,
+   "bytes": 4692,
+   "src": "sky 砖压掉火橙、压暗、微模糊；页面壳与弹窗的底",
+   "avg": "#152026"
   }
  },
  "frames": {

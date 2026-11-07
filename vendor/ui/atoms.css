@@ -7,7 +7,8 @@
 .yx-tile-parchment { background-image: url("tiles/parchment.webp"); background-size: 512px; }
 .yx-tile-sky { background-image: url("tiles/sky.webp"); background-size: 512px; }
 .yx-tile-wood { background-image: url("tiles/wood.webp"); background-size: 256px; }
-.yx-night { background-color: var(--yx-iron-900); background-image: url("tiles/sky.webp"); background-size: 512px; color: var(--yx-paper); }
+.yx-night { background-color: var(--yx-iron-900); background-image: url("tiles/night.webp"); background-size: 512px; color: var(--yx-paper); }
+.yx-tile-night { background-image: url("tiles/night.webp"); background-size: 512px; }
 
 /* 框：铁牌（九宫格）与石尺（三切） */
 .yx-ironplate { border-style: solid; border-width: 28px 34px; border-image: url("frames/ironplate.webp") 28 34 28 34 fill / 28px 34px stretch; color: var(--yx-glow-200); font: 700 26px/1 var(--yx-font-title); text-shadow: var(--yx-glow-text); text-align: center; letter-spacing: .2em; padding: 6px 10px; display: inline-block; min-width: 220px; }

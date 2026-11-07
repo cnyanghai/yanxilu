@@ -2513,7 +2513,7 @@ html.clip-mode main{padding:18px 18px 40px}
 /* ---- 邮差奇幻界面：首页大门与墓园宽柜（第四稿，vendor/ui） ---- */
 html.gate-mode .topbar,html.gate-mode .mainnav{display:none}
 html.gate-mode main{padding:0;max-width:none}
-.yx-gate{position:relative;min-height:100vh;background:#0D141A url(vendor/ui/tiles/sky.webp) center/512px;overflow:hidden}
+.yx-gate{position:relative;min-height:100vh;background:#0D141A url(vendor/ui/tiles/night.webp) center/512px;overflow:hidden}
 .yx-gate-img{position:relative;height:100vh;aspect-ratio:2/3;margin:0 auto;max-width:100%;overflow:hidden}
 @media (max-aspect-ratio:2/3){.yx-gate-img{height:auto;width:100%}}
 .yx-gate-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
@@ -2593,7 +2593,7 @@ html.yx-scene.yx-night .rd-view,html.yx-scene.yx-night .rd-frame{filter:invert(.
 .yx-arch.enter-short .yx-cab{animation:yx-rise .3s both}
 .yx-arch.enter-short .yx-stone{animation:yx-in .25s .3s both}
 .yx-arch.still .yx-cab,.yx-arch.still .yx-stone{animation:none}
-.ydesk.yx-desk{background:#0D141A url(vendor/ui/tiles/sky.webp) center/512px;color:#EFE8D6;padding:14px 16px 40px;--ink:#EFE8D6}
+.ydesk.yx-desk{background:#0D141A url(vendor/ui/tiles/night.webp) center/512px;color:#EFE8D6;padding:14px 16px 40px;--ink:#EFE8D6}
 .yx-desk-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;max-width:1080px;margin:0 auto 14px}
 .yx-desk-title{font:700 24px/1.2 "ZCOOL XiaoWei","Noto Serif SC",serif;color:#FFD48A;text-shadow:0 0 6px rgba(255,170,60,.9),0 0 14px rgba(255,120,30,.6),0 1px 0 #000;letter-spacing:.08em}
 .yx-desk-sub{font:13px "Noto Sans SC",system-ui,sans-serif;color:#A9C6CC}
@@ -2657,6 +2657,30 @@ html.yx-scene .jot{background:#EFE8D6 url(vendor/ui/tiles/parchment.webp) 0 0/51
 html.yx-scene .jot textarea{font:19px/1.7 "Ma Shan Zheng","LXGW WenKai",serif;color:#1C1A17;background:transparent}
 html.yx-scene .jot .btn{background:linear-gradient(#F4A742,#E8762B);color:#140c08;border-color:#0D141A}
 html.yx-scene .jot-to{color:#5A4334;font-family:"ZCOOL XiaoWei","Noto Serif SC",serif}
+
+/* 收尾：放回的反向动画；新场景四页的页面壳换暗色（html.yx-dark，只在 gate / shelf / archive / notes 四条路由上） */
+.yx-cover-wrap.closing{animation:yx-fade .28s reverse both}
+.yx-cover-wrap.closing .yx-cover{animation:yx-fly .28s cubic-bezier(.4,0,.8,.4) reverse both}
+.yx-cover-wrap.closing .yx-ruler,.yx-cover-wrap.closing .yx-cover-acts{animation:yx-fade .15s reverse both}
+.yx-card-big-wrap.closing{animation:yx-fade .22s reverse both}
+.yx-card-big-wrap.closing .yx-card.big{animation:yx-pop .22s reverse both}
+html.yx-dark body{background:#0D141A url(vendor/ui/tiles/night.webp) center/512px;color:#EFE8D6}
+html.yx-dark main{color:#EFE8D6}
+html.yx-dark .topbar{background:#0D141A;border-bottom-color:#324D5B}
+html.yx-dark .brand,html.yx-dark .mainnav a{color:#EFE8D6}
+html.yx-dark .mainnav a:hover{background:rgba(255,255,255,.06)}
+html.yx-dark .mainnav a[aria-current="page"]{background:#E8762B;color:#140c08}
+html.yx-dark .topbar .btn,html.yx-dark .topbar .btn.ghost{color:#EFE8D6;border-color:#647277;background:rgba(13,20,26,.5)}
+html.yx-dark .phead,html.yx-dark .phead h1{color:#EFE8D6}
+html.yx-dark .seg{background:rgba(13,20,26,.6);border-color:#647277}
+html.yx-dark .seg button{color:#A9C6CC}html.yx-dark .seg button:hover{color:#EFE8D6}html.yx-dark .seg button[aria-pressed="true"]{background:#E8762B;color:#140c08}
+html.yx-dark .chipbtn{background:rgba(13,20,26,.6);color:#EFE8D6;border-color:#647277}
+html.yx-dark .chipbtn[aria-pressed="true"]{border-color:#FFD48A;color:#FFD48A}
+html.yx-dark .arch-q{background:rgba(13,20,26,.6);border-color:#647277;color:#A9C6CC}html.yx-dark .arch-q input{color:#EFE8D6;background:transparent}
+html.yx-dark .k-legend,html.yx-dark .eyebrow,html.yx-dark .meta,html.yx-dark .linkbtn{color:#A9C6CC}
+html.yx-dark .btn{background:#324D5B;color:#EFE8D6;border-color:#0D141A}html.yx-dark .btn.ghost{background:transparent;color:#EFE8D6;border-color:#647277}
+html.yx-dark .arules{color:#EFE8D6}html.yx-dark .arule{background:rgba(13,20,26,.55);border-color:#324D5B}
+@media (max-width:720px){html.yx-dark .mainnav{background:#0D141A;border-top-color:#324D5B}html.yx-dark .mainnav a[aria-current="page"]{background:transparent;color:#FFD48A}}
 </style>
 
 <header class="topbar" id="rail"></header>
@@ -10808,6 +10832,7 @@ var FOIL = (function () {
     document.documentElement.classList.toggle("clip-mode", S.route === "clip");
     document.documentElement.classList.toggle("gate-mode", S.route === "gate");
     document.documentElement.classList.toggle("yx-scene", LK().scene === "youchai"); yxNightApply();
+    document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai" && /^(gate|shelf|archive|notes)/.test(S.route));
     if (S.route !== "gate" && S.route !== "home") { try { localStorage.setItem("yx-last", S.route); } catch (e0) { /* 忽略 */ } }
     $("#rail").innerHTML = railHTML();
     var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);
@@ -11044,9 +11069,9 @@ var FOIL = (function () {
     if (act === "eb-del-yes") { ebRemove(t.getAttribute("data-id")); return; }
     if (act === "eb-read") { S.yxOpen = null; readerOpen(t.getAttribute("data-id"), { notes: t.getAttribute("data-notes") === "1" }); return; }
     if (act === "rd-close") { readerClose(); return; }
-    if (act === "yx-unpick") { S.yxOpen = null; render(); return; }
+    if (act === "yx-unpick") { var cw = document.querySelector(".yx-cover-wrap"); if (cw && !REDUCE && LK().motion) { cw.classList.add("closing"); setTimeout(function () { S.yxOpen = null; render(); }, 280); } else { S.yxOpen = null; render(); } return; }
     if (act === "yx-card") { S.yxCard = t.getAttribute("data-id"); render(); return; }
-    if (act === "yx-card-back") { S.yxCard = null; render(); return; }
+    if (act === "yx-card-back") { var bw = document.querySelector(".yx-card-big-wrap"); if (bw && !REDUCE && LK().motion) { bw.classList.add("closing"); setTimeout(function () { S.yxCard = null; render(); }, 220); } else { S.yxCard = null; render(); } return; }
     if (act === "yx-desk-old") { S.yxDeskOld = true; render(); return; }
     if (act === "yx-night") { var nt = !document.documentElement.classList.contains("yx-night"); try { localStorage.setItem("yx-night", nt ? "1" : "0"); } catch (e9) { /* 忽略 */ } document.documentElement.classList.toggle("yx-night", nt); return; }
     if (act === "rd-prev") { rdStep(-1); return; }

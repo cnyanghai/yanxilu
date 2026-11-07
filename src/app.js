@@ -5793,6 +5793,7 @@ var FOIL = (function () {
     document.documentElement.classList.toggle("clip-mode", S.route === "clip");
     document.documentElement.classList.toggle("gate-mode", S.route === "gate");
     document.documentElement.classList.toggle("yx-scene", LK().scene === "youchai"); yxNightApply();
+    document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai" && /^(gate|shelf|archive|notes)/.test(S.route));
     if (S.route !== "gate" && S.route !== "home") { try { localStorage.setItem("yx-last", S.route); } catch (e0) { /* 忽略 */ } }
     $("#rail").innerHTML = railHTML();
     var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);
@@ -6029,9 +6030,9 @@ var FOIL = (function () {
     if (act === "eb-del-yes") { ebRemove(t.getAttribute("data-id")); return; }
     if (act === "eb-read") { S.yxOpen = null; readerOpen(t.getAttribute("data-id"), { notes: t.getAttribute("data-notes") === "1" }); return; }
     if (act === "rd-close") { readerClose(); return; }
-    if (act === "yx-unpick") { S.yxOpen = null; render(); return; }
+    if (act === "yx-unpick") { var cw = document.querySelector(".yx-cover-wrap"); if (cw && !REDUCE && LK().motion) { cw.classList.add("closing"); setTimeout(function () { S.yxOpen = null; render(); }, 280); } else { S.yxOpen = null; render(); } return; }
     if (act === "yx-card") { S.yxCard = t.getAttribute("data-id"); render(); return; }
-    if (act === "yx-card-back") { S.yxCard = null; render(); return; }
+    if (act === "yx-card-back") { var bw = document.querySelector(".yx-card-big-wrap"); if (bw && !REDUCE && LK().motion) { bw.classList.add("closing"); setTimeout(function () { S.yxCard = null; render(); }, 220); } else { S.yxCard = null; render(); } return; }
     if (act === "yx-desk-old") { S.yxDeskOld = true; render(); return; }
     if (act === "yx-night") { var nt = !document.documentElement.classList.contains("yx-night"); try { localStorage.setItem("yx-night", nt ? "1" : "0"); } catch (e9) { /* 忽略 */ } document.documentElement.classList.toggle("yx-night", nt); return; }
     if (act === "rd-prev") { rdStep(-1); return; }
