@@ -1,0 +1,61 @@
+/* 邮差奇幻界面 · 令牌（圣经第四稿，docs/ui-style-bible.md）。只放数值，不放组件。 */
+:root {
+  /* 冷青八成 */
+  --yx-teal-900: #1A2730;
+  --yx-teal-700: #324D5B;
+  --yx-teal-400: #5593A4;
+  /* 火橙两成，画里的 */
+  --yx-fire-900: #3A2A22;
+  --yx-fire-700: #7A5142;
+  --yx-fire-400: #B76F49;
+  /* 界面光源：唯一的暖色 */
+  --yx-glow-600: #E8762B;
+  --yx-glow-400: #F4A742;
+  --yx-glow-200: #FFD48A;
+  /* 铁黑、雾青白、锈褐 */
+  --yx-iron-900: #0D141A;
+  --yx-iron-700: #1C2029;
+  --yx-mist-600: #647277;
+  --yx-mist-300: #A9C6CC;
+  --yx-rust-700: #5C4334;
+  --yx-rust-500: #B04E1E;
+  /* 纸与墨 */
+  --yx-paper: #EFE8D6;
+  --yx-paper-deep: #E6DCC2;
+  --yx-ink: #1C1A17;
+  --yx-ink-soft: #5A5046;
+  --yx-night-paper: #16141A;
+  --yx-night-ink: #CFC8B6;
+  /* 字 */
+  --yx-font-title: "ZCOOL XiaoWei", "Noto Serif SC", serif;   /* 隶书上线前的替身；标题图用 glow_text 预渲染 */
+  --yx-font-body: "Noto Serif SC", "LXGW WenKai", serif;
+  --yx-font-hand: "Ma Shan Zheng", "LXGW WenKai", serif;
+  --yx-font-ui: "Noto Sans SC", system-ui, sans-serif;
+  --yx-read-size: 18px;
+  --yx-read-lh: 1.75;
+  /* 形 */
+  --yx-radius-s: 4px;
+  --yx-radius-m: 8px;
+  --yx-radius-l: 14px;
+  --yx-ruler-h: 28px;
+  --yx-gutter: 20px;
+  /* 影与光 */
+  --yx-shadow: 0 6px 18px rgba(0, 0, 0, .55);
+  --yx-shadow-soft: 0 2px 6px rgba(0, 0, 0, .4);
+  --yx-glow: 0 0 10px rgba(255, 170, 60, .85), 0 0 28px rgba(255, 120, 30, .45);
+  --yx-glow-text: 0 0 6px rgba(255, 170, 60, .9), 0 0 16px rgba(255, 120, 30, .6), 0 1px 0 rgba(0, 0, 0, .8);
+  /* 瓷砖 */
+  --yx-tile-stone: url("tiles/stone.webp");
+  --yx-tile-iron: url("tiles/iron.webp");
+  --yx-tile-parchment: url("tiles/parchment.webp");
+  --yx-tile-sky: url("tiles/sky.webp");
+  --yx-tile-wood: url("tiles/wood.webp");
+  /* 动 */
+  --yx-t-fast: 180ms;
+  --yx-t-mid: 300ms;
+  --yx-t-slow: 420ms;
+  --yx-ease: cubic-bezier(.22, .9, .3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  :root { --yx-t-fast: 0ms; --yx-t-mid: 0ms; --yx-t-slow: 0ms; }
+}

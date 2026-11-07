@@ -799,5 +799,73 @@
    ]
   }
  },
- "total_bytes": 3710526
+ "total_bytes": 3833068,
+ "tiles": {
+  "stone": {
+   "file": "tiles/stone.webp",
+   "size": 512,
+   "bytes": 31196,
+   "src": "P023 祭坛石面 (40,560,300,780)",
+   "avg": "#21262a"
+  },
+  "iron": {
+   "file": "tiles/iron.webp",
+   "size": 512,
+   "bytes": 13260,
+   "src": "P017 站名铁牌内 (260,310,760,410)",
+   "avg": "#212527"
+  },
+  "parchment": {
+   "file": "tiles/parchment.webp",
+   "size": 512,
+   "bytes": 19158,
+   "src": "P024 纸纹中间 (300,400,724,824)",
+   "avg": "#bcb9a6"
+  },
+  "sky": {
+   "file": "tiles/sky.webp",
+   "size": 512,
+   "bytes": 11736,
+   "src": "P019 天 (560,20,1000,260)",
+   "avg": "#273d4b"
+  },
+  "wood": {
+   "file": "tiles/wood.webp",
+   "size": 512,
+   "bytes": 6344,
+   "src": "P029 柜背板 (560,560,718,638)，源只有 78 像素，偏糊",
+   "avg": "#13161a"
+  }
+ },
+ "frames": {
+  "ironplate": {
+   "file": "frames/ironplate.webp",
+   "w": 585,
+   "h": 150,
+   "slice": [
+    28,
+    34,
+    28,
+    34
+   ],
+   "repeat": "stretch",
+   "src": "P017 站名牌 (215,280,800,430)",
+   "css": "border-image:url(frames/ironplate.webp) 28 34 28 34 fill / 28px 34px stretch"
+  },
+  "stoneruler": {
+   "file": "frames/stoneruler.webp",
+   "w": 1100,
+   "h": 80,
+   "slice": [
+    0,
+    40,
+    0,
+    40
+   ],
+   "repeat": "stretch",
+   "src": "P023 祭坛边雕带 (200,820,1300,900)",
+   "css": "border-image:url(frames/stoneruler.webp) 0 40 0 40 fill / 0 40px stretch"
+  }
+ },
+ "tokens": "tokens.css"
 }
