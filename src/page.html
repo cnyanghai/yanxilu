@@ -2509,6 +2509,48 @@ html.clip-mode main{padding:18px 18px 40px}
 .wall.scene-arch-m .wm-plus{position:absolute;right:6px;bottom:-15px;z-index:4;background:rgba(230,210,160,.25);color:#F0DFB0}
 .wall.scene-arch-m .wm.ghost{aspect-ratio:auto;padding:14px var(--sc-pad)}
 .wall.scene-arch-m .wm-add{background:rgba(0,0,0,.25);color:#E6D2A0;border-color:rgba(230,210,160,.4)}
+
+/* ---- 邮差奇幻界面：首页大门与墓园宽柜（第四稿，vendor/ui） ---- */
+html.gate-mode .topbar,html.gate-mode .mainnav{display:none}
+html.gate-mode main{padding:0;max-width:none}
+.yx-gate{position:relative;min-height:100vh;background:#0D141A url(vendor/ui/tiles/sky.webp) center/512px;overflow:hidden}
+.yx-gate-img{position:relative;height:100vh;aspect-ratio:2/3;margin:0 auto;max-width:100%;overflow:hidden}
+@media (max-aspect-ratio:2/3){.yx-gate-img{height:auto;width:100%}}
+.yx-gate-bg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.yx-gate-title{position:absolute;object-fit:contain;animation:yx-fade .7s .5s both;pointer-events:none}
+.yx-board{position:absolute;display:block;transform-origin:center;animation:yx-fade .5s both}
+.yx-board img{width:100%;height:100%;object-fit:contain;display:block;transition:filter .18s}
+.yx-board:nth-of-type(1){animation-delay:1.2s}.yx-board:nth-of-type(2){animation-delay:1.45s}.yx-board:nth-of-type(3){animation-delay:1.7s}
+.yx-board:hover img,.yx-board:focus-visible img{filter:brightness(1.3) drop-shadow(0 0 10px rgba(255,170,60,.9))}
+.yx-gate-acts{position:absolute;left:0;right:0;bottom:max(18px,env(safe-area-inset-bottom,0px));display:flex;gap:12px;justify-content:center;animation:yx-fade .6s 2.2s both}
+.yx-btn{display:inline-flex;align-items:center;padding:10px 22px;border-radius:8px;font:700 16px "ZCOOL XiaoWei","Noto Serif SC",serif;letter-spacing:.1em;text-decoration:none;border:2px solid #0D141A;white-space:nowrap}
+.yx-btn.glow{background:linear-gradient(#F4A742,#E8762B);color:#140c08;box-shadow:0 0 10px rgba(255,170,60,.85),0 0 28px rgba(255,120,30,.45)}
+.yx-btn.ghost{background:rgba(13,20,26,.6);color:#A9C6CC;border-color:#647277}
+@keyframes yx-fade{from{opacity:0}to{opacity:1}}
+.yx-shelf{position:relative;width:100%;background:#0D141A}
+.yx-shelf.d{overflow:hidden;width:100vw;margin-left:calc(50% - 50vw)}
+.yx-shelf.m{width:100vw;margin-left:calc(50% - 50vw)}
+.yx-cab{position:relative;background:url(vendor/ui/scenes/shelf.webp) no-repeat 0 0/1536px 1024px;transform-origin:top left}
+.yx-shelf.m .yx-rowm{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;margin:0 0 6px}
+.yx-plaque{position:absolute;display:flex;align-items:center;justify-content:center;font:700 18px/1 "ZCOOL XiaoWei","Noto Serif SC",serif;color:#FFD48A;text-shadow:0 0 6px rgba(255,170,60,.9),0 0 14px rgba(255,120,30,.6),0 1px 0 #000;letter-spacing:.06em;white-space:nowrap;overflow:hidden;pointer-events:none}
+.yx-book{position:absolute;margin:0;padding:0;border:0;background:none;cursor:pointer;display:block;transform-origin:bottom center;transition:transform .18s;--op:1}
+.yx-book img{position:absolute;inset:0;width:100%;height:100%;display:block}
+.yx-book .yx-t{position:absolute;left:50%;top:14%;transform:translateX(-50%);writing-mode:vertical-rl;max-height:62%;overflow:hidden;color:#ECE2C4;font:700 12px/1 "ZCOOL XiaoWei","Noto Serif SC",serif;letter-spacing:.05em;text-shadow:0 0 2px #000,0 1px 0 #000,0 -1px 0 #000,1px 0 0 #000,-1px 0 0 #000;white-space:nowrap}
+.yx-book:hover,.yx-book:focus-visible{transform:translateY(-6px);z-index:2}
+.yx-book.ghost{--op:.62;opacity:var(--op);filter:saturate(.35)}
+.yx-book.ghost::after{content:"";position:absolute;inset:0;background:rgba(90,200,210,.22);mix-blend-mode:screen;pointer-events:none}
+.yx-book.doing::before,.yx-book.done::before{content:"";position:absolute;left:2px;right:2px;top:-1px;height:2px;z-index:1}
+.yx-book.doing::before{background:#E8762B;box-shadow:0 0 6px 2px rgba(255,150,40,.8)}
+.yx-book.done::before{background:#FFD48A;box-shadow:0 0 4px 1px rgba(255,220,140,.7)}
+.yx-book.dim{opacity:.22}
+.yx-book.picked{outline:2px solid #FFD48A;outline-offset:2px}
+.yx-shelf.enter .yx-cab{animation:yx-rise 1.3s cubic-bezier(.22,.9,.3,1) both}
+.yx-shelf.enter .yx-book{animation:yx-in .5s both;animation-delay:calc(1.3s + var(--i) * 45ms)}
+.yx-shelf.enter-short .yx-cab{animation:yx-rise .3s both}
+.yx-shelf.enter-short .yx-book{animation:yx-in .25s .3s both}
+@keyframes yx-rise{0%{transform:translateY(28%)}55%{transform:translateY(-1.2%) translateX(.3%)}70%{transform:translateY(.6%) translateX(-.3%)}85%{transform:translateY(-.3%)}100%{transform:none}}
+@keyframes yx-in{from{opacity:0;transform:translateY(-10px) scale(1.04);filter:blur(2px) brightness(1.6)}to{opacity:var(--op);transform:none;filter:none}}
+.yx-shelf.still .yx-cab,.yx-shelf.still .yx-book{animation:none}
 </style>
 
 <header class="topbar" id="rail"></header>
