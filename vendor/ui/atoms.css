@@ -28,7 +28,7 @@
 .yx-page.night { background-color: var(--yx-night-paper); background-blend-mode: multiply; color: var(--yx-night-ink); }
 
 /* 控件 */
-.yx-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: var(--yx-radius-m); font: 700 16px var(--yx-font-title); letter-spacing: .1em; cursor: pointer; border: 2px solid var(--yx-iron-900); transition: transform var(--yx-t-fast) var(--yx-ease), box-shadow var(--yx-t-fast); user-select: none; }
+.yx-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: var(--yx-radius-m); font: 700 16px var(--yx-font-title); letter-spacing: .1em; cursor: pointer; border: 2px solid var(--yx-iron-900); transition: transform var(--yx-t-fast) var(--yx-ease), box-shadow var(--yx-t-fast); user-select: none; white-space: nowrap; }
 .yx-btn:active { transform: translateY(2px); }
 .yx-btn.glow { background: linear-gradient(var(--yx-glow-400), var(--yx-glow-600)); color: #140c08; box-shadow: var(--yx-glow), inset 0 1px 0 rgba(255,255,255,.35); }
 .yx-btn.stone { background: url("tiles/stone.webp") 0 0 / 256px; color: var(--yx-paper); box-shadow: var(--yx-shadow-soft), inset 0 1px 0 rgba(255,255,255,.12); border-color: var(--yx-mist-600); }
@@ -54,7 +54,7 @@
 .yx-scroll h3 { margin: 0 0 8px; font: 700 22px/1.2 var(--yx-font-title); letter-spacing: .12em; text-align: center; }
 .yx-scroll p { margin: 0 0 10px; font: 17px/1.7 var(--yx-font-body); }
 .yx-scroll .acts { display: flex; gap: 12px; justify-content: flex-end; margin: 10px 0 0; }
-@media (max-width: 600px) { .yx-scroll { border-width: 48px 105px 102px 70px; border-image-width: 48px 105px 102px 70px; padding: 0 2px 6px; } .yx-scroll h3 { font-size: 19px; } .yx-scroll p { font-size: 15px; } .yx-scroll .acts { gap: 8px; } }
+@media (max-width: 600px) { .yx-scroll { border-width: 40px 88px 85px 58px; border-image-width: 40px 88px 85px 58px; padding: 0 0 4px; } .yx-scroll h3 { font-size: 19px; } .yx-scroll p { font-size: 15px; } .yx-scroll .acts { gap: 8px; } .yx-scroll .yx-btn { padding: 8px 14px; font-size: 15px; } }
 
 /* 图标 */
 .yx-icon { width: 44px; height: 44px; object-fit: contain; vertical-align: middle; filter: drop-shadow(0 2px 3px rgba(0,0,0,.6)); }
