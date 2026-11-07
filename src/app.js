@@ -5718,7 +5718,8 @@ var FOIL = (function () {
     var top = narrow ? YX.arch.band[0] : 0, bh = narrow ? YX.arch.band[1] : YX.scene.h;
     function stone(st, j) {
       var p = P[j];
-      return '<button type="button" class="yx-stone' + (st.folder ? " folder" : "") + '" data-act="abox" data-t="' + esc(st.t) + '" style="left:' + p[0] + "px;top:" + (p[1] - top) + "px;width:" + (p[2] - p[0]) + "px;height:" + (p[3] - p[1]) + "px;--i:" + (n++) + '"><span class="yx-stone-n">' + esc(st.name) + '</span><span class="yx-stone-s">' + esc(st.sub) + "</span></button>";
+      var L = String(st.name).length, fs = L <= 4 ? 32 : L <= 8 ? 26 : L <= 12 ? 21 : 17;
+      return '<button type="button" class="yx-stone' + (st.folder ? " folder" : "") + '" data-act="abox" data-t="' + esc(st.t) + '" style="left:' + p[0] + "px;top:" + (p[1] - top) + "px;width:" + (p[2] - p[0]) + "px;height:" + (p[3] - p[1]) + "px;--i:" + (n++) + '"><span class="yx-stone-n" style="font-size:' + fs + 'px">' + esc(st.name) + '</span><span class="yx-stone-s">' + esc(st.sub) + "</span></button>";
     }
     var html = blocks.map(function (bl) {
       var cab = '<div class="yx-cab arch" data-bh="' + bh + '" style="width:' + YX.scene.w + "px;height:" + bh + "px;background-position:0 -" + top + 'px">' + bl.map(stone).join("") + "</div>";
