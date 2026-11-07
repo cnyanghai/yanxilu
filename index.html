@@ -2626,6 +2626,45 @@ html.yx-scene.yx-night .rd-view,html.yx-scene.yx-night .rd-frame{filter:invert(.
 @keyframes yx-pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
 .yx-desk-empty{color:#A9C6CC;text-align:center;padding:40px}
 @media (max-width:600px){.yx-stone-n{font-size:26px}.yx-card{width:120px}.yx-fan{padding:16px 10px 24px}}
+
+/* 笔记场：骨臂举本，本子页皮 */
+.yx-notes{position:relative;width:100vw;margin-left:calc(50% - 50vw);background:#0D141A;margin-bottom:24px}
+.yx-notes.d{overflow:hidden}
+.yx-notes.m .yx-rowm{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
+.yx-cab.notes{background-image:url(vendor/ui/scenes/notes.webp)}
+.yx-nb{position:absolute;margin:0;padding:4px;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;transform:rotate(var(--r,0deg));scroll-snap-align:center;border-radius:8px}
+.yx-nb:hover,.yx-nb:focus-visible{outline:2px solid rgba(255,212,138,.7);outline-offset:6px}
+.yx-nb-n{font:700 24px/1.2 "ZCOOL XiaoWei","Noto Serif SC",serif;color:#FFD48A;text-shadow:0 0 6px rgba(255,170,60,.9),0 0 16px rgba(255,120,30,.6),0 1px 0 #000;letter-spacing:.06em;white-space:nowrap}
+.yx-nb-s{font:13px "Noto Sans SC",system-ui,sans-serif;color:#E6DFC8;text-shadow:0 1px 2px #000,0 0 4px #000}
+.yx-nb.ghost .yx-nb-n{color:#A9C6CC;text-shadow:0 1px 2px #000,0 0 6px rgba(169,198,204,.5)}
+.yx-notes.enter .yx-cab{animation:yx-rise 1.3s cubic-bezier(.22,.9,.3,1) both}
+.yx-notes.enter .yx-nb{animation:yx-in .5s both;animation-delay:calc(1.1s + var(--i) * 200ms)}
+.yx-notes.enter-short .yx-cab{animation:yx-rise .3s both}
+.yx-notes.enter-short .yx-nb{animation:yx-in .25s .3s both}
+.yx-notes.still .yx-cab,.yx-notes.still .yx-nb{animation:none}
+/* 本子页：骨白纸纹、日期印、马善政手写、石尺翻天 */
+html.yx-scene .nbk{background:#EFE8D6 url(vendor/ui/tiles/parchment.webp) 0 0/512px;color:#1C1A17;border-radius:4px;box-shadow:0 2px 0 #c9bfa6,0 24px 44px -16px rgba(0,0,0,.7)}
+html.yx-scene .nbk-l{border-right:0;box-shadow:inset -18px 0 24px -14px rgba(40,30,15,.45)}
+html.yx-scene .nbk-r h1{display:inline-block;float:right;margin:0 0 10px 14px;padding:6px 10px;border:3px double #B04E1E;border-radius:4px;color:#B04E1E;font:700 16px/1.3 "ZCOOL XiaoWei","Noto Serif SC",serif;letter-spacing:.08em;transform:rotate(-4deg);background:transparent}
+html.yx-scene .nbk-r h1 small{display:block;font-size:12px;color:#B04E1E}
+html.yx-scene .np-eye{background:#3a3f58 url(vendor/ui/frames/stoneruler.webp) center/100% 100% no-repeat;color:#EFE8D6;padding:4px 12px;border-radius:0;display:flex;justify-content:space-between;align-items:center}
+html.yx-scene .np-eye .linkbtn{color:#EFE8D6;text-decoration:none}
+html.yx-scene .np-ent .np-body,html.yx-scene .np-ent .np-body p{font:20px/1.8 "Ma Shan Zheng","LXGW WenKai",serif;color:#1C1A17}
+html.yx-scene .np-ent time{font:12px "Noto Sans SC",system-ui,sans-serif;color:#8c8270}
+html.yx-scene .np-ta{font:20px/36px "Ma Shan Zheng","LXGW WenKai",serif;color:#1C1A17;background:repeating-linear-gradient(180deg,transparent 0 35px,rgba(90,67,52,.25) 35px 36px);background-attachment:local;border-bottom-color:#B04E1E}
+html.yx-scene .np-paper.empty p{font:18px/1.8 "Ma Shan Zheng",serif;color:#8c8270}
+html.yx-scene .nbk-l .eyebrow,html.yx-scene .np-mnav h2{font-family:"ZCOOL XiaoWei","Noto Serif SC",serif;color:#5A4334}
+html.yx-scene .np-cal{color:#5A5046}html.yx-scene .np-cal .np-d{color:#1C1A17;border-radius:50%}
+html.yx-scene .np-cal .np-dot::after{background:#E8762B}
+html.yx-scene .np-cal .np-cur{background:#E8762B;color:#140c08;box-shadow:0 0 8px rgba(255,150,40,.7)}
+html.yx-scene .np-toc{border-top-color:rgba(90,67,52,.3)}html.yx-scene .np-toc-b{color:#1C1A17}html.yx-scene .np-toc-b.cur{background:rgba(232,118,43,.14)}
+html.yx-scene .np-toc-b span{font-family:"ZCOOL XiaoWei","Noto Serif SC",serif}
+html.yx-scene .np-foot{color:#8c8270}
+html.yx-scene .np-jot{background:linear-gradient(#F4A742,#E8762B);color:#140c08;border-color:#0D141A;box-shadow:0 0 10px rgba(255,170,60,.7)}
+html.yx-scene .jot{background:#EFE8D6 url(vendor/ui/tiles/parchment.webp) 0 0/512px;color:#1C1A17;box-shadow:0 24px 40px -14px rgba(0,0,0,.7),inset 0 0 0 2px #1C1A17,inset 0 0 0 4px #5C4334}
+html.yx-scene .jot textarea{font:19px/1.7 "Ma Shan Zheng","LXGW WenKai",serif;color:#1C1A17;background:transparent}
+html.yx-scene .jot .btn{background:linear-gradient(#F4A742,#E8762B);color:#140c08;border-color:#0D141A}
+html.yx-scene .jot-to{color:#5A4334;font-family:"ZCOOL XiaoWei","Noto Serif SC",serif}
 </style>
 
 <header class="topbar" id="rail"></header>
@@ -9255,13 +9294,15 @@ var FOIL = (function () {
         : '<div class="np-paper empty" ' + (S.canEdit ? 'data-act="np-edit" role="button" tabindex="0"' : "") + "><p>" + (S.canEdit ? "这一页还是空的。点这里开始写，或者在任何页面按 <kbd>N</kbd> 记一笔。" : "这一页还是空的。") + "</p></div>";
     var nE = npEntries(text).length, nW = npWords(text), mt = pg && pg.m ? (function (d) { return isNaN(d) ? "" : pad(d.getHours()) + ":" + pad(d.getMinutes()); })(new Date(pg.m)) : "";
     var foot = text ? '<span>' + nE + " 段 · " + nW + " 字" + (mt ? " · 改于 " + esc(mt) : "") + "</span>" : "<span></span>";
+    var rack = LK().scene === "youchai" ? yxNotesRackHTML(days.length) :
+      '<section class="nrack" aria-label="笔记本架"><div class="nr-board" aria-hidden="true"></div><div class="nr-books">' +
+      '<button type="button" class="nbk-b cur" data-act="np-day" data-d="' + td + '" style="--nc:#2F4A4F" title="随手本：一天一页，记一笔都落在这里"><small>' + days.length + " 页</small><i>随手本</i></button>" +
+      (S.canEdit ? '<button type="button" class="nbk-b ghost" data-act="nb-new"><span>＋ 新本子</span></button>' : "") +
+      '</div><div class="nr-legs" aria-hidden="true"><i></i><i></i></div></section>';
     return '<div class="view shelf notes-v">' + bannerHTML() +
       '<header class="phead arch-head"><div>' + shelfSeg("notes") + "</div>" +
       (S.canEdit ? '<button type="button" class="btn ghost np-jot" data-act="jot">✎ 记一笔 <kbd>N</kbd></button>' : "") + "</header>" +
-      '<section class="nrack" aria-label="笔记本架"><div class="nr-board" aria-hidden="true"></div><div class="nr-books">' +
-      '<button type="button" class="nbk-b' + (true ? " cur" : "") + '" data-act="np-day" data-d="' + td + '" style="--nc:#2F4A4F" title="随手本：一天一页，记一笔都落在这里"><small>' + days.length + " 页</small><i>随手本</i></button>" +
-      (S.canEdit ? '<button type="button" class="nbk-b ghost" data-act="nb-new"><span>＋ 新本子</span></button>' : "") +
-      '</div><div class="nr-legs" aria-hidden="true"><i></i><i></i></div></section>' +
+      rack +
       '<section class="nbk" aria-label="随手本"><div class="nbk-l"><p class="eyebrow">随手本 · ' + NP_MONTHS[+ym.slice(5, 7) - 1] + "</p>" + npCalHTML(ym, day, days) +
       (recent ? '<ul class="np-toc">' + recent + "</ul>" : '<p class="meta np-none">这个月还没有写过的页。</p>') + "</div>" +
       '<div class="nbk-r"><p class="eyebrow np-eye"><span>' + (day === td ? "今天" : day > td ? "以后" : "那天") + '</span><span class="np-dnav">' +
@@ -10591,6 +10632,7 @@ var FOIL = (function () {
   var YX = { dir: "vendor/ui/", scene: { w: 1536, h: 1024 }, rows: [{"plaque":[250,437,343,473],"feet":462,"cavity":62},{"plaque":[250,522,343,558],"feet":552,"cavity":78},{"plaque":[250,607,343,643],"feet":637,"cavity":73},{"plaque":[250,702,343,738],"feet":732,"cavity":83},{"plaque":[250,792,343,828],"feet":822,"cavity":78}], inner: [362, 1300],
     gate: { w: 1024, h: 1536, plate: [250, 300, 770, 420], boards: [[315,870,448,905,4],[307,922,445,958,-2],[330,975,440,1018,3]] },
     arch: { panels: [[150,470,330,700],[460,380,620,690],[800,470,985,730],[1125,470,1310,730]], band: [350, 420] },
+    notes: { books: [[235,450,350,520,-3],[462,290,580,360,4],[555,530,680,600,2],[812,430,925,500,-6],[1042,320,1160,390,-3],[1262,540,1380,610,2]], band: [170, 430] },
     covers: [[333,430,[105,100,275,325]],[319,434,[102,104,255,321]],[336,435,[107,104,268,321]],[343,436,[109,104,274,322]],[336,444,[107,106,268,328]],[331,446,[105,107,264,330]],[344,447,[110,107,275,330]],[337,446,[107,107,269,330]]],
     spines: { n: [[108,456],[122,438],[120,434],[125,455],[106,437],[114,453],[115,440],[98,417],[124,450],[115,420],[109,450],[128,450],[107,430],[118,446],[115,426],[110,416]], w: [[185,473],[165,444],[180,417],[99,405],[129,395],[127,397],[127,392],[99,360],[130,370],[92,331],[119,402],[151,447],[141,428],[159,411],[151,422],[132,390],[176,461],[131,365],[184,443],[128,372],[149,390],[103,346],[125,398],[129,449],[151,313],[134,427],[139,366],[123,380],[137,357],[183,371],[105,369],[158,400]] } };
   function yxPad(n) { return (n < 10 ? "0" : "") + n; }
@@ -10647,17 +10689,20 @@ var FOIL = (function () {
     document.querySelectorAll(".yx-shelf.m .yx-cab").forEach(function (c) { var bh = parseFloat(c.getAttribute("data-bh")) || 100; c.style.zoom = String(Math.round(Math.max(1.6, Math.min(2.6, 200 / bh)) * 100) / 100); });
     document.querySelectorAll(".yx-arch.d .yx-cab").forEach(function (c) { c.style.zoom = String(Math.round(Math.min(1.25, c.parentNode.clientWidth / YX.scene.w) * 1000) / 1000); });
     document.querySelectorAll(".yx-arch.m .yx-cab").forEach(function (c) { var pw = YX.arch.panels[0][2] - YX.arch.panels[0][0]; c.style.zoom = String(Math.round(0.74 * c.parentNode.clientWidth / pw * 100) / 100); });
+    document.querySelectorAll(".yx-notes.d .yx-cab").forEach(function (c) { c.style.zoom = String(Math.round(Math.min(1.25, c.parentNode.clientWidth / YX.scene.w) * 1000) / 1000); });
+    document.querySelectorAll(".yx-notes.m .yx-cab").forEach(function (c) { c.style.zoom = String(Math.round(Math.min(1.5, 0.62 * c.parentNode.clientWidth / 140) * 100) / 100); });
   }
   function yxMount() {
-    var sh = document.querySelector(".yx-shelf, .yx-arch");
+    var sh = document.querySelector(".yx-shelf, .yx-arch, .yx-notes");
     if (!sh) return;
     yxZoom();
     document.querySelectorAll(".yx-arch.m .yx-rowm").forEach(function (r) { var z = parseFloat(r.firstChild && r.firstChild.style.zoom) || 1, p = YX.arch.panels[0]; r.scrollLeft = Math.round(((p[0] + p[2]) / 2) * z - r.clientWidth / 2); });
+    document.querySelectorAll(".yx-notes.m .yx-rowm").forEach(function (r) { var z = parseFloat(r.firstChild && r.firstChild.style.zoom) || 1, p = YX.notes.books[0]; r.scrollLeft = Math.round(((p[0] + p[2]) / 2) * z - r.clientWidth / 2); });
     /* 手机：每条格层先滑到领域牌那里，别停在柜子左边的柱子上 */
     document.querySelectorAll(".yx-shelf.m .yx-rowm").forEach(function (r) { var z = parseFloat(r.firstChild && r.firstChild.style.zoom) || 1; r.scrollLeft = Math.round((YX.rows[0].plaque[0] - 14) * z); });
     if (!sh.classList.contains("still")) {
       var seen = false;
-      var key = sh.classList.contains("yx-arch") ? "yx-seen-arch" : "yx-seen-shelf";
+      var key = sh.classList.contains("yx-arch") ? "yx-seen-arch" : sh.classList.contains("yx-notes") ? "yx-seen-notes" : "yx-seen-shelf";
       try { seen = sessionStorage.getItem(key) === "1"; sessionStorage.setItem(key, "1"); } catch (e) { /* 忽略 */ }
       sh.classList.add(seen ? "enter-short" : "enter");
       sh.addEventListener("click", function () { sh.classList.remove("enter"); sh.classList.add("enter-short"); }, { once: true });
@@ -10732,6 +10777,18 @@ var FOIL = (function () {
       bigH = '<div class="yx-card-big-wrap">' + yxCardFace(big, tp, 0, true) + '<div class="yx-cover-acts">' + read + '<button type="button" class="yx-btn ghost" data-act="yx-card-back">放回</button></div></div>';
     }
     return '<div class="ydesk yx-desk" role="dialog" aria-modal="true" aria-label="' + esc(title) + '"><div class="yx-desk-head"><span class="yx-desk-title">' + esc(title) + '</span><span class="yx-desk-sub">' + esc(sub) + '</span><span class="yx-desk-acts"><button type="button" class="yx-btn ghost small" data-act="yx-desk-old">牌册</button><button type="button" class="yx-btn stone small" data-act="desk-close">回到档案架</button></span></div>' + hand + bigH + "</div>";
+  }
+  /* 笔记场：骨臂举本。场景里六只骨臂各举一本（画好的），本名叠在封面上：第一本是随手本，第二本是「＋ 新本子」，其余留给主题本；点本子走原来的动作。 */
+  function yxNotesRackHTML(nPages) {
+    var narrow = window.innerWidth < 900, still = REDUCE || !LK().motion, B = YX.notes.books, top = narrow ? YX.notes.band[0] : 0, bh = narrow ? YX.notes.band[1] : YX.scene.h;
+    var items = [{ act: "np-day", d: today(), name: "随手本", sub: nPages + " 页", cur: true }];
+    if (S.canEdit) items.push({ act: "nb-new", name: "新本子", sub: "＋", ghost: true });
+    var labels = items.map(function (it, i) {
+      var r = B[i]; if (!r) return "";
+      return '<button type="button" class="yx-nb' + (it.ghost ? " ghost" : "") + (it.cur ? " cur" : "") + '" data-act="' + it.act + '"' + (it.d ? ' data-d="' + it.d + '"' : "") + ' style="left:' + r[0] + "px;top:" + (r[1] - top) + "px;width:" + (r[2] - r[0]) + "px;height:" + (r[3] - r[1]) + "px;--r:" + (-r[4]) + "deg;--i:" + i + '"><span class="yx-nb-n">' + esc(it.name) + '</span><span class="yx-nb-s">' + esc(it.sub) + "</span></button>";
+    }).join("");
+    var cab = '<div class="yx-cab notes" data-bh="' + bh + '" style="width:' + YX.scene.w + "px;height:" + bh + "px;background-position:0 -" + top + 'px">' + labels + "</div>";
+    return '<section class="yx-notes ' + (narrow ? "m" : "d") + (still ? " still" : "") + '" aria-label="笔记本架 · 骨臂">' + (narrow ? '<div class="yx-rowm snap">' + cab + "</div>" : cab) + "</section>";
   }
   function yxNightApply() { var on = false; try { on = localStorage.getItem("yx-night") === "1"; } catch (e) { /* 忽略 */ } document.documentElement.classList.toggle("yx-night", on); }
   function yxGateHTML() {
