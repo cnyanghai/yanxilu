@@ -1774,6 +1774,7 @@ var FOIL = (function () {
   }
   /* 展台在书墙右边一栏，滚动时停在屏幕上 */
   function stageHTML() {
+    if (LK().scene === "youchai") return "";
     var id = stagePick();
     if (/^t:/.test(id)) {
       var mini = '<div class="dais"><div class="stg-mid"><div class="stg-scale"><div class="stg-zoom">' + stageCover(id) + '</div></div><i class="stg-stand" aria-hidden="true"></i></div><i class="stg-top" aria-hidden="true"></i></div>';
@@ -2320,6 +2321,7 @@ var FOIL = (function () {
       (kind === "pdf" ? '<span class="rd-zoom"><button type="button" class="btn ghost small" data-act="rd-zoom" data-z="-1" aria-label="缩小">－</button><button type="button" class="btn ghost small" data-act="rd-zoom" data-z="1" aria-label="放大">＋</button></span>' : "") +
       (LIB.books[id] ? '<button type="button" class="btn ghost small rd-tb" data-act="rd-side" data-tab="ch" aria-pressed="false">本章精读</button>' : "") +
       '<button type="button" class="btn ghost small rd-tb rd-nb" data-act="rd-side" data-tab="mk" aria-pressed="false">笔记 <span class="rd-nbn">' + nMk + "</span></button>" +
+      (LK().scene === "youchai" ? '<button type="button" class="btn ghost small" data-act="yx-night">夜读</button>' : "") +
       '<button type="button" class="btn ghost small" data-act="rd-close">关闭</button></div>' +
       '<div class="rd-main"><div class="rd-view"><p class="rd-msg">正在打开……</p></div><aside class="rd-side" aria-label="本章精读、划线和批注" hidden></aside></div>' +
       '<div class="rd-foot"><button type="button" class="btn ghost small" data-act="rd-prev">‹ ' + (kind === "pdf" ? "上一页" : "上一部分") + "</button>" +
@@ -3859,7 +3861,7 @@ var FOIL = (function () {
     return '<div class="view reader">' + bannerHTML() +
       '<header><p class="eyebrow"><a href="#b-' + bid + '">《' + esc(b.title) + "》</a> · 精读稿</p><h1>第" + CN[n] + "章　" + esc(ch.title) + "</h1>" +
       '<div class="stats"><span><b>' + Math.round(chars / 100) / 10 + "</b>千字</span><span><b>" + secs.length + "</b>个论证单元</span><span><b>" + answered + "</b>/ " + prompts.length + " 道自测已作答</span><span><b>" + nChecks + "</b>处待核对</span></div>" +
-      '<div class="reader-bar">' + zoom + '<div class="whole">' + statusCtl(cid, "第" + CN[n] + "章") + "</div></div>" +
+      '<div class="reader-bar">' + zoom + (LK().scene === "youchai" ? '<button type="button" class="btn ghost small" data-act="yx-night">夜读</button>' : "") + '<div class="whole">' + statusCtl(cid, "第" + CN[n] + "章") + "</div></div>" +
       '<p class="meta reader-note">' + esc(d.note) + " 例证标“书中”的是作者在书里用的，标“补充”的是本页为帮助理解加的。</p></header>" +
       '<div class="reader-body">' + body + "</div>" +
       '<section class="reader-foot">' + noteBlock(cid, "我的批注", "这一章读完后，用自己的话写下最关键的推理，以及你最怀疑的一环。也可以记下原书中与这里不一致的地方（附页码）。") +
@@ -5602,6 +5604,7 @@ var FOIL = (function () {
    * 手机按格层切开竖排，一层一条横着滑。书按编号稳定挑一根书脊零件，题签竖排叠上去，状态用形与光：没读是幽灵、在读书口一线橙、读完一线金。 */
   var YX = { dir: "vendor/ui/", scene: { w: 1536, h: 1024 }, rows: [{"plaque":[250,437,343,473],"feet":462,"cavity":62},{"plaque":[250,522,343,558],"feet":552,"cavity":78},{"plaque":[250,607,343,643],"feet":637,"cavity":73},{"plaque":[250,702,343,738],"feet":732,"cavity":83},{"plaque":[250,792,343,828],"feet":822,"cavity":78}], inner: [362, 1300],
     gate: { w: 1024, h: 1536, plate: [250, 300, 770, 420], boards: [[315,870,448,905,4],[307,922,445,958,-2],[330,975,440,1018,3]] },
+    covers: [[333,430,[105,100,275,325]],[319,434,[102,104,255,321]],[336,435,[107,104,268,321]],[343,436,[109,104,274,322]],[336,444,[107,106,268,328]],[331,446,[105,107,264,330]],[344,447,[110,107,275,330]],[337,446,[107,107,269,330]]],
     spines: { n: [[108,456],[122,438],[120,434],[125,455],[106,437],[114,453],[115,440],[98,417],[124,450],[115,420],[109,450],[128,450],[107,430],[118,446],[115,426],[110,416]], w: [[185,473],[165,444],[180,417],[99,405],[129,395],[127,397],[127,392],[99,360],[130,370],[92,331],[119,402],[151,447],[141,428],[159,411],[151,422],[132,390],[176,461],[131,365],[184,443],[128,372],[149,390],[103,346],[125,398],[129,449],[151,313],[134,427],[139,366],[123,380],[137,357],[183,371],[105,369],[158,400]] } };
   function yxPad(n) { return (n < 10 ? "0" : "") + n; }
   function yxSpineOf(id) {
@@ -5670,6 +5673,26 @@ var FOIL = (function () {
     }
   }
   window.addEventListener("resize", yxZoom);
+  /* 书从架上点开（手机优先）：点书脊，书飞到屏中央放大成封面零件，封面下一条石尺写读到哪、上次几天前，两个动作「接着读」「目录」，退出「放回」。
+   * 封面按编号从八本零件里稳定挑一本，书名叠在题签板上。接着读走原来的主按钮动作（电子书 eb-read / 精读 open-ch）。 */
+  function yxCoverHTML() {
+    if (LK().scene !== "youchai" || !S.yxOpen || !ITEMS[S.yxOpen]) return "";
+    var id = S.yxOpen, it = ITEMS[id], c = YX.covers[hashN(id + "c") % YX.covers.length], bs = bookState(id), rdg = readingOf(id), b = LIB.books[id], eb = ebookOf(id);
+    var pct = Math.round(((rdg && rdg.pct) || bs.pct || 0) * 100), lt = lastTouch(id), days = lt ? Math.floor((Date.now() - new Date(lt).getTime()) / 86400000) : -1;
+    var next = b ? b.chapters[Math.min(bs.done, b.chapters.length - 1)] : null, pl = c[2];
+    var main = eb ? '<button type="button" class="yx-btn glow" data-act="eb-read" data-id="' + esc(id) + '">' + (pct ? "接着读 · " + pct + "%" : "开始读") + "</button>"
+      : b ? '<button type="button" class="yx-btn glow" data-act="open-ch" data-book="' + esc(id) + '" data-n="' + next.n + '">' + (bs.done ? "继续精读" : "开始精读") + "</button>"
+      : (ebCanUpload() ? ebUploadBtn(id, "＋ 挂一本电子书").replace('class="btn ghost eb-up', 'class="yx-btn stone eb-up') : "");
+    var toc = b ? '<a class="yx-btn stone" href="#b-' + esc(id) + '">目录</a>' : "";
+    var ruler = '<span>' + (pct ? "读到 " + pct + "%" : (bs.s === "done" || bs.s === "review") ? "读完了" : "还没读") + "</span><span>" + (days > 0 ? "上次 " + days + " 天前" : days === 0 ? "今天读过" : esc(it.by || "")) + "</span>";
+    var from = S.yxFrom ? "--fx:" + Math.round(S.yxFrom.x) + "px;--fy:" + Math.round(S.yxFrom.y) + "px" : "--fx:50vw;--fy:50vh";
+    return '<div class="yx-cover-wrap" role="dialog" aria-modal="true" aria-label="《' + esc(it.title) + '》" style="' + from + '">' +
+      '<div class="yx-cover"><img src="' + YX.dir + "covers/c" + yxPad(hashN(id + "c") % YX.covers.length + 1) + '.webp" alt="">' +
+      '<span class="yx-cover-t" style="left:' + (pl[0] / c[0] * 100).toFixed(1) + "%;top:" + (pl[1] / c[1] * 100).toFixed(1) + "%;width:" + ((pl[2] - pl[0]) / c[0] * 100).toFixed(1) + "%;height:" + ((pl[3] - pl[1]) / c[1] * 100).toFixed(1) + '%">' + esc(it.title.replace(/（.*）$/, "")) + "</span></div>" +
+      '<div class="yx-ruler">' + ruler + "</div>" +
+      '<div class="yx-cover-acts">' + main + toc + '<button type="button" class="yx-btn ghost" data-act="yx-unpick">放回</button></div></div>';
+  }
+  function yxNightApply() { var on = false; try { on = localStorage.getItem("yx-night") === "1"; } catch (e) { /* 忽略 */ } document.documentElement.classList.toggle("yx-night", on); }
   function yxGateHTML() {
     var g = YX.gate, pc = function (r) { return "left:" + (r[0] / g.w * 100).toFixed(2) + "%;top:" + (r[1] / g.h * 100).toFixed(2) + "%;width:" + ((r[2] - r[0]) / g.w * 100).toFixed(2) + "%;height:" + ((r[3] - r[1]) / g.h * 100).toFixed(2) + "%"; };
     var last = ""; try { last = localStorage.getItem("yx-last") || ""; } catch (e) { /* 忽略 */ }
@@ -5694,6 +5717,7 @@ var FOIL = (function () {
     syncMyBooks(); syncBoxes();
     document.documentElement.classList.toggle("clip-mode", S.route === "clip");
     document.documentElement.classList.toggle("gate-mode", S.route === "gate");
+    document.documentElement.classList.toggle("yx-scene", LK().scene === "youchai"); yxNightApply();
     if (S.route !== "gate" && S.route !== "home") { try { localStorage.setItem("yx-last", S.route); } catch (e0) { /* 忽略 */ } }
     $("#rail").innerHTML = railHTML();
     var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);
@@ -5712,7 +5736,7 @@ var FOIL = (function () {
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
-    $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML());
+    $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML()) + (r === "shelf" ? yxCoverHTML() : "");
     document.body.classList.toggle("desk-on", !!document.querySelector(".ydesk"));
     wallPack(); grimHydrate(); yxMount();
     if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);
@@ -5868,6 +5892,9 @@ var FOIL = (function () {
     if (act === "mgs") { openGoalStop(t.getAttribute("data-g"), +t.getAttribute("data-i")); return; }
     if (act === "pick") {
       var pid = t.getAttribute("data-id"), fly = null;
+      if (LK().scene === "youchai" && t.closest(".yx-shelf")) {
+        var rr = t.getBoundingClientRect(); S.yxFrom = { x: rr.left + rr.width / 2, y: rr.top + rr.height / 2 }; S.yxOpen = pid; S.shelfPick = pid; render(); return;
+      }
       if (pid !== S.shelfPick && S.route === "shelf" && !REDUCE && LK().motion && t.closest(".wall")) {
         var dc = document.querySelector(".dais-col");
         if (dc && window.getComputedStyle(dc).position === "sticky") fly = { r: t.getBoundingClientRect(), col: window.getComputedStyle(t).getPropertyValue("--cl").trim() };
@@ -5925,8 +5952,10 @@ var FOIL = (function () {
     if (act === "eb-del") { S.ebConfirm = t.getAttribute("data-id"); render(); return; }
     if (act === "eb-del-no") { S.ebConfirm = null; render(); return; }
     if (act === "eb-del-yes") { ebRemove(t.getAttribute("data-id")); return; }
-    if (act === "eb-read") { readerOpen(t.getAttribute("data-id"), { notes: t.getAttribute("data-notes") === "1" }); return; }
+    if (act === "eb-read") { S.yxOpen = null; readerOpen(t.getAttribute("data-id"), { notes: t.getAttribute("data-notes") === "1" }); return; }
     if (act === "rd-close") { readerClose(); return; }
+    if (act === "yx-unpick") { S.yxOpen = null; render(); return; }
+    if (act === "yx-night") { var nt = !document.documentElement.classList.contains("yx-night"); try { localStorage.setItem("yx-night", nt ? "1" : "0"); } catch (e9) { /* 忽略 */ } document.documentElement.classList.toggle("yx-night", nt); return; }
     if (act === "rd-prev") { rdStep(-1); return; }
     if (act === "rd-next") { rdStep(1); return; }
     if (act === "rd-zoom") { pdfZoom(+t.getAttribute("data-z")); return; }

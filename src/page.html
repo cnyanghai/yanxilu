@@ -2551,6 +2551,32 @@ html.gate-mode main{padding:0;max-width:none}
 @keyframes yx-rise{0%{transform:translateY(28%)}55%{transform:translateY(-1.2%) translateX(.3%)}70%{transform:translateY(.6%) translateX(-.3%)}85%{transform:translateY(-.3%)}100%{transform:none}}
 @keyframes yx-in{from{opacity:0;transform:translateY(-10px) scale(1.04);filter:blur(2px) brightness(1.6)}to{opacity:var(--op);transform:none;filter:none}}
 .yx-shelf.still .yx-cab,.yx-shelf.still .yx-book{animation:none}
+
+/* 书从架上点开：封面屏与单页阅读皮（html.yx-scene） */
+.yx-cover-wrap{position:fixed;inset:0;z-index:70;background:rgba(13,20,26,.82);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;animation:yx-fade .3s both}
+.yx-cover{position:relative;width:min(70vw,340px);aspect-ratio:3/4;filter:drop-shadow(0 20px 40px rgba(0,0,0,.75));animation:yx-fly .5s cubic-bezier(.22,.9,.3,1) both;transform-origin:center}
+.yx-cover img{width:100%;height:100%;display:block;object-fit:contain}
+.yx-cover-t{position:absolute;display:flex;align-items:center;justify-content:center;text-align:center;padding:4%;box-sizing:border-box;font:700 clamp(15px,4.6vw,26px)/1.25 "ZCOOL XiaoWei","Noto Serif SC",serif;color:#FFD48A;text-shadow:0 0 6px rgba(255,170,60,.9),0 0 14px rgba(255,120,30,.6),0 1px 0 #000;letter-spacing:.06em;overflow:hidden}
+.yx-ruler{width:min(70vw,340px);height:28px;box-sizing:border-box;background:url(vendor/ui/frames/stoneruler.webp) center/100% 100% no-repeat;display:flex;align-items:center;justify-content:space-between;padding:0 14px;font:12px "Noto Sans SC",system-ui,sans-serif;color:#EFE8D6;animation:yx-fade .4s .4s both}
+.yx-cover-acts{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;animation:yx-fade .4s .5s both}
+.yx-btn.stone{background:#324D5B;color:#EFE8D6;border-color:#647277;cursor:pointer}
+.yx-btn{cursor:pointer}
+@keyframes yx-fly{from{transform:translate(calc(var(--fx) - 50vw),calc(var(--fy) - 50vh)) scale(.12);opacity:.6}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){.yx-cover,.yx-cover-wrap,.yx-ruler,.yx-cover-acts{animation:none}}
+/* 阅读皮：骨白纸、两条石尺、18 像素正文；夜读换墨黑纸 */
+html.yx-scene .rd{background:#EFE8D6 url(vendor/ui/tiles/parchment.webp) 0 0/512px}
+html.yx-scene .rd-bar,html.yx-scene .rd-foot{background:#3a3f58 url(vendor/ui/frames/stoneruler.webp) center/100% 100% no-repeat;border:0;color:#EFE8D6;min-height:34px}
+html.yx-scene .rd-bar .rd-t,html.yx-scene .rd-pos,html.yx-scene .rd-pc{color:#EFE8D6}
+html.yx-scene .rd-bar .btn,html.yx-scene .rd-foot .btn{color:#EFE8D6;border-color:#647277;background:rgba(13,20,26,.45)}
+html.yx-scene .rd-bar .rd-toc{background:#EFE8D6;color:#1C1A17}
+html.yx-scene .rd-pg{background:rgba(0,0,0,.35)}html.yx-scene .rd-pg i{background:#E8762B;box-shadow:0 0 6px rgba(255,150,40,.8)}
+html.yx-scene .view.reader{background:#EFE8D6 url(vendor/ui/tiles/parchment.webp) 0 0/512px;color:#1C1A17;padding-left:20px;padding-right:20px}
+html.yx-scene .reader-body{font-size:18px;line-height:1.75}
+html.yx-scene .reader-bar{background:#3a3f58 url(vendor/ui/frames/stoneruler.webp) center/100% 100% no-repeat;color:#EFE8D6;padding:4px 12px;border-radius:0}
+html.yx-scene .reader-bar .btn{color:#EFE8D6;border-color:#647277;background:rgba(13,20,26,.45)}
+html.yx-scene.yx-night .rd,html.yx-scene.yx-night .view.reader{background:#16141A;color:#CFC8B6}
+html.yx-scene.yx-night .reader-body,html.yx-scene.yx-night .reader-body p,html.yx-scene.yx-night .view.reader header{color:#CFC8B6}
+html.yx-scene.yx-night .rd-view,html.yx-scene.yx-night .rd-frame{filter:invert(.92) hue-rotate(180deg)}
 </style>
 
 <header class="topbar" id="rail"></header>
