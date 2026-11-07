@@ -2577,6 +2577,47 @@ html.yx-scene .reader-bar .btn{color:#EFE8D6;border-color:#647277;background:rgb
 html.yx-scene.yx-night .rd,html.yx-scene.yx-night .view.reader{background:#16141A;color:#CFC8B6}
 html.yx-scene.yx-night .reader-body,html.yx-scene.yx-night .reader-body p,html.yx-scene.yx-night .view.reader header{color:#CFC8B6}
 html.yx-scene.yx-night .rd-view,html.yx-scene.yx-night .rd-frame{filter:invert(.92) hue-rotate(180deg)}
+
+/* 档案场：碑林与牌桌 */
+.yx-arch{position:relative;width:100vw;margin-left:calc(50% - 50vw);background:#0D141A}
+.yx-arch.d{overflow:hidden}
+.yx-arch.m .yx-rowm{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;margin:0 0 8px}
+.yx-cab.arch{background-image:url(vendor/ui/scenes/archive.webp)}
+.yx-stone{position:absolute;margin:0;padding:8px;border:0;background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;scroll-snap-align:center;border-radius:12px;transition:background .18s}
+.yx-stone:hover,.yx-stone:focus-visible{background:rgba(255,170,60,.08);outline:2px solid rgba(255,212,138,.6);outline-offset:4px}
+.yx-stone-n{font:700 30px/1.25 "ZCOOL XiaoWei","Noto Serif SC",serif;color:#FFD48A;text-shadow:0 0 6px rgba(255,170,60,.9),0 0 16px rgba(255,120,30,.6),0 1px 0 #000;letter-spacing:.06em;text-align:center;max-width:100%;overflow:hidden}
+.yx-stone-s{font:16px/1.3 "Noto Sans SC",system-ui,sans-serif;color:#E6DFC8;text-shadow:0 1px 2px #000,0 0 4px #000}
+.yx-stone.folder .yx-stone-n{font-size:26px}
+.yx-arch.enter .yx-cab{animation:yx-rise 1.3s cubic-bezier(.22,.9,.3,1) both}
+.yx-arch.enter .yx-stone{animation:yx-in .5s both;animation-delay:calc(1.1s + var(--i) * 160ms)}
+.yx-arch.enter-short .yx-cab{animation:yx-rise .3s both}
+.yx-arch.enter-short .yx-stone{animation:yx-in .25s .3s both}
+.yx-arch.still .yx-cab,.yx-arch.still .yx-stone{animation:none}
+.ydesk.yx-desk{background:#0D141A url(vendor/ui/tiles/sky.webp) center/512px;color:#EFE8D6;padding:14px 16px 40px;--ink:#EFE8D6}
+.yx-desk-head{display:flex;flex-wrap:wrap;align-items:center;gap:8px 14px;max-width:1080px;margin:0 auto 14px}
+.yx-desk-title{font:700 24px/1.2 "ZCOOL XiaoWei","Noto Serif SC",serif;color:#FFD48A;text-shadow:0 0 6px rgba(255,170,60,.9),0 0 14px rgba(255,120,30,.6),0 1px 0 #000;letter-spacing:.08em}
+.yx-desk-sub{font:13px "Noto Sans SC",system-ui,sans-serif;color:#A9C6CC}
+.yx-desk-acts{margin-left:auto;display:flex;gap:8px}
+.yx-btn.small{padding:6px 12px;font-size:13px}
+.yx-fan{display:flex;gap:6px;align-items:flex-end;overflow-x:auto;padding:24px 16px 30px;max-width:1080px;margin:0 auto;scroll-snap-type:x proximity}
+.yx-card-btn{margin:0;padding:0;border:0;background:none;cursor:pointer;flex:none;scroll-snap-align:center;transition:transform .18s}
+.yx-card-btn:hover,.yx-card-btn:focus-visible{transform:translateY(-10px);z-index:2}
+.yx-card{position:relative;width:150px;aspect-ratio:803/1184;transform:rotate(var(--r,0deg));filter:drop-shadow(0 8px 14px rgba(0,0,0,.6))}
+.yx-card.big{width:min(80vw,340px);transform:none;filter:drop-shadow(0 20px 40px rgba(0,0,0,.75))}
+.yx-card-bg{position:absolute;inset:0;width:100%;height:100%;display:block}
+.yx-card-t{position:absolute;left:16.2%;top:17.7%;width:67.2%;height:13.5%;display:flex;align-items:center;justify-content:center;text-align:center;padding:2% 3%;box-sizing:border-box;font:700 12px/1.2 "ZCOOL XiaoWei","Noto Serif SC",serif;color:#1C1A17;overflow:hidden;letter-spacing:.02em}
+.yx-card.big .yx-card-t{font-size:clamp(14px,4.4vw,22px)}
+.yx-card-meta{position:absolute;left:12%;right:12%;top:34%;text-align:center;font:13px/1.5 "Noto Sans SC",system-ui,sans-serif;color:#5A5046}
+.yx-card-why{position:absolute;left:12%;right:12%;top:44%;text-align:center;font:14px/1.6 "Noto Serif SC",serif;color:#1C1A17}
+.yx-card-coin{position:absolute;right:8%;top:5%;width:16%;aspect-ratio:1;border-radius:50%;background:radial-gradient(#F4A742,#B07D2A);border:2px solid #5A3A22;display:flex;align-items:center;justify-content:center;font:700 11px "Noto Sans SC",sans-serif;color:#140c08}
+.yx-card-seal{position:absolute;left:39.5%;top:84%;width:21%;aspect-ratio:1;object-fit:contain}
+.yx-card.big .yx-card-seal{top:83%}
+.yx-card-state{position:absolute;left:0;right:0;top:95.5%;text-align:center;font:12px "Noto Sans SC",sans-serif;color:#5A5046}
+.yx-card-big-wrap{position:fixed;inset:0;z-index:5;background:rgba(13,20,26,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px;animation:yx-fade .25s both}
+.yx-card-big-wrap .yx-card.big{animation:yx-pop .3s cubic-bezier(.22,.9,.3,1) both}
+@keyframes yx-pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.yx-desk-empty{color:#A9C6CC;text-align:center;padding:40px}
+@media (max-width:600px){.yx-stone-n{font-size:26px}.yx-card{width:120px}.yx-fan{padding:16px 10px 24px}}
 </style>
 
 <header class="topbar" id="rail"></header>
