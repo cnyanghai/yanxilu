@@ -2749,6 +2749,47 @@ html.yx-scene .nbk-r h1{animation:yx-stamp .35s cubic-bezier(.2,1.4,.4,1) both}
 .yx-nav-ico{width:22px;height:22px;object-fit:contain;filter:drop-shadow(0 1px 1px rgba(0,0,0,.6))}
 .yx-brand-ico{width:30px;height:30px;object-fit:contain}
 @media (max-width:720px){.yx-nav-ico{width:26px;height:26px}}
+
+/* ---- 独立 App 的壳：HUD 贴边不进画，底栏三条；场景页是全屏舞台 ---- */
+html.yx-app .topbar{position:fixed;inset:0 0 auto 0;z-index:40;background:transparent;border:0;pointer-events:none}
+html.yx-app .topbar .tb-in{display:contents}
+html.yx-app .yx-hud-top{position:fixed;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:flex-start;padding:calc(8px + env(safe-area-inset-top,0px)) 10px 0;pointer-events:none}
+html.yx-app .yx-hud-l,html.yx-app .yx-hud-r{display:flex;gap:6px;align-items:center;pointer-events:auto}
+html.yx-app .yx-hud-b{display:inline-flex;flex-direction:column;align-items:center;gap:1px;min-width:46px;padding:5px 6px;border:0;border-radius:10px;background:rgba(13,20,26,.55);color:#EFE8D6;font:11px "Noto Sans SC",system-ui,sans-serif;text-decoration:none;cursor:pointer;backdrop-filter:blur(4px)}
+html.yx-app .yx-hud-b img{width:24px;height:24px;object-fit:contain;filter:drop-shadow(0 1px 2px rgba(0,0,0,.7))}
+html.yx-app .yx-hud-r .mode{pointer-events:auto}
+html.yx-app .yx-hud-r .mode.login{background:linear-gradient(#F4A742,#E8762B);color:#140c08;border:0;border-radius:10px;padding:8px 12px;font-weight:700;text-decoration:none}
+html.yx-app .yx-hud-look{position:relative}
+html.yx-app .yx-hud-look .look-pop{right:0;top:calc(100% + 8px)}
+html.yx-app .mainnav{position:fixed;left:0;right:0;bottom:0;z-index:40;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;background:#0D141A;border-top:2px solid #324D5B;padding:6px 4px calc(8px + env(safe-area-inset-bottom,0px));pointer-events:auto;flex:none}
+html.yx-app .mainnav a{flex-direction:column;justify-content:center;gap:3px;min-height:50px;padding:0;border-radius:10px;font-size:12px;color:#EFE8D6}
+html.yx-app .mainnav a[aria-current="page"]{background:transparent;color:#FFD48A;font-weight:700}
+html.yx-app .mainnav a .yx-nav-ico{width:28px;height:28px}
+html.yx-app main{padding:0;max-width:none}
+html.yx-app-scene body{overflow:hidden;background:#0D141A}
+html.yx-app-scene main{padding:0}
+html.yx-app .banner{display:none}
+html.yx-app.gate-mode .yx-hud-top,html.yx-app.gate-mode .mainnav{display:none}
+.yx-stage{position:fixed;left:0;right:0;top:0;bottom:64px;overflow:hidden;background:#0D141A;touch-action:none;user-select:none}
+.yx-field{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.yx-world{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.yx-rise{position:absolute;inset:0}
+.yx-furn{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;filter:drop-shadow(0 18px 24px rgba(0,0,0,.55))}
+.yx-world .yx-book,.yx-world .yx-stone,.yx-world .yx-nb{pointer-events:auto}
+.yx-rowhit{position:absolute;margin:0;padding:0;border:0;background:transparent;cursor:zoom-in;display:none;z-index:3}
+html.yx-app-scene[data-narrow="1"] .yx-world:not(.zoomed) .yx-rowhit{display:block}
+.yx-world.enter .yx-rise{animation:yx-rise 1.3s cubic-bezier(.22,.9,.3,1) both}
+.yx-world.enter .yx-book{animation:yx-in .5s both;animation-delay:calc(1.3s + var(--i) * 45ms)}
+.yx-world.enter .yx-plaque,.yx-world.enter .yx-stone,.yx-world.enter .yx-nb{animation:yx-in .5s both;animation-delay:calc(1.2s + var(--i,0) * 160ms)}
+.yx-world.enter-short .yx-rise{animation:yx-rise .3s both}
+.yx-world.enter-short .yx-book,.yx-world.enter-short .yx-plaque,.yx-world.enter-short .yx-stone,.yx-world.enter-short .yx-nb{animation:yx-in .25s .3s both}
+.yx-world.still .yx-rise,.yx-world.still .yx-book,.yx-world.still .yx-plaque,.yx-world.still .yx-stone,.yx-world.still .yx-nb{animation:none}
+.yx-world::after{content:"";position:absolute;left:-10%;right:-10%;bottom:0;height:34%;pointer-events:none;background:linear-gradient(90deg,transparent 0,rgba(169,198,204,.16) 18%,transparent 36%,rgba(169,198,204,.11) 58%,transparent 74%,rgba(169,198,204,.14) 90%,transparent 100%);mask-image:linear-gradient(180deg,transparent,#000 60%);-webkit-mask-image:linear-gradient(180deg,transparent,#000 60%);animation:yx-fog 46s linear infinite;mix-blend-mode:screen}
+.yx-world.still::after{display:none}
+.yx-sheet{position:fixed;inset:0;z-index:60;overflow:auto;background:rgba(13,20,26,.92);padding:calc(10px + env(safe-area-inset-top,0px)) 12px 80px;box-sizing:border-box;animation:yx-fade .25s both}
+.yx-sheet-bar{display:flex;justify-content:flex-end;max-width:980px;margin:0 auto 8px}
+.yx-sheet .phead,.yx-sheet .yx-notes,.yx-sheet .nrack,.yx-sheet .banner{display:none}
+.yx-sheet .view{padding:0}
 </style>
 
 <header class="topbar" id="rail"></header>
@@ -5535,6 +5576,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   }
   function recCount() { var n = 0; COLLS.forEach(function (c) { if (c !== "lessons") n += Object.keys(S.data[c] || {}).length; }); return n; }
   function bannerHTML() {
+    if (APP && /^(gate|shelf|archive|notes)/.test(S.route)) return "";
     if (ON_SERVER && S.mode === "db") {
       var me = SRV.me();
       if (!me) return '<div class="banner" role="note"><span>登录 Baba 账号后，进度、批注、电子书和英语的学习记录都记在你的账号里，换手机、换电脑都在。</span>' +
@@ -5592,9 +5634,10 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     if (APP) {
       var asec = /^(shelf|[tbr]-)/.test(r) ? "shelf" : /^(archive|clip|marks)/.test(r) ? "archive" : /^notes/.test(r) ? "notes" : r;
       function ait(id, label, ico) { return '<a href="#' + id + '"' + (asec === id ? ' aria-current="page"' : "") + '><img class="yx-nav-ico" src="' + YX.dir + "icons/" + ico + '.webp" alt=""><span>' + label + "</span></a>"; }
-      return '<div class="tb-in"><a class="brand" href="#gate" aria-label="邮差，回到大门"><img class="yx-brand-ico" src="' + YX.dir + 'icons/gate.webp" alt=""><b>邮差</b></a>' +
-        '<nav class="mainnav" aria-label="主导航">' + ait("shelf", "书架", "book") + ait("archive", "档案架", "card") + ait("notes", "笔记本", "notebook") + "</nav>" +
-        srch + jotB + modeH + "</div>";
+      var hud = S.yxZoomed ? '<button type="button" class="yx-hud-b" data-act="yx-overview" title="全景"><img src="' + YX.dir + 'icons/magnifier.webp" alt=""><span>全景</span></button>' : '<a class="yx-hud-b" href="#gate" title="回到大门"><img src="' + YX.dir + 'icons/gate.webp" alt=""><span>大门</span></a>';
+      var look = r === "shelf" ? '<div class="look yx-hud-look"><button type="button" class="yx-hud-b" data-act="look" aria-expanded="' + !!S.lookOpen + '" title="布置"><img src="' + YX.dir + 'icons/lantern.webp" alt=""><span>布置</span></button>' + (S.lookOpen ? lookPopHTML() : "") + "</div>" : "";
+      return '<div class="yx-hud-top"><div class="yx-hud-l">' + hud + '</div><div class="yx-hud-r">' + look + '<button type="button" class="yx-hud-b" data-act="cmdk" title="搜索"><img src="' + YX.dir + 'icons/magnifier.webp" alt=""><span>搜</span></button>' + (S.canEdit ? '<button type="button" class="yx-hud-b" data-act="jot" title="记一笔"><img src="' + YX.dir + 'icons/quill.webp" alt=""><span>记</span></button>' : "") + modeH + "</div></div>" +
+        '<nav class="mainnav" aria-label="主导航">' + ait("shelf", "书架", "book") + ait("archive", "档案架", "card") + ait("notes", "笔记本", "notebook") + "</nav>";
     }
     return '<div class="tb-in"><a class="brand" href="#home" aria-label="研习录，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>研习录</b></a>' +
       '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + it("shelf", "书架") + it("journal", "足迹") + "</nav>" +
@@ -9503,7 +9546,7 @@ var FOIL = (function () {
   }
   function npDayLabel(d) { return cnDate(d) + " · " + WD[new Date(d + "T12:00:00").getDay()]; }
   function npRouteDay() { var m = /^notes-(\d{4}-\d{2}-\d{2})$/.exec(S.route); return m ? m[1] : today(); }
-  function npGo(d) { S.npMonth = null; S.npEdit = null; var h = d === today() ? "#notes" : "#notes-" + d; if (location.hash === h) render(); else location.hash = h; }
+  function npGo(d) { if (APP) S.yxNbOpen = true; S.npMonth = null; S.npEdit = null; var h = d === today() ? "#notes" : "#notes-" + d; if (location.hash === h) render(); else location.hash = h; }
   function npCalHTML(ym, day, days) {
     var y = +ym.slice(0, 4), mo = +ym.slice(5, 7), first = new Date(y, mo - 1, 1), n = new Date(y, mo, 0).getDate();
     var lead = (first.getDay() + 6) % 7, has = {}, td = today();
@@ -10875,6 +10918,7 @@ var FOIL = (function () {
     gate: { w: 1024, h: 1536, plate: [250, 300, 770, 420], boards: [[315,870,448,905,4],[307,922,445,958,-2],[330,975,440,1018,3]] },
     arch: { panels: [[150,470,330,700],[460,380,620,690],[800,470,985,730],[1125,470,1310,730]], band: [350, 420] },
     notes: { books: [[235,450,350,520,-3],[462,290,580,360,4],[555,530,680,600,2],[812,430,925,500,-6],[1042,320,1160,390,-3],[1262,540,1380,610,2]], band: [170, 430] },
+    layers: { shelf: { field: "scenes/shelf-field.webp", furn: "scenes/shelf-furniture.webp", box: [95, 95, 1440, 890] }, archive: { field: "scenes/archive-field.webp", furn: "scenes/archive-furniture.webp", box: [100, 230, 1360, 780] }, notes: { field: "scenes/notes-field.webp", furn: "scenes/notes-furniture.webp", box: [140, 200, 1420, 1010] } },
     covers: [[333,430,[105,100,275,325]],[319,434,[102,104,255,321]],[336,435,[107,104,268,321]],[343,436,[109,104,274,322]],[336,444,[107,106,268,328]],[331,446,[105,107,264,330]],[344,447,[110,107,275,330]],[337,446,[107,107,269,330]]],
     spines: { n: [[108,456],[122,438],[120,434],[125,455],[106,437],[114,453],[115,440],[98,417],[124,450],[115,420],[109,450],[128,450],[107,430],[118,446],[115,426],[110,416]], w: [[185,473],[165,444],[180,417],[99,405],[129,395],[127,397],[127,392],[99,360],[130,370],[92,331],[119,402],[151,447],[141,428],[159,411],[151,422],[132,390],[176,461],[131,365],[184,443],[128,372],[149,390],[103,346],[125,398],[129,449],[151,313],[134,427],[139,366],[123,380],[137,357],[183,371],[105,369],[158,400]] } };
   function yxPad(n) { return (n < 10 ? "0" : "") + n; }
@@ -11078,6 +11122,104 @@ var FOIL = (function () {
       else if (name === "ink") { tone(1400, 0.03, "sine", 0.2, 0); noise(0.03, "white", 3000, 0, 0.12, 0, 0); }
     } catch (e) { /* 没有声也不碍事 */ }
   }
+  /* ---------- 独立 App 的舞台：一个干净的场铺满屏，整座家具（另一层）颤抖着长出来，镜头按屏幕定 ----------
+   * 世界坐标 = 场景图像素（1536×1024）；.yx-world 整块用 transform 放到舞台上；场另铺一张满屏的底（object-fit: cover）接住世界外的空白。
+   * 桌面：整个世界 contain；手机：书架全景（整座柜子）→ 点一层推近；碑一屏一座、本子一屏一本，拖着换，松手吸附。 */
+  function yxLayer(name) { var L = YX.layers && YX.layers[name]; return L ? { field: YX.dir + L.field, furn: YX.dir + L.furn, box: L.box } : { field: YX.dir + "scenes/" + name + ".webp", furn: "", box: [0, 0, YX.scene.w, YX.scene.h] }; }
+  function yxStageHTML(route) {
+    var name = route === "notes" ? "notes" : route === "archive" ? "archive" : "shelf", L = yxLayer(name), still = REDUCE || !LK().motion, items = "", anchors = [], n = 0;
+    if (name === "shelf") {
+      var lines = yxLayout();
+      lines.forEach(function (ln) { var row = YX.rows[ln.slot % YX.rows.length]; ln.row = row; ln.items.forEach(function (b) { b.top = row.feet - b.h; }); });
+      var rowsOut = {};
+      lines.forEach(function (ln) {
+        var blockIdx = Math.floor(ln.slot / YX.rows.length); if (blockIdx > 0) return; /* App 舞台先只放第一座柜；以后多柜横向排 */
+        var p = ln.row.plaque, mid = (ln.row.feet - ln.row.cavity + ln.row.feet) / 2;
+        items += '<span class="yx-plaque" style="left:' + p[0] + "px;top:" + p[1] + "px;width:" + (p[2] - p[0]) + "px;height:" + (p[3] - p[1]) + 'px">' + esc(ln.name) + "</span>";
+        items += ln.items.map(function (b) { return yxBookHTML(b, 0, n++); }).join("");
+        rowsOut[ln.slot] = 1; anchors.push({ x: YX.inner[0] + 190, y: mid, row: ln.slot });
+      });
+      YX.rows.forEach(function (row, i) { var top = row.feet - row.cavity - 6; items += '<button type="button" class="yx-rowhit" data-act="yx-row" data-row="' + i + '" aria-label="推近这一层" style="left:' + (YX.inner[0] - 120) + "px;top:" + top + "px;width:" + (YX.inner[1] - YX.inner[0] + 130) + "px;height:" + (row.cavity + 16) + 'px"></button>'; });
+    } else if (name === "archive") {
+      var stones = yxStones(), P = YX.arch.panels;
+      stones.slice(0, P.length).forEach(function (st, j) {
+        var p = P[j], Ln = String(st.name).length, fs = Ln <= 4 ? 32 : Ln <= 8 ? 26 : Ln <= 12 ? 21 : 17;
+        items += '<button type="button" class="yx-stone' + (st.folder ? " folder" : "") + '" data-act="abox" data-t="' + esc(st.t) + '" style="left:' + p[0] + "px;top:" + p[1] + "px;width:" + (p[2] - p[0]) + "px;height:" + (p[3] - p[1]) + "px;--i:" + (n++) + '"><span class="yx-stone-n" style="font-size:' + fs + 'px">' + esc(st.name) + '</span><span class="yx-stone-s">' + esc(st.sub) + "</span></button>";
+        anchors.push({ x: (p[0] + p[2]) / 2, y: (p[1] + p[3]) / 2 - 40 });
+      });
+      if (!stones.length) items += '<span class="yx-plaque" style="left:560px;top:560px;width:420px;height:60px">档案架还是空的</span>';
+    } else {
+      var B = YX.notes.books, list = [{ act: "np-day", d: today(), name: "随手本", sub: npDays().length + " 页", cur: true }];
+      if (S.canEdit) list.push({ act: "nb-new", name: "新本子", sub: "＋", ghost: true });
+      list.forEach(function (it, i) {
+        var r = B[i]; if (!r) return;
+        items += '<button type="button" class="yx-nb' + (it.ghost ? " ghost" : "") + '" data-act="' + it.act + '"' + (it.d ? ' data-d="' + it.d + '"' : "") + ' style="left:' + r[0] + "px;top:" + r[1] + "px;width:" + (r[2] - r[0]) + "px;height:" + (r[3] - r[1]) + "px;--r:" + (-r[4]) + "deg;--i:" + i + '"><span class="yx-nb-n">' + esc(it.name) + '</span><span class="yx-nb-s">' + esc(it.sub) + "</span></button>";
+        anchors.push({ x: (r[0] + r[2]) / 2, y: (r[1] + r[3]) / 2 + 60 });
+      });
+    }
+    S.yxAnchors = anchors;
+    var furn = L.furn ? '<img class="yx-furn" src="' + L.furn + '" alt="">' : "";
+    return '<section class="yx-stage" data-scene="' + name + '" aria-label="' + ({ shelf: "书架", archive: "档案架", notes: "笔记本" }[name]) + '">' +
+      '<img class="yx-field" src="' + L.field + '" alt="">' +
+      '<div class="yx-world' + (still ? " still" : "") + '" style="width:' + YX.scene.w + "px;height:" + YX.scene.h + 'px"><div class="yx-rise">' + furn + items + "</div></div></section>";
+  }
+  var CAM = { s: 1, cx: 768, cy: 512, zoomed: false };
+  function yxCam(stage, world, anim) {
+    var W = stage.clientWidth, H = stage.clientHeight;
+    world.style.transition = anim && !REDUCE ? "transform .42s cubic-bezier(.22,.9,.3,1)" : "none";
+    world.style.transform = "translate(" + Math.round(W / 2 - CAM.cx * CAM.s) + "px," + Math.round(H / 2 - CAM.cy * CAM.s) + "px) scale(" + CAM.s.toFixed(4) + ")";
+  }
+  function yxCamPreset(stage) {
+    var W = stage.clientWidth, H = stage.clientHeight, name = stage.getAttribute("data-scene"), L = yxLayer(name), b = L.box, narrow = W < 900, A = S.yxAnchors || [];
+    if (!narrow || name === "shelf" && !S.yxZoomed) {
+      /* 整座家具完整放进屏里：桌面按整个世界 contain；手机按家具的包围盒适配宽度 */
+      var s = narrow ? Math.min((W - 16) / (b[2] - b[0]), (H - 40) / (b[3] - b[1])) : Math.min(W / YX.scene.w, H / YX.scene.h);
+      CAM = { s: s, cx: narrow ? (b[0] + b[2]) / 2 : YX.scene.w / 2, cy: narrow ? (b[1] + b[3]) / 2 : YX.scene.h / 2, zoomed: false };
+    } else if (name === "shelf") {
+      var a = A.filter(function (x) { return x.row === S.yxZoomRow; })[0] || A[0] || { x: 600, y: 500 };
+      CAM = { s: W / 430, cx: a.x, cy: a.y, zoomed: true };
+    } else {
+      var a2 = A[S.yxPanIx || 0] || { x: 768, y: 512 }, s2 = name === "archive" ? 0.72 * W / 180 : 0.62 * W / 120;
+      CAM = { s: s2, cx: a2.x, cy: a2.y, zoomed: false };
+    }
+  }
+  function yxStageMount() {
+    var stage = document.querySelector(".yx-stage"); if (!stage) { S.yxZoomed = false; return; }
+    var world = stage.querySelector(".yx-world"), nav = document.querySelector(".mainnav"), navH = nav ? nav.getBoundingClientRect().height : 0;
+    stage.style.bottom = navH + "px";
+    document.documentElement.setAttribute("data-narrow", stage.clientWidth < 900 ? "1" : "0"); world.classList.toggle("zoomed", !!S.yxZoomed);
+    yxCamPreset(stage); yxCam(stage, world, false);
+    if (!world.classList.contains("still") && !world.getAttribute("data-entered")) {
+      var key = "yx-seen-" + stage.getAttribute("data-scene"), seen = false;
+      try { seen = sessionStorage.getItem(key) === "1"; sessionStorage.setItem(key, "1"); } catch (e) { /* 忽略 */ }
+      world.classList.add(seen ? "enter-short" : "enter"); if (!seen) yxSfx("soil");
+      stage.addEventListener("click", function () { if (world.classList.contains("enter")) { world.classList.remove("enter"); world.classList.add("enter-short"); } }, { once: true });
+    }
+    world.setAttribute("data-entered", "1");
+    if (stage.getAttribute("data-yx")) return;
+    stage.setAttribute("data-yx", "1");
+    /* 拖着看：手机上碑与本子左右换，书架推近后左右看；松手吸附到最近的一座 / 一本 */
+    var sx = null, sy = null, c0 = null, moved = false, movedAt = 0;
+    stage.addEventListener("pointerdown", function (e) { if (e.button) return; sx = e.clientX; sy = e.clientY; c0 = { cx: CAM.cx, cy: CAM.cy }; moved = false; });
+    stage.addEventListener("pointermove", function (e) {
+      if (sx === null) return; var dx = e.clientX - sx, dy = e.clientY - sy;
+      if (!moved && Math.abs(dx) + Math.abs(dy) < 8) return;
+      moved = true; var W = stage.clientWidth, H = stage.clientHeight, name = stage.getAttribute("data-scene");
+      var canPan = W < 900 && (name !== "shelf" || CAM.zoomed); if (!canPan) return;
+      CAM.cx = Math.max(W / 2 / CAM.s, Math.min(YX.scene.w - W / 2 / CAM.s, c0.cx - dx / CAM.s));
+      if (name === "shelf") CAM.cy = Math.max(H / 2 / CAM.s, Math.min(YX.scene.h - H / 2 / CAM.s, c0.cy - dy / CAM.s));
+      yxCam(stage, world, false);
+    });
+    var up = function () {
+      if (sx === null) return; sx = null;
+      if (!moved) return; movedAt = Date.now();
+      var name = stage.getAttribute("data-scene"), A = S.yxAnchors || [];
+      if (name !== "shelf" && A.length) { var best = 0, bd = 1e9; A.forEach(function (a, i) { var d = Math.abs(a.x - CAM.cx); if (d < bd) { bd = d; best = i; } }); S.yxPanIx = best; yxCamPreset(stage); yxCam(stage, world, true); }
+    };
+    stage.addEventListener("pointerup", up); stage.addEventListener("pointercancel", up); stage.addEventListener("pointerleave", up);
+    stage.addEventListener("click", function (e) { if (Date.now() - movedAt < 350) { e.stopPropagation(); e.preventDefault(); } }, true);
+  }
+  window.addEventListener("resize", function () { var st = document.querySelector(".yx-stage"); if (st) { yxCamPreset(st); yxCam(st, st.querySelector(".yx-world"), false); } });
   function yxNightApply() { var on = false; try { on = localStorage.getItem("yx-night") === "1"; } catch (e) { /* 忽略 */ } document.documentElement.classList.toggle("yx-night", on); }
   function yxGateHTML() {
     var g = YX.gate, pc = function (r) { return "left:" + (r[0] / g.w * 100).toFixed(2) + "%;top:" + (r[1] / g.h * 100).toFixed(2) + "%;width:" + ((r[2] - r[0]) / g.w * 100).toFixed(2) + "%;height:" + ((r[3] - r[1]) / g.h * 100).toFixed(2) + "%"; };
@@ -11097,7 +11239,7 @@ var FOIL = (function () {
     ROUTES["b-" + b] = 1;
     Object.keys(LIB.books[b].deep || {}).forEach(function (n) { ROUTES["r-" + b + "-" + n] = 1; });
   });
-  function readHash() { var h = (location.hash || "").slice(1); if (APP && (!h || h === "home")) return "gate"; return ROUTES[h] || /^notes-\d{4}-\d{2}-\d{2}$/.test(h) || (PLAN && /^l-(\d{4}-\d{2}-\d{2}|[a-z]+-\d{2})$/.test(h)) ? h : (APP ? "gate" : "home"); }
+  function readHash() { var h = (location.hash || "").slice(1); if (APP && /^notes-\d{4}/.test(h)) S.yxNbOpen = true; if (APP && (!h || h === "home")) return "gate"; return ROUTES[h] || /^notes-\d{4}-\d{2}-\d{2}$/.test(h) || (PLAN && /^l-(\d{4}-\d{2}-\d{2}|[a-z]+-\d{2})$/.test(h)) ? h : (APP ? "gate" : "home"); }
 
   function render(scrollTop) {
     syncMyBooks(); syncBoxes();
@@ -11105,6 +11247,7 @@ var FOIL = (function () {
     document.documentElement.classList.toggle("gate-mode", S.route === "gate");
     document.documentElement.classList.toggle("yx-scene", LK().scene === "youchai"); yxNightApply();
     document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai");
+    document.documentElement.classList.toggle("yx-app", APP); document.documentElement.classList.toggle("yx-app-scene", APP && /^(shelf|archive|notes)/.test(S.route));
     if (S.route !== "gate" && S.route !== "home") { try { localStorage.setItem("yx-last", S.route); } catch (e0) { /* 忽略 */ } }
     $("#rail").innerHTML = railHTML();
     var r = S.route, html, rm = /^r-(.+)-(\d+)$/.exec(r);
@@ -11115,6 +11258,9 @@ var FOIL = (function () {
     else if (/^l-/.test(r)) html = lessonHTML(r.slice(2));
     else if (/^c-/.test(r)) html = courseHTML(r.slice(2));
     else if (r === "gate") html = yxGateHTML();
+    else if (APP && r === "shelf") html = yxStageHTML("shelf");
+    else if (APP && r === "archive") html = yxStageHTML("archive") + boxSheetHTML() + deskHTML();
+    else if (APP && /^notes/.test(r)) html = yxStageHTML("notes") + (S.yxNbOpen ? '<div class="yx-sheet" role="dialog" aria-modal="true" aria-label="随手本"><div class="yx-sheet-bar"><button type="button" class="yx-btn ghost small" data-act="yx-nb-close">合上本子</button></div>' + notesHTML() + "</div>" : "");
     else if (r === "shelf") html = shelfHTML();
     else if (r === "archive") html = archiveHTML();
     else if (/^notes/.test(r)) html = notesHTML();
@@ -11125,7 +11271,7 @@ var FOIL = (function () {
     var sy = window.scrollY;
     $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML()) + (r === "shelf" ? yxCoverHTML() : "");
     document.body.classList.toggle("desk-on", !!document.querySelector(".ydesk"));
-    wallPack(); grimHydrate(); yxMount();
+    wallPack(); grimHydrate(); yxMount(); yxStageMount();
     if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);
     filmMount();
     ebHydrate();
@@ -11279,7 +11425,7 @@ var FOIL = (function () {
     if (act === "mgs") { openGoalStop(t.getAttribute("data-g"), +t.getAttribute("data-i")); return; }
     if (act === "pick") {
       var pid = t.getAttribute("data-id"), fly = null;
-      if (LK().scene === "youchai" && t.closest(".yx-shelf")) {
+      if (LK().scene === "youchai" && t.closest(".yx-shelf, .yx-stage")) {
         var rr = t.getBoundingClientRect(); S.yxFrom = { x: rr.left + rr.width / 2, y: rr.top + rr.height / 2 }; S.yxOpen = pid; S.shelfPick = pid; yxSfx("paper"); render(); yxSfx("ding"); return;
       }
       if (pid !== S.shelfPick && S.route === "shelf" && !REDUCE && LK().motion && t.closest(".wall")) {
@@ -11342,6 +11488,9 @@ var FOIL = (function () {
     if (act === "eb-del-yes") { ebRemove(t.getAttribute("data-id")); return; }
     if (act === "eb-read") { S.yxOpen = null; readerOpen(t.getAttribute("data-id"), { notes: t.getAttribute("data-notes") === "1" }); return; }
     if (act === "rd-close") { readerClose(); return; }
+    if (act === "yx-row") { S.yxZoomed = true; S.yxZoomRow = +t.getAttribute("data-row"); yxSfx("paper"); render(); return; }
+    if (act === "yx-overview") { S.yxZoomed = false; render(); return; }
+    if (act === "yx-nb-close") { S.yxNbOpen = false; render(); return; }
     if (act === "yx-unpick") { yxSfx("candle"); var cw = document.querySelector(".yx-cover-wrap"); if (cw && !REDUCE && LK().motion) { cw.classList.add("closing"); setTimeout(function () { S.yxOpen = null; render(); }, 280); } else { S.yxOpen = null; render(); } return; }
     if (act === "yx-card") { var fn = t.closest(".yx-fan"); if (fn && fn.getAttribute("data-moved") === "1") { fn.setAttribute("data-moved", "0"); return; } S.yxCard = t.getAttribute("data-id"); yxSfx("paper"); render(); return; }
     if (act === "yx-flip-read") { var fl = document.querySelector(".yx-flip"), fid = t.getAttribute("data-id"); if (fl && !REDUCE && LK().motion) { fl.classList.add("flipped"); yxSfx("paper"); setTimeout(function () { readerOpen(fid); }, 420); } else readerOpen(fid); return; }

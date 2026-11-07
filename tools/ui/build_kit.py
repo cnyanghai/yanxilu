@@ -49,6 +49,15 @@ def main():
         if s['gamma'] != 1.0: im = lift(im, s['gamma'], s.get('black', 0.0))
         p = f'{out}/scenes/{name}.webp'; sz = save(im, p, 86); total += sz
         e = {k: v for k, v in s.items() if k not in ('src',)}; e.update(file=f'scenes/{name}.webp', w=im.width, h=im.height, bytes=sz); kit['scenes'][name] = e
+    # 家具层与空场（split_scene.py 从「原场景 + edit 去家具版」差分拆出）；box 是家具在世界坐标里的包围盒（镜头用）
+    boxes = {'shelf': [95, 95, 1440, 890], 'archive': [100, 230, 1360, 780], 'notes': [140, 200, 1420, 1010]}
+    for name, box in boxes.items():
+        fp, fu = R + f'empty/{name}-field.webp', R + f'empty/{name}-furniture.webp'
+        if not (os.path.exists(fp) and os.path.exists(fu)): continue
+        import shutil
+        shutil.copy(fp, f'{out}/scenes/{name}-field.webp'); shutil.copy(fu, f'{out}/scenes/{name}-furniture.webp')
+        total += os.path.getsize(fp) + os.path.getsize(fu)
+        kit['scenes'][name].update(field=f'scenes/{name}-field.webp', furn=f'scenes/{name}-furniture.webp', box=box, layers_note='空场由 edit 端点去家具得到（P035 到 P037），家具层是差分遮罩羽化；App 舞台用两层做「场先在、家具长出」')
     # 纸
     im = Image.open(first(R + 'book/paper_*.png')).convert('RGB').crop((120, 160, 904, 1376))
     p = f'{out}/paper/parchment.webp'; sz = save(im, p, 80); total += sz
