@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>墓碑卡片 · 灰盒原型（手机）</title>
+<style>
+  :root { color-scheme: dark; }
+  body { margin: 0; background: #0b0d12; color: #d9d2e6; font: 14px/1.5 system-ui, "Noto Sans SC", sans-serif; }
+  header { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 16px; border-bottom: 1px solid #1e2436; }
+  button { background: #1c2029; color: #e8e2f2; border: 1px solid #3a4258; border-radius: 6px; padding: 5px 12px; cursor: pointer; font: inherit; }
+  button.on { background: #2e6b7a; border-color: #8fc4cc; }
+  #t { font-variant-numeric: tabular-nums; margin-left: auto; opacity: .8; }
+  main { padding: 12px 16px; display: flex; gap: 16px; align-items: flex-start; flex-wrap: wrap; }
+  canvas { display: block; background: #000; border-radius: 18px; }
+  p.note { max-width: 420px; opacity: .75; }
+</style>
+</head>
+<body>
+<header>
+  <b>墓碑卡片 · 手机灰盒</b>
+  <button id="replay">重放</button>
+  <button id="short">短版 0.3 秒</button>
+  <button id="half">半速</button>
+  <span id="t">t = 0.00 s</span>
+</header>
+<main>
+  <canvas id="c" width="390" height="844"></canvas>
+  <p class="note">只有形状与时间，没有美术。点碑：0.6 秒里碑缩到顶部成碑额，卡从碑顶一张张飞出在屏下半摆成一把扇。扇开后：左右拖扇转动；点一张卡放大 0.3 秒；再点翻面 0.42 秒成文章页；文章页底尺左端「放回」反向收回。地址加 <code>?t=0.4</code> 定格，<code>?board=1</code> 出分镜图。</p>
+</main>
+<script>
+(() => {
+const W = 390, H = 844;
+const q = new URLSearchParams(location.search);
+const clamp = (v, a = 0, b = 1) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, u) => a + (b - a) * u;
+const eo = u => 1 - Math.pow(1 - clamp(u), 3);
+const eio = u => -(Math.cos(Math.PI * clamp(u)) - 1) / 2;
+const eb = u => { const c = 1.70158; u = clamp(u); return 1 + (c + 1) * Math.pow(u - 1, 3) + c * Math.pow(u - 1, 2); };
+const BONE = '#EFE8D6', INK = '#1C1A17', STONE = '#5C6382', ORANGE = '#E8762B', PAPER = '#E6DCC2';
+const TITLES = ['库存周期', '大宗与美元', '铁矿石', '航运指数', '猪周期', '铜的故事'];
+const N = TITLES.length, CW = 100, CH = 150, R = 340, CX = W / 2, CY = 560 + R;
+
+function tomb(ctx, cx, top, w, h, alpha, label) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.fillStyle = '#3a3f58'; ctx.beginPath(); ctx.moveTo(cx - w / 2, top + h); ctx.lineTo(cx - w / 2, top + w * .45); ctx.quadraticCurveTo(cx, top - w * .15, cx + w / 2, top + w * .45); ctx.lineTo(cx + w / 2, top + h); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#07040b'; ctx.lineWidth = 3; ctx.stroke();
+  ctx.fillStyle = '#8c93ae'; ctx.fillRect(cx - w * .34, top + w * .5, w * .68, h - w * .6);
+  if (label) { ctx.fillStyle = INK; ctx.font = `bold ${Math.round(w * .16)}px serif`; ctx.textAlign = 'center'; ctx.fillText(label, cx, top + w * .5 + (h - w * .6) * .45); ctx.font = `${Math.round(w * .09)}px serif`; ctx.fillText('6 篇', cx, top + w * .5 + (h - w * .6) * .62); }
+  ctx.restore();
+}
+function cardFace(ctx, x, y, w, h, title, big) {
+  ctx.fillStyle = PAPER; ctx.fillRect(-w / 2, -h / 2, w, h); ctx.strokeStyle = '#2a2018'; ctx.lineWidth = 2; ctx.strokeRect(-w / 2 + 3, -h / 2 + 3, w - 6, h - 6);
+  ctx.fillStyle = '#d9cfb2'; ctx.fillRect(-w * .34, -h * .42, w * .68, h * .16); ctx.fillStyle = INK; ctx.font = `${big ? 'bold ' : ''}${Math.round(h * (big ? .07 : .085))}px serif`; ctx.textAlign = 'center'; ctx.fillText(title, 0, -h * .31);
+  if (big) { ctx.font = `${Math.round(h * .038)}px serif`; ctx.fillStyle = '#5a5046'; ctx.fillText('来源：知乎 · 2026-10-21', 0, -h * .16); ctx.fillStyle = INK; ctx.fillText('为什么存：把周期与库存讲清楚了', 0, -h * .06);
+    ctx.fillStyle = '#c89a3c'; ctx.beginPath(); ctx.arc(w * .36, -h * .4, w * .07, 0, 7); ctx.fill(); ctx.fillStyle = INK; ctx.font = `${Math.round(h * .03)}px serif`; ctx.fillText('12 分', w * .36, -h * .39);
+    ctx.fillStyle = '#5aaab4'; ctx.beginPath(); ctx.arc(0, h * .36, w * .06, 0, 7); ctx.fill(); ctx.fillStyle = '#5a5046'; ctx.fillText('读了', 0, h * .46); }
+}
+function cardAt(ctx, i, u, w = CW, h = CH) {
+  // u: 0 在碑顶 → 1 在扇上
+  const a = (-26 + 52 * i / (N - 1)) * Math.PI / 180;
+  const fx = CX + R * Math.sin(a), fy = CY - R * Math.cos(a) + 40;
+  const x = lerp(CX, fx, u), y = lerp(150, fy, u), rot = lerp(0, a, u), s = lerp(.3, 1, u);
+  ctx.save(); ctx.translate(x, y); ctx.rotate(rot); ctx.scale(s, s); cardFace(ctx, 0, 0, w, h, TITLES[i], false); ctx.restore();
+  return { x, y };
+}
+function ruler(ctx, y, left, right, mid) {
+  ctx.fillStyle = STONE; ctx.fillRect(0, y, W, 28); ctx.fillStyle = BONE; ctx.font = '12px serif';
+  ctx.textAlign = 'left'; ctx.fillText(left, 14, y + 18); ctx.textAlign = 'right'; ctx.fillText(right, W - 14, y + 18);
+  if (mid) { ctx.textAlign = 'center'; ctx.fillText(mid, W / 2, y + 18); }
+}
+function article(ctx, u) {
+  ctx.save(); ctx.globalAlpha = u; ctx.fillStyle = BONE; ctx.fillRect(0, 0, W, H); ctx.fillStyle = INK;
+  let y = 70; for (let i = 0; i < 24; i++) { const len = 18 + ((i * 5) % 5); ctx.fillRect(20, y - 13, Math.min(W - 40, len * 17.2), 14 * (i % 8 === 7 ? 0 : 1)); y += 31.5; if (i % 8 === 7) y += 8; }
+  ruler(ctx, 0, '史料 · 库存周期', '来源 知乎'); ruler(ctx, H - 28, '放回', '', '读到 40%'); ctx.fillStyle = ORANGE; ctx.fillRect(0, H - 31, W * .4, 3); ctx.restore();
+}
+// 时间轴：0-0.6 碑缩成碑额 + 卡飞出摆扇；之后交互
+function render(ctx, t, short, st) {
+  const T = short ? 0.3 : 0.6;
+  ctx.clearRect(0, 0, W, H); ctx.fillStyle = '#0b0d12'; ctx.fillRect(0, 0, W, H); ctx.fillStyle = '#121a22'; ctx.fillRect(0, 0, W, 520);
+  ctx.fillStyle = STONE; ctx.fillRect(0, 0, W, 44); ctx.fillStyle = BONE; ctx.font = '16px serif'; ctx.textAlign = 'center'; ctx.fillText('档案架', W / 2, 28);
+  const u = eio(t / T);
+  // 碑：从屏中一座大碑缩到顶部碑额
+  const tw = lerp(280, 150, u), th = lerp(420, 70, u), ttop = lerp(220, 50, u);
+  tomb(ctx, W / 2, ttop, tw, th, 1, u < .6 ? '史料' : '');
+  if (u >= .6) { ctx.fillStyle = BONE; ctx.font = 'bold 22px serif'; ctx.textAlign = 'center'; ctx.fillText('史料', W / 2, ttop + 48); ctx.font = '12px serif'; ctx.fillText('6 篇 · 读了 3', W / 2, ttop + 66); }
+  if (u > .2) { for (let i = 0; i < N; i++) { const ui = eb(clamp((u - .2 - i * .1) / .5)); if (st.pick !== null && i === st.pick) continue; ctx.save(); ctx.globalAlpha = st.pick !== null ? .35 : 1; cardAt(ctx, i, ui); ctx.restore(); } }
+  if (st.pick !== null) {
+    const v = eio(clamp((performance.now() - st.t0) / 300)); const a = (-26 + 52 * st.pick / (N - 1)) * Math.PI / 180;
+    const fx = CX + R * Math.sin(a), fy = CY - R * Math.cos(a) + 40;
+    const x = lerp(fx, W / 2, v), y = lerp(fy, 380, v), s = lerp(1, 3.1, v), rot = lerp(a, 0, v);
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+    if (st.flip !== null) { const fu = eio(clamp((performance.now() - st.flip) / 420)); if (fu < .5) { ctx.scale(s * (1 - fu * 2), s); cardFace(ctx, 0, 0, CW, CH, TITLES[st.pick], true); ctx.restore(); } else { ctx.restore(); article(ctx, (fu - .5) * 2); } }
+    else { ctx.scale(s, s); cardFace(ctx, 0, 0, CW, CH, TITLES[st.pick], true); ctx.restore(); if (v >= 1) { ctx.fillStyle = ORANGE; ctx.fillRect(40, 720, 190, 48); ctx.fillStyle = '#140c08'; ctx.font = 'bold 16px serif'; ctx.textAlign = 'center'; ctx.fillText('翻过来读', 135, 750); ctx.strokeStyle = '#8c93ae'; ctx.strokeRect(250, 720, 100, 48); ctx.fillStyle = BONE; ctx.fillText('放回', 300, 750); } }
+  }
+  return T;
+}
+const c = document.getElementById('c'), ctx = c.getContext('2d');
+const st = { pick: null, t0: 0, flip: null };
+let short = q.get('short') === '1', speed = 1, t0 = performance.now(), frozen = q.has('t') ? Number(q.get('t')) : null;
+if (q.get('board')) {
+  const times = [0.0, 0.15, 0.3, 0.45, 0.6, 0.9];
+  const cw = 195, ch = 422, pad = 14; c.width = pad + (times.length + 2) * (cw + pad); c.height = ch + 60; c.style.width = c.width + 'px'; c.style.borderRadius = '8px';
+  const off = document.createElement('canvas'); off.width = W; off.height = H; const octx = off.getContext('2d');
+  ctx.fillStyle = '#0b0d12'; ctx.fillRect(0, 0, c.width, c.height); ctx.fillStyle = '#d9d2e6'; ctx.font = '14px system-ui'; ctx.fillText('墓碑卡片 · 手机灰盒分镜（点碑 0.6 秒内碑缩成碑额、卡飞出摆扇 → 点卡放大 0.3 秒 → 翻面 0.42 秒成文章）', pad, 22);
+  const shots = times.map(tt => ({ t: tt, st: { pick: null, t0: 0, flip: null }, label: `${tt.toFixed(2)} 秒` }));
+  shots.push({ t: 1, st: { pick: 2, t0: performance.now() - 1000, flip: null }, label: '点卡放大' });
+  shots.push({ t: 1, st: { pick: 2, t0: performance.now() - 1000, flip: performance.now() - 1000 }, label: '翻面成文章' });
+  shots.forEach((s, i) => { octx.clearRect(0, 0, W, H); render(octx, s.t, false, s.st); const x = pad + i * (cw + pad), y = 34; ctx.drawImage(off, x, y, cw, ch); ctx.strokeStyle = '#3a4258'; ctx.strokeRect(x + .5, y + .5, cw, ch); ctx.fillStyle = '#b8b0c8'; ctx.font = '12px system-ui'; ctx.fillText(s.label, x, y + ch + 16); });
+  return;
+}
+function frame(now) {
+  const t = frozen !== null ? frozen : (now - t0) / 1000 * speed;
+  render(ctx, t, short, st); document.getElementById('t').textContent = `t = ${t.toFixed(2)} s`;
+  if (frozen === null) requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+const restart = () => { t0 = performance.now(); frozen = null; st.pick = null; st.flip = null; requestAnimationFrame(frame); };
+document.getElementById('replay').onclick = restart;
+document.getElementById('short').onclick = e => { short = !short; e.target.classList.toggle('on', short); restart(); };
+document.getElementById('half').onclick = e => { speed = speed === 1 ? .5 : 1; e.target.classList.toggle('on', speed !== 1); restart(); };
+c.addEventListener('click', e => {
+  const r = c.getBoundingClientRect(); const x = (e.clientX - r.left) * W / r.width, y = (e.clientY - r.top) * H / r.height;
+  const t = (performance.now() - t0) / 1000 * speed; if (t < (short ? .3 : .6)) { t0 = performance.now() - (short ? 300 : 600) / speed; return; }
+  if (st.flip !== null) { if (y > H - 28 && x < 70) { st.flip = null; st.pick = null; } return; }
+  if (st.pick !== null) { if (y > 720 && y < 768) { if (x < 230) st.flip = performance.now(); else st.pick = null; } else st.flip = performance.now(); return; }
+  // 命中扇上的卡：取最近的卡心
+  let best = -1, bd = 1e9; for (let i = 0; i < N; i++) { const a = (-26 + 52 * i / (N - 1)) * Math.PI / 180; const fx = CX + R * Math.sin(a), fy = CY - R * Math.cos(a) + 40; const d = Math.hypot(x - fx, y - fy); if (d < bd) { bd = d; best = i; } }
+  if (bd < 90) { st.pick = best; st.t0 = performance.now(); }
+});
+})();
+</script>
+</body>
+</html>
