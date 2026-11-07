@@ -1,0 +1,51 @@
+/* 邮差奇幻界面 · 原子组件（圣经第四稿）。依赖 tokens.css 与 vendor/fonts/fonts.css。
+   瓷砖与框的图片路径相对本文件（vendor/ui/），所以不写在变量里。 */
+
+/* 瓷砖 */
+.yx-tile-stone { background-image: url("tiles/stone.webp"); background-size: 256px; }
+.yx-tile-iron { background-image: url("tiles/iron.webp"); background-size: 256px; }
+.yx-tile-parchment { background-image: url("tiles/parchment.webp"); background-size: 512px; }
+.yx-tile-sky { background-image: url("tiles/sky.webp"); background-size: 512px; }
+.yx-tile-wood { background-image: url("tiles/wood.webp"); background-size: 256px; }
+.yx-night { background-color: var(--yx-iron-900); background-image: url("tiles/sky.webp"); background-size: 512px; color: var(--yx-paper); }
+
+/* 框：铁牌（九宫格）与石尺（三切） */
+.yx-ironplate { border-style: solid; border-width: 28px 34px; border-image: url("frames/ironplate.webp") 28 34 28 34 fill / 28px 34px stretch; color: var(--yx-glow-200); font: 700 26px/1 var(--yx-font-title); text-shadow: var(--yx-glow-text); text-align: center; letter-spacing: .2em; padding: 6px 10px; display: inline-block; min-width: 220px; }
+.yx-ironplate.small { min-width: 140px; font-size: 18px; }
+.yx-ruler { height: var(--yx-ruler-h); border-style: solid; border-width: 0 40px; border-image: url("frames/stoneruler.webp") 0 40 0 40 fill / 0 40px stretch; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font: 12px var(--yx-font-ui); color: var(--yx-paper); position: relative; }
+.yx-ruler .bar { position: absolute; left: 0; bottom: -3px; height: 3px; background: var(--yx-glow-600); box-shadow: var(--yx-glow); }
+
+/* 羊皮纸板：纸纹瓷砖加墨线、锈线、铁包角 */
+.yx-panel { background-color: var(--yx-paper-deep); background-image: url("tiles/parchment.webp"); background-size: 512px; color: var(--yx-ink); border: 3px solid var(--yx-ink); outline: 1px solid var(--yx-rust-700); outline-offset: -9px; padding: 22px 24px; box-shadow: var(--yx-shadow); position: relative; }
+.yx-panel::before, .yx-panel::after, .yx-panel > i::before, .yx-panel > i::after { content: ""; position: absolute; width: 16px; height: 16px; background: url("tiles/iron.webp") 0 0 / 64px; border: 1px solid #000; }
+.yx-panel::before { left: -3px; top: -3px; } .yx-panel::after { right: -3px; top: -3px; } .yx-panel > i::before { left: -3px; bottom: -3px; } .yx-panel > i::after { right: -3px; bottom: -3px; }
+.yx-panel h3 { margin: 0 0 8px; font: 700 20px/1.2 var(--yx-font-title); letter-spacing: .1em; }
+.yx-panel p { margin: 0 0 8px; font: var(--yx-read-size)/var(--yx-read-lh) var(--yx-font-body); }
+.yx-panel .hand { font: 20px/1.8 var(--yx-font-hand); }
+
+/* 阅读页：单页纸铺满，只有两条石尺 */
+.yx-page { background-color: var(--yx-paper); background-image: url("tiles/parchment.webp"); background-size: 512px; color: var(--yx-ink); font: var(--yx-read-size)/var(--yx-read-lh) var(--yx-font-body); padding: var(--yx-gutter); }
+.yx-page.night { background-color: var(--yx-night-paper); background-blend-mode: multiply; color: var(--yx-night-ink); }
+
+/* 控件 */
+.yx-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: var(--yx-radius-m); font: 700 16px var(--yx-font-title); letter-spacing: .1em; cursor: pointer; border: 2px solid var(--yx-iron-900); transition: transform var(--yx-t-fast) var(--yx-ease), box-shadow var(--yx-t-fast); user-select: none; }
+.yx-btn:active { transform: translateY(2px); }
+.yx-btn.glow { background: linear-gradient(var(--yx-glow-400), var(--yx-glow-600)); color: #140c08; box-shadow: var(--yx-glow), inset 0 1px 0 rgba(255,255,255,.35); }
+.yx-btn.stone { background: url("tiles/stone.webp") 0 0 / 256px; color: var(--yx-paper); box-shadow: var(--yx-shadow-soft), inset 0 1px 0 rgba(255,255,255,.12); border-color: var(--yx-mist-600); }
+.yx-btn.ghost { background: transparent; color: var(--yx-mist-300); border-color: var(--yx-mist-600); }
+.yx-input { background: var(--yx-paper) url("tiles/parchment.webp") 0 0 / 512px; color: var(--yx-ink); border: 2px solid var(--yx-ink); border-radius: var(--yx-radius-s); padding: 10px 12px; font: 16px var(--yx-font-body); box-shadow: inset 0 2px 4px rgba(0,0,0,.25); }
+.yx-input::placeholder { color: var(--yx-ink-soft); }
+.yx-toggle { width: 56px; height: 30px; border-radius: 15px; background: url("tiles/iron.webp") 0 0 / 128px; border: 2px solid var(--yx-iron-900); position: relative; display: inline-block; vertical-align: middle; }
+.yx-toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--yx-mist-300); transition: left var(--yx-t-fast); }
+.yx-toggle.on::after { left: 29px; background: var(--yx-glow-400); box-shadow: var(--yx-glow); }
+.yx-tabs { display: inline-flex; border: 2px solid var(--yx-iron-900); border-radius: var(--yx-radius-m); overflow: hidden; background: url("tiles/stone.webp") 0 0 / 256px; }
+.yx-tabs > * { padding: 8px 18px; font: 700 15px var(--yx-font-title); letter-spacing: .1em; color: var(--yx-mist-300); cursor: pointer; }
+.yx-tabs > .on { background: var(--yx-paper) url("tiles/parchment.webp") 0 0 / 512px; color: var(--yx-ink); }
+.yx-seal { width: 44px; height: 44px; vertical-align: middle; }
+.yx-chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; background: rgba(13,20,26,.75); border: 1px solid var(--yx-mist-600); color: var(--yx-mist-300); font: 13px var(--yx-font-ui); }
+
+/* 卷轴弹窗（卷轴零件出来前：铁牌当头、纸板当身） */
+.yx-scroll { width: min(560px, 100%); margin: 0 auto; }
+.yx-scroll .head { display: block; margin: 0 auto -18px; position: relative; z-index: 1; }
+.yx-scroll .body { padding-top: 40px; }
+.yx-scroll .acts { display: flex; gap: 12px; justify-content: flex-end; margin-top: 14px; }

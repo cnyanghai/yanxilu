@@ -867,5 +867,9 @@
    "css": "border-image:url(frames/stoneruler.webp) 0 40 0 40 fill / 0 40px stretch"
   }
  },
- "tokens": "tokens.css"
+ "tokens": "tokens.css",
+ "css": [
+  "tokens.css",
+  "atoms.css"
+ ]
 }

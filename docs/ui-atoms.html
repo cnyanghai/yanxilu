@@ -6,108 +6,75 @@
 <title>邮差 · 原子零件墙</title>
 <link rel="stylesheet" href="../vendor/fonts/fonts.css">
 <link rel="stylesheet" href="../vendor/ui/tokens.css">
+<link rel="stylesheet" href="../vendor/ui/atoms.css">
 <style>
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--yx-iron-900) var(--yx-tile-sky) center / 512px; color: var(--yx-paper); font: 15px/1.6 var(--yx-font-ui); }
+  body { margin: 0; font: 15px/1.6 var(--yx-font-ui); }
   main { max-width: 1180px; margin: 0 auto; padding: 24px var(--yx-gutter) 80px; }
   h1 { font: 700 40px/1.2 var(--yx-font-title); color: var(--yx-glow-200); text-shadow: var(--yx-glow-text); margin: 10px 0 4px; letter-spacing: .06em; }
   h2 { font: 700 20px/1.3 var(--yx-font-title); color: var(--yx-mist-300); margin: 34px 0 12px; letter-spacing: .08em; }
   .sub { color: var(--yx-mist-300); opacity: .85; }
   .row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-start; }
-  /* 瓷砖 */
   .tile { width: 150px; height: 110px; border: 2px solid var(--yx-iron-700); box-shadow: var(--yx-shadow-soft); position: relative; }
   .tile b { position: absolute; left: 0; right: 0; bottom: 0; padding: 3px 8px; background: rgba(13,20,26,.8); font: 12px var(--yx-font-ui); color: var(--yx-mist-300); }
-  .t-stone { background: var(--yx-tile-stone) 0 0 / 256px; }
-  .t-iron { background: var(--yx-tile-iron) 0 0 / 256px; }
-  .t-parchment { background: var(--yx-tile-parchment) 0 0 / 256px; }
-  .t-sky { background: var(--yx-tile-sky) 0 0 / 256px; }
-  .t-wood { background: var(--yx-tile-wood) 0 0 / 256px; }
-  /* 框 */
-  .ironplate { border-style: solid; border-width: 28px 34px; border-image: url("../vendor/ui/frames/ironplate.webp") 28 34 28 34 fill / 28px 34px stretch; color: var(--yx-glow-200); font: 700 26px/1 var(--yx-font-title); text-shadow: var(--yx-glow-text); text-align: center; letter-spacing: .2em; padding: 6px 10px; display: inline-block; min-width: 220px; }
-  .ruler { height: var(--yx-ruler-h); border-style: solid; border-width: 0 40px; border-image: url("../vendor/ui/frames/stoneruler.webp") 0 40 0 40 fill / 0 40px stretch; display: flex; align-items: center; justify-content: space-between; padding: 0 6px; font: 12px var(--yx-font-ui); color: var(--yx-paper); position: relative; }
-  .ruler .bar { position: absolute; left: 0; bottom: -3px; height: 3px; background: var(--yx-glow-600); box-shadow: var(--yx-glow); }
-  .panel { background: var(--yx-paper-deep) var(--yx-tile-parchment) 0 0 / 512px; color: var(--yx-ink); border: 3px solid var(--yx-ink); outline: 1px solid var(--yx-rust-700); outline-offset: -9px; padding: 22px 24px; box-shadow: var(--yx-shadow); position: relative; }
-  .panel::before, .panel::after, .panel i::before, .panel i::after { content: ""; position: absolute; width: 16px; height: 16px; background: var(--yx-tile-iron) 0 0 / 64px; border: 1px solid #000; }
-  .panel::before { left: -3px; top: -3px; } .panel::after { right: -3px; top: -3px; } .panel i::before { left: -3px; bottom: -3px; } .panel i::after { right: -3px; bottom: -3px; }
-  .panel h3 { margin: 0 0 8px; font: 700 20px/1.2 var(--yx-font-title); letter-spacing: .1em; }
-  .panel p { margin: 0 0 8px; font: var(--yx-read-size)/var(--yx-read-lh) var(--yx-font-body); }
-  .panel .hand { font: 20px/1.8 var(--yx-font-hand); }
-  /* 控件 */
-  .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 22px; border-radius: var(--yx-radius-m); font: 700 16px var(--yx-font-title); letter-spacing: .1em; cursor: pointer; border: 2px solid var(--yx-iron-900); transition: transform var(--yx-t-fast) var(--yx-ease), box-shadow var(--yx-t-fast); }
-  .btn:active { transform: translateY(2px); }
-  .btn-glow { background: linear-gradient(var(--yx-glow-400), var(--yx-glow-600)); color: #140c08; box-shadow: var(--yx-glow), inset 0 1px 0 rgba(255,255,255,.35); }
-  .btn-stone { background: var(--yx-tile-stone) 0 0 / 256px; color: var(--yx-paper); box-shadow: var(--yx-shadow-soft), inset 0 1px 0 rgba(255,255,255,.12); border-color: var(--yx-mist-600); }
-  .btn-ghost { background: transparent; color: var(--yx-mist-300); border-color: var(--yx-mist-600); }
-  .input { background: var(--yx-paper) var(--yx-tile-parchment) 0 0 / 512px; color: var(--yx-ink); border: 2px solid var(--yx-ink); border-radius: var(--yx-radius-s); padding: 10px 12px; font: 16px var(--yx-font-body); width: 260px; box-shadow: inset 0 2px 4px rgba(0,0,0,.25); }
-  .input::placeholder { color: var(--yx-ink-soft); }
-  .toggle { width: 56px; height: 30px; border-radius: 15px; background: var(--yx-tile-iron) 0 0 / 128px; border: 2px solid var(--yx-iron-900); position: relative; display: inline-block; vertical-align: middle; }
-  .toggle::after { content: ""; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: var(--yx-mist-300); transition: left var(--yx-t-fast); }
-  .toggle.on::after { left: 29px; background: var(--yx-glow-400); box-shadow: var(--yx-glow); }
-  .tabs { display: inline-flex; border: 2px solid var(--yx-iron-900); border-radius: var(--yx-radius-m); overflow: hidden; background: var(--yx-tile-stone) 0 0 / 256px; }
-  .tabs span { padding: 8px 18px; font: 700 15px var(--yx-font-title); letter-spacing: .1em; color: var(--yx-mist-300); }
-  .tabs span.on { background: var(--yx-paper) var(--yx-tile-parchment) 0 0 / 512px; color: var(--yx-ink); }
-  .seal { width: 44px; height: 44px; vertical-align: middle; }
-  .chip { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 20px; background: rgba(13,20,26,.75); border: 1px solid var(--yx-mist-600); color: var(--yx-mist-300); font: 13px var(--yx-font-ui); }
-  /* 卷轴弹窗（待卷轴零件；先用羊皮纸板加铁牌当头） */
-  .scroll { width: min(560px, 100%); margin: 0 auto; }
-  .scroll .head { display: block; margin: 0 auto -18px; position: relative; z-index: 1; }
-  .scroll .body { padding-top: 40px; }
-  .scroll .acts { display: flex; gap: 12px; justify-content: flex-end; margin-top: 14px; }
   .icons { display: grid; grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 10px; }
   .icons div { height: 84px; border: 1px dashed var(--yx-mist-600); border-radius: var(--yx-radius-m); display: flex; align-items: center; justify-content: center; font: 13px var(--yx-font-ui); color: var(--yx-mist-300); background: rgba(13,20,26,.5); }
-  @media (max-width: 600px) { h1 { font-size: 30px; } .tile { width: calc(50% - 7px); } .input { width: 100%; } }
+  .page-demo { width: min(360px, 100%); height: 300px; overflow: hidden; border: 2px solid var(--yx-iron-900); box-shadow: var(--yx-shadow); }
+  @media (max-width: 600px) { h1 { font-size: 30px; } .tile { width: calc(50% - 7px); } .yx-input { width: 100%; } }
 </style>
 </head>
-<body>
+<body class="yx-night">
 <main>
   <h1>邮差 · 原子零件墙</h1>
-  <div class="sub">阶段 3：瓷砖、框、控件、令牌，全部从定稿图里取或按令牌画；标题字上线前换隶书预渲染。</div>
+  <div class="sub">阶段 3：瓷砖、框、控件、令牌。全部从定稿图里取或按令牌画；组件在 vendor/ui/atoms.css，数值在 tokens.css；标题字上线前换隶书预渲染。</div>
 
   <h2>一、瓷砖（无缝，从定稿图裁）</h2>
   <div class="row">
-    <div class="tile t-stone"><b>stone · 祭坛石</b></div>
-    <div class="tile t-iron"><b>iron · 铁牌锈面</b></div>
-    <div class="tile t-parchment"><b>parchment · 纸纹</b></div>
-    <div class="tile t-sky"><b>sky · 风暴夜</b></div>
-    <div class="tile t-wood"><b>wood · 柜背板</b></div>
+    <div class="tile yx-tile-stone"><b>stone · 祭坛石</b></div>
+    <div class="tile yx-tile-iron"><b>iron · 铁牌锈面</b></div>
+    <div class="tile yx-tile-parchment"><b>parchment · 纸纹</b></div>
+    <div class="tile yx-tile-sky"><b>sky · 风暴夜</b></div>
+    <div class="tile yx-tile-wood"><b>wood · 柜背板</b></div>
   </div>
 
   <h2>二、框</h2>
   <div class="row">
-    <div class="ironplate">邮 差</div>
-    <div class="ironplate" style="min-width:140px;font-size:18px">书 架</div>
-    <div style="flex:1;min-width:260px"><div class="ruler"><span>梦溪笔谈</span><span>第 12 页 / 共 96 页</span><span>卷一 · 故事</span><div class="bar" style="width:37%"></div></div></div>
+    <div class="yx-ironplate">邮 差</div>
+    <div class="yx-ironplate small">书 架</div>
+    <div style="flex:1;min-width:260px"><div class="yx-ruler"><span>梦溪笔谈</span><span>第 12 页 / 共 96 页</span><span>卷一 · 故事</span><div class="bar" style="width:37%"></div></div></div>
   </div>
   <div class="row" style="margin-top:14px">
-    <div class="panel" style="width:min(420px,100%)"><i></i>
+    <div class="yx-panel" style="width:min(420px,100%)"><i></i>
       <h3>羊皮纸板</h3>
       <p>正文十八像素、行高一点七五，墨字在骨白纸上，对比约十二比一。板的角是铁包角，边是墨线加锈线。</p>
       <p class="hand">手写字用马善政：记一笔，落笔有墨点。</p>
     </div>
+    <div class="page-demo yx-page"><div class="yx-ruler" style="margin:-20px -20px 14px"><span>梦溪笔谈</span><span>卷一 · 故事</span></div>这一页是阅读页：单页纸铺满，只有两条石尺和极淡纸纹，不画场景。点两侧翻页，点中间收起石尺。</div>
+    <div class="page-demo yx-page night"><div class="yx-ruler" style="margin:-20px -20px 14px"><span>梦溪笔谈</span><span>夜读</span></div>夜读换墨黑纸，字换骨白，对比仍在九比一以上。</div>
   </div>
 
   <h2>三、控件</h2>
   <div class="row" style="align-items:center">
-    <span class="btn btn-glow">接着读</span>
-    <span class="btn btn-stone">目录</span>
-    <span class="btn btn-ghost">放回</span>
-    <input class="input" placeholder="搜笔记…">
-    <span class="toggle on"></span><span class="toggle"></span>
-    <div class="tabs"><span class="on">书架</span><span>档案架</span><span>笔记本</span></div>
+    <span class="yx-btn glow">接着读</span>
+    <span class="yx-btn stone">目录</span>
+    <span class="yx-btn ghost">放回</span>
+    <input class="yx-input" placeholder="搜笔记…" style="width:260px">
+    <span class="yx-toggle on"></span><span class="yx-toggle"></span>
+    <div class="yx-tabs"><span class="on">书架</span><span>档案架</span><span>笔记本</span></div>
   </div>
   <div class="row" style="align-items:center;margin-top:14px">
-    <img class="seal" src="../vendor/ui/seals/s01.webp" alt="没读"><span class="chip">没读 · 空圈</span>
-    <img class="seal" src="../vendor/ui/seals/s02.webp" alt="读了"><span class="chip">读了 · 实心</span>
-    <img class="seal" src="../vendor/ui/seals/s03.webp" alt="批注"><span class="chip">写了批注 · 羽毛</span>
-    <img class="seal" src="../vendor/ui/seals/s04.webp" alt="结卷"><span class="chip">结卷 · 方印</span>
+    <img class="yx-seal" src="../vendor/ui/seals/s01.webp" alt="没读"><span class="yx-chip">没读 · 空圈</span>
+    <img class="yx-seal" src="../vendor/ui/seals/s02.webp" alt="读了"><span class="yx-chip">读了 · 实心</span>
+    <img class="yx-seal" src="../vendor/ui/seals/s03.webp" alt="批注"><span class="yx-chip">写了批注 · 羽毛</span>
+    <img class="yx-seal" src="../vendor/ui/seals/s04.webp" alt="结卷"><span class="yx-chip">结卷 · 方印</span>
   </div>
 
   <h2>四、卷轴弹窗（卷轴零件待出，先用纸板加铁牌当头）</h2>
-  <div class="scroll">
-    <div class="ironplate head">合上这本书？</div>
-    <div class="panel body"><i></i>
+  <div class="yx-scroll">
+    <div class="yx-ironplate head">合上这本书？</div>
+    <div class="yx-panel body"><i></i>
       <p>读到第 12 页。合上后书回到架上，下次从这里接着读。</p>
-      <div class="acts"><span class="btn btn-ghost">再读会儿</span><span class="btn btn-glow">合上</span></div>
+      <div class="acts"><span class="yx-btn ghost">再读会儿</span><span class="yx-btn glow">合上</span></div>
     </div>
   </div>
 
