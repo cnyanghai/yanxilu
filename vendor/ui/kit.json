@@ -1,0 +1,803 @@
+{
+ "version": "2026-11-06",
+ "style": "第四稿 青橙墓园（docs/ui-style-bible.md）",
+ "curve": {
+  "gamma": 0.85,
+  "archive_notes_gamma": 0.9,
+  "black": 0.0,
+  "saturation": 1.08
+ },
+ "scenes": {
+  "home": {
+   "gamma": 0.85,
+   "prompt": "P017",
+   "plate": [
+    250,
+    300,
+    770,
+    420
+   ],
+   "boards": [
+    [
+     315,
+     870,
+     448,
+     905,
+     4
+    ],
+    [
+     307,
+     922,
+     445,
+     958,
+     -2
+    ],
+    [
+     330,
+     975,
+     440,
+     1018,
+     3
+    ]
+   ],
+   "note": "首页大门 2:3；plate 站名牌、boards 三块路牌（x0,y0,x1,y1,斜度）",
+   "file": "scenes/home.webp",
+   "w": 1024,
+   "h": 1536,
+   "bytes": 396268
+  },
+  "shelf": {
+   "gamma": 0.85,
+   "black": 0.03,
+   "prompt": "P029",
+   "rows": [
+    {
+     "plaque": [
+      250,
+      437,
+      343,
+      473
+     ],
+     "feet": 462,
+     "cavity": 62
+    },
+    {
+     "plaque": [
+      250,
+      522,
+      343,
+      558
+     ],
+     "feet": 552,
+     "cavity": 78
+    },
+    {
+     "plaque": [
+      250,
+      607,
+      343,
+      643
+     ],
+     "feet": 637,
+     "cavity": 73
+    },
+    {
+     "plaque": [
+      250,
+      702,
+      343,
+      738
+     ],
+     "feet": 732,
+     "cavity": 83
+    },
+    {
+     "plaque": [
+      250,
+      792,
+      343,
+      828
+     ],
+     "feet": 822,
+     "cavity": 78
+    }
+   ],
+   "inner": [
+    362,
+    1300
+   ],
+   "note": "宽柜 3:2 擦脸版；rows 每层：plaque 领域牌、feet 书脚 y、cavity 空腔高；inner 书可放的 x 范围",
+   "file": "scenes/shelf.webp",
+   "w": 1536,
+   "h": 1024,
+   "bytes": 257442
+  },
+  "archive": {
+   "gamma": 0.9,
+   "prompt": "P019",
+   "panels": [
+    [
+     150,
+     470,
+     330,
+     700
+    ],
+    [
+     460,
+     380,
+     620,
+     690
+    ],
+    [
+     800,
+     470,
+     985,
+     730
+    ],
+    [
+     1125,
+     470,
+     1310,
+     730
+    ]
+   ],
+   "note": "碑林 3:2；panels 四座碑的空板",
+   "file": "scenes/archive.webp",
+   "w": 1536,
+   "h": 1024,
+   "bytes": 286882
+  },
+  "notes": {
+   "gamma": 0.9,
+   "prompt": "P020",
+   "books": [
+    [
+     235,
+     450,
+     350,
+     520,
+     -3
+    ],
+    [
+     462,
+     290,
+     580,
+     360,
+     4
+    ],
+    [
+     555,
+     530,
+     680,
+     600,
+     2
+    ],
+    [
+     812,
+     430,
+     925,
+     500,
+     -6
+    ],
+    [
+     1042,
+     320,
+     1160,
+     390,
+     -3
+    ],
+    [
+     1262,
+     540,
+     1380,
+     610,
+     2
+    ]
+   ],
+   "note": "骨臂 3:2；books 六本封面上可叠题签的矩形（x0,y0,x1,y1,斜度）。正式版骨臂与本子要分层",
+   "file": "scenes/notes.webp",
+   "w": 1536,
+   "h": 1024,
+   "bytes": 212006
+  },
+  "spread": {
+   "gamma": 1.0,
+   "prompt": "P023",
+   "pages": [
+    [
+     350,
+     210,
+     760,
+     670
+    ],
+    [
+     830,
+     210,
+     1230,
+     670
+    ]
+   ],
+   "note": "石台对开 3:2；pages 左右页可排字区",
+   "file": "scenes/spread.webp",
+   "w": 1536,
+   "h": 1024,
+   "bytes": 272520
+  },
+  "paper": {
+   "file": "paper/parchment.webp",
+   "w": 784,
+   "h": 1216,
+   "bytes": 79878,
+   "prompt": "P024",
+   "note": "单页纸纹，已裁掉四边暗角；阅读页平铺或拉伸，正文底色 #EFE8D6"
+  }
+ },
+ "parts": {
+  "spines_narrow": {
+   "prompt": "P030",
+   "note": "细书脊十六根（宽高约 1:4），优先用；题签板在上三分之一到三分之二",
+   "items": [
+    {
+     "file": "spines/n01.webp",
+     "w": 108,
+     "h": 456,
+     "bytes": 17574
+    },
+    {
+     "file": "spines/n02.webp",
+     "w": 122,
+     "h": 438,
+     "bytes": 17738
+    },
+    {
+     "file": "spines/n03.webp",
+     "w": 120,
+     "h": 434,
+     "bytes": 15706
+    },
+    {
+     "file": "spines/n04.webp",
+     "w": 125,
+     "h": 455,
+     "bytes": 19510
+    },
+    {
+     "file": "spines/n05.webp",
+     "w": 106,
+     "h": 437,
+     "bytes": 14504
+    },
+    {
+     "file": "spines/n06.webp",
+     "w": 114,
+     "h": 453,
+     "bytes": 17840
+    },
+    {
+     "file": "spines/n07.webp",
+     "w": 115,
+     "h": 440,
+     "bytes": 16842
+    },
+    {
+     "file": "spines/n08.webp",
+     "w": 98,
+     "h": 417,
+     "bytes": 12986
+    },
+    {
+     "file": "spines/n09.webp",
+     "w": 124,
+     "h": 450,
+     "bytes": 18950
+    },
+    {
+     "file": "spines/n10.webp",
+     "w": 115,
+     "h": 420,
+     "bytes": 16774
+    },
+    {
+     "file": "spines/n11.webp",
+     "w": 109,
+     "h": 450,
+     "bytes": 17540
+    },
+    {
+     "file": "spines/n12.webp",
+     "w": 128,
+     "h": 450,
+     "bytes": 17480
+    },
+    {
+     "file": "spines/n13.webp",
+     "w": 107,
+     "h": 430,
+     "bytes": 14560
+    },
+    {
+     "file": "spines/n14.webp",
+     "w": 118,
+     "h": 446,
+     "bytes": 17008
+    },
+    {
+     "file": "spines/n15.webp",
+     "w": 115,
+     "h": 426,
+     "bytes": 17524
+    },
+    {
+     "file": "spines/n16.webp",
+     "w": 110,
+     "h": 416,
+     "bytes": 14276
+    }
+   ]
+  },
+  "spines_wide": {
+   "prompt": "P021",
+   "note": "宽书脊三十二根（宽高约 1:3），厚书或补位用",
+   "items": [
+    {
+     "file": "spines/wa_01.webp",
+     "w": 185,
+     "h": 473,
+     "bytes": 28056
+    },
+    {
+     "file": "spines/wa_02.webp",
+     "w": 165,
+     "h": 444,
+     "bytes": 21786
+    },
+    {
+     "file": "spines/wa_03.webp",
+     "w": 180,
+     "h": 417,
+     "bytes": 22362
+    },
+    {
+     "file": "spines/wa_04.webp",
+     "w": 99,
+     "h": 405,
+     "bytes": 13696
+    },
+    {
+     "file": "spines/wa_05.webp",
+     "w": 129,
+     "h": 395,
+     "bytes": 18018
+    },
+    {
+     "file": "spines/wa_06.webp",
+     "w": 127,
+     "h": 397,
+     "bytes": 18168
+    },
+    {
+     "file": "spines/wa_07.webp",
+     "w": 127,
+     "h": 392,
+     "bytes": 15120
+    },
+    {
+     "file": "spines/wa_08.webp",
+     "w": 99,
+     "h": 360,
+     "bytes": 12642
+    },
+    {
+     "file": "spines/wa_09.webp",
+     "w": 130,
+     "h": 370,
+     "bytes": 15710
+    },
+    {
+     "file": "spines/wa_10.webp",
+     "w": 92,
+     "h": 331,
+     "bytes": 10222
+    },
+    {
+     "file": "spines/wa_11.webp",
+     "w": 119,
+     "h": 402,
+     "bytes": 15756
+    },
+    {
+     "file": "spines/wa_12.webp",
+     "w": 151,
+     "h": 447,
+     "bytes": 19972
+    },
+    {
+     "file": "spines/wa_13.webp",
+     "w": 141,
+     "h": 428,
+     "bytes": 18050
+    },
+    {
+     "file": "spines/wa_14.webp",
+     "w": 159,
+     "h": 411,
+     "bytes": 18984
+    },
+    {
+     "file": "spines/wa_15.webp",
+     "w": 151,
+     "h": 422,
+     "bytes": 21618
+    },
+    {
+     "file": "spines/wa_16.webp",
+     "w": 132,
+     "h": 390,
+     "bytes": 17668
+    },
+    {
+     "file": "spines/wb_01.webp",
+     "w": 176,
+     "h": 461,
+     "bytes": 25408
+    },
+    {
+     "file": "spines/wb_02.webp",
+     "w": 131,
+     "h": 365,
+     "bytes": 16218
+    },
+    {
+     "file": "spines/wb_03.webp",
+     "w": 184,
+     "h": 443,
+     "bytes": 24864
+    },
+    {
+     "file": "spines/wb_04.webp",
+     "w": 128,
+     "h": 372,
+     "bytes": 17632
+    },
+    {
+     "file": "spines/wb_05.webp",
+     "w": 149,
+     "h": 390,
+     "bytes": 20784
+    },
+    {
+     "file": "spines/wb_06.webp",
+     "w": 103,
+     "h": 346,
+     "bytes": 11792
+    },
+    {
+     "file": "spines/wb_07.webp",
+     "w": 125,
+     "h": 398,
+     "bytes": 14714
+    },
+    {
+     "file": "spines/wb_08.webp",
+     "w": 129,
+     "h": 449,
+     "bytes": 18124
+    },
+    {
+     "file": "spines/wb_09.webp",
+     "w": 151,
+     "h": 313,
+     "bytes": 13676
+    },
+    {
+     "file": "spines/wb_10.webp",
+     "w": 134,
+     "h": 427,
+     "bytes": 20450
+    },
+    {
+     "file": "spines/wb_11.webp",
+     "w": 139,
+     "h": 366,
+     "bytes": 17994
+    },
+    {
+     "file": "spines/wb_12.webp",
+     "w": 123,
+     "h": 380,
+     "bytes": 14576
+    },
+    {
+     "file": "spines/wb_13.webp",
+     "w": 137,
+     "h": 357,
+     "bytes": 16890
+    },
+    {
+     "file": "spines/wb_14.webp",
+     "w": 183,
+     "h": 371,
+     "bytes": 19842
+    },
+    {
+     "file": "spines/wb_15.webp",
+     "w": 105,
+     "h": 369,
+     "bytes": 13732
+    },
+    {
+     "file": "spines/wb_16.webp",
+     "w": 158,
+     "h": 400,
+     "bytes": 20452
+    }
+   ]
+  },
+  "covers": {
+   "prompt": "P022",
+   "note": "书封面八本；plate 题签板（第 1 本量过，其余按比例估，叠字前复核）",
+   "items": [
+    {
+     "file": "covers/c01.webp",
+     "w": 333,
+     "h": 430,
+     "bytes": 44964,
+     "plate": [
+      105,
+      100,
+      275,
+      325
+     ]
+    },
+    {
+     "file": "covers/c02.webp",
+     "w": 319,
+     "h": 434,
+     "bytes": 45520,
+     "plate": [
+      102,
+      104,
+      255,
+      321
+     ]
+    },
+    {
+     "file": "covers/c03.webp",
+     "w": 336,
+     "h": 435,
+     "bytes": 38610,
+     "plate": [
+      107,
+      104,
+      268,
+      321
+     ]
+    },
+    {
+     "file": "covers/c04.webp",
+     "w": 343,
+     "h": 436,
+     "bytes": 54530,
+     "plate": [
+      109,
+      104,
+      274,
+      322
+     ]
+    },
+    {
+     "file": "covers/c05.webp",
+     "w": 336,
+     "h": 444,
+     "bytes": 52044,
+     "plate": [
+      107,
+      106,
+      268,
+      328
+     ]
+    },
+    {
+     "file": "covers/c06.webp",
+     "w": 331,
+     "h": 446,
+     "bytes": 42698,
+     "plate": [
+      105,
+      107,
+      264,
+      330
+     ]
+    },
+    {
+     "file": "covers/c07.webp",
+     "w": 344,
+     "h": 447,
+     "bytes": 49324,
+     "plate": [
+      110,
+      107,
+      275,
+      330
+     ]
+    },
+    {
+     "file": "covers/c08.webp",
+     "w": 337,
+     "h": 446,
+     "bytes": 43822,
+     "plate": [
+      107,
+      107,
+      269,
+      330
+     ]
+    }
+   ]
+  },
+  "notebooks": {
+   "prompt": "P028",
+   "note": "本子封面六本；plate 题签板",
+   "items": [
+    {
+     "file": "notebooks/b01.webp",
+     "w": 346,
+     "h": 419,
+     "bytes": 44240,
+     "plate": [
+      99,
+      105,
+      231,
+      215
+     ],
+     "name": "青布皮筋"
+    },
+    {
+     "file": "notebooks/b02.webp",
+     "w": 352,
+     "h": 419,
+     "bytes": 44636,
+     "plate": [
+      100,
+      85,
+      245,
+      155
+     ],
+     "name": "棕皮搭扣"
+    },
+    {
+     "file": "notebooks/b03.webp",
+     "w": 356,
+     "h": 418,
+     "bytes": 41296,
+     "plate": [
+      110,
+      90,
+      245,
+      160
+     ],
+     "name": "黑皮铁角"
+    },
+    {
+     "file": "notebooks/b04.webp",
+     "w": 351,
+     "h": 438,
+     "bytes": 49592,
+     "plate": [
+      100,
+      90,
+      250,
+      180
+     ],
+     "name": "犊皮蜡封"
+    },
+    {
+     "file": "notebooks/b05.webp",
+     "w": 367,
+     "h": 439,
+     "bytes": 50328,
+     "plate": [
+      100,
+      95,
+      250,
+      185
+     ],
+     "name": "锈橙绶带"
+    },
+    {
+     "file": "notebooks/b06.webp",
+     "w": 360,
+     "h": 436,
+     "bytes": 53326,
+     "plate": [
+      100,
+      95,
+      250,
+      175
+     ],
+     "name": "灰蓝布铜扣"
+    }
+   ]
+  },
+  "card_front": {
+   "prompt": "P025",
+   "note": "羊皮纸牌正面；plate 题签板，seal 蜡封位（圆心与半径）",
+   "items": [
+    {
+     "file": "cards/front01.webp",
+     "w": 803,
+     "h": 1184,
+     "bytes": 253956,
+     "plate": [
+      130,
+      210,
+      670,
+      370
+     ],
+     "seal": [
+      403,
+      1075,
+      85
+     ]
+    }
+   ]
+  },
+  "card_back": {
+   "prompt": "P026",
+   "note": "牌背；plate 下方题签板",
+   "items": [
+    {
+     "file": "cards/back01.webp",
+     "w": 864,
+     "h": 1347,
+     "bytes": 328860,
+     "plate": [
+      260,
+      1090,
+      600,
+      1160
+     ]
+    }
+   ]
+  },
+  "seals": {
+   "prompt": "P027",
+   "note": "状态印四枚，形状各不同",
+   "items": [
+    {
+     "file": "seals/s01.webp",
+     "w": 324,
+     "h": 336,
+     "bytes": 25846,
+     "state": "ring",
+     "name": "没读（空圈）"
+    },
+    {
+     "file": "seals/s02.webp",
+     "w": 328,
+     "h": 345,
+     "bytes": 33510,
+     "state": "disc",
+     "name": "读了（实心）"
+    },
+    {
+     "file": "seals/s03.webp",
+     "w": 308,
+     "h": 330,
+     "bytes": 31024,
+     "state": "feather",
+     "name": "写了批注（羽毛）"
+    },
+    {
+     "file": "seals/s04.webp",
+     "w": 326,
+     "h": 326,
+     "bytes": 35616,
+     "state": "square",
+     "name": "结卷（方印）"
+    }
+   ]
+  }
+ },
+ "total_bytes": 3710526
+}
