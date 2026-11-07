@@ -771,7 +771,7 @@
       hangSet("float");
       try { window.localStorage.setItem(LOOK_KEY, JSON.stringify(v)); } catch (e) { /* 存不了就只在这次生效 */ }
     }
-    return { v: LOOK_V, read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : LOOK_DEF.read, motion: v.motion !== false, dust: v.dust !== false, tod: v.tod !== false,
+    return { v: LOOK_V, read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : LOOK_DEF.read, motion: v.motion !== false, sound: v.sound === true, dust: v.dust !== false, tod: v.tod !== false,
       fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : LOOK_DEF.fx, binding: BINDINGS.some(function (r) { return r[0] === v.binding; }) ? v.binding : LOOK_DEF.binding, color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : LOOK_DEF.color,
       scene: SCENES.some(function (r) { return r[0] === v.scene; }) ? v.scene : LOOK_DEF.scene,
       deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice(),
@@ -1730,6 +1730,7 @@ var FOIL = (function () {
       '<section class="lk-sec lk-row"><h3>跟着时辰变光</h3><button type="button" class="lk-sw" data-act="look-tod" role="switch" aria-checked="' + L.tod + '"><i aria-hidden="true"></i>' + (L.tod ? "开" : "关") + '</button><p class="meta">书墙跟着一天的光走：清晨微凉，黄昏偏暖，夜里暗下来、烛光更亮。</p></section>' +
       '<section class="lk-sec lk-row"><h3>久不读的书落灰</h3><button type="button" class="lk-sw" data-act="look-dust" role="switch" aria-checked="' + L.dust + '"><i aria-hidden="true"></i>' + (L.dust ? "开" : "关") + '</button><p class="meta">在读的书 30 天没碰，书顶会积一层薄灰，鼠标扫过就擦掉。</p></section>' +
       '<section class="lk-sec lk-row"><h3>摆件的动静</h3><button type="button" class="lk-sw" data-act="look-motion" role="switch" aria-checked="' + L.motion + '"' + (REDUCE ? " disabled" : "") + '><i aria-hidden="true"></i>' + (L.motion && !REDUCE ? "开" : "关") + '</button><p class="meta">' + (REDUCE ? "系统设了减少动态效果，摆件都静着。" : "沙在流、烛火跳、热气往上冒、钟在走。") + "</p></section>" +
+      '<section class="lk-sec lk-row"><h3>墓园的声</h3><button type="button" class="lk-sw" data-act="look-sound" role="switch" aria-checked="' + L.sound + '"><i aria-hidden="true"></i>' + (L.sound ? "开" : "关") + '</button><p class="meta">只在「墓园宽柜」场景里响：门吱呀、烛噗、翻纸、叮、落土、墨点，都是合成的小声。</p></section>' +
       '<section class="lk-sec"><h3>摆件 <small>每件可以指定放在哪一格的书后面，也可以让它自己找空当</small></h3><ul class="lk-list">' + tiles + "</ul></section>" +
       '<div class="lk-foot"><button type="button" class="linkbtn" data-act="look-reset">恢复默认</button><button type="button" class="btn small" data-act="look">好了</button></div></div>';
   }
@@ -4228,6 +4229,7 @@ var FOIL = (function () {
   function jotSave(text) {
     text = String(text || "").replace(/\s+$/, "").replace(/^\s+/, "");
     if (!text) return Promise.resolve(false);
+    S.yxInk = Date.now();
     var d = today(), old = npGet(d), body = (old && String(old.text || "").trim() ? String(old.text).replace(/\s+$/, "") + "\n\n" : "") + hhmm() + "　" + text;
     return npSave(d, body).then(function () { return true; });
   }
@@ -4280,9 +4282,9 @@ var FOIL = (function () {
       '<header class="phead arch-head"><div>' + shelfSeg("notes") + "</div>" +
       (S.canEdit ? '<button type="button" class="btn ghost np-jot" data-act="jot">✎ 记一笔 <kbd>N</kbd></button>' : "") + "</header>" +
       rack +
-      '<section class="nbk" aria-label="随手本"><div class="nbk-l"><p class="eyebrow">随手本 · ' + NP_MONTHS[+ym.slice(5, 7) - 1] + "</p>" + npCalHTML(ym, day, days) +
+      '<section class="nbk" aria-label="随手本"><div class="nbk-l">' + (LK().scene === "youchai" ? '<button type="button" class="yx-btn ghost small yx-cal-close" data-act="yx-cal">合上日历</button>' : "") + '<p class="eyebrow">随手本 · ' + NP_MONTHS[+ym.slice(5, 7) - 1] + "</p>" + npCalHTML(ym, day, days) +
       (recent ? '<ul class="np-toc">' + recent + "</ul>" : '<p class="meta np-none">这个月还没有写过的页。</p>') + "</div>" +
-      '<div class="nbk-r"><p class="eyebrow np-eye"><span>' + (day === td ? "今天" : day > td ? "以后" : "那天") + '</span><span class="np-dnav">' +
+      '<div class="nbk-r"><p class="eyebrow np-eye"><span>' + (day === td ? "今天" : day > td ? "以后" : "那天") + (LK().scene === "youchai" ? ' <button type="button" class="linkbtn yx-cal-btn" data-act="yx-cal">日历</button>' : "") + '</span><span class="np-dnav">' +
       '<button type="button" class="linkbtn" data-act="np-day" data-d="' + (prev || "") + '"' + (prev ? "" : " disabled") + ">‹ 前一页</button>" +
       (day !== td ? '<button type="button" class="linkbtn" data-act="np-day" data-d="' + td + '">今天</button>' : "") +
       '<button type="button" class="linkbtn" data-act="np-day" data-d="' + (next || "") + '"' + (next ? "" : " disabled") + ">后一页 ›</button></span></p>" +
@@ -5670,6 +5672,17 @@ var FOIL = (function () {
     document.querySelectorAll(".yx-notes.m .yx-cab").forEach(function (c) { c.style.zoom = String(Math.round(Math.min(1.5, 0.62 * c.parentNode.clientWidth / 140) * 100) / 100); });
   }
   function yxMount() {
+    var fan = document.querySelector(".yx-fan.arc");
+    if (fan && !fan.getAttribute("data-yx")) {
+      fan.setAttribute("data-yx", "1"); var o = 0, max = parseFloat(fan.getAttribute("data-max")) || 0, sx = null, so = 0;
+      var setO = function (v) { o = Math.max(-max, Math.min(max, v)); fan.style.setProperty("--o", o.toFixed(2) + "deg"); };
+      fan.addEventListener("pointerdown", function (e) { sx = e.clientX; so = o; fan.setAttribute("data-moved", "0"); });
+      fan.addEventListener("pointermove", function (e) { if (sx === null) return; var dx = e.clientX - sx; if (Math.abs(dx) > 6) fan.setAttribute("data-moved", "1"); setO(so + dx * 0.09); });
+      var up = function () { sx = null; }; fan.addEventListener("pointerup", up); fan.addEventListener("pointercancel", up); fan.addEventListener("pointerleave", up);
+      fan.addEventListener("wheel", function (e) { setO(o + (e.deltaY + e.deltaX) * 0.05); e.preventDefault(); }, { passive: false });
+    }
+    /* 记一笔落页后 5 秒内（期间可能因数据回写再渲染几次），最后一段标成刚落的笔：墨点只画一次声只响一次 */
+    if (S.yxInk && Date.now() - S.yxInk < 5000) { var ents = document.querySelectorAll(".np-ent"), last = ents[ents.length - 1], tm = last && last.querySelector("time"); if (tm && tm.textContent === hhmm()) { last.classList.add("yx-ink"); if (!S.yxInkPlayed) { yxSfx("ink"); S.yxInkPlayed = true; } } } else S.yxInkPlayed = false;
     var sh = document.querySelector(".yx-shelf, .yx-arch, .yx-notes");
     if (!sh) return;
     yxZoom();
@@ -5681,7 +5694,7 @@ var FOIL = (function () {
       var seen = false;
       var key = sh.classList.contains("yx-arch") ? "yx-seen-arch" : sh.classList.contains("yx-notes") ? "yx-seen-notes" : "yx-seen-shelf";
       try { seen = sessionStorage.getItem(key) === "1"; sessionStorage.setItem(key, "1"); } catch (e) { /* 忽略 */ }
-      sh.classList.add(seen ? "enter-short" : "enter");
+      sh.classList.add(seen ? "enter-short" : "enter"); if (!seen) yxSfx("soil");
       sh.addEventListener("click", function () { sh.classList.remove("enter"); sh.classList.add("enter-short"); }, { once: true });
     }
   }
@@ -5746,12 +5759,18 @@ var FOIL = (function () {
     if (fp !== null) { var list = looseClips(fp); if (!list.length) { S.deskOpen = false; return ""; } items = list.map(clipItem); title = fp ? domInfo(fp).name + " · 剪报夹" : "收件匣"; sub = list.length + " 篇"; }
     else { if (!tp) { S.deskOpen = false; return ""; } items = topicItems(tp); title = tp.title; sub = topicNo(tp) + " · " + items.length + " 件" + (TP_STATUS[tp.status] ? " · " + TP_STATUS[tp.status] : ""); }
     var big = S.yxCard ? items.filter(function (rp) { return rp.id === S.yxCard; })[0] : null;
-    var hand = items.length ? '<div class="yx-fan">' + items.map(function (rp, i) { return '<button type="button" class="yx-card-btn" data-act="yx-card" data-id="' + esc(rp.id) + '">' + yxCardFace(rp, tp, i, false) + "</button>"; }).join("") + "</div>" : '<p class="yx-desk-empty">盒里还是空的。</p>';
+    var narrow = window.innerWidth < 720, n = items.length, step = Math.max(3.5, Math.min(narrow ? 10 : 9, (narrow ? 90 : 110) / Math.max(1, n))), still = REDUCE || !LK().motion;
+    var maxA = Math.max(0, (n - 1) / 2 * step);
+    var hand = n ? '<div class="yx-fan arc' + (narrow ? " m" : "") + (still ? "" : " enter") + '" style="--R:' + (narrow ? 520 : 820) + 'px;--o:0deg" data-max="' + maxA.toFixed(2) + '">' + items.map(function (rp, i) {
+      var a = ((i - (n - 1) / 2) * step).toFixed(2);
+      return '<button type="button" class="yx-card-btn" data-act="yx-card" data-id="' + esc(rp.id) + '" style="--a:' + a + "deg;--i:" + i + '">' + yxCardFace(rp, tp, i, false) + "</button>";
+    }).join("") + "</div>" : '<p class="yx-desk-empty">盒里还是空的。</p>';
     var bigH = "";
     if (big) {
       var c = big.clip, out = itemOut(big);
-      var read = out ? '<a class="yx-btn glow" href="' + esc(c ? c.url : reportHref(big)) + '" target="_blank" rel="noopener">在新标签页打开</a>' : '<button type="button" class="yx-btn glow" data-act="clip-open" data-id="' + esc(c.id) + '">翻过来读</button>';
-      bigH = '<div class="yx-card-big-wrap">' + yxCardFace(big, tp, 0, true) + '<div class="yx-cover-acts">' + read + '<button type="button" class="yx-btn ghost" data-act="yx-card-back">放回</button></div></div>';
+      var read = out ? '<a class="yx-btn glow" href="' + esc(c ? c.url : reportHref(big)) + '" target="_blank" rel="noopener">在新标签页打开</a>' : '<button type="button" class="yx-btn glow" data-act="yx-flip-read" data-id="' + esc(c.id) + '">翻过来读</button>';
+      var back = '<div class="yx-card big back"><img class="yx-card-bg" src="' + YX.dir + 'cards/back01.webp" alt=""><span class="yx-back-t">' + esc(title) + "</span></div>";
+      bigH = '<div class="yx-card-big-wrap"><div class="yx-flip"><div class="yx-face">' + yxCardFace(big, tp, 0, true) + '</div><div class="yx-face back">' + back + '</div></div><div class="yx-cover-acts">' + read + '<button type="button" class="yx-btn ghost" data-act="yx-card-back">放回</button></div></div>';
     }
     return '<div class="ydesk yx-desk" role="dialog" aria-modal="true" aria-label="' + esc(title) + '"><div class="yx-desk-head"><span class="yx-desk-title">' + esc(title) + '</span><span class="yx-desk-sub">' + esc(sub) + '</span><span class="yx-desk-acts"><button type="button" class="yx-btn ghost small" data-act="yx-desk-old">牌册</button><button type="button" class="yx-btn stone small" data-act="desk-close">回到档案架</button></span></div>' + hand + bigH + "</div>";
   }
@@ -5766,6 +5785,35 @@ var FOIL = (function () {
     }).join("");
     var cab = '<div class="yx-cab notes" data-bh="' + bh + '" style="width:' + YX.scene.w + "px;height:" + bh + "px;background-position:0 -" + top + 'px">' + labels + "</div>";
     return '<section class="yx-notes ' + (narrow ? "m" : "d") + (still ? " still" : "") + '" aria-label="笔记本架 · 骨臂">' + (narrow ? '<div class="yx-rowm snap">' + cab + "</div>" : cab) + "</section>";
+  }
+  /* 六个声：全部 WebAudio 合成，没有音频文件；默认关，布置里开；只在墓园场景响。 */
+  var YXA = null;
+  function yxSfx(name) {
+    if (LK().scene !== "youchai" || !LK().sound) return;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+      YXA = YXA || new AC(); if (YXA.state === "suspended") YXA.resume();
+      var ctx = YXA, t = ctx.currentTime, out = ctx.createGain(); out.gain.value = 0.9; out.connect(ctx.destination);
+      function noise(dur, type, freq, q, g0, g1, delay) {
+        var n = ctx.sampleRate * dur, buf = ctx.createBuffer(1, n, ctx.sampleRate), d = buf.getChannelData(0), last = 0;
+        for (var i = 0; i < n; i++) { var w = Math.random() * 2 - 1; if (type === "brown") { last = (last + 0.02 * w) / 1.02; d[i] = last * 3.5; } else d[i] = w; }
+        var src = ctx.createBufferSource(); src.buffer = buf; var f = ctx.createBiquadFilter(); f.type = q ? "bandpass" : "lowpass"; f.frequency.value = freq; if (q) f.Q.value = q;
+        var g = ctx.createGain(); g.gain.setValueAtTime(0.0001, t + delay); g.gain.exponentialRampToValueAtTime(g0, t + delay + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + delay + dur);
+        src.connect(f); f.connect(g); g.connect(out); src.start(t + delay); src.stop(t + delay + dur + 0.05);
+      }
+      function tone(freq, dur, type, g0, delay, slide) {
+        var o = ctx.createOscillator(), g = ctx.createGain(); o.type = type || "sine"; o.frequency.setValueAtTime(freq, t + delay);
+        if (slide) o.frequency.exponentialRampToValueAtTime(slide, t + delay + dur);
+        g.gain.setValueAtTime(0.0001, t + delay); g.gain.exponentialRampToValueAtTime(g0, t + delay + 0.01); g.gain.exponentialRampToValueAtTime(0.0001, t + delay + dur);
+        o.connect(g); g.connect(out); o.start(t + delay); o.stop(t + delay + dur + 0.05);
+      }
+      if (name === "ding") { tone(880, 0.5, "sine", 0.25, 0); tone(1760, 0.3, "sine", 0.06, 0); }
+      else if (name === "candle") { noise(0.12, "white", 1200, 0, 0.18, 0, 0); tone(180, 0.1, "sine", 0.12, 0); }
+      else if (name === "paper") { noise(0.22, "white", 2600, 1.2, 0.22, 0, 0); noise(0.12, "white", 900, 0, 0.08, 0, 0.05); }
+      else if (name === "soil") { noise(0.38, "brown", 320, 0, 0.5, 0, 0); noise(0.2, "white", 500, 0, 0.1, 0, 0.1); }
+      else if (name === "door") { tone(90, 0.7, "sawtooth", 0.08, 0, 140); noise(0.5, "white", 700, 2, 0.06, 0, 0.1); }
+      else if (name === "ink") { tone(1400, 0.03, "sine", 0.2, 0); noise(0.03, "white", 3000, 0, 0.12, 0, 0); }
+    } catch (e) { /* 没有声也不碍事 */ }
   }
   function yxNightApply() { var on = false; try { on = localStorage.getItem("yx-night") === "1"; } catch (e) { /* 忽略 */ } document.documentElement.classList.toggle("yx-night", on); }
   function yxGateHTML() {
@@ -5969,7 +6017,7 @@ var FOIL = (function () {
     if (act === "pick") {
       var pid = t.getAttribute("data-id"), fly = null;
       if (LK().scene === "youchai" && t.closest(".yx-shelf")) {
-        var rr = t.getBoundingClientRect(); S.yxFrom = { x: rr.left + rr.width / 2, y: rr.top + rr.height / 2 }; S.yxOpen = pid; S.shelfPick = pid; render(); return;
+        var rr = t.getBoundingClientRect(); S.yxFrom = { x: rr.left + rr.width / 2, y: rr.top + rr.height / 2 }; S.yxOpen = pid; S.shelfPick = pid; yxSfx("paper"); render(); yxSfx("ding"); return;
       }
       if (pid !== S.shelfPick && S.route === "shelf" && !REDUCE && LK().motion && t.closest(".wall")) {
         var dc = document.querySelector(".dais-col");
@@ -5989,13 +6037,14 @@ var FOIL = (function () {
     if (act === "look-binding") { lookSet({ binding: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-scene") { lookSet({ scene: t.getAttribute("data-v") }); render(); return; }
     if (act === "look-motion") { lookSet({ motion: !LK().motion }); render(); return; }
+    if (act === "look-sound") { lookSet({ sound: !LK().sound }); yxSfx("ding"); render(); return; }
     if (act === "look-dust") { lookSet({ dust: !LK().dust }); render(); return; }
     if (act === "look-tod") { lookSet({ tod: !LK().tod }); render(); return; }
     if (act === "look-deco") { var dn = t.getAttribute("data-d"), dl = LK().deco.slice(), di = dl.indexOf(dn); if (di >= 0) dl.splice(di, 1); else dl.push(dn); lookSet({ deco: dl }); render(); return; }
     if (act === "look-reset") { hangSet("float"); lookSet({ v: LOOK_V, read: LOOK_DEF.read, fx: LOOK_DEF.fx, color: LOOK_DEF.color, binding: LOOK_DEF.binding, motion: true, deco: DECO_DEFAULT.slice(), place: {} }); render(); return; }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = wallClass(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
-    if (act === "abox") { S.archPick = t.getAttribute("data-t"); S.deskOpen = true; S.clipDel = null; S.yxCard = null; S.yxDeskOld = false; render(); var dc = document.querySelector('.ydesk [data-act="desk-close"]'); if (dc) try { dc.focus({ preventScroll: true }); } catch (e2) { /* 忽略 */ } return; }
+    if (act === "abox") { S.archPick = t.getAttribute("data-t"); S.deskOpen = true; S.clipDel = null; S.yxCard = null; S.yxDeskOld = false; yxSfx("soil"); render(); var dc = document.querySelector('.ydesk [data-act="desk-close"]'); if (dc) try { dc.focus({ preventScroll: true }); } catch (e2) { /* 忽略 */ } return; }
     if (act === "desk-close") { deskClose(); return; }
     if (act === "arch-f") { S.archF = t.getAttribute("data-f"); render(); return; }
     if (act === "ritual") { ritualOpen(t.getAttribute("data-d")); return; }
@@ -6030,9 +6079,11 @@ var FOIL = (function () {
     if (act === "eb-del-yes") { ebRemove(t.getAttribute("data-id")); return; }
     if (act === "eb-read") { S.yxOpen = null; readerOpen(t.getAttribute("data-id"), { notes: t.getAttribute("data-notes") === "1" }); return; }
     if (act === "rd-close") { readerClose(); return; }
-    if (act === "yx-unpick") { var cw = document.querySelector(".yx-cover-wrap"); if (cw && !REDUCE && LK().motion) { cw.classList.add("closing"); setTimeout(function () { S.yxOpen = null; render(); }, 280); } else { S.yxOpen = null; render(); } return; }
-    if (act === "yx-card") { S.yxCard = t.getAttribute("data-id"); render(); return; }
-    if (act === "yx-card-back") { var bw = document.querySelector(".yx-card-big-wrap"); if (bw && !REDUCE && LK().motion) { bw.classList.add("closing"); setTimeout(function () { S.yxCard = null; render(); }, 220); } else { S.yxCard = null; render(); } return; }
+    if (act === "yx-unpick") { yxSfx("candle"); var cw = document.querySelector(".yx-cover-wrap"); if (cw && !REDUCE && LK().motion) { cw.classList.add("closing"); setTimeout(function () { S.yxOpen = null; render(); }, 280); } else { S.yxOpen = null; render(); } return; }
+    if (act === "yx-card") { var fn = t.closest(".yx-fan"); if (fn && fn.getAttribute("data-moved") === "1") { fn.setAttribute("data-moved", "0"); return; } S.yxCard = t.getAttribute("data-id"); yxSfx("paper"); render(); return; }
+    if (act === "yx-flip-read") { var fl = document.querySelector(".yx-flip"), fid = t.getAttribute("data-id"); if (fl && !REDUCE && LK().motion) { fl.classList.add("flipped"); yxSfx("paper"); setTimeout(function () { readerOpen(fid); }, 420); } else readerOpen(fid); return; }
+    if (act === "yx-cal") { var nl = document.querySelector(".nbk-l"); if (nl) { nl.classList.toggle("open"); document.body.classList.toggle("yx-cal-open", nl.classList.contains("open")); } return; }
+    if (act === "yx-card-back") { yxSfx("candle"); var bw = document.querySelector(".yx-card-big-wrap"); if (bw && !REDUCE && LK().motion) { bw.classList.add("closing"); setTimeout(function () { S.yxCard = null; render(); }, 220); } else { S.yxCard = null; render(); } return; }
     if (act === "yx-desk-old") { S.yxDeskOld = true; render(); return; }
     if (act === "yx-night") { var nt = !document.documentElement.classList.contains("yx-night"); try { localStorage.setItem("yx-night", nt ? "1" : "0"); } catch (e9) { /* 忽略 */ } document.documentElement.classList.toggle("yx-night", nt); return; }
     if (act === "rd-prev") { rdStep(-1); return; }

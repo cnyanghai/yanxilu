@@ -2,7 +2,7 @@
  * 就像装了个 App，地铁里没网也能打开翻剪报、看进度（记录的读写照常走网络）。
  * /api/、/_blob/（电子书文件）、登录相关从不缓存。
  * 版本号由 build.py 盖进来：页面一发新版，旧缓存整个换掉。 */
-var V = "yxl-6cc4c66e4e";
+var V = "yxl-191f8b63ba";
 self.addEventListener("install", function () { self.skipWaiting(); });
 self.addEventListener("activate", function (e) {
   e.waitUntil(caches.keys().then(function (ks) {
