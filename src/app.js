@@ -2814,37 +2814,65 @@ var FOIL = (function () {
       '<span class="ab-foot">' + (tp.status === "closed" ? '<i class="ab-seal" aria-hidden="true">结</i>' : "") + "<span>" + n + " 件</span></span></span>" +
       '<i class="ab-hole" aria-hidden="true"></i>' + (tp.status === "yearly" ? '<span class="ab-tag">年更</span>' : "") + (tp.status === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
   }
-  /* 剪报夹：一个领域里还没装盒的剪报，插在一只牛皮纸文件架里，露出纸头 */
+  /* ---------- 档案架的纸模形式（2026-11-08 定，docs/shelf-design-review.md 六之二到六之五） ----------
+   * 一块牛皮纸板，一个领域一层层板。一个课题一个牌盒，立在层板上一排同向（像一排扑克牌盒），盒越厚牌越多；
+   * 盒面：大的领域单字、卷号、盒名；同一层板上赤陶与黑卡交替。没装盒的剪报是层板尽头的一叠牌：有没拆的就牌背朝上，都拆过了最上面一张牌面朝上写标题。
+   * 没有状态签、没有统计牌（用户 11-08 定：使用频率上是无效单位）；状态只在打开盒子后看牌。收件匣是最下面一层。 */
+  var DOM_GLYPH = { geo: "地", cycle: "周", fut: "货", co: "司", fin: "金" };
+  function domGlyph(k) { return DOM_GLYPH[k] || (domInfo(k).name || "研").charAt(0); }
   function folderText(list) { return list.map(function (c) { return c.title + " " + (c.note || "") + " " + (c.author || ""); }).join(" ").toLowerCase(); }
-  function folderHTML(tid, list) { return bagHTML(tid, list, "shelf"); }
   function newBoxSlot(tid) {
-    return S.canEdit ? '<button type="button" class="anew" data-act="abox-new" data-t="' + esc(tid) + '" title="在「' + esc(domInfo(tid).name) + '」新立一个档案盒"><b aria-hidden="true">＋</b><span>新档案盒</span></button>' : "";
+    return S.canEdit ? '<button type="button" class="anew" data-act="abox-new" data-t="' + esc(tid) + '" title="在「' + esc(domInfo(tid).name) + '」新立一个档案盒"><b aria-hidden="true">＋</b><span>新盒</span></button>' : "";
   }
-  function archBayHTML(tid, w) {
+  function apackHTML(tp, idx) {
+    var n = topicItems(tp).length, on = S.archPick === tp.id;
+    var tip = tp.title + (tp.question ? "：" + tp.question : "") + " · " + n + " 件" + (tp.since ? " · 立卷 " + tp.since : "");
+    return '<button type="button" class="apack' + (on ? " picked" : "") + (archMatch(tp) ? "" : " dim") + '" data-act="abox" data-t="' + esc(tp.id) + '" title="' + esc(tip) + '" aria-pressed="' + on + '" aria-label="' + esc(tp.title + "，" + n + " 件") + '">' +
+      '<span class="pp-pack' + (idx % 2 ? " k" : "") + '" style="--n:' + n + '" aria-hidden="true">' +
+      '<span class="f front"><i class="frame"></i><span class="code">' + esc(topicNo(tp)) + '</span><span class="g">' + esc(domGlyph(tp.track)) + '</span><span class="n">' + esc(tp.title) + "</span></span>" +
+      '<span class="f side"><span>' + esc(tp.title) + " · " + n + ' 件</span></span><span class="f top"></span></span></button>';
+  }
+  /* 一叠牌：clips 是没装盒的剪报（tid 是领域；"" 是收件匣），reports 是收件匣里没立卷的内置单件 */
+  function adeckHTML(tid, clips, reports) {
+    var unseen = clips.filter(function (c) { return !c.seen; }), on = S.archPick === "cf:" + tid, q = S.archQ || "";
+    var all = (reports || []).map(function (rp) { return { title: rp.title, note: rp.desc || "" }; }).concat(clips);
+    var text = folderText(all), n = all.length, top = all[all.length - 1];
+    var glyph = tid ? domGlyph(tid) : "匣";
+    var face = unseen.length ? '<span class="cd"><span class="g">' + esc(glyph) + "</span></span>" : '<span class="cd"></span><span class="cd up">' + esc(top ? top.title : "") + "</span>";
+    var lab = "<em>" + (tid ? "剪报 · " : "收件匣 · ") + n + (unseen.length ? " · " + unseen.length + " 没拆" : "") + "</em>";
+    var tip = (tid ? "还没装盒的 " + n + " 篇剪报" : "收件匣里 " + n + " 件") + (unseen.length ? "，" + unseen.length + " 篇还没拆封" : "") + "。点开摊在桌上";
+    var cls = "adeck afold" + (on ? " picked" : "") + (q && text.indexOf(q) < 0 ? " dim" : "");
+    if (clips.length) return '<button type="button" class="' + cls + '" data-act="abox" data-t="cf:' + esc(tid) + '" data-q="' + esc(text) + '" title="' + esc(tip) + '" aria-pressed="' + on + '">' + face + lab + "</button>";
+    var rp = reports[reports.length - 1];
+    return '<a class="' + cls.replace(" afold", "") + '" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener" data-q="' + esc(text) + '" title="' + esc(tip.replace("点开摊在桌上", "打开最新的一件")) + '">' + face + lab + "</a>";
+  }
+  function arowHTML(tid) {
     var di = domInfo(tid), tps = boxesOf(tid), loose = looseClips(tid);
     var n = tps.reduce(function (a, tp) { return a + topicItems(tp).length; }, 0);
-    var row = tps.map(function (tp) { return boxHTML(tp); }).join("") + (loose.length ? folderHTML(tid, loose) : "");
-    var vacant = !row;
-    row = (row || (S.canEdit ? "" : '<span class="bay-empty">还没有课题</span>')) + newBoxSlot(tid);
-    var plate = (di.code ? '<b class="cls">' + esc(di.code) + "</b>" : "") + "<b>" + esc(di.name) + "</b><span>" + tps.length + " 卷 · " + n + " 件" + (loose.length ? " · 剪报 " + loose.length : "") + "</span>";
-    return '<div class="bay' + (w ? "" : " grow") + (vacant ? " vacant" : "") + '" style="--c:' + di.col + (w ? ";--w:" + w + "px" : "") + '"><div class="bay-row">' + row + '<span class="bookend" aria-hidden="true"></span></div>' +
-      '<div class="lip">' + (di.href ? '<a class="plate" href="' + esc(di.href) + '">' + plate + "</a>" : '<span class="plate">' + plate + "</span>") + "</div></div>";
+    var packs = tps.map(apackHTML).join(""), deck = loose.length ? adeckHTML(tid, loose, []) : "", empty = !packs && !deck;
+    var lab = (di.code ? '<span class="cls">' + esc(di.code) + "</span>" : "") + "<b>" + esc(di.name) + "</b><span>" + (tps.length ? tps.length + " 盒 · " + n + " 件" : "还没有盒子") + (loose.length ? " · 剪报 " + loose.length : "") + "</span>";
+    return '<div class="arow pp-stage' + (empty ? " empty" : "") + '" data-dom="' + esc(tid) + '"><i class="plank" aria-hidden="true"></i>' + packs + deck + newBoxSlot(tid) +
+      (di.href ? '<a class="arow-lab pp-paper" href="' + esc(di.href) + '">' + lab + "</a>" : '<span class="arow-lab pp-paper">' + lab + "</span>") + "</div>";
   }
-  function trayHTML(w) {
-    var list = inboxItems(), clips = looseClips(""), q = S.archQ || "";
-    var all = list.concat(clips.slice(0, 3).reverse().map(clipItem));
-    var sheets = all.slice(-3).map(function (rp, i, arr) {
-      var k = arr.length - 1 - i, text = (rp.title + " " + (rp.desc || "")).toLowerCase();
-      var st = ' style="--k:var(' + KINDS[reportKind(rp)] + ");bottom:" + (16 + k * 40) + "px;transform:rotate(" + (k % 2 ? -3 : 2) + 'deg)"';
-      var inner = '<i aria-hidden="true"></i><b>' + esc(rp.title) + "</b><span>" + esc(reportKind(rp)) + " · " + esc(rp.date || "") + "</span>";
-      var cls = "asheet" + (q && text.indexOf(q) < 0 ? " dim" : "");
-      if (rp.clip && rp.clip.status !== "link") return '<button type="button" class="' + cls + '" data-act="clip-open" data-id="' + esc(rp.clip.id) + '" data-q="' + esc(text) + '"' + st + ">" + inner + "</button>";
-      return '<a class="' + cls + '" href="' + esc(rp.clip ? rp.clip.url : reportHref(rp)) + '" target="_blank" rel="noopener" data-q="' + esc(text) + '"' + st + ">" + inner + "</a>";
-    }).join("");
-    var nn = list.length + clips.length, lab = "<span>" + (nn ? nn + " 件待归卷" : "没有待归卷的") + "</span>";
-    return '<div class="bay atray" style="--w:' + w + 'px"><div class="atray-h"><b>收件匣</b><span>零散的小分析、没分领域的剪报先放这里；攒到两件讲同一件事，再立卷装盒。</span></div>' +
-      '<div class="atray-pile">' + (sheets || '<span class="atray-empty">空</span>') + '<i class="atray-base" aria-hidden="true"></i></div>' +
-      '<div class="lip">' + (clips.length ? '<button type="button" class="plate" data-act="abox" data-t="cf:" aria-pressed="' + (S.archPick === "cf:") + '">' + lab + "</button>" : '<span class="plate">' + lab + "</span>") + "</div></div>";
+  function ainboxHTML() {
+    var list = inboxItems(), clips = looseClips(""), n = list.length + clips.length;
+    var deck = n ? adeckHTML("", clips, list) : '<span class="aempty pp-cut">空</span>';
+    return '<div class="arow ainbox atray pp-stage' + (n ? "" : " empty") + '"><i class="plank" aria-hidden="true"></i>' + deck +
+      '<span class="arow-lab pp-paper"><b>收件匣</b><span>' + (n ? n + " 件待归卷" : "零散的小分析、没分领域的剪报先放这里") + "</span></span></div>";
+  }
+  /* 还没有盒子也没有剪报的领域合在一层：每个领域一个「＋ 新盒」的切口加一块层板签 */
+  function aemptiesHTML(list) {
+    if (!list.length) return "";
+    return '<div class="arow aempties pp-stage"><i class="plank" aria-hidden="true"></i>' + list.map(function (k) {
+      var di = domInfo(k), lab = (di.code ? '<span class="cls">' + esc(di.code) + "</span>" : "") + "<b>" + esc(di.name) + "</b>";
+      return '<div class="aslot" data-dom="' + esc(k) + '">' + newBoxSlot(k) + (di.href ? '<a class="arow-lab pp-paper" href="' + esc(di.href) + '">' + lab + "</a>" : '<span class="arow-lab pp-paper">' + lab + "</span>") + "</div>";
+    }).join("") + "</div>";
+  }
+  function arackHTML() {
+    var order = [], full = [], empties = [];
+    ARCH_ROWS.forEach(function (row) { row.forEach(function (c) { if (c[0] !== "+") order.push(c[0]); }); });
+    order.concat(archCustom()).forEach(function (k) { (boxesOf(k).length || looseClips(k).length ? full : empties).push(k); });
+    return '<section class="arack archive pp-paper pp-slab" aria-label="档案架">' + full.map(arowHTML).join("") + aemptiesHTML(empties) + ainboxHTML() + "</section>";
   }
   /* 打开的盒子下面：改、删（自己立的）或撤下（内置的） */
   function boxActsHTML(tp) {
@@ -3019,7 +3047,7 @@ var FOIL = (function () {
     if (/^cf:/.test(was || "") && bx && !looseClips(was.slice(3)).length) S.archPick = bx.id;
     render();
     if (r0 && S.route === "archive") {
-      var tg = bx ? document.querySelector('.abox[data-t="' + bx.id + '"]')
+      var tg = bx ? document.querySelector('.archive [data-act="abox"][data-t="' + bx.id + '"]') || document.querySelector('.abox[data-t="' + bx.id + '"]')
         : upd.track ? document.querySelector('.afold[data-t="cf:' + upd.track + '"]')
         : document.querySelector(".atray");
       flySlip(r0, tg);
@@ -3057,27 +3085,14 @@ var FOIL = (function () {
     var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null;
     if (fp !== null && !looseClips(fp).length) { fp = null; S.archPick = null; }
     if (fp === null && S.archPick && !TOPIC[S.archPick]) S.archPick = null;
-    var f = S.archF || "all", cust = archCustom();
-    function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="arch-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
-    function cnt(s) { return TOPICS.filter(function (tp) { return tp.status === s; }).length; }
-    var rows = ARCH_ROWS.slice();
-    for (var ci = 0; ci < cust.length; ci += 3) rows.push(cust.slice(ci, ci + 3).map(function (k) { return [k, 0]; }));
-    var cab = rows.map(function (row) {
-      var empty = row.every(function (c) { return c[0] === "+" ? !inboxItems().length && !looseClips("").length : !boxesOf(c[0]).length && !looseClips(c[0]).length; });
-      return '<div class="tier' + (empty ? " empty" : "") + '">' + row.map(function (c) { return c[0] === "+" ? trayHTML(c[1]) : archBayHTML(c[0], c[1]); }).join("") + "</div>";
-    }).join("");
-    var legend = Object.keys(KINDS).filter(function (k) { return k !== "剪报" || clipsOn(); }).map(function (k) { return '<span style="--k:var(' + KINDS[k] + ')"><i aria-hidden="true"></i>' + k + "</span>"; }).join("");
-    var rules = [["一", "一个问题一盒", "新资料先问：它在回答哪个问题？已经有这个问题，就装进那一盒；是新问题才立新卷，点「＋ 新档案盒」自己就能立。卷号跟书架用同一套索书号。"],
-      ["二", "盒里按件编号", "每件是档案、数据、计划、纪要、剪报之一，色签露在盒顶。件越多盒越厚，一眼看出这一盒是查资料多，还是做数据多。"],
-      ["三", "零散的先进收件匣", "一次性的小分析、没分领域的剪报不急着立卷；分了领域还没装盒的剪报装在那一格的剪报夹（档案袋）里，点开拆封。攒到两件讲同一件事，再一起装盒。"],
+    var rules = [["一", "一个问题一盒", "新资料先问：它在回答哪个问题？已经有这个问题，就装进那一盒；是新问题才立新卷，点层板上的「＋ 新盒」自己就能立。卷号跟书架用同一套索书号。"],
+      ["二", "盒里一件一张牌", "每件是档案、数据、计划、纪要、剪报之一，装进盒里就是一张牌。件越多盒越厚，一眼看出哪一盒积得最多。"],
+      ["三", "零散的先进收件匣", "一次性的小分析、没分领域的剪报不急着立卷；分了领域还没装盒的剪报是那一层尽头的一叠牌，没拆的牌背朝上。攒到两件讲同一件事，再一起装盒。"],
       ["四", "线网上一盒一个地标", "地图上只画课题，不画单件，地标下面写着件数。资料再多，地标也只随课题增长。"]];
-    var cabSec = LK().scene === "youchai" ? yxArchiveHTML() : '<section class="cabinet archive" aria-label="档案架"><div class="cab-top"><span>研究档案</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>';
+    var cabSec = LK().scene === "youchai" ? yxArchiveHTML() : arackHTML();
     return '<div class="view shelf archive-v">' + bannerHTML() +
-      '<header class="phead arch-head"><div>' + shelfSeg("archive") +
-      '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", TOPICS.length) + chip("doing", "在做", cnt("doing")) + chip("yearly", "要年更", cnt("yearly")) + chip("closed", "已结卷", cnt("closed")) +
-      (S.canEdit ? '<button type="button" class="chipbtn chip-new" data-act="abox-new">＋ 新档案盒</button>' : "") + "</div></div>" +
-      '<div class="arch-side"><div class="k-legend"><span class="kl-h">盒顶的色签</span>' + legend + "</div>" +
-      '<label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
+      '<header class="phead arch-head"><div>' + shelfSeg("archive") + "</div>" +
+      '<div class="arch-side"><label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
       '<div class="arch-main"><div class="arch-col">' + cabSec + boxOffHTML() + clipBarHTML() + "</div></div>" +
       '<section class="arules" aria-labelledby="ar-h"><h2 id="ar-h">怎样归档</h2><div class="ar-grid">' + rules.map(function (r) { return '<div class="arule"><p><b class="ar-n">' + r[0] + "</b><b>" + r[1] + "</b></p><p>" + r[2] + "</p></div>"; }).join("") + "</div>" +
       '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进邮差”，我按这四条归档；剪报和自己立的盒子，在这里直接整理。</p></section>' + boxSheetHTML() + deskHTML() + "</div>";
@@ -3085,8 +3100,8 @@ var FOIL = (function () {
   /* 搜索框：不重画页面，只把不相关的盒子调暗 */
   function applyArchFilter() {
     var q = S.archQ || "";
-    document.querySelectorAll(".archive .abox").forEach(function (b) { var tp = TOPIC[b.getAttribute("data-t")]; if (tp) b.classList.toggle("dim", !archMatch(tp)); });
-    document.querySelectorAll(".archive .asheet, .archive .afold").forEach(function (a) { a.classList.toggle("dim", !!q && (a.getAttribute("data-q") || "").indexOf(q) < 0); });
+    document.querySelectorAll(".archive .abox, .archive .apack").forEach(function (b) { var tp = TOPIC[b.getAttribute("data-t")]; if (tp) b.classList.toggle("dim", !archMatch(tp)); });
+    document.querySelectorAll(".archive .asheet, .archive .afold, .archive .adeck").forEach(function (a) { a.classList.toggle("dim", !!q && (a.getAttribute("data-q") || "").indexOf(q) < 0); });
   }
   /* ---------- 卡牌：一篇文章一张牌 ----------
    * 盒里的每一件、夹里的每一篇都是一张牌，平时牌背朝上。牌背是固定的封面（圆光里一幅夜读小景：月、远山、一盏灯、一卷书）
@@ -6336,7 +6351,7 @@ var FOIL = (function () {
     document.querySelectorAll(".drop-ok").forEach(function (el) { el.classList.remove("drop-ok"); });
   });
   function dropTarget(e) {
-    var el = e.target.closest && e.target.closest('.abox[data-t]:not([data-t^="cf:"]), .afold, .atray');
+    var el = e.target.closest && e.target.closest('.abox[data-t]:not([data-t^="cf:"]), .apack[data-t], .afold, .atray');
     return el || null;
   }
   document.addEventListener("dragover", function (e) {

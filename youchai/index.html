@@ -37,6 +37,12 @@
   --f-num:"Barlow Condensed","Barlow",sans-serif;
   --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
   --r:6px;
+  /* 纸模（paper craft）：五种纸 + 两层颗粒 + 影色。量自参考样张（docs/shelf-design-review.md 六之四）：一个色相、八层明度，六成面积是亮纸 */
+  --pp-kraft:#CDAE86; --pp-kraft-2:#C1A077; --pp-kraft-3:#A8865C; --pp-kraft-dk:#7E5E3A; --pp-kraft-bk:#5E4428;
+  --pp-cream:#EFE4CF; --pp-cream-2:#E6D8BE; --pp-terra:#B4552B; --pp-terra-dk:#8B4119; --pp-olive:#857A4F; --pp-olive-dk:#66593A;
+  --pp-ink:#3A2A1E; --pp-ink-2:#6B5A48; --pp-ink-3:#8F7E69; --pp-black:#2B2522; --pp-copper:#C4763A; --pp-shade:60,35,15;
+  --pp-fibre:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.05 .1' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 .38'/></filter><rect width='300' height='300' filter='url(%23f)'/></svg>");
+  --pp-tooth:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='t'><feTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='1' seed='3' stitchTiles='stitch'/><feColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 .95'/></filter><rect width='120' height='120' filter='url(%23t)'/></svg>");
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
@@ -50,6 +56,7 @@
     --bdg-on:#171513; --bdg-on-dk:#171513; --late:#F2B23E; --early:#7FD1E3; --on-signal:#171513;
     --spine:#2A2622; --plate:#3A3326; --plate-line:#7A6A48; --plate-ink:#E9DCBD; --wood:#100D0B; --wood-2:#1C1814; --wood-hi:#3A322C;
     --bay-bg:#26221E; --bay-hi:rgba(255,240,210,.07); --stamp-bg:#25221E; --cover:#0E131C; --fold-paper:#211E1A; --fold-pg:#2A2622; --fold-pg2:#24201C; --card:#25221E; --card-line:#45403A; --oak-hi:#8A7052; --oak-1:#6E573E; --oak-2:#5A4632; --oak-ink:#F2E4C6; --linen:#24201C; --linen-tx:rgba(255,240,210,.035); --wall-light:rgba(255,236,200,.06); --dais-bg:#2B2621; --dais-light:rgba(255,226,170,.12); --plab:#E4DAC5; --plab-line:rgba(0,0,0,.35); --rope-1:#A08A62; --rope-2:#7E6A48; --niche-bg:#1B1815; --ghost-line:#6A5F4E; --rattan-1:#A58552; --rattan-2:#8A6D42; --rattan-rim:#6A5232; --cfa-ink:#CDB8DA; --case:#3B5270; --case-ink:#F2EAD6; --case-ink-2:rgba(242,234,214,.62); --case-hole:rgba(242,234,214,.24); --pk-cover:#2C4170;
+    --pp-kraft:#6A5238; --pp-kraft-2:#5C4630; --pp-kraft-3:#4A3826; --pp-kraft-dk:#3A2B1C; --pp-kraft-bk:#2A1F14; --pp-cream:#D9CDB4; --pp-cream-2:#CDBFA3; --pp-shade:0,0,0;
     color-scheme:dark;
   }
 }
@@ -64,6 +71,7 @@
   --bdg-on:#171513; --bdg-on-dk:#171513; --late:#F2B23E; --early:#7FD1E3; --on-signal:#171513;
   --spine:#2A2622; --plate:#3A3326; --plate-line:#7A6A48; --plate-ink:#E9DCBD; --wood:#100D0B; --wood-2:#1C1814; --wood-hi:#3A322C;
   --bay-bg:#26221E; --bay-hi:rgba(255,240,210,.07); --stamp-bg:#25221E; --cover:#0E131C; --fold-paper:#211E1A; --fold-pg:#2A2622; --fold-pg2:#24201C; --card:#25221E; --card-line:#45403A; --oak-hi:#8A7052; --oak-1:#6E573E; --oak-2:#5A4632; --oak-ink:#F2E4C6; --linen:#24201C; --linen-tx:rgba(255,240,210,.035); --wall-light:rgba(255,236,200,.06); --dais-bg:#2B2621; --dais-light:rgba(255,226,170,.12); --plab:#E4DAC5; --plab-line:rgba(0,0,0,.35); --rope-1:#A08A62; --rope-2:#7E6A48; --niche-bg:#1B1815; --ghost-line:#6A5F4E; --rattan-1:#A58552; --rattan-2:#8A6D42; --rattan-rim:#6A5232; --cfa-ink:#CDB8DA; --case:#3B5270; --case-ink:#F2EAD6; --case-ink-2:rgba(242,234,214,.62); --case-hole:rgba(242,234,214,.24); --pk-cover:#2C4170;
+  --pp-kraft:#6A5238; --pp-kraft-2:#5C4630; --pp-kraft-3:#4A3826; --pp-kraft-dk:#3A2B1C; --pp-kraft-bk:#2A1F14; --pp-cream:#D9CDB4; --pp-cream-2:#CDBFA3; --pp-shade:0,0,0;
   color-scheme:dark;
 }
 *,*::before,*::after{box-sizing:border-box}
@@ -777,9 +785,10 @@ button.stp .stp-tx{display:flex}
 .stg-cover,.stg-box{transition:transform .3s ease}
 .dais .stg-cover:hover,.dais .stg-box:hover{transform:perspective(900px) rotateY(-3.5deg) translateY(-2px)}
 @media (prefers-reduced-motion: reduce){.dais .stg-cover:hover,.dais .stg-box:hover{transform:none}.abox.picked .ab-band{transform:none}}
-body.drag-clip .abox:not([data-t^="cf:"]),body.drag-clip .afold,body.drag-clip .atray{outline:2px dashed color-mix(in srgb,var(--ink-3) 55%,transparent);outline-offset:3px}
+body.drag-clip .abox:not([data-t^="cf:"]),body.drag-clip .afold,body.drag-clip .atray,body.drag-clip .apack,body.drag-clip .adeck,body.drag-clip .ainbox{outline:2px dashed color-mix(in srgb,var(--ink-3) 55%,transparent);outline-offset:3px}
 .drop-ok{outline:3px solid var(--ink) !important;outline-offset:3px}
 .abox.drop-ok,.afold.drop-ok{transform:translateY(-6px)}
+.apack.drop-ok,.adeck.drop-ok{outline-offset:6px;border-radius:6px}
 .cl-card[draggable="true"]{cursor:grab}
 .cl-card[draggable="true"]:active{cursor:grabbing}
 /* 书墙光阴：清晨微凉、黄昏偏暖、夜里暗下来 */
@@ -1564,6 +1573,96 @@ body.rd-on{overflow:hidden}
 .rd-msg{margin:auto;padding:24px;max-width:30em;text-align:center;font-size:15px;line-height:1.8;color:var(--ink-2)}
 .rd-foot{display:flex;justify-content:space-between;gap:12px;padding:10px 18px;padding-bottom:calc(10px + env(safe-area-inset-bottom,0px));background:var(--leaf);border-top:1px solid var(--rule)}
 .rd-foot .btn[disabled]{opacity:.35;cursor:default}
+/* ===== 纸模（paper craft）材质：公用类 =====
+ * 规则量自样张（docs/shelf-design-review.md 六之四、六之五）：
+ * .pp-paper 一片纸（底色 + 两层颗粒）；.pp-slab 凸起的纸片：切边一圈亮、顶边 2 像素亮、底下 6 像素三层暗带加软影；
+ * .pp-emb 压进纸里的字（左上暗、右下亮）；.pp-cut 纸被挖掉的洞（唯一的凹）；
+ * .pp-pack 三维盒（正面、侧面、顶面）：一排同向 rotateY(-22°)，盒厚 = 正面宽 × .32 + 每张牌 1px，盒面哑光不加亮线，盒底一片平躺的接触影。 */
+.pp-paper{--face:var(--pp-cream);--e1:color-mix(in srgb,var(--face),#2B1A0C 22%);--e2:color-mix(in srgb,var(--face),#2B1A0C 40%);--e3:color-mix(in srgb,var(--face),#2B1A0C 58%);
+  background-color:var(--face);background-image:var(--pp-fibre),var(--pp-tooth);background-blend-mode:soft-light,overlay;color:var(--pp-ink)}
+.pp-slab{border-radius:6px;position:relative;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.5),inset 0 0 0 1px rgba(255,255,255,.26),inset 0 -1px 0 rgba(var(--pp-shade),.12),
+    0 1px 0 var(--e1),0 2px 0 var(--e1),0 3px 0 var(--e2),1px 4px 0 var(--e2),1px 5px 0 var(--e3),2px 6px 0 var(--e3),2px 9px 10px -2px rgba(var(--pp-shade),.55)}
+.pp-emb{text-shadow:-1px -1px 0 rgba(50,30,12,.38),1px 1px 0 rgba(255,255,255,.5)}
+.pp-emb-hi{text-shadow:-1px -1px 0 rgba(0,0,0,.35),1px 1px 0 rgba(255,255,255,.3)}
+.pp-cut{border:1.5px dashed rgba(var(--pp-shade),.55);border-radius:6px;background:rgba(var(--pp-shade),.06);box-shadow:inset 2px 3px 5px rgba(var(--pp-shade),.28),inset 0 0 0 1px rgba(255,255,255,.12);display:grid;place-items:center;color:var(--pp-ink-2)}
+.pp-stage{perspective:2200px;perspective-origin:50% 25%}
+.pp-pack{--w:84px;--h:126px;--n:3;--d:calc(var(--w) * .32 + var(--n) * 1px);--ry:-22deg;--rx:-4deg;--face:var(--pp-terra);--inkc:var(--pp-black);
+  position:relative;display:block;width:var(--w);height:var(--h);transform-style:preserve-3d;transform-origin:50% 100%;transform:rotateY(var(--ry)) rotateX(var(--rx));flex:none;transition:transform .18s}
+.pp-pack::before{content:"";position:absolute;left:-8%;right:-22%;bottom:0;height:calc(var(--d) + 16px);transform-origin:center bottom;transform:translateZ(calc(var(--d) / 2 + 8px)) rotateX(90deg);background:radial-gradient(ellipse at 42% 55%,rgba(var(--pp-shade),.62),rgba(var(--pp-shade),.28) 45%,rgba(var(--pp-shade),0) 74%)}
+.pp-pack .f{position:absolute;left:0;top:0;display:block;background-color:var(--face);background-image:var(--pp-tooth);background-blend-mode:overlay;color:var(--inkc);backface-visibility:hidden}
+.pp-pack .front{width:var(--w);height:var(--h);transform:translateZ(calc(var(--d) / 2));border-radius:3px;box-shadow:inset -1px 0 0 rgba(0,0,0,.16)}
+.pp-pack .side{width:var(--d);height:var(--h);left:100%;transform-origin:left center;transform:translateZ(calc(var(--d) / 2)) rotateY(90deg);filter:brightness(.70) saturate(.95);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pp-pack .side span{writing-mode:vertical-rl;font-family:var(--f-body);font-size:9px;font-weight:500;line-height:1;letter-spacing:.16em;opacity:.9;white-space:nowrap}
+.pp-pack .top{width:var(--w);height:var(--d);transform-origin:center top;transform:translateZ(calc(-1 * var(--d) / 2)) rotateX(90deg);filter:brightness(1.18)}
+.pp-pack.k{--face:var(--pp-black);--inkc:var(--pp-copper)}
+.pp-pack .frame{position:absolute;inset:6px;border:1px solid currentColor;opacity:.7;border-radius:1px}
+.pp-pack .frame::after{content:"";position:absolute;inset:3px;border:1px dotted currentColor;opacity:.6}
+.pp-pack .code{position:absolute;left:10px;top:9px;font-family:var(--f-mono);font-size:7.5px;font-weight:600;line-height:1;letter-spacing:.1em;opacity:.85;white-space:nowrap}
+.pp-pack .g{position:absolute;left:0;right:0;top:30%;text-align:center;font-family:var(--f-display);font-size:44px;font-weight:900;line-height:1}
+.pp-pack .n{position:absolute;left:10px;right:10px;bottom:11px;text-align:center;font-family:var(--f-display);font-size:9px;font-weight:600;line-height:1;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid currentColor;padding:5px 3px 4px}
+@media (prefers-reduced-motion: reduce){.pp-pack{transition:none}}
+
+/* ===== 书架：档案架（纸模）：一块牛皮纸板，一层层板，每个领域一层；盒子立在层板上一排同向；没装盒的剪报是层板尽头的一叠牌；收件匣是最下面一层 ===== */
+.arack{--face:var(--pp-kraft-2);padding:14px 12px 4px;border-radius:9px;width:100%}
+.arow{position:relative;display:flex;align-items:flex-end;gap:16px;padding:0 16px 22px;height:var(--rh,200px);margin-bottom:12px}
+.arow.empty{--rh:104px}
+.arow>*{position:relative}
+.arow .plank{position:absolute;left:0;right:0;bottom:0;height:16px;--face:var(--pp-kraft);border-radius:4px;background-color:var(--face);background-image:var(--pp-tooth);background-blend-mode:overlay;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.25),0 2px 0 var(--pp-kraft-3),0 4px 0 var(--pp-kraft-dk),0 6px 0 var(--pp-kraft-bk),2px 9px 10px -2px rgba(var(--pp-shade),.55)}
+.arow-lab{position:absolute;left:14px;bottom:-5px;z-index:3;display:inline-flex;align-items:baseline;gap:8px;height:21px;padding:0 10px;--face:var(--pp-cream);border-radius:3px;font-family:var(--f-ui);font-size:11.5px;line-height:21px;letter-spacing:.06em;color:var(--pp-ink);text-decoration:none;white-space:nowrap;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 0 var(--e1),0 2px 0 var(--e2),1px 4px 5px -1px rgba(var(--pp-shade),.45)}
+.arow-lab .cls{font-family:var(--f-mono);font-weight:600;color:var(--pp-terra-dk)}
+.arow-lab b{font-weight:700}
+.arow-lab span{color:var(--pp-ink-2)}
+a.arow-lab:hover b{text-decoration:underline}
+.apack{flex:none;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.apack:hover .pp-pack{transform:rotateY(var(--ry)) rotateX(var(--rx)) translateY(-6px)}
+.apack.picked .pp-pack{transform:rotateY(var(--ry)) rotateX(var(--rx)) translateY(-10px)}
+.apack.picked .pp-pack .front{box-shadow:inset 0 0 0 2px var(--pp-cream),inset -1px 0 0 rgba(0,0,0,.16)}
+.apack:focus-visible{outline:2px solid var(--indigo);outline-offset:6px;border-radius:4px}
+.apack.dim,.adeck.dim{opacity:.3}
+.adeck{position:relative;flex:none;width:88px;height:60px;align-self:flex-end;margin:0 0 10px;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer;text-decoration:none;text-align:left;-webkit-tap-highlight-color:transparent}
+.adeck .cd{position:absolute;inset:0;display:block;--face:var(--pp-black);color:var(--pp-copper);border-radius:4px;background-color:var(--face);background-image:var(--pp-tooth);background-blend-mode:overlay;
+  box-shadow:0 1px 0 #1a1512,0 2px 0 #3a302a,0 3px 0 #1a1512,0 4px 0 #3a302a,0 5px 0 #1a1512,3px 9px 10px -3px rgba(40,25,10,.6)}
+.adeck .cd::before{content:"";position:absolute;inset:5px;border:1px solid currentColor;opacity:.6;border-radius:2px}
+.adeck .cd .g{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-family:var(--f-display);font-size:24px;font-weight:900;line-height:1}
+.adeck .cd.up{--face:var(--pp-cream);color:var(--pp-ink);transform:rotate(-5deg) translate(-3px,-6px);padding:8px 10px;font-family:var(--f-display);font-size:10px;font-weight:600;line-height:1.35;overflow:hidden;
+  background-image:var(--pp-tooth);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 0 #C9B48F,0 2px 0 #A8865C,2px 5px 8px -2px rgba(var(--pp-shade),.55)}
+.adeck .cd.up::before{display:none}
+.adeck em{position:absolute;left:0;right:0;top:-24px;text-align:center;font-family:var(--f-ui);font-size:10px;line-height:1;letter-spacing:.16em;color:var(--pp-ink-2);font-style:normal;white-space:nowrap}
+.adeck:hover .cd.up{transform:rotate(-5deg) translate(-3px,-10px)}
+.adeck:hover .cd:not(.up){transform:translateY(-3px)}
+.adeck:focus-visible{outline:2px solid var(--indigo);outline-offset:6px;border-radius:4px}
+.adeck.picked .cd.up{box-shadow:inset 0 0 0 2px var(--pp-terra),0 1px 0 #C9B48F,0 2px 0 #A8865C,2px 5px 8px -2px rgba(var(--pp-shade),.55)}
+.arack .anew{width:72px;height:108px;align-self:flex-end;margin:0 0 12px;padding:0;gap:10px;border:1.5px dashed rgba(var(--pp-shade),.55);border-radius:6px;background:rgba(var(--pp-shade),.06);box-shadow:inset 2px 3px 5px rgba(var(--pp-shade),.28),inset 0 0 0 1px rgba(255,255,255,.12);color:var(--pp-ink-2);justify-content:center}
+.arack .anew b{font-family:var(--f-display);font-size:30px;font-weight:300}
+.arack .anew span{writing-mode:horizontal-tb;font-family:var(--f-body);font-size:10px;letter-spacing:.14em}
+.arack .anew:hover{color:var(--pp-ink);border-color:rgba(var(--pp-shade),.8);background:rgba(var(--pp-shade),.1)}
+.arow.empty .anew{height:56px;width:88px;flex-direction:row;gap:8px;margin-bottom:14px}
+.arow.empty .anew b{font-size:22px}
+.aempty{width:88px;height:56px;align-self:flex-end;margin-bottom:14px;font-family:var(--f-body);font-size:11px;letter-spacing:.14em}
+.aempties{--rh:122px;gap:22px}
+.aslot{display:flex;flex-direction:column;align-items:center;gap:9px;margin-bottom:-1px}
+.aslot .arow-lab{position:static;gap:6px}
+.arack .aslot .anew{width:64px;height:54px;margin:0;flex-direction:row;gap:0}
+.arack .aslot .anew b{font-size:22px}
+.arack .aslot .anew span{display:none}
+.ainbox .plank{--face:var(--pp-kraft-3)}
+@media (max-width:640px){
+  .arack{padding:12px 8px 2px}
+  .arow{--rh:168px;gap:10px;padding:0 10px 18px;margin-bottom:10px}
+  .arow.empty{--rh:92px}
+  .arow .pp-pack{--w:70px;--h:105px}
+  .arow .pp-pack .g{font-size:36px}
+  .arow .pp-pack .n{font-size:8.5px;bottom:9px}
+  .arow .pp-pack .code{font-size:7px}
+  .arow-lab{left:10px;font-size:10.5px;height:19px;line-height:19px;padding:0 8px;gap:6px}
+  .adeck{width:76px;height:52px}
+  .arack .anew{width:60px;height:92px}
+  .aempties{--rh:112px;gap:12px}
+  .arack .aslot .anew{width:52px;height:44px}
+}
 /* ===== 书架：档案架 ===== */
 .shelf-seg{margin-top:16px}
 .shelf-seg a{display:inline-block;font-family:var(--f-ui);font-size:14px;padding:6px 16px;border-radius:999px;color:var(--ink-3);text-decoration:none}
@@ -1577,13 +1676,6 @@ body.rd-on{overflow:hidden}
 .arch-q:focus-within{border-color:var(--ink)}
 .arch-q input{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:14px;color:var(--ink);outline:none}
 .arch-main{display:flex;flex-wrap:wrap;align-items:flex-start;justify-content:center;gap:34px;margin-top:22px}
-.cabinet{margin-top:0}
-.cabinet.archive{width:900px}
-.archive .tier.empty .bay{min-height:150px}
-.archive .tier.empty .bay-empty{margin-bottom:40px}
-.archive .bay{min-height:338px}
-.archive .bay-row{gap:7px}
-.bay-empty{align-self:center;margin:0 auto 90px;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3)}
 .abox{position:relative;flex:none;height:252px;padding:0;border:0;border-radius:3px 3px 0 0;cursor:pointer;font:inherit;text-align:center;
   background:linear-gradient(90deg,#A9844C 0,#C9A367 9%,#D3B077 50%,#C59E62 91%,#A27D46 100%);box-shadow:inset 0 0 0 1px rgba(80,56,20,.35),0 10px 14px -10px rgba(36,33,30,.6);transition:transform .15s,opacity .15s}
 .abox:hover{transform:translateY(-4px)}
@@ -1591,7 +1683,7 @@ body.rd-on{overflow:hidden}
 .abox.doing:hover{transform:translateY(-20px)}
 .abox.picked{outline:3px solid var(--ink);outline-offset:3px}
 .abox:focus-visible{outline:2px solid var(--indigo);outline-offset:3px}
-.abox.dim,.asheet.dim{opacity:.28}
+.abox.dim{opacity:.28}
 .ab-slips i{position:absolute;width:9px;background:var(--k);border-radius:1px 1px 0 0;box-shadow:inset 0 -6px 0 rgba(0,0,0,.08)}
 .ab-band{position:absolute;left:0;right:0;top:0;height:9px;background:var(--c);border-radius:3px 3px 0 0}
 .ab-label{position:absolute;left:7px;right:7px;top:20px;bottom:44px;box-sizing:border-box;padding:6px 0 8px;display:flex;flex-direction:column;align-items:center;gap:8px;background:#F7F1E2;border:1px solid #B79A63;color:#24211E}
@@ -1606,25 +1698,8 @@ body.rd-on{overflow:hidden}
 .ab-tag{position:absolute;z-index:2;right:-6px;top:2px;padding:2px 5px 3px 9px;background:#F4EAD0;border:1px solid #A8956A;border-radius:2px 7px 7px 2px;font-family:var(--f-ui);font-size:10.5px;font-weight:700;line-height:1.2;color:#C8372D;transform:rotate(9deg);box-shadow:0 3px 4px -2px rgba(0,0,0,.35)}
 .ab-tag::before{content:"";position:absolute;left:3px;top:50%;margin-top:-2px;width:4px;height:4px;border-radius:50%;background:#8A7A5A}
 .abox .sp-rib{left:50%;margin-left:-3px;bottom:-30px;height:32px}
-.bay.atray{flex-direction:column;align-items:stretch;justify-content:space-between;gap:12px;padding:22px 12px 26px;background:radial-gradient(90% 90% at 50% -10%,var(--bay-hi) 0%,transparent 70%),color-mix(in srgb,var(--bay-bg) 92%,#000)}
-.atray-h{text-align:center}
-.atray-h b{display:block;font-family:var(--f-display);font-size:15px;letter-spacing:.2em;color:var(--ink)}
-.atray-h span{display:block;margin-top:6px;font-family:var(--f-ui);font-size:12px;line-height:1.6;color:var(--ink-3)}
-.atray-pile{position:relative;height:150px}
-.atray-empty{position:absolute;left:0;right:0;bottom:44px;text-align:center;font-family:var(--f-ui);font-size:12.5px;color:var(--ink-3)}
-.asheet{position:absolute;left:4px;right:4px;height:62px;box-sizing:border-box;padding:8px 10px;background:#FBF7EC;border:1px solid #CFC3A6;box-shadow:0 6px 10px -8px rgba(0,0,0,.5);text-decoration:none;color:#24211E;text-align:left;transition:opacity .15s}
-.asheet i{display:block;width:26px;height:4px;margin-bottom:5px;background:var(--k)}
-.asheet b{display:block;font-family:var(--f-display);font-size:12px;line-height:1.3;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.asheet span{font-family:var(--f-mono);font-size:10px;color:#6E675E}
-.asheet:hover b{text-decoration:underline}
-.atray-base{position:absolute;left:0;right:0;bottom:0;height:30px;background:linear-gradient(#7A6650,#5A4A3B);border-radius:0 0 4px 4px;box-shadow:inset 0 3px 0 rgba(255,255,255,.15)}
-.atray .lip{justify-content:center;padding-left:0}
-button.plate{cursor:pointer;line-height:1}
-button.plate:hover span,button.plate[aria-pressed="true"] span{text-decoration:underline;opacity:1}
-button.asheet{font:inherit;cursor:pointer;appearance:none}
-.arch-col{flex:none;width:900px;max-width:100%}
+.arch-col{flex:none;width:680px;max-width:100%}
 .arch-col .a-off{margin-top:12px}
-.bay.grow{flex:1 1 0}
 /* ---------- 卡牌与卡包 ----------
  * 一篇文章一张牌：牌背是固定封面（圆光夜读小景）加题签，右上铜钱是用时，底边是来源和宝石。--dom 是领域色，一盒一种底色。 */
 .yc{--dom2:color-mix(in srgb,var(--dom) 68%,#fff);--domd:color-mix(in srgb,var(--dom) 48%,#000);position:relative;display:block;flex:none;width:112px;height:157px;margin:0;padding:0;border:0;box-sizing:border-box;border-radius:6px;overflow:hidden;
@@ -2173,16 +2248,8 @@ button.wm-lab:focus-visible{outline:2px solid var(--indigo);outline-offset:2px}
 @media (prefers-reduced-motion: reduce){.fx-pull .cb,.fx-sheen .cb{transition:none}.fx-sheen .cb:hover .cb-gl::before{animation:none}}
 
 @media (max-width:1100px){
-  .cabinet.archive{width:100%}
   .arch-side{align-items:flex-start}
-  .archive .bay-row{flex-wrap:wrap;row-gap:30px}
-  .bay.atray{flex:1 1 100%;min-height:250px}
   .arch-col{width:100%}
-  .archive .bay:has(.bay-empty),.archive .bay.vacant{min-height:64px;padding-top:14px}
-  .archive .bay:has(.bay-empty) .bookend,.archive .bay.vacant .bookend{display:none}
-  .archive .bay-empty{margin:0 0 4px 0}
-  .bay.atray:has(.atray-empty){min-height:0}
-  .atray:has(.atray-empty) .atray-pile{height:70px}
   .ar-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 }
 @media (max-width:640px){
@@ -8123,37 +8190,65 @@ var FOIL = (function () {
       '<span class="ab-foot">' + (tp.status === "closed" ? '<i class="ab-seal" aria-hidden="true">结</i>' : "") + "<span>" + n + " 件</span></span></span>" +
       '<i class="ab-hole" aria-hidden="true"></i>' + (tp.status === "yearly" ? '<span class="ab-tag">年更</span>' : "") + (tp.status === "doing" ? '<i class="sp-rib" aria-hidden="true"></i>' : "") + "</button>";
   }
-  /* 剪报夹：一个领域里还没装盒的剪报，插在一只牛皮纸文件架里，露出纸头 */
+  /* ---------- 档案架的纸模形式（2026-11-08 定，docs/shelf-design-review.md 六之二到六之五） ----------
+   * 一块牛皮纸板，一个领域一层层板。一个课题一个牌盒，立在层板上一排同向（像一排扑克牌盒），盒越厚牌越多；
+   * 盒面：大的领域单字、卷号、盒名；同一层板上赤陶与黑卡交替。没装盒的剪报是层板尽头的一叠牌：有没拆的就牌背朝上，都拆过了最上面一张牌面朝上写标题。
+   * 没有状态签、没有统计牌（用户 11-08 定：使用频率上是无效单位）；状态只在打开盒子后看牌。收件匣是最下面一层。 */
+  var DOM_GLYPH = { geo: "地", cycle: "周", fut: "货", co: "司", fin: "金" };
+  function domGlyph(k) { return DOM_GLYPH[k] || (domInfo(k).name || "研").charAt(0); }
   function folderText(list) { return list.map(function (c) { return c.title + " " + (c.note || "") + " " + (c.author || ""); }).join(" ").toLowerCase(); }
-  function folderHTML(tid, list) { return bagHTML(tid, list, "shelf"); }
   function newBoxSlot(tid) {
-    return S.canEdit ? '<button type="button" class="anew" data-act="abox-new" data-t="' + esc(tid) + '" title="在「' + esc(domInfo(tid).name) + '」新立一个档案盒"><b aria-hidden="true">＋</b><span>新档案盒</span></button>' : "";
+    return S.canEdit ? '<button type="button" class="anew" data-act="abox-new" data-t="' + esc(tid) + '" title="在「' + esc(domInfo(tid).name) + '」新立一个档案盒"><b aria-hidden="true">＋</b><span>新盒</span></button>' : "";
   }
-  function archBayHTML(tid, w) {
+  function apackHTML(tp, idx) {
+    var n = topicItems(tp).length, on = S.archPick === tp.id;
+    var tip = tp.title + (tp.question ? "：" + tp.question : "") + " · " + n + " 件" + (tp.since ? " · 立卷 " + tp.since : "");
+    return '<button type="button" class="apack' + (on ? " picked" : "") + (archMatch(tp) ? "" : " dim") + '" data-act="abox" data-t="' + esc(tp.id) + '" title="' + esc(tip) + '" aria-pressed="' + on + '" aria-label="' + esc(tp.title + "，" + n + " 件") + '">' +
+      '<span class="pp-pack' + (idx % 2 ? " k" : "") + '" style="--n:' + n + '" aria-hidden="true">' +
+      '<span class="f front"><i class="frame"></i><span class="code">' + esc(topicNo(tp)) + '</span><span class="g">' + esc(domGlyph(tp.track)) + '</span><span class="n">' + esc(tp.title) + "</span></span>" +
+      '<span class="f side"><span>' + esc(tp.title) + " · " + n + ' 件</span></span><span class="f top"></span></span></button>';
+  }
+  /* 一叠牌：clips 是没装盒的剪报（tid 是领域；"" 是收件匣），reports 是收件匣里没立卷的内置单件 */
+  function adeckHTML(tid, clips, reports) {
+    var unseen = clips.filter(function (c) { return !c.seen; }), on = S.archPick === "cf:" + tid, q = S.archQ || "";
+    var all = (reports || []).map(function (rp) { return { title: rp.title, note: rp.desc || "" }; }).concat(clips);
+    var text = folderText(all), n = all.length, top = all[all.length - 1];
+    var glyph = tid ? domGlyph(tid) : "匣";
+    var face = unseen.length ? '<span class="cd"><span class="g">' + esc(glyph) + "</span></span>" : '<span class="cd"></span><span class="cd up">' + esc(top ? top.title : "") + "</span>";
+    var lab = "<em>" + (tid ? "剪报 · " : "收件匣 · ") + n + (unseen.length ? " · " + unseen.length + " 没拆" : "") + "</em>";
+    var tip = (tid ? "还没装盒的 " + n + " 篇剪报" : "收件匣里 " + n + " 件") + (unseen.length ? "，" + unseen.length + " 篇还没拆封" : "") + "。点开摊在桌上";
+    var cls = "adeck afold" + (on ? " picked" : "") + (q && text.indexOf(q) < 0 ? " dim" : "");
+    if (clips.length) return '<button type="button" class="' + cls + '" data-act="abox" data-t="cf:' + esc(tid) + '" data-q="' + esc(text) + '" title="' + esc(tip) + '" aria-pressed="' + on + '">' + face + lab + "</button>";
+    var rp = reports[reports.length - 1];
+    return '<a class="' + cls.replace(" afold", "") + '" href="' + esc(reportHref(rp)) + '" target="_blank" rel="noopener" data-q="' + esc(text) + '" title="' + esc(tip.replace("点开摊在桌上", "打开最新的一件")) + '">' + face + lab + "</a>";
+  }
+  function arowHTML(tid) {
     var di = domInfo(tid), tps = boxesOf(tid), loose = looseClips(tid);
     var n = tps.reduce(function (a, tp) { return a + topicItems(tp).length; }, 0);
-    var row = tps.map(function (tp) { return boxHTML(tp); }).join("") + (loose.length ? folderHTML(tid, loose) : "");
-    var vacant = !row;
-    row = (row || (S.canEdit ? "" : '<span class="bay-empty">还没有课题</span>')) + newBoxSlot(tid);
-    var plate = (di.code ? '<b class="cls">' + esc(di.code) + "</b>" : "") + "<b>" + esc(di.name) + "</b><span>" + tps.length + " 卷 · " + n + " 件" + (loose.length ? " · 剪报 " + loose.length : "") + "</span>";
-    return '<div class="bay' + (w ? "" : " grow") + (vacant ? " vacant" : "") + '" style="--c:' + di.col + (w ? ";--w:" + w + "px" : "") + '"><div class="bay-row">' + row + '<span class="bookend" aria-hidden="true"></span></div>' +
-      '<div class="lip">' + (di.href ? '<a class="plate" href="' + esc(di.href) + '">' + plate + "</a>" : '<span class="plate">' + plate + "</span>") + "</div></div>";
+    var packs = tps.map(apackHTML).join(""), deck = loose.length ? adeckHTML(tid, loose, []) : "", empty = !packs && !deck;
+    var lab = (di.code ? '<span class="cls">' + esc(di.code) + "</span>" : "") + "<b>" + esc(di.name) + "</b><span>" + (tps.length ? tps.length + " 盒 · " + n + " 件" : "还没有盒子") + (loose.length ? " · 剪报 " + loose.length : "") + "</span>";
+    return '<div class="arow pp-stage' + (empty ? " empty" : "") + '" data-dom="' + esc(tid) + '"><i class="plank" aria-hidden="true"></i>' + packs + deck + newBoxSlot(tid) +
+      (di.href ? '<a class="arow-lab pp-paper" href="' + esc(di.href) + '">' + lab + "</a>" : '<span class="arow-lab pp-paper">' + lab + "</span>") + "</div>";
   }
-  function trayHTML(w) {
-    var list = inboxItems(), clips = looseClips(""), q = S.archQ || "";
-    var all = list.concat(clips.slice(0, 3).reverse().map(clipItem));
-    var sheets = all.slice(-3).map(function (rp, i, arr) {
-      var k = arr.length - 1 - i, text = (rp.title + " " + (rp.desc || "")).toLowerCase();
-      var st = ' style="--k:var(' + KINDS[reportKind(rp)] + ");bottom:" + (16 + k * 40) + "px;transform:rotate(" + (k % 2 ? -3 : 2) + 'deg)"';
-      var inner = '<i aria-hidden="true"></i><b>' + esc(rp.title) + "</b><span>" + esc(reportKind(rp)) + " · " + esc(rp.date || "") + "</span>";
-      var cls = "asheet" + (q && text.indexOf(q) < 0 ? " dim" : "");
-      if (rp.clip && rp.clip.status !== "link") return '<button type="button" class="' + cls + '" data-act="clip-open" data-id="' + esc(rp.clip.id) + '" data-q="' + esc(text) + '"' + st + ">" + inner + "</button>";
-      return '<a class="' + cls + '" href="' + esc(rp.clip ? rp.clip.url : reportHref(rp)) + '" target="_blank" rel="noopener" data-q="' + esc(text) + '"' + st + ">" + inner + "</a>";
-    }).join("");
-    var nn = list.length + clips.length, lab = "<span>" + (nn ? nn + " 件待归卷" : "没有待归卷的") + "</span>";
-    return '<div class="bay atray" style="--w:' + w + 'px"><div class="atray-h"><b>收件匣</b><span>零散的小分析、没分领域的剪报先放这里；攒到两件讲同一件事，再立卷装盒。</span></div>' +
-      '<div class="atray-pile">' + (sheets || '<span class="atray-empty">空</span>') + '<i class="atray-base" aria-hidden="true"></i></div>' +
-      '<div class="lip">' + (clips.length ? '<button type="button" class="plate" data-act="abox" data-t="cf:" aria-pressed="' + (S.archPick === "cf:") + '">' + lab + "</button>" : '<span class="plate">' + lab + "</span>") + "</div></div>";
+  function ainboxHTML() {
+    var list = inboxItems(), clips = looseClips(""), n = list.length + clips.length;
+    var deck = n ? adeckHTML("", clips, list) : '<span class="aempty pp-cut">空</span>';
+    return '<div class="arow ainbox atray pp-stage' + (n ? "" : " empty") + '"><i class="plank" aria-hidden="true"></i>' + deck +
+      '<span class="arow-lab pp-paper"><b>收件匣</b><span>' + (n ? n + " 件待归卷" : "零散的小分析、没分领域的剪报先放这里") + "</span></span></div>";
+  }
+  /* 还没有盒子也没有剪报的领域合在一层：每个领域一个「＋ 新盒」的切口加一块层板签 */
+  function aemptiesHTML(list) {
+    if (!list.length) return "";
+    return '<div class="arow aempties pp-stage"><i class="plank" aria-hidden="true"></i>' + list.map(function (k) {
+      var di = domInfo(k), lab = (di.code ? '<span class="cls">' + esc(di.code) + "</span>" : "") + "<b>" + esc(di.name) + "</b>";
+      return '<div class="aslot" data-dom="' + esc(k) + '">' + newBoxSlot(k) + (di.href ? '<a class="arow-lab pp-paper" href="' + esc(di.href) + '">' + lab + "</a>" : '<span class="arow-lab pp-paper">' + lab + "</span>") + "</div>";
+    }).join("") + "</div>";
+  }
+  function arackHTML() {
+    var order = [], full = [], empties = [];
+    ARCH_ROWS.forEach(function (row) { row.forEach(function (c) { if (c[0] !== "+") order.push(c[0]); }); });
+    order.concat(archCustom()).forEach(function (k) { (boxesOf(k).length || looseClips(k).length ? full : empties).push(k); });
+    return '<section class="arack archive pp-paper pp-slab" aria-label="档案架">' + full.map(arowHTML).join("") + aemptiesHTML(empties) + ainboxHTML() + "</section>";
   }
   /* 打开的盒子下面：改、删（自己立的）或撤下（内置的） */
   function boxActsHTML(tp) {
@@ -8328,7 +8423,7 @@ var FOIL = (function () {
     if (/^cf:/.test(was || "") && bx && !looseClips(was.slice(3)).length) S.archPick = bx.id;
     render();
     if (r0 && S.route === "archive") {
-      var tg = bx ? document.querySelector('.abox[data-t="' + bx.id + '"]')
+      var tg = bx ? document.querySelector('.archive [data-act="abox"][data-t="' + bx.id + '"]') || document.querySelector('.abox[data-t="' + bx.id + '"]')
         : upd.track ? document.querySelector('.afold[data-t="cf:' + upd.track + '"]')
         : document.querySelector(".atray");
       flySlip(r0, tg);
@@ -8366,27 +8461,14 @@ var FOIL = (function () {
     var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null;
     if (fp !== null && !looseClips(fp).length) { fp = null; S.archPick = null; }
     if (fp === null && S.archPick && !TOPIC[S.archPick]) S.archPick = null;
-    var f = S.archF || "all", cust = archCustom();
-    function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="arch-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
-    function cnt(s) { return TOPICS.filter(function (tp) { return tp.status === s; }).length; }
-    var rows = ARCH_ROWS.slice();
-    for (var ci = 0; ci < cust.length; ci += 3) rows.push(cust.slice(ci, ci + 3).map(function (k) { return [k, 0]; }));
-    var cab = rows.map(function (row) {
-      var empty = row.every(function (c) { return c[0] === "+" ? !inboxItems().length && !looseClips("").length : !boxesOf(c[0]).length && !looseClips(c[0]).length; });
-      return '<div class="tier' + (empty ? " empty" : "") + '">' + row.map(function (c) { return c[0] === "+" ? trayHTML(c[1]) : archBayHTML(c[0], c[1]); }).join("") + "</div>";
-    }).join("");
-    var legend = Object.keys(KINDS).filter(function (k) { return k !== "剪报" || clipsOn(); }).map(function (k) { return '<span style="--k:var(' + KINDS[k] + ')"><i aria-hidden="true"></i>' + k + "</span>"; }).join("");
-    var rules = [["一", "一个问题一盒", "新资料先问：它在回答哪个问题？已经有这个问题，就装进那一盒；是新问题才立新卷，点「＋ 新档案盒」自己就能立。卷号跟书架用同一套索书号。"],
-      ["二", "盒里按件编号", "每件是档案、数据、计划、纪要、剪报之一，色签露在盒顶。件越多盒越厚，一眼看出这一盒是查资料多，还是做数据多。"],
-      ["三", "零散的先进收件匣", "一次性的小分析、没分领域的剪报不急着立卷；分了领域还没装盒的剪报装在那一格的剪报夹（档案袋）里，点开拆封。攒到两件讲同一件事，再一起装盒。"],
+    var rules = [["一", "一个问题一盒", "新资料先问：它在回答哪个问题？已经有这个问题，就装进那一盒；是新问题才立新卷，点层板上的「＋ 新盒」自己就能立。卷号跟书架用同一套索书号。"],
+      ["二", "盒里一件一张牌", "每件是档案、数据、计划、纪要、剪报之一，装进盒里就是一张牌。件越多盒越厚，一眼看出哪一盒积得最多。"],
+      ["三", "零散的先进收件匣", "一次性的小分析、没分领域的剪报不急着立卷；分了领域还没装盒的剪报是那一层尽头的一叠牌，没拆的牌背朝上。攒到两件讲同一件事，再一起装盒。"],
       ["四", "线网上一盒一个地标", "地图上只画课题，不画单件，地标下面写着件数。资料再多，地标也只随课题增长。"]];
-    var cabSec = LK().scene === "youchai" ? yxArchiveHTML() : '<section class="cabinet archive" aria-label="档案架"><div class="cab-top"><span>研究档案</span></div><div class="cab-body">' + cab + '</div><div class="cab-feet" aria-hidden="true"><i></i><i></i></div></section>';
+    var cabSec = LK().scene === "youchai" ? yxArchiveHTML() : arackHTML();
     return '<div class="view shelf archive-v">' + bannerHTML() +
-      '<header class="phead arch-head"><div>' + shelfSeg("archive") +
-      '<div class="chips" role="group" aria-label="只看">' + chip("all", "全部", TOPICS.length) + chip("doing", "在做", cnt("doing")) + chip("yearly", "要年更", cnt("yearly")) + chip("closed", "已结卷", cnt("closed")) +
-      (S.canEdit ? '<button type="button" class="chipbtn chip-new" data-act="abox-new">＋ 新档案盒</button>' : "") + "</div></div>" +
-      '<div class="arch-side"><div class="k-legend"><span class="kl-h">盒顶的色签</span>' + legend + "</div>" +
-      '<label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
+      '<header class="phead arch-head"><div>' + shelfSeg("archive") + "</div>" +
+      '<div class="arch-side"><label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
       '<div class="arch-main"><div class="arch-col">' + cabSec + boxOffHTML() + clipBarHTML() + "</div></div>" +
       '<section class="arules" aria-labelledby="ar-h"><h2 id="ar-h">怎样归档</h2><div class="ar-grid">' + rules.map(function (r) { return '<div class="arule"><p><b class="ar-n">' + r[0] + "</b><b>" + r[1] + "</b></p><p>" + r[2] + "</p></div>"; }).join("") + "</div>" +
       '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进邮差”，我按这四条归档；剪报和自己立的盒子，在这里直接整理。</p></section>' + boxSheetHTML() + deskHTML() + "</div>";
@@ -8394,8 +8476,8 @@ var FOIL = (function () {
   /* 搜索框：不重画页面，只把不相关的盒子调暗 */
   function applyArchFilter() {
     var q = S.archQ || "";
-    document.querySelectorAll(".archive .abox").forEach(function (b) { var tp = TOPIC[b.getAttribute("data-t")]; if (tp) b.classList.toggle("dim", !archMatch(tp)); });
-    document.querySelectorAll(".archive .asheet, .archive .afold").forEach(function (a) { a.classList.toggle("dim", !!q && (a.getAttribute("data-q") || "").indexOf(q) < 0); });
+    document.querySelectorAll(".archive .abox, .archive .apack").forEach(function (b) { var tp = TOPIC[b.getAttribute("data-t")]; if (tp) b.classList.toggle("dim", !archMatch(tp)); });
+    document.querySelectorAll(".archive .asheet, .archive .afold, .archive .adeck").forEach(function (a) { a.classList.toggle("dim", !!q && (a.getAttribute("data-q") || "").indexOf(q) < 0); });
   }
   /* ---------- 卡牌：一篇文章一张牌 ----------
    * 盒里的每一件、夹里的每一篇都是一张牌，平时牌背朝上。牌背是固定的封面（圆光里一幅夜读小景：月、远山、一盏灯、一卷书）
@@ -11645,7 +11727,7 @@ var FOIL = (function () {
     document.querySelectorAll(".drop-ok").forEach(function (el) { el.classList.remove("drop-ok"); });
   });
   function dropTarget(e) {
-    var el = e.target.closest && e.target.closest('.abox[data-t]:not([data-t^="cf:"]), .afold, .atray');
+    var el = e.target.closest && e.target.closest('.abox[data-t]:not([data-t^="cf:"]), .apack[data-t], .afold, .atray');
     return el || null;
   }
   document.addEventListener("dragover", function (e) {

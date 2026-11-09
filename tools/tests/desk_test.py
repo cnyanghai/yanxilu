@@ -25,7 +25,7 @@ async def main():
         await pg.goto(B + "/#archive"); await pg.wait_for_timeout(1500)
         print("desk at start:", await pg.locator(".ydesk").count(), "| side panel:", await pg.locator(".pulled").count(), "| clips section:", await pg.locator(".clips").count(), "| clipbar:", await pg.locator(".clipbar").count())
         await pg.screenshot(path=OUT + "desk-shelf.png", full_page=True)
-        fin = pg.locator(".bay").nth(1)
+        fin = pg.locator('.arow[data-dom="fin"]')
         await fin.locator(".afold").click(); await pg.wait_for_timeout(300)
         print("desk open:", await pg.locator(".ydesk").count(), "| body locked:", await pg.evaluate("document.body.classList.contains('desk-on')"), "| focus:", await pg.evaluate("document.activeElement.getAttribute('data-act')"))
         await pg.screenshot(path=OUT + "desk-sealed.png")
@@ -55,7 +55,7 @@ async def main():
         await pg.keyboard.press("Escape"); await pg.wait_for_timeout(300)
         print("after Esc:", await pg.locator(".ydesk").count(), "| locked:", await pg.evaluate("document.body.classList.contains('desk-on')"))
         # open a box desk
-        await pg.locator('.abox[data-t]:not([data-t^="cf:"])').first.click(); await pg.wait_for_timeout(300)
+        await pg.locator('.apack[data-t]').first.click(); await pg.wait_for_timeout(300)
         print("box desk:", await pg.inner_text(".ydesk h2"), "| cards:", await pg.locator(".ydesk .yhand .yc").count())
         await pg.screenshot(path=OUT + "desk-box.png")
         await pg.click('.ydesk [data-act="desk-close"]'); await pg.wait_for_timeout(300)
