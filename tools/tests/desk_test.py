@@ -23,25 +23,25 @@ async def main():
         await ctx.add_cookies([{"name": "sid", "value": "u1", "url": B}])
         pg = await ctx.new_page(); pg.on("pageerror", lambda e: errs.append("main: " + str(e)))
         await pg.goto(B + "/#archive"); await pg.wait_for_timeout(1500)
-        print("desk at start:", await pg.locator(".ydesk").count(), "| side panel:", await pg.locator(".pulled").count(), "| clips section:", await pg.locator(".clips").count(), "| clipbar:", await pg.locator(".clipbar").count())
+        print("desk at start:", await pg.locator(".ytable").count(), "| side panel:", await pg.locator(".pulled").count(), "| clips section:", await pg.locator(".clips").count(), "| clipbar:", await pg.locator(".clipbar").count())
         await pg.screenshot(path=OUT + "desk-shelf.png", full_page=True)
         fin = pg.locator('.afold[data-t="cf:fin"]')
         await fin.click(); await pg.wait_for_timeout(300)
-        print("desk open:", await pg.locator(".ydesk").count(), "| body locked:", await pg.evaluate("document.body.classList.contains('desk-on')"), "| focus:", await pg.evaluate("document.activeElement.getAttribute('data-act')"))
+        print("desk open:", await pg.locator(".ytable").count(), "| body locked:", await pg.evaluate("document.body.classList.contains('desk-on')"), "| focus:", await pg.evaluate("document.activeElement.getAttribute('data-act')"))
         await pg.screenshot(path=OUT + "desk-sealed.png")
-        await pg.click(".ydesk .ybag.big.sealed"); await pg.wait_for_timeout(700)
+        await pg.click(".ytable .ybag.big.sealed"); await pg.wait_for_timeout(700)
         await pg.screenshot(path=OUT + "desk-flying.png")
         await pg.wait_for_timeout(2200)
-        print("hand:", await pg.locator(".ydesk .yhand .yc").count(), "| boxes on desk:", await pg.locator(".ydesk .yd-boxrow .abox").count(), "| anew:", await pg.locator(".ydesk .anew").count())
+        print("hand:", await pg.locator(".ytable .yhand .yc").count(), "| boxes on desk:", await pg.locator(".ytable .yd-boxrow .apack").count(), "| anew:", await pg.locator(".ytable .anew").count())
         await pg.screenshot(path=OUT + "desk-opened.png", full_page=False)
         # flip from the desk
-        await pg.click(".ydesk .yhand .yc >> nth=0"); await pg.wait_for_timeout(1500)
+        await pg.click(".ytable .yhand .yc >> nth=0"); await pg.wait_for_timeout(1500)
         print("reader:", await pg.locator(".rd").count())
         await pg.click('[data-act="rd-close"]'); await pg.wait_for_timeout(400)
-        print("desk still open after reader:", await pg.locator(".ydesk").count())
+        print("desk still open after reader:", await pg.locator(".ytable").count())
         # file via drop onto a desk box (synthetic DnD)
         moved = await pg.evaluate("""() => {
-          const card = document.querySelector('.ydesk .yhand .yc[data-clip]'); const box = document.querySelector('.ydesk .yd-boxrow .abox[data-t]');
+          const card = document.querySelector('.ytable .yhand .yc[data-clip]'); const box = document.querySelector('.ytable .yd-boxrow .apack[data-t]');
           if (!card || !box) return 'missing';
           const dt = new DataTransfer();
           card.dispatchEvent(new DragEvent('dragstart', {bubbles: true, dataTransfer: dt}));
@@ -50,20 +50,20 @@ async def main():
           return card.getAttribute('data-clip') + ' -> ' + box.getAttribute('data-t');
         }""")
         await pg.wait_for_timeout(500)
-        print("drop:", moved, "| toast:", await pg.inner_text("#toast"), "| hand now:", await pg.locator(".ydesk .yhand .yc").count())
+        print("drop:", moved, "| toast:", await pg.inner_text("#toast"), "| hand now:", await pg.locator(".ytable .yhand .yc").count())
         # Esc closes
         await pg.keyboard.press("Escape"); await pg.wait_for_timeout(300)
-        print("after Esc:", await pg.locator(".ydesk").count(), "| locked:", await pg.evaluate("document.body.classList.contains('desk-on')"))
+        print("after Esc:", await pg.locator(".ytable").count(), "| locked:", await pg.evaluate("document.body.classList.contains('desk-on')"))
         # open a box desk
         await pg.locator('.apack[data-t]').first.click(); await pg.wait_for_timeout(300)
-        print("box desk:", await pg.inner_text(".ydesk h2"), "| cards:", await pg.locator(".ydesk .yhand .yc").count())
+        print("box desk:", await pg.inner_text(".ytable h2"), "| cards:", await pg.locator(".ytable .yhand .yc").count())
         await pg.screenshot(path=OUT + "desk-box.png")
-        await pg.click('.ydesk [data-act="desk-close"]'); await pg.wait_for_timeout(300)
+        await pg.click('.ytable [data-act="desk-close"]'); await pg.wait_for_timeout(300)
         # mobile
         await pg.set_viewport_size({"width": 390, "height": 844}); await pg.wait_for_timeout(300)
         await fin.click(); await pg.wait_for_timeout(400)
         await pg.screenshot(path=OUT + "desk-m.png", full_page=False)
-        print("mobile desk:", await pg.locator(".ydesk").count(), "| overflow:", await pg.evaluate("document.querySelector('.ydesk').scrollWidth"))
+        print("mobile desk:", await pg.locator(".ytable").count(), "| overflow:", await pg.evaluate("document.querySelector('.ytable').scrollWidth"))
         print("errors:", errs)
         await b.close()
 asyncio.run(main())

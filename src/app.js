@@ -2886,17 +2886,25 @@ var FOIL = (function () {
     return '<table class="aitems"><thead><tr><th scope="col">件</th><th scope="col">题名</th><th scope="col">类型</th><th scope="col" class="dt">日期</th></tr></thead><tbody>' + rows + "</tbody></table>";
   }
   function deskEye(text) {
-    return '<p class="eyebrow yd-eye"><span>' + text + '</span><button type="button" class="btn ghost small" data-act="desk-close" aria-label="关上，回到档案架">回到档案架<kbd>Esc</kbd></button></p>';
+    return '<div class="yd-eye"><span class="yd-eye-t">' + text + '</span><button type="button" class="btn ghost small" data-act="desk-close" aria-label="关上，回到档案架">回到档案架<kbd>Esc</kbd></button></div>';
   }
-  function archPanelHTML(tpArg, desk) {
+  /* 桌面上立着的那只盒子：盖子翻开，牌已经抽出来 */
+  function openPackHTML(tp, tid, n) {
+    var code = tp ? topicNo(tp) : tid ? (domInfo(tid).code || "") : "匣", g = tp ? domGlyph(tp.track) : tid ? domGlyph(tid) : "匣", name = tp ? tp.title : tid ? domInfo(tid).name + " · 剪报" : "收件匣";
+    return '<span class="pp-pack open" style="--n:' + n + '" aria-hidden="true"><span class="f top"></span><i class="lid"></i>' +
+      '<span class="f front"><i class="frame"></i><span class="code">' + esc(code) + '</span><span class="g">' + esc(g) + '</span><span class="n">' + esc(name) + "</span></span>" +
+      '<span class="f side"><span>' + esc(name) + " · " + n + ' 件</span></span></span>';
+  }
+  /* 打开的档案盒：桌面上盒子立着、盖子翻开，牌摊在旁边；读过的牌面朝上、没读的牌背朝上。下面收着牌册、来龙去脉、备考与改删撤 */
+  function archPanelHTML(tpArg) {
     var tp = tpArg || TOPIC[S.archPick]; if (!tp) return "";
-    var items = topicItems(tp), col = domCol(tp.track), di = domInfo(tp.track);
-    var meta = [di.name, tp.since ? "立卷 " + tp.since : "", TP_STATUS[tp.status], items.length + " 件"].filter(Boolean).join(" · ");
+    var items = topicItems(tp), di = domInfo(tp.track);
+    var meta = [di.name, tp.since ? "立卷 " + tp.since : "", items.length + " 件"].filter(Boolean).join(" · ");
     var rel = "";
     if (!tp.mine) {
       var books = (tp.books || []).filter(function (b) { return ITEMS[b]; });
       var spines = books.map(function (b) {
-        var it = ITEMS[b], c2 = it.home ? domCol(it.home) : col;
+        var it = ITEMS[b], c2 = it.home ? domCol(it.home) : domCol(tp.track);
         return '<button type="button" class="ms" data-act="pick-go" data-id="' + esc(b) + '" title="《' + esc(it.title) + "》" + esc(it.by || "") + '" aria-label="在书墙上看《' + esc(it.title) + '》" style="--c:' + c2 + ";height:" + (40 + (hashN(b) % 12)) + 'px"></button>';
       }).join("");
       var uses = [];
@@ -2904,52 +2912,51 @@ var FOIL = (function () {
       var line = tp.line && typeof freeLine === "function" ? freeLine(tp.line) : null, grown = "";
       if (line) grown += '<span class="ln" style="--c2:var(' + line.color + ')"></span>自选线「' + esc(freeName(line)) + "」" + freeStops(line).length + " 站";
       if (uses.length) grown += (grown ? "<br>" : "") + uses.map(esc).join("<br>");
-      rel = '<div><p class="meta ap-rel-h">来龙去脉</p><div class="arel"><div><b>从哪来</b>' + esc(tp.origin || "—") + "</div>" +
+      rel = '<details class="ylist"><summary><b>来龙去脉</b></summary><div class="arel"><div><b>从哪来</b>' + esc(tp.origin || "—") + "</div>" +
         "<div><b>用到的书</b>" + (books.length ? '<span class="ms-row">' + spines + "</span>书架上 " + books.length + " 本" : "—") + "</div>" +
-        "<div><b>" + (line ? "长出来的" : "用得上") + "</b>" + (grown || "—") + "</div></div></div>";
+        "<div><b>" + (line ? "长出来的" : "用得上") + "</b>" + (grown || "—") + "</div></div></details>";
     }
-    var q = tp.question || tp.answer ? '<div class="ap-q">' + (tp.question ? '<small>课题问题</small><p class="q">' + esc(tp.question) + "</p>" : "") +
-      (tp.answer ? "<small>现在的答案（每装进一件就改一次）</small><p class=\"a\">" + esc(tp.answer) + "</p>" : "") + "</div>" : "";
-    var table = items.length ? handHTML(items, tp) + gemLegendHTML(items, tp) +
-        '<details class="ylist" data-ylist=""' + (S.ylist ? " open" : "") + '><summary><b>牌册</b><small>卷内目录 · ' + items.length + " 件</small></summary>" + itemTableHTML(itemRowsHTML(items, tp)) + "</details>"
-      : '<p class="meta ap-empty">盒里还是空的。' + (clipsOn() ? "在剪报的「放到」里选这一盒，就装进来了。" : "") + "</p>";
-    var eye = "打开的档案盒 · 一副牌" + (tp.mine ? " · 自己立的" : "");
-    return (desk ? '<div class="yd-in apanel" aria-labelledby="ap-h" style="--c:' + col + '">' + deskEye(eye) : '<aside class="pulled apanel" aria-labelledby="ap-h" style="--c:' + col + '"><p class="eyebrow">' + eye + "</p>") +
-      '<div class="pb-h"><span class="pb-bar" aria-hidden="true"></span><div><span class="ap-no">研 · ' + esc(topicNo(tp)) + '</span><h2 id="ap-h">' + esc(tp.title) + '</h2><p class="meta">' + esc(meta) + "</p></div></div>" +
-      q + table + rel + (tp.note ? '<p class="ap-note"><b>备考</b>' + esc(tp.note) + "</p>" : "") + boxActsHTML(tp) + (desk ? "</div>" : "</aside>");
+    var q = tp.question ? '<p class="yt-q pp-emb">' + esc(tp.question) + "</p>" : "";
+    var ans = tp.answer ? '<div class="yt-ans pp-paper pp-slab"><small>现在的答案 · 每装进一件就改一次</small><p>' + esc(tp.answer) + "</p></div>" : "";
+    var scene = '<div class="yt-scene">' + openPackHTML(tp, null, items.length) +
+      (items.length ? handHTML(items, tp) : '<p class="meta ap-empty">盒里还是空的。' + (clipsOn() ? "在剪报的「放到」里选这一盒，就装进来了。" : "") + "</p>") + "</div>";
+    var list = items.length ? '<details class="ylist" data-ylist=""' + (S.ylist ? " open" : "") + '><summary><b>牌册</b><small>卷内目录 · ' + items.length + " 件</small></summary>" + itemTableHTML(itemRowsHTML(items, tp)) + "</details>" : "";
+    return '<div class="yd-in apanel" aria-labelledby="ap-h">' + deskEye("打开的档案盒" + (tp.mine ? " · 自己立的" : "")) +
+      '<div class="yt-head"><span class="ap-no">' + esc(topicNo(tp)) + '</span><h2 id="ap-h" class="pp-emb">' + esc(tp.title) + '</h2><p class="meta">' + esc(meta) + "</p></div>" +
+      q + scene + ans + list + rel + (tp.note ? '<p class="ap-note"><b>备考</b>' + esc(tp.note) + "</p>" : "") + boxActsHTML(tp) + "</div>";
   }
-  /* 打开的剪报夹（tid 为 "" 是收件匣里没分领域的剪报） */
+  /* 打开的那叠牌（tid 为 "" 是收件匣里没分领域的剪报）：没拆的封着，点开拆封；拆过的摊开 */
   function folderPanelHTML(tid) {
-    var list = looseClips(tid), di = tid ? domInfo(tid) : null, col = di ? di.col : "var(--ink-3)";
+    var list = looseClips(tid), di = tid ? domInfo(tid) : null;
     var rows = list.map(function (c, i) {
       var rp = clipItem(c), sub = [c.author, clipKindLabel(c)].filter(Boolean).join(" · ") + (rp.desc ? " · " + rp.desc : "");
       return '<tr><td class="n">' + pad2(i + 1) + "</td><td>" + itemLink(rp, esc(c.title) + (itemOut(rp) ? ' <span aria-hidden="true">↗</span>' : "")) + '<span class="d">' + esc(sub) + "</span>" + (S.canEdit ? placeSel(c) + clipDelHTML(c) : "") + "</td>" +
         '<td class="dt">' + esc(rp.date) + "</td></tr>";
     }).join("");
-    var tip = tid ? "把牌拖到下面的档案盒上就装进盒里，或在牌册的「放到」里选；讲同一件事的攒到两三篇，可以新立一盒。" : "在牌册的「放到」里选一个领域或档案盒。";
-    var boxes = tid && S.canEdit ? '<div class="yd-boxes"><p class="meta">「' + esc(di.name) + '」的档案盒 · 把牌拖上去就装进盒里</p><div class="yd-boxrow">' + boxesOf(tid).map(function (tp) { return boxHTML(tp); }).join("") + newBoxSlot(tid) + "</div></div>" : "";
+    var tip = tid ? "把牌拖到下面的盒子上就装进盒里，或在牌册的「放到」里选；讲同一件事的攒到两三篇，可以新立一盒。" : "在牌册的「放到」里选一个领域或档案盒。";
+    var boxes = S.canEdit && TOPICS.length ? '<div class="yd-boxes"><p class="meta">把牌拖到盒子上就装进盒里</p><div class="yd-boxrow pp-stage">' + TOPICS.map(apackHTML).join("") + newBoxSlot(tid) + "</div></div>" : "";
     var unseen = list.filter(function (c) { return !c.seen; }), anim = S.packAnim === tid, sealed = unseen.length > 0 || anim;
     var seen = anim ? list : list.filter(function (c) { return c.seen; });
     var pack = sealed
-      ? '<div class="ypack sealed"><div class="ymat" aria-hidden="true"><span>拆 封 处</span></div>' + bagHTML(tid, list, "sealed") +
-        '<p class="meta">' + (anim ? "拆封……" : (S.canEdit ? "点袋子拆封：" : "封着的：") + unseen.length + " 篇新剪的还没拆，约 " + packMinutes(unseen) + " 分钟" + (seen.length ? "；拆过的 " + seen.length + " 篇在下面" : "")) + "</p></div>"
-      : '<div class="ypack opened">' + bagHTML(tid, list, "opened") + '<p class="ypk-txt">拆过的袋子。' + list.length + " 篇牌在下面：拖到架子上的档案盒里就装盒；点一张翻开读。</p></div>";
-    var hand = seen.length ? handHTML(seen.map(clipItem), null, sealed && !anim ? "" : "") + gemLegendHTML(seen.map(clipItem), null) : "";
-    return '<div class="yd-in apanel afpanel" aria-labelledby="ap-h" style="--c:' + col + '">' + deskEye(tid ? "打开的剪报夹 · 卡包" : "收件匣 · 没分领域的剪报") +
-      '<div class="pb-h"><span class="pb-bar" aria-hidden="true"></span><div>' + (di && di.code ? '<span class="ap-no">' + esc(di.code) + "</span>" : "") + '<h2 id="ap-h">' + (tid ? esc(di.name) + " · 剪报夹" : "没分领域的剪报") + '</h2><p class="meta">' + list.length + " 篇" + (unseen.length ? " · " + unseen.length + " 篇没拆" : "") + "</p></div></div>" +
+      ? '<div class="ypack sealed">' + bagHTML(tid, list, "sealed") +
+        '<p class="meta">' + (anim ? "拆封……" : (S.canEdit ? "点一下拆封：" : "封着的：") + unseen.length + " 篇新剪的还没拆，约 " + packMinutes(unseen) + " 分钟" + (seen.length ? "；拆过的 " + seen.length + " 篇在下面" : "")) + "</p></div>"
+      : '<div class="ypack opened">' + bagHTML(tid, list, "opened") + '<p class="ypk-txt">拆过的牌。' + list.length + " 篇：拖到下面的盒子里就装盒；点一张翻开读。</p></div>";
+    var hand = seen.length ? handHTML(seen.map(clipItem), null) : "";
+    return '<div class="yd-in apanel afpanel" aria-labelledby="ap-h">' + deskEye(tid ? "没装盒的剪报" : "收件匣 · 没分领域的剪报") +
+      '<div class="yt-head">' + (di && di.code ? '<span class="ap-no">' + esc(di.code) + "</span>" : "") + '<h2 id="ap-h" class="pp-emb">' + (tid ? esc(di.name) + " · 剪报" : "没分领域的剪报") + '</h2><p class="meta">' + list.length + " 篇" + (unseen.length ? " · " + unseen.length + " 篇没拆" : "") + "</p></div>" +
       pack + hand + '<p class="meta">' + tip + "</p>" + boxes +
       '<details class="ylist" data-ylist=""' + (S.ylist ? " open" : "") + '><summary><b>牌册</b><small>放到哪 · ' + list.length + ' 篇</small></summary><table class="aitems"><thead><tr><th scope="col">篇</th><th scope="col">题名</th><th scope="col" class="dt">存的日期</th></tr></thead><tbody>' + rows + "</tbody></table></details>" +
       (S.canEdit && tid ? '<div class="btns"><button type="button" class="btn small" data-act="abox-new" data-t="' + esc(tid) + '">＋ 在「' + esc(di.name) + "」新立一盒</button></div>" : "") + "</div>";
   }
-  /* 桌面：点开一盒或一夹，整屏盖上一张深色木桌，牌摆在上面；Esc 或“回到档案架”关上 */
+  /* 桌面：点开一盒或一叠牌，桌面上摊开（桌面版在档案架右边一栏，手机整屏盖上来）；Esc 或“回到档案架”关上 */
   function deskHTML() {
     if (!S.deskOpen || S.route !== "archive") return "";
     if (LK().scene === "youchai" && !S.yxDeskOld) return yxDeskHTML();
     var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null, inner = "";
     if (fp !== null) { if (looseClips(fp).length) inner = folderPanelHTML(fp); }
-    else if (TOPIC[S.archPick]) inner = archPanelHTML(null, true);
+    else if (TOPIC[S.archPick]) inner = archPanelHTML(null);
     if (!inner) { S.deskOpen = false; return ""; }
-    return '<div class="ydesk" role="dialog" aria-modal="true" aria-labelledby="ap-h">' + inner + "</div>";
+    return '<section class="ytable pp-paper pp-slab" role="region" aria-labelledby="ap-h">' + inner + "</section>";
   }
   function deskClose() {
     var pick = S.archPick; S.deskOpen = false; S.yxCard = null; S.yxDeskOld = false; render();
@@ -3076,7 +3083,7 @@ var FOIL = (function () {
     return '<div class="view shelf archive-v">' + bannerHTML() +
       '<header class="phead arch-head"><div>' + shelfSeg("archive") + "</div>" +
       '<div class="arch-side"><label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
-      '<div class="arch-main"><div class="arch-col">' + cabSec + boxOffHTML() + clipBarHTML() + "</div></div>" + boxSheetHTML() + deskHTML() + "</div>";
+      '<div class="arch-main' + (S.deskOpen ? " has-desk" : "") + '"><div class="arch-col">' + cabSec + boxOffHTML() + clipBarHTML() + "</div>" + deskHTML() + "</div>" + boxSheetHTML() + "</div>";
   }
   /* 搜索框：不重画页面，只把不相关的盒子调暗 */
   function applyArchFilter() {
@@ -3115,28 +3122,20 @@ var FOIL = (function () {
   }
   function cardHTML(rp, tp) {
     var c = rp.clip, tr = tp ? tp.track : c && c.track && domExists(c.track) ? c.track : "";
-    var col = tr ? domCol(tr) : "#6E675E", g = cardGem(rp, tp), src = cardSrc(rp), min = cardMin(rp), out = itemOut(rp);
-    var tag = String(rp.title || "").replace(/\s+/g, " ").slice(0, 40), kind = reportKind(rp);
-    var coin = c ? '<span class="yc-coin" aria-hidden="true">' + esc(min) + "</span>" : '<span class="yc-coin k" style="--k:var(' + KINDS[kind] + ')" aria-hidden="true">' + esc(kind.charAt(0)) + "</span>";
-    var inner = '<span class="yc-silk" aria-hidden="true"></span><span class="yc-rim" aria-hidden="true"></span>' +
-      '<svg class="yc-scene" aria-hidden="true"><use href="#yx-scene"/></svg>' +
-      (g === 3 ? '<i class="yc-yin" aria-hidden="true">引</i>' : "") +
-      '<span class="yc-tag"><span>' + esc(tag) + "</span></span>" + coin +
-      '<span class="yc-band"><span class="yc-src ' + src.k + '"><i aria-hidden="true"></i>' + esc(src.label) + '</span><i class="yc-gem g' + g + '" aria-hidden="true">' + GEM_CH[g] + "</i></span>";
+    var g = cardGem(rp, tp), src = cardSrc(rp), min = cardMin(rp), out = itemOut(rp), kind = reportKind(rp), up = g >= 1;
+    var code = tp ? topicNo(tp) : tr ? (domInfo(tr).code || "") : "匣", glyph = tr ? domGlyph(tr) : "匣";
+    var meta = [src.label, rp.date || "", c && min && min !== "链" ? "约 " + min + " 分钟" : ""].filter(Boolean).join(" · ");
+    var inner = up
+      ? '<span class="yc-face"><span class="yc-kind" title="' + esc(kind) + '">' + esc(kind.charAt(0)) + '</span><b class="yc-t">' + esc(rp.title) + '</b><span class="yc-meta">' + esc(meta) + "</span>" + (rp.desc ? '<span class="yc-why">' + esc(rp.desc) + "</span>" : "") + (g === 2 ? '<i class="yc-mk" aria-hidden="true">批</i>' : "") + "</span>"
+      : '<span class="yc-bk"><i class="frame"></i><span class="code">' + esc(code) + '</span><span class="g">' + esc(glyph) + '</span><span class="code r">' + esc(code) + "</span></span>";
     var tip = rp.title + " · " + src.label + (c && min !== "链" ? " · 约 " + min + " 分钟" : "") + " · " + GEM_LABEL[g] + (out ? " · 在新标签页打开原文" : " · 点一下翻开读");
     var wait = c && S.packNew && S.packNew[c.id] ? " yc-wait" : "";
-    var attrs = ' class="yc' + wait + '" style="--dom:' + col + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"' + (c && S.canEdit ? ' draggable="true" data-clip="' + esc(c.id) + '"' : "");
+    var attrs = ' class="yc' + (up ? " up" : " dn") + wait + '" title="' + esc(tip) + '" aria-label="' + esc(tip) + '"' + (c && S.canEdit ? ' draggable="true" data-clip="' + esc(c.id) + '"' : "");
     if (out) return "<a" + attrs + ' href="' + esc(c ? c.url : reportHref(rp)) + '" target="_blank" rel="noopener">' + inner + "</a>";
     return '<button type="button"' + attrs + ' data-act="clip-open" data-id="' + esc(c.id) + '">' + inner + "</button>";
   }
   function handHTML(items, tp, cls) {
     return '<div class="yhand' + (cls ? " " + cls : "") + '">' + items.map(function (rp) { return cardHTML(rp, tp); }).join("") + "</div>";
-  }
-  /* 宝石图例：这一把牌里各有几张 */
-  function gemLegendHTML(items, tp) {
-    var n = [0, 0, 0, 0];
-    items.forEach(function (rp) { n[cardGem(rp, tp)]++; });
-    return '<p class="meta ylegend">' + n.map(function (k, i) { return k ? '<span><i class="yc-gem g' + i + '" aria-hidden="true"></i>' + GEM_LABEL[i] + " " + k + "</span>" : ""; }).join("") + "</p>";
   }
   function packUnseen(tid) { return looseClips(tid).filter(function (c) { return !c.seen; }); }
   function packMinutes(list) { return list.reduce(function (a, c) { return a + (c.status === "link" ? 0 : Math.max(1, Math.round((c.words || 0) / 400))); }, 0); }
@@ -3149,7 +3148,7 @@ var FOIL = (function () {
     var strip = sealed ? '<span class="yb-strip" aria-hidden="true"><i>封</i><small>' + esc(when) + '</small></span><span class="yb-strip b" aria-hidden="true"></span>' : "";
     var cnt = sealed && mode !== "shelf" ? unseen.length + " 篇" : list.length + " 篇";
     var tip = sealed ? "剪报夹：" + unseen.length + " 篇还没拆封" + (list.length > unseen.length ? "，另有 " + (list.length - unseen.length) + " 篇拆过" : "") : "剪报夹：还没装盒的 " + list.length + " 篇";
-    var inner = '<span class="yb-flap" aria-hidden="true"></span><span class="yb-tie" aria-hidden="true"></span>' + strip +
+    var inner = '<span class="yb-card" aria-hidden="true"><i class="frame"></i><span class="g">' + esc(tid ? domGlyph(tid) : "匣") + "</span></span>" + strip +
       '<span class="yb-label"><b>' + (mode === "shelf" ? "剪报" : esc(name)) + "</b><span>" + esc(cnt) + "</span></span>" +
       (mode === "shelf" && unseen.length ? '<span class="yb-badge" aria-hidden="true">' + unseen.length + "</span>" : "");
     if (mode === "shelf") return '<button type="button" class="afold ybag' + (sealed ? " sealed" : " opened") + (on ? " picked" : "") + (q && text.indexOf(q) < 0 ? " dim" : "") + '" style="--dom:' + col + '" data-act="abox" data-t="cf:' + esc(tid) + '" data-q="' + esc(text) + '" title="' + esc(tip) + '" aria-pressed="' + on + '">' + inner + "</button>";
@@ -3183,7 +3182,7 @@ var FOIL = (function () {
       });
     }
     if (!bag || !cards.length) { finish(); return; }
-    if (window.innerWidth < 1100) panel.scrollIntoView({ block: "start", behavior: "smooth" });
+    if (window.innerWidth >= 1100) panel.scrollIntoView({ block: "start", behavior: "smooth" });
     setTimeout(function () {
       bag = document.querySelector('.afpanel .ybag.big[data-t="' + tid + '"]') || bag;
       cards = Array.prototype.slice.call(document.querySelectorAll(".afpanel .yhand .yc.yc-wait"));
@@ -5970,7 +5969,7 @@ var FOIL = (function () {
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
     $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML()) + (r === "shelf" ? yxCoverHTML() : "");
-    document.body.classList.toggle("desk-on", !!document.querySelector(".ydesk"));
+    document.body.classList.toggle("desk-on", !!document.querySelector(".ydesk") || (!!document.querySelector(".ytable") && window.innerWidth < 1100));
     wallPack(); grimHydrate(); yxMount(); yxStageMount();
     if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);
     filmMount();
@@ -6153,7 +6152,7 @@ var FOIL = (function () {
     if (act === "look-reset") { hangSet("float"); lookSet({ v: LOOK_V, read: LOOK_DEF.read, fx: LOOK_DEF.fx, color: LOOK_DEF.color, binding: LOOK_DEF.binding, motion: true, deco: DECO_DEFAULT.slice(), place: {} }); render(); return; }
     if (act === "hang") { hangSet(t.getAttribute("data-h")); var wl = document.querySelector(".wall"); if (wl) wl.className = wallClass(); document.querySelectorAll(".hang-b").forEach(function (b) { b.setAttribute("aria-checked", String(b.getAttribute("data-h") === hangGet())); }); return; }
     if (act === "shelf-f") { S.shelfF = t.getAttribute("data-f"); render(); return; }
-    if (act === "abox") { S.archPick = t.getAttribute("data-t"); S.deskOpen = true; S.clipDel = null; S.yxCard = null; S.yxDeskOld = false; yxSfx("soil"); render(); var dc = document.querySelector('.ydesk [data-act="desk-close"]'); if (dc) try { dc.focus({ preventScroll: true }); } catch (e2) { /* 忽略 */ } return; }
+    if (act === "abox") { S.archPick = t.getAttribute("data-t"); S.deskOpen = true; S.clipDel = null; S.yxCard = null; S.yxDeskOld = false; yxSfx("soil"); render(); var dc = document.querySelector('.ytable [data-act="desk-close"], .ydesk [data-act="desk-close"]'); if (dc) try { dc.focus({ preventScroll: true }); } catch (e2) { /* 忽略 */ } return; }
     if (act === "desk-close") { deskClose(); return; }
     if (act === "arch-f") { S.archF = t.getAttribute("data-f"); render(); return; }
     if (act === "ritual") { ritualOpen(t.getAttribute("data-d")); return; }

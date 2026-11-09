@@ -3,14 +3,15 @@ type: status
 status: active
 cluster: product
 stage: 产品 2026-11-08 改名「邮差」（代号 yanxilu 不变）；只做三件家具（书架、档案架、笔记本），书架收成「上传与接着读」、档案架优先重做、笔记本加新本子，阶段表 docs/shelf-design-review.md 六之二；线网图等页面保留不动；墓园系列（墓园宽柜、/youchai/、奇幻蓝图）冻结保留；三维小世界在 yanxilu-world 仓库
-next: 用户过门阶段 1（docs/ui-archive-stage1.jpg）后进阶段 2 开盒即卡牌：桌面右栏 / 手机整屏，盒子立着盖子翻开，牌从盒口抽出扇开，没读的牌背朝下、读过的牌面朝上（标题、来源与日期与分钟、为什么存），牌靠盒斜 14° 底边露厚；牌册、来龙去脉、改删撤收进底部；去掉深色木桌。之后 3 书架上传与接着读、4 新本子、5 一个房间（全站换纸模底与页头）、6 验收。
+next: 用户过门阶段 2（docs/ui-archive-stage2.jpg）后进阶段 3 书架收成「上传与接着读」：加书直接选 PDF / EPUB，书墙按六之四规则重画（纸片书脊加米白签、层板亮纸片、在读的书三维斜放配「接着读」纸条），去掉精读入口与连接；之后 4 新本子、5 一个房间（全站纸模底与页头）、6 验收。
 blocked_by: 无
-updated: 2026-11-08
+updated: 2026-11-09
 ---
 
 # 状态
 
 ## 现在停在哪
+- 2026-11-09 阶段 2 开盒即卡牌上线：deskHTML 改出 .ytable（纸模桌面，桌面版放在 .arch-main 右栏、窄屏 fixed 盖整屏，滚动锁只在窄屏），archPanelHTML / folderPanelHTML 重写（题头、问题压印、盒子立着开盖 openPackHTML、牌摊开、答案便签、牌册与来龙去脉折叠、备考与改删撤）；cardHTML 重写：没读牌背朝上（黑卡铜字领域大字卷号）、读过牌面朝上（米白：类型一字签、标题、来源日期分钟、为什么存、批注铜印）；bagHTML 大袋改成一叠黑牌加「封」封条，拆封动效沿用；桌面上的盒子行改用 apackHTML（拖放装盒可用了）；gemLegendHTML 删掉。desk_test 通过（焦点、拖放、Esc、手机不横溢）。截图 docs/ui-archive-stage2.jpg。书墙页仍旧样式。
 - 2026-11-08 夜（六） 用户：档案架下面的「怎样归档」去掉；样张的牌盒很清楚，我们的发虚 → 放大三倍看：CSS 3D 变换的层被整层重采样，字和线软，盒面颗粒重采样成斑块。改成正交投影的平面画法（正面对齐像素不变换、侧面窄矩形叠黑、顶面平行四边形叠白、盒底模糊椭圆接触影），盒面去颗粒去滤镜，字号加大一号（卷号 9、盒名 10）。「怎样归档」四条与说明段删掉，相关样式删掉。desk_test 通过，对比图更新，放大对照 docs/ui-archive-box-zoom.jpg。
 - 2026-11-08 夜（五） 用户：档案架不分领域，没必要一个领域一行 → 改成一块板按行重复层板（背景重复渐变画层板，颗粒盖在上面），盒子按领域顺序再按卷号排成一排同向立满一层换下一层，后面跟各领域没装盒的那叠牌（签上带索书号）、收件匣一叠牌、「＋ 新盒」切口；领域签、空领域行都删了。desk_test 通过，对比图更新。
 - 2026-11-08 夜（四） 用户定「进代码」→ 阶段 1 档案架新形式上线：src/page.html 加纸模变量（`--pp-kraft/-2/-3/-dk/-bk`、`--pp-cream/-2`、`--pp-terra`、`--pp-olive`、`--pp-ink/-2/-3`、`--pp-black`、`--pp-copper`、`--pp-shade`、`--pp-fibre`、`--pp-tooth`，暗色各有一套）与公用类 .pp-paper / .pp-slab / .pp-emb / .pp-emb-hi / .pp-cut / .pp-stage / .pp-pack；src/app.js 新函数 apackHTML（牌盒）、adeckHTML（一叠牌）、arowHTML（一层）、aemptiesHTML（没盒子的领域合一层）、ainboxHTML（收件匣）、arackHTML，archiveHTML 改用；删掉 archBayHTML / trayHTML / folderHTML 与档案架专用旧样式（.cabinet.archive、.atray、.asheet 等）；筛选签（全部 / 在做 / 要年更 / 已结卷）与色签图例去掉；「怎样归档」四条改口径。拖放、搜索调暗、小纸条飞向目标都接到新类。build 过，desk_test（选择器改成 .arow[data-dom] 与 .apack）与 notes_test 通过。前后对比 docs/ui-archive-stage1.jpg。书墙页与开盒桌面仍是旧样式（阶段 2、3、5）。
@@ -153,6 +154,7 @@ updated: 2026-11-08
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
+- 2026-11-09 阶段 2 开盒即卡牌进代码：.ytable、牌、卡包、拆封；desk_test 选择器改 .ytable；截图进 docs。
 - 2026-11-08 夜（六） 盒子改正交平面画法（去 3D、去颗粒、去滤镜），「怎样归档」删除；放大对照图进 docs。
 - 2026-11-08 夜（五） 档案架改不分领域：agrid 网格加背景重复层板，arowHTML / aemptiesHTML 删掉。
 - 2026-11-08 夜（四） 阶段 1 档案架新形式进代码：page.html 纸模变量与公用类、app.js 档案架重写、旧样式与旧函数删除、desk_test 选择器更新、前后对比图。
