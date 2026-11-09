@@ -1846,6 +1846,76 @@ body.desk-on{overflow:hidden}
   .arch-main.has-desk .arch-col{width:100%}
 }
 @media (max-width:640px){ .ytable{padding:12px 12px 100px} .yt-head h2{font-size:22px} .yt-scene{gap:14px 18px;padding:10px 4px 6px 0} .yt-scene .pp-pack{--w:72px;--h:108px;margin:16px 6px 12px 4px} .yt-scene .pp-pack .g{font-size:40px} .yd-eye .btn kbd{display:none} }
+/* ===== 书墙（纸模）：一块牛皮纸板，层板按行重复；书是立着的纸片，书名在竖的米白签上；最后一格是放一本书的切口 ===== */
+.pwall{--face:var(--pp-kraft-2);--rh:236px;--pk:16px;padding:0;border-radius:9px;overflow:hidden;
+  background-image:var(--pp-fibre),var(--pp-tooth),
+    repeating-linear-gradient(to bottom,transparent 0 calc(var(--rh) - var(--pk) - 2px),rgba(255,255,255,.5) calc(var(--rh) - var(--pk) - 2px) calc(var(--rh) - var(--pk)),var(--pp-kraft) calc(var(--rh) - var(--pk)) calc(var(--rh) - 6px),var(--pp-kraft-3) calc(var(--rh) - 6px) calc(var(--rh) - 4px),var(--pp-kraft-dk) calc(var(--rh) - 4px) calc(var(--rh) - 2px),var(--pp-kraft-bk) calc(var(--rh) - 2px) var(--rh)),
+    repeating-linear-gradient(to bottom,rgba(var(--pp-shade),.38) 0 1px,rgba(var(--pp-shade),.22) 1px 5px,rgba(var(--pp-shade),0) 14px var(--rh));
+  background-blend-mode:soft-light,overlay,normal,normal;background-position:0 0,0 0,0 14px,0 14px}
+.pgrid{display:flex;flex-wrap:wrap;align-items:flex-end;gap:0 7px;padding:14px 18px 0}
+.pcell{height:var(--rh);display:flex;align-items:flex-end;padding-bottom:calc(var(--pk) + 4px)}
+.pspine{--sx:1.35;--sy:1.25;--e1:color-mix(in srgb,var(--face),#2B1A0C 22%);--e2:color-mix(in srgb,var(--face),#2B1A0C 45%);position:relative;display:flex;align-items:flex-start;justify-content:center;flex:none;
+  width:calc(var(--w) * var(--sx));height:calc(var(--h) * var(--sy));margin:0;padding:18px 0 0;border:0;border-radius:4px 4px 2px 2px;cursor:pointer;font:inherit;color:var(--pp-ink);
+  background-color:var(--face);background-image:var(--pp-fibre),var(--pp-tooth);background-blend-mode:soft-light,overlay;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 0 0 1px rgba(255,255,255,.22),2px 0 0 var(--e1),3px 0 0 var(--e2),3px 3px 0 var(--e2),3px 4px 0 var(--e2),4px 8px 8px -2px rgba(var(--pp-shade),.55);transition:transform .18s}
+.pspine .pg{position:absolute;left:2px;right:2px;top:-3px;height:4px;background:var(--pp-cream-2);background-image:repeating-linear-gradient(90deg,rgba(60,40,20,.35) 0 1px,transparent 1px 3px);border-radius:2px 2px 0 0}
+.pspine .lab{display:flex;flex-direction:row-reverse;gap:2px;max-height:calc(100% - 30px);padding:10px 3px 9px;border-radius:1px;background-color:var(--pp-cream);background-image:var(--pp-tooth);background-blend-mode:overlay;box-shadow:inset 0 0 0 1px rgba(60,35,15,.18),1px 1px 0 rgba(60,35,15,.35)}
+.pspine.lt .lab{background-color:var(--pp-kraft)}
+.pspine .t{writing-mode:vertical-rl;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-family:var(--f-display);font-size:11px;font-weight:600;line-height:1.1;letter-spacing:.12em;color:var(--pp-ink);text-shadow:-1px -1px 0 rgba(50,30,12,.22),1px 1px 0 rgba(255,255,255,.55)}
+.pspine .t.sub{font-size:9.5px;font-weight:500;color:var(--pp-ink-2)}
+.pspine .lab.lat .t{font-family:var(--f-ui);letter-spacing:.04em}
+.pspine .rib{position:absolute;top:-10px;width:8px;height:26px;margin-left:-4px;background:var(--pp-terra);clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%);box-shadow:1px 1px 0 rgba(0,0,0,.25);z-index:2}
+.pspine .eb{position:absolute;left:50%;bottom:8px;width:6px;height:6px;margin-left:-3px;border-radius:50%;background:var(--pp-copper);box-shadow:0 1px 0 rgba(0,0,0,.3)}
+.pspine:hover{transform:translateY(-6px)}
+.pspine.picked{transform:translateY(-10px)}
+.pspine.picked .lab{box-shadow:inset 0 0 0 1px rgba(60,35,15,.18),0 0 0 2px var(--pp-terra),1px 1px 0 rgba(60,35,15,.35)}
+.pspine:focus-visible{outline:2px solid var(--indigo);outline-offset:5px}
+.pslot{width:96px;height:calc(var(--rh) - var(--pk) - 36px);max-height:200px;margin:0;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;border:1.5px dashed rgba(var(--pp-shade),.55);border-radius:6px;background:rgba(var(--pp-shade),.06);box-shadow:inset 2px 3px 5px rgba(var(--pp-shade),.28),inset 0 0 0 1px rgba(255,255,255,.12);color:var(--pp-ink-2);font:inherit;cursor:pointer}
+.pslot b{font-family:var(--f-display);font-size:30px;font-weight:300;line-height:1}
+.pslot span{font-family:var(--f-body);font-size:10.5px;letter-spacing:.14em}
+.pslot:hover{color:var(--pp-ink);border-color:rgba(var(--pp-shade),.8);background:rgba(var(--pp-shade),.1)}
+/* 书立：在读的书立在右栏，封面朝外，左边露出书口 */
+.pstand{--face:var(--pp-kraft-2);position:sticky;top:78px;max-height:calc(100vh - 94px);overflow:auto;overscroll-behavior:contain;scrollbar-width:thin;border-radius:9px;padding:18px 22px 22px;display:flex;flex-direction:column;gap:14px;color:var(--pp-ink)}
+.ps-eye{margin:0;font-family:var(--f-ui);font-size:12px;letter-spacing:.14em;color:var(--pp-ink-2)}
+.pbook{--w:176px;--h:250px;--n:12;--d:calc(12px + var(--n) * 1px);--s:calc(var(--d) * .37);--t:4px;position:relative;display:block;width:calc(var(--w) + var(--s));height:calc(var(--h) + var(--t));margin:18px auto 22px}
+.pbook::before{content:"";position:absolute;left:4px;right:-8px;bottom:-6px;height:14px;border-radius:50%;background:rgba(var(--pp-shade),.55);filter:blur(6px)}
+.pbook .pages{position:absolute;left:0;top:var(--t);width:var(--s);height:var(--h);background:var(--pp-cream);background-image:repeating-linear-gradient(90deg,rgba(60,40,20,.3) 0 1px,transparent 1px 3px);border-radius:2px 0 0 2px}
+.pbook .cv{position:absolute;left:var(--s);top:var(--t);width:var(--w);height:var(--h);display:block;border-radius:2px 5px 5px 2px;background-color:var(--face);background-image:var(--pp-fibre),var(--pp-tooth);background-blend-mode:soft-light,overlay;box-shadow:inset 1px 0 0 rgba(0,0,0,.18),inset 0 2px 0 rgba(255,255,255,.2),inset 0 0 0 1px rgba(255,255,255,.1)}
+.pbook .cv::before{content:"";position:absolute;left:var(--s);right:0;top:calc(-1 * var(--t));height:var(--t);background:var(--pp-cream-2);background-image:repeating-linear-gradient(0deg,rgba(60,40,20,.25) 0 1px,transparent 1px 3px);clip-path:polygon(0 0,100% 0,calc(100% - var(--s)) 100%,0 100%);left:0}
+.pbook .plate{position:absolute;left:22px;right:22px;top:46px;height:auto;padding:16px 8px 14px;display:flex;flex-direction:column;gap:6px;align-items:center;text-align:center;background-color:var(--pp-cream);background-image:var(--pp-tooth);background-blend-mode:overlay;border-radius:1px;box-shadow:1px 1px 0 rgba(0,0,0,.3),inset 0 0 0 1px rgba(60,35,15,.25)}
+.pbook .plate b{font-family:var(--f-display);font-size:17px;font-weight:700;line-height:1.4;letter-spacing:.1em;color:var(--pp-ink);text-shadow:-1px -1px 0 rgba(50,30,12,.22),1px 1px 0 rgba(255,255,255,.55)}
+.pbook .plate i{font-style:normal;font-family:var(--f-display);font-size:12px;line-height:1.4;color:var(--pp-ink-2)}
+.pbook .plate small{font-family:var(--f-ui);font-size:10.5px;letter-spacing:.14em;color:var(--pp-ink-2);margin-top:2px}
+.pbook .rib{position:absolute;left:46px;bottom:-30px;width:14px;height:62px;background:var(--pp-terra);clip-path:polygon(0 0,100% 0,100% 100%,50% 82%,0 100%);box-shadow:1px 1px 0 rgba(0,0,0,.3)}
+.ps-id h2{margin:0;font-family:var(--f-display);font-size:22px;font-weight:900;line-height:1.3;letter-spacing:.04em;color:var(--pp-ink)}
+.ps-id .meta{margin:4px 0 0;color:var(--pp-ink-2)}
+.ps-prog{margin:8px 0 0;font-family:var(--f-ui);font-size:13.5px;color:var(--pp-ink)}
+.ps-acts{margin:0}
+.pstand .btn{background:var(--pp-terra);border-color:var(--pp-terra);color:var(--pp-cream);box-shadow:0 1px 0 var(--pp-terra-dk),0 2px 0 var(--pp-terra-dk),1px 4px 6px -1px rgba(var(--pp-shade),.45)}
+.pstand .btn.ghost{background:var(--pp-cream);border-color:transparent;color:var(--pp-ink);box-shadow:0 1px 0 #C9B48F,0 2px 0 #A8865C,1px 4px 6px -1px rgba(var(--pp-shade),.45)}
+.ps-mk{margin:0;font-family:var(--f-ui);font-size:13px;color:var(--pp-ink-2)}
+.pstand .linkbtn{color:var(--pp-ink-2)}
+.pstand .linkbtn.danger{color:var(--pp-terra-dk)}
+.ps-more{border-top:1px dashed rgba(var(--pp-shade),.35);padding-top:10px}
+.ps-more summary{cursor:pointer;font-family:var(--f-ui);font-size:13px;color:var(--pp-ink-2);list-style:none}
+.ps-more summary::-webkit-details-marker{display:none}
+.ps-more-in{display:flex;flex-direction:column;gap:12px;margin-top:10px;font-size:13.5px}
+.pstand .eb-file{font-size:13px}
+.add-file small{display:block;margin-top:6px;font-family:var(--f-ui);font-size:12px;line-height:1.6;color:var(--ink-3)}
+.add-file input[type=file]{font:inherit;font-size:13.5px}
+@media (max-width:1100px){ .pstand{position:static;max-height:none;scroll-margin-top:84px} }
+@media (max-width:640px){
+  .pwall{--rh:196px;--pk:13px}
+  .pgrid{gap:0 5px;padding:12px 10px 0}
+  .pspine{--sx:1;--sy:1;padding-top:14px}
+  .pspine .t{font-size:10px}
+  .pspine .lab{padding:8px 2px 7px}
+  .pslot{width:70px;height:140px}
+  .pstand{padding:14px 14px 18px}
+  .pbook{--w:150px;--h:214px;margin:12px auto 18px}
+  .pbook .plate{top:36px;padding:12px 6px 10px}
+  .pbook .plate b{font-size:15px}
+}
 /* 剪报栏：只剩“存链接”和怎么剪 */
 .clipbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-top:18px;padding:12px 16px;background:var(--leaf);border:1px solid var(--rule);border-radius:var(--r)}
 .clipbar > b{font-family:var(--f-display);font-size:17px}

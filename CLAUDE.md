@@ -13,7 +13,8 @@
 
 - 单文件前端：`src/app.js`（全部逻辑）+ `src/page.html`（CSS 和外壳）+ `src/server.js`（服务器版垫片）。**改完必须跑 `python3 build.py`**，它生成 `index.html`、`server/index.html`、`dist/artifact.html`、`reports/*.html` 和 `sw.js`（版本号来自 index.html 的 sha1）。生成物要一起提交。
 - `vendor/`：自带的字体（`vendor/fonts`）、KaTeX、PDF.js、PWA 清单。不要引用 Google Fonts，国内打不开。
-- 书皮：`docs/cover-masters.md` 是书皮的设计尺子（跟谁学、十条规则、对照墙）。画布装帧在 `src/app.js` 的 `FOIL`（布面烫金 / 维多利亚）与 `GRIM`（秘典）两个库里，书用 `data-grim` 规格、`grimHydrate()` 画。「老书皮」走另一条路：真书封面的公有领域扫描在 `vendor/covers/`（授权见那里的 `SOURCES.md`），清单是 `src/app.js` 的 `OLDC`，生产线在 `tools/covers/`；代码只叠书名、皮签和阅读状态。插画级的美术不要再用画布硬画，先定生产方式。三维资产一律按专业流程（`docs/bookcase-production.md` 是样板）：量尺 → 粗模 → 高模 → 分层材质 → 看光 → 合成 → 出图，脚本在 `tools/blender/web_props/`，在用户开着的桌面 Blender（端口 9877，`tools/blender/mcp_call.py`）里做，每阶段并排蓝本过门。场景图在 `vendor/scene/`。
+- 质感：2026-11-08 起全站走纸模（paper craft），规则量自两张样张，写在 `docs/shelf-design-review.md` 六之四、六之五；变量 `--pp-*` 与公用类 `.pp-paper / .pp-slab / .pp-emb / .pp-cut / .pp-pack` 在 `src/page.html`。书墙是 `.pwall` 加 `.pspine`（纸片书脊、米白签），档案架是 `.arack` 加 `.apack`（正交画的牌盒），开盒是 `.ytable`，牌是 `.yc`。盒子、牌、书不加颗粒、不用 CSS 3D（会发虚），厚的盒体正交平面画，薄的纸片才上颗粒。
+- 书皮（2026-11-09 起书墙不用，装帧库留着）：`docs/cover-masters.md` 是书皮的设计尺子（跟谁学、十条规则、对照墙）。画布装帧在 `src/app.js` 的 `FOIL`（布面烫金 / 维多利亚）与 `GRIM`（秘典）两个库里，书用 `data-grim` 规格、`grimHydrate()` 画。「老书皮」走另一条路：真书封面的公有领域扫描在 `vendor/covers/`（授权见那里的 `SOURCES.md`），清单是 `src/app.js` 的 `OLDC`，生产线在 `tools/covers/`；代码只叠书名、皮签和阅读状态。插画级的美术不要再用画布硬画，先定生产方式。三维资产一律按专业流程（`docs/bookcase-production.md` 是样板）：量尺 → 粗模 → 高模 → 分层材质 → 看光 → 合成 → 出图，脚本在 `tools/blender/web_props/`，在用户开着的桌面 Blender（端口 9877，`tools/blender/mcp_call.py`）里做，每阶段并排蓝本过门。场景图在 `vendor/scene/`。
 - 数据：`S.data[集合][id]`，`put(coll, id, val)` / `del(coll, id)` 写入；服务器版走 Baba 的 `/api/yxl/*`，公开版存 localStorage。集合名在 `COLLS`。剪报（`clips`/`clipbody`）只在服务器版有。笔记本架是 `nbooks` / `pages`（设计稿 `docs/notebook-design.md`，字段两边仓库共用，不改含义只加字段）。
 - 服务器端（另一个仓库 cnyanghai/baba-english）：`src/lib/yxl.ts` 的 `serveYxl` 直接读研习录克隆里的静态文件。2026-10-28 起是通配路由 `src/app/[...path]/route.ts`：本仓库里**任何带 `index.html` 的顶层目录**推到 main 就能在 `/<目录>` 访问。不对外的目录（server、src、tools、study、dist）写在那边的 DENY 里。`youchai/` 是独立 App「邮差」的入口（build.py 从同一份代码生成，PWA），线上 `/youchai/`；2026-11-08 起与「墓园宽柜」场景一起冻结不再推进，主线是素墙系列做完整（`docs/shelf-design-review.md` 第六节）。`/world` 是 Baba 另克隆 yanxilu-world 仓库后在本克隆里放的链接，不在本仓库里。Baba 的部署由人在 WSL 里跑 `scripts/deploy-yanxilu.sh`，Claude 不要自己部署。
 
@@ -23,10 +24,9 @@
 python3 build.py
 python3 tools/baba_mock.py 8790          # 本地模拟 Baba：/api/yxl/*、首页给 server/index.html（另开一个终端跑着）
 python3 tools/tests/desk_test.py         # 档案架：拆封、翻牌、桌面（Playwright）
-python3 tools/tests/binding_test.py foil # 装帧：书脊、在读封面、展台封面都画出或贴上，切回布面照旧；参数 old / foil / victorian / grim
 python3 tools/tests/notes_test.py        # 笔记本架：记一笔、随手本编辑自动保存、日历、搜索、手机单栏
-python3 tools/tests/scene_test.py        # 场景「拱形书柜」：四张图加载、行高跟墙宽、书在格层里、切回素墙、窄屏不用
 ```
+`tools/tests/_frozen/` 里的 binding_test 与 scene_test 对着 2026-11-09 前的旧书墙（布面 / 烫金 / 老书皮书脊、拱形书柜场景），不跑。
 Windows 上把 `python3` 换成 `python`。mock 起来以后浏览器打开 http://127.0.0.1:8790/#archive 就能看到服务器版（测试账号 cookie `sid=u1`，测试脚本会自己带）。截图落在 `tools/out/`（已 gitignore）。`abox_test.py`、`clip_test.py` 写于侧栏面板时期，部分步骤已过时，改之前先看。本机没有 Playwright 就 `pip install playwright && playwright install chromium`。
 
 ## 规矩（人定的，不要改）

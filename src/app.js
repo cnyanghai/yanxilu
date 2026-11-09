@@ -638,19 +638,21 @@
     var radios = doms.map(function (d) { var di = domInfo(d); return '<label class="add-dir" style="--c:' + di.col + '"><input type="radio" name="track" value="' + esc(d) + '"' + (d === tr ? " checked" : "") + '><i aria-hidden="true"></i>' + esc(di.name) + "</label>"; }).join("") +
       '<label class="add-dir new"><input type="radio" name="track" value="__new"' + (tr === "__new" ? " checked" : "") + '><b aria-hidden="true">＋</b>新领域</label>';
     return '<div class="add-sheet" role="dialog" aria-modal="true" aria-labelledby="add-h"><form class="add-card" id="add-form" data-edit="' + esc(S.addOpen.edit || "") + '">' +
-      '<h2 id="add-h">' + (ed ? "改一下这本书" : "加一本书") + "</h2>" +
+      '<h2 id="add-h">' + (ed ? "改一下这本书" : "放一本书") + "</h2>" +
+      (ed || !ebCanUpload() ? "" : '<label class="add-f add-file"><span>书的文件</span><input id="add-file" name="ebfile" type="file" accept="application/pdf,.pdf,application/epub+zip,.epub"><small>PDF 或 EPUB，选了就能在邮差里读；书名会从文件名带出来。也可以先不选。</small></label>') +
       '<label class="add-f"><span>书名</span><input id="add-title" name="title" required maxlength="60" autocomplete="off" placeholder="比如：置身事内" value="' + esc(ed ? ed.title : "") + '"></label>' +
       '<label class="add-f"><span>作者</span><input name="by" maxlength="40" autocomplete="off" placeholder="可以不填" value="' + esc(ed ? ed.by || "" : "") + '"></label>' +
       '<fieldset class="add-f"><legend>放在哪个领域</legend><div class="add-dirs">' + radios + "</div></fieldset>" +
       '<div class="add-new">' + domFieldsHTML(null) + "</div>" +
       '<label class="add-f"><span>为什么读</span><textarea name="why" rows="3" maxlength="200" placeholder="一两句话，以后看到书脊就想得起来">' + esc(ed ? ed.why || "" : "") + "</textarea></label>" +
       '<div class="btns"><button type="submit" class="btn">' + (ed ? "保存" : "放上书墙") + '</button><button type="button" class="btn ghost" data-act="add-close">取消</button></div>' +
-      (ed ? "" : '<p class="meta">放上去以后，在展台上可以上传这本书的 PDF 或 EPUB。</p>') + "</form></div>";
+      "</form></div>";
   }
   function addSave(f) {
     var title = (f.elements.title.value || "").trim(), by = (f.elements.by.value || "").trim(), why = (f.elements.why.value || "").trim();
-    var tr = (f.querySelector('input[name="track"]:checked') || {}).value;
-    if (!title) { toast("先写书名"); f.elements.title.focus(); return; }
+    var tr = (f.querySelector('input[name="track"]:checked') || {}).value, file = f.elements.ebfile && f.elements.ebfile.files && f.elements.ebfile.files[0];
+    if (!title && file) title = file.name.replace(/\.(pdf|epub)$/i, "").trim();
+    if (!title) { toast("先写书名，或者选一个文件"); f.elements.title.focus(); return; }
     if (tr === "__new") {
       var nd = domRead(f, ""); if (!nd) return;
       if (nd.same) tr = nd.same;
@@ -662,6 +664,7 @@
     put("mybooks", id, { title: title, by: by, track: tr, why: why, t: old ? old.t : new Date().toISOString() });
     S.addOpen = null; S.shelfPick = id; S.flip = old ? null : id; syncMyBooks(); render();
     toast(old ? "改好了" : "《" + title + "》放上书墙了");
+    if (file && !old) ebUpload(id, file);
   }
   function shelfOpsHTML(id) {
     var it = ITEMS[id];
@@ -1580,9 +1583,38 @@ var FOIL = (function () {
     if (!innerT) innerT = '<span class="wm-empty">这一格还空着' + (S.canEdit ? "<small>点搁板右边的 ＋ 加书</small>" : "") + "</span>";
     return wmHTML(key, di.col, label, di.href, innerT, di.custom ? "mine" : "", head + " · 续");
   }
+  /* ---------- 书墙（纸模，2026-11-09 阶段 3）：一块牛皮纸板，层板按行重复，书是一片片立着的纸，书名印在竖的米白签上；
+   * 不分领域（按领域顺序、再按书架顺序排满一层换一层）；在读的书露一条书签；最后一格是「放一本书」的切口。
+   * 书架只管两件事：放一本书（直接选 PDF / EPUB）、接着读。精读讲义、练习与专题、英语片盒、CFA 函套不在书墙上（线网那边还在）。 */
+  var PSPINE_FACES = ["var(--pp-kraft-dk)", "var(--pp-olive)", "var(--pp-terra)", "var(--pp-cream-2)", "var(--pp-black)"];
+  function pspineHTML(it, idx) {
+    var bs = bookState(it.id), h0 = hashN(it.id), title = it.title.replace(/（.*）$/, ""), lat = isLatin(title);
+    var face = PSPINE_FACES[(h0 + idx) % PSPINE_FACES.length], h = 150 + h0 % 28, w = (lat ? 24 : 26) + (h0 % 5) * 3 + Math.min(10, Math.round(bookMinutes(it.id) / 60 * 0.8));
+    var parts = title.indexOf("：") > 0 ? title.split("：") : [title], two = parts.length > 1;
+    if (two) w += 10;
+    var state = bs.s === "doing" ? "doing" : bs.s === "done" || bs.s === "review" ? "done" : "";
+    var rp = state === "doing" ? Math.max(0, Math.min(1, bs.epct || bs.pct || 0)) : 0;
+    var tip = "《" + title + "》" + (it.by || "") + " · " + (STATUS_LABEL[bs.s] || "") + (bs.epct ? " · 读到 " + Math.round(bs.epct * 100) + "%" : "") + (ebookOf(it.id) ? " · 有电子书" : "");
+    var cls = "pspine" + (state ? " " + state : "") + (S.shelfPick === it.id ? " picked" : "") + (face === "var(--pp-cream-2)" ? " lt" : "");
+    return '<span class="pcell"><button type="button" class="' + cls + '" data-act="pick" data-id="' + esc(it.id) + '" style="--face:' + face + ";--w:" + w + "px;--h:" + h + 'px" title="' + esc(tip) + '" aria-pressed="' + (S.shelfPick === it.id) + '">' +
+      '<i class="pg" aria-hidden="true"></i><span class="lab' + (lat ? " lat" : "") + '"><span class="t">' + esc(parts[0]) + "</span>" + (two ? '<span class="t sub">' + esc(parts[1]) + "</span>" : "") + "</span>" +
+      (state === "doing" ? '<i class="rib" style="left:' + Math.round(18 + 60 * rp) + '%" aria-hidden="true"></i>' : "") + (ebookOf(it.id) ? '<i class="eb" aria-hidden="true"></i>' : "") + "</button></span>";
+  }
+  function pwallBooks() {
+    var out = [];
+    domList().forEach(function (k) { trackBooks(k).books.forEach(function (it) { if (out.indexOf(it) < 0) out.push(it); }); });
+    return out;
+  }
+  function pwallHTML() {
+    var books = pwallBooks();
+    var cells = books.map(pspineHTML).join("");
+    var slot = S.canEdit ? '<span class="pcell"><button type="button" class="pslot" data-act="add-book" title="放一本书：直接选 PDF 或 EPUB"><b aria-hidden="true">＋</b><span>放一本书</span></button></span>' : "";
+    return '<section class="pwall pp-paper pp-slab" aria-label="书墙"><div class="pgrid">' + cells + slot + "</div></section>";
+  }
   /* 先把所有格子排成一排交给页面，再由 wallPack() 按实际宽度分排 */
   function wallHTML() {
     if (LK().scene === "youchai") return yxShelfHTML();
+    return pwallHTML();
     var keys = domList().concat(["en", "+"]);
     var sc = sceneOn(), d = sc && SC_DIM[sc], st = d ? ' style="--sc-w:' + d.w + ";--sc-top:" + d.top + ";--sc-bay:" + d.bay + ";--sc-base:" + d.base + ";--sc-pad:" + d.pad + "%;--sc-dir:" + d.dir + '"' : "";
     return '<section class="' + wallClass() + '" aria-label="书墙"' + st + ">" + (sc ? '<div class="sc-top" aria-hidden="true"></div>' : "") + '<div class="wall-row">' + keys.map(wallModule).join("") + "</div>" + (sc ? '<div class="sc-base" aria-hidden="true"></div>' : "") + "</section>";
@@ -1784,10 +1816,30 @@ var FOIL = (function () {
     if (LK().binding !== "cloth" && LK().binding !== "old") { var gsp = grimSpec(it, tid, 0, bookState(id), pt, true); return '<div class="stg-cover grim' + flip + '" style="--cl:' + gsp.base + '"' + grimAttr(gsp) + '><canvas class="gs" aria-hidden="true"></canvas><span class="vh">《' + esc(it.title) + "》" + esc(it.by || "") + "</span></div>"; }
     return '<div class="stg-cover' + (light ? " light" : "") + flip + '" style="--cl:' + base + (pt.ink ? ";--tx:" + pt.ink : "") + '"><i class="sc-rule" aria-hidden="true"></i>' + coverTitle(it.title) + '<span class="sc-by">' + esc(it.by ? it.by + " 著" : "CFA 一级") + '</span><span class="sc-foot">' + esc(tname || "") + '</span><i class="sc-rule" aria-hidden="true"></i></div>';
   }
+  /* 书立（纸模）：在读的那本书立在右边一栏，封面朝外，露出书口；下面是书名、作者、读到哪、「接着读」或「挂一本电子书」、划线数；改书名与拿下收在「更多」 */
+  function pstandHTML(id) {
+    var it = ITEMS[id], bs = bookState(id), eb = ebookOf(id), rdg = readingOf(id), di = domInfo(it.home), h0 = hashN(id);
+    var face = PSPINE_FACES[h0 % PSPINE_FACES.length], title = it.title.replace(/（.*）$/, ""), parts = title.indexOf("：") > 0 ? title.split("：") : [title];
+    var pct = rdg && rdg.pct > 0.004 ? Math.round(rdg.pct * 100) : bs.pct > 0.004 && !LIB.books[id] ? Math.round(bs.pct * 100) : 0;
+    var where = rdg && rdg.label ? rdg.label : "", when = rdg && rdg.t ? agoText(rdg.t) : "";
+    var prog = pct ? "读到 " + pct + "%" + (where ? " · " + where : "") + (when ? " · " + when : "") : bs.s === "done" || bs.s === "review" ? "读完了" : eb ? "还没开始读" : "";
+    var acts = [];
+    if (eb) acts.push('<button type="button" class="btn ps-go" data-act="eb-read" data-id="' + esc(id) + '">' + (pct ? "接着读" : "开始读") + "</button>");
+    else acts.push(ebUploadBtn(id, "＋ 挂上 PDF 或 EPUB"));
+    var nMk = marksOf(id).length;
+    var mk = nMk ? '<p class="ps-mk">' + (eb ? '<button type="button" class="linkbtn" data-act="eb-read" data-id="' + esc(id) + '" data-notes="1">' + nMk + " 条划线和批注，在书里看</button>" : nMk + " 条划线和批注") + "</p>" : "";
+    var more = (eb ? ebFileHTML(id) : "") + shelfOpsHTML(id);
+    var cover = '<span class="pbook" style="--face:' + face + ";--n:" + (8 + h0 % 10) + '" aria-hidden="true"><i class="pages"></i><span class="cv"><span class="plate"><b>' + esc(parts[0]) + "</b>" + (parts[1] ? "<i>" + esc(parts[1]) + "</i>" : "") + (it.by ? "<small>" + esc(shortBy(it.by)) + "</small>" : "") + "</span>" + (pct ? '<i class="rib"></i>' : "") + "</span></span>";
+    return '<aside class="pstand pp-paper pp-slab" aria-label="书立"><p class="ps-eye">' + (pct ? "在读" : "拿起来的书") + "</p>" + cover +
+      '<div class="ps-id"><h2 id="pulled-h" class="pp-emb">' + esc(title) + '</h2><p class="meta">' + esc([it.by, di.name].filter(Boolean).join(" · ")) + "</p>" + (prog ? '<p class="ps-prog">' + esc(prog) + "</p>" : "") + "</div>" +
+      (acts.join("") ? '<div class="btns ps-acts">' + acts.join("") + "</div>" : "") + mk +
+      (more ? '<details class="ps-more"' + (S.moreOpen ? " open" : "") + ' data-more=""><summary>更多</summary><div class="ps-more-in">' + more + "</div></details>" : "") + "</aside>";
+  }
   /* 展台在书墙右边一栏，滚动时停在屏幕上 */
   function stageHTML() {
     if (LK().scene === "youchai") return "";
     var id = stagePick();
+    if (id && ITEMS[id] && ITEMS[id].kind === "book" && !/^t:/.test(id)) return pstandHTML(id);
     if (/^t:/.test(id)) {
       var mini = '<div class="dais"><div class="stg-mid"><div class="stg-scale"><div class="stg-zoom">' + stageCover(id) + '</div></div><i class="stg-stand" aria-hidden="true"></i></div><i class="stg-top" aria-hidden="true"></i></div>';
       S.flip = null;
@@ -3530,16 +3582,9 @@ var FOIL = (function () {
     });
   }
   function shelfHTML() {
-    var books = allItems().filter(function (id) { return ITEMS[id].kind === "book" && !isHidden(id); });
-    var cnt = { doing: 0, done: 0, todo: 0 };
-    books.forEach(function (id) { var s = bookState(id).s; cnt[s === "review" ? "done" : s] = (cnt[s === "review" ? "done" : s] || 0) + 1; });
-    EN_IDS.forEach(function (id) { var s = enState(id).s; cnt[s === "review" ? "done" : s] = (cnt[s === "review" ? "done" : s] || 0) + 1; });
-    var nFilm = (EN.films || []).length, nAll = books.length + EN_IDS.length;
-    var f = S.shelfF || "all";
-    function chip(k, label, n) { return '<button type="button" class="chipbtn" data-act="shelf-f" data-f="' + k + '" aria-pressed="' + (f === k) + '">' + label + ' <span class="segn">' + n + "</span></button>"; }
     return '<div class="view shelf wallv">' + bannerHTML() +
-      '<header class="w-head">' + shelfSeg("shelf") + '<div class="w-tools"><details class="w-filt"><summary class="look-btn" aria-label="只看哪些书">' + ({ all: "全部", doing: "在读", done: "读完", todo: "还没读" }[f] || "全部") + ' <span class="segn">' + ({ all: nAll, doing: cnt.doing || 0, done: cnt.done || 0, todo: cnt.todo || 0 }[f]) + '</span><i class="lk-caret" aria-hidden="true"></i></summary><div class="w-filt-pop chips" role="group" aria-label="只看">' + chip("all", "全部", nAll) + chip("doing", "在读", cnt.doing || 0) + chip("done", "读完", cnt.done || 0) + chip("todo", "还没读", cnt.todo || 0) + "</div></details>" + lookHTML() + (S.canEdit ? '<button type="button" class="btn small w-add" data-act="add-book">＋ 加一本书</button>' : "") + "</div></header>" +
-      '<div class="w-main"><div class="w-left">' + wallHTML() + wallLegend() + hiddenListHTML() + "</div>" + stageHTML() + "</div>" + addSheetHTML() + domSheetHTML() + "</div>";
+      '<header class="w-head">' + shelfSeg("shelf") + '<div class="w-tools">' + (S.canEdit ? '<button type="button" class="btn small w-add" data-act="add-book">＋ 放一本书</button>' : "") + "</div></header>" +
+      '<div class="w-main"><div class="w-left">' + wallHTML() + hiddenListHTML() + "</div>" + stageHTML() + "</div>" + addSheetHTML() + domSheetHTML() + "</div>";
   }
 
   /* ---------- 方向页 ---------- */
@@ -6134,7 +6179,7 @@ var FOIL = (function () {
       if (pid !== S.shelfPick && !fly) S.flip = pid; S.shelfPick = pid;
       if (S.route !== "shelf") { location.hash = "#shelf"; return; }
       render(); if (fly) flyToDais(fly.r, fly.col);
-      var stg = document.querySelector(".dais-col");
+      var stg = document.querySelector(".dais-col, .pstand");
       if (stg && window.getComputedStyle(stg).position !== "sticky") { var sr = stg.getBoundingClientRect(); if (sr.top < 0 || sr.top > window.innerHeight * 0.4) stg.scrollIntoView({ block: "start", behavior: REDUCE ? "auto" : "smooth" }); }
       return;
     }
@@ -6360,6 +6405,7 @@ var FOIL = (function () {
     if (t.classList && t.classList.contains("cl-trk")) { clipMove(t.getAttribute("data-id"), t.value); return; }
     if (t.name === "place" && t.form && t.form.id === "clip-form") { var nb = t.form.querySelector(".cp-nb"); if (nb) { nb.hidden = !/^nb:/.test(t.value); if (!nb.hidden) nb.querySelector("input").focus(); } return; }
     if (t.id === "imp-file") { var jf = t.files && t.files[0]; t.value = ""; impFile(jf); return; }
+    if (t.id === "add-file") { var af = t.files && t.files[0], ti = document.getElementById("add-title"); if (af && ti && !ti.value.trim()) ti.value = af.name.replace(/\.(pdf|epub)$/i, "").trim(); return; }
     if (t.classList && t.classList.contains("lk-place")) {
       var pk = t.getAttribute("data-d"), pv = t.value, dl2 = LK().deco.filter(function (x) { return x !== pk; }), pl = Object.assign({}, LK().place);
       delete pl[pk]; if (pv) { dl2.push(pk); if (pv !== "auto") pl[pk] = pv; }
