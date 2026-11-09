@@ -3,7 +3,7 @@ type: status
 status: active
 cluster: product
 stage: 产品 2026-11-08 改名「邮差」（代号 yanxilu 不变）；只做三件家具（书架、档案架、笔记本），书架收成「上传与接着读」、档案架优先重做、笔记本加新本子，阶段表 docs/shelf-design-review.md 六之二；线网图等页面保留不动；墓园系列（墓园宽柜、/youchai/、奇幻蓝图）冻结保留；三维小世界在 yanxilu-world 仓库
-next: 用户过门阶段 3（docs/ui-shelf-stage3.jpg）后进阶段 4 笔记本架加新本子：本子架 .pp 纸模（本子正交画、同向、露书口、封面贴签）、新本子表单（本名、一句说明）、翻开按本子分页、记一笔可选本子，随手本仍是第一本；之后 5 一个房间（全站纸模底与页头、线网等页不动）、6 验收。
+next: 用户过门阶段 4（docs/ui-notes-stage4.jpg）后进阶段 5 一个房间：全站底色换牛皮纸、顶栏与分段条按纸模重做、三件家具页头一行、手机首屏见家具；线网图、足迹等页只换底色与顶栏不动内容；之后 6 验收（四张截图混进真书房照片盲测、STATUS 收尾）。
 blocked_by: 无
 updated: 2026-11-09
 ---
@@ -11,6 +11,7 @@ updated: 2026-11-09
 # 状态
 
 ## 现在停在哪
+- 2026-11-09 阶段 4 笔记本架加新本子上线：nbList / nbGet / nbPages / nbCount / npCtx / npEditKey / nbGo / npNew / npTitleSave / npDelete / nbSheetHTML / nbSave / nbDelete；notesHTML 拆成 nrackHTML（纸模架子 .nrack / .nbk-b）、dailySpreadHTML（随手本对开，原样）、topicSpreadHTML（主题本对开：左目录加新一页加改本名，右标题输入框加正文加撕掉这一页）；npSave 键可以是日期或页 id；jotHTML 多本时出 #jot-nb 选择，jotSave(text, nb) 记到主题本最新一页；路由加 #nb-<id> 与 #np-t-…；搜索收主题本与页；对开本 .nbk 换纸模色与板厚。notes_test 全过；手工走过：新本子 → 新一页 → 改标题 → 写正文自动保存 → 记一笔选本子 → 搜索命中。截图 docs/ui-notes-stage4.jpg。
 - 2026-11-09 阶段 3 书架收成「上传与接着读」上线：wallHTML 改出 pwallHTML（.pwall 层板背景 + .pgrid 弹性排列 + .pcell 固定行高 + .pspine 纸片书脊），stageHTML 对书走 pstandHTML（.pstand 书立：.pbook 纸书封面、书名作者、读到哪、接着读 / 挂上 PDF 或 EPUB、划线数、更多里改书名与拿下）；shelfHTML 页头只剩分段与「放一本书」；addSheetHTML 第一项选文件（#add-file 改动时书名从文件名带出），addSave 保存后 ebUpload；点书滚到书立。去掉：筛选、布置按钮、图例、精读链接、为什么读、批注框、方向链接、进度卡的两周条；英语行、CFA 函套、练习篮不在书墙上（线网那边照旧）。binding_test 与 scene_test 移到 tools/tests/_frozen/（对着旧书墙），desk_test 与 notes_test 通过。CLAUDE.md 加纸模说明。截图 docs/ui-shelf-stage3.jpg。
 - 2026-11-09 阶段 2 开盒即卡牌上线：deskHTML 改出 .ytable（纸模桌面，桌面版放在 .arch-main 右栏、窄屏 fixed 盖整屏，滚动锁只在窄屏），archPanelHTML / folderPanelHTML 重写（题头、问题压印、盒子立着开盖 openPackHTML、牌摊开、答案便签、牌册与来龙去脉折叠、备考与改删撤）；cardHTML 重写：没读牌背朝上（黑卡铜字领域大字卷号）、读过牌面朝上（米白：类型一字签、标题、来源日期分钟、为什么存、批注铜印）；bagHTML 大袋改成一叠黑牌加「封」封条，拆封动效沿用；桌面上的盒子行改用 apackHTML（拖放装盒可用了）；gemLegendHTML 删掉。desk_test 通过（焦点、拖放、Esc、手机不横溢）。截图 docs/ui-archive-stage2.jpg。书墙页仍旧样式。
 - 2026-11-08 夜（六） 用户：档案架下面的「怎样归档」去掉；样张的牌盒很清楚，我们的发虚 → 放大三倍看：CSS 3D 变换的层被整层重采样，字和线软，盒面颗粒重采样成斑块。改成正交投影的平面画法（正面对齐像素不变换、侧面窄矩形叠黑、顶面平行四边形叠白、盒底模糊椭圆接触影），盒面去颗粒去滤镜，字号加大一号（卷号 9、盒名 10）。「怎样归档」四条与说明段删掉，相关样式删掉。desk_test 通过，对比图更新，放大对照 docs/ui-archive-box-zoom.jpg。
@@ -155,6 +156,7 @@ updated: 2026-11-09
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
+- 2026-11-09 阶段 4 笔记本进代码：多本、主题本对开、记一笔选本子、路由与搜索；notebook-design.md 加上线记录。
 - 2026-11-09 阶段 3 书架进代码：pwall / pspine / pstand / 加书选文件；旧书墙测试冻结；CLAUDE.md 更新。
 - 2026-11-09 阶段 2 开盒即卡牌进代码：.ytable、牌、卡包、拆封；desk_test 选择器改 .ytable；截图进 docs。
 - 2026-11-08 夜（六） 盒子改正交平面画法（去 3D、去颗粒、去滤镜），「怎样归档」删除；放大对照图进 docs。
