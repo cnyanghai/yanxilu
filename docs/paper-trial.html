@@ -5,7 +5,8 @@
 <title>纸模质感试笔 · 书架 / 档案架 / 笔记本架（2026-11-08 第二稿）</title>
 <link rel="stylesheet" href="../vendor/fonts/fonts.css">
 <style>
-/* 纸模（paper craft）第二稿。改了四件事：
+/* 纸模（paper craft）第三稿（2026-11-09：量过样张后改：全部是叠起来的纸、没有凹槽；切边一圈亮、顶边更亮、底下 6 像素暗带；字压进纸里；盒与本子方向一致；书脊重设计）。
+   第二稿。改了四件事：
    1. 厚度：每片纸是有板厚的（四层硬边 + 软影），牌盒与本子是真三维（CSS 3D 三个面），斜立、靠在后墙上。
    2. 纹理：两层颗粒（粗纤维 + 细牙口）直接混进每片纸的底色里，不再只盖一层淡网。
    3. 三页都画：书架、档案架（架 + 开盒）、笔记本架，手机与桌面各一版。
@@ -14,27 +15,27 @@
   --kraft:#CDAE86; --kraft-2:#C1A077; --kraft-3:#A8865C; --kraft-dk:#7E5E3A; --kraft-bk:#5E4428;
   --cream:#EFE4CF; --cream-2:#E6D8BE;
   --terra:#B4552B; --terra-dk:#8B4119;
-  --olive:#8E8458; --olive-dk:#6E6540;
+  --olive:#857A4F; --olive-dk:#66593A;
   --ink:#3A2A1E; --ink-2:#6B5A48; --ink-3:#8F7E69; --black:#2B2522; --copper:#C4763A;
   --f-serif:"Noto Serif SC","Noto Serif CJK SC","Songti SC",serif; --f-sans:"Noto Sans SC","Noto Sans CJK SC","PingFang SC",sans-serif;
   /* 两层颗粒：粗纤维（低频）用柔光，细牙口（高频）用叠加；灰度噪声，中灰不变、亮处提、暗处压 */
-  --fibre:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.05 .1' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 .75'/></filter><rect width='300' height='300' filter='url(%23f)'/></svg>");
-  --tooth:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='t'><feTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='1' seed='3' stitchTiles='stitch'/><feColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 .7'/></filter><rect width='120' height='120' filter='url(%23t)'/></svg>");
+  --fibre:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.05 .1' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 .38'/></filter><rect width='300' height='300' filter='url(%23f)'/></svg>");
+  --tooth:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='t'><feTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='1' seed='3' stitchTiles='stitch'/><feColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 .95'/></filter><rect width='120' height='120' filter='url(%23t)'/></svg>");
 }
 *{box-sizing:border-box}
 body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font-size:14px;line-height:1.45}
 
 /* ---------- 纸：一片有厚度的纸 ---------- */
-.paper{--face:var(--cream);--e1:color-mix(in srgb,var(--face),#2B1A0C 24%);--e2:color-mix(in srgb,var(--face),#2B1A0C 42%);
+.paper{--face:var(--cream);--e1:color-mix(in srgb,var(--face),#2B1A0C 22%);--e2:color-mix(in srgb,var(--face),#2B1A0C 40%);--e3:color-mix(in srgb,var(--face),#2B1A0C 58%);
   background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;color:var(--ink)}
-.slab{border-radius:5px;position:relative;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 1px 0 0 rgba(255,255,255,.28),inset -1px 0 0 rgba(0,0,0,.08),
-    0 1px 0 var(--e1),0 2px 0 var(--e1),1px 3px 0 var(--e2),1px 4px 0 var(--e2),2px 5px 0 var(--e2),
-    4px 10px 16px -4px rgba(60,40,20,.55)}
+.slab{border-radius:6px;position:relative;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.5),inset 0 0 0 1px rgba(255,255,255,.26),inset 0 -1px 0 rgba(60,35,15,.12),
+    0 1px 0 var(--e1),0 2px 0 var(--e1),0 3px 0 var(--e2),1px 4px 0 var(--e2),1px 5px 0 var(--e3),2px 6px 0 var(--e3),
+    2px 9px 10px -2px rgba(60,35,15,.55)}
 .well{border-radius:6px;position:relative;
   box-shadow:inset 3px 4px 7px rgba(60,40,20,.5),inset 1px 1px 0 rgba(60,40,20,.25),inset -1px -1px 0 rgba(255,255,255,.35)}
-.emb{text-shadow:0 1px 0 rgba(255,255,255,.42),0 -1px 0 rgba(50,30,12,.32)}          /* 压进纸里的字 */
-.emb-hi{text-shadow:0 -1px 0 rgba(255,255,255,.35),0 1px 0 rgba(50,30,12,.45)}       /* 凸起的字（深底上用） */
+.emb{text-shadow:-1px -1px 0 rgba(50,30,12,.38),1px 1px 0 rgba(255,255,255,.5)}          /* 压进纸里的字 */
+.emb-hi{text-shadow:-1px -1px 0 rgba(0,0,0,.35),1px 1px 0 rgba(255,255,255,.3)}       /* 凸起的字（深底上用） */
 .torn{clip-path:polygon(0 7px,4% 1px,10% 6px,18% 0,27% 6px,36% 1px,45% 6px,54% 0,63% 6px,72% 1px,81% 6px,90% 0,96% 6px,100% 2px,100% calc(100% - 5px),94% 100%,86% calc(100% - 4px),74% 100%,62% calc(100% - 6px),50% 100%,38% calc(100% - 4px),26% 100%,14% calc(100% - 6px),4% 100%,0 calc(100% - 3px))}
 .tornwrap{filter:drop-shadow(0 2px 0 var(--e1)) drop-shadow(1px 4px 0 var(--e2)) drop-shadow(3px 8px 8px rgba(60,40,20,.45))}
 .cut{border:1.5px dashed rgba(60,40,20,.55);border-radius:6px;background:rgba(60,40,20,.06);box-shadow:inset 2px 3px 5px rgba(60,40,20,.28),inset 0 0 0 1px rgba(255,255,255,.12);display:grid;place-items:center;color:var(--ink-2)}
@@ -42,11 +43,11 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
 
 /* ---------- 三维盒：牌盒与本子 ---------- */
 .stage{perspective:1000px;perspective-origin:50% 25%}
-.pack{--w:84px;--h:126px;--n:3;--d:calc(9px + var(--n) * 2px);--ry:-24deg;--rz:-6deg;--rx:-5deg;--face:var(--terra);--inkc:var(--black);
+.pack{--w:84px;--h:126px;--n:3;--d:calc(9px + var(--n) * 2px);--ry:-22deg;--rz:0deg;--rx:-4deg;--face:var(--terra);--inkc:var(--black);
   position:relative;width:var(--w);height:var(--h);transform-style:preserve-3d;transform-origin:50% 100%;transform:rotateY(var(--ry)) rotateX(var(--rx)) rotateZ(var(--rz));flex:none}
 .pack .f{position:absolute;left:0;top:0;background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;color:var(--inkc);backface-visibility:hidden}
-.pack .front{width:var(--w);height:var(--h);transform:translateZ(calc(var(--d) / 2));border-radius:2px;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 1px 0 0 rgba(255,255,255,.18),6px 14px 18px -6px rgba(50,30,15,.6)}
+.pack .front{width:var(--w);height:var(--h);transform:translateZ(calc(var(--d) / 2));border-radius:3px;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.3),inset 0 0 0 1px rgba(255,255,255,.2),6px 14px 18px -6px rgba(50,30,15,.6)}
 .pack .side{width:var(--d);height:var(--h);left:100%;transform-origin:left center;transform:translateZ(calc(var(--d) / 2)) rotateY(90deg);filter:brightness(.72) saturate(.9);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .pack .side span{writing-mode:vertical-rl;font:500 8.5px/1 var(--f-sans);letter-spacing:.14em;opacity:.9;white-space:nowrap}
 .pack .top{width:var(--w);height:var(--d);transform-origin:center top;transform:translateZ(calc(-1 * var(--d) / 2)) rotateX(90deg);filter:brightness(1.1)}
@@ -85,20 +86,22 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
 .body.two{grid-template-columns:minmax(0,1fr) 380px;align-items:start}
 
 /* ---------- 书架 ---------- */
-.case{--face:var(--kraft-dk);padding:12px 12px 0;border-radius:8px}
-.row{position:relative;display:flex;align-items:flex-end;gap:6px;padding:0 10px 14px;height:var(--rh,228px);--sy:1.12}
-.row .wall{position:absolute;inset:0 0 14px;--face:var(--kraft-3);background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;border-radius:3px}
-.row .plank{position:absolute;left:-12px;right:-12px;bottom:0;height:14px;--face:var(--kraft-2);background-color:var(--face);background-image:var(--tooth);background-blend-mode:overlay;
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.4),inset 0 -5px 0 rgba(60,40,20,.35),0 4px 0 rgba(60,40,20,.2),0 10px 14px -4px rgba(50,30,15,.6)}
+.case{--face:var(--kraft-2);padding:14px 12px 0;border-radius:9px}
+.row{position:relative;display:flex;align-items:flex-end;gap:7px;padding:0 12px 16px;height:var(--rh,228px);--sy:1.12;margin-bottom:8px}
+.row .wall{display:none}
+.row .plank{position:absolute;left:0;right:0;bottom:0;height:16px;--face:var(--kraft);border-radius:4px;background-color:var(--face);background-image:var(--tooth);background-blend-mode:overlay;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.25),0 2px 0 var(--kraft-3),0 4px 0 var(--kraft-dk),0 6px 0 var(--kraft-bk),2px 9px 10px -2px rgba(60,35,15,.55)}
 .row>*{position:relative}
-.spine{--face:var(--kraft-dk);--e2:color-mix(in srgb,var(--face),#2B1A0C 45%);width:calc(var(--w,30px) * var(--sx,1.4));height:min(calc(var(--h,170px) * var(--sy,1.25)),var(--hmax,999px));border-radius:2px 2px 1px 1px;display:flex;align-items:flex-start;justify-content:center;padding-top:14px;
-  box-shadow:inset 1px 0 0 rgba(255,255,255,.26),inset -2px 0 0 rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.3),3px 0 0 var(--e2),4px 3px 0 rgba(60,40,20,.25),6px 6px 8px -2px rgba(50,30,15,.5);flex:none}
-.spine::before{content:"";position:absolute;left:1px;right:1px;top:-3px;height:4px;background:var(--cream-2);background-image:repeating-linear-gradient(90deg,rgba(60,40,20,.35) 0 1px,transparent 1px 3px);border-radius:1px 1px 0 0}
-.spine span{writing-mode:vertical-rl;font:600 11.5px/1 var(--f-serif);letter-spacing:.14em;color:var(--inkc,var(--cream));white-space:nowrap;max-height:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis}
-.spine.t{--face:var(--terra)}.spine.o{--face:var(--olive)}.spine.k{--face:var(--black);--inkc:var(--copper)}.spine.c{--face:var(--cream);--inkc:var(--ink)}.spine.b{--face:var(--kraft-2);--inkc:var(--ink)}
+.spine{--face:var(--kraft-dk);--e1:color-mix(in srgb,var(--face),#2B1A0C 22%);--e2:color-mix(in srgb,var(--face),#2B1A0C 45%);width:calc(var(--w,30px) * var(--sx,1.4));height:min(calc(var(--h,170px) * var(--sy,1.25)),var(--hmax,999px));border-radius:4px 4px 2px 2px;display:flex;align-items:flex-start;justify-content:center;padding-top:18px;margin-bottom:4px;
+  background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.35),inset 0 0 0 1px rgba(255,255,255,.22),2px 0 0 var(--e1),3px 0 0 var(--e2),3px 3px 0 var(--e2),3px 4px 0 var(--e2),4px 8px 8px -2px rgba(50,30,15,.55);flex:none}
+.spine::before{content:"";position:absolute;left:2px;right:2px;top:-3px;height:4px;background:var(--cream-2);background-image:repeating-linear-gradient(90deg,rgba(60,40,20,.35) 0 1px,transparent 1px 3px);border-radius:2px 2px 0 0}
+.spine span{writing-mode:vertical-rl;font:600 11px/1 var(--f-serif);letter-spacing:.12em;color:var(--ink);white-space:nowrap;max-height:calc(100% - 30px);overflow:hidden;text-overflow:ellipsis;background-color:var(--cream);background-image:var(--tooth);background-blend-mode:overlay;padding:10px 3px 9px;border-radius:1px;box-shadow:inset 0 0 0 1px rgba(60,35,15,.18),1px 1px 0 rgba(60,35,15,.35);text-shadow:-1px -1px 0 rgba(50,30,12,.25),1px 1px 0 rgba(255,255,255,.55)}
+.spine.t{--face:var(--terra)}.spine.o{--face:var(--olive)}.spine.k{--face:var(--black)}.spine.c{--face:var(--cream-2)}.spine.b{--face:var(--kraft-3)}
+.spine.c span{background-color:var(--kraft);}
 .lean{margin-left:10px}
 .reading{display:flex;align-items:flex-end;gap:16px;margin-right:14px}
-.pack.book{--w:118px;--h:176px;--n:9;--face:var(--kraft-dk);--inkc:var(--cream);--ry:22deg;--rz:3deg;--rx:-4deg}
+.pack.book{--w:118px;--h:176px;--n:9;--face:var(--kraft-dk);--inkc:var(--cream);--ry:22deg;--rz:0deg;--rx:-4deg}
 .pack.book .side{left:auto;right:100%;transform-origin:right center;transform:translateZ(calc(var(--d) / 2)) rotateY(-90deg);--face:var(--cream);filter:none;background-image:repeating-linear-gradient(90deg,rgba(60,40,20,.3) 0 1px,transparent 1px 3px),var(--tooth);background-blend-mode:normal,overlay}
 .pack.book .top{--face:var(--cream-2);filter:none;background-image:repeating-linear-gradient(0deg,rgba(60,40,20,.25) 0 1px,transparent 1px 3px);background-blend-mode:normal}
 .pack.book .front{border-radius:2px 4px 4px 2px}
@@ -113,7 +116,7 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
 .upload{width:var(--w,110px);height:var(--h,210px);align-self:center;flex:none}
 .stand{--face:var(--kraft-2);border-radius:8px;padding:26px 24px 28px;display:grid;justify-items:center;align-content:start;gap:26px}
 .stand h2{margin:0;justify-self:start;font:600 12px/1 var(--f-serif);letter-spacing:.3em;color:var(--ink-2)}
-.stand .pack.book{--w:176px;--h:258px;--n:14;--ry:26deg;--rz:2deg;--rx:-5deg;margin:16px 0 30px 40px}
+.stand .pack.book{--w:176px;--h:258px;--n:14;--ry:24deg;--rz:0deg;--rx:-5deg;margin:16px 0 30px 40px}
 .stand .pack.book .plate{top:52px;left:22px;right:22px;font-size:17px;padding:18px 8px}
 .stand .pack.book .plate small{font-size:10.5px}
 .stand .pack.book .rib{left:44px;width:14px;height:64px;bottom:-34px}
@@ -124,9 +127,9 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
 .upload small{display:block;font:500 10px/1.4 var(--f-sans);letter-spacing:.14em;margin-top:6px;text-align:center}
 
 /* ---------- 档案架 ---------- */
-.rack{--face:var(--kraft-dk);padding:12px 12px 0;border-radius:8px}
-.rack .row{--rh:190px;gap:0;justify-content:space-around;padding:0 6px 14px}
-.rack .pack{margin-bottom:2px}
+.rack{--face:var(--kraft-2);padding:14px 12px 0;border-radius:9px}
+.rack .row{--rh:190px;gap:0;justify-content:space-around;padding:0 6px 18px}
+.rack .pack{margin-bottom:0}
 .deck{position:relative;width:92px;height:62px;flex:none;align-self:flex-end;margin-bottom:6px}
 .deck .cd{position:absolute;inset:0;--face:var(--black);color:var(--copper);border-radius:4px;background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;box-shadow:0 1px 0 #1a1512,0 2px 0 #3a302a,0 3px 0 #1a1512,0 4px 0 #3a302a,0 5px 0 #1a1512,3px 9px 10px -3px rgba(40,25,10,.6)}
 .deck .cd::before{content:"";position:absolute;inset:5px;border:1px solid currentColor;opacity:.6}
@@ -140,7 +143,7 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
 /* 打开一盒：盒子立着盖子翻开，牌抽出来扇开在前面 */
 .table{--face:var(--kraft-2);border-radius:8px;padding:18px 16px 16px;position:relative;min-height:330px}
 .table .stage{position:absolute;left:0;right:0;top:0;bottom:0}
-.table .pack.open{position:absolute;right:56px;top:96px;--w:112px;--h:168px;--ry:-18deg;--rx:-10deg;--rz:-2deg;--n:7}
+.table .pack.open{position:absolute;right:56px;top:96px;--w:112px;--h:168px;--rx:-10deg;--n:7}
 .table .pack.open .front .g{font-size:60px}
 .table .pack.open .front .n{font-size:11px;bottom:14px}
 .card{position:absolute;width:150px;height:216px;border-radius:5px;--face:var(--black);color:var(--copper);background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;
@@ -160,9 +163,9 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
 .table .cap small{display:block;margin-top:8px;font:400 10px/1.5 var(--f-sans);letter-spacing:.1em;color:var(--ink-2)}
 
 /* ---------- 笔记本架 ---------- */
-.ledge{--face:var(--kraft-dk);padding:12px 12px 0;border-radius:8px}
-.ledge .row{--rh:250px;gap:22px;padding:0 20px 14px}
-.pack.nb{--w:118px;--h:172px;--n:22;--ry:-20deg;--rz:-3deg;--rx:-4deg}
+.ledge{--face:var(--kraft-2);padding:14px 12px 0;border-radius:9px}
+.ledge .row{--rh:250px;gap:22px;padding:0 20px 18px}
+.pack.nb{--w:118px;--h:172px;--n:22}
 .pack.nb .label{font-size:12px;top:40px;padding:9px 4px}
 .ledge .cut{width:118px;height:172px;align-self:flex-end;margin-bottom:12px}
 .ledge .cut small{font:500 9.5px/1.3 var(--f-sans);letter-spacing:.14em;margin-top:4px}
@@ -193,10 +196,11 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
   .nav a.on{color:var(--terra)}
   .nav a.on::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--terra);margin-top:1px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
   /* 书架 */
-  .case{padding:10px 8px 0}
-  .row{--rh:190px;gap:4px;padding:0 6px 12px;--sx:1;--sy:1;--hmax:146px}
-  .row .plank{left:-8px;right:-8px}
-  .spine span{font-size:10px}
+  .case{padding:12px 8px 0}
+  .row{--rh:190px;gap:5px;padding:0 8px 14px;--sx:1;--sy:1;--hmax:146px;margin-bottom:6px}
+  .row .plank{height:13px}
+  .spine{padding-top:14px}
+  .spine span{font-size:10px;padding:8px 2px 7px}
   .pack.book{--w:98px;--h:146px;--ry:20deg}
   .pack.book .plate{top:26px;font-size:11.5px;padding:9px 4px}
   .reading{gap:10px;margin-right:6px}
@@ -208,8 +212,8 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
   .reading.m-only{display:flex !important}
   .body{grid-template-columns:1fr !important}
   /* 档案架 */
-  .rack{padding:10px 8px 0}
-  .rack .row{--rh:186px;padding:0 2px 12px}
+  .rack{padding:12px 8px 0}
+  .rack .row{--rh:186px;padding:0 2px 15px}
   .pack{--w:78px;--h:117px}
   .pack .front .g{font-size:40px}
   .deck{width:78px;height:54px}
@@ -224,8 +228,8 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
   .table .pack.open .front .g{font-size:40px}
   .table .pack.open .front .n{font-size:9px;bottom:11px}
   /* 笔记本 */
-  .ledge{padding:10px 8px 0}
-  .ledge .row{--rh:182px;gap:8px;padding:0 8px 12px;--sx:1;--sy:1}
+  .ledge{padding:12px 8px 0}
+  .ledge .row{--rh:182px;gap:8px;padding:0 8px 15px;--sx:1;--sy:1}
   .pack.nb{--w:80px;--h:116px}
   .pack.nb .label{font-size:10px;top:30px;padding:7px 4px}
   .ledge .cut{width:80px;height:116px}
@@ -314,21 +318,21 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
   <div class="body" style="grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)">
     <div class="rack paper slab">
       <div class="row stage"><div class="wall"></div>
-        <div class="pack" style="--n:3;--ry:-26deg;--rz:-7deg;--rx:-6deg"><div class="f front"><i class="frame"></i><span class="code">F0 · 01</span><span class="g">周</span><span class="n">居民部门</span><span class="code r">F0 · 01</span></div><div class="f side"><span>居民部门 · 三张</span></div><div class="f top"></div></div>
-        <div class="pack k" style="--n:5;--ry:-14deg;--rz:3deg;--rx:-3deg"><div class="f front"><i class="frame"></i><span class="code">F0 · 02</span><span class="g">周</span><span class="n">康波与利率</span><span class="code r">F0 · 02</span></div><div class="f side"><span>康波与利率 · 五张</span></div><div class="f top"></div></div>
-        <div class="pack" style="--n:3;--ry:-30deg;--rz:-10deg;--rx:-8deg"><div class="f front"><i class="frame"></i><span class="code">D8 · 01</span><span class="g">地</span><span class="n">冷战是怎么开始的</span><span class="code r">D8 · 01</span></div><div class="f side"><span>冷战 · 三张</span></div><div class="f top"></div></div>
-        <div class="pack k d-only" style="--n:7;--ry:-20deg;--rz:-4deg;--rx:-5deg"><div class="f front"><i class="frame"></i><span class="code">D8 · 02</span><span class="g">地</span><span class="n">海权与航道</span><span class="code r">D8 · 02</span></div><div class="f side"><span>海权与航道 · 七张</span></div><div class="f top"></div></div>
+        <div class="pack" style="--n:3"><div class="f front"><i class="frame"></i><span class="code">F0 · 01</span><span class="g">周</span><span class="n">居民部门</span><span class="code r">F0 · 01</span></div><div class="f side"><span>居民部门 · 三张</span></div><div class="f top"></div></div>
+        <div class="pack k" style="--n:5"><div class="f front"><i class="frame"></i><span class="code">F0 · 02</span><span class="g">周</span><span class="n">康波与利率</span><span class="code r">F0 · 02</span></div><div class="f side"><span>康波与利率 · 五张</span></div><div class="f top"></div></div>
+        <div class="pack" style="--n:3"><div class="f front"><i class="frame"></i><span class="code">D8 · 01</span><span class="g">地</span><span class="n">冷战是怎么开始的</span><span class="code r">D8 · 01</span></div><div class="f side"><span>冷战 · 三张</span></div><div class="f top"></div></div>
+        <div class="pack k d-only" style="--n:7"><div class="f front"><i class="frame"></i><span class="code">D8 · 02</span><span class="g">地</span><span class="n">海权与航道</span><span class="code r">D8 · 02</span></div><div class="f side"><span>海权与航道 · 七张</span></div><div class="f top"></div></div>
         <div class="plank"></div>
       </div>
       <div class="row stage"><div class="wall"></div>
-        <div class="pack k" style="--n:1;--ry:-22deg;--rz:-5deg;--rx:-6deg"><div class="f front"><i class="frame"></i><span class="code">F830 · 01</span><span class="g">金</span><span class="n">凯利公式与仓位</span><span class="code r">F830 · 01</span></div><div class="f side"><span>一张</span></div><div class="f top"></div></div>
-        <div class="pack" style="--n:2;--ry:-16deg;--rz:5deg;--rx:-4deg"><div class="f front"><i class="frame"></i><span class="code">F724 · 01</span><span class="g">货</span><span class="n">做市商靠什么赚钱</span><span class="code r">F724 · 01</span></div><div class="f side"><span>做市商 · 两张</span></div><div class="f top"></div></div>
+        <div class="pack k" style="--n:1"><div class="f front"><i class="frame"></i><span class="code">F830 · 01</span><span class="g">金</span><span class="n">凯利公式与仓位</span><span class="code r">F830 · 01</span></div><div class="f side"><span>一张</span></div><div class="f top"></div></div>
+        <div class="pack" style="--n:2"><div class="f front"><i class="frame"></i><span class="code">F724 · 01</span><span class="g">货</span><span class="n">做市商靠什么赚钱</span><span class="code r">F724 · 01</span></div><div class="f side"><span>做市商 · 两张</span></div><div class="f top"></div></div>
         <div class="deck"><div class="cd"><span>?</span></div><div class="cd up">人口老龄化的拐点在哪一年</div><em>收件匣 · 三张</em></div>
         <div class="plank"></div>
       </div>
       <div class="row stage"><div class="wall"></div>
-        <div class="pack" style="--n:4;--ry:-24deg;--rz:-6deg;--rx:-5deg"><div class="f front"><i class="frame"></i><span class="code">F0 · 03</span><span class="g">周</span><span class="n">库存周期</span><span class="code r">F0 · 03</span></div><div class="f side"><span>库存周期 · 四张</span></div><div class="f top"></div></div>
-        <div class="pack k" style="--n:2;--ry:-18deg;--rz:4deg;--rx:-3deg"><div class="f front"><i class="frame"></i><span class="code">D9 · 01</span><span class="g">司</span><span class="n">反垄断一百年</span><span class="code r">D9 · 01</span></div><div class="f side"><span>反垄断 · 两张</span></div><div class="f top"></div></div>
+        <div class="pack" style="--n:4"><div class="f front"><i class="frame"></i><span class="code">F0 · 03</span><span class="g">周</span><span class="n">库存周期</span><span class="code r">F0 · 03</span></div><div class="f side"><span>库存周期 · 四张</span></div><div class="f top"></div></div>
+        <div class="pack k" style="--n:2"><div class="f front"><i class="frame"></i><span class="code">D9 · 01</span><span class="g">司</span><span class="n">反垄断一百年</span><span class="code r">D9 · 01</span></div><div class="f side"><span>反垄断 · 两张</span></div><div class="f top"></div></div>
         <div class="cut"><b>＋</b><small>新盒</small></div>
         <div class="plank"></div>
       </div>
@@ -359,7 +363,7 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
     <div class="table paper slab" style="min-height:420px">
       <div class="cap emb">F0 · 01 居民部门<small>三张 · 牌面朝上的是读过的 · 点牌翻面</small></div>
       <div class="stage">
-        <div class="pack open" style="--n:3;--rx:-6deg"><div class="f front"><i class="frame"></i><span class="code">F0 · 01</span><span class="g">周</span><span class="n">居民部门</span><span class="code r">F0 · 01</span></div><div class="f side"><span>居民部门 · 三张</span></div><div class="f flap"></div></div>
+        <div class="pack open" style="--n:3"><div class="f front"><i class="frame"></i><span class="code">F0 · 01</span><span class="g">周</span><span class="n">居民部门</span><span class="code r">F0 · 01</span></div><div class="f side"><span>居民部门 · 三张</span></div><div class="f flap"></div></div>
         <div class="card back" style="left:8px;top:122px;transform:rotate(-10deg)"><span class="k">F0 · 01</span><span class="g">周</span><span class="k2">F0 · 01</span></div>
         <div class="card back" style="left:72px;top:114px;transform:rotate(-4deg)"><span class="k">F0 · 01</span><span class="g">周</span><span class="k2">F0 · 01</span></div>
         <div class="card face" style="left:140px;top:108px;transform:rotate(3deg)"><span class="kind">数据</span><h3>中美消费与人口</h3><p>国家统计局 · 2026 年 10 月 · 六分钟</p><p class="why">消费占 GDP 四成，比美国低二十八个百分点。</p></div>
@@ -382,11 +386,11 @@ body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font
   <div class="body">
     <div class="ledge paper slab">
       <div class="row stage"><div class="wall"></div>
-        <div class="pack nb b" style="--n:28;--ry:-22deg;--rz:-4deg"><div class="f front"><i class="spinehint"></i><i class="band"></i><div class="label">随手本<small>十一月</small></div></div><div class="f side"></div><div class="f top"></div></div>
-        <div class="pack nb o" style="--n:14;--ry:-16deg;--rz:2deg"><div class="f front"><i class="spinehint"></i><i class="band"></i><div class="label">读书札记</div></div><div class="f side"></div><div class="f top"></div></div>
-        <div class="pack nb k" style="--n:9;--ry:-26deg;--rz:-7deg;--rx:-7deg"><div class="f front"><i class="spinehint"></i><div class="label">康波笔记</div></div><div class="f side"></div><div class="f top"></div></div>
-        <div class="pack nb d-only" style="--n:6;--ry:-18deg;--rz:3deg"><div class="f front"><i class="spinehint"></i><i class="band"></i><div class="label">周报底稿</div></div><div class="f side"></div><div class="f top"></div></div>
-        <div class="pack nb c d-only" style="--n:4;--ry:-20deg;--rz:-3deg"><div class="f front"><i class="spinehint"></i><div class="label">摘抄</div></div><div class="f side"></div><div class="f top"></div></div>
+        <div class="pack nb b" style="--n:28"><div class="f front"><i class="spinehint"></i><i class="band"></i><div class="label">随手本<small>十一月</small></div></div><div class="f side"></div><div class="f top"></div></div>
+        <div class="pack nb o" style="--n:14"><div class="f front"><i class="spinehint"></i><i class="band"></i><div class="label">读书札记</div></div><div class="f side"></div><div class="f top"></div></div>
+        <div class="pack nb k" style="--n:9"><div class="f front"><i class="spinehint"></i><div class="label">康波笔记</div></div><div class="f side"></div><div class="f top"></div></div>
+        <div class="pack nb d-only" style="--n:6"><div class="f front"><i class="spinehint"></i><i class="band"></i><div class="label">周报底稿</div></div><div class="f side"></div><div class="f top"></div></div>
+        <div class="pack nb c d-only" style="--n:4"><div class="f front"><i class="spinehint"></i><div class="label">摘抄</div></div><div class="f side"></div><div class="f top"></div></div>
         <div class="cut"><b>＋</b><small>新本子</small></div>
         <div class="plank"></div>
       </div>
