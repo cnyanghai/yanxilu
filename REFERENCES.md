@@ -28,11 +28,14 @@ last_scan: 2026-11-04
 | 2026-11-06 | WebSearch | 卡怎么存放：mymind（无文件夹只搜索）、Raindrop（收藏夹加标签）、Are.na（block 多 channel）、Milanote / Kosmik / Muse（空间板）、Luhmann 卡片盒（文献卡与想法卡两盒、固定编号加索引） | 结论在 docs/archive-design.md 第五节第 2 小节：借 Are.na 的引卡、Luhmann 的两盒分工、空间板做工作面；mymind 与 Raindrop 排除 |
 | 2026-11-06 | 用户给的三张图 + Pinterest + WebSearch + Steam | 奇幻风 UI：魔法觉醒日记本、ROVAI 使命板、挂夹抽屉；Pinterest「游戏ui」搜索页；图书管理员整理游戏；UI 生产流水线（手绘 / AI 辅助 / 九宫格 / border-image） | 结论在 docs/archive-design.md 第六节：形式定为挂夹抽屉 → 夹子 → 活页对开；生产用生图加切片，不用 Blender |
 | 2026-11-06 | 用户给的四张风格图 + Pinterest「游戏 书架」 | 绘本厚涂的定调图：Legendary Journey 海报、永恒之柱式日志界面、Cresendo 宝箱概念表、皮面魔法书；Pinterest 书架搜索页 | 结论在 docs/ui-system-plan.md 第一节：色板五色、书即界面、概念表当样式图、写实物只取形制 |
+| 2026-11-08 | 用户给的两张图 | 纸艺界面（Planfix CRM 概念）与 MYTHOS 扑克牌盒 | 量色相与明度（都在暖棕一族、靠明度分层）；结论进条目两条与审视稿六之三 |
 
 ## 条目
 
 | 来源 | 是什么 | 可借鉴 | 不适用的原因 | 结论 |
 |---|---|---|---|---|
+| 用户给的图（本机 tools/out/ref/planfix-papercraft.webp） | Planfix CRM 的纸艺界面概念图：牛皮纸底、压痕纸片、半圆表盘、四块硬纸统计牌、撕边任务纸；全图一个暖棕色相、四层明度 | 材质体系（四种纸、一种压痕、左上一盏灯）、靠明度不靠色相、衬线大写拉字距；全部可用 CSS 做 | 表盘与统计牌是仪表盘词汇，只在档案架首屏用一次 | 采纳为邮差全站质感锚（2026-11-08，待用户定），分析在 docs/shelf-design-review.md 六之三 |
+| 用户给的图（本机 tools/out/ref/mythos-cards.webp） | MYTHOS 扑克：黑卡铜色线描人物、回纹边、赤陶牌盒、一个巨大的 Ω 当标志 | 档案盒做成 2:3 牌盒，面上一个领域单字；牌背黑卡铜字、点线双框；黑与赤陶两色交替 | 人物线描不做（没有画师），回纹换点线 | 借鉴：档案盒与牌背的造型（2026-11-08） |
 | https://www.igloo.inc/ 与 https://awwwards.com/igloo-inc-case-study.html | Pudgy Penguins 母公司落地页，Abeto × Bureaux；Three.js + three-mesh-bvh + Svelte + GSAP + Vite，Houdini / Blender 建模 | 一种材质做到极致；滚动驱动镜头与生长时间线；UI 用 WebGL 画在场景里；低端机持续实测；开场用代码生成不用视频 | 只有三章的展示页，专业图形团队，自研工具链；我们每天用、无美术 | 借鉴 |
 | https://kriss.ai/home/overview 与 https://www.awwwards.com/case-study-ai-with-a-human-touch-the-new-face-of-kriss-ai.html | 牙科 AI 助手官网，Studio 28K；OGL + Svelte 5 + Blender + PayloadCMS + Cloudflare。2026-10-28 深拆见 `design/KRISS-ANALYSIS.md`：单文件 29 MB 场景、KTX2 贴图、全烘焙 lightmap 无实时阴影、透光玻璃、长焦 3/4 俯视、2 到 2.8 秒 inOutCubic 镜头、待机呼吸、房色系统 | 房间即单元、楼即总览、一个 URL 一间房；厚度 + 圆角 + 剖切面；烘焙光；镜头在房外看进去；每房一色 UI 跟随；卡片贴边；先草图再三维 | 八间房内容写死；黏土粉彩风与我们材质宇宙不同；29 MB 首包我们不许；OGL 生态薄 | 借鉴（方法样板，不抄风格） |
 | https://github.com/brunosimon/my-room-in-3d | Bruno Simon 的个人房间，Blender 建模 + 烘焙光照 + Three.js，4.5k 星，2021 | 烘焙进贴图、场景无实时光是网页上"一间房"好看又跑得动的标准做法 | 单间、静态、无数据 | 借鉴（渲染路线） |
