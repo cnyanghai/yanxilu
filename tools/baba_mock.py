@@ -1,4 +1,4 @@
-"""本地模拟 Baba 服务器：/api/yxl/* 按 Baba 新接口的语义实现，首页给研习录 server/index.html。
+"""本地模拟 Baba 服务器：/api/yxl/* 按 Baba 新接口的语义实现，首页给邮差 server/index.html。
 用法：python3 tools/baba_mock.py 8790   （在仓库根目录跑；先 python3 build.py 生成 server/index.html）"""
 import json, sys, os, time, uuid, urllib.parse, threading
 from http.server import ThreadingHTTPServer, BaseHTTPRequestHandler
@@ -48,7 +48,7 @@ TYPES = {".html":"text/html; charset=utf-8",".mjs":"text/javascript; charset=utf
 def baba_page(title, body):
     return ("<!doctype html><html><head><meta charset=utf-8><title>Baba 英语 · 看视频学英语</title><script>" + EMBED + "</script>"
       "<style>html[data-embed] [data-site-header]{display:none} html[data-embed] [data-site-main]{padding-top:0} [data-site-header]{position:fixed;top:0;left:0;right:0;height:56px;background:#222;color:#fff} [data-site-main]{padding-top:56px} body{margin:0;font-family:sans-serif;background:#111;color:#eee}</style></head>"
-      "<body><header data-site-header>Baba 顶栏 <a href='/'>研习录</a></header><main data-site-main><h1 id=t>" + title + "</h1>" + body + "</main></body></html>")
+      "<body><header data-site-header>Baba 顶栏 <a href='/'>邮差</a></header><main data-site-main><h1 id=t>" + title + "</h1>" + body + "</main></body></html>")
 class H(BaseHTTPRequestHandler):
     protocol_version = "HTTP/1.1"
     def log_message(self, *a): pass

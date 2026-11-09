@@ -1,6 +1,6 @@
-# 研习录（yanxilu）· 给 Claude Code 的项目说明
+# 邮差（yanxilu）· 给 Claude Code 的项目说明
 
-研习录是一间可以养的书房的网页版：书墙放书、档案架放盒、桌上放牌；剪的、读的、写的在里面长成东西。公开版在 GitHub Pages，主版本在 https://baba.wogucloud.cn（Baba 服务器上的一份克隆，cron 每 5 分钟 `git pull`，所以**推到 main 就是上线**）。
+邮差（代号 yanxilu，2026-11-08 前叫研习录；仓库、目录、路由名不改）是一间可以养的书房的网页版：书墙放书、档案架放盒、桌上放牌；剪的、读的、写的在里面长成东西。公开版在 GitHub Pages，主版本在 https://baba.wogucloud.cn（Baba 服务器上的一份克隆，cron 每 5 分钟 `git pull`，所以**推到 main 就是上线**）。
 
 三维小世界（版本 2，游戏项目）2026-11-02 拆到了另一个仓库 `cnyanghai/yanxilu-world`（brain 里 `1-Projects/yanxilu-world`），两边共用同一份 Baba 数据，代码互不引用。本仓库只管书架网页（版本 1 系列，git 标签 `v1` 是 2026-10-28 的 main）。
 

@@ -1,0 +1,275 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>档案架样稿 · 素墙系列（2026-11-08）</title>
+<link rel="stylesheet" href="../vendor/fonts/fonts.css">
+<style>
+/* 素墙系列的材质语言：一盏左上灯、一种橡木、一种阴影。颜色取自 src/page.html 的变量。 */
+:root{
+  --linen:#E9E2D3; --linen-tx:rgba(110,90,60,.06); --wall-light:rgba(255,250,238,.7);
+  --oak-hi:#E8D5B2; --oak-1:#D6BB94; --oak-2:#C9AB81; --oak-3:#B4946A; --oak-ink:#4A3820;
+  --plate:#EFE5CA; --plate-line:#A8966A; --plate-ink:#3A332B; --plab:#F3ECDB;
+  --card:#FBF8EE; --card-line:#D9D2BC; --ink:#1C1A17; --ink-2:#5A5347; --ink-3:#8A8273;
+  --board:#B7B0A2; --board-2:#A39B8C; --board-ink:#3E3831;
+  --k-doc:#1F4E8C; --k-data:#00897B; --k-plan:#C8372D; --k-note:#D08A12; --k-clip:#7A4E9C;
+  --wood:#2E2925; --wood-2:#3A322C; --wood-hi:#6A5B4F;
+  --sh:4px 6px 12px -5px rgba(60,40,20,.42); --sh-s:2px 3px 6px -2px rgba(60,40,20,.35);
+  --f-display:"Noto Serif SC","Noto Serif CJK SC","Songti SC",serif; --f-body:"Noto Sans SC","Noto Sans CJK SC","PingFang SC",sans-serif; --f-num:"Barlow Condensed","Barlow",sans-serif;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#2a2a2a;color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5}
+.frame{width:1100px;margin:24px auto;padding:22px 24px 26px;background:var(--linen);background-image:radial-gradient(70% 40% at 50% 0%,var(--wall-light),transparent 70%),repeating-linear-gradient(0deg,var(--linen-tx) 0 1px,transparent 1px 7px),repeating-linear-gradient(90deg,var(--linen-tx) 0 1px,transparent 1px 7px);border-radius:8px}
+.frame.dark{background:var(--wood);background-image:linear-gradient(100deg,rgba(255,220,170,.06),transparent 60%),repeating-linear-gradient(90deg,rgba(255,255,255,.02) 0 2px,transparent 2px 9px);color:#EFE6D2}
+.frame h3{margin:0 0 14px;font:600 15px/1.2 var(--f-body);color:var(--ink-2);letter-spacing:.04em}
+.frame.dark h3{color:#CDB996}
+.frame h3 small{font-weight:400;margin-left:10px;color:var(--ink-3)}
+.frame.dark h3 small{color:#9C8C72}
+.plaque{display:inline-block;padding:2px 10px;border:1px solid var(--plate-line);background:var(--plate);color:var(--plate-ink);font:500 12px/1.6 var(--f-body);letter-spacing:.14em;border-radius:2px;box-shadow:inset 0 1px 0 #fff8}
+.code{font:600 11px/1 var(--f-num);letter-spacing:.12em;color:var(--oak-ink)}
+.st{position:absolute;width:14px;height:14px;display:grid;place-items:center;font:700 9px/1 var(--f-body)}
+.st.doing{top:-4px;right:8px;width:10px;height:22px;background:var(--k-plan);clip-path:polygon(0 0,100% 0,100% 100%,50% 78%,0 100%)}
+.st.yearly{top:6px;right:6px;border-radius:50%;border:1.5px solid var(--oak-ink);color:var(--oak-ink);background:var(--plab)}
+.st.yearly::after{content:"年"}
+.st.done{top:6px;right:6px;border:1.5px solid #9E3324;color:#9E3324;background:var(--plab);border-radius:1px}
+.st.done::after{content:"结"}
+.cnt{font:600 11px/1 var(--f-num);color:var(--ink-3);letter-spacing:.06em}
+
+/* ---- 甲 卡片目录柜 ---- */
+.cab{background:linear-gradient(180deg,var(--oak-hi),var(--oak-1) 12%,var(--oak-2));border-radius:6px 6px 3px 3px;padding:14px 16px 18px;box-shadow:var(--sh),inset 0 1px 0 #fff6;position:relative}
+.cab::after{content:"";position:absolute;left:14px;right:14px;bottom:-12px;height:12px;background:linear-gradient(180deg,var(--oak-3),#8F7352);border-radius:0 0 4px 4px;box-shadow:0 6px 10px -6px rgba(60,40,20,.5)}
+.cab-top{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:12px}
+.pigeon{display:flex;gap:6px}
+.pigeon .ph{width:64px;height:44px;background:linear-gradient(180deg,#5A4A3A,#3F3328);border-radius:2px;box-shadow:inset 3px 3px 6px rgba(0,0,0,.45);position:relative;overflow:hidden}
+.pigeon .ph i{position:absolute;bottom:0;width:70%;height:26px;background:var(--card);border:1px solid var(--card-line);border-bottom:0;left:10%;transform:rotate(-3deg) translateY(6px);box-shadow:var(--sh-s)}
+.pigeon .ph i+i{left:18%;transform:rotate(2deg) translateY(10px);height:22px}
+.pigeon .ph i+i+i{left:6%;transform:rotate(-1deg) translateY(13px);height:18px}
+.pigeon .ph small{position:absolute;top:3px;left:0;right:0;text-align:center;color:#D9C9A8;font:600 10px/1 var(--f-num);letter-spacing:.1em}
+.row{display:grid;grid-template-columns:132px 1fr;gap:12px;align-items:center;padding:8px 0;border-top:1px solid rgba(74,56,32,.18)}
+.row:first-of-type{border-top:0}
+.row-tag{font:500 12px/1.4 var(--f-body);color:var(--oak-ink)}
+.row-tag small{display:block;font:600 10px/1.6 var(--f-num);letter-spacing:.14em;color:#7A6246}
+.drawers{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.dr{position:relative;height:76px;border-radius:3px;background:linear-gradient(180deg,var(--oak-1),var(--oak-2) 70%,var(--oak-3));box-shadow:inset 0 1px 0 #fff7,inset 0 -2px 0 rgba(74,56,32,.25),var(--sh-s)}
+.dr .lbl{position:absolute;left:8px;right:8px;top:8px;height:44px;background:var(--plab);border:1.5px solid var(--plate-line);border-radius:2px;padding:3px 6px 0;overflow:hidden;box-shadow:inset 0 0 0 1px #fff8}
+.dr .lbl small{display:block;font:600 9px/1 var(--f-num);letter-spacing:.12em;color:var(--ink-3)}
+.dr .lbl b{display:block;font:500 12px/1.25 var(--f-display);color:var(--ink);margin-top:2px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.dr .lbl em{position:absolute;right:5px;bottom:2px;font-style:normal;font:600 9px/1 var(--f-num);color:var(--ink-3)}
+.dr .pull{position:absolute;left:50%;bottom:7px;width:26px;height:7px;margin-left:-13px;border-radius:4px;background:linear-gradient(180deg,#F1E3C2,#A8905E);box-shadow:0 1px 2px rgba(0,0,0,.35)}
+.dr.empty .lbl{background:rgba(243,236,219,.55);border-color:rgba(168,150,106,.5)}
+
+/* ---- 乙 层板上的档案盒 ---- */
+.wall{padding:6px 10px 4px}
+.brow{position:relative;padding:0 0 26px;margin-bottom:26px}
+.boxes{display:flex;align-items:flex-end;gap:10px;padding:0 24px 0 18px;min-height:150px}
+.board{position:relative;height:12px;background:linear-gradient(180deg,var(--oak-hi),var(--oak-1) 40%,var(--oak-2));border-radius:2px;box-shadow:0 10px 10px -8px rgba(60,40,20,.5),inset 0 1px 0 #fff7}
+.board::after{content:"";position:absolute;left:0;right:0;top:12px;height:6px;background:linear-gradient(180deg,var(--oak-3),#8F7352)}
+.bplate{position:absolute;left:18px;top:22px;padding:1px 8px;background:var(--plate);border:1px solid var(--plate-line);border-radius:2px;font:500 11px/1.7 var(--f-body);color:var(--plate-ink);letter-spacing:.06em}
+.bplate b{font:600 10px/1 var(--f-num);letter-spacing:.14em;margin-right:6px}
+.bplus{position:absolute;right:18px;top:22px;width:20px;height:20px;border-radius:50%;border:1px solid var(--plate-line);background:var(--plate);color:var(--ink-3);text-align:center;font:500 14px/18px var(--f-body)}
+.hbox{position:relative;height:166px;width:46px;background:linear-gradient(90deg,var(--board-2),var(--board) 30%,var(--board) 70%,#9E9688);border-radius:2px;box-shadow:var(--sh),inset 1px 0 0 #fff5}
+.hbox.w2{width:58px}.hbox.w3{width:74px}.hbox.w5{width:96px}
+.hbox::before,.hbox::after{content:"";position:absolute;left:0;right:0;height:5px;background:linear-gradient(180deg,#E8D5A8,#9C7D4A)}
+.hbox::before{top:0;border-radius:2px 2px 0 0}.hbox::after{bottom:0;border-radius:0 0 2px 2px}
+.hbox .sp{position:absolute;left:50%;top:12px;bottom:30px;width:30px;margin-left:-15px;background:var(--plab);border:1px solid var(--plate-line);border-radius:1px;display:flex;flex-direction:column;align-items:center;padding:4px 0;gap:4px}
+.hbox .sp small{font:600 8px/1 var(--f-num);letter-spacing:.08em;color:var(--ink-3)}
+.hbox .sp b{writing-mode:vertical-rl;font:500 12px/1 var(--f-display);color:var(--ink);letter-spacing:.06em;flex:1;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;max-height:92px}
+.hbox .sp em{font-style:normal;font:600 9px/1 var(--f-num);color:var(--ink-3)}
+.hbox .st{right:auto;left:50%;margin-left:-5px}
+.hbox .st.doing{top:-3px;margin-left:-5px}
+.hbox .st.yearly,.hbox .st.done{top:auto;bottom:8px;left:50%;margin-left:-7px}
+.inbox-tray{position:relative;width:150px;height:46px;align-self:flex-end;background:linear-gradient(180deg,var(--oak-1),var(--oak-2));border-radius:3px;box-shadow:var(--sh-s);margin-left:auto}
+.inbox-tray i{position:absolute;left:10px;right:10px;bottom:8px;height:30px;background:var(--card);border:1px solid var(--card-line);transform:rotate(-1.5deg);box-shadow:var(--sh-s)}
+.inbox-tray i+i{transform:rotate(1deg);bottom:12px}.inbox-tray i+i+i{transform:rotate(-.5deg);bottom:16px}
+.inbox-tray small{position:absolute;left:0;right:0;top:-20px;text-align:center;font:500 11px/1 var(--f-body);color:var(--ink-3)}
+
+/* ---- 丙 鸽笼格（分信架） ---- */
+.prack{background:linear-gradient(180deg,var(--oak-hi),var(--oak-1) 10%,var(--oak-2));padding:12px;border-radius:6px 6px 3px 3px;box-shadow:var(--sh),inset 0 1px 0 #fff6}
+.prack .ptitle{display:flex;justify-content:space-between;align-items:center;margin:0 4px 10px}
+.prow{display:grid;grid-template-columns:120px repeat(6,1fr);gap:8px;margin-bottom:8px}
+.prow .slots{display:contents}
+.prow-tag{display:flex;flex-direction:column;justify-content:center;padding:0 6px;color:var(--oak-ink);font:500 12px/1.3 var(--f-body)}
+.prow-tag small{font:600 10px/1.6 var(--f-num);letter-spacing:.14em;color:#7A6246}
+.slot{position:relative;height:96px;overflow:hidden;background:linear-gradient(180deg,#4E3F31,#3A2E23);border-radius:2px;box-shadow:inset 4px 5px 8px rgba(0,0,0,.5),inset -1px -1px 0 rgba(255,255,255,.08)}
+.slot .num{position:absolute;left:50%;top:-5px;transform:translateX(-50%);padding:0 6px;background:linear-gradient(180deg,#F1E3C2,#B49A68);border-radius:2px;font:600 9px/14px var(--f-num);letter-spacing:.12em;color:#3A2E1A;box-shadow:0 1px 1px rgba(0,0,0,.4)}
+.slot .face{position:absolute;left:7px;right:7px;top:12px;bottom:7px;background:linear-gradient(90deg,var(--board-2),var(--board) 25%,var(--board) 75%,#9E9688);border-radius:2px;box-shadow:var(--sh-s);padding:6px 6px 0;overflow:hidden}
+.slot .face::before{content:"";position:absolute;left:0;right:0;top:0;height:4px;background:linear-gradient(180deg,#E8D5A8,#9C7D4A)}
+.slot .face .lbl{margin-top:4px;background:var(--plab);border:1px solid var(--plate-line);border-radius:1px;padding:3px 5px;height:50px;overflow:hidden}
+.slot .face .lbl small{display:block;font:600 8px/1 var(--f-num);letter-spacing:.12em;color:var(--ink-3)}
+.slot .face .lbl b{display:block;font:500 11px/1.25 var(--f-display);color:var(--ink);margin-top:2px}
+.slot .face em{position:absolute;right:8px;bottom:4px;font-style:normal;font:600 9px/1 var(--f-num);color:var(--board-ink)}
+.slot .st{z-index:2}
+.slot .st.doing{top:-4px}
+.slot.mail i{position:absolute;bottom:-30px;left:12%;width:72%;height:70px;background:var(--card);border:1px solid var(--card-line);transform:rotate(-3deg);box-shadow:var(--sh-s)}
+.slot.mail i+i{left:16%;bottom:-24px;transform:rotate(2.5deg)}
+.slot.mail i+i+i{left:8%;bottom:-18px;transform:rotate(-1deg)}
+.slot.mail .cnt{position:absolute;left:50%;transform:translateX(-50%);top:18px;padding:2px 7px;border-radius:9px;background:rgba(40,30,20,.72);color:#E9DCBF;z-index:2}
+
+/* ---- 打开一盒 A：匣子翻开（浅） ---- */
+.open-a{display:grid;grid-template-columns:300px 1fr;gap:18px;align-items:start}
+.lid{background:linear-gradient(180deg,var(--board),var(--board-2));border-radius:4px;padding:14px;box-shadow:var(--sh);position:relative;min-height:330px}
+.lid::before{content:"";position:absolute;left:0;right:0;top:0;height:6px;background:linear-gradient(180deg,#E8D5A8,#9C7D4A);border-radius:4px 4px 0 0}
+.lid .note{background:var(--card);border:1px solid var(--card-line);padding:12px 14px 14px;transform:rotate(-.6deg);box-shadow:var(--sh-s);margin-top:8px}
+.lid .note small{display:block;font:500 11px/1.4 var(--f-body);color:var(--ink-3);letter-spacing:.06em}
+.lid .note b{display:block;font:600 15px/1.45 var(--f-display);margin:4px 0 10px}
+.lid .note p{margin:0;font:400 13px/1.7 var(--f-display);color:var(--ink-2)}
+.lid .note p::before{content:"现在的答案 · ";color:var(--ink-3);font-family:var(--f-body);font-size:11px}
+.lid .meta{margin:12px 2px 0;font:400 11px/1.6 var(--f-body);color:#4A4237}
+.lid .meta b{font-weight:500}
+.tray{background:linear-gradient(180deg,var(--oak-1),var(--oak-2));border-radius:4px;padding:14px 16px 16px;box-shadow:var(--sh),inset 0 1px 0 #fff6}
+.tray header{display:flex;align-items:baseline;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.tray header h2{margin:0;font:600 20px/1.3 var(--f-display);color:var(--ink)}
+.tray header .meta{color:var(--oak-ink);font-size:12px}
+.tray header .back{margin-left:auto;font:500 12px/1 var(--f-body);color:var(--oak-ink);border:1px solid rgba(74,56,32,.4);border-radius:14px;padding:5px 10px;background:rgba(255,255,255,.25)}
+.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.icard{position:relative;color:var(--ink);background:var(--card);border:1px solid var(--card-line);border-radius:3px;padding:12px 12px 12px 14px;min-height:124px;box-shadow:var(--sh-s);background-image:repeating-linear-gradient(0deg,transparent 0 23px,rgba(120,140,170,.18) 23px 24px);background-position:0 44px}
+.icard::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;border-radius:3px 0 0 3px;background:var(--kc,#8A8273)}
+.icard h4{margin:0 26px 4px 0;font:600 14px/1.35 var(--f-display)}
+.icard .src{margin:0;font:400 11px/1.5 var(--f-body);color:var(--ink-3)}
+.icard .why{margin:8px 0 0;font:400 12px/1.6 var(--f-display);color:var(--ink-2)}
+.coin{position:absolute;right:10px;top:10px;width:20px;height:20px;border-radius:50%;display:grid;place-items:center;color:#fff;font:600 11px/1 var(--f-body);background:var(--kc)}
+.seal{position:absolute;right:10px;bottom:10px;width:16px;height:16px;border:1.5px solid var(--ink-3);border-radius:50%}
+.seal.read{background:var(--ink-3)}
+.seal.note{border-radius:0;transform:rotate(45deg);width:12px;height:12px;right:12px;bottom:12px;border-color:#9E3324}
+.seal.done{border-radius:1px;border-color:#9E3324}
+.tabs{display:flex;gap:6px;margin-top:14px;padding-top:12px;border-top:1px solid rgba(74,56,32,.2)}
+.tabs span{padding:3px 10px;background:var(--plate);border:1px solid var(--plate-line);border-radius:2px;font:500 11px/1.6 var(--f-body);color:var(--plate-ink)}
+.tabs span.plus{margin-left:auto;background:var(--oak-ink);color:#F6EEDC;border-color:var(--oak-ink)}
+
+/* ---- 打开一盒 B：深木桌收拾干净 ---- */
+.open-b header{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;margin-bottom:6px}
+.open-b header .code{color:#CDB996}
+.open-b header h2{margin:0;font:600 22px/1.3 var(--f-display);color:#F3E9D4}
+.open-b header .meta{color:#A89777;font-size:12px}
+.open-b header .back{margin-left:auto;font:500 12px/1 var(--f-body);color:#E6D8BC;border:1px solid rgba(230,216,188,.35);border-radius:14px;padding:5px 10px}
+.open-b .q{margin:0 0 16px;font:400 14px/1.6 var(--f-display);color:#D9CBAE;border-left:3px solid #C89A4A;padding-left:10px}
+.open-b .q b{color:#F3E9D4;font-weight:500}
+.open-b .cards{grid-template-columns:repeat(4,1fr)}
+.open-b .icard{box-shadow:4px 7px 14px -6px rgba(0,0,0,.6)}
+.open-b .tabs{border-top-color:rgba(230,216,188,.2)}
+.open-b .tabs span{background:transparent;color:#CDB996;border-color:rgba(205,185,150,.4)}
+.open-b .tabs span.plus{background:#C89A4A;border-color:#C89A4A;color:#2A2118}
+
+/* ---- 手机 ---- */
+@media (max-width:480px){
+  .frame{width:100%;margin:0;padding:14px 12px 18px;border-radius:0}
+  .cab{padding:10px 10px 14px}
+  .cab-top{flex-direction:column;align-items:flex-start;gap:8px}
+  .pigeon .ph{width:56px}
+  .row{grid-template-columns:1fr;gap:6px;padding:8px 0}
+  .drawers{grid-template-columns:repeat(3,1fr)}
+  .dr{height:70px}
+  .boxes{padding:0 8px;min-height:140px;overflow:hidden}
+  .bplate{left:8px}.bplus{right:8px}
+  .inbox-tray{width:110px}
+  .prow{grid-template-columns:1fr;gap:6px}
+  .prow .slots{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+  .slot .face .lbl b{font-size:10px}
+  .prow-tag{flex-direction:row;gap:8px;align-items:baseline;padding:0 2px}
+  .slot{height:92px}
+  .open-a{grid-template-columns:1fr;gap:10px}
+  .lid{min-height:0;padding:10px}
+  .tray{padding:12px}
+  .cards,.open-b .cards{grid-template-columns:1fr}
+  .tray header h2,.open-b header h2{font-size:18px}
+  .tabs{flex-wrap:wrap}
+}
+</style>
+<body>
+
+<section class="frame" id="rack-a">
+<h3>甲 卡片目录柜<small>橡木矮柜，一领域一行，一盒一抽屉；空抽屉也是抽屉；柜顶鸽笼格是收件匣</small></h3>
+<div class="cab">
+  <div class="cab-top"><span class="plaque">研 究 档 案</span>
+    <div class="pigeon"><div class="ph"><small>收件匣</small><i></i><i></i><i></i></div><div class="ph"><small>剪报夹</small><i></i></div><div class="ph"><small>待定</small></div></div></div>
+  <div class="row"><div class="row-tag"><small>D8</small>地缘与战争</div><div class="drawers">
+    <div class="dr"><div class="lbl"><small>D8 · 01</small><b>冷战是怎么开始的</b><em>3 件</em></div><i class="pull"></i><span class="st doing" title="在做"></span></div>
+    <div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div></div></div>
+  <div class="row"><div class="row-tag"><small>F0</small>经济周期</div><div class="drawers">
+    <div class="dr"><div class="lbl"><small>F0 · 01</small><b>居民部门：消费、人口与财富</b><em>3 件</em></div><i class="pull"></i><span class="st yearly" title="要年更"></span></div>
+    <div class="dr"><div class="lbl"><small>F0 · 02</small><b>康波与利率</b><em>5 件</em></div><i class="pull"></i><span class="st done" title="已结卷"></span></div>
+    <div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div></div></div>
+  <div class="row"><div class="row-tag"><small>F830</small>CFA 级金融</div><div class="drawers">
+    <div class="dr"><div class="lbl"><small>F830 · 01</small><b>凯利公式与仓位管理</b><em>1 件</em></div><i class="pull"></i><span class="st doing"></span></div>
+    <div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div></div></div>
+  <div class="row"><div class="row-tag"><small>F724</small>期货与商品</div><div class="drawers">
+    <div class="dr"><div class="lbl"><small>F724 · 01</small><b>做市商靠什么赚钱</b><em>2 件</em></div><i class="pull"></i><span class="st doing"></span></div>
+    <div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div><div class="dr empty"><div class="lbl"></div><i class="pull"></i></div></div></div>
+</div>
+</section>
+
+<section class="frame" id="rack-b">
+<h3>乙 层板上的档案盒<small>和书墙同一块浮板；灰板盒配黄铜包边，厚度随件数；一领域一层，层末一枚小加号；收件匣是板上一只浅托盘</small></h3>
+<div class="wall">
+  <div class="brow"><div class="boxes">
+    <div class="hbox w3"><div class="sp"><small>D8·01</small><b>冷战是怎么开始的</b><em>3</em></div><span class="st doing"></span></div>
+    <div class="inbox-tray"><i></i><i></i><i></i><small>收件匣 · 3 件待归位</small></div>
+  </div><div class="board"><span class="bplate"><b>D8</b>地缘与战争 · 1 盒 3 件</span><span class="bplus">+</span></div></div>
+  <div class="brow"><div class="boxes">
+    <div class="hbox w3"><div class="sp"><small>F0·01</small><b>居民部门：消费、人口与财富</b><em>3</em></div><span class="st yearly"></span></div>
+    <div class="hbox w5"><div class="sp"><small>F0·02</small><b>康波与利率</b><em>5</em></div><span class="st done"></span></div>
+  </div><div class="board"><span class="bplate"><b>F0</b>经济周期 · 2 盒 8 件</span><span class="bplus">+</span></div></div>
+  <div class="brow"><div class="boxes">
+    <div class="hbox"><div class="sp"><small>F830·01</small><b>凯利公式与仓位管理</b><em>1</em></div><span class="st doing"></span></div>
+    <div class="hbox w2" style="margin-left:40px"><div class="sp"><small>F724·01</small><b>做市商靠什么赚钱</b><em>2</em></div><span class="st doing"></span></div>
+  </div><div class="board"><span class="bplate"><b>F830 · F724</b>CFA 级金融 · 期货与商品</span><span class="bplus">+</span></div></div>
+</div>
+</section>
+
+<section class="frame" id="rack-c">
+<h3>丙 分信架（鸽笼格）<small>邮差的架子：一格一盒，格口黄铜号牌；收件匣的信露着纸边等归位；空格是暗的格，不是虚线</small></h3>
+<div class="prack">
+  <div class="ptitle"><span class="plaque">研 究 档 案</span><span class="cnt">5 盒 · 14 件 · 收件匣 3</span></div>
+  <div class="prow"><div class="prow-tag"><small>收件匣</small>待归位</div><div class="slots">
+    <div class="slot mail"><span class="num">IN</span><i></i><i></i><i></i><span class="cnt">3 件</span></div>
+    <div class="slot mail"><span class="num">剪报夹</span><i></i><span class="cnt">1 件</span></div>
+    <div class="slot"><span class="num">—</span></div><div class="slot"><span class="num">—</span></div><div class="slot"><span class="num">—</span></div><div class="slot"><span class="num">—</span></div></div></div>
+  <div class="prow"><div class="prow-tag"><small>D8</small>地缘与战争</div><div class="slots">
+    <div class="slot"><span class="num">D8·01</span><div class="face"><div class="lbl"><small>D8 · 01</small><b>冷战是怎么开始的</b></div><em>3 件</em></div><span class="st doing"></span></div>
+    <div class="slot"><span class="num">D8·02</span></div><div class="slot"><span class="num">D8·03</span></div><div class="slot"><span class="num">D8·04</span></div><div class="slot"><span class="num">D8·05</span></div><div class="slot"><span class="num">D8·06</span></div></div></div>
+  <div class="prow"><div class="prow-tag"><small>F0</small>经济周期</div><div class="slots">
+    <div class="slot"><span class="num">F0·01</span><div class="face"><div class="lbl"><small>F0 · 01</small><b>居民部门：消费、人口与财富</b></div><em>3 件</em></div><span class="st yearly"></span></div>
+    <div class="slot"><span class="num">F0·02</span><div class="face"><div class="lbl"><small>F0 · 02</small><b>康波与利率</b></div><em>5 件</em></div><span class="st done"></span></div>
+    <div class="slot"><span class="num">F0·03</span></div><div class="slot"><span class="num">F0·04</span></div><div class="slot"><span class="num">F0·05</span></div><div class="slot"><span class="num">F0·06</span></div></div></div>
+  <div class="prow"><div class="prow-tag"><small>F830</small>CFA 级金融</div><div class="slots">
+    <div class="slot"><span class="num">F830·01</span><div class="face"><div class="lbl"><small>F830 · 01</small><b>凯利公式与仓位管理</b></div><em>1 件</em></div><span class="st doing"></span></div>
+    <div class="slot"><span class="num">F830·02</span></div><div class="slot"><span class="num">F830·03</span></div><div class="slot"><span class="num">F830·04</span></div><div class="slot"><span class="num">F830·05</span></div><div class="slot"><span class="num">F830·06</span></div></div></div>
+  <div class="prow"><div class="prow-tag"><small>F724</small>期货与商品</div><div class="slots">
+    <div class="slot"><span class="num">F724·01</span><div class="face"><div class="lbl"><small>F724 · 01</small><b>做市商靠什么赚钱</b></div><em>2 件</em></div><span class="st doing"></span></div>
+    <div class="slot"><span class="num">F724·02</span></div><div class="slot"><span class="num">F724·03</span></div><div class="slot"><span class="num">F724·04</span></div><div class="slot"><span class="num">F724·05</span></div><div class="slot"><span class="num">F724·06</span></div></div></div>
+</div>
+</section>
+
+<section class="frame" id="open-a">
+<h3>打开一盒 A · 匣子翻开<small>留在浅色房间里；盖子内侧一张便签写问题与现在的答案，匣里牌面朝上直接是卡；牌册、来龙去脉、备考收进底下一排黄铜小签</small></h3>
+<div class="open-a">
+  <div class="lid"><div class="note"><small>这一盒想回答</small><b>中国家庭的钱花在哪、存在哪？和美国、日本差在哪里？</b><p>中国居民消费只占 GDP 的四成，比美国低约 28 个百分点；钱更多存成存款和房子，美国家庭的钱主要在股票和养老金。人口老龄化在加快。</p></div>
+    <p class="meta">从哪来 · 读周金涛《涛动周期论》时做的辅助研究<br>用得上 · <b>SQL 第 31 课</b>、<b>Python 第 13 课</b></p></div>
+  <div class="tray"><header><span class="code">研 · F0 · 01</span><h2>居民部门：消费、人口与财富</h2><span class="meta">经济周期 · 要年更 · 3 件</span><span class="back">回到档案架</span></header>
+    <div class="cards">
+      <article class="icard" style="--kc:var(--k-data)"><span class="coin">数</span><h4>中美消费与人口</h4><p class="src">国家统计局 · 2026-10 · 6 分钟</p><p class="why">消费占 GDP 四成，比美国低 28 个百分点</p><span class="seal" title="没读"></span></article>
+      <article class="icard" style="--kc:var(--k-data)"><span class="coin">数</span><h4>中美日财富存量</h4><p class="src">各国央行资产负债表 · 2026-10 · 8 分钟</p><p class="why">存款是 GDP 的 1.2 倍，美国家庭的钱在股票与养老金</p><span class="seal read" title="读了"></span></article>
+      <article class="icard" style="--kc:var(--k-clip)"><span class="coin">剪</span><h4>人口老龄化的拐点在哪一年</h4><p class="src">知乎 · 2026-11-02 · 12 分钟</p><p class="why">2025 年 65 岁以上首次多于 0 到 14 岁</p><span class="seal note" title="写了批注"></span></article>
+    </div>
+    <div class="tabs"><span>牌册 3</span><span>来龙去脉</span><span>备考</span><span>改这一盒</span><span class="plus">＋ 装一件</span></div>
+  </div>
+</div>
+</section>
+
+<section class="frame dark" id="open-b">
+<h3>打开一盒 B · 桌上摊牌<small>深木桌保留，但只剩一行题头、一行问题和牌面朝上的卡；其他全部收进底下一排签</small></h3>
+<div class="open-b">
+  <header><span class="code">研 · F0 · 01</span><h2>居民部门：消费、人口与财富</h2><span class="meta">经济周期 · 要年更 · 3 件</span><span class="back">回到档案架</span></header>
+  <p class="q"><b>中国家庭的钱花在哪、存在哪？和美国、日本差在哪里？</b> 现在的答案：消费只占 GDP 四成，钱更多存成存款和房子。</p>
+  <div class="cards">
+    <article class="icard" style="--kc:var(--k-data)"><span class="coin">数</span><h4>中美消费与人口</h4><p class="src">国家统计局 · 2026-10 · 6 分钟</p><p class="why">消费占 GDP 四成，比美国低 28 个百分点</p><span class="seal"></span></article>
+    <article class="icard" style="--kc:var(--k-data)"><span class="coin">数</span><h4>中美日财富存量</h4><p class="src">各国央行资产负债表 · 2026-10 · 8 分钟</p><p class="why">存款是 GDP 的 1.2 倍，美国家庭的钱在股票与养老金</p><span class="seal read"></span></article>
+    <article class="icard" style="--kc:var(--k-clip)"><span class="coin">剪</span><h4>人口老龄化的拐点在哪一年</h4><p class="src">知乎 · 2026-11-02 · 12 分钟</p><p class="why">2025 年 65 岁以上首次多于 0 到 14 岁</p><span class="seal note"></span></article>
+    <article class="icard" style="--kc:var(--k-doc)"><span class="coin">档</span><h4>日本家庭资产三十年</h4><p class="src">日本银行 · 2026-09 · 15 分钟</p><p class="why">泡沫后家庭从房子退回存款，和中国现在像</p><span class="seal done"></span></article>
+  </div>
+  <div class="tabs"><span>牌册 4</span><span>来龙去脉</span><span>备考</span><span>改这一盒</span><span class="plus">＋ 装一件</span></div>
+</div>
+</section>
+
+</body>
+</html>

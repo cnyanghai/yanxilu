@@ -1,4 +1,4 @@
-/* 研习录 · 自己服务器上的版本（baba.wogucloud.cn）
+/* 邮差 · 自己服务器上的版本（baba.wogucloud.cn）
  * 只在 build.py 生成 server/index.html 时放进页面，放在 app.js 前面。
  * 做两件事：
  *   1. window.YXL_SERVER：告诉 app.js 现在跑在自己的服务器上（英语一层读 Baba 的实时数据、Baba 的页面在浮层里打开、登录按钮）；
@@ -6,7 +6,7 @@
  *      这样 app.js 不用改读写逻辑，照旧按“云端记录”的方式工作。
  * 记录存在 Baba 的 Postgres 里（表 YxlDoc），电子书存在服务器磁盘上（表 YxlFile），按 Baba 的登录账号分开。 */
 (function () {
-  /* 万一研习录被套进了 Baba 的浮层（比如在浮层里点了指回首页的链接），跳出来整页打开 */
+  /* 万一邮差被套进了 Baba 的浮层（比如在浮层里点了指回首页的链接），跳出来整页打开 */
   try { if (window.top !== window.self && window.top.location.origin === location.origin) { window.top.location.href = location.href; return; } } catch (e) { /* 不同源时不管 */ }
   var API = "/api/yxl";
   var state = null, loadedAt = 0, loading = null, pending = 0, listeners = {};

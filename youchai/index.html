@@ -2831,7 +2831,7 @@ html.yx-app-scene[data-narrow="1"] .yx-world:not(.zoomed) .yx-rowhit{display:blo
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 <script>window.YXL_APP = "youchai";</script>
 <script>
-/* 研习录 · 自己服务器上的版本（baba.wogucloud.cn）
+/* 邮差 · 自己服务器上的版本（baba.wogucloud.cn）
  * 只在 build.py 生成 server/index.html 时放进页面，放在 app.js 前面。
  * 做两件事：
  *   1. window.YXL_SERVER：告诉 app.js 现在跑在自己的服务器上（英语一层读 Baba 的实时数据、Baba 的页面在浮层里打开、登录按钮）；
@@ -2839,7 +2839,7 @@ html.yx-app-scene[data-narrow="1"] .yx-world:not(.zoomed) .yx-rowhit{display:blo
  *      这样 app.js 不用改读写逻辑，照旧按“云端记录”的方式工作。
  * 记录存在 Baba 的 Postgres 里（表 YxlDoc），电子书存在服务器磁盘上（表 YxlFile），按 Baba 的登录账号分开。 */
 (function () {
-  /* 万一研习录被套进了 Baba 的浮层（比如在浮层里点了指回首页的链接），跳出来整页打开 */
+  /* 万一邮差被套进了 Baba 的浮层（比如在浮层里点了指回首页的链接），跳出来整页打开 */
   try { if (window.top !== window.self && window.top.location.origin === location.origin) { window.top.location.href = location.href; return; } } catch (e) { /* 不同源时不管 */ }
   var API = "/api/yxl";
   var state = null, loadedAt = 0, loading = null, pending = 0, listeners = {};
@@ -5580,9 +5580,9 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     p.then(function () {
       var me = ON_SERVER && SRV.me();
-      var blob = new Blob([JSON.stringify({ app: "研习录", exported: new Date().toISOString(), user: (me && me.name) || "", data: data })], { type: "application/json" });
+      var blob = new Blob([JSON.stringify({ app: "邮差", exported: new Date().toISOString(), user: (me && me.name) || "", data: data })], { type: "application/json" });
       var a = document.createElement("a");
-      a.href = URL.createObjectURL(blob); a.download = "研习录备份-" + today() + ".json";
+      a.href = URL.createObjectURL(blob); a.download = "邮差备份-" + today() + ".json";
       document.body.appendChild(a); a.click();
       setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 4000);
       S.expBusy = false; render(); toast("备份下载好了，放个妥当的地方。");
@@ -5653,7 +5653,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
       return '<div class="yx-hud-top"><div class="yx-hud-l">' + hud + '</div><div class="yx-hud-r">' + look + '<button type="button" class="yx-hud-b" data-act="cmdk" title="搜索"><img src="' + YX.dir + 'icons/magnifier.webp" alt=""><span>搜</span></button>' + (S.canEdit ? '<button type="button" class="yx-hud-b" data-act="jot" title="记一笔"><img src="' + YX.dir + 'icons/quill.webp" alt=""><span>记</span></button>' : "") + modeH + "</div></div>" +
         '<nav class="mainnav" aria-label="主导航">' + ait("shelf", "书架", "book") + ait("archive", "档案架", "card") + ait("notes", "笔记本", "notebook") + "</nav>";
     }
-    return '<div class="tb-in"><a class="brand" href="#home" aria-label="研习录，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>研习录</b></a>' +
+    return '<div class="tb-in"><a class="brand" href="#home" aria-label="邮差，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>邮差</b></a>' +
       '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + it("shelf", "书架") + it("journal", "足迹") + "</nav>" +
       srch + jotB + modeH + "</div>";
   }
@@ -5742,7 +5742,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
   /* ---------- 书架：英语一层 ----------
    * 一部电影或一部剧是一个片盒（像影碟盒，侧边有胶片孔），绘本封面朝外立着，最右边是 Baba 的生词本卡片盒。
    * 片盒的状态和书一样：在学的抽出半截挂丝带，学完盖“完”字章。
-   * 研习录自己的电影线（《当幸福来敲门》）按课表算学到第几段；Baba 上的片子在面板里手动标。 */
+   * 邮差自己的电影线（《当幸福来敲门》）按课表算学到第几段；Baba 上的片子在面板里手动标。 */
   function enHref(path) { return String(EN.site || "").replace(/\/$/, "") + (path || ""); }
   function enState(id) {
     var x = EN_ITEM[id], s = st(id), r = { s: s, pct: 0, done: 0, total: 0 };
@@ -5859,7 +5859,7 @@ window.YXL_LESSONS = {"2026-10-11": "# 2026-10-11（周日）准备日\n\n> 第�
     }
     if (ON_SERVER) return enDaisServer(id, x, es, head, why, noteLab, notePh);
     var go2 = '<a class="btn" href="' + esc(enHref(x.path)) + '" target="_blank" rel="noopener">' + (film ? "去 Baba 学" : "去 Baba 读") + " ↗</a>";
-    var sync = '<p class="meta">学到哪、收了哪些生词都记在 Baba 上，暂时不传回研习录，学到一半或学完了在上面标一下。</p>';
+    var sync = '<p class="meta">学到哪、收了哪些生词都记在 Baba 上，暂时不传回邮差，学到一半或学完了在上面标一下。</p>';
     return { col: "var(--ln-en)", head: head, body: '<div class="btns pb-acts">' + go2 + "</div>" + moreHTML(why + sync + noteBlock(id, noteLab, notePh), "介绍 · " + noteLab) };
   }
   /* ---------- 自己加的书、从书墙上拿下的书 ----------
@@ -7083,7 +7083,7 @@ var FOIL = (function () {
     if (EN_ITEM[id]) {
       var x = EN_ITEM[id];
       if (x.kind === "read") return '<div class="stg-cover pic' + flip + '"><span class="pk-sky" aria-hidden="true"><i></i><i></i><i></i></span><span class="sc-kind">' + esc(x.type) + '</span><span class="sc-en">' + esc(x.en) + '</span><span class="sc-t sm">' + esc(x.title) + '</span><span class="sc-foot">Baba · ' + esc(x.level || "") + "</span></div>";
-      return '<div class="stg-cover film' + flip + '" style="--cl:' + clothOf("en", x.id) + '"><i class="sc-holes" aria-hidden="true"></i><span class="sc-kind">' + esc(x.type) + " · " + esc(String(x.year || "")) + '</span>' + coverTitle(x.title) + '<span class="sc-en">' + esc(x.en) + '</span><span class="sc-foot">' + (x.where === "local" ? "研习录跟读" : "Baba 英语") + "</span></div>";
+      return '<div class="stg-cover film' + flip + '" style="--cl:' + clothOf("en", x.id) + '"><i class="sc-holes" aria-hidden="true"></i><span class="sc-kind">' + esc(x.type) + " · " + esc(String(x.year || "")) + '</span>' + coverTitle(x.title) + '<span class="sc-en">' + esc(x.en) + '</span><span class="sc-foot">' + (x.where === "local" ? "邮差跟读" : "Baba 英语") + "</span></div>";
     }
     var it = ITEMS[id], tid = it.home, pt = /^cfa-/.test(id) ? { hex: cfaPaint(0)[1], ink: cfaPaint(0)[2] || "" } : bookPaint(tid, id), base = pt.hex, light = lumHex(base) > 0.2, tname = domInfo(tid).name;
     if (LK().binding === "old" && it.kind === "book") {
@@ -7129,7 +7129,7 @@ var FOIL = (function () {
       '<span><i class="lg-b thin"></i><i class="lg-b thick"></i>书脊越厚，花的时间越多</span><span><i class="lg-b done"></i>盖章：读完</span><span><i class="lg-film"></i>蓝布面盒：电影或剧</span><span><i class="lg-bk"></i>藤筐：练习与专题</span></div></details>';
   }
   /* ---------- 电子书：给书架上的书挂一个 PDF 或 EPUB ----------
-   * claude.ai 版：文件用 assets 能力存在这个研习录自己的存储里（只有你能打开，换设备也在）。
+   * claude.ai 版：文件用 assets 能力存在这个邮差自己的存储里（只有你能打开，换设备也在）。
    *   PDF 原样存；EPUB 不在存储接受的格式里，按接口文档的建议包成 base64 文本（text/plain）存，打开时再还原（enc: "b64"）。
    *   记录在 ebooks 集合：文档 id = 书的 id，内容 { asset, kind, enc, name, size, t }；PDF 的打开地址是 "/_blob/" + asset。
    * GitHub 公开版：文件只存在当前浏览器的 IndexedDB 里（库 yanxilu-ebooks，键 = 书的 id），不会传到网上；
@@ -7148,7 +7148,7 @@ var FOIL = (function () {
     if (/\.pdf$/i.test(n) || file.type === "application/pdf") return "pdf";
     return "";
   }
-  var EB_ERR = { too_large: "", unsupported_type: "只能上传 PDF 或 EPUB 文件。", quota_or_state: "研习录的存储空间满了，先移除一些不用的电子书。",
+  var EB_ERR = { too_large: "", unsupported_type: "只能上传 PDF 或 EPUB 文件。", quota_or_state: "邮差的存储空间满了，先移除一些不用的电子书。",
     disk_full: "服务器的磁盘快满了，传不下这本书。", rate_limited: "传得太频繁了，过一会儿再试。", upstream_auth: ON_SERVER ? "登录过期了，重新登录后再传。" : "登录状态过期了，刷新页面后再试。", store_unavailable: "服务器存不下这个文件，过一会儿再试。", capability_disabled: "这个页面现在不能上传文件。", not_granted: "这个页面现在不能上传文件。", capability_removed: "这个页面现在不能上传文件。" };
   function ebookOf(id) {
     var e = S.data.ebooks ? S.data.ebooks[id] || null : null;
@@ -8017,7 +8017,7 @@ var FOIL = (function () {
   /* ---------- 书架：档案架（研究课题一盒一盒放） ----------
    * 一个课题一个档案盒，盒里按件编号；件越多盒越厚，盒顶露出每件的色签（档案、数据、计划、纪要、剪报）。
    * 在做的盒子抽出半截、挂丝带；要年更的挂小牌；结卷的盖“结”字章。没立课题的单件放收件匣。
-   * 盒子有两种：内置的（LIB.topics，讨论完一个问题说“放进研习录”时归进仓库），和自己在档案架上立的。
+   * 盒子有两种：内置的（LIB.topics，讨论完一个问题说“放进邮差”时归进仓库），和自己在档案架上立的。
    * aboxes：自己立的档案盒，文档 id = "ab-" + 时间，内容 { title 盒名, track 领域, question 这一盒想回答的问题, status（doing / yearly / closed）, note 备考, t }。
    * aboxoff：从档案架上撤下的内置档案盒，文档 id = 课题 id，内容 { t }；放回去就删掉这一条。
    * 剪报（clips）里的 box 记着装进了哪一盒；没装盒的挂在那个领域一格里的剪报夹，没分领域的进收件匣。 */
@@ -8082,7 +8082,7 @@ var FOIL = (function () {
     if (/^b:/.test(p)) return "「" + TOPIC[p.slice(2)].title + "」这一盒";
     return p ? "「" + domInfo(p).name + "」的剪报夹" : "收件匣";
   }
-  /* 盒里一件的标题：剪报在研习录里打开，别的在新标签页打开原文 */
+  /* 盒里一件的标题：剪报在邮差里打开，别的在新标签页打开原文 */
   function itemLink(rp, inner, cls) {
     var c = rp.clip;
     if (c && c.status !== "link") return '<button type="button" class="ai-t' + (cls ? " " + cls : "") + '" data-act="clip-open" data-id="' + esc(c.id) + '">' + inner + "</button>";
@@ -8389,7 +8389,7 @@ var FOIL = (function () {
       '<label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
       '<div class="arch-main"><div class="arch-col">' + cabSec + boxOffHTML() + clipBarHTML() + "</div></div>" +
       '<section class="arules" aria-labelledby="ar-h"><h2 id="ar-h">怎样归档</h2><div class="ar-grid">' + rules.map(function (r) { return '<div class="arule"><p><b class="ar-n">' + r[0] + "</b><b>" + r[1] + "</b></p><p>" + r[2] + "</p></div>"; }).join("") + "</div>" +
-      '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进研习录”，我按这四条归档；剪报和自己立的盒子，在这里直接整理。</p></section>' + boxSheetHTML() + deskHTML() + "</div>";
+      '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进邮差”，我按这四条归档；剪报和自己立的盒子，在这里直接整理。</p></section>' + boxSheetHTML() + deskHTML() + "</div>";
   }
   /* 搜索框：不重画页面，只把不相关的盒子调暗 */
   function applyArchFilter() {
@@ -8544,8 +8544,8 @@ var FOIL = (function () {
    * clips：每篇一条，文档 id = "cl-" + 时间 + 随机，内容 { key 去重用的键, url, title, author, site, kind（answer / article / page）,
    *   date 原文发表时间, track 领域, note 为什么存, excerpt 开头一段, words 字数, sel 只存了选中的一段, status（full 有全文 / link 只有链接）, t 存的时间, ut 更新时间 }。
    * clipbody：正文，文档 id 同上，内容 { html（清洗过的）, t }。正文可能很长，不随记录一起下发，打开时才取。
-   * 剪的办法：浏览器书签栏里的「收进研习录」按钮（一段 javascript: 书签），在知乎页面上点它，
-   *   它读出当前回答或文章（选中了文字就只取选中的），开一个研习录的小窗口（#clip），用 postMessage 把内容递过去，你在小窗里确认、选领域、写一句再保存。
+   * 剪的办法：浏览器书签栏里的「收进邮差」按钮（一段 javascript: 书签），在知乎页面上点它，
+   *   它读出当前回答或文章（选中了文字就只取选中的），开一个邮差的小窗口（#clip），用 postMessage 把内容递过去，你在小窗里确认、选领域、写一句再保存。
    * 手机知乎 App：分享 → 复制链接，粘贴到档案架的框里先存链接；回电脑打开原文再点一次按钮，补上全文。 */
   function clipsOn() { return ON_SERVER && S.mode === "db" && !!(SRV.caps && SRV.caps() && SRV.caps().clips); }
   function clipList() {
@@ -8727,10 +8727,10 @@ var FOIL = (function () {
         out.html = c.innerHTML; out.sel = true;
       } else out.html = node.innerHTML;
       var W = window.open(ORIGIN + "/#clip", "yxlclip", "width=540,height=760");
-      if (!W) { alert("浏览器拦住了弹出窗口。请允许这个网站弹出窗口，再点一次「收进研习录」。"); return; }
+      if (!W) { alert("浏览器拦住了弹出窗口。请允许这个网站弹出窗口，再点一次「收进邮差」。"); return; }
       var n = 0, iv = setInterval(function () { try { W.postMessage({ yxlClip: out }, ORIGIN); } catch (e) { /* 小窗还没打开好 */ } if (++n > 80) clearInterval(iv); }, 300);
       window.addEventListener("message", function f(e) { if (e.origin === ORIGIN && e.data === "yxl-clip-got") { clearInterval(iv); window.removeEventListener("message", f); } });
-    } catch (err) { alert("收进研习录出错了：" + (err && err.message)); }
+    } catch (err) { alert("收进邮差出错了：" + (err && err.message)); }
   }
   function clipperHref() { return "javascript:" + encodeURIComponent("(" + clipperMain.toString().replace(/\n\s*/g, "\n") + ")(" + JSON.stringify(location.origin) + ")"); }
 
@@ -8751,17 +8751,17 @@ var FOIL = (function () {
   });
   function clipPageHTML() {
     var c = S.clipIn, me = ON_SERVER && SRV.me();
-    var head = '<header class="cp-h"><span class="roundel" aria-hidden="true"><i></i></span><b>收进研习录</b><span class="cp-to">档案架 · 剪报</span></header>';
-    if (!ON_SERVER) return '<div class="view clip-page">' + head + '<p class="cp-msg">剪报只在研习录的网站版（baba.wogucloud.cn）上能用。</p></div>';
+    var head = '<header class="cp-h"><span class="roundel" aria-hidden="true"><i></i></span><b>收进邮差</b><span class="cp-to">档案架 · 剪报</span></header>';
+    if (!ON_SERVER) return '<div class="view clip-page">' + head + '<p class="cp-msg">剪报只在邮差的网站版（baba.wogucloud.cn）上能用。</p></div>';
     if (S.mode !== "db") return '<div class="view clip-page">' + head + '<p class="cp-msg">正在连接……</p></div>';
     if (!me) return '<div class="view clip-page">' + head + '<p class="cp-msg">先登录 Baba 账号，剪下的内容会存进你的账号。' + (c ? "刚才那篇已经记下了，登录回来还在。" : "") + '</p><p><a class="btn" href="' + esc(SRV.loginHref()) + '">登录</a></p></div>';
     if (!clipsOn()) return '<div class="view clip-page">' + head + '<p class="cp-msg">服务器还是旧版本，存不了剪报。部署一次 Baba 就好了。</p></div>';
     if (S.clipDone) {
       var dn = (S.data.clips || {})[S.clipDone] || {};
       return '<div class="view clip-page">' + head + '<div class="cp-done"><b>存好了 ✓</b><p>《' + esc(dn.title || "") + "》放进了档案架上" + esc(placeName(dn)) + "。</p>" +
-        '<p class="btns"><a class="btn ghost small" href="/#archive" target="_blank" rel="noopener">在研习录里看</a><button type="button" class="btn small" data-act="clip-close">关掉这个窗口</button></p></div></div>';
+        '<p class="btns"><a class="btn ghost small" href="/#archive" target="_blank" rel="noopener">在邮差里看</a><button type="button" class="btn small" data-act="clip-close">关掉这个窗口</button></p></div></div>';
     }
-    if (!c) return '<div class="view clip-page">' + head + '<p class="cp-msg">等书签按钮把内容递过来……<br><small>如果一直没反应：回到原来的页面，再点一次书签栏里的「收进研习录」。</small></p></div>';
+    if (!c) return '<div class="view clip-page">' + head + '<p class="cp-msg">等书签按钮把内容递过来……<br><small>如果一直没反应：回到原来的页面，再点一次书签栏里的「收进邮差」。</small></p></div>';
     var old = clipByKey(clipKey(c.url)), text = clipPlain(c.html);
     return '<div class="view clip-page">' + head +
       '<form id="clip-form" class="cp-form" autocomplete="off">' +
@@ -8800,8 +8800,8 @@ var FOIL = (function () {
   /* 剪报栏：只留“存链接”的框和怎么剪的说明；剪报本身都是牌，在盒子和夹子里 */
   function clipHelpHTML() {
     return '<div class="cl-help">' +
-      '<div class="clh-col"><h3>电脑上</h3><p>把这个按钮拖到浏览器的书签栏：</p><p><a class="cl-bm" href="' + esc(clipperHref()) + '" data-act="clip-bm" draggable="true">收进研习录</a></p>' +
-      "<p>在知乎看到好的回答或文章，点一下书签栏里的「收进研习录」，弹出的小窗里选个领域、写一句为什么存，它就成了那个领域剪报夹里的一张牌。先选中一段文字再点，就只存那一段。微信公众号文章和别的网页也能剪。</p></div>" +
+      '<div class="clh-col"><h3>电脑上</h3><p>把这个按钮拖到浏览器的书签栏：</p><p><a class="cl-bm" href="' + esc(clipperHref()) + '" data-act="clip-bm" draggable="true">收进邮差</a></p>' +
+      "<p>在知乎看到好的回答或文章，点一下书签栏里的「收进邮差」，弹出的小窗里选个领域、写一句为什么存，它就成了那个领域剪报夹里的一张牌。先选中一段文字再点，就只存那一段。微信公众号文章和别的网页也能剪。</p></div>" +
       '<div class="clh-col"><h3>手机上</h3><p>知乎 App 里点「分享 → 复制链接」，粘贴到旁边的框里，先把链接存下；回到电脑打开原文，再点一次按钮补上全文。</p>' +
       '<p>手机浏览器看知乎网页版的话，也能用按钮：随便收藏一个书签，把它的网址改成按钮的代码。<button type="button" class="linkbtn" data-act="clip-copy-bm">复制按钮代码</button></p></div></div>';
   }
@@ -8823,7 +8823,7 @@ var FOIL = (function () {
     if (old) { toast("这篇已经存过了。"); form.t.value = ""; return; }
     var now = new Date().toISOString(), id = "cl-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
     put("clips", id, { key: key, url: p.url, title: p.title.slice(0, 300), author: p.author, site: p.site, kind: p.kind, date: "", track: "", note: "", excerpt: "", words: 0, sel: 0, status: "link", t: now, ut: now })
-      .then(function () { toast("链接存下了。回电脑打开原文，点「收进研习录」补上全文。"); });
+      .then(function () { toast("链接存下了。回电脑打开原文，点「收进邮差」补上全文。"); });
     form.t.value = ""; render();
   }
   function clipEp(id, c) {
@@ -9046,7 +9046,7 @@ var FOIL = (function () {
       '<div class="fw">' + fw.parts.map(function (p) {
         return '<div class="fwp"><h3>' + esc(p[0]) + "</h3><ol start=\"" + (n + 1) + '">' + p[1].map(function (q) { n++; return "<li>" + esc(q) + "</li>"; }).join("") + "</ol></div>";
       }).join("") + "</div>" +
-      '<p class="meta fw-foot">' + esc(fw.foot || "用法：选一场冲突，把清单复制到和 Claude 的对话里逐条回答；分析成文后，可以作为“专题实战”的成果收进研习录。") + "</p>";
+      '<p class="meta fw-foot">' + esc(fw.foot || "用法：选一场冲突，把清单复制到和 Claude 的对话里逐条回答；分析成文后，可以作为“专题实战”的成果收进邮差。") + "</p>";
   }
 
   /* ---------- 练习：假设开关 / 概念卡 / 分析框架 ---------- */
@@ -10038,7 +10038,7 @@ var FOIL = (function () {
     }
     var body = md ? '<article class="md">' + mdHTML(md) + "</article>"
       : c.loading ? '<p class="empty-line">路线单加载中……</p>'
-      : '<p class="empty-line">研习录里还没有这天的路线单。可以先看 <a href="' + gh2 + '" target="_blank" rel="noopener">GitHub 上的版本</a>。</p>';
+      : '<p class="empty-line">邮差里还没有这天的路线单。可以先看 <a href="' + gh2 + '" target="_blank" rel="noopener">GitHub 上的版本</a>。</p>';
     return '<div class="view lesson"><p class="eyebrow"><a href="#journal">足迹</a> · ' + (date === PLAN.prep ? "讲义" : "路线单") + "</p>" + nav + cards + body + nav +
       '<p class="meta src">原文件：<a href="' + gh2 + '" target="_blank" rel="noopener">study/daily/' + date + ".md</a></p></div>";
   }
@@ -10460,7 +10460,7 @@ var FOIL = (function () {
       '<section class="panel rules-p" aria-labelledby="ru-h"><h2 id="ru-h">运行规则</h2><ol class="rules-l">' +
       "<li>两种线：目标线是自己定的能力目标，按估算小时排站；自选线是单独挑出来学的一门课或一本书，一课一站。</li>" +
       "<li>进度看小时：每晚打卡说学了哪几课、多少分钟，目标线上的小时数自动累加。</li>" +
-      "<li>到站要检验：学够小时不算到站，过了这一站的检验才算。检验做完告诉我，我记进研习录。</li>" +
+      "<li>到站要检验：学够小时不算到站，过了这一站的检验才算。检验做完告诉我，我记进邮差。</li>" +
       "<li>没有晚点：路线单只是建议，没学完不记欠账，下次从停下的那一课接着学。</li>" +
       "<li>出发前选今天学多少：保底只学电影一段，标准按路线单，多学在目标线上再加一课。</li>" +
       "<li>电影线每天一段，周日回看本周 6 段；周日的周复盘在足迹里记一个“检”。</li>" +
@@ -10919,7 +10919,7 @@ var FOIL = (function () {
       "<li>片源：用你自己合法获得的《当幸福来敲门》视频文件，MP4 最稳；只有音频（MP3）也能练听和跟读。</li>" +
       "<li>字幕：英文字幕或中英双语字幕，.srt 或 .vtt。双语字幕的中文会用在“背诵”这一步当提示。</li>" +
       "<li>两个文件一起选。字幕会记在这个浏览器里，下次只要重新选片源；片源每次都要重新选，这是浏览器的安全限制。</li>" +
-      "<li>文件只在你的浏览器里打开，不会上传。研习录只记“第几段第几句背熟了”，不存台词。</li>" +
+      "<li>文件只在你的浏览器里打开，不会上传。邮差只记“第几段第几句背熟了”，不存台词。</li>" +
       "<li>如果在这里播放不了本地视频，换到 GitHub 公开版的同一页面：cnyanghai.github.io/yanxilu/#c-film（录音跟读也只在那里能用）。</li>" +
       "<li>晚上打卡时说一句“电影第几段学完了”，地图上的电影线就往前走一站。</li></ul></section>";
   }
@@ -11320,7 +11320,7 @@ var FOIL = (function () {
     }
     try { navigator.clipboard.writeText(text).then(function () { toast(msg || "已复制"); }, fallback); } catch (e) { fallback(); }
   }
-  /* ---------- 浮层：服务器版里在研习录上面打开 Baba 的页面（逐句学、生词本、学习进度） ----------
+  /* ---------- 浮层：服务器版里在邮差上面打开 Baba 的页面（逐句学、生词本、学习进度） ----------
    * 同一个网站，用 iframe 套进来；Baba 那边看到自己在浮层里，就把顶栏藏掉（见 Baba 的 layout）。关掉浮层时重新取一次英语数据。 */
   var OV = null;
   function ovOpen(href, title) {

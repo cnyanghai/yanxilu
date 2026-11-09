@@ -53,7 +53,7 @@ app_html = (app_html.replace('href="vendor/', 'href="../vendor/').replace('src="
             .replace('<link rel="manifest" href="../vendor/pwa/manifest.json">', '<link rel="manifest" href="manifest.json">')
             .replace('<link rel="apple-touch-icon" href="../vendor/pwa/icon-192.png">', '<link rel="apple-touch-icon" href="icon-192.png">')
             .replace('<link rel="icon" href="../vendor/pwa/icon-192.png" type="image/png">', '<link rel="icon" href="icon-192.png" type="image/png">')
-            .replace("<title>研习录</title>", "<title>邮差</title>", 1))
+            .replace("<title>邮差</title>", "<title>邮差</title>", 1))
 app_html = app_html.replace("</head>", '<meta name="theme-color" content="#0D141A">\n</head>', 1)
 (root / "youchai").mkdir(exist_ok=True)
 (root / "youchai/index.html").write_text(app_html, encoding="utf-8")
