@@ -1594,26 +1594,22 @@ body.rd-on{overflow:hidden}
 .pp-pack .n{position:absolute;left:10px;right:10px;bottom:11px;text-align:center;font-family:var(--f-display);font-size:9px;font-weight:600;line-height:1;letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid currentColor;padding:5px 3px 4px}
 @media (prefers-reduced-motion: reduce){.pp-pack{transition:none}}
 
-/* ===== 书架：档案架（纸模）：一块牛皮纸板，一层层板，每个领域一层；盒子立在层板上一排同向；没装盒的剪报是层板尽头的一叠牌；收件匣是最下面一层 ===== */
-.arack{--face:var(--pp-kraft-2);padding:14px 12px 4px;border-radius:9px;width:100%}
-.arow{position:relative;display:flex;align-items:flex-end;gap:16px;padding:0 16px 22px;height:var(--rh,200px);margin-bottom:12px}
-.arow.empty{--rh:104px}
-.arow>*{position:relative}
-.arow .plank{position:absolute;left:0;right:0;bottom:0;height:16px;--face:var(--pp-kraft);border-radius:4px;background-color:var(--face);background-image:var(--pp-tooth);background-blend-mode:overlay;
-  box-shadow:inset 0 2px 0 rgba(255,255,255,.55),inset 0 0 0 1px rgba(255,255,255,.25),0 2px 0 var(--pp-kraft-3),0 4px 0 var(--pp-kraft-dk),0 6px 0 var(--pp-kraft-bk),2px 9px 10px -2px rgba(var(--pp-shade),.55)}
-.arow-lab{position:absolute;left:14px;bottom:-5px;z-index:3;display:inline-flex;align-items:baseline;gap:8px;height:21px;padding:0 10px;--face:var(--pp-cream);border-radius:3px;font-family:var(--f-ui);font-size:11.5px;line-height:21px;letter-spacing:.06em;color:var(--pp-ink);text-decoration:none;white-space:nowrap;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 0 var(--e1),0 2px 0 var(--e2),1px 4px 5px -1px rgba(var(--pp-shade),.45)}
-.arow-lab .cls{font-family:var(--f-mono);font-weight:600;color:var(--pp-terra-dk)}
-.arow-lab b{font-weight:700}
-.arow-lab span{color:var(--pp-ink-2)}
-a.arow-lab:hover b{text-decoration:underline}
+/* ===== 书架：档案架（纸模）：一块牛皮纸板，层板按行重复；不分领域，盒子按顺序一排同向立满一层再换一层；
+ * 没装盒的剪报是一叠牌跟在盒子后面，收件匣一叠牌在最后，再一个「＋ 新盒」的切口。层板画在板子的背景里（重复渐变），颗粒盖在上面 ===== */
+.arack{--face:var(--pp-kraft-2);--rh:200px;--pk:20px;padding:0;border-radius:9px;width:100%;overflow:hidden;
+  background-image:var(--pp-fibre),var(--pp-tooth),
+    repeating-linear-gradient(to bottom,transparent 0 calc(var(--rh) - var(--pk) - 2px),rgba(255,255,255,.5) calc(var(--rh) - var(--pk) - 2px) calc(var(--rh) - var(--pk)),var(--pp-kraft) calc(var(--rh) - var(--pk)) calc(var(--rh) - 6px),var(--pp-kraft-3) calc(var(--rh) - 6px) calc(var(--rh) - 4px),var(--pp-kraft-dk) calc(var(--rh) - 4px) calc(var(--rh) - 2px),var(--pp-kraft-bk) calc(var(--rh) - 2px) var(--rh)),
+    repeating-linear-gradient(to bottom,rgba(var(--pp-shade),.38) 0 1px,rgba(var(--pp-shade),.22) 1px 5px,rgba(var(--pp-shade),0) 14px var(--rh));
+  background-blend-mode:soft-light,overlay,normal,normal;background-position:0 0,0 0,0 14px,0 14px}
+.agrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(126px,1fr));grid-auto-rows:var(--rh);align-items:end;justify-items:center;padding:14px 14px 0;gap:0 6px}
+.agrid>*{margin-bottom:calc(var(--pk) + 4px)}
 .apack{flex:none;margin:0;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
 .apack:hover .pp-pack{transform:rotateY(var(--ry)) rotateX(var(--rx)) translateY(-6px)}
 .apack.picked .pp-pack{transform:rotateY(var(--ry)) rotateX(var(--rx)) translateY(-10px)}
 .apack.picked .pp-pack .front{box-shadow:inset 0 0 0 2px var(--pp-cream),inset -1px 0 0 rgba(0,0,0,.16)}
 .apack:focus-visible{outline:2px solid var(--indigo);outline-offset:6px;border-radius:4px}
 .apack.dim,.adeck.dim{opacity:.3}
-.adeck{position:relative;flex:none;width:88px;height:60px;align-self:flex-end;margin:0 0 10px;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer;text-decoration:none;text-align:left;-webkit-tap-highlight-color:transparent}
+.adeck{position:relative;display:block;width:88px;height:60px;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer;text-decoration:none;text-align:left;-webkit-tap-highlight-color:transparent}
 .adeck .cd{position:absolute;inset:0;display:block;--face:var(--pp-black);color:var(--pp-copper);border-radius:4px;background-color:var(--face);background-image:var(--pp-tooth);background-blend-mode:overlay;
   box-shadow:0 1px 0 #1a1512,0 2px 0 #3a302a,0 3px 0 #1a1512,0 4px 0 #3a302a,0 5px 0 #1a1512,3px 9px 10px -3px rgba(40,25,10,.6)}
 .adeck .cd::before{content:"";position:absolute;inset:5px;border:1px solid currentColor;opacity:.6;border-radius:2px}
@@ -1621,38 +1617,27 @@ a.arow-lab:hover b{text-decoration:underline}
 .adeck .cd.up{--face:var(--pp-cream);color:var(--pp-ink);transform:rotate(-5deg) translate(-3px,-6px);padding:8px 10px;font-family:var(--f-display);font-size:10px;font-weight:600;line-height:1.35;overflow:hidden;
   background-image:var(--pp-tooth);box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 1px 0 #C9B48F,0 2px 0 #A8865C,2px 5px 8px -2px rgba(var(--pp-shade),.55)}
 .adeck .cd.up::before{display:none}
-.adeck em{position:absolute;left:0;right:0;top:-24px;text-align:center;font-family:var(--f-ui);font-size:10px;line-height:1;letter-spacing:.16em;color:var(--pp-ink-2);font-style:normal;white-space:nowrap}
+.adeck em{position:absolute;left:-10px;right:-10px;top:-24px;text-align:center;font-family:var(--f-ui);font-size:10px;line-height:1;letter-spacing:.14em;color:var(--pp-ink-2);font-style:normal;white-space:nowrap}
+.adeck em .cls{font-family:var(--f-mono);font-weight:600;color:var(--pp-terra-dk);margin-right:4px}
 .adeck:hover .cd.up{transform:rotate(-5deg) translate(-3px,-10px)}
 .adeck:hover .cd:not(.up){transform:translateY(-3px)}
 .adeck:focus-visible{outline:2px solid var(--indigo);outline-offset:6px;border-radius:4px}
 .adeck.picked .cd.up{box-shadow:inset 0 0 0 2px var(--pp-terra),0 1px 0 #C9B48F,0 2px 0 #A8865C,2px 5px 8px -2px rgba(var(--pp-shade),.55)}
-.arack .anew{width:72px;height:108px;align-self:flex-end;margin:0 0 12px;padding:0;gap:10px;border:1.5px dashed rgba(var(--pp-shade),.55);border-radius:6px;background:rgba(var(--pp-shade),.06);box-shadow:inset 2px 3px 5px rgba(var(--pp-shade),.28),inset 0 0 0 1px rgba(255,255,255,.12);color:var(--pp-ink-2);justify-content:center}
+.adeck.empty{display:grid;place-items:center;cursor:default;font-family:var(--f-body);font-size:11px;letter-spacing:.14em}
+.arack .anew{width:72px;height:108px;margin:0;padding:0;gap:10px;border:1.5px dashed rgba(var(--pp-shade),.55);border-radius:6px;background:rgba(var(--pp-shade),.06);box-shadow:inset 2px 3px 5px rgba(var(--pp-shade),.28),inset 0 0 0 1px rgba(255,255,255,.12);color:var(--pp-ink-2);justify-content:center}
 .arack .anew b{font-family:var(--f-display);font-size:30px;font-weight:300}
 .arack .anew span{writing-mode:horizontal-tb;font-family:var(--f-body);font-size:10px;letter-spacing:.14em}
 .arack .anew:hover{color:var(--pp-ink);border-color:rgba(var(--pp-shade),.8);background:rgba(var(--pp-shade),.1)}
-.arow.empty .anew{height:56px;width:88px;flex-direction:row;gap:8px;margin-bottom:14px}
-.arow.empty .anew b{font-size:22px}
-.aempty{width:88px;height:56px;align-self:flex-end;margin-bottom:14px;font-family:var(--f-body);font-size:11px;letter-spacing:.14em}
-.aempties{--rh:122px;gap:22px}
-.aslot{display:flex;flex-direction:column;align-items:center;gap:9px;margin-bottom:-1px}
-.aslot .arow-lab{position:static;gap:6px}
-.arack .aslot .anew{width:64px;height:54px;margin:0;flex-direction:row;gap:0}
-.arack .aslot .anew b{font-size:22px}
-.arack .aslot .anew span{display:none}
-.ainbox .plank{--face:var(--pp-kraft-3)}
+.agrid>.anew{margin-bottom:calc(var(--pk) + 6px)}
 @media (max-width:640px){
-  .arack{padding:12px 8px 2px}
-  .arow{--rh:168px;gap:10px;padding:0 10px 18px;margin-bottom:10px}
-  .arow.empty{--rh:92px}
-  .arow .pp-pack{--w:70px;--h:105px}
-  .arow .pp-pack .g{font-size:36px}
-  .arow .pp-pack .n{font-size:8.5px;bottom:9px}
-  .arow .pp-pack .code{font-size:7px}
-  .arow-lab{left:10px;font-size:10.5px;height:19px;line-height:19px;padding:0 8px;gap:6px}
-  .adeck{width:76px;height:52px}
+  .arack{--rh:170px;--pk:16px}
+  .agrid{grid-template-columns:repeat(auto-fill,minmax(104px,1fr));padding:12px 8px 0;gap:0 4px}
+  .arack .pp-pack{--w:70px;--h:105px}
+  .arack .pp-pack .g{font-size:36px}
+  .arack .pp-pack .n{font-size:8.5px;bottom:9px}
+  .arack .pp-pack .code{font-size:7px}
+  .adeck{width:78px;height:54px}
   .arack .anew{width:60px;height:92px}
-  .aempties{--rh:112px;gap:12px}
-  .arack .aslot .anew{width:52px;height:44px}
 }
 /* ===== 书架：档案架 ===== */
 .shelf-seg{margin-top:16px}
