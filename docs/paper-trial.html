@@ -2,173 +2,415 @@
 <html lang="zh-CN">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>纸模质感试笔 · 档案架一屏（2026-11-08）</title>
+<title>纸模质感试笔 · 书架 / 档案架 / 笔记本架（2026-11-08 第二稿）</title>
 <link rel="stylesheet" href="../vendor/fonts/fonts.css">
 <style>
-/* 纸模（paper craft）材质试笔。四种纸：牛皮纸底、米白卡纸、赤陶硬纸、橄榄硬纸；一种压痕；一盏左上灯。
-   色板从用户给的两张图量出：全部在色相 15 到 37 度一族里，靠明度分层，不靠色相。 */
+/* 纸模（paper craft）第二稿。改了四件事：
+   1. 厚度：每片纸是有板厚的（四层硬边 + 软影），牌盒与本子是真三维（CSS 3D 三个面），斜立、靠在后墙上。
+   2. 纹理：两层颗粒（粗纤维 + 细牙口）直接混进每片纸的底色里，不再只盖一层淡网。
+   3. 三页都画：书架、档案架（架 + 开盒）、笔记本架，手机与桌面各一版。
+   4. 没有仪表盘、统计牌、在做签。数量用物理表达：盒子越厚牌越多，书签挂在哪就读到哪。 */
 :root{
-  --kraft:#CDAE86; --kraft-2:#C1A077; --kraft-3:#A8865C; --kraft-dk:#7E5E3A;
+  --kraft:#CDAE86; --kraft-2:#C1A077; --kraft-3:#A8865C; --kraft-dk:#7E5E3A; --kraft-bk:#5E4428;
   --cream:#EFE4CF; --cream-2:#E6D8BE;
-  --terra:#B4552B; --terra-dk:#8B4119; --terra-lt:#D07A4E;
+  --terra:#B4552B; --terra-dk:#8B4119;
   --olive:#8E8458; --olive-dk:#6E6540;
   --ink:#3A2A1E; --ink-2:#6B5A48; --ink-3:#8F7E69; --black:#2B2522; --copper:#C4763A;
   --f-serif:"Noto Serif SC","Noto Serif CJK SC","Songti SC",serif; --f-sans:"Noto Sans SC","Noto Sans CJK SC","PingFang SC",sans-serif;
-  /* 压痕：凸起的纸片有 2 像素的板厚（右下暗边）加软影；凹下去的格是内影 */
-  --raise:inset 0 1px 0 rgba(255,255,255,.55),inset 0 -1px 0 rgba(0,0,0,.08),2px 2px 0 rgba(90,60,30,.28),4px 7px 12px -5px rgba(90,60,30,.45);
-  --press:inset 3px 4px 6px rgba(70,45,20,.42),inset -1px -1px 0 rgba(255,255,255,.35);
+  /* 两层颗粒：粗纤维（低频）用柔光，细牙口（高频）用叠加；灰度噪声，中灰不变、亮处提、暗处压 */
+  --fibre:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.05 .1' numOctaves='3' seed='7' stitchTiles='stitch'/><feColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 .75'/></filter><rect width='300' height='300' filter='url(%23f)'/></svg>");
+  --tooth:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='t'><feTurbulence type='fractalNoise' baseFrequency='.95' numOctaves='1' seed='3' stitchTiles='stitch'/><feColorMatrix values='.33 .33 .33 0 0 .33 .33 .33 0 0 .33 .33 .33 0 0 0 0 0 0 .7'/></filter><rect width='120' height='120' filter='url(%23t)'/></svg>");
 }
 *{box-sizing:border-box}
-body{margin:0;background:#8d8a84;font-family:var(--f-sans);color:var(--ink);font-size:14px;line-height:1.45}
-.grain{position:relative}
-.grain::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;opacity:.16;mix-blend-mode:multiply;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .35 0 0 0 0 .25 0 0 0 0 .15 0 0 0 .9 0'/></filter><rect width='160' height='160' filter='url(%23n)'/></svg>")}
-.phone{width:390px;margin:0 auto;background:var(--kraft);padding:0 0 70px;position:relative;min-height:900px}
-.phone>*{position:relative;z-index:1}
+body{margin:0;background:#86827a;font-family:var(--f-sans);color:var(--ink);font-size:14px;line-height:1.45}
 
-/* 顶栏 */
-.top{display:flex;align-items:center;justify-content:space-between;padding:14px 14px 10px}
-.brand{background:var(--terra);color:var(--cream);font:700 20px/1 var(--f-serif);letter-spacing:.22em;padding:9px 14px 8px 16px;border-radius:4px;box-shadow:var(--raise)}
-.tag{background:var(--cream);color:var(--ink);font:500 11px/1 var(--f-sans);letter-spacing:.18em;padding:7px 10px 6px 12px;transform:rotate(-1.5deg);clip-path:polygon(0 8%,6% 0,30% 5%,55% 0,80% 6%,100% 2%,98% 60%,100% 100%,70% 94%,40% 100%,12% 95%,0 100%);box-shadow:2px 3px 6px -2px rgba(90,60,30,.5)}
+/* ---------- 纸：一片有厚度的纸 ---------- */
+.paper{--face:var(--cream);--e1:color-mix(in srgb,var(--face),#2B1A0C 24%);--e2:color-mix(in srgb,var(--face),#2B1A0C 42%);
+  background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;color:var(--ink)}
+.slab{border-radius:5px;position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.55),inset 1px 0 0 rgba(255,255,255,.28),inset -1px 0 0 rgba(0,0,0,.08),
+    0 1px 0 var(--e1),0 2px 0 var(--e1),1px 3px 0 var(--e2),1px 4px 0 var(--e2),2px 5px 0 var(--e2),
+    4px 10px 16px -4px rgba(60,40,20,.55)}
+.well{border-radius:6px;position:relative;
+  box-shadow:inset 3px 4px 7px rgba(60,40,20,.5),inset 1px 1px 0 rgba(60,40,20,.25),inset -1px -1px 0 rgba(255,255,255,.35)}
+.emb{text-shadow:0 1px 0 rgba(255,255,255,.42),0 -1px 0 rgba(50,30,12,.32)}          /* 压进纸里的字 */
+.emb-hi{text-shadow:0 -1px 0 rgba(255,255,255,.35),0 1px 0 rgba(50,30,12,.45)}       /* 凸起的字（深底上用） */
+.torn{clip-path:polygon(0 7px,4% 1px,10% 6px,18% 0,27% 6px,36% 1px,45% 6px,54% 0,63% 6px,72% 1px,81% 6px,90% 0,96% 6px,100% 2px,100% calc(100% - 5px),94% 100%,86% calc(100% - 4px),74% 100%,62% calc(100% - 6px),50% 100%,38% calc(100% - 4px),26% 100%,14% calc(100% - 6px),4% 100%,0 calc(100% - 3px))}
+.tornwrap{filter:drop-shadow(0 2px 0 var(--e1)) drop-shadow(1px 4px 0 var(--e2)) drop-shadow(3px 8px 8px rgba(60,40,20,.45))}
+.cut{border:1.5px dashed rgba(60,40,20,.55);border-radius:6px;background:rgba(60,40,20,.06);box-shadow:inset 2px 3px 5px rgba(60,40,20,.28),inset 0 0 0 1px rgba(255,255,255,.12);display:grid;place-items:center;color:var(--ink-2)}
+.cut b{font:300 34px/1 var(--f-serif)}
 
-/* 米白凹面板：标题、半圆表盘 */
-.panel{margin:4px 14px 12px;background:var(--cream);border-radius:6px;padding:14px 14px 12px;box-shadow:var(--press);text-align:center}
-.panel h1{margin:0 0 8px;font:700 17px/1.2 var(--f-serif);letter-spacing:.28em;color:var(--ink)}
-.gauge{position:relative;width:200px;height:112px;margin:4px auto 0;overflow:hidden}
-.gauge .arc{position:absolute;left:0;top:0;width:200px;height:200px;border-radius:50%;background:conic-gradient(from -90deg,var(--terra) 0 var(--p),transparent var(--p) 180deg,transparent 180deg);-webkit-mask:radial-gradient(circle at 50% 50%,transparent 70px,#000 71px,#000 86px,transparent 87px);mask:radial-gradient(circle at 50% 50%,transparent 70px,#000 71px,#000 86px,transparent 87px);filter:drop-shadow(1px 2px 0 rgba(90,60,30,.35))}
-.gauge .track{position:absolute;left:0;top:0;width:200px;height:200px;border-radius:50%;background:conic-gradient(from -90deg,rgba(90,60,30,.18) 0 180deg,transparent 180deg);-webkit-mask:radial-gradient(circle at 50% 50%,transparent 70px,#000 71px,#000 86px,transparent 87px);mask:radial-gradient(circle at 50% 50%,transparent 70px,#000 71px,#000 86px,transparent 87px)}
-.gauge .ticks{position:absolute;inset:0;background:repeating-conic-gradient(from -90deg at 50% 100%,var(--ink-3) 0 .6deg,transparent .6deg 10deg);-webkit-mask:radial-gradient(circle at 50% 100%,transparent 90px,#000 91px,#000 98px,transparent 99px);mask:radial-gradient(circle at 50% 100%,transparent 90px,#000 91px,#000 98px,transparent 99px);opacity:.8}
-.gauge b{position:absolute;left:0;right:0;bottom:4px;font:700 40px/1 var(--f-serif);color:var(--terra);letter-spacing:-.02em;text-shadow:1px 1px 0 rgba(255,255,255,.6)}
-.gauge b small{font-size:18px;letter-spacing:0}
-.panel .sub{margin:6px 0 0;font:500 10.5px/1.4 var(--f-sans);letter-spacing:.2em;color:var(--ink-2)}
+/* ---------- 三维盒：牌盒与本子 ---------- */
+.stage{perspective:1000px;perspective-origin:50% 25%}
+.pack{--w:84px;--h:126px;--n:3;--d:calc(9px + var(--n) * 2px);--ry:-24deg;--rz:-6deg;--rx:-5deg;--face:var(--terra);--inkc:var(--black);
+  position:relative;width:var(--w);height:var(--h);transform-style:preserve-3d;transform-origin:50% 100%;transform:rotateY(var(--ry)) rotateX(var(--rx)) rotateZ(var(--rz));flex:none}
+.pack .f{position:absolute;left:0;top:0;background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;color:var(--inkc);backface-visibility:hidden}
+.pack .front{width:var(--w);height:var(--h);transform:translateZ(calc(var(--d) / 2));border-radius:2px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35),inset 1px 0 0 rgba(255,255,255,.18),6px 14px 18px -6px rgba(50,30,15,.6)}
+.pack .side{width:var(--d);height:var(--h);left:100%;transform-origin:left center;transform:translateZ(calc(var(--d) / 2)) rotateY(90deg);filter:brightness(.72) saturate(.9);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.pack .side span{writing-mode:vertical-rl;font:500 8.5px/1 var(--f-sans);letter-spacing:.14em;opacity:.9;white-space:nowrap}
+.pack .top{width:var(--w);height:var(--d);transform-origin:center top;transform:translateZ(calc(-1 * var(--d) / 2)) rotateX(90deg);filter:brightness(1.1)}
+.pack.k{--face:var(--black);--inkc:var(--copper)}.pack.o{--face:var(--olive);--inkc:var(--cream)}.pack.c{--face:var(--cream);--inkc:var(--ink)}.pack.b{--face:var(--kraft-dk);--inkc:var(--cream)}
+/* 牌盒印刷：双线框、角标、大字、小名 */
+.pack .front .frame{position:absolute;inset:6px;border:1px solid currentColor;opacity:.7;border-radius:1px}
+.pack .front .frame::after{content:"";position:absolute;inset:3px;border:1px dotted currentColor;opacity:.6}
+.pack .front .code{position:absolute;left:10px;top:9px;font:600 7.5px/1 var(--f-sans);letter-spacing:.12em;opacity:.85}
+.pack .front .code.r{display:none}
+.pack .front .g{position:absolute;left:0;right:0;top:30%;text-align:center;font:900 44px/1 var(--f-serif)}
+.pack .front .n{position:absolute;left:10px;right:10px;bottom:11px;text-align:center;font:600 9px/1 var(--f-serif);letter-spacing:.06em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border:1px solid currentColor;padding:5px 3px 4px}
+/* 本子：封面 + 书口（米白纸页侧面） */
+.pack.nb .side{--face:var(--cream);filter:none;background-image:repeating-linear-gradient(90deg,rgba(60,40,20,.28) 0 1px,transparent 1px 3px),var(--tooth);background-blend-mode:normal,overlay}
+.pack.nb .top{--face:var(--cream-2);filter:none;background-image:repeating-linear-gradient(0deg,rgba(60,40,20,.22) 0 1px,transparent 1px 3px);background-blend-mode:normal}
+.pack.nb .front{border-radius:2px 5px 5px 2px}
+.pack.nb .band{position:absolute;top:0;bottom:0;right:14px;width:5px;background:var(--black);opacity:.85;box-shadow:1px 0 0 rgba(255,255,255,.15)}
+.pack.nb .label{position:absolute;left:12px;right:24px;top:30px;padding:7px 4px;background-color:var(--cream);background-image:var(--tooth);background-blend-mode:overlay;color:var(--ink);text-align:center;font:600 10px/1.3 var(--f-serif);letter-spacing:.1em;box-shadow:1px 1px 0 rgba(0,0,0,.25);border-radius:1px}
+.pack.nb .label small{display:block;font:400 7.5px/1.4 var(--f-sans);letter-spacing:.12em;color:var(--ink-2);margin-top:2px}
+.pack.nb .spinehint{position:absolute;left:0;top:0;bottom:0;width:7px;background:rgba(0,0,0,.18);border-right:1px solid rgba(255,255,255,.12)}
+/* 盒盖翻开 */
+.pack .flap{width:var(--w);height:calc(var(--d) + 10px);transform-origin:center bottom;transform:translateZ(calc(var(--d) / 2)) translateY(calc(-1 * var(--d) - 10px)) rotateX(55deg);filter:brightness(.95);border-radius:3px 3px 0 0}
+.pack .flap::after{content:"";position:absolute;inset:4px 8px;border:1px solid currentColor;opacity:.5}
 
-/* 四块硬纸统计牌 */
-.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:0 14px 14px}
-.tile{background:var(--olive);color:var(--cream);border-radius:5px;padding:10px 4px 8px;text-align:center;box-shadow:var(--raise)}
-.tile.hot{background:var(--terra)}
-.tile b{display:block;font:700 26px/1 var(--f-serif)}
-.tile small{display:block;margin-top:5px;font:500 10px/1 var(--f-sans);letter-spacing:.16em}
+/* ---------- 屏 ---------- */
+.screen{position:relative;overflow:hidden;width:100%;max-width:1280px;margin:0 auto 28px;height:820px;
+  background-color:var(--kraft);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay}
+.screen>*{position:relative}
+.top{display:flex;align-items:center;gap:18px;padding:16px 22px 10px}
+.brand{--face:var(--terra);color:var(--cream);font:700 22px/1 var(--f-serif);letter-spacing:.24em;padding:11px 14px 10px 18px;border-radius:4px}
+.tabs{display:flex;gap:10px;margin-left:auto}
+.tab{--face:var(--kraft-2);padding:10px 18px 9px;font:600 13px/1 var(--f-serif);letter-spacing:.26em;color:var(--ink-2);border-radius:4px}
+.tab.on{--face:var(--cream);color:var(--ink)}
+.nav{display:none}
+.body{padding:6px 22px 0;display:grid;gap:18px}
+.m-only{display:none !important}
+.body.two{grid-template-columns:minmax(0,1fr) 380px;align-items:start}
 
-/* 分信架：凹格里立着牌盒 */
-.rack{margin:0 14px 14px;background:var(--kraft-2);border-radius:6px;padding:12px 10px 12px;box-shadow:var(--raise)}
-.rack .rh{display:flex;justify-content:space-between;align-items:baseline;margin:0 4px 10px}
-.rack .rh h2{margin:0;font:700 13px/1 var(--f-serif);letter-spacing:.3em;color:var(--ink)}
-.rack .rh span{font:500 10px/1 var(--f-sans);letter-spacing:.14em;color:var(--ink-2)}
-.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.slot{position:relative;height:150px;border-radius:4px;background:var(--kraft-3);box-shadow:var(--press);padding:10px 10px 8px}
-.slot .num{position:absolute;left:50%;top:-6px;transform:translateX(-50%);padding:2px 7px;white-space:nowrap;z-index:3;background:var(--cream);border-radius:2px;font:600 9px/1.2 var(--f-sans);letter-spacing:.14em;color:var(--ink-2);box-shadow:1px 1px 0 rgba(90,60,30,.35)}
-.box{position:relative;width:100%;height:100%;border-radius:3px;padding:10px 6px 6px;display:flex;flex-direction:column;align-items:center;box-shadow:var(--raise);background:var(--black);color:var(--copper);overflow:hidden}
-.box.t{background:var(--terra);color:var(--black)}
-.box::before{content:"";position:absolute;inset:5px;border:1px solid currentColor;opacity:.55;border-radius:2px}
-.box::after{content:"";position:absolute;inset:8px;border:1px dotted currentColor;opacity:.35;border-radius:1px}
-.box .g{font:900 40px/1 var(--f-serif);margin-top:8px}
-.box .n{margin-top:auto;font:500 9.5px/1.3 var(--f-serif);letter-spacing:.06em;text-align:center;max-height:26px;overflow:hidden}
-.box .c{font:600 9px/1 var(--f-sans);letter-spacing:.12em;margin-top:3px;opacity:.85}
-.box .code{position:absolute;left:0;right:0;top:6px;text-align:center;font:600 8px/1 var(--f-sans);letter-spacing:.14em;opacity:.7}
-.ribbon{position:absolute;right:16px;top:6px;width:9px;height:22px;background:var(--cream);clip-path:polygon(0 0,100% 0,100% 100%,50% 76%,0 100%);box-shadow:1px 1px 0 rgba(0,0,0,.3);z-index:2}
-.seal{position:absolute;right:7px;bottom:6px;width:14px;height:14px;display:grid;place-items:center;font:700 8px/1 var(--f-sans);background:var(--cream);color:var(--ink);border-radius:50%;z-index:2}
-.seal.sq{border-radius:1px}
+/* ---------- 书架 ---------- */
+.case{--face:var(--kraft-dk);padding:12px 12px 0;border-radius:8px}
+.row{position:relative;display:flex;align-items:flex-end;gap:6px;padding:0 10px 14px;height:var(--rh,228px);--sy:1.12}
+.row .wall{position:absolute;inset:0 0 14px;--face:var(--kraft-3);background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;border-radius:3px}
+.row .plank{position:absolute;left:-12px;right:-12px;bottom:0;height:14px;--face:var(--kraft-2);background-color:var(--face);background-image:var(--tooth);background-blend-mode:overlay;
+  box-shadow:inset 0 2px 0 rgba(255,255,255,.4),inset 0 -5px 0 rgba(60,40,20,.35),0 4px 0 rgba(60,40,20,.2),0 10px 14px -4px rgba(50,30,15,.6)}
+.row>*{position:relative}
+.spine{--face:var(--kraft-dk);--e2:color-mix(in srgb,var(--face),#2B1A0C 45%);width:calc(var(--w,30px) * var(--sx,1.4));height:min(calc(var(--h,170px) * var(--sy,1.25)),var(--hmax,999px));border-radius:2px 2px 1px 1px;display:flex;align-items:flex-start;justify-content:center;padding-top:14px;
+  box-shadow:inset 1px 0 0 rgba(255,255,255,.26),inset -2px 0 0 rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.3),3px 0 0 var(--e2),4px 3px 0 rgba(60,40,20,.25),6px 6px 8px -2px rgba(50,30,15,.5);flex:none}
+.spine::before{content:"";position:absolute;left:1px;right:1px;top:-3px;height:4px;background:var(--cream-2);background-image:repeating-linear-gradient(90deg,rgba(60,40,20,.35) 0 1px,transparent 1px 3px);border-radius:1px 1px 0 0}
+.spine span{writing-mode:vertical-rl;font:600 11.5px/1 var(--f-serif);letter-spacing:.14em;color:var(--inkc,var(--cream));white-space:nowrap;max-height:calc(100% - 20px);overflow:hidden;text-overflow:ellipsis}
+.spine.t{--face:var(--terra)}.spine.o{--face:var(--olive)}.spine.k{--face:var(--black);--inkc:var(--copper)}.spine.c{--face:var(--cream);--inkc:var(--ink)}.spine.b{--face:var(--kraft-2);--inkc:var(--ink)}
+.lean{margin-left:10px}
+.reading{display:flex;align-items:flex-end;gap:16px;margin-right:14px}
+.pack.book{--w:118px;--h:176px;--n:9;--face:var(--kraft-dk);--inkc:var(--cream);--ry:22deg;--rz:3deg;--rx:-4deg}
+.pack.book .side{left:auto;right:100%;transform-origin:right center;transform:translateZ(calc(var(--d) / 2)) rotateY(-90deg);--face:var(--cream);filter:none;background-image:repeating-linear-gradient(90deg,rgba(60,40,20,.3) 0 1px,transparent 1px 3px),var(--tooth);background-blend-mode:normal,overlay}
+.pack.book .top{--face:var(--cream-2);filter:none;background-image:repeating-linear-gradient(0deg,rgba(60,40,20,.25) 0 1px,transparent 1px 3px);background-blend-mode:normal}
+.pack.book .front{border-radius:2px 4px 4px 2px}
+.pack.book .plate{position:absolute;left:14px;right:14px;top:34px;padding:12px 6px;background-color:var(--cream);background-image:var(--tooth);background-blend-mode:overlay;color:var(--ink);text-align:center;font:700 13px/1.5 var(--f-serif);letter-spacing:.12em;box-shadow:1px 1px 0 rgba(0,0,0,.3),inset 0 0 0 1px rgba(60,40,20,.25);border-radius:1px}
+.pack.book .plate small{display:block;font:400 9px/1.4 var(--f-sans);letter-spacing:.14em;color:var(--ink-2);margin-top:4px}
+.pack.book .rib{position:absolute;left:30px;bottom:-26px;width:11px;height:48px;background:var(--terra);clip-path:polygon(0 0,100% 0,100% 100%,50% 82%,0 100%);box-shadow:1px 1px 0 rgba(0,0,0,.3)}
+.pack.book .mark{position:absolute;right:-3px;top:calc(100% * (1 - var(--pct,.47)));width:14px;height:3px;background:var(--terra);box-shadow:0 1px 0 rgba(0,0,0,.3)}
+.slip{--face:var(--cream);padding:10px 14px 9px;font:500 12px/1.5 var(--f-sans);color:var(--ink);align-self:flex-end;margin-bottom:6px;min-width:150px}
+.slip b{display:block;font:700 14px/1.4 var(--f-serif);letter-spacing:.06em}
+.slip small{display:block;color:var(--ink-2);letter-spacing:.06em}
+.slip .go{display:inline-block;margin-top:7px;--face:var(--terra);color:var(--cream);font:600 11px/1 var(--f-sans);letter-spacing:.2em;padding:7px 11px 6px 13px;border-radius:3px}
+.upload{width:var(--w,110px);height:var(--h,210px);align-self:center;flex:none}
+.stand{--face:var(--kraft-2);border-radius:8px;padding:26px 24px 28px;display:grid;justify-items:center;align-content:start;gap:26px}
+.stand h2{margin:0;justify-self:start;font:600 12px/1 var(--f-serif);letter-spacing:.3em;color:var(--ink-2)}
+.stand .pack.book{--w:176px;--h:258px;--n:14;--ry:26deg;--rz:2deg;--rx:-5deg;margin:16px 0 30px 40px}
+.stand .pack.book .plate{top:52px;left:22px;right:22px;font-size:17px;padding:18px 8px}
+.stand .pack.book .plate small{font-size:10.5px}
+.stand .pack.book .rib{left:44px;width:14px;height:64px;bottom:-34px}
+.stand .slip{width:100%;min-width:0;padding:14px 18px 14px;font-size:13px}
+.stand .slip b{font-size:17px}
+.stand .slip .go{font-size:12px;padding:9px 14px 8px 16px;margin-top:10px}
+.upload b{display:block;text-align:center}
+.upload small{display:block;font:500 10px/1.4 var(--f-sans);letter-spacing:.14em;margin-top:6px;text-align:center}
 
-/* 收件匣：撕边纸 */
-.inbox{margin:0 14px 14px;background:var(--cream);padding:14px 14px 12px;clip-path:polygon(0 6px,4% 0,10% 5px,18% 1px,27% 6px,36% 0,45% 5px,54% 1px,63% 6px,72% 0,81% 5px,90% 1px,96% 6px,100% 2px,100% 100%,0 100%);filter:drop-shadow(3px 5px 6px rgba(90,60,30,.4))}
-.inbox h2{margin:0 0 8px;font:700 15px/1 var(--f-serif);letter-spacing:.24em;color:var(--terra)}
-.inbox ul{list-style:none;margin:0;padding:0}
-.inbox li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px dashed rgba(90,60,30,.35);font:400 12.5px/1.35 var(--f-sans)}
-.inbox li:last-child{border-bottom:0}
-.inbox li i{width:16px;height:16px;border-radius:50%;background:var(--olive);box-shadow:inset 1px 1px 0 rgba(255,255,255,.4),1px 1px 0 rgba(90,60,30,.4);flex:none}
-.inbox li i.t{background:var(--terra)}.inbox li i.k{background:var(--kraft-2)}
-.inbox li span{flex:1}
-.inbox li small{font:500 10.5px/1 var(--f-sans);letter-spacing:.08em;color:var(--ink-2)}
+/* ---------- 档案架 ---------- */
+.rack{--face:var(--kraft-dk);padding:12px 12px 0;border-radius:8px}
+.rack .row{--rh:190px;gap:0;justify-content:space-around;padding:0 6px 14px}
+.rack .pack{margin-bottom:2px}
+.deck{position:relative;width:92px;height:62px;flex:none;align-self:flex-end;margin-bottom:6px}
+.deck .cd{position:absolute;inset:0;--face:var(--black);color:var(--copper);border-radius:4px;background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;box-shadow:0 1px 0 #1a1512,0 2px 0 #3a302a,0 3px 0 #1a1512,0 4px 0 #3a302a,0 5px 0 #1a1512,3px 9px 10px -3px rgba(40,25,10,.6)}
+.deck .cd::before{content:"";position:absolute;inset:5px;border:1px solid currentColor;opacity:.6}
+.deck .cd span{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font:900 24px/1 var(--f-serif)}
+.deck .cd.up{--face:var(--cream);color:var(--ink);transform:rotate(-5deg) translate(-3px,-6px);box-shadow:0 1px 0 var(--e1),0 2px 0 var(--e2),2px 5px 8px -2px rgba(60,40,20,.55);padding:8px 10px;font:600 10px/1.35 var(--f-serif)}
+.deck .cd.up::before{display:none}
+.deck em{position:absolute;left:0;right:0;top:-22px;text-align:center;font:500 9.5px/1 var(--f-sans);letter-spacing:.18em;color:var(--ink-2);font-style:normal}
+.rack .cut{width:84px;height:126px;align-self:flex-end;margin-bottom:12px}
+.rack .cut small{font:500 9.5px/1.3 var(--f-sans);letter-spacing:.14em;margin-top:4px}
 
-/* 打开一盒：牌从盒口抽出，牌背黑铜，牌面米白 */
-.open{margin:0 14px 16px;background:var(--kraft-2);border-radius:6px;padding:12px 12px 14px;box-shadow:var(--raise)}
-.open .rh{display:flex;justify-content:space-between;align-items:baseline;margin:0 2px 10px}
-.open .rh h2{margin:0;font:700 13px/1 var(--f-serif);letter-spacing:.3em}
-.open .rh span{font:500 10px/1 var(--f-sans);letter-spacing:.14em;color:var(--ink-2)}
-.fan{position:relative;height:196px}
-.card{position:absolute;width:118px;height:168px;border-radius:5px;box-shadow:var(--raise);overflow:hidden}
-.card.back{background:var(--black);color:var(--copper)}
-.card.back::before{content:"";position:absolute;inset:7px;border:1.5px solid currentColor;border-radius:3px}
-.card.back::after{content:"";position:absolute;inset:11px;border:1px dotted currentColor;opacity:.7}
-.card.back .g{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font:900 48px/1 var(--f-serif)}
-.card.back .k{position:absolute;left:12px;top:14px;font:600 10px/1 var(--f-sans);letter-spacing:.12em}
-.card.back .k2{position:absolute;right:12px;bottom:14px;font:600 10px/1 var(--f-sans);letter-spacing:.12em;transform:rotate(180deg)}
-.card.face{background:var(--cream);color:var(--ink);padding:12px 12px 10px}
-.card.face::before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--terra)}
-.card.face .kind{display:inline-block;background:var(--olive);color:var(--cream);font:600 9px/1 var(--f-sans);letter-spacing:.12em;padding:3px 6px;border-radius:2px;margin:0 0 8px 4px}
-.card.face h3{margin:0 0 6px 4px;font:700 13px/1.35 var(--f-serif)}
-.card.face p{margin:0 0 0 4px;font:400 10.5px/1.5 var(--f-sans);color:var(--ink-2)}
-.card.face .why{margin-top:8px;font:400 11px/1.5 var(--f-serif);color:var(--ink)}
-.c1{left:6px;top:14px;transform:rotate(-7deg)}.c2{left:64px;top:8px;transform:rotate(-2deg)}.c3{left:118px;top:4px;transform:rotate(3deg);z-index:2}
-.box-lie{position:absolute;right:0;bottom:0;z-index:1;width:92px;height:62px;border-radius:4px;background:var(--terra);color:var(--black);box-shadow:var(--raise);display:grid;place-items:center;font:900 30px/1 var(--f-serif)}
-.box-lie::before{content:"";position:absolute;inset:4px;border:1px solid currentColor;opacity:.5;border-radius:2px}
-.box-lie small{position:absolute;left:0;right:0;bottom:4px;text-align:center;font:600 8px/1 var(--f-sans);letter-spacing:.12em;opacity:.75}
+/* 打开一盒：盒子立着盖子翻开，牌抽出来扇开在前面 */
+.table{--face:var(--kraft-2);border-radius:8px;padding:18px 16px 16px;position:relative;min-height:330px}
+.table .stage{position:absolute;left:0;right:0;top:0;bottom:0}
+.table .pack.open{position:absolute;right:56px;top:96px;--w:112px;--h:168px;--ry:-18deg;--rx:-10deg;--rz:-2deg;--n:7}
+.table .pack.open .front .g{font-size:60px}
+.table .pack.open .front .n{font-size:11px;bottom:14px}
+.card{position:absolute;width:150px;height:216px;border-radius:5px;--face:var(--black);color:var(--copper);background-color:var(--face);background-image:var(--fibre),var(--tooth);background-blend-mode:soft-light,overlay;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.2),0 1px 0 var(--e1),0 2px 0 var(--e1),1px 3px 0 var(--e2),4px 9px 12px -4px rgba(40,25,10,.65);transform-origin:50% 100%}
+.card.back::before{content:"";position:absolute;inset:7px;border:1.5px solid currentColor;border-radius:3px;opacity:.9}
+.card.back::after{content:"";position:absolute;inset:11px;border:1px dotted currentColor;opacity:.6}
+.card.back .g{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font:900 62px/1 var(--f-serif)}
+.card.back .k{position:absolute;left:12px;top:13px;font:600 9.5px/1 var(--f-sans);letter-spacing:.12em}
+.card.back .k2{position:absolute;right:12px;bottom:13px;font:600 9.5px/1 var(--f-sans);letter-spacing:.12em;transform:rotate(180deg)}
+.card.face{--face:var(--cream);color:var(--ink);padding:14px 12px 10px 16px;overflow:hidden}
+.card.face::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--terra);border-radius:5px 0 0 5px}
+.card.face .kind{display:inline-block;--face:var(--olive);background:var(--olive);color:var(--cream);font:600 9px/1 var(--f-sans);letter-spacing:.14em;padding:3px 6px 2px 7px;border-radius:2px;margin-bottom:8px;box-shadow:0 1px 0 var(--olive-dk)}
+.card.face h3{margin:0 0 8px;font:700 15px/1.35 var(--f-serif)}
+.card.face p{margin:0;font:400 11.5px/1.55 var(--f-sans);color:var(--ink-2)}
+.card.face .why{margin-top:10px;font:400 12px/1.6 var(--f-serif);color:var(--ink);border-top:1px dashed rgba(60,40,20,.3);padding-top:6px}
+.table .cap{position:absolute;left:16px;top:14px;font:600 12px/1 var(--f-serif);letter-spacing:.3em;color:var(--ink-2)}
+.table .cap small{display:block;margin-top:8px;font:400 10px/1.5 var(--f-sans);letter-spacing:.1em;color:var(--ink-2)}
 
-/* 底栏 */
-.nav{position:absolute;left:0;right:0;bottom:0;height:64px;background:var(--cream);display:flex;justify-content:space-around;align-items:center;box-shadow:0 -2px 0 rgba(90,60,30,.25),0 -6px 12px -6px rgba(90,60,30,.4);z-index:3}
-.nav a{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink-2);text-decoration:none;font:500 10.5px/1 var(--f-sans);letter-spacing:.14em}
-.nav a svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.nav a.on{color:var(--terra)}
-.nav a.on::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--terra);margin-top:1px}
+/* ---------- 笔记本架 ---------- */
+.ledge{--face:var(--kraft-dk);padding:12px 12px 0;border-radius:8px}
+.ledge .row{--rh:250px;gap:22px;padding:0 20px 14px}
+.pack.nb{--w:118px;--h:172px;--n:22;--ry:-20deg;--rz:-3deg;--rx:-4deg}
+.pack.nb .label{font-size:12px;top:40px;padding:9px 4px}
+.ledge .cut{width:118px;height:172px;align-self:flex-end;margin-bottom:12px}
+.ledge .cut small{font:500 9.5px/1.3 var(--f-sans);letter-spacing:.14em;margin-top:4px}
+.spread{position:relative;display:grid;grid-template-columns:1fr 1fr;height:360px;margin:8px 10px 0;filter:drop-shadow(0 3px 0 #B9A98A) drop-shadow(0 6px 0 #8F7E5F) drop-shadow(4px 12px 14px rgba(50,30,15,.55))}
+.page{--face:var(--cream);background-color:var(--face);background-image:repeating-linear-gradient(0deg,transparent 0 27px,rgba(60,40,20,.22) 27px 28px),var(--fibre),var(--tooth);background-blend-mode:normal,soft-light,overlay;padding:22px 24px 18px 26px;position:relative}
+.page.l{border-radius:4px 0 0 4px;box-shadow:inset -12px 0 16px -10px rgba(60,40,20,.55),inset 0 1px 0 rgba(255,255,255,.5)}
+.page.r{border-radius:0 4px 4px 0;box-shadow:inset 12px 0 16px -10px rgba(60,40,20,.5),inset 0 1px 0 rgba(255,255,255,.5)}
+.page .date{font:700 15px/1 var(--f-serif);letter-spacing:.18em;margin:0 0 20px}
+.page .date small{font:400 10.5px/1 var(--f-sans);letter-spacing:.16em;color:var(--ink-2);margin-left:10px}
+.page p{margin:0;font:400 13px/28px var(--f-serif);color:var(--ink)}
+.page p.hand{color:var(--ink-2)}
+.page .write{position:absolute;right:22px;bottom:18px;--face:var(--terra);color:var(--cream);font:600 11px/1 var(--f-sans);letter-spacing:.2em;padding:8px 12px 7px 14px;border-radius:3px}
+.monthtabs{position:absolute;right:-26px;top:30px;display:grid;gap:10px;z-index:2}
+.monthtabs span{--face:var(--kraft-2);width:26px;padding:12px 0;writing-mode:vertical-rl;font:600 9.5px/1 var(--f-sans);letter-spacing:.2em;text-align:center;color:var(--ink-2);background-color:var(--face);background-image:var(--tooth);background-blend-mode:overlay;border-radius:0 4px 4px 0;box-shadow:inset 1px 0 0 rgba(0,0,0,.15),2px 2px 0 var(--kraft-3)}
+.monthtabs span.on{--face:var(--cream);color:var(--ink);width:30px}
 
-/* 材质小样 */
-.swatch{width:390px;margin:16px auto 0;background:var(--kraft);padding:14px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;position:relative}
-.swatch>*{position:relative;z-index:1}
-.sw{height:64px;border-radius:5px;display:flex;align-items:flex-end;padding:6px 8px;font:500 10px/1.2 var(--f-sans);letter-spacing:.1em;box-shadow:var(--raise)}
-.sw.press{box-shadow:var(--press)}
+/* ---------- 手机 ---------- */
+@media (max-width:480px){
+  .screen{height:844px;max-width:390px}
+  .top{padding:14px 14px 8px;gap:10px}
+  .brand{font-size:20px;padding:9px 12px 8px 16px}
+  .tabs{display:none}
+  .body{padding:4px 12px 0;gap:14px}
+  .nav{display:flex;position:absolute;left:0;right:0;bottom:0;height:64px;--face:var(--cream);justify-content:space-around;align-items:center;border-radius:0;z-index:5;
+    box-shadow:0 -1px 0 var(--e1),0 -2px 0 var(--e1),0 -3px 0 var(--e2),0 -8px 14px -6px rgba(60,40,20,.5)}
+  .nav a{display:flex;flex-direction:column;align-items:center;gap:4px;color:var(--ink-2);text-decoration:none;font:500 10.5px/1 var(--f-sans);letter-spacing:.14em}
+  .nav a svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 1px 0 rgba(255,255,255,.5))}
+  .nav a.on{color:var(--terra)}
+  .nav a.on::after{content:"";width:5px;height:5px;border-radius:50%;background:var(--terra);margin-top:1px;box-shadow:inset 0 1px 0 rgba(255,255,255,.3)}
+  /* 书架 */
+  .case{padding:10px 8px 0}
+  .row{--rh:190px;gap:4px;padding:0 6px 12px;--sx:1;--sy:1;--hmax:146px}
+  .row .plank{left:-8px;right:-8px}
+  .spine span{font-size:10px}
+  .pack.book{--w:98px;--h:146px;--ry:20deg}
+  .pack.book .plate{top:26px;font-size:11.5px;padding:9px 4px}
+  .reading{gap:10px;margin-right:6px}
+  .slip{min-width:0;padding:8px 10px 8px;font-size:11px;margin-bottom:4px}
+  .slip b{font-size:12.5px}
+  .upload{--w:70px;--h:140px}
+  .d-only{display:none !important}
+  .m-only{display:block !important}
+  .reading.m-only{display:flex !important}
+  .body{grid-template-columns:1fr !important}
+  /* 档案架 */
+  .rack{padding:10px 8px 0}
+  .rack .row{--rh:186px;padding:0 2px 12px}
+  .pack{--w:78px;--h:117px}
+  .pack .front .g{font-size:40px}
+  .deck{width:78px;height:54px}
+  .rack .cut{width:78px;height:117px}
+  .table{min-height:470px;padding:14px}
+  .table .pack.open{right:12px;top:70px;--w:78px;--h:117px}
+  .card{width:124px;height:194px}
+  .card.back .g{font-size:50px}
+  .card.face h3{font-size:13.5px}
+  .card.face p{font-size:10.5px}
+  .card.face .why{font-size:11px}
+  .table .pack.open .front .g{font-size:40px}
+  .table .pack.open .front .n{font-size:9px;bottom:11px}
+  /* 笔记本 */
+  .ledge{padding:10px 8px 0}
+  .ledge .row{--rh:182px;gap:8px;padding:0 8px 12px;--sx:1;--sy:1}
+  .pack.nb{--w:80px;--h:116px}
+  .pack.nb .label{font-size:10px;top:30px;padding:7px 4px}
+  .ledge .cut{width:80px;height:116px}
+  .spread{height:400px;margin:4px 30px 0 4px;grid-template-columns:1fr}
+  .page.r{display:none}
+  .page.l{border-radius:4px;box-shadow:inset 0 1px 0 rgba(255,255,255,.5)}
+  .page{padding:18px 18px 16px 20px}
+  .monthtabs{right:-26px;top:24px}
+}
 </style>
 <body>
 
-<div class="phone grain" id="phone">
-  <div class="top"><div class="brand">邮差</div><div class="tag">档 案 架</div></div>
+<!-- ===================== 书架 ===================== -->
+<section class="screen" id="shelf">
+  <div class="top"><div class="brand paper slab emb-hi">邮差</div>
+    <div class="tabs"><div class="tab paper slab on emb">书架</div><div class="tab paper slab emb">档案架</div><div class="tab paper slab emb">笔记本</div></div>
+  </div>
+  <div class="body two">
+    <div class="case paper slab">
+      <div class="row stage"><div class="wall"></div>
+        <div class="reading m-only">
+          <div class="pack book" style="--pct:.47"><div class="f front"><div class="plate">货币金融学<small>米什金</small></div><i class="rib"></i><i class="mark"></i></div><div class="f side"></div><div class="f top"></div></div>
+          <div class="slip paper slab"><b>货币金融学</b><small>读到第 128 页 · 第五章</small><span class="go paper slab emb-hi">接着读</span></div>
+        </div>
+        <div class="spine o" style="--w:34px;--h:168px"><span>周期</span></div>
+        <div class="spine k" style="--w:26px;--h:158px"><span>证券分析</span></div>
+        <div class="spine t" style="--w:30px;--h:172px"><span>国富论</span></div>
+        <div class="spine c" style="--w:22px;--h:150px"><span>随机漫步的傻瓜</span></div>
+        <div class="spine b d-only" style="--w:28px;--h:164px"><span>大衰退</span></div>
+        <div class="spine o d-only" style="--w:24px;--h:155px"><span>利率史</span></div>
+        <div class="spine k d-only" style="--w:36px;--h:176px"><span>资本的秩序</span></div>
+        <div class="spine t d-only" style="--w:26px;--h:160px"><span>金融炼金术</span></div>
+        <div class="spine b d-only" style="--w:30px;--h:168px"><span>冷战</span></div>
+        <div class="spine c d-only" style="--w:24px;--h:152px"><span>石油大博弈</span></div>
+        <div class="spine o d-only" style="--w:28px;--h:166px"><span>美元霸权</span></div>
+        <div class="spine t d-only" style="--w:26px;--h:158px"><span>债务危机</span></div>
+        <div class="spine b d-only" style="--w:30px;--h:170px"><span>大国的兴衰</span></div>
+        <div class="spine k d-only" style="--w:24px;--h:150px"><span>康波</span></div>
+        <div class="plank"></div>
+      </div>
+      <div class="row stage"><div class="wall"></div>
+        <div class="spine b" style="--w:30px;--h:166px"><span>大衰退</span></div>
+        <div class="spine k" style="--w:26px;--h:156px"><span>利率史</span></div>
+        <div class="spine o" style="--w:34px;--h:174px"><span>资本的秩序</span></div>
+        <div class="spine t" style="--w:24px;--h:150px"><span>金融炼金术</span></div>
+        <div class="spine c" style="--w:28px;--h:160px"><span>冷战</span></div>
+        <div class="spine b" style="--w:26px;--h:164px"><span>石油大博弈</span></div>
+        <div class="spine k d-only" style="--w:30px;--h:170px"><span>美元霸权</span></div>
+        <div class="spine t d-only" style="--w:32px;--h:172px"><span>货币的非国家化</span></div>
+        <div class="spine k d-only" style="--w:22px;--h:150px"><span>做市</span></div>
+        <div class="spine c d-only" style="--w:24px;--h:152px"><span>中央银行</span></div>
+        <div class="upload cut lean"><b>＋</b><small>放一本书</small></div>
+        <div class="plank"></div>
+      </div>
+      <div class="row stage"><div class="wall"></div>
+        <div class="spine t" style="--w:28px;--h:164px"><span>经济学原理</span></div>
+        <div class="spine c" style="--w:24px;--h:150px"><span>就业利息和货币通论</span></div>
+        <div class="spine k" style="--w:34px;--h:174px"><span>通向奴役之路</span></div>
+        <div class="spine o" style="--w:26px;--h:158px"><span>繁荣与萧条</span></div>
+        <div class="spine b" style="--w:30px;--h:166px"><span>货币史</span></div>
+        <div class="spine t" style="--w:24px;--h:152px"><span>黄金</span></div>
+        <div class="spine o d-only" style="--w:30px;--h:168px"><span>人口</span></div>
+        <div class="spine k d-only" style="--w:26px;--h:156px"><span>大衰退</span></div>
+        <div class="spine b d-only" style="--w:28px;--h:164px"><span>石油</span></div>
+        <div class="spine c d-only" style="--w:24px;--h:150px"><span>利率</span></div>
+        <div class="plank"></div>
+      </div>
+    </div>
+    <div class="stand paper slab d-only"><h2 class="emb">接着读</h2>
+      <div class="stage"><div class="pack book" style="--pct:.47"><div class="f front"><div class="plate">货币金融学<small>米什金</small></div><i class="rib"></i><i class="mark"></i></div><div class="f side"></div><div class="f top"></div></div></div>
+      <div class="slip paper slab"><b>货币金融学</b><small>读到第 128 页 · 第五章 利率的行为</small><span class="go paper slab emb-hi">接着读</span></div>
+    </div>
+  </div>
+  <nav class="nav paper">
+    <a href="#" class="on"><svg viewBox="0 0 24 24"><path d="M4 5h4v15H4zM10 5h4v15h-4zM16 7l4-1 2 14-4 1z"/></svg>书架</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M3 8h18v12H3zM3 8l2-4h14l2 4M9 12h6"/></svg>档案架</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 3v18M12 8h4M12 12h4"/></svg>笔记本</a>
+  </nav>
+</section>
 
-  <section class="panel grain"><h1>研 究 档 案</h1>
-    <div class="gauge" style="--p:116deg"><div class="track"></div><div class="arc"></div><div class="ticks"></div><b>64<small>%</small></b></div>
-    <p class="sub">十四件读过九件 · 五个领域 · 五盒</p></section>
-
-  <div class="tiles"><div class="tile"><b>3</b><small>在做</small></div><div class="tile"><b>1</b><small>要年更</small></div><div class="tile"><b>1</b><small>已结卷</small></div><div class="tile hot"><b>3</b><small>待归位</small></div></div>
-
-  <section class="rack grain"><div class="rh"><h2>分信架</h2><span>一格一盒 · 5 / 6</span></div>
-    <div class="slots">
-      <div class="slot"><span class="num">F0 · 01</span><div class="box t"><span class="code">经济周期</span><span class="g">周</span><span class="n">居民部门：消费、人口与财富</span><span class="c">3 件</span></div><span class="seal" title="要年更">年</span></div>
-      <div class="slot"><span class="num">F0 · 02</span><div class="box"><span class="code">经济周期</span><span class="g">周</span><span class="n">康波与利率</span><span class="c">5 件</span></div><span class="seal sq" title="已结卷">结</span></div>
-      <div class="slot"><span class="num">D8 · 01</span><div class="box"><span class="code">地缘与战争</span><span class="g">地</span><span class="n">冷战是怎么开始的</span><span class="c">3 件</span></div><span class="ribbon" title="在做"></span></div>
-      <div class="slot"><span class="num">F830 · 01</span><div class="box t"><span class="code">CFA 级金融</span><span class="g">金</span><span class="n">凯利公式与仓位管理</span><span class="c">1 件</span></div><span class="ribbon"></span></div>
-      <div class="slot"><span class="num">F724 · 01</span><div class="box"><span class="code">期货与商品</span><span class="g">货</span><span class="n">做市商靠什么赚钱</span><span class="c">2 件</span></div><span class="ribbon"></span></div>
-      <div class="slot"><span class="num">—</span></div>
-    </div></section>
-
-  <section class="inbox grain"><h2>收件匣</h2><ul>
-    <li><i class="t"></i><span>人口老龄化的拐点在哪一年</span><small>11 月 2 日</small></li>
-    <li><i></i><span>日本家庭资产三十年</span><small>11 月 5 日</small></li>
-    <li><i class="k"></i><span>做市商的库存风险怎么对冲</span><small>11 月 8 日</small></li>
-  </ul></section>
-
-  <section class="open grain"><div class="rh"><h2>打开一盒</h2><span>F0 · 01 · 三件 · 牌面朝上的是读过的</span></div>
-    <div class="fan">
-      <div class="card back c1"><span class="k">F0·01</span><span class="g">周</span><span class="k2">F0·01</span></div>
-      <div class="card back c2"><span class="k">F0·01</span><span class="g">周</span><span class="k2">F0·01</span></div>
-      <div class="card face c3"><span class="kind">数据</span><h3>中美消费与人口</h3><p>国家统计局 · 2026-10 · 6 分钟</p><p class="why">消费占 GDP 四成，比美国低 28 个百分点。</p></div>
-      <div class="box-lie">周<small>居民部门</small></div>
-    </div></section>
-
-  <nav class="nav">
+<!-- ===================== 档案架 ===================== -->
+<section class="screen" id="archive">
+  <div class="top"><div class="brand paper slab emb-hi">邮差</div>
+    <div class="tabs"><div class="tab paper slab emb">书架</div><div class="tab paper slab on emb">档案架</div><div class="tab paper slab emb">笔记本</div></div>
+  </div>
+  <div class="body" style="grid-template-columns:minmax(0,1.15fr) minmax(0,1fr)">
+    <div class="rack paper slab">
+      <div class="row stage"><div class="wall"></div>
+        <div class="pack" style="--n:3;--ry:-26deg;--rz:-7deg;--rx:-6deg"><div class="f front"><i class="frame"></i><span class="code">F0 · 01</span><span class="g">周</span><span class="n">居民部门</span><span class="code r">F0 · 01</span></div><div class="f side"><span>居民部门 · 三张</span></div><div class="f top"></div></div>
+        <div class="pack k" style="--n:5;--ry:-14deg;--rz:3deg;--rx:-3deg"><div class="f front"><i class="frame"></i><span class="code">F0 · 02</span><span class="g">周</span><span class="n">康波与利率</span><span class="code r">F0 · 02</span></div><div class="f side"><span>康波与利率 · 五张</span></div><div class="f top"></div></div>
+        <div class="pack" style="--n:3;--ry:-30deg;--rz:-10deg;--rx:-8deg"><div class="f front"><i class="frame"></i><span class="code">D8 · 01</span><span class="g">地</span><span class="n">冷战是怎么开始的</span><span class="code r">D8 · 01</span></div><div class="f side"><span>冷战 · 三张</span></div><div class="f top"></div></div>
+        <div class="pack k d-only" style="--n:7;--ry:-20deg;--rz:-4deg;--rx:-5deg"><div class="f front"><i class="frame"></i><span class="code">D8 · 02</span><span class="g">地</span><span class="n">海权与航道</span><span class="code r">D8 · 02</span></div><div class="f side"><span>海权与航道 · 七张</span></div><div class="f top"></div></div>
+        <div class="plank"></div>
+      </div>
+      <div class="row stage"><div class="wall"></div>
+        <div class="pack k" style="--n:1;--ry:-22deg;--rz:-5deg;--rx:-6deg"><div class="f front"><i class="frame"></i><span class="code">F830 · 01</span><span class="g">金</span><span class="n">凯利公式与仓位</span><span class="code r">F830 · 01</span></div><div class="f side"><span>一张</span></div><div class="f top"></div></div>
+        <div class="pack" style="--n:2;--ry:-16deg;--rz:5deg;--rx:-4deg"><div class="f front"><i class="frame"></i><span class="code">F724 · 01</span><span class="g">货</span><span class="n">做市商靠什么赚钱</span><span class="code r">F724 · 01</span></div><div class="f side"><span>做市商 · 两张</span></div><div class="f top"></div></div>
+        <div class="deck"><div class="cd"><span>?</span></div><div class="cd up">人口老龄化的拐点在哪一年</div><em>收件匣 · 三张</em></div>
+        <div class="plank"></div>
+      </div>
+      <div class="row stage"><div class="wall"></div>
+        <div class="pack" style="--n:4;--ry:-24deg;--rz:-6deg;--rx:-5deg"><div class="f front"><i class="frame"></i><span class="code">F0 · 03</span><span class="g">周</span><span class="n">库存周期</span><span class="code r">F0 · 03</span></div><div class="f side"><span>库存周期 · 四张</span></div><div class="f top"></div></div>
+        <div class="pack k" style="--n:2;--ry:-18deg;--rz:4deg;--rx:-3deg"><div class="f front"><i class="frame"></i><span class="code">D9 · 01</span><span class="g">司</span><span class="n">反垄断一百年</span><span class="code r">D9 · 01</span></div><div class="f side"><span>反垄断 · 两张</span></div><div class="f top"></div></div>
+        <div class="cut"><b>＋</b><small>新盒</small></div>
+        <div class="plank"></div>
+      </div>
+    </div>
+    <div class="table paper slab d-only">
+      <div class="cap emb">打开一盒<small>F0 · 01 居民部门 · 牌面朝上的是读过的</small></div>
+      <div class="stage">
+        <div class="pack open" style="--n:3"><div class="f front"><i class="frame"></i><span class="code">F0 · 01</span><span class="g">周</span><span class="n">居民部门</span><span class="code r">F0 · 01</span></div><div class="f side"><span>居民部门 · 三张</span></div><div class="f flap"></div></div>
+        <div class="card back" style="left:34px;top:104px;transform:rotate(-9deg)"><span class="k">F0 · 01</span><span class="g">周</span><span class="k2">F0 · 01</span></div>
+        <div class="card back" style="left:128px;top:96px;transform:rotate(-3deg)"><span class="k">F0 · 01</span><span class="g">周</span><span class="k2">F0 · 01</span></div>
+        <div class="card face" style="left:228px;top:90px;transform:rotate(3deg)"><span class="kind">数据</span><h3>中美消费与人口</h3><p>国家统计局 · 2026 年 10 月 · 六分钟</p><p class="why">消费占 GDP 四成，比美国低二十八个百分点。</p></div>
+      </div>
+    </div>
+  </div>
+  <nav class="nav paper">
     <a href="#"><svg viewBox="0 0 24 24"><path d="M4 5h4v15H4zM10 5h4v15h-4zM16 7l4-1 2 14-4 1z"/></svg>书架</a>
     <a href="#" class="on"><svg viewBox="0 0 24 24"><path d="M3 8h18v12H3zM3 8l2-4h14l2 4M9 12h6"/></svg>档案架</a>
     <a href="#"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 3v18M12 8h4M12 12h4"/></svg>笔记本</a>
   </nav>
-</div>
+</section>
 
-<div class="swatch grain" id="swatch">
-  <div class="sw" style="background:var(--kraft-2);color:var(--ink)">牛皮纸底</div>
-  <div class="sw" style="background:var(--cream);color:var(--ink)">米白卡纸</div>
-  <div class="sw" style="background:var(--terra);color:var(--cream)">赤陶硬纸</div>
-  <div class="sw" style="background:var(--olive);color:var(--cream)">橄榄硬纸</div>
-  <div class="sw" style="background:var(--black);color:var(--copper)">黑卡配铜</div>
-  <div class="sw press" style="background:var(--kraft-3);color:var(--cream)">凹格</div>
-  <div class="sw" style="background:var(--cream);color:var(--ink);font:700 15px/1 var(--f-serif);letter-spacing:.3em;align-items:center;justify-content:center">标 题</div>
-  <div class="sw" style="background:var(--cream);color:var(--terra);font:700 26px/1 var(--f-serif);align-items:center;justify-content:center">64%</div>
-</div>
+<!-- 手机版：打开一盒单独一屏 -->
+<section class="screen" id="archive-open">
+  <div class="top"><div class="brand paper slab emb-hi">邮差</div>
+    <div class="tabs"><div class="tab paper slab emb">书架</div><div class="tab paper slab on emb">档案架</div><div class="tab paper slab emb">笔记本</div></div>
+  </div>
+  <div class="body">
+    <div class="table paper slab" style="min-height:420px">
+      <div class="cap emb">F0 · 01 居民部门<small>三张 · 牌面朝上的是读过的 · 点牌翻面</small></div>
+      <div class="stage">
+        <div class="pack open" style="--n:3;--rx:-6deg"><div class="f front"><i class="frame"></i><span class="code">F0 · 01</span><span class="g">周</span><span class="n">居民部门</span><span class="code r">F0 · 01</span></div><div class="f side"><span>居民部门 · 三张</span></div><div class="f flap"></div></div>
+        <div class="card back" style="left:8px;top:122px;transform:rotate(-10deg)"><span class="k">F0 · 01</span><span class="g">周</span><span class="k2">F0 · 01</span></div>
+        <div class="card back" style="left:72px;top:114px;transform:rotate(-4deg)"><span class="k">F0 · 01</span><span class="g">周</span><span class="k2">F0 · 01</span></div>
+        <div class="card face" style="left:140px;top:108px;transform:rotate(3deg)"><span class="kind">数据</span><h3>中美消费与人口</h3><p>国家统计局 · 2026 年 10 月 · 六分钟</p><p class="why">消费占 GDP 四成，比美国低二十八个百分点。</p></div>
+      </div>
+    </div>
+    <div class="deck" style="margin:34px auto 0;align-self:center"><div class="cd"><span>?</span></div><div class="cd up">人口老龄化的拐点在哪一年</div><em>收件匣 · 三张 · 拖进盒里</em></div>
+  </div>
+  <nav class="nav paper">
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M4 5h4v15H4zM10 5h4v15h-4zM16 7l4-1 2 14-4 1z"/></svg>书架</a>
+    <a href="#" class="on"><svg viewBox="0 0 24 24"><path d="M3 8h18v12H3zM3 8l2-4h14l2 4M9 12h6"/></svg>档案架</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 3v18M12 8h4M12 12h4"/></svg>笔记本</a>
+  </nav>
+</section>
+
+<!-- ===================== 笔记本架 ===================== -->
+<section class="screen" id="notes">
+  <div class="top"><div class="brand paper slab emb-hi">邮差</div>
+    <div class="tabs"><div class="tab paper slab emb">书架</div><div class="tab paper slab emb">档案架</div><div class="tab paper slab on emb">笔记本</div></div>
+  </div>
+  <div class="body">
+    <div class="ledge paper slab">
+      <div class="row stage"><div class="wall"></div>
+        <div class="pack nb b" style="--n:28;--ry:-22deg;--rz:-4deg"><div class="f front"><i class="spinehint"></i><i class="band"></i><div class="label">随手本<small>十一月</small></div></div><div class="f side"></div><div class="f top"></div></div>
+        <div class="pack nb o" style="--n:14;--ry:-16deg;--rz:2deg"><div class="f front"><i class="spinehint"></i><i class="band"></i><div class="label">读书札记</div></div><div class="f side"></div><div class="f top"></div></div>
+        <div class="pack nb k" style="--n:9;--ry:-26deg;--rz:-7deg;--rx:-7deg"><div class="f front"><i class="spinehint"></i><div class="label">康波笔记</div></div><div class="f side"></div><div class="f top"></div></div>
+        <div class="pack nb d-only" style="--n:6;--ry:-18deg;--rz:3deg"><div class="f front"><i class="spinehint"></i><i class="band"></i><div class="label">周报底稿</div></div><div class="f side"></div><div class="f top"></div></div>
+        <div class="pack nb c d-only" style="--n:4;--ry:-20deg;--rz:-3deg"><div class="f front"><i class="spinehint"></i><div class="label">摘抄</div></div><div class="f side"></div><div class="f top"></div></div>
+        <div class="cut"><b>＋</b><small>新本子</small></div>
+        <div class="plank"></div>
+      </div>
+    </div>
+    <div class="spread">
+      <div class="page l"><p class="date emb">十一月八日<small>星期日 · 随手本</small></p>
+        <p>周末两天把书架的问题捋了一遍：贴图尺寸固定，桌面与手机顾不过来。</p>
+        <p class="hand">改走纸模，一种材料三件家具。</p>
+        <p class="hand">档案盒按牌盒做，斜立着，一盒一包。</p>
+        <span class="write paper slab emb-hi">记一笔</span>
+      </div>
+      <div class="page r"><p class="date emb">十一月七日<small>星期六</small></p>
+        <p>读米什金第五章，利率的行为。</p>
+        <p class="hand">把「做市商靠什么赚钱」那张剪报归进 F724 盒。</p>
+      </div>
+      <div class="monthtabs"><span class="on">十一月</span><span>十月</span><span>九月</span></div>
+    </div>
+  </div>
+  <nav class="nav paper">
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M4 5h4v15H4zM10 5h4v15h-4zM16 7l4-1 2 14-4 1z"/></svg>书架</a>
+    <a href="#"><svg viewBox="0 0 24 24"><path d="M3 8h18v12H3zM3 8l2-4h14l2 4M9 12h6"/></svg>档案架</a>
+    <a href="#" class="on"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 3v18M12 8h4M12 12h4"/></svg>笔记本</a>
+  </nav>
+</section>
 
 </body>
 </html>
