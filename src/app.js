@@ -3072,17 +3072,11 @@ var FOIL = (function () {
     var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null;
     if (fp !== null && !looseClips(fp).length) { fp = null; S.archPick = null; }
     if (fp === null && S.archPick && !TOPIC[S.archPick]) S.archPick = null;
-    var rules = [["一", "一个问题一盒", "新资料先问：它在回答哪个问题？已经有这个问题，就装进那一盒；是新问题才立新卷，点层板上的「＋ 新盒」自己就能立。卷号跟书架用同一套索书号。"],
-      ["二", "盒里一件一张牌", "每件是档案、数据、计划、纪要、剪报之一，装进盒里就是一张牌。件越多盒越厚，一眼看出哪一盒积得最多。"],
-      ["三", "零散的先进收件匣", "一次性的小分析、没分领域的剪报不急着立卷；分了领域还没装盒的剪报是那一层尽头的一叠牌，没拆的牌背朝上。攒到两件讲同一件事，再一起装盒。"],
-      ["四", "线网上一盒一个地标", "地图上只画课题，不画单件，地标下面写着件数。资料再多，地标也只随课题增长。"]];
     var cabSec = LK().scene === "youchai" ? yxArchiveHTML() : arackHTML();
     return '<div class="view shelf archive-v">' + bannerHTML() +
       '<header class="phead arch-head"><div>' + shelfSeg("archive") + "</div>" +
       '<div class="arch-side"><label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
-      '<div class="arch-main"><div class="arch-col">' + cabSec + boxOffHTML() + clipBarHTML() + "</div></div>" +
-      '<section class="arules" aria-labelledby="ar-h"><h2 id="ar-h">怎样归档</h2><div class="ar-grid">' + rules.map(function (r) { return '<div class="arule"><p><b class="ar-n">' + r[0] + "</b><b>" + r[1] + "</b></p><p>" + r[2] + "</p></div>"; }).join("") + "</div>" +
-      '<p class="meta">讨论完一个问题、查完一份资料，说一句“放进邮差”，我按这四条归档；剪报和自己立的盒子，在这里直接整理。</p></section>' + boxSheetHTML() + deskHTML() + "</div>";
+      '<div class="arch-main"><div class="arch-col">' + cabSec + boxOffHTML() + clipBarHTML() + "</div></div>" + boxSheetHTML() + deskHTML() + "</div>";
   }
   /* 搜索框：不重画页面，只把不相关的盒子调暗 */
   function applyArchFilter() {
