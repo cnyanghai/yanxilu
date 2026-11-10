@@ -11,6 +11,7 @@ updated: 2026-11-09
 # 状态
 
 ## 现在停在哪
+- 2026-11-09 盲测通过：用户看八张混排说「都不跳，过」。纸模六阶段验收完成；下一轮待用户定先做哪条（见未决问题）。
 - 2026-11-09 阶段 6 验收：公开版（file:// 无服务器）三页跑通（立本子、写页、放书，无报错）；线上 baba.wogucloud.cn 与 GitHub Pages 已是新代码；盲测墙 tools/out/paper/blind-wall.jpg（六张我们的加两张参考，打乱，含参考不入库）发给用户；11-04 十一条与 11-08 五条逐条收口写进审视稿六之六（九条了、两条部分、一条不适用、一条待办）；README 四条功能口径改成现状；留给下一轮的七条列在六之六末尾。纸模六阶段到此完成。
 - 2026-11-09 阶段 5 一个房间上线：page.html 末尾加一段全站纸模外壳：body 牛皮纸底加颗粒；.topbar 米白纸片（去黑底线，底下暗带）；.mainnav 当前项赤陶纸片、手机底栏米白纸片当前项赤陶；.btn 赤陶纸片、.btn.ghost 米白纸片；.shelf-seg 牛皮纸托加米白纸片；.arch-q、.clipbar、.add-card、.jot 米白纸片；暗色模式沿用 --pp-* 暗色一套。线网、足迹、阅读器只换底与顶栏，截图检查过不坏。desk_test 与 notes_test 通过。截图 docs/ui-room-stage5.jpg。
 - 2026-11-09 阶段 4 笔记本架加新本子上线：nbList / nbGet / nbPages / nbCount / npCtx / npEditKey / nbGo / npNew / npTitleSave / npDelete / nbSheetHTML / nbSave / nbDelete；notesHTML 拆成 nrackHTML（纸模架子 .nrack / .nbk-b）、dailySpreadHTML（随手本对开，原样）、topicSpreadHTML（主题本对开：左目录加新一页加改本名，右标题输入框加正文加撕掉这一页）；npSave 键可以是日期或页 id；jotHTML 多本时出 #jot-nb 选择，jotSave(text, nb) 记到主题本最新一页；路由加 #nb-<id> 与 #np-t-…；搜索收主题本与页；对开本 .nbk 换纸模色与板厚。notes_test 全过；手工走过：新本子 → 新一页 → 改标题 → 写正文自动保存 → 记一笔选本子 → 搜索命中。截图 docs/ui-notes-stage4.jpg。
@@ -90,6 +91,7 @@ updated: 2026-11-09
 - 线上 `/world` 要等 Baba 另克隆 yanxilu-world 并在本克隆里放一个 `world` 链接（用户跑一次部署脚本里的命令），在那之前 `/world` 返回 404。
 
 ## 已定决策
+- 2026-11-09 阶段 6 验收用户过门（盲测都不跳）。
 - 2026-11-09 用户逐阶段过门：阶段 1 档案架（后改不分领域、盒子正交平面画）、2 开盒即卡牌、3 书架收成上传与接着读、4 笔记本多本、5 一个房间，全部进代码并上线。
 - 2026-11-08 夜 用户定：档案架不分领域，盒子排满一层换一层，不要一个领域一行。
 - 2026-11-08 夜 用户定：邮差全站质感走纸模，按第二稿的形式做三页；档案盒按牌盒做、一排同向摆放，本子同样同向；书架与书脊要按样张拆解重设计；不要仪表盘、统计牌、「在做」等状态签（无效单位）。颜色由 Claude 定。
