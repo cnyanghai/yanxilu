@@ -25,6 +25,7 @@ python3 build.py
 python3 tools/baba_mock.py 8790          # 本地模拟 Baba：/api/yxl/*、首页给 server/index.html（另开一个终端跑着）
 python3 tools/tests/desk_test.py         # 档案架：拆封、翻牌、桌面（Playwright）
 python3 tools/tests/notes_test.py        # 笔记本架：记一笔、随手本编辑自动保存、日历、搜索、手机单栏
+python3 tools/tests/look_test.py         # 样子没坏：十二张截图对基准（自己起模拟服务，端口 8793）；样子是有意改的就加 --update 重拍，基准图一起提交
 ```
 `tools/tests/_frozen/` 里的 binding_test 与 scene_test 对着 2026-11-09 前的旧书墙（布面 / 烫金 / 老书皮书脊、拱形书柜场景），不跑。
 Windows 上把 `python3` 换成 `python`。mock 起来以后浏览器打开 http://127.0.0.1:8790/#archive 就能看到服务器版（测试账号 cookie `sid=u1`，测试脚本会自己带）。截图落在 `tools/out/`（已 gitignore）。`abox_test.py`、`clip_test.py` 写于侧栏面板时期，部分步骤已过时，改之前先看。本机没有 Playwright 就 `pip install playwright && playwright install chromium`。
