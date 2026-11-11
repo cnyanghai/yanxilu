@@ -346,7 +346,7 @@
     }
     return '<div class="tb-in"><a class="brand" href="#home" aria-label="邮差，回到线网"><span class="roundel" aria-hidden="true"><i></i></span><b>邮差</b></a>' +
       '<nav class="mainnav" aria-label="主导航">' + it("home", "线网") + it("shelf", "书架") + it("journal", "足迹") + "</nav>" +
-      srch + jotB + modeH + "</div>";
+      '<div class="tb-tools">' + srch + jotB + modeH + "</div></div>";
   }
 
   /* ---------- 专题（独立页面，新标签页打开；按 reportGroups 分组） ---------- */
@@ -3122,10 +3122,12 @@ var FOIL = (function () {
   function shelfSeg(cur) {
     var nBooks = allItems().filter(function (id) { return ITEMS[id].kind === "book"; }).length;
     var mkN = allMarks().length;
-    return '<nav class="seg shelf-seg" aria-label="书架里的几件家具"><a href="#shelf"' + (cur === "shelf" ? ' aria-current="page"' : "") + ">书墙<small> · " + nBooks + " 本</small></a>" +
-      '<a href="#archive"' + (cur === "archive" ? ' aria-current="page"' : "") + ">档案架<small> · " + TOPICS.length + " 卷 " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "") + "</small></a>" +
-      '<a href="#notes"' + (cur === "notes" ? ' aria-current="page"' : "") + ">笔记本架<small> · 1 本</small></a>" +
-      (mkN ? '<a href="#marks"' + (cur === "marks" ? ' aria-current="page"' : "") + ">摘抄册<small> · " + mkN + " 条</small></a>" : "") + "</nav>";
+    /* 一排数字砖：大数字 + 家具名 + 小字单位（窄屏只留前两样） */
+    function tile(id, n, label, unit) { return '<a href="#' + id + '"' + (cur === id ? ' aria-current="page"' : "") + '><b class="n">' + n + "</b><span>" + label + "</span><small>" + unit + "</small></a>"; }
+    return '<nav class="seg shelf-seg" aria-label="书架里的几件家具">' + tile("shelf", nBooks, "书墙", "本书") +
+      tile("archive", TOPICS.length, "档案架", "卷 · " + REPORTS.length + " 件" + (clipsOn() && clipList().length ? " · 剪报 " + clipList().length : "")) +
+      tile("notes", nbList().length, "笔记本架", "本") +
+      (mkN ? tile("marks", mkN, "摘抄册", "条") : "") + "</nav>";
   }
   function archiveHTML() {
     var fp = /^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : null;
@@ -3583,7 +3585,7 @@ var FOIL = (function () {
   }
   function shelfHTML() {
     return '<div class="view shelf wallv">' + bannerHTML() +
-      '<header class="w-head">' + shelfSeg("shelf") + '<div class="w-tools">' + (S.canEdit ? '<button type="button" class="btn small w-add" data-act="add-book">＋ 放一本书</button>' : "") + "</div></header>" +
+      '<header class="w-head">' + shelfSeg("shelf") + '<div class="w-tools">' + (S.canEdit ? '<button type="button" class="btn small w-add" data-act="add-book" aria-label="放一本书"><b aria-hidden="true">＋</b><span>放一本书</span></button>' : "") + "</div></header>" +
       '<div class="w-main"><div class="w-left">' + wallHTML() + hiddenListHTML() + "</div>" + stageHTML() + "</div>" + addSheetHTML() + domSheetHTML() + "</div>";
   }
 
