@@ -41,7 +41,7 @@
    * 2026-11-10 精修 1：实色按样张渲染后的色定（底 #956B43 亮 112、奶油面其实是茶色 #CFA97C 亮 173、淡纸 #D8BB9C 给读字的页），纹理滤镜改 sRGB 插值后实色与渲出来的色一比一（之前 linearRGB 把噪点均值抬到 .73，整站发白两档就是这个） */
   --pp-kraft:#956B43; --pp-kraft-2:#BF9265; --pp-kraft-3:#7E5A36; --pp-kraft-dk:#5C4120; --pp-kraft-bk:#3E2B14;
   --pp-cream:#CFA97C; --pp-cream-2:#D8BB9C; --pp-terra:#AC5626; --pp-terra-dk:#8B4319; --pp-olive:#725F2F; --pp-olive-dk:#54461F;
-  --pp-ink:#3E1D00; --pp-ink-2:#5A2A0A; --pp-ink-3:#7A4A28; --pp-black:#2B2522; --pp-copper:#C4763A; --pp-shade:60,42,14;
+  --pp-ink:#3E1D00; --pp-ink-2:#5A2A0A; --pp-ink-3:#7A4A28; --pp-black:#3B2416; --pp-black-dk:color-mix(in srgb,var(--pp-black),#000 40%); --pp-black-lt:color-mix(in srgb,var(--pp-black),#FFF4E0 7%); --pp-copper:#C4763A; --pp-shade:60,42,14;
   --pp-pulp:url(../vendor/paper/pulp-1x.webp); --pp-pulp-s:256px; --pp-hi:#E6D0A8; --pp-well:#B88F62; --pp-sheet:#DCC2A4;
   --pp-pillow:linear-gradient(165deg,rgba(255,255,255,.07),rgba(0,0,0,.05));
   --pp-sink:inset 2px 3px 4px rgba(var(--pp-shade),.62),inset 0 0 0 1px rgba(var(--pp-shade),.3),1px 1px 0 rgba(255,240,216,.5);
@@ -1623,7 +1623,7 @@ body.rd-on{overflow:hidden}
 .apack.dim,.adeck.dim{opacity:.3}
 .adeck{position:relative;display:block;width:88px;height:60px;padding:0;border:0;background:none;font:inherit;color:inherit;cursor:pointer;text-decoration:none;text-align:left;-webkit-tap-highlight-color:transparent}
 .adeck .cd{position:absolute;inset:0;display:block;--face:var(--pp-black);color:var(--pp-copper);border-radius:4px;background-color:var(--face);
-  box-shadow:0 1px 0 #1a1512,0 2px 0 #3a302a,0 3px 0 #1a1512,0 4px 0 #3a302a,0 5px 0 #1a1512,3px 9px 10px -3px rgba(40,25,10,.6)}
+  box-shadow:0 1px 0 var(--pp-black-dk),0 2px 0 var(--pp-black-lt),0 3px 0 var(--pp-black-dk),0 4px 0 var(--pp-black-lt),0 5px 0 var(--pp-black-dk),3px 9px 10px -3px rgba(40,25,10,.6)}
 .adeck .cd::before{content:"";position:absolute;inset:5px;border:1px solid currentColor;opacity:.6;border-radius:2px}
 .adeck .cd .g{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-family:var(--f-display);font-size:24px;font-weight:900;line-height:1}
 .adeck .cd.up{--face:var(--pp-cream-2);color:var(--pp-ink);transform:rotate(-5deg) translate(-3px,-6px);padding:8px 10px;font-family:var(--f-display);font-size:10px;font-weight:600;line-height:1.35;overflow:hidden;box-shadow:var(--raise-sm)}
@@ -1735,7 +1735,7 @@ body.rd-on{overflow:hidden}
 /* 一叠还没拆的牌（卡包）：黑卡摞着，一条米白封条写「封」和日子；点一下拆封。拆过的缩成小小一摞当夹子 */
 .ybag{position:relative;flex:none;width:118px;height:170px;margin:0;padding:0;border:0;box-sizing:border-box;border-radius:6px;font:inherit;text-align:center;color:var(--pp-copper);cursor:pointer;background:none;transition:transform .15s,opacity .15s}
 .ybag:focus-visible{outline:2px solid var(--indigo);outline-offset:4px}
-.yb-card{position:absolute;inset:0;display:block;border-radius:6px;background:var(--pp-black);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 0 #1a1512,0 2px 0 #3a302a,0 3px 0 #1a1512,0 4px 0 #3a302a,0 5px 0 #1a1512,0 6px 0 #3a302a,0 7px 0 #1a1512,3px 11px 12px -3px rgba(40,25,10,.65)}
+.yb-card{position:absolute;inset:0;display:block;border-radius:6px;background:var(--pp-black);box-shadow:inset 0 1px 0 rgba(255,255,255,.18),0 1px 0 var(--pp-black-dk),0 2px 0 var(--pp-black-lt),0 3px 0 var(--pp-black-dk),0 4px 0 var(--pp-black-lt),0 5px 0 var(--pp-black-dk),0 6px 0 var(--pp-black-lt),0 7px 0 var(--pp-black-dk),3px 11px 12px -3px rgba(40,25,10,.65)}
 .yb-card .frame{position:absolute;inset:7px;border:1.5px solid currentColor;border-radius:3px;opacity:.9}
 .yb-card .frame::after{content:"";position:absolute;inset:3px;border:1px solid currentColor;opacity:.45}
 .yb-card .g{position:absolute;left:0;right:0;top:50%;transform:translateY(-50%);text-align:center;font-family:var(--f-display);font-size:56px;font-weight:900;line-height:1}
@@ -1817,7 +1817,7 @@ body.desk-on{overflow:hidden}
 .yt-scene .pp-pack .n{font-size:10px}
 .yt-scene .yhand{flex:1 1 300px;padding-top:0}
 .yt-scene .ap-empty{flex:1 1 260px;align-self:center;border-color:rgba(var(--pp-shade),.45);color:var(--pp-ink-2)}
-.pp-pack.open .top{background-color:#1A1410;background-image:none;clip-path:polygon(var(--s) 0,100% 0,var(--w) 100%,0 100%)}
+.pp-pack.open .top{background-color:var(--pp-black-dk);background-image:none;clip-path:polygon(var(--s) 0,100% 0,var(--w) 100%,0 100%)}
 .pp-pack.open .lid{position:absolute;left:4px;top:-17px;width:calc(var(--w) - 8px);height:18px;background:var(--face);background-image:linear-gradient(rgba(0,0,0,.18),rgba(0,0,0,.18));transform:skewX(-32deg);transform-origin:left bottom;border-radius:2px 2px 0 0;z-index:1;box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .pp-pack.open .lid::after{content:"";position:absolute;inset:4px 8px;border:1px solid var(--inkc);opacity:.4}
 .yt-ans{--face:var(--pp-cream-2);padding:12px 16px 12px}
@@ -9935,7 +9935,7 @@ var FOIL = (function () {
   var NB_DAILY = "nb-daily";
   /* 多本（2026-11-09 阶段 4）：主题本存 nbooks { name, color, kind: "topic", note, order, t }，id nb- 加时间；随手本 nb-daily 不存。
    * 主题本的页 { nb, title, text, t, m }，id np-t- 加时间加随机，按 t 排；地址 #nb-<本子 id> 开最新一页，#np-t-… 开某一页。 */
-  var NB_COLORS = [["ink", "墨青", "#3C5A5E"], ["kraft", "牛皮", "var(--pp-kraft-dk)"], ["olive", "橄榄", "var(--pp-olive)"], ["terra", "赤陶", "var(--pp-terra)"], ["cream", "米白", "var(--pp-cream-2)"], ["black", "黑卡", "var(--pp-black)"]];
+  var NB_COLORS = [["ink", "墨青", "#3C5A5E"], ["kraft", "牛皮", "var(--pp-kraft-dk)"], ["olive", "橄榄", "var(--pp-olive)"], ["terra", "赤陶", "var(--pp-terra)"], ["cream", "米白", "var(--pp-cream-2)"], ["black", "深可可", "var(--pp-black)"]];
   function nbColor(c) { var x = NB_COLORS.filter(function (k) { return k[0] === c; })[0] || NB_COLORS[0]; return x[2]; }
   function nbList() {
     var N = S.data.nbooks || {}, out = [{ id: NB_DAILY, name: "随手本", color: "ink", kind: "daily" }];

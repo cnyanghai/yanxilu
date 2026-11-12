@@ -4264,7 +4264,7 @@ var FOIL = (function () {
   var NB_DAILY = "nb-daily";
   /* 多本（2026-11-09 阶段 4）：主题本存 nbooks { name, color, kind: "topic", note, order, t }，id nb- 加时间；随手本 nb-daily 不存。
    * 主题本的页 { nb, title, text, t, m }，id np-t- 加时间加随机，按 t 排；地址 #nb-<本子 id> 开最新一页，#np-t-… 开某一页。 */
-  var NB_COLORS = [["ink", "墨青", "#3C5A5E"], ["kraft", "牛皮", "var(--pp-kraft-dk)"], ["olive", "橄榄", "var(--pp-olive)"], ["terra", "赤陶", "var(--pp-terra)"], ["cream", "米白", "var(--pp-cream-2)"], ["black", "黑卡", "var(--pp-black)"]];
+  var NB_COLORS = [["ink", "墨青", "#3C5A5E"], ["kraft", "牛皮", "var(--pp-kraft-dk)"], ["olive", "橄榄", "var(--pp-olive)"], ["terra", "赤陶", "var(--pp-terra)"], ["cream", "米白", "var(--pp-cream-2)"], ["black", "深可可", "var(--pp-black)"]];
   function nbColor(c) { var x = NB_COLORS.filter(function (k) { return k[0] === c; })[0] || NB_COLORS[0]; return x[2]; }
   function nbList() {
     var N = S.data.nbooks || {}, out = [{ id: NB_DAILY, name: "随手本", color: "ink", kind: "daily" }];
