@@ -1,7 +1,7 @@
 ---
 type: references
 project: yanxilu
-last_scan: 2026-11-04
+last_scan: 2026-11-11
 ---
 
 # 已有方案与参考
@@ -29,6 +29,7 @@ last_scan: 2026-11-04
 | 2026-11-06 | 用户给的三张图 + Pinterest + WebSearch + Steam | 奇幻风 UI：魔法觉醒日记本、ROVAI 使命板、挂夹抽屉；Pinterest「游戏ui」搜索页；图书管理员整理游戏；UI 生产流水线（手绘 / AI 辅助 / 九宫格 / border-image） | 结论在 docs/archive-design.md 第六节：形式定为挂夹抽屉 → 夹子 → 活页对开；生产用生图加切片，不用 Blender |
 | 2026-11-06 | 用户给的四张风格图 + Pinterest「游戏 书架」 | 绘本厚涂的定调图：Legendary Journey 海报、永恒之柱式日志界面、Cresendo 宝箱概念表、皮面魔法书；Pinterest 书架搜索页 | 结论在 docs/ui-system-plan.md 第一节：色板五色、书即界面、概念表当样式图、写实物只取形制 |
 | 2026-11-08 | 用户给的两张图 | 纸艺界面（Planfix CRM 概念）与 MYTHOS 扑克牌盒 | 量色相与明度（都在暖棕一族、靠明度分层）；结论进条目两条与审视稿六之三 |
+| 2026-11-11 | 另一个会话「Igloo 网站动效分析」 + WebSearch | igloo.inc 动效实测结论；炉石界面与开包的设计讲座；边专注边布置房间的游戏；Are.na；Anki 共享牌组 | 用户重述产品目的、问怎样做到惊艳之后做的查证；五条进条目，两条待看 |
 
 ## 条目
 
@@ -78,6 +79,11 @@ last_scan: 2026-11-04
 
 | 维基共享资源 Publishers' bindings 分类、波士顿公共图书馆的惠特曼装帧（Sarah Wyman Whitman Bindings at the Boston Public Library，CC BY 2.0）、大英图书馆与 Michael Twyman 收藏的维多利亚出版商装帧（CC0） https://commons.wikimedia.org/wiki/Category:Publishers%27_bindings | 2500 多张 1840 到 1910 年代出版商装帧的正面照片，大多标了公有领域或 CC0，惠特曼那批 245 张是 CC BY 2.0 | 插画级书皮的现成来源：真书的画质，代码只叠书名与状态；按授权署名、逐张记来源即可放进公开仓库 | 原书名是英文，要抹或用皮签盖；只有封面没有书脊；画的内容和我们的书对不上 | 采纳（2026-11-03 做成「老书皮」装帧，56 张，来源见 vendor/covers/SOURCES.md） |
 <!-- 结论四选一：采纳 / 借鉴 / 仅参考 / 排除 -->
+| 另一个会话的实测（2026-11-11，igloo.inc 完整滚一遍加资源清单） | 整站一块全屏 WebGL 画布，页面只有 27 个节点，滚轮不滚页面只推进一条时间轴；约 20 个 Draco 模型、40 张 KTX2 贴图、近 20 个音效；文字用 MSDF 画在画布里；冰屋有完整与炸开两套烘焙贴图 | 效果 = 预先烘焙的三维资产 + 自写着色器 + 声音，动画逻辑最简单；光影预先算好、一段演出一条时间轴、画面常有微动与颗粒、每个交互一个音 | 全画布画字（中文阅读差）、接管滚动、几十个模型的体量；它是看一次的两分钟短片，我们每天用 | 借鉴：只用在拆包、进门这类几秒的演出上，日常读写不用 |
+| GDC 2015，Derek Sakamoto「Hearthstone: How to Create an Immersive User Interface」 https://gdcvault.com/play/1022036/Hearthstone-How-to-Create-an | 炉石界面的设计过程讲座。团队定下「一个实体盒子」以后，木板、托盘这些界面都从盒子里长出来；开包要用声音和画面复刻拆实体卡包的手感（后半句是二手转述，没看到讲稿） | 先定一个实体隐喻，再让全部界面从它长出来；开包是一段短演出 | 开包的具体节奏没查到文字，要看录像 | 借鉴：做拆包样机之前先看录像 |
+| Steam 上「边专注边布置房间」一类：Mini Cozy Room: Lo-Fi（2025-03，评价很好）、Gloria's House（番茄钟挣币买摆设）、Virtual Cottage 2 | 专注计时加一间可布置的小房间 | 说明「学习工具 + 一间自己的房间」有人买账 | 房间与学的内容无关（摆设靠计时挣），都是单机，不能串门、不能带走东西 | 仅参考：我们的差异是房间由真实的书、剪报、笔记长出来，并且给别人看、能拿走一排 |
+| Are.na https://www.are.na/about | 块与频道：一块内容能放进任意多个频道；频道默认公开，别人可以把你的块接进他自己的频道 | 「逛别人的收藏 + 拿一块回自己那里」的最小社交；公开是默认 | 是列表与网格，没有空间与物件感 | 借鉴：分享的最小单位怎么定 |
+| AnkiWeb 共享牌组（论坛帖 https://forums.ankiweb.net/t/shared-decks-the-current-state-of-ankiweb/45904 ） | 备考的人把做好的牌组传上去，后来的人直接下载用 | 「复用别人的学习成果」有真实需求 | 2024 到 2025 的帖子一直在抱怨难逛、难找；只有牌没有路径 | 仅参考：逛的体验正是它的短板 |
 
 ## 笔记本设计调研（2026-11-04，为书架里加笔记本做的查前作业）
 
@@ -134,6 +140,8 @@ last_scan: 2026-11-04
 
 ## 待看
 
+- 《Choreographed Emotion: How to Create a Legendary Card Pack Opening》（N3TWORK，Medium）https://medium.com/n3twork/choreographed-emotion-6-steps-to-a-great-card-reveal-ux-a6e6bb8487dd ：2026-11-11 抓取返回 403 没读到；做拆包样机前请用户在浏览器里打开，或换来源。
+- GDC Vault 上 Sakamoto 那场讲座的录像，看开包一段的节奏。
 - 微信内置浏览器（X5 内核）的 WebGL 2 内存上限与 KTX2 支持情况：没搜到资料，第 1 步做完直接在用户手机上实测。
 - `1-Projects/微缩IP全生态` 的 Godot 丹房原型：看一眼它的资产怎么做的，有没有能借的建模经验。
 - igloo.inc 的 three.js 论坛帖 https://discourse.threejs.org/t/landing-site-igloo-inc/67249 。
