@@ -23,7 +23,8 @@ try:
             ctx = br.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=1, has_touch=True, service_workers="block")
             pg = ctx.new_page(); errs = []
             pg.on("pageerror", lambda e: errs.append(str(e)))
-            pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" else None)
+            # 没有声卡的机器上浏览器会报一条音频设备的错，和页面无关，不算
+            pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" and "audio device" not in m.text else None)
             st = lambda: pg.evaluate("window.__lab && window.__lab.state")
             def until(want, sec=8):
                 t0 = time.time()
@@ -32,7 +33,7 @@ try:
                     pg.wait_for_timeout(60)
                 return False
             shot = lambda name: pg.screenshot(path=os.path.join(OUT, "%s-%s.png" % (mode, name)))
-            pg.goto(B + "/lab/?dev&mode=" + mode)
+            pg.goto(B + "/lab?dev&mode=" + mode)
             check(mode + " 送到后停在等待", until("idle", 25), st())
             shot("1-idle")
             # 手指沿封口从左划到右：先划到一半停住截图，再划到头
@@ -83,7 +84,7 @@ try:
         # 横屏桌面：牌排成一排
         ctx = br.new_context(viewport={"width": 1280, "height": 800}, device_scale_factor=1, service_workers="block"); pg = ctx.new_page(); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
-        pg.goto(B + "/lab/?mode=quiet"); pg.wait_for_function("window.__lab && window.__lab.state === 'idle'", timeout=15000)
+        pg.goto(B + "/lab?mode=quiet"); pg.wait_for_function("window.__lab && window.__lab.state === 'idle'", timeout=15000)
         pg.evaluate("window.__lab.manual(true)"); pg.evaluate("window.__lab.step(.5)"); pg.screenshot(path=os.path.join(OUT, "desk-1-idle.png"))
         pg.evaluate("window.__lab.tearTo(1)"); pg.evaluate("window.__lab.step(3)"); pg.evaluate("window.__lab.flipAll()"); pg.evaluate("window.__lab.step(2)")
         pg.screenshot(path=os.path.join(OUT, "desk-2-all-up.png"))

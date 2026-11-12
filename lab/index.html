@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#2A221C">
 <title>拆包样机 · 邮差</title>
+<!-- 服务器上这页的地址是 /lab（没有尾斜杠，带斜杠会被转回来），相对路径会解析到根上去；补一个 base，让 pack.js、../vendor 都按 /lab/ 算。
+     GitHub Pages 上地址以 / 结尾，这段什么也不做。 -->
+<script>(function(){var p=location.pathname;if(!/\/$/.test(p)&&!/\.html?$/.test(p))document.write('<base href="'+p.replace(/[^\w\-\/.~%]/g,'')+'/">');})();</script>
 <link rel="stylesheet" href="../vendor/fonts/fonts.css">
 <style>
   :root{color-scheme:dark;--ink:#F3E7D3;--ink-2:rgba(243,231,211,.72);--pane:rgba(30,23,18,.72);--line:rgba(243,231,211,.28)}
@@ -49,6 +52,7 @@
     <button type="button" id="b-take" class="main" hidden>收下</button>
   </div>
 </footer>
-<script type="module" src="pack.js"></script>
+<!-- 用 import() 而不是 src：浏览器的预读不会抢在上面那个 base 之前去根上找 pack.js -->
+<script type="module">import("./pack.js");</script>
 </body>
 </html>
