@@ -32,6 +32,7 @@ last_scan: 2026-11-12
 | 2026-11-11 | 另一个会话「Igloo 网站动效分析」 + WebSearch | igloo.inc 动效实测结论；炉石界面与开包的设计讲座；边专注边布置房间的游戏；Are.na；Anki 共享牌组 | 用户重述产品目的、问怎样做到惊艳之后做的查证；五条进条目，两条待看 |
 | 2026-11-11 | gh search + WebSearch | card pack opening three.js / booster pack opening animation / hearthstone pack opening；宝可梦卡牌口袋版与炉石的开包设计 | GitHub 上没有能直接用的三维开包实现（只有文字模拟器和一个零星的网页组件），自己做；两款游戏的做法三条进条目 |
 | 2026-11-12 | gh search + WebSearch | 3d bookshelf / bookshelf threejs / virtual bookshelf 3d；3D bookshelf web UI book spines pull out；reading app spine view unread vs read at a glance | 有一个同类的开源整机（KoreShelf）和一个七本书的展示页（complete-shelf），都不是能嵌进来的部件，也都不回答「一眼看出读过多少」；自己做灰盒，四条进条目 |
+| 2026-11-12 | WebSearch | Letterboxd four favourites profile；Sims 4 Gallery download rooms save to my library；Notion duplicate public page | 「三秒看懂一个人」和「一个动作带走一整套」各有成熟做法，都是平面界面里的按钮和列表，没有能直接用的部件；三条做法进条目，进门样机自己做 |
 
 ## 条目
 
@@ -93,6 +94,9 @@ last_scan: 2026-11-12
 | The Complete Shelf https://github.com/MengTo/complete-shelf （716 星，没有许可证） | 单文件 Three.js 展示页：七本布面精装，抽一本到详情、转着看、翻几页，声音是事先生成的 | 抽出与放回用确定的起止姿态、换父节点时不跳帧；布、木、合页各有一声 | 七本书的大片式展示，不是「几百本一眼看全」；没有许可证，代码不能用 | 仅参考（抽出与放回的做法） |
 | Shelfieline（iOS 应用，商店页 https://mwm.ai/apps/shelfieline/6767300403 ） | 书脊视图的读书记录应用：书脊有高矮和纹理，四种状态（想读 / 在读 / 读完 / 囤着），另有封面格子视图 | 书脊视图加阅读状态有人做成了产品 | 只看了商店页，没看到它怎么在书脊上区分状态 | 仅参考 |
 | Book Riot：把读过的书脊朝里放 https://bookriot.com/how-to-organize-rainbow-bookshelves/ | 实体书架的土办法：读过的书脊朝里、没读的朝外，再把架子分成读过和没读两段 | 人确实会用「摆法」而不是标签来分读没读；分成两段是自然的做法 | 讲的是实体书架 | 采纳为书架样机的两条：读没读靠物件的样子（没读包白纸、读过露布面、在读探出来），另给一种「按读没读放」的排法 |
+| Letterboxd 的「四部最爱」（The Spinoff 2025-04 https://thespinoff.co.nz/culture/24-04-2025/how-letterboxds-four-favourites-took-over-the-internet ；Young Hollywood https://younghollywood.com/scene/letterboxd-as-personality-gen-z-film-trend.html ） | 个人页最上面一排四张海报，自己挑的；被当成介绍自己的速记和搭话的由头 | 一眼看懂一个人，靠的是他自己挑出来的少数几样，不是全量清单；是主人摆的，不是系统算的 | 是影迷社区，四张海报是平面的 | 借鉴：进门第一眼是主人自己写的一句话加几排他摆好的科目，不是统计 |
+| The Sims 4 的图库（EA 帮助页 https://help.ea.com/en/help/the-sims/the-sims-4/the-sims-4-gallery/ ） | 逛别的玩家传上来的房间、房子、人物，点下载存进「我的收藏」，再放进自己的地块；对方用了你没有的内容时会缺件 | 「带走」分两步：先落进自己的收藏，再摆到自己的地方；缺件要说清楚 | 是游戏里的建造模式，要先开地块才能放 | 借鉴：带走的一排先进邮包，之后才放进自己的书架；带走的是书单和顺序，书的文件不跟着走，要在当场说明 |
+| Notion 的「复制公开页面」（官方帮助 https://www.notion.com/help/duplicate-public-pages ） | 公开页面右上角一个 Duplicate 按钮，选一个工作区，整页连子页复制过去，归自己改；页面主人可以关掉「允许复制」 | 一个按钮带走一整套；主人说了算哪些能被带走 | 一下点完没有任何过程，带走的东西去了哪要自己找 | 借鉴：以后每一排要有「许不许带走」的开关；我们把带走做成一个看得见的动作（拉出来、捆好、进包） |
 
 ## 笔记本设计调研（2026-11-04，为书架里加笔记本做的查前作业）
 

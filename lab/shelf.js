@@ -11,23 +11,13 @@
  *   6 换排法 「按类放 / 按读没读放」：整面书一起飞到新位置
  *
  * 结构：书是一个 InstancedMesh（三百本也只画两三次），书脊的字画在一张图集上；抽出来的那一本换成单独的模型，贴图另画一张清楚的。
+ * 动画轨、声音、舞台、书的样子、架子在 kit.js（和进门样机共用）。
  * 字（书名签、层板签、底下的纸）用网页排；声音是 WebAudio 现场合成的，没有音频文件。书名、作者都是编的。
  * 调试：地址加 ?dev 显示帧率与状态，?n=300 直接进三百本；window.__lab 给测试脚本用。 */
-import * as THREE from "../vendor/three/three.module.min.js";
+import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, DIM, TONES, PALE, INK_LT, INK_SOFT, CJK, STN } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
-const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
-const lerp = (a, b, k) => a + (b - a) * k;
-const rad = THREE.MathUtils.degToRad;
-const E = {
-  lin: (k) => k,
-  out3: (k) => 1 - Math.pow(1 - k, 3),
-  in2: (k) => k * k,
-  io3: (k) => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2),
-  back: (k) => { const s = 1.6, t = k - 1; return 1 + (s + 1) * t * t * t + s * t * t; },
-};
-const vib = (ms) => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { /* 苹果手机没有 */ } };
 
 /* ---------- 手感参数（要调就调这张表） ---------- */
 const P = {
@@ -45,15 +35,9 @@ const P = {
 };
 
 /* ---------- 尺寸（一个单位是一厘米） ---------- */
-const SH = 29, BT = 2, ST = 2, CD = 21, PL = 5;      // 层高（净）、层板厚、侧板厚、柜深、踢脚高
+const { SH, BT, ST, CD, PL } = DIM;                 // 层高（净）、层板厚、侧板厚、柜深、踢脚高（架子在 kit.js）
 const PAD = .7, GAPB = .06, RECESS = 1;              // 每层两头留空、书与书的缝、书脊比层板前沿缩进多少
 const DIVW = .9, DIVGAP = .5;                        // 分隔板的厚度与两边的空
-const STN = { todo: "没读", doing: "在读", done: "读过" };
-
-/* ---------- 颜色（占位；读没读只靠明暗和形状，不靠色相） ---------- */
-const TONES = ["#4B4138", "#5C5142", "#3C3D44", "#66574A", "#50433D", "#454F49"];   // 读过的书露出的布面，六类各一种，都是深的
-const PALE = "#D8CEBC", INK_LT = "#EADDC4", INK_SOFT = "#8B7C69", PAPER = "#E9E0CE", TAB = "#FFF3DC";
-const CJK = '"Songti SC","STSong","Noto Serif CJK SC","Source Han Serif SC","SimSun",serif';   // 画布上的字用系统字体：几百个书名要是走自带字体会拉很多分片
 
 /* ---------- 书（编的） ---------- */
 const CATS = ["金融", "历史", "地缘", "数学", "语言", "杂书"], CATW = [.24, .2, .14, .14, .12, .16];
@@ -67,7 +51,6 @@ const HEADS = [
 ];
 const TAILS = ["简史", "的逻辑", "十二讲", "笔记", "导论", "与秩序", "手册", "之外", "原理", "札记", "三十年", "入门", "的边界", "考", "讲义", "漫谈", "小史", "问答", "读本", "图说"];
 const SUR = "陈林周吴郑冯沈韩秦许何吕施张孔曹严华金魏陶姜".split(""), GIV = ["明远", "一苇", "知白", "守拙", "子衿", "怀瑾", "望舒", "清和", "行之", "若水", "景行", "思齐", "牧之", "云帆"];
-function rng(seed) { let a = seed >>> 0; return () => { a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 function makeBooks(n) {
   const r = rng(20261112 + n), out = [], seen = new Set();
   for (let i = 0; i < n; i++) {
@@ -86,21 +69,9 @@ function makeBooks(n) {
   return out;
 }
 
-/* ---------- 渲染器、镜头、光 ---------- */
+/* ---------- 渲染器、镜头、光（kit.js） ---------- */
 const canvas = $("#gl");
-let renderer;
-try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance" }); }
-catch (e) {
-  const d = document.createElement("div"); d.className = "nogl"; d.textContent = "这台设备的浏览器打不开三维画面（WebGL 不可用），样机看不了。换一个浏览器试试。";
-  document.body.appendChild(d); throw e;
-}
-renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
-const maxAniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-const scene = new THREE.Scene(); scene.background = new THREE.Color(0x2a221c);
-const camera = new THREE.PerspectiveCamera(34, 1, 4, 4000);
-scene.add(new THREE.HemisphereLight(0xfff1dc, 0x4a3c30, 1.55));
-const key = new THREE.DirectionalLight(0xfff4e2, 2.3); key.castShadow = true; scene.add(key, key.target);
-{ const sm = innerWidth * Math.min(devicePixelRatio || 1, 2) < 1500 ? 1024 : 2048; key.shadow.mapSize.set(sm, sm); } key.shadow.bias = -.0006; key.shadow.normalBias = .12; key.shadow.radius = 3;
+const { renderer, scene, camera, key, maxAniso } = createStage(canvas);
 const CAM = { dist: 300, y: 80, fov: 34, k: 1, wpp: 1 };
 
 /* ---------- 状态 ---------- */
@@ -110,47 +81,9 @@ const S = {
 };
 let N = 0, books = [], L = null;
 
-/* ---------- 小动画轨 ---------- */
-const tracks = new Set();
-function play(dur, fn, o = {}) { const tr = { t: -(o.delay || 0), dur: Math.max(dur, 1e-4), fn, ease: o.ease || E.out3, done: o.done }; tracks.add(tr); return tr; }
-function wait(sec, done) { return play(sec, () => {}, { done }); }
-function stepTracks(dt) {
-  for (const tr of [...tracks]) {
-    if (!tracks.has(tr)) continue;
-    tr.t += dt; if (tr.t < 0) continue;
-    const k = Math.min(1, tr.t / tr.dur); tr.fn(tr.ease(k), k);
-    if (k >= 1) { tracks.delete(tr); if (tr.done) tr.done(); }
-  }
-}
-
-/* ---------- 声音（现场合成） ---------- */
-const AU = { ctx: null, master: null, on: true, buf: null };
-try { if (localStorage.getItem("lab-pack-snd") === "0") AU.on = false; } catch (e) { /* 忽略 */ }
-function au(gesture) {             // gesture：这次是不是手指点出来的。浏览器不许页面一打开就出声，第一次得由手指来建
-  if (!AU.on) return null;
-  if (!AU.ctx) {
-    if (!gesture) return null;
-    const C = window.AudioContext || window.webkitAudioContext; if (!C) return null;
-    AU.ctx = new C(); AU.master = AU.ctx.createGain(); AU.master.gain.value = .6; AU.master.connect(AU.ctx.destination);
-    const n = Math.floor(AU.ctx.sampleRate * 1.5); AU.buf = AU.ctx.createBuffer(1, n, AU.ctx.sampleRate);
-    const d = AU.buf.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1;
-  }
-  if (AU.ctx.state === "suspended") AU.ctx.resume();
-  return AU.ctx;
-}
-function noise(o) {
-  const c = au(); if (!c) return; const t = c.currentTime + (o.when || 0), dur = o.dur || .1;
-  const s = c.createBufferSource(); s.buffer = AU.buf; s.loop = true;
-  const f = c.createBiquadFilter(); f.type = o.type || "bandpass"; f.frequency.setValueAtTime(o.f || 2000, t); if (o.f2) f.frequency.exponentialRampToValueAtTime(o.f2, t + dur); f.Q.value = o.q || 1;
-  const g = c.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(o.gain || .2, t + (o.attack || .004)); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-  s.connect(f); f.connect(g); g.connect(AU.master); s.start(t, Math.random()); s.stop(t + dur + .05);
-}
-function tone(o) {
-  const c = au(); if (!c) return; const t = c.currentTime + (o.when || 0), dur = o.dur || .2;
-  const s = c.createOscillator(); s.type = o.type || "sine"; s.frequency.setValueAtTime(o.f || 440, t); if (o.f2) s.frequency.exponentialRampToValueAtTime(o.f2, t + dur);
-  const g = c.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.linearRampToValueAtTime(o.gain || .15, t + (o.attack || .005)); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
-  s.connect(g); g.connect(AU.master); s.start(t); s.stop(t + dur + .05);
-}
+/* ---------- 小动画轨、声音（kit.js） ---------- */
+const { play, wait, step: stepTracks, clear: clearTracks } = createTracks();
+const { AU, au, noise, tone } = createAudio();
 const SFX = {
   tick(b) { const f = 1500 - b.t * 165; tone({ f, f2: f * .82, dur: .07, gain: .13, type: "triangle" }); noise({ dur: .018, type: "highpass", f: 3000, gain: .06 }); },   // 划过一本：越厚的书声音越低
   shelve(k) { const f = 420 + k * 380 + Math.random() * 60; tone({ f, f2: f * .7, dur: .06, gain: .07, type: "triangle" }); noise({ dur: .03, type: "lowpass", f: 1200, gain: .06 }); },
@@ -162,53 +95,12 @@ const SFX = {
   mark(st) { (st === "done" ? [523, 659, 784, 1047] : st === "doing" ? [523, 784] : [330]).forEach((f, i) => tone({ f, dur: .3, gain: .1, when: i * .06 })); },
 };
 
-/* ---------- 书脊图集：每本一格，贴到书脊上；封面两侧只取这一格的底色 ---------- */
-const CELLW = 48, CELLH = 192, COLS = 42;
-const atlasC = document.createElement("canvas"), atlasG = atlasC.getContext("2d");
-let atlasT = null;
-function drawSpine(g, x, y, w, h, b) {
-  const todo = b.st === "todo";
-  g.fillStyle = todo ? PALE : TONES[b.cat]; g.fillRect(x, y, w, h);
-  const sy = h / b.h, tw = b.t * sy;                    // 图上横竖的比例和真书脊不一样，按竖向的像素来排，横向整体拉开，贴上去才还原
-  g.save(); g.translate(x + w / 2, y); g.scale((w / b.t) / sy, 1);
-  if (!todo) { g.fillStyle = INK_LT; g.globalAlpha = .5; const lh = Math.max(1, h * .008); g.fillRect(-tw / 2, h * .07, tw, lh); g.fillRect(-tw / 2, h * .925, tw, lh); g.globalAlpha = 1; }
-  const chars = [...b.title], n = chars.length, fs = Math.min(tw * .6, (h * .6) / n), step = Math.min(fs * 1.14, (h * .64) / n);
-  g.font = "700 " + fs.toFixed(2) + "px " + CJK; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = todo ? INK_SOFT : INK_LT;
-  chars.forEach((c, k) => g.fillText(c, 0, h * .15 + step * (k + .5)));
-  g.restore();
-}
-function drawCell(b) {
-  const x = (b.i % COLS) * CELLW, y = Math.floor(b.i / COLS) * CELLH;
-  atlasG.fillStyle = b.st === "todo" ? PALE : TONES[b.cat]; atlasG.fillRect(x, y, CELLW, CELLH);   // 格子四周留一圈同色，缩小采样时不串到邻格
-  drawSpine(atlasG, x + 3, y + 2, CELLW - 6, CELLH - 4, b);
-}
-function buildAtlas() {
-  atlasC.width = COLS * CELLW; atlasC.height = Math.ceil(N / COLS) * CELLH;
-  books.forEach(drawCell);
-  if (atlasT) atlasT.dispose();
-  atlasT = new THREE.CanvasTexture(atlasC); atlasT.colorSpace = THREE.SRGBColorSpace; atlasT.anisotropy = maxAniso;
-  coverMat.map = atlasT; coverMat.needsUpdate = true;
-}
-
-/* ---------- 书：一个实例化的盒子 ---------- */
-const coverMat = new THREE.MeshStandardMaterial({ roughness: .86, metalness: 0 });
-coverMat.onBeforeCompile = (sh) => {          // 每本书用图集里自己那一格（uvo = 左下角 u、v，宽、高）
-  sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nattribute vec4 uvo;")
-    .replace("#include <uv_vertex>", "#include <uv_vertex>\n#ifdef USE_MAP\n\tvMapUv = uvo.xy + uv * uvo.zw;\n#endif");
-};
-const paperMat = new THREE.MeshStandardMaterial({ color: PAPER, roughness: .95 });
-const tabMat = new THREE.MeshStandardMaterial({ color: TAB, roughness: .8, emissive: new THREE.Color(TAB), emissiveIntensity: .28 });
-const unitBox = new THREE.BoxGeometry(1, 1, 1);
-let books3d = null, tabs = null;
-function buildMesh() {
-  if (books3d) { scene.remove(books3d, tabs); books3d.geometry.dispose(); books3d.dispose(); tabs.dispose(); }
-  const g = new THREE.BoxGeometry(1, 1, 1);                                   // 面的顺序：+x -x +y -y +z -z；书脊朝 +z，前后封面是 ±x
-  [0, 0, 1, 1, 0, 1].forEach((m, k) => { g.groups[k].materialIndex = m; });   // 封面与书脊用图集，上下和书口是纸
-  for (let v = 0; v < 8; v++) g.attributes.uv.setXY(v, .06, .03);             // 前后封面只取格子左下角的一点底色
-  const uvo = new Float32Array(N * 4), tw = atlasC.width, th = atlasC.height;
-  books.forEach((b) => { const x = (b.i % COLS) * CELLW + 3, y = Math.floor(b.i / COLS) * CELLH + 2; uvo.set([x / tw, 1 - (y + CELLH - 4) / th, (CELLW - 6) / tw, (CELLH - 4) / th], b.i * 4); });
-  g.setAttribute("uvo", new THREE.InstancedBufferAttribute(uvo, 4));
-  books3d = new THREE.InstancedMesh(g, [coverMat, paperMat], N); books3d.castShadow = books3d.receiveShadow = true; books3d.frustumCulled = false;
+/* ---------- 书：样子在 kit.js（书脊图集、实例化的盒子），这里只管这一页的这一批 ---------- */
+const { paperMat, tabMat, unitBox, makeAtlas, makeMesh } = createBookKit(maxAniso);
+let atlas = null, books3d = null, tabs = null;
+function buildBooks() {
+  if (books3d) { scene.remove(books3d, tabs); books3d.geometry.dispose(); books3d.dispose(); tabs.dispose(); atlas.dispose(); }
+  atlas = makeAtlas(books); books3d = makeMesh(books, atlas);
   tabs = new THREE.InstancedMesh(unitBox, tabMat, N); tabs.castShadow = true; tabs.frustumCulled = false;
   scene.add(books3d, tabs);
 }
@@ -277,23 +169,11 @@ function chooseW(aspect) {                                       // 架子的宽
 function counts() { const c = { todo: 0, doing: 0, done: 0 }; books.forEach((b) => { c[b.st]++; }); return c; }
 
 /* ---------- 架子（灰盒：几块板） ---------- */
-const caseG = new THREE.Group(); scene.add(caseG);
-const caseMat = new THREE.MeshStandardMaterial({ color: 0x8f7d6a, roughness: .9 }), backMat = new THREE.MeshStandardMaterial({ color: 0x51463d, roughness: .95 });
-const wallMat = new THREE.MeshStandardMaterial({ color: 0x40352e, roughness: 1 }), floorMat = new THREE.MeshStandardMaterial({ color: 0x2c231d, roughness: 1 });
+const caseKit = createCase(scene, unitBox);
 const divMat = new THREE.MeshStandardMaterial({ color: 0x2a221c, roughness: .8 });
 const divs3d = [0, 1].map(() => { const m = new THREE.Mesh(unitBox, divMat); m.castShadow = m.receiveShadow = true; m.scale.set(0, 0, 0); scene.add(m); return m; });
 let caseW = 100, caseH = 150;
-function buildCase(W, R) {
-  caseG.children.forEach((m) => { if (m.geometry !== unitBox) m.geometry.dispose(); }); caseG.clear();
-  caseW = W + 2 * ST; caseH = R * (SH + BT) + BT + PL;
-  const add = (w, h, d, x, y, z, mat) => { const m = new THREE.Mesh(unitBox, mat); m.scale.set(w, h, d); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; caseG.add(m); return m; };
-  add(caseW, caseH - PL, 1, 0, PL + (caseH - PL) / 2, -CD + .5, backMat);                                  // 背板
-  [-1, 1].forEach((s) => add(ST, caseH, CD + .6, s * (W / 2 + ST / 2), caseH / 2, -CD / 2 + .3, caseMat));  // 两侧
-  for (let k = 0; k <= R; k++) add(W, BT, CD - 1, 0, PL + BT / 2 + k * (SH + BT), -(CD - 1) / 2, caseMat); // 层板
-  add(W, PL, CD - 3, 0, PL / 2, -(CD - 3) / 2 - 2, backMat);                                               // 踢脚
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(caseW + 900, caseH + 600), wallMat); wall.position.set(0, caseH / 2, -CD - .2); wall.receiveShadow = true; caseG.add(wall);
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(caseW + 900, 700), floorMat); floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, 350 - CD); floor.receiveShadow = true; caseG.add(floor);
-}
+function buildCase(W, R) { const s = caseKit.build(W, R); caseW = s.w; caseH = s.h; }
 function setDividers(show) {
   divs3d.forEach((m, k) => {
     const d = show && L.arr === "state" ? L.divs[k] : null;
@@ -316,9 +196,7 @@ function fitCam() {
   CAM.wpp = 2 * CAM.dist * tanH / A.vh;                              // 架子正面上，屏幕一个像素是多少厘米
   CAM.y = caseH / 2 - ((A.bot - A.top) / 2) * CAM.wpp;               // 底下的按钮比顶上占得多，架子往上让一点
   camera.near = 4; camera.far = CAM.dist + 1200; camera.updateProjectionMatrix();
-  const Lz = Math.max(caseW, caseH) * 1.2 + 120, half = Math.hypot(caseW, caseH) / 2 + 34;
-  key.position.set(-.5 * Lz, caseH / 2 + .75 * Lz, .8 * Lz); key.target.position.set(0, caseH / 2, -CD / 2);
-  Object.assign(key.shadow.camera, { left: -half, right: half, top: half, bottom: -half, near: 10, far: Lz * 2.4 }); key.shadow.camera.updateProjectionMatrix();
+  lightCase(key, caseW, caseH);
 }
 function placeCamera(raw) {
   const k = 1 - Math.exp(-6 * raw); S.par.x += (S.par.tx - S.par.x) * k; S.par.y += (S.par.ty - S.par.y) * k;
@@ -403,8 +281,8 @@ function moveTip(x, y) {
 /* ---------- 节拍 ---------- */
 function layoutFit() { const A = avail(), best = chooseW(A.w / A.h); S.W = best.W; S.R = best.R; L = pack(S.arr, S.W); buildCase(S.W, S.R); fitCam(); }
 function rebuild(n) {
-  tracks.clear(); N = n; books = makeBooks(n); S.hot = S.cur = -1; S.outReady = false; S.yaw = S.yawT = 0; hero.visible = false; dim.visible = false; tip.classList.remove("on");
-  buildAtlas(); buildMesh(); layoutFit(); setDividers(false); setLabels(false); enter();
+  clearTracks(); N = n; books = makeBooks(n); S.hot = S.cur = -1; S.outReady = false; S.yaw = S.yawT = 0; hero.visible = false; dim.visible = false; tip.classList.remove("on");
+  buildBooks(); layoutFit(); setDividers(false); setLabels(false); enter();
 }
 function enter() {
   S.state = "enter"; S.fast = false;
@@ -467,7 +345,7 @@ function pullOut(i) {
 function setStatus(st) {
   const b = books[S.cur]; if (S.state !== "out" || !b || b.st === st) return;
   b.st = st; if (st === "doing" && !(b.prog > 0 && b.prog < 1)) b.prog = .08; if (st === "done") b.prog = 1; if (st === "todo") b.prog = 0;
-  drawCell(b); atlasT.needsUpdate = true; heroSetup(b);
+  atlas.redraw(b); heroSetup(b);
   play(.3, (e, kk) => { b.k = 1 + Math.sin(Math.PI * kk) * .07; }, { ease: E.lin });
   SFX.mark(st); vib(8); ui();
 }

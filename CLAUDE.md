@@ -13,7 +13,7 @@
 
 - 单文件前端：`src/app.js`（全部逻辑）+ `src/page.html`（CSS 和外壳）+ `src/server.js`（服务器版垫片）。**改完必须跑 `python3 build.py`**，它生成 `index.html`、`server/index.html`、`dist/artifact.html`、`reports/*.html` 和 `sw.js`（版本号来自 index.html 的 sha1）。生成物要一起提交。
 - `vendor/`：自带的字体（`vendor/fonts`）、KaTeX、PDF.js、PWA 清单。不要引用 Google Fonts，国内打不开。
-- 方向（2026-11-11 定，全文在 README「方向」一节）：立体做到物件一层，先用能动的灰盒样机把三个瞬间（一眼看全、拆包、进门）按手感做对，再选外观；现有纸模版原样留作日常工具，**外观不再加工**；用户再给参考图先问它适不适合产品目的，不直接改主线。样机在 `lab/`（独立页面，不进 build.py，说明与进度表见 `lab/README.md`；拆包在线上 `/lab`，2026-11-12 用户定「热闹」；书架「一眼看全」在 `/lab/shelf.html`），三维用自带的 three.js 0.186（`vendor/three/`，按相对路径引，不用 importmap），主站的 Service Worker 不缓存 `/lab/`。
+- 方向（2026-11-11 定，全文在 README「方向」一节）：立体做到物件一层，先用能动的灰盒样机把三个瞬间（一眼看全、拆包、进门）按手感做对，再选外观；现有纸模版原样留作日常工具，**外观不再加工**；用户再给参考图先问它适不适合产品目的，不直接改主线。样机在 `lab/`（独立页面，不进 build.py，说明与进度表见 `lab/README.md`；拆包在线上 `/lab`，2026-11-12 用户定「热闹」；书架「一眼看全」在 `/lab/shelf.html`，同日用户答过；进门在 `/lab/door.html`；书架与进门公用的零件在 `lab/kit.js`，书和架子的样子只改那里），三维用自带的 three.js 0.186（`vendor/three/`，按相对路径引，不用 importmap），主站的 Service Worker 不缓存 `/lab/`。
 - 质感：2026-11-08 起全站走纸模（paper craft），规则量自两张样张，写在 `docs/shelf-design-review.md` 六之四、六之五；变量 `--pp-*` 与公用类 `.pp-paper / .pp-slab / .pp-emb / .pp-cut / .pp-pack` 在 `src/page.html`。2026-11-10 起材质只有一处定义（六之八）：纸浆纹理是烘出来的图 `vendor/paper/pulp*.webp`（脚本 `tools/paper/bake_pulp.py`），用 overlay 叠在实色上；每片纸只写面色 `--face`，凸起用 `box-shadow:var(--raise)` 或 `var(--raise-sm)`，凹用 `var(--pp-sink)`，侧壁与亮边由样式表末尾「一个房间」里的材质名单从面色算，新纸片要把选择器加进名单；不要再写死暗条色值。版面是拼砖：底只当 8 像素砖缝，奶油放内容、橄榄是没选中的数字砖、赤陶是品牌与主操作，选中靠明度与形状不靠红绿。书墙是 `.pwall` 加 `.pspine`（纸片书脊、米白签），档案架是 `.arack` 加 `.apack`（正交画的牌盒），开盒是 `.ytable`，牌是 `.yc`。盒子、牌、书不加颗粒、不用 CSS 3D（会发虚），厚的盒体正交平面画，薄的纸片才上颗粒。
 - 书皮（2026-11-09 起书墙不用，装帧库留着）：`docs/cover-masters.md` 是书皮的设计尺子（跟谁学、十条规则、对照墙）。画布装帧在 `src/app.js` 的 `FOIL`（布面烫金 / 维多利亚）与 `GRIM`（秘典）两个库里，书用 `data-grim` 规格、`grimHydrate()` 画。「老书皮」走另一条路：真书封面的公有领域扫描在 `vendor/covers/`（授权见那里的 `SOURCES.md`），清单是 `src/app.js` 的 `OLDC`，生产线在 `tools/covers/`；代码只叠书名、皮签和阅读状态。插画级的美术不要再用画布硬画，先定生产方式。三维资产一律按专业流程（`docs/bookcase-production.md` 是样板）：量尺 → 粗模 → 高模 → 分层材质 → 看光 → 合成 → 出图，脚本在 `tools/blender/web_props/`，在用户开着的桌面 Blender（端口 9877，`tools/blender/mcp_call.py`）里做，每阶段并排蓝本过门。场景图在 `vendor/scene/`。
 - 数据：`S.data[集合][id]`，`put(coll, id, val)` / `del(coll, id)` 写入；服务器版走 Baba 的 `/api/yxl/*`，公开版存 localStorage。集合名在 `COLLS`。剪报（`clips`/`clipbody`）只在服务器版有。笔记本架是 `nbooks` / `pages`（设计稿 `docs/notebook-design.md`，字段两边仓库共用，不改含义只加字段）。
@@ -28,6 +28,7 @@ python3 tools/tests/desk_test.py         # 档案架：拆封、翻牌、桌面�
 python3 tools/tests/notes_test.py        # 笔记本架：记一笔、随手本编辑自动保存、日历、搜索、手机单栏
 python3 tools/tests/lab_pack_test.py     # 拆包样机：热闹（默认）与安静各走一遍流程并截关键帧（自己起模拟服务，端口 8798，软件渲染较慢约两三分钟）
 python3 tools/tests/lab_shelf_test.py    # 书架样机：划过书脊、抽出、改读没读、放回、换排法、换本数（自己起模拟服务，端口 8799，软件渲染约两三分钟）
+python3 tools/tests/lab_door_test.py     # 进门样机：敲门进、看懂、往下拉带走一排、点签带走、邮包、直接到（自己起模拟服务，端口 8796，软件渲染约两三分钟）
 python3 tools/tests/look_test.py         # 样子没坏：十二张截图对基准（自己起模拟服务，端口 8793）；样子是有意改的就加 --update 重拍，基准图一起提交
 ```
 `tools/tests/_frozen/` 里的 binding_test 与 scene_test 对着 2026-11-09 前的旧书墙（布面 / 烫金 / 老书皮书脊、拱形书柜场景），不跑。
