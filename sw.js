@@ -14,7 +14,7 @@ self.addEventListener("fetch", function (e) {
   if (req.method !== "GET") return;
   var url = new URL(req.url);
   if (url.origin !== location.origin) return;
-  if (/\/api\/|\/_blob\/|\/login|\/logout|\/account/.test(url.pathname)) return;
+  if (/\/api\/|\/_blob\/|\/login|\/logout|\/account|\/lab(\/|$)/.test(url.pathname)) return;   /* lab/ 是随时在改的样机，不进缓存 */
   var nav = req.mode === "navigate";
   e.respondWith(caches.open(V).then(function (c) {
     if (nav) {

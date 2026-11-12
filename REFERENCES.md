@@ -30,6 +30,7 @@ last_scan: 2026-11-11
 | 2026-11-06 | 用户给的四张风格图 + Pinterest「游戏 书架」 | 绘本厚涂的定调图：Legendary Journey 海报、永恒之柱式日志界面、Cresendo 宝箱概念表、皮面魔法书；Pinterest 书架搜索页 | 结论在 docs/ui-system-plan.md 第一节：色板五色、书即界面、概念表当样式图、写实物只取形制 |
 | 2026-11-08 | 用户给的两张图 | 纸艺界面（Planfix CRM 概念）与 MYTHOS 扑克牌盒 | 量色相与明度（都在暖棕一族、靠明度分层）；结论进条目两条与审视稿六之三 |
 | 2026-11-11 | 另一个会话「Igloo 网站动效分析」 + WebSearch | igloo.inc 动效实测结论；炉石界面与开包的设计讲座；边专注边布置房间的游戏；Are.na；Anki 共享牌组 | 用户重述产品目的、问怎样做到惊艳之后做的查证；五条进条目，两条待看 |
+| 2026-11-11 | gh search + WebSearch | card pack opening three.js / booster pack opening animation / hearthstone pack opening；宝可梦卡牌口袋版与炉石的开包设计 | GitHub 上没有能直接用的三维开包实现（只有文字模拟器和一个零星的网页组件），自己做；两款游戏的做法三条进条目 |
 
 ## 条目
 
@@ -84,6 +85,9 @@ last_scan: 2026-11-11
 | Steam 上「边专注边布置房间」一类：Mini Cozy Room: Lo-Fi（2025-03，评价很好）、Gloria's House（番茄钟挣币买摆设）、Virtual Cottage 2 | 专注计时加一间可布置的小房间 | 说明「学习工具 + 一间自己的房间」有人买账 | 房间与学的内容无关（摆设靠计时挣），都是单机，不能串门、不能带走东西 | 仅参考：我们的差异是房间由真实的书、剪报、笔记长出来，并且给别人看、能拿走一排 |
 | Are.na https://www.are.na/about | 块与频道：一块内容能放进任意多个频道；频道默认公开，别人可以把你的块接进他自己的频道 | 「逛别人的收藏 + 拿一块回自己那里」的最小社交；公开是默认 | 是列表与网格，没有空间与物件感 | 借鉴：分享的最小单位怎么定 |
 | AnkiWeb 共享牌组（论坛帖 https://forums.ankiweb.net/t/shared-decks-the-current-state-of-ankiweb/45904 ） | 备考的人把做好的牌组传上去，后来的人直接下载用 | 「复用别人的学习成果」有真实需求 | 2024 到 2025 的帖子一直在抱怨难逛、难找；只有牌没有路径 | 仅参考：逛的体验正是它的短板 |
+| 宝可梦卡牌口袋版的开包（官方说明 https://corporate.pokemon.co.jp/en/topics/detail/t-28/ ；评测 https://gamesradar.com/games/pokemon/pokemon-tcg-pocket-understands-the-fun-of-collecting-cards-more-than-any-other-digital-card-game 、https://inverse.com/gaming/pokemon-tcg-pocket-collecting-cards ） | 手指横着划开包装，牌一张张自己抽出来看，向上划收进收藏；官方的说法是「重现实体牌的手感，再加上数字才有的表现」；报道说美术总监拆了很多真包去调那一声撕开的声音 | 必须亲手划开（不是点一下）；声音占一半；一张张由人控制着看；最后一个手势把牌收走 | 它的节奏和计时器、付费绑在一起，我们不要 | 采纳为拆包样机的手势骨架（划开、逐张、上划收下） |
+| 炉石的开包（美术总监 Ben Thompson 访谈 https://toucharcade.com/2017/04/04/designing-hearthstone-card-packs-animations-iterations-ungoro-and-more-with-art-director-ben-thompson ；PC Gamer https://pcgamer.com/behind-the-addictive-psychology-and-seductive-art-of-loot-boxes ） | 包拖到槽里炸开，五张牌背朝上飞出来，一张张自己翻；翻之前牌底下的光先透露稀有度；每种包的开启动画先画分镜定节拍，包是三维模型；后来加了按住快开，论坛上有人说快开就没了期待 | 先画分镜定节拍；背朝上、自己翻；翻之前给一点预告；快进要有但不是默认 | 稀有度与抽奖的那套心理我们不用，预告改成「这篇有多长」 | 采纳为拆包样机的节拍（顿一下、闪、发牌、逐张翻、牌底光晕） |
+| GitHub 检索（2026-11-11）：akio-byte/booster-pack-animation-component 等 | 一个不依赖库的五张牌开包网页组件（零星标）、几个炉石开包的文字或桌面模拟器 | 无 | 没有三维、没有手势跟手、没有声音，量级不够 | 排除：自己做，见 lab/pack.js |
 
 ## 笔记本设计调研（2026-11-04，为书架里加笔记本做的查前作业）
 

@@ -87,7 +87,8 @@ class H(BaseHTTPRequestHandler):
         if p in ("/room", "/room/"): p = "/room/index.html"
         if p in ("/world", "/world/"): p = "/world/index.html"
         if p in ("/youchai", "/youchai/"): p = "/youchai/index.html"
-        if p.startswith("/vendor/") or p.startswith("/reports/") or p.startswith("/room/") or p.startswith("/world/") or p.startswith("/youchai/"):
+        if p in ("/lab", "/lab/"): p = "/lab/index.html"
+        if p.startswith("/vendor/") or p.startswith("/reports/") or p.startswith("/room/") or p.startswith("/world/") or p.startswith("/youchai/") or p.startswith("/lab/"):
             f = os.path.normpath(YXL + p)
             if not f.startswith(YXL + "/") or not os.path.isfile(f): return self.send(404, "nf", "text/plain")
             return self.send(200, open(f, "rb").read(), TYPES.get(os.path.splitext(f)[1], "application/octet-stream"))
