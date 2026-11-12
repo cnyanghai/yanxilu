@@ -1,4 +1,5 @@
-/* 拆包样机（灰盒）。只回答一件事：拆包的手感对不对，热闹和安静哪种对。外观是占位的，不在这里讨论。
+/* 拆包样机（灰盒）。只回答一件事：拆包的手感对不对。外观是占位的，不在这里讨论。
+ * 2026-11-12 用户在手机上试过，开法定「热闹」；「安静」那一套参数留着备查，地址加 ?mode=quiet 才进。
  *
  * 节拍（两种开法共用，强弱不同，差别全在下面 MODES 一张表里）：
  *   1 送到   一包牌从上面落到眼前，轻轻浮着；手指碰它它会偏一下
@@ -127,7 +128,7 @@ const S = {
   mode: "loud", state: "boot", p: 0, pShown: 0, dir: 1, packNo: 1, taken: 0, inspect: -1,
   freeze: 0, shake: 0, fast: false, manual: false, stripFly: 0, t: 0, par: { x: 0, y: 0, tx: 0, ty: 0 }, poke: 0,
 };
-try { const m = localStorage.getItem("lab-pack-mode"); if (m && MODES[m]) S.mode = m; else if (matchMedia("(prefers-reduced-motion: reduce)").matches) S.mode = "quiet"; } catch (e) { /* 存不了就用默认 */ }
+try { if (matchMedia("(prefers-reduced-motion: reduce)").matches) S.mode = "quiet"; } catch (e) { /* 系统设了「减少动态效果」的才默认安静 */ }
 if (Q.get("mode") && MODES[Q.get("mode")]) S.mode = Q.get("mode");
 const M = () => MODES[S.mode];
 
@@ -370,7 +371,6 @@ function ui() {
   let key = S.state; if (S.state === "reveal") key = S.inspect >= 0 ? "inspect" : allUp ? "done" : anyUp ? "revealUp" : "reveal";
   hint.textContent = HINTS[key] || "";
   bAll.hidden = !(S.state === "reveal" && !allUp && S.inspect < 0); bTake.hidden = !(S.state === "reveal" && allUp && S.inspect < 0);
-  document.querySelectorAll(".seg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mode === S.mode)));
   $("#snd").setAttribute("aria-pressed", String(AU.on));
 }
 function setState(s) { S.state = s; ui(); }
@@ -521,7 +521,6 @@ function endPointer(ev) {
   G.mode = "";
 }
 canvas.addEventListener("pointerup", endPointer); canvas.addEventListener("pointercancel", endPointer);
-document.querySelectorAll(".seg button").forEach((b) => b.addEventListener("click", () => { au(); S.mode = b.dataset.mode; try { localStorage.setItem("lab-pack-mode", S.mode); } catch (e) { /* 忽略 */ } arrive(); }));
 $("#snd").addEventListener("click", () => { AU.on = !AU.on; try { localStorage.setItem("lab-pack-snd", AU.on ? "1" : "0"); } catch (e) { /* 忽略 */ } if (!AU.on) tearSoundStop(); else { au(); SFX.tick(); } ui(); });
 bAll.addEventListener("click", () => { au(); flipAll(); }); bTake.addEventListener("click", () => { au(); collect(); });
 addEventListener("resize", fit);

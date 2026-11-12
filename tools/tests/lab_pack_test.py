@@ -1,4 +1,4 @@
-"""拆包样机（lab/）：送到、划开封口、发牌、翻牌、拿起来看、收下、下一包；热闹与安静两种开法各走一遍，手机竖屏。
+"""拆包样机（lab/）：送到、划开封口、发牌、翻牌、拿起来看、收下、下一包；热闹（默认，2026-11-12 用户定）与安静（?mode=quiet）各走一遍，手机竖屏。
 用法：python3 tools/tests/lab_pack_test.py           # 自己起模拟服务（端口 8797），软件渲染
 截图落在 tools/out/lab/（已 gitignore）。样机看的是手感，这条测试只保证流程走得通、不报错。"""
 import os, sys, time, subprocess, urllib.request
@@ -33,7 +33,8 @@ try:
                     pg.wait_for_timeout(60)
                 return False
             shot = lambda name: pg.screenshot(path=os.path.join(OUT, "%s-%s.png" % (mode, name)))
-            pg.goto(B + "/lab?dev&mode=" + mode)
+            pg.goto(B + "/lab?dev" + ("" if mode == "loud" else "&mode=quiet"))      # 2026-11-12 起默认就是热闹，安静要带参数
+            pg.wait_for_function("window.__lab"); check(mode + " 进的是这种开法", pg.evaluate("window.__lab.S.mode") == mode)
             check(mode + " 送到后停在等待", until("idle", 25), st())
             shot("1-idle")
             # 手指沿封口从左划到右：先划到一半停住截图，再划到头

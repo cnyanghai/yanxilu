@@ -18,11 +18,8 @@
   .bar>*{pointer-events:auto}
   .bar h1{margin:0;font:700 15px/1 "Noto Serif SC",serif;letter-spacing:.08em;white-space:nowrap}
   .bar h1 small{display:block;margin-top:5px;font:400 11px/1 "Noto Sans SC",sans-serif;letter-spacing:0;color:var(--ink-2)}
-  .seg{margin-left:auto;display:flex;padding:3px;border-radius:999px;background:var(--pane);border:1px solid var(--line)}
-  .seg button,.snd{appearance:none;border:0;background:none;color:var(--ink-2);font:500 14px/1 inherit;font-family:inherit;padding:9px 14px;border-radius:999px;cursor:pointer}
-  /* 选中：实心底、深字、加粗，不靠颜色区分 */
-  .seg button[aria-pressed="true"]{background:var(--ink);color:#2A221C;font-weight:700}
-  .snd{background:var(--pane);border:1px solid var(--line);padding:9px 12px;white-space:nowrap}
+  .go,.snd{appearance:none;color:var(--ink-2);font:500 14px/1 inherit;font-family:inherit;padding:9px 12px;border-radius:999px;cursor:pointer;background:var(--pane);border:1px solid var(--line);white-space:nowrap;text-decoration:none}
+  .go{margin-left:auto}
   .snd[aria-pressed="false"]{text-decoration:line-through;opacity:.7}
   .foot{position:fixed;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:12px;padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));pointer-events:none;text-align:center}
   .hint{margin:0;font-size:14px;line-height:1.5;color:var(--ink);text-shadow:0 1px 6px rgba(0,0,0,.7);min-height:21px;transition:opacity .25s}
@@ -39,10 +36,7 @@
 <canvas id="gl" tabindex="0" aria-label="拆包样机：一包没拆的牌"></canvas>
 <header class="bar">
   <h1>拆包样机<small>灰盒：只看手感，不看外观</small></h1>
-  <div class="seg" role="group" aria-label="开法">
-    <button type="button" data-mode="loud" aria-pressed="true">热闹</button>
-    <button type="button" data-mode="quiet" aria-pressed="false">安静</button>
-  </div>
+  <a class="go" href="./shelf.html">书架样机</a>
   <button type="button" class="snd" id="snd" aria-pressed="true" aria-label="声音">声音</button>
 </header>
 <footer class="foot">
