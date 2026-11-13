@@ -56,8 +56,10 @@ try:
             ratio = min((lum(L["pale"]) + .05) / (lum(t) + .05) for t in L["tones"])
             check("%s：没读的比读过的亮得多（对比不低于 4）" % L["name"], ratio >= 4, round(ratio, 2))
         flow(pg, errs, "study", "旧书房")
-        # 顶栏的按钮：单子上两项，换成灰盒；换过以后进门页、拆包页跟着换
-        pg.click("#look"); pg.wait_for_timeout(200)
+        # 「外观」按钮（书架页收在底下的工具纸里，先点把手）：单子上两项，换成灰盒；换过以后进门页、拆包页跟着换
+        pg.click("#grab"); pg.wait_for_timeout(450); pg.click("#look"); pg.wait_for_timeout(200)
+        mr = pg.evaluate("(() => { const r = document.querySelector('.lookmenu').getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight && r.left >= 0 && r.right <= innerWidth; })()")
+        check("单子往上开，整张在屏幕里", mr)
         opts = pg.locator(".lookmenu.on button").evaluate_all("els => els.map(e => e.dataset.look)")
         check("点「外观」出来一张单子：旧书房和灰盒两项，现在这个是按下的", opts == ["study", "grey"] and pg.locator('.lookmenu button[aria-pressed="true"]').get_attribute("data-look") == "study", opts)
         pg.screenshot(path=os.path.join(OUT, "look-menu.png"))

@@ -75,7 +75,7 @@ const { AU, au, noise, tone, toggle: sndToggle } = createAudio();
 const { tabMat, unitBox, makeAtlas, makeMesh } = createBookKit(maxAniso);
 const caseKit = createCase(scene, unitBox);
 const books = makeBooks(), N = books.length, R = ROWS.length + 1;
-const atlas = makeAtlas(books), paleAtlas = makeAtlas(books, true);           // 他架上的样子；带走的那一份（都包着白纸）
+const atlas = makeAtlas(books, false, 256), paleAtlas = makeAtlas(books, true, 256);   // 他架上的样子；带走的那一份（都包着白纸）。一格画 256 高：这一页的书在两倍屏上最高一百七八十像素，原来的 192 贴上去略微放大
 const books3d = makeMesh(books, atlas), copies = makeMesh(books, paleAtlas);
 const tabs = new THREE.InstancedMesh(unitBox, tabMat, N); tabs.castShadow = true; tabs.frustumCulled = false;
 copies.receiveShadow = false; scene.add(books3d, tabs, copies);

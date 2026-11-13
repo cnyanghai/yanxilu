@@ -118,21 +118,21 @@ export const LOOKS = {
   },
   // 旧书房：暗处一盏暖灯，胡桃木的架子，布面烫金的书；没读的包着牛皮纸捆两道麻绳
   study: {
-    name: "旧书房", bg: 0x1c1510, hemi: [0xffdcb0, 0x33241a, 1.05], key: [0xffd29a, 3.5], sun: [-.38, .95, .72], soft: 4,
-    tones: ["#5C1F1F", "#1F3B2E", "#1E2A45", "#5A3B1E", "#3F2440", "#2A2420"], pale: "#DCCBA6", inkLt: "#E7D3A0", inkSoft: "#5E4226", paper: "#E6D9BC", tab: "#FFE2A8", tabGlow: .7,
-    gilt: "#D9B56A", twine: "#8A6A42",
+    name: "旧书房", bg: 0x1c1510, hemi: [0xffdcb0, 0x33241a, 1.35], key: [0xffd29a, 4.7], sun: [-.38, .95, .72], soft: 4,   // 2026-11-13 夜里用户在手机上看书发暗：天光 1.05 → 1.35，主光 3.5 → 4.7
+    tones: ["#5C1F1F", "#1F3B2E", "#1E2A45", "#5A3B1E", "#3F2440", "#2A2420"], pale: "#E3D3AE", inkLt: "#E7D3A0", inkSoft: "#3E2913", paper: "#E6D9BC", tab: "#FFE2A8", tabGlow: .7,
+    gilt: "#E6C478", twine: "#8A6A42",
     spine: "study", font: CJK, bookRough: .82, grain: "cloth", jit: .16,
     dim: { SH: 29, BT: 2.2, ST: 2.6, CD: 21, PL: 8 },
     // 造型（2026-11-13「造型」一门）。mould：架子的线脚，单位厘米。stile 壁柱比侧板往外宽多少、stileT 往前凸多少；frieze 压顶线下面那条平带多高；
     //   k 压顶线和底座线脚整体放大多少（1 是量参考时定的原大：压顶高 5.9 出 4.6，底座线脚出 2.2）
     // aoK：角落里的暗有多重（看光一门；架子里靠上、往里、贴着侧板的地方，墙和地靠近架子的一圈，都是按位置算的，不用贴图）。有了它就不用每层后面那片影子了（ao 归零）
-    cs: { frame: 0x6f4526, back: 0x2c1b10, wall: 0x3a2a1d, floor: 0x2a1c12, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", ao: 0, aoK: .9,
+    cs: { frame: 0x6f4526, back: 0x2c1b10, wall: 0x3a2a1d, floor: 0x2a1c12, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", ao: 0, aoK: .68,
       mould: { stile: 1, stileT: 1, frieze: 2.6, k: .75 } },
     // 看光（2026-11-13「看光」一门）：灯光有一圈，不是到处一样亮。主光还是那盏平行光（影子不变），亮度按位置乘一个数：
     //   x、y 最亮的那一点在架子的哪里（宽、高的比例，中线是 0）；r 光圈多大（按宽高里大的那个算）；hi 圈心亮多少、lo 圈外暗到多少。
     //   只管贴着架子和墙的东西；抽出来飞到眼前的书不受影响
-    pool: { x: -.12, y: .7, r: .62, hi: 1.32, lo: .5 },
-    film: .035,                                              // 网页上那层暗角里掺的颗粒有多重（暗处的渐变在手机屏上容易看出一道道台阶，颗粒把它打散）
+    pool: { x: -.12, y: .7, r: .62, hi: 1.22, lo: .72 },
+    film: .02, vig: .2,                                              // 网页上那层暗角里掺的颗粒有多重（暗处的渐变在手机屏上容易看出一道道台阶，颗粒把它打散）
     // 书的样子：board 封面板厚、sq 封面比书芯多出来的一圈（飘口），都是厘米；sag 圆脊鼓出来多少（按书厚的比例）；seg 圆脊分几段
     book: { board: .25, sq: .3, sag: .22, seg: 6 },
     css: { bg: "#1C1510", ink: "#F0DFC0", ink2: "rgba(240,223,192,.76)", pane: "rgba(26,18,12,.8)", line: "rgba(217,181,106,.5)", on: "#1A130E", halo: "rgba(0,0,0,.9)", sheet: "18,13,9", lab: "rgba(22,15,10,.9)", scheme: "dark" }, veil: 0x0b0806,
@@ -179,7 +179,7 @@ function applyLook() {
     .lookmenu button{appearance:none;border:0;background:none;color:var(--ink);font:500 15px/1 inherit;font-family:inherit;padding:12px 16px;border-radius:10px;text-align:left;cursor:pointer;white-space:nowrap}
     .lookmenu button[aria-pressed="true"]{background:var(--ink);color:var(--on);font-weight:700}
     .lookmenu small{display:block;margin-top:5px;font-size:11.5px;font-weight:400;opacity:.75}
-    html[data-look="study"] body::after{content:"";position:fixed;inset:0;pointer-events:none;background-size:64px 64px,auto,auto;background:var(--film,none),radial-gradient(ellipse at 50% 34%,rgba(255,186,104,.09),rgba(255,186,104,0) 58%),radial-gradient(ellipse at 50% 42%,rgba(0,0,0,0) 46%,rgba(0,0,0,.4) 100%)}
+    html[data-look="study"] body::after{content:"";position:fixed;inset:0;pointer-events:none;background-size:64px 64px,auto,auto;background:var(--film,none),radial-gradient(ellipse at 50% 34%,rgba(255,186,104,.09),rgba(255,186,104,0) 58%),radial-gradient(ellipse at 50% 42%,rgba(0,0,0,0) 46%,rgba(0,0,0,${LOOK.vig == null ? .4 : LOOK.vig}) 100%)}
     html[data-look="study"] .bar h1,html[data-look="study"] .go,html[data-look="study"] .snd,html[data-look="study"] .seg button,html[data-look="study"] .mini,html[data-look="study"] .bag,html[data-look="study"] .acts button{font-family:"Noto Serif SC","Songti SC",serif}
     html[data-look="paper"] .go,html[data-look="paper"] .snd,html[data-look="paper"] .seg,html[data-look="paper"] .seg button,html[data-look="paper"] .mini,html[data-look="paper"] .bag,html[data-look="paper"] .lab,html[data-look="paper"] .tip,html[data-look="paper"] .sheet .main,html[data-look="paper"] .lookmenu,html[data-look="paper"] .lookmenu button{border-radius:5px}
     html[data-look="paper"] .bar h1,html[data-look="toy"] .bar h1{font-family:"Noto Sans SC","PingFang SC",sans-serif}
@@ -200,7 +200,9 @@ function applyLook() {
   document.body.appendChild(menu);
   btn.addEventListener("click", (ev) => {
     ev.stopPropagation(); const r = btn.getBoundingClientRect(); menu.classList.toggle("on");
-    menu.style.top = Math.round(r.bottom + 8) + "px"; menu.style.right = Math.max(8, Math.round(innerWidth - r.right)) + "px";
+    const up = r.bottom + 8 + menu.offsetHeight > innerHeight - 8;                // 按钮底下放不下就往上开（书架页的按钮在底下的工具纸里）
+    menu.style.top = up ? "auto" : Math.round(r.bottom + 8) + "px"; menu.style.bottom = up ? Math.round(innerHeight - r.top + 8) + "px" : "auto";
+    menu.style.right = Math.max(8, Math.min(Math.round(innerWidth - r.right), innerWidth - menu.offsetWidth - 8)) + "px";
   });
   addEventListener("pointerdown", (ev) => { if (!menu.contains(ev.target) && ev.target !== btn) menu.classList.remove("on"); });
 }
@@ -463,10 +465,11 @@ export const PALE = LOOK.pale, INK_LT = LOOK.inkLt, INK_SOFT = LOOK.inkSoft, PAP
 export const STN = { todo: "没读", doing: "在读", done: "读过" };
 const CELLW = 48, CELLH = 192, COLS = 42;
 // 画一条书脊。pale：不管读没读都画成包着白纸的样子（别人那里带走的一份，到你手里都是没读的）
-function titleV(g, chars, tw, y0, y1, color, font, weight, wide = .6) {      // 竖排的书名，排在 y0 到 y1 之间，居中
+function titleV(g, chars, tw, y0, y1, color, font, weight, wide = .6, fat = 0) {      // 竖排的书名，排在 y0 到 y1 之间，居中。fat：再描一道同色的边（字高的几分之几），宋体的细横在小字上才不断
   const n = chars.length, fs = Math.min(tw * wide, ((y1 - y0) * .94) / n), step = Math.min(fs * 1.14, (y1 - y0) / n), top = (y0 + y1) / 2 - step * n / 2;
   g.font = weight + " " + fs.toFixed(2) + "px " + font; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = color;
-  chars.forEach((c, k) => g.fillText(c, 0, top + step * (k + .5)));
+  if (fat) { g.strokeStyle = color; g.lineWidth = fs * fat; g.lineJoin = "round"; }
+  chars.forEach((c, k) => { if (fat) g.strokeText(c, 0, top + step * (k + .5)); g.fillText(c, 0, top + step * (k + .5)); });
 }
 // 每种外观的书脊怎么画。坐标：横向 -tw/2 到 tw/2，竖向 0 到 h，底色已经铺好。最上面 4% 什么都不画（封面取那里的底色）
 const SPINES = {
@@ -493,7 +496,7 @@ const SPINES = {
     if (todo) {                                            // 没读：牛皮纸包着，上下折边，捆两道麻绳
       g.fillStyle = "rgba(90,60,30,.13)"; g.fillRect(-tw / 2, h * .04, tw, h * .035); g.fillRect(-tw / 2, h * .95, tw, h * .05);
       g.fillStyle = LOOK.twine; [.2, .8].forEach((f) => g.fillRect(-tw / 2, h * f, tw, Math.max(1.3, h * .009)));
-      titleV(g, [...b.title], tw, h * .25, h * .76, INK_SOFT, CJK, 600); return;
+      titleV(g, [...b.title], tw, h * .25, h * .76, INK_SOFT, CJK, 700, .72, .035); return;
     }
     const lw = Math.max(1, h * .007);                      // 读过：布面，书名压在一格深色的皮签上，三道竹节，烫金的线和一枚小菱花
     const gold = mask ? MASK.gilt : LOOK.gilt;
@@ -502,7 +505,7 @@ const SPINES = {
       [.115, .76, .885].forEach((f) => { g.fillStyle = "rgba(0,0,0,.42)"; g.fillRect(-tw / 2, h * f, tw, lw * 2.2); g.fillStyle = "rgba(255,255,255,.15)"; g.fillRect(-tw / 2, h * f - lw, tw, lw); });
     }
     g.fillStyle = gold; [.055, .07, .145, .735, .93, .945].forEach((f) => g.fillRect(-tw * .42, h * f, tw * .84, lw));
-    titleV(g, [...b.title], tw, h * .18, h * .7, gold, CJK, 700);
+    titleV(g, [...b.title], tw, h * .18, h * .7, gold, CJK, 700, .72, .03);
     const d = Math.min(tw * .22, h * .024); g.save(); g.translate(0, h * .825); g.rotate(Math.PI / 4); g.fillRect(-d / 2, -d / 2, d, d); g.restore();
   },
 };
@@ -526,13 +529,15 @@ export function createBookKit(maxAniso) {
   const unitBox = new THREE.BoxGeometry(1, 1, 1);
   const shape = LOOK.book ? bookGeo() : null, pagesMat = shape ? paperMat.clone() : null; if (pagesMat) aoHook(pagesMat, "in", bookHook);   // 旧书房：书有封面板、飘口和圆脊
   // 书脊图集：每本一格，贴到书脊上；封面两侧只取这一格的底色。每张图集带自己的材质
-  function makeAtlas(books, pale) {
+  // ch：一格画多高（像素）。书在屏上有多大就该画多大：画小了贴上去是放大的，字就糊（2026-11-13 夜里用户在手机上看到的就是这个）。不给就是 192
+  function makeAtlas(books, pale, ch) {
     const canvas = document.createElement("canvas"), g = canvas.getContext("2d");
-    canvas.width = COLS * CELLW; canvas.height = Math.max(1, Math.ceil(books.length / COLS)) * CELLH;
+    const CH = Math.round(clamp((ch || CELLH) / 32, 6, 24)) * 32, CW = CH / 4, cols = Math.min(COLS, Math.floor(4096 / CW)), mx = Math.round(CW / 16), my = Math.round(CH / 96);   // 一张图最宽 4096，手机都吃得下
+    canvas.width = cols * CW; canvas.height = Math.max(1, Math.ceil(books.length / cols)) * CH;
     function draw(b) {
-      const x = (b.i % COLS) * CELLW, y = Math.floor(b.i / COLS) * CELLH;
-      g.fillStyle = pale || b.st === "todo" ? PALE : TONES[b.cat % TONES.length]; g.fillRect(x, y, CELLW, CELLH);   // 格子四周留一圈同色，缩小采样时不串到邻格
-      drawSpine(g, x + 3, y + 2, CELLW - 6, CELLH - 4, b, pale); grainOver(g, x, y, CELLW, CELLH, pale || b.st === "todo");
+      const x = (b.i % cols) * CW, y = Math.floor(b.i / cols) * CH;
+      g.fillStyle = pale || b.st === "todo" ? PALE : TONES[b.cat % TONES.length]; g.fillRect(x, y, CW, CH);   // 格子四周留一圈同色，缩小采样时不串到邻格
+      drawSpine(g, x + mx, y + my, CW - 2 * mx, CH - 2 * my, b, pale); grainOver(g, x, y, CW, CH, pale || b.st === "todo");
     }
     books.forEach(draw);
     const tex = new THREE.CanvasTexture(canvas); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = maxAniso;
@@ -543,7 +548,7 @@ export function createBookKit(maxAniso) {
       if (shape) bookHook(sh);
     };
     aoHook(mat, "in", cell);
-    return { canvas, tex, mat, redraw(b) { draw(b); tex.needsUpdate = true; }, dispose() { tex.dispose(); mat.dispose(); } };
+    return { canvas, tex, mat, cw: CW, ch: CH, cols, mx, my, redraw(b) { draw(b); tex.needsUpdate = true; }, dispose() { tex.dispose(); mat.dispose(); } };
   }
   // 一批书 = 一个实例化的盒子（三百本也只画两三次）。书脊朝 +z，前后封面是 ±x
   function makeMesh(books, atlas) {
@@ -557,7 +562,8 @@ export function createBookKit(maxAniso) {
       for (let v = 0; v < 8; v++) g.attributes.uv.setXY(v, .06, .98);           // 前后封面只取格子左上角的一点底色（那里各种外观都不画东西）
     }
     const uvo = new Float32Array(books.length * 4), tw = atlas.canvas.width, th = atlas.canvas.height;
-    books.forEach((b) => { const x = (b.i % COLS) * CELLW + 3, y = Math.floor(b.i / COLS) * CELLH + 2; uvo.set([x / tw, 1 - (y + CELLH - 4) / th, (CELLW - 6) / tw, (CELLH - 4) / th], b.i * 4); });
+    const { cw, ch, cols, mx, my } = atlas;
+    books.forEach((b) => { const x = (b.i % cols) * cw + mx, y = Math.floor(b.i / cols) * ch + my; uvo.set([x / tw, 1 - (y + ch - my * 2) / th, (cw - 2 * mx) / tw, (ch - 2 * my) / th], b.i * 4); });
     g.setAttribute("uvo", new THREE.InstancedBufferAttribute(uvo, 4));
     const m = new THREE.InstancedMesh(g, mats, books.length); m.castShadow = m.receiveShadow = true; m.frustumCulled = false;
     return m;

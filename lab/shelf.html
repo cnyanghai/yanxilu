@@ -12,23 +12,26 @@
   html,body{height:100%;margin:0;background:var(--bg);overflow:hidden;overscroll-behavior:none}
   body{font-family:"Noto Sans SC","PingFang SC","Microsoft YaHei",system-ui,sans-serif;color:var(--ink);-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
   #gl{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none;outline:none}
-  .bar{position:fixed;left:0;right:0;top:0;display:flex;align-items:center;gap:6px;padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;pointer-events:none}
-  .bar>*{pointer-events:auto}
-  .bar h1{margin:0 auto 0 0;font:700 15px/1 "Noto Serif SC","Songti SC",serif;letter-spacing:.08em;white-space:nowrap}
-  .bar h1 small{display:block;margin-top:5px;font:400 11px/1 "Noto Sans SC",sans-serif;letter-spacing:0;color:var(--ink-2)}
+  /* 2026-11-13 夜里用户定：进书架只看到书架，上面下面都不放字和按钮。原来顶栏、底栏上的东西收进底下一张工具纸，平时只留一道小把手 */
   .go,.snd{appearance:none;color:var(--ink-2);font:500 14px/1 inherit;font-family:inherit;padding:9px 11px;border-radius:999px;cursor:pointer;background:var(--pane);border:1px solid var(--line);white-space:nowrap;text-decoration:none}
   .snd[aria-pressed="false"]{text-decoration:line-through;opacity:.7}
   .seg{display:flex;padding:3px;border-radius:999px;background:var(--pane);border:1px solid var(--line)}
   .seg button{appearance:none;border:0;background:none;color:var(--ink-2);font:500 14px/1 inherit;font-family:inherit;padding:9px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
   /* 选中：实心底、深字、加粗，不靠颜色区分 */
   .seg button[aria-pressed="true"]{background:var(--ink);color:var(--on);font-weight:700}
-  .foot{position:fixed;left:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;gap:10px;padding:8px 12px calc(14px + env(safe-area-inset-bottom,0px));pointer-events:none;text-align:center;transition:opacity .2s,transform .25s}
-  .foot.off{opacity:0;transform:translateY(12px)}
-  .foot.off *{pointer-events:none!important}
-  .hint{margin:0;font-size:13px;line-height:1.55;color:var(--ink);text-shadow:0 1px 6px var(--halo);min-height:40px}
+  .grab{position:fixed;z-index:6;left:50%;bottom:calc(env(safe-area-inset-bottom,0px));width:120px;height:26px;margin-left:-60px;padding:0;appearance:none;border:0;background:none;cursor:pointer;touch-action:none;transition:opacity .2s}
+  .grab i{display:block;width:40px;height:4px;margin:0 auto;border-radius:2px;background:var(--ink);opacity:.34}
+  .grab.off{opacity:0;pointer-events:none}
+  .veil{position:fixed;z-index:7;inset:0;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s}
+  .veil.on{opacity:1;pointer-events:auto}
+  .tools{position:fixed;z-index:8;left:0;right:0;bottom:0;max-width:560px;margin:0 auto;box-sizing:border-box;display:flex;flex-direction:column;gap:12px;padding:10px 16px calc(18px + env(safe-area-inset-bottom,0px));border-radius:18px 18px 0 0;background:rgba(var(--sheet),.96);border:1px solid var(--line);border-bottom:0;transform:translateY(105%);visibility:hidden;transition:transform .25s,visibility 0s .25s}
+  .tools.on{transform:none;visibility:visible;transition:transform .25s}
+  .tools .grip{width:40px;height:4px;border-radius:2px;background:var(--ink);opacity:.34;margin:0 auto}
+  .hint{margin:0;font-size:13px;line-height:1.6;color:var(--ink);text-align:center}
   .hint b{font-weight:700}
-  .ctl{display:flex;flex-wrap:wrap;justify-content:center;gap:8px}
-  .ctl>*{pointer-events:auto}
+  .hint small{display:block;font-size:12px;color:var(--ink-2)}
+  .trow{display:flex;align-items:center;flex-wrap:wrap;gap:8px}
+  .trow>span{flex:0 0 5.2em;font-size:12px;line-height:1.3;color:var(--ink-2)}
   /* 手指上方的小签：现在碰到的是哪一本 */
   .tip{position:fixed;left:0;top:0;max-width:min(260px,72vw);padding:8px 12px;border-radius:10px;background:var(--ink);color:var(--on);pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.45);opacity:0;transition:opacity .08s;will-change:transform}
   .tip.on{opacity:1}
@@ -45,48 +48,68 @@
   .sheet p{margin:0;font-size:13px;color:var(--ink-2)}
   .sheet .row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;align-items:center}
   .sheet .main{appearance:none;border:0;background:var(--ink);color:var(--on);font:700 15px/1 inherit;font-family:inherit;padding:13px 22px;border-radius:12px;cursor:pointer}
-  .dev{position:fixed;left:8px;top:64px;font:11px/1.4 "IBM Plex Mono",monospace;color:#fff;background:rgba(0,0,0,.5);padding:4px 6px;border-radius:4px;pointer-events:none;white-space:pre}
+  .sheet .sub{appearance:none;border:1px solid var(--line);background:var(--pane);color:var(--ink);font:500 15px/1 inherit;font-family:inherit;padding:12px 20px;border-radius:12px;cursor:pointer}
+  .sheet .lnk{appearance:none;border:0;background:none;color:var(--ink-2);font:400 13px/1 inherit;font-family:inherit;padding:8px 10px;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+  .sheet [hidden]{display:none}
+  /* 读到哪了：一条细线，填了多少就是读了多少；只靠长短和明暗，不靠颜色 */
+  .prog{width:min(240px,62vw);height:4px;border-radius:2px;background:var(--line);overflow:hidden}
+  .prog i{display:block;height:100%;width:0;border-radius:2px;background:var(--ink);transition:width .35s}
+  .dev{position:fixed;left:8px;top:8px;font:11px/1.4 "IBM Plex Mono",monospace;color:#fff;background:rgba(0,0,0,.5);padding:4px 6px;border-radius:4px;pointer-events:none;white-space:pre}
   .nogl{position:fixed;inset:0;display:grid;place-items:center;padding:24px;text-align:center;line-height:1.7}
-  @media (max-width:420px){.bar h1 small{display:none}.seg button{padding:9px 10px;font-size:13px}}
+  @media (max-width:420px){.seg button{padding:9px 10px;font-size:13px}}
 </style>
 </head>
 <body>
 <canvas id="gl" tabindex="0" aria-label="书架样机：一面书墙"></canvas>
-<header class="bar">
-  <h1>书架样机<small>灰盒：只看手感，不看外观</small></h1>
-  <a class="go" href="./">拆包</a>
-  <a class="go" href="./door.html">进门</a>
-  <button type="button" class="snd" id="snd" aria-pressed="true" aria-label="声音">声音</button>
-  <button type="button" class="go" id="look" aria-haspopup="menu">外观</button>
-</header>
 <div id="labs" aria-hidden="true"></div>
 <div class="tip" id="tip" aria-hidden="true"><b></b><span></span></div>
-<footer class="foot" id="foot">
-  <p class="hint" id="hint" aria-live="polite">正在上架…</p>
-  <div class="ctl">
+<!-- 平时屏幕上只有书架和这一道小把手：点它或者往上划，出来一张工具纸（排法、在读的记号、本数、声音、外观、去别的样机） -->
+<button type="button" class="grab" id="grab" aria-label="工具" aria-expanded="false" aria-controls="tools"><i></i></button>
+<div class="veil" id="veil"></div>
+<section class="tools" id="tools" aria-label="工具">
+  <div class="grip" aria-hidden="true"></div>
+  <p class="hint" id="hint" aria-live="polite"></p>
+  <div class="trow"><span>排法</span>
     <div class="seg" id="seg-arr" role="group" aria-label="排法">
       <button type="button" data-arr="topic" aria-pressed="true">按类放</button>
       <button type="button" data-arr="state" aria-pressed="false">按读没读放</button>
     </div>
+  </div>
+  <div class="trow"><span>在读的记号</span>
+    <div class="seg" id="seg-mark" role="group" aria-label="在读的记号">
+      <button type="button" data-mark="ribbon" aria-pressed="true">丝带</button>
+      <button type="button" data-mark="tab" aria-pressed="false">白签</button>
+    </div>
+  </div>
+  <div class="trow"><span>本数</span>
     <div class="seg" id="seg-n" role="group" aria-label="本数">
-      <button type="button" data-n="40" aria-pressed="false">40 本</button>
-      <button type="button" data-n="120" aria-pressed="true">120</button>
+      <button type="button" data-n="40" aria-pressed="true">40 本</button>
+      <button type="button" data-n="120" aria-pressed="false">120</button>
       <button type="button" data-n="300" aria-pressed="false">300</button>
     </div>
   </div>
-</footer>
+  <div class="trow"><span>声音与外观</span>
+    <button type="button" class="snd" id="snd" aria-pressed="true" aria-label="声音">声音</button>
+    <button type="button" class="go" id="look" aria-haspopup="menu">外观</button>
+  </div>
+  <div class="trow"><span>别的样机</span>
+    <a class="go" href="./">拆包</a>
+    <a class="go" href="./door.html">进门</a>
+  </div>
+</section>
+<!-- 抽出来以后底下的那张纸。读没读不用手标：打开读了就自己变成在读，读完自己变成读过；在别处读完的才用底下那行小字补标 -->
 <section class="sheet" id="sheet" aria-live="polite">
   <h2 id="s-title"></h2>
   <p id="s-meta"></p>
+  <div class="prog" id="s-prog" role="progressbar" aria-label="读到哪了" aria-valuemin="0" aria-valuemax="100"><i></i></div>
   <div class="row">
-    <div class="seg" id="seg-st" role="group" aria-label="读到哪了">
-      <button type="button" data-st="todo" aria-pressed="false">没读</button>
-      <button type="button" data-st="doing" aria-pressed="false">在读</button>
-      <button type="button" data-st="done" aria-pressed="false">读过</button>
-    </div>
-    <button type="button" class="main" id="b-back">放回去</button>
+    <button type="button" class="main" id="b-read">打开读</button>
+    <button type="button" class="sub" id="b-back">放回去</button>
   </div>
-  <p>左右拖动转着看，点空白处也能放回去</p>
+  <div class="row">
+    <button type="button" class="lnk" id="b-done">在别处读完了</button>
+    <button type="button" class="lnk" id="b-todo">当作没读过</button>
+  </div>
 </section>
 <script type="module">import("./shelf.js");</script>
 </body>
