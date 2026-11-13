@@ -8,7 +8,10 @@
  *   只有地址带 ?look=paper|toy 才看得到，不再跟进。拆包页（pack.js）也接到这张表上（每种外观的 pk 一栏），只做了旧书房和灰盒。
  * 2026-11-13「材质」一门（用户点头下载以后）：旧书房的架子、地、拆包页的桌面贴真的木纹，抽出来的那本书和牌背加布纹的凹凸，
  *   烫金反环境光。木纹和布纹是 Poly Haven 的扫描图（CC0），转成 WebP 放在 vendor/tex/；环境光是这里用代码搭的，不是图。
- *   图读不到就退回代码画的花纹，页面照常能用。整面墙上的书脊没有上金属反光（一本只有十几个像素宽，看不出来，反而会让书名发暗）。 */
+ *   图读不到就退回代码画的花纹，页面照常能用。整面墙上的书脊没有上金属反光（一本只有十几个像素宽，看不出来，反而会让书名发暗）。
+ * 2026-11-13「造型」一门：旧书房的架子加线脚（压顶线、平带、壁柱、层板的圆前沿、底座，剖面写在 createCase 里，沿外沿走一圈，
+ *   架子多宽多高都跟着长）；书有封面板、飘口和圆脊（bookGeo，架上的书由着色器按每本的大小摆，抽出来的那本用 bakeBook）；
+ *   切角的盒子 chamferBox 给纸包用。别的外观还是原来的方板和方盒子。 */
 import * as THREE from "../vendor/three/three.module.min.js";   // 直接按相对路径引，不用 importmap（旧一点的手机浏览器不认）
 export { THREE };
 
@@ -117,8 +120,13 @@ export const LOOKS = {
     tones: ["#5C1F1F", "#1F3B2E", "#1E2A45", "#5A3B1E", "#3F2440", "#2A2420"], pale: "#DCCBA6", inkLt: "#E7D3A0", inkSoft: "#5E4226", paper: "#E6D9BC", tab: "#FFE2A8", tabGlow: .7,
     gilt: "#D9B56A", twine: "#8A6A42",
     spine: "study", font: CJK, bookRough: .82, grain: "cloth", jit: .16,
-    dim: { SH: 29, BT: 2.2, ST: 2.6, CD: 21, PL: 6 },
-    cs: { frame: 0x6f4526, back: 0x2c1b10, wall: 0x3a2a1d, floor: 0x2a1c12, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", crown: true, ao: .5 },
+    dim: { SH: 29, BT: 2.2, ST: 2.6, CD: 21, PL: 8 },
+    // 造型（2026-11-13「造型」一门）。mould：架子的线脚，单位厘米。stile 壁柱比侧板往外宽多少、stileT 往前凸多少；frieze 压顶线下面那条平带多高；
+    //   k 压顶线和底座线脚整体放大多少（1 是量参考时定的原大：压顶高 5.9 出 4.6，底座线脚出 2.2）
+    cs: { frame: 0x6f4526, back: 0x2c1b10, wall: 0x3a2a1d, floor: 0x2a1c12, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", ao: .5,
+      mould: { stile: 1, stileT: 1, frieze: 2.6, k: .75 } },
+    // 书的样子：board 封面板厚、sq 封面比书芯多出来的一圈（飘口），都是厘米；sag 圆脊鼓出来多少（按书厚的比例）；seg 圆脊分几段
+    book: { board: .25, sq: .3, sag: .22, seg: 6 },
     css: { bg: "#1C1510", ink: "#F0DFC0", ink2: "rgba(240,223,192,.76)", pane: "rgba(26,18,12,.8)", line: "rgba(217,181,106,.5)", on: "#1A130E", halo: "rgba(0,0,0,.9)", sheet: "18,13,9", lab: "rgba(22,15,10,.9)", scheme: "dark" }, veil: 0x0b0806,
     props: { pack: 0xc2a06c, band: 0x7a5a36, bandH: .5, notes: [0x3a2618, 0x1e2a45] },                           // 牌包是牛皮纸捆麻绳，和拆包页的那一包一个样
     // 真的材质（2026-11-13「材质」一门）：扫描的木头和书布，图在 vendor/tex/。tile：一张图铺多少厘米；grainX：木纹顺着图的横向走；
@@ -266,6 +274,120 @@ export function weave(mat, w, h, on = true, tile) {
   mat.normalMap.repeat.set(w / (tile || c.tile), h / (tile || c.tile)); mat.normalScale.setScalar(on ? c.depth : 0);
 }
 
+/* ---------- 造型的零件（旧书房「造型」一门）：切角的盒子、线脚、书 ---------- */
+function geoOf(P, N, U, groups, extra) {
+  const g = new THREE.BufferGeometry();
+  g.setAttribute("position", new THREE.Float32BufferAttribute(P, 3)); g.setAttribute("normal", new THREE.Float32BufferAttribute(N, 3)); g.setAttribute("uv", new THREE.Float32BufferAttribute(U, 2));
+  if (extra) Object.entries(extra).forEach(([k, a]) => g.setAttribute(k, new THREE.Float32BufferAttribute(a, 3)));
+  if (groups) groups.forEach(([start, count, mi]) => g.addGroup(start, count, mi));
+  return g;
+}
+// 切角的盒子：棱上都切掉一条 c 宽的斜面，光打上去棱是一道亮线，看着像折出来的纸包而不是一块砖。
+// 六个大面各一个材质号（和 BoxGeometry 一样：+x -x +y -y +z -z），斜面和角是第七个（6）
+export function chamferBox(w, h, d, c) {
+  const H = [w / 2, h / 2, d / 2], P = [], N = [], U = [], idx = [[], [], [], [], [], [], []];
+  const pt = (s, ax) => s.map((sg, k) => sg * (H[k] - (k === ax ? 0 : c)));        // 一个角上、落在 ax 这个面上的那个点
+  const poly = (pts, mi, uvs) => {                                                 // 一个平的多边形：法线朝外（按中心方向定），扇形拆成三角
+    const a = pts[0], b = pts[1], e = pts[2], n = new THREE.Vector3(b[0] - a[0], b[1] - a[1], b[2] - a[2]).cross(new THREE.Vector3(e[0] - a[0], e[1] - a[1], e[2] - a[2])).normalize();
+    const cen = pts.reduce((m, q) => [m[0] + q[0], m[1] + q[1], m[2] + q[2]], [0, 0, 0]); let order = pts.map((_, k) => k);
+    if (n.x * cen[0] + n.y * cen[1] + n.z * cen[2] < 0) { n.negate(); order = order.reverse(); }
+    for (let k = 1; k + 1 < order.length; k++) [order[0], order[k], order[k + 1]].forEach((o) => { idx[mi].push(P.length / 3); P.push(...pts[o]); N.push(n.x, n.y, n.z); U.push(...(uvs ? uvs[o] : [.5, .5])); });
+  };
+  const S = [-1, 1];
+  [0, 1, 2].forEach((ax) => S.forEach((sg) => {                                     // 六个大面
+    const u = (ax + 1) % 3, v = (ax + 2) % 3, pts = [], uvs = [];
+    [[-1, -1], [1, -1], [1, 1], [-1, 1]].forEach(([su, sv]) => { const sgn = [0, 0, 0]; sgn[ax] = sg; sgn[u] = su; sgn[v] = sv; pts.push(pt(sgn, ax)); });
+    pts.forEach((q) => { uvs.push(ax === 2 ? [sg * q[0] / w + .5, q[1] / h + .5] : ax === 0 ? [-sg * q[2] / d + .5, q[1] / h + .5] : [q[0] / w + .5, -sg * q[2] / d + .5]); });
+    poly(pts, ax * 2 + (sg > 0 ? 0 : 1), uvs);
+  }));
+  [0, 1, 2].forEach((ax) => S.forEach((s1) => S.forEach((s2) => {                   // 十二条棱上的斜面：棱顺着 ax，夹在 u、v 两个面之间
+    const u = (ax + 1) % 3, v = (ax + 2) % 3, q = (sa, on) => { const sgn = [0, 0, 0]; sgn[ax] = sa; sgn[u] = s1; sgn[v] = s2; return pt(sgn, on); };
+    poly([q(-1, u), q(1, u), q(1, v), q(-1, v)], 6);
+  })));
+  S.forEach((sx) => S.forEach((sy) => S.forEach((sz) => poly([pt([sx, sy, sz], 0), pt([sx, sy, sz], 1), pt([sx, sy, sz], 2)], 6))));   // 八个角
+  const order = [], groups = []; idx.forEach((list, mi) => { groups.push([order.length, list.length, mi]); order.push(...list); });
+  const pick = (A, n) => order.flatMap((i) => A.slice(i * n, i * n + n));
+  return geoOf(pick(P, 3), pick(N, 3), pick(U, 2), groups);
+}
+// 线脚的剖面：从下往上画，p 是往外伸多少、y 是高；直线段是平的面，弧是圆的面（法线跟着弧走）
+function profile(k = 1) {
+  const strips = [], api = {
+    strips,
+    line(p0, y0, p1, y1) { const dx = p1 - p0, dy = y1 - y0, l = Math.hypot(dx, dy) || 1, n = { np: dy / l, ny: -dx / l }; strips.push([{ p: p0 * k, y: y0 * k, ...n }, { p: p1 * k, y: y1 * k, ...n }]); return api; },
+    arc(cp, cy, r, a0, a1, n = 6) {                         // 角度从 a0 走到 a1（度）；逆时针是鼓出来的，顺时针是凹进去的
+      const sg = a1 > a0 ? 1 : -1, st = [];
+      for (let i = 0; i <= n; i++) { const a = rad(a0 + (a1 - a0) * i / n); st.push({ p: (cp + r * Math.cos(a)) * k, y: (cy + r * Math.sin(a)) * k, np: sg * Math.cos(a), ny: sg * Math.sin(a) }); }
+      strips.push(st); return api;
+    },
+  };
+  return api;
+}
+// 把一条剖面沿架子的外沿走一圈（左侧、正面、右侧，转角对缝）。X0：外沿到中线多宽；Z0：外沿的正面在哪；zB：背后到哪；y0：剖面的零点放多高。贴图坐标是厘米
+function sweepGeo(strips, X0, Z0, zB, y0) {
+  const P = [], N = [], U = [];
+  const legs = [(p) => [[-X0 - p, zB], [-X0 - p, Z0 + p], [-1, 0], 0], (p) => [[-X0 - p, Z0 + p], [X0 + p, Z0 + p], [0, 1], Z0 - zB], (p) => [[X0 + p, Z0 + p], [X0 + p, zB], [1, 0], Z0 - zB + 2 * X0]];
+  strips.forEach((st) => {
+    let v = 0;
+    for (let i = 0; i + 1 < st.length; i++) {
+      const a = st[i], b = st[i + 1], dv = Math.hypot(b.p - a.p, b.y - a.y);
+      legs.forEach((leg) => {
+        const [A0, A1, d, u0] = leg(a.p), [B0, B1] = leg(b.p), len = Math.hypot(A1[0] - A0[0], A1[1] - A0[1]);
+        const vert = (q, xz, vv, uu) => { P.push(xz[0], y0 + q.y, xz[1]); N.push(d[0] * q.np, q.ny, d[1] * q.np); U.push(uu, vv); };
+        vert(a, A0, v, u0); vert(a, A1, v, u0 + len); vert(b, B1, v + dv, u0 + len); vert(a, A0, v, u0); vert(b, B1, v + dv, u0 + len); vert(b, B0, v + dv, u0);
+      });
+      v += dv;
+    }
+  });
+  return geoOf(P, N, U);
+}
+// 一本书：两块封面板夹着书芯，书芯比封面小一圈（飘口），书脊是鼓出来的圆脊。坐标是单位盒子（厚、高、深各 1，书脊朝 +z），
+// 板厚和飘口是厘米、圆脊按书厚的比例，这些要知道这本书多大才摆得对：ins 记每个点往里收多少厘米，spn 记圆脊上鼓多少、斜多少。
+//   架上的书是一个实例化的网格，每本大小不同，由着色器按每本的大小去摆（见 bookHook）；抽出来的那一本用 bakeBook 按它的大小摆好。
+// 材质号：0 书脊、1 封面（+x）、2 封底（-x）、3 封面板的边和里子、书脊两头、4 书芯
+export function bookGeo() {
+  const B = LOOK.book, P = [], N = [], U = [], I = [], S = [], idx = [[], [], [], [], []];
+  // 一个四边形：四个点各带 [位置, 往里收的厘米, 圆脊]；先按「一厘米见方的书」摆一下看朝向对不对，不对就反过来
+  const quad = (v, n, mi, uvs) => {
+    const at = (q) => new THREE.Vector3(q[0][0] + (q[1] ? q[1][0] : 0), q[0][1] + (q[1] ? q[1][1] : 0), q[0][2] + (q[1] ? q[1][2] : 0) + (q[2] ? q[2][0] * .2 : 0));
+    const a = at(v[0]), c = new THREE.Vector3().subVectors(at(v[1]), a).cross(new THREE.Vector3().subVectors(at(v[2]), a));
+    let o = [0, 1, 2, 0, 2, 3]; if (c.x * n[0] + c.y * n[1] + c.z * n[2] < 0) o = [0, 2, 1, 0, 3, 2];
+    o.forEach((k) => { idx[mi].push(P.length / 3); P.push(...v[k][0]); N.push(...n); U.push(...(uvs ? uvs[k] : [.06, .98])); I.push(...(v[k][1] || [0, 0, 0])); S.push(...(v[k][2] || [0, 0, 0])); });
+  };
+  [1, -1].forEach((sx) => {                                  // 两块封面板：外面、里面、上、下、书口那一边
+    const X = sx * .5, inn = [-sx * B.board, 0, 0], c = (y, z, on) => [[X, y, z], on ? inn : null];
+    quad([c(-.5, -.5), c(-.5, .5), c(.5, .5), c(.5, -.5)], [sx, 0, 0], sx > 0 ? 1 : 2, [[-.5, -.5], [-.5, .5], [.5, .5], [.5, -.5]].map(([y, z]) => [sx > 0 ? .5 - z : z + .5, y + .5]));
+    quad([c(-.5, -.5, 1), c(-.5, .5, 1), c(.5, .5, 1), c(.5, -.5, 1)], [-sx, 0, 0], 3);
+    [1, -1].forEach((sy) => quad([c(sy * .5, -.5), c(sy * .5, .5), c(sy * .5, .5, 1), c(sy * .5, -.5, 1)], [0, sy, 0], 3));
+    quad([c(-.5, -.5), c(.5, -.5), c(.5, -.5, 1), c(-.5, -.5, 1)], [0, 0, -1], 3);
+  });
+  for (let i = 0; i < B.seg; i++) {                           // 圆脊：分几段，每个点记鼓多少（抛物线）和这一点的斜率；两头各补一片盖住
+    const x0 = -.5 + i / B.seg, x1 = -.5 + (i + 1) / B.seg, sp = (x) => [1 - 4 * x * x, -8 * x, 1], cap = (x) => [1 - 4 * x * x, 0, 0];
+    quad([[[x0, -.5, .5], null, sp(x0)], [[x1, -.5, .5], null, sp(x1)], [[x1, .5, .5], null, sp(x1)], [[x0, .5, .5], null, sp(x0)]], [0, 0, 1], 0, [[x0 + .5, 0], [x1 + .5, 0], [x1 + .5, 1], [x0 + .5, 1]]);
+    [1, -1].forEach((sy) => quad([[[x0, sy * .5, .5]], [[x1, sy * .5, .5]], [[x1, sy * .5, .5], null, cap(x1)], [[x0, sy * .5, .5], null, cap(x0)]], [0, sy, 0], 3));
+  }
+  const pg = (x, y, z) => [[x * .5, y * .5, z * .5], [-x * B.board, -y * B.sq, z < 0 ? B.sq : 0]];   // 书芯：比封面板小一圈，只做看得见的三面（上、下、书口）
+  [1, -1].forEach((sy) => quad([pg(-1, sy, -1), pg(1, sy, -1), pg(1, sy, 1), pg(-1, sy, 1)], [0, sy, 0], 4));
+  quad([pg(-1, -1, -1), pg(1, -1, -1), pg(1, 1, -1), pg(-1, 1, -1)], [0, 0, -1], 4);
+  const order = [], groups = []; idx.forEach((list, mi) => { groups.push([order.length, list.length, mi]); order.push(...list); });
+  const pick = (A, n) => order.flatMap((i) => A.slice(i * n, i * n + n));
+  return geoOf(pick(P, 3), pick(N, 3), pick(U, 2), groups, { ins: pick(I, 3), spn: pick(S, 3) });
+}
+// 按一本书的厚、高、深把上面那个形状摆好（给抽出来的那一本用；它的网格再按 t、h、d 拉开）
+export function bakeBook(geo, t, h, d) {
+  const g = geo.clone(), P = g.attributes.position, N = g.attributes.normal, I = g.attributes.ins, S = g.attributes.spn, sag = LOOK.book.sag * t / d;
+  for (let i = 0; i < P.count; i++) {
+    P.setXYZ(i, P.getX(i) + I.getX(i) / t, P.getY(i) + I.getY(i) / h, P.getZ(i) + I.getZ(i) / d + S.getX(i) * sag);
+    if (S.getZ(i) > .5) { const nx = -S.getY(i) * sag, l = Math.hypot(nx, 1); N.setXYZ(i, nx / l, 0, 1 / l); }
+  }
+  return g;
+}
+// 架上的书：每本的大小在实例矩阵里，着色器从里面取出厚、高、深，再把板厚、飘口、圆脊摆到位
+function bookHook(sh) {
+  sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nattribute vec3 ins;\nattribute vec3 spn;")
+    .replace("#include <beginnormal_vertex>", "#include <beginnormal_vertex>\n#ifdef USE_INSTANCING\n\tvec3 bsc = vec3( length( instanceMatrix[ 0 ].xyz ), length( instanceMatrix[ 1 ].xyz ), length( instanceMatrix[ 2 ].xyz ) );\n\tfloat bsag = " + LOOK.book.sag.toFixed(4) + " * bsc.x / bsc.z;\n\tif ( spn.z > .5 ) objectNormal = normalize( vec3( - spn.y * bsag, 0., 1. ) );\n#endif")
+    .replace("#include <begin_vertex>", "#include <begin_vertex>\n#ifdef USE_INSTANCING\n\ttransformed += ins / bsc; transformed.z += spn.x * bsag;\n#endif");
+}
+
 /* ---------- 三维舞台：渲染器、镜头、一盏主光加天光 ---------- */
 export function createStage(canvas) {
   let renderer;
@@ -359,6 +481,7 @@ export function createBookKit(maxAniso) {
   const paperMat = new THREE.MeshStandardMaterial({ color: PAPER, roughness: .95 });
   const tabMat = new THREE.MeshStandardMaterial({ color: TAB, roughness: .8, emissive: new THREE.Color(TAB), emissiveIntensity: LOOK.tabGlow });
   const unitBox = new THREE.BoxGeometry(1, 1, 1);
+  const shape = LOOK.book ? bookGeo() : null, pagesMat = shape ? paperMat.clone() : null; if (pagesMat) pagesMat.onBeforeCompile = bookHook;   // 旧书房：书有封面板、飘口和圆脊
   // 书脊图集：每本一格，贴到书脊上；封面两侧只取这一格的底色。每张图集带自己的材质
   function makeAtlas(books, pale) {
     const canvas = document.createElement("canvas"), g = canvas.getContext("2d");
@@ -374,21 +497,28 @@ export function createBookKit(maxAniso) {
     mat.onBeforeCompile = (sh) => {          // 每本书用图集里自己那一格（uvo = 左下角 u、v，宽、高）
       sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nattribute vec4 uvo;")
         .replace("#include <uv_vertex>", "#include <uv_vertex>\n#ifdef USE_MAP\n\tvMapUv = uvo.xy + uv * uvo.zw;\n#endif");
+      if (shape) bookHook(sh);
     };
     return { canvas, tex, mat, redraw(b) { draw(b); tex.needsUpdate = true; }, dispose() { tex.dispose(); mat.dispose(); } };
   }
   // 一批书 = 一个实例化的盒子（三百本也只画两三次）。书脊朝 +z，前后封面是 ±x
   function makeMesh(books, atlas) {
-    const g = new THREE.BoxGeometry(1, 1, 1);                                   // 面的顺序：+x -x +y -y +z -z
-    [0, 0, 1, 1, 0, 1].forEach((m, k) => { g.groups[k].materialIndex = m; });   // 封面与书脊用图集，上下和书口是纸
-    for (let v = 0; v < 8; v++) g.attributes.uv.setXY(v, .06, .98);             // 前后封面只取格子左上角的一点底色（那里各种外观都不画东西）
+    let g, mats;
+    if (shape) {                                                                // 旧书房：书脊用图集里自己那一格，封面板只取格子左上角的一点底色，书芯是纸
+      g = shape.clone(); mats = [atlas.mat, atlas.mat, atlas.mat, atlas.mat, pagesMat];
+      [1, 2].forEach((mi) => { const gr = g.groups[mi]; for (let v = gr.start; v < gr.start + gr.count; v++) g.attributes.uv.setXY(v, .06, .98); });
+    } else {
+      g = new THREE.BoxGeometry(1, 1, 1); mats = [atlas.mat, paperMat];         // 面的顺序：+x -x +y -y +z -z
+      [0, 0, 1, 1, 0, 1].forEach((m, k) => { g.groups[k].materialIndex = m; });   // 封面与书脊用图集，上下和书口是纸
+      for (let v = 0; v < 8; v++) g.attributes.uv.setXY(v, .06, .98);           // 前后封面只取格子左上角的一点底色（那里各种外观都不画东西）
+    }
     const uvo = new Float32Array(books.length * 4), tw = atlas.canvas.width, th = atlas.canvas.height;
     books.forEach((b) => { const x = (b.i % COLS) * CELLW + 3, y = Math.floor(b.i / COLS) * CELLH + 2; uvo.set([x / tw, 1 - (y + CELLH - 4) / th, (CELLW - 6) / tw, (CELLH - 4) / th], b.i * 4); });
     g.setAttribute("uvo", new THREE.InstancedBufferAttribute(uvo, 4));
-    const m = new THREE.InstancedMesh(g, [atlas.mat, paperMat], books.length); m.castShadow = m.receiveShadow = true; m.frustumCulled = false;
+    const m = new THREE.InstancedMesh(g, mats, books.length); m.castShadow = m.receiveShadow = true; m.frustumCulled = false;
     return m;
   }
-  return { paperMat, tabMat, unitBox, makeAtlas, makeMesh };
+  return { paperMat, tabMat, unitBox, makeAtlas, makeMesh, shape };
 }
 
 /* ---------- 架子（灰盒：几块板，外加后面的墙和脚下的地）。一个单位是一厘米 ---------- */
@@ -419,8 +549,20 @@ export function createCase(scene, unitBox) {
     const s = g.createLinearGradient(0, 0, w, 0); s.addColorStop(0, "rgba(0,0,0,.55)"); s.addColorStop(.1, "rgba(0,0,0,0)"); s.addColorStop(.9, "rgba(0,0,0,0)"); s.addColorStop(1, "rgba(0,0,0,.55)"); g.fillStyle = s; g.fillRect(0, 0, w, h);
   })) }) : null;
   const plane = new THREE.PlaneGeometry(1, 1);
+  // 旧书房的线脚（剖面只算一次，沿外沿走一圈时才按架子的大小生成）。尺寸是量参考定的：压顶线三段大小相近（凹弧、平带、反曲线），底座是一段立面上面收一道反曲线
+  const M = C.mould, keep = new Set([unitBox, plane]);
+  const nose = M ? new THREE.CylinderGeometry(BT / 2, BT / 2, 1, 10, 1, true, -Math.PI / 2, Math.PI).rotateZ(Math.PI / 2) : null;      // 层板前沿：半圆的一条
+  const bead = M ? new THREE.CylinderGeometry(.35, .35, 1, 8, 1, true) : null;                                                         // 壁柱里侧的一道圆线
+  if (M) { keep.add(nose); keep.add(bead); }
+  const PROF = M && {
+    cornice: profile(M.k).line(0, 0, .5, 0).line(.5, 0, .5, .5).arc(1.7, .5, 1.2, 180, 90).line(1.7, 1.7, 2.1, 1.7).line(2.1, 1.7, 2.1, 3.3).line(2.1, 3.3, 2.4, 3.3)
+      .arc(2.4, 4.25, .95, -90, 0).arc(4.3, 4.25, .95, 180, 90).line(4.3, 5.2, 4.6, 5.2).line(4.6, 5.2, 4.6, 5.9).line(4.6, 5.9, 0, 5.9).strips,
+    neck: profile(1).arc(0, 0, .4, -90, 90, 5).strips,                                                                                  // 平带底下一道小圆线
+    plinth: (H) => { const o = 2.2 * M.k, e = 1.9 * M.k, r = (e - .15) / 2, y = H - 2.2;   // 立面出 o；往上收一小步到 e，再一道反曲线（下半鼓、上半凹）收到离外沿 .15
+      return profile(1).line(o, 0, o, y - .4).line(o, y - .4, e, y - .4).line(e, y - .4, e, y).arc(e - r, y, r, 0, 90).arc(e - r, y + 2 * r, r, -90, -180).line(.15, y + 2 * r, .15, H - .15).line(.15, H - .15, 0, H - .15).line(0, H - .15, 0, H).strips; },
+  };
   function build(W, R) {                                           // W：里面净宽，R：几层。回来的是整座的外宽和总高
-    group.children.forEach((m) => { if (m.geometry !== unitBox && m.geometry !== plane) m.geometry.dispose(); }); group.clear();
+    group.children.forEach((m) => { if (!keep.has(m.geometry)) m.geometry.dispose(); }); group.clear();
     skins.forEach((k) => { k.own.forEach((o) => o.dispose()); k.m.dispose(); }); skins.length = 0;
     const w = W + 2 * ST, h = R * (SH + BT) + BT + PL;
     const add = (bw, bh, bd, x, y, z, mat) => { const m = new THREE.Mesh(unitBox, mat); m.scale.set(bw, bh, bd); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; group.add(m); return m; };
@@ -428,16 +570,27 @@ export function createCase(scene, unitBox) {
     const board = (seed) => skin(caseMat, tex, (CD - 1) / T, W / T, true, "frame", seed), boardMat = board(11);
     [-1, 1].forEach((s) => add(ST, h, CD + .6, s * (W / 2 + ST / 2), h / 2, -CD / 2 + .3, skin(caseMat, tex, CD / T, h / T, false, "frame", s + 3)));   // 两侧
     for (let k = 0; k <= R; k++) add(W, BT, CD - 1, 0, PL + BT / 2 + k * (SH + BT), -(CD - 1) / 2, board(k + 1));        // 层板（一块一个材质，木纹错开）
-    add(W, PL, CD - 3, 0, PL / 2, -(CD - 3) / 2 - 2, backMat);                                                          // 踢脚
-    let top = h;
-    if (C.crown) {                                                                                                     // 旧书房：顶上一道压顶线，脚下一圈底座
-      add(w + 2.4, 1.4, CD + 1.8, 0, h + .7, -CD / 2 + .9, boardMat); add(w + 5.6, 3.6, CD + 3.4, 0, h + 3.2, -CD / 2 + 1.7, boardMat);
-      add(w + 3.2, PL - 1, CD + 2, 0, (PL - 1) / 2, -CD / 2 + 1, boardMat); top = h + 5;
-    }
+    let top = h, wOut = w;
+    if (M) {
+      // 旧书房：两根壁柱、层板的圆前沿、顶上一条平带加压顶线、脚下一圈底座。线脚的贴图坐标是厘米，所以重复数给 1 / T
+      const X0 = W / 2 + ST + M.stile, Z0 = .6 + M.stileT, zB = -CD, run = (seed) => skin(caseMat, tex, 1 / T, 1 / T, true, "frame", seed);
+      const mesh = (geo, mat) => { const m = new THREE.Mesh(geo, mat); m.castShadow = m.receiveShadow = true; group.add(m); return m; };
+      [-1, 1].forEach((sd) => {
+        add(ST + M.stile, h - PL, M.stileT, sd * (W / 2 + (ST + M.stile) / 2), PL + (h - PL) / 2, .6 + M.stileT / 2, skin(caseMat, tex, (ST + M.stile) / T, (h - PL) / T, false, "frame", sd + 7));
+        const b = mesh(bead, skin(caseMat, tex, 2.2 / T, (h - PL) / T, false, "frame", sd + 9)); b.scale.set(1, h - PL, 1); b.position.set(sd * (W / 2 + .05), PL + (h - PL) / 2, Z0 - .1);
+      });
+      for (let k = 0; k <= R; k++) { const n = mesh(nose, skin(caseMat, tex, 3.4 / T, W / T, false, "frame", k + 21)); n.scale.set(W, 1, 1); n.position.set(0, PL + BT / 2 + k * (SH + BT), 0); }
+      const band = (bh, seed) => skin(caseMat, tex, bh / T, 2 * X0 / T, true, "frame", seed);                                             // 横着的一条板：木纹顺着宽走
+      add(2 * X0, PL, Z0 - zB, 0, PL / 2, (Z0 + zB) / 2, band(PL, 31)); mesh(sweepGeo(PROF.plinth(PL), X0, Z0, zB, 0), run(32));                 // 底座：里面一块实心的，外面一圈线脚
+      add(2 * X0, M.frieze, Z0 - zB, 0, h + M.frieze / 2, (Z0 + zB) / 2, band(M.frieze, 33)); mesh(sweepGeo(PROF.neck, X0, Z0, zB, h), run(34));       // 平带和它底下的小圆线
+      const cy = h + M.frieze, ch = 5.9 * M.k, cp = 4.6 * M.k;
+      mesh(sweepGeo(PROF.cornice, X0, Z0, zB, cy), run(35)); add(2 * X0, .4, Z0 - zB, 0, cy + ch - .2, (Z0 + zB) / 2, band(.4, 36));               // 压顶线和它的顶
+      top = cy + ch; wOut = 2 * X0 + cp;                                                                                                // 镜头按这个宽来装：压顶线两头各让它伸进边上的留白一半
+    } else add(W, PL, CD - 3, 0, PL / 2, -(CD - 3) / 2 - 2, backMat);                                                    // 踢脚
     if (shade) for (let k = 0; k < R; k++) { const m = new THREE.Mesh(plane, shade); m.scale.set(W, SH, 1); m.position.set(0, PL + BT + k * (SH + BT) + SH / 2, -CD + 1.06); m.renderOrder = 1; group.add(m); }
     const wall = new THREE.Mesh(new THREE.PlaneGeometry(w + 900, h + 600), skin(wallMat, wallTex, (w + 900) / (C.wallTex ? 34 : T), (h + 600) / (C.wallTex ? 34 : T))); wall.position.set(0, h / 2, -CD - .2); wall.receiveShadow = true; group.add(wall);
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(w + 900, 900), skin(floorMat, tex, (w + 900) / T, 900 / T, false, "floor")); floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, 450 - CD); floor.receiveShadow = true; group.add(floor);
-    return { w, h: top };
+    return { w: wOut, h: top };
   }
   return { group, build, caseMat, backMat, wallMat, floorMat };
 }

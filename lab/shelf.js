@@ -14,7 +14,7 @@
  * 动画轨、声音、舞台、书的样子、架子在 kit.js（和进门样机共用）。
  * 字（书名签、层板签、底下的纸）用网页排；声音是 WebAudio 现场合成的，没有音频文件。书名、作者都是编的。
  * 调试：地址加 ?dev 显示帧率与状态，?n=300 直接进三百本；window.__lab 给测试脚本用。 */
-import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, grainOver, LOOK, DIM, TONES, PALE, INK_LT, INK_SOFT, CJK, STN, MASK, foil, weave, whenReady } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
+import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, grainOver, LOOK, DIM, TONES, PALE, INK_LT, INK_SOFT, CJK, STN, MASK, foil, weave, whenReady, bakeBook } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -96,7 +96,7 @@ const SFX = {
 };
 
 /* ---------- 书：样子在 kit.js（书脊图集、实例化的盒子），这里只管这一页的这一批 ---------- */
-const { paperMat, tabMat, unitBox, makeAtlas, makeMesh } = createBookKit(maxAniso);
+const { paperMat, tabMat, unitBox, makeAtlas, makeMesh, shape: bookShape } = createBookKit(maxAniso);
 let atlas = null, books3d = null, tabs = null;
 function buildBooks() {
   if (books3d) { scene.remove(books3d, tabs); books3d.geometry.dispose(); books3d.dispose(); tabs.dispose(); atlas.dispose(); }
@@ -117,7 +117,9 @@ const hFrontM = document.createElement("canvas"); hFrontM.width = hFrontC.width;
 const hSpineM = document.createElement("canvas"); hSpineM.width = hSpineC.width; hSpineM.height = hSpineC.height;
 const hFrontMT = new THREE.CanvasTexture(hFrontM), hSpineMT = new THREE.CanvasTexture(hSpineM);
 const GILT = foil(hmFront, hFrontMT) && foil(hmSpine, hSpineMT);
-const heroBody = new THREE.Mesh(unitBox, [hmFront, hmBack, paperMat, paperMat, hmSpine, paperMat]); heroBody.castShadow = true; hero.add(heroBody);
+// 旧书房的书有封面板、飘口和圆脊（kit.js 的 bookGeo）：抽出来的这一本按它自己的大小摆好；别的外观还是一个盒子
+const heroBody = bookShape ? new THREE.Mesh(bookShape, [hmSpine, hmFront, hmBack, hmBack, paperMat]) : new THREE.Mesh(unitBox, [hmFront, hmBack, paperMat, paperMat, hmSpine, paperMat]);
+heroBody.castShadow = true; hero.add(heroBody);
 const heroTab = new THREE.Mesh(unitBox, tabMat); hero.add(heroTab);
 function drawFront(g, w, h, b, mask) {                 // 封面跟着外观走：灰盒和纸模是两道框，玩具盒下面一截换色，旧书房读过的烫金、没读的捆麻绳。mask：只画「哪里是金」
   const todo = b.st === "todo", K = LOOK.spine, F = LOOK.font, ink = mask ? MASK.gilt : todo ? INK_SOFT : (LOOK.gilt || INK_LT), wt = K === "toy" ? "900 " : "700 ";
@@ -142,6 +144,7 @@ function heroSetup(b) {
   hmBack.color.set(b.st === "todo" ? PALE : TONES[b.cat]);
   if (GILT) { drawFront(hFrontM.getContext("2d"), hFrontM.width, hFrontM.height, b, true); hFrontMT.needsUpdate = true; drawSpine(hSpineM.getContext("2d"), 0, 0, hSpineM.width, hSpineM.height, b, false, true); hSpineMT.needsUpdate = true; }
   const cloth = b.st !== "todo"; weave(hmFront, b.d, b.h, cloth); weave(hmBack, b.d, b.h, cloth); weave(hmSpine, b.t, b.h, cloth);
+  if (bookShape) { if (heroBody.geometry !== bookShape) heroBody.geometry.dispose(); heroBody.geometry = bakeBook(bookShape, b.t, b.h, b.d); }
   heroBody.scale.set(b.t, b.h, b.d);
   heroTab.visible = b.st === "doing"; heroTab.scale.set(b.t * .62, 2.6, .14); heroTab.position.set(0, b.h / 2 + .55, b.d / 2 + .05);
   hero.visible = true;

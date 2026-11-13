@@ -14,7 +14,7 @@
  * 结构：three.js 只画物件（桌面、包、牌、光），字用网页排；声音是 WebAudio 现场合成的，没有音频文件。
  * 调试：地址加 ?dev 显示帧率与状态；window.__lab 给测试脚本用。 */
 import * as THREE from "../vendor/three/three.module.min.js";   // 直接按相对路径引，不用 importmap（旧一点的手机浏览器不认）
-import { LOOK, patternTex, grainOver, texReady, whenReady, woodOn, makeEnv, foil, weave, MASK } from "./kit.js";       // 外观表、花纹。引进来的同时 kit.js 会把网页上那层字的颜色和顶栏的「外观」按钮接好
+import { LOOK, patternTex, grainOver, texReady, whenReady, woodOn, makeEnv, foil, weave, MASK, chamferBox } from "./kit.js";       // 外观表、花纹。引进来的同时 kit.js 会把网页上那层字的颜色和顶栏的「外观」按钮接好
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -79,7 +79,7 @@ const key = new THREE.DirectionalLight(PK.key[0], PK.key[1]); key.position.set(-
 Object.assign(key.shadow.camera, { left: -11, right: 11, top: 13, bottom: -11, near: 1, far: 50 });
 scene.add(key, key.target);
 const burstLight = new THREE.PointLight(0xffd9a0, 0, 30, 1.6); scene.add(burstLight);
-makeEnv(renderer);                                         // 旧书房：环境光，牌背的烫金反它
+const ENV = makeEnv(renderer);                             // 旧书房：环境光，牌背的烫金和牌的金边反它
 const lamp = PK.lamp ? new THREE.PointLight(PK.lamp[0], PK.lamp[1], 60, 1.5) : null; if (lamp) scene.add(lamp);   // 旧书房：桌子上方一盏灯，中间亮四周暗；位置在 fit() 里跟着镜头对准的地方走
 
 /* ---------- 画布贴图 ---------- */
@@ -271,7 +271,7 @@ const cardShape = rrShape(CW, CH, CR);
 const cardBody = new THREE.ExtrudeGeometry(cardShape, { depth: CT, bevelEnabled: false, curveSegments: 5 }); cardBody.translate(0, 0, -CT / 2);
 const cardFace = new THREE.ShapeGeometry(cardShape, 5);
 { const p = cardFace.attributes.position, uv = cardFace.attributes.uv; for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / CW + .5, p.getY(i) / CH + .5); uv.needsUpdate = true; }
-const edgeMat = new THREE.MeshStandardMaterial({ color: PK.edge, roughness: .9 });
+const edgeMat = ENV ? new THREE.MeshStandardMaterial({ color: PK.edge, roughness: .36, metalness: .8, envMap: ENV }) : new THREE.MeshStandardMaterial({ color: PK.edge, roughness: .9 });   // 旧书房：牌的四边刷金
 const glowMap = glowTex();
 const cards = [];
 function buildCards() {
@@ -309,11 +309,20 @@ function applyCard(c) {
 /* ---------- 包 ---------- */
 const pack = new THREE.Group(); scene.add(pack);
 const packMat = { side: new THREE.MeshStandardMaterial({ color: PK.side, roughness: .9 }), mouth: new THREE.MeshStandardMaterial({ color: PK.mouth, roughness: 1 }), front: new THREE.MeshStandardMaterial({ roughness: .9 }), back: new THREE.MeshStandardMaterial({ color: PK.rear, roughness: .9 }) };
-const bodyMats = [packMat.side, packMat.side, packMat.mouth, packMat.side, packMat.front, packMat.back];
-const body = new THREE.Mesh(new THREE.BoxGeometry(PW, BH, PT), bodyMats); body.position.y = -STRIP / 2; body.castShadow = true; pack.add(body);
-if (PK.twine) {                                            // 旧书房：包身上捆两道麻绳，真的两圈，前后左右都看得到
-  const tm = new THREE.MeshStandardMaterial({ color: PK.twine, roughness: 1 }), tg = new THREE.BoxGeometry(PW + .05, .055, PT + .05);
-  [.33, -.4].forEach((f) => { const m = new THREE.Mesh(tg, tm); m.position.y = -STRIP / 2 + f * BH; m.castShadow = true; pack.add(m); });
+const bodyMats = [packMat.side, packMat.side, packMat.mouth, packMat.side, packMat.front, packMat.back, packMat.side];
+// 旧书房：包身的棱切掉一条斜面（折出来的纸包，棱上有一道亮线）；灰盒还是方盒子
+const body = new THREE.Mesh(STUDY ? chamferBox(PW, BH, PT, .035) : new THREE.BoxGeometry(PW, BH, PT), bodyMats); body.position.y = -STRIP / 2; body.castShadow = true; pack.add(body);
+if (PK.twine) {                                            // 旧书房：包身上捆两道麻绳，圆的，绕包一圈；每道在正面右边打一个结，垂下两截绳头
+  const tm = new THREE.MeshStandardMaterial({ color: PK.twine, roughness: 1 }), R = .03, a = PW / 2 + R * .7, b = PT / 2 + R * .7, rc = .06, pts = [];
+  [[a - rc, b - rc, 0], [-(a - rc), b - rc, 90], [-(a - rc), -(b - rc), 180], [a - rc, -(b - rc), 270]].forEach(([cx, cz, a0]) => { for (let k = 0; k <= 4; k++) { const t = rad(a0 + k * 22.5); pts.push(new THREE.Vector3(cx + rc * Math.cos(t), 0, cz + rc * Math.sin(t))); } });
+  const loop = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, true, "catmullrom", .05), 96, R, 6, true);
+  const knot = new THREE.IcosahedronGeometry(R * 2.1, 1), tail = new THREE.CylinderGeometry(R * .7, R * .85, 1, 6); tail.translate(0, -.5, 0);
+  [.365, -.4].forEach((f, k) => {
+    const g = new THREE.Group(); g.position.y = -STRIP / 2 + f * BH; pack.add(g);
+    const add = (geo) => { const m = new THREE.Mesh(geo, tm); m.castShadow = true; g.add(m); return m; };
+    add(loop); const kx = PW * (.3 - k * .06), kn = add(knot); kn.position.set(kx, 0, b + R * .6); kn.scale.set(1.25, .9, .8);
+    [[-.5, .34], [.42, .26]].forEach(([rz, len]) => { const t = add(tail); t.position.set(kx, -.01, b + R * .9); t.rotation.z = rz; t.scale.set(1, len, 1); });
+  });
 }
 const stripMat = new THREE.MeshStandardMaterial({ color: PK.strip, roughness: .9, transparent: true });
 const segGeo = new THREE.BoxGeometry(SEG, STRIP, PT);
