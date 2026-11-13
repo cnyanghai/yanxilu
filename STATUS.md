@@ -187,7 +187,7 @@ updated: 2026-11-13
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
-- 2026-11-13 用户答「过，选外观」：进门过门记进已定决策；查外观的生产方式与现成素材（七条进 REFERENCES：烘焙光与实时光、黏土感配方、图生三维、CC0 素材站、Tiny Bookshop、Book of Hours、闪卡箔光）；kit.js 加外观表与「外观」菜单，shelf / door 两页颜色改成变量；三个候选样张纸模、玩具盒、旧书房；新测试 lab_look_test.py；对照图 docs/lab-looks.jpg；lab/README.md 加「选外观」一节，CLAUDE.md 同步。
+- 2026-11-13 用户答「过，选外观」：进门过门记进已定决策；查外观的生产方式与现成素材（七条进 REFERENCES：烘焙光与实时光、黏土感配方、图生三维、CC0 素材站、Tiny Bookshop、Book of Hours、闪卡箔光）；kit.js 加外观表与「外观」菜单，shelf / door 两页颜色改成变量；三个候选样张纸模、玩具盒、旧书房；新测试 lab_look_test.py；对照图 docs/lab-looks.jpg；lab/README.md 加「选外观」一节，CLAUDE.md 同步。推送 1dc9a99 后线上 Baba 与 GitHub Pages 各用浏览器实际打开：不带参数是灰盒，三个候选各自打得开，进门页跟着换，无失败请求无报错；书架、进门、外观三条流程测试全过。真机上的帧率和观感没法由 Claude 验证。
 - 2026-11-12 用户答「直接到」：door.js 默认进法改成直接到、去掉切换（敲门进留 ?way=knock 对照），door.html 去掉切换条和用不到的样式；lab_door_test.py 按新默认改、分镜八拍重排，docs/lab-door-frames.jpg 重拍；lab/README.md、CLAUDE.md、STATUS 同步。推送 ba6c7f2 后线上 Baba 与 GitHub Pages 的 /lab/door.html 各用浏览器实际打开走过：默认直接到、约 1 秒能动、往下拉带走一排、无失败请求无报错。
 - 2026-11-12 用户答「过，做进门」：书架过门记进已定决策；查「三秒看懂一个人」与「一个动作带走一整套」的做法（Letterboxd 四部最爱、模拟人生图库、Notion 复制公开页面三条进 REFERENCES，没有能直接用的）；抽公用模块 lab/kit.js，shelf.js 改成引用它（书架测试重跑通过）；做进门样机 lab/door.html + door.js，测试 lab_door_test.py，分镜图 docs/lab-door-frames.jpg；三页顶栏互相加链接；lab/README.md 与项目说明更新。三条流程测试（拆包、书架、进门）都过。
 - 2026-11-12 用户答「热闹」：拆包默认开法定下，去掉切换按钮；查三维书架的现成方案（KoreShelf、complete-shelf、Shelfieline、Book Riot 四条进 REFERENCES，没有能直接用的）；做第二个瞬间的样机 lab/shelf.html + shelf.js，测试 lab_shelf_test.py，分镜图 docs/lab-shelf-frames.jpg；lab/README.md 改成三个瞬间的进度表加两份上手清单；项目说明补测试命令。两条流程测试（lab_shelf_test、lab_pack_test）都过；软件渲染下显卡排队会让网页层的淡入晚到，分镜截图前改成等底部按钮真的回来。
