@@ -15,7 +15,7 @@
  * 进法：2026-11-12 用户在手机上两种都试过，定「直接到」，不要敲门那一段。敲门进（一扇门、门牌、敲两下、门开、镜头穿过门）
  *   留在代码里对照用，地址加 ?way=knock 才走，页面上不再有切换。
  * 调试：地址加 ?dev 显示帧率与状态；window.__lab 给测试脚本用。 */
-import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, DIM, STN, CJK, PAPER } from "./kit.js";
+import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, DIM, STN, CJK, PAPER, LOOK as SKIN } from "./kit.js";
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -92,11 +92,12 @@ ROWS.forEach((row, r) => {
 const { w: caseW, h: caseH } = caseKit.build(W, R);
 // 最下面一层：牌盒和本子，只是摆着
 {
-  const packMat = new THREE.MeshStandardMaterial({ color: 0x3b2a20, roughness: .8 }), bandMat = new THREE.MeshStandardMaterial({ color: 0xc9b089, roughness: .9 });
-  const noteMats = [0x5e5a48, 0x6a4a3a].map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: .85 }));
+  const PR = SKIN.props || { pack: 0x3b2a20, band: 0xc9b089, bandH: 2.2, notes: [0x5e5a48, 0x6a4a3a] };     // 落选的两种样张没配摆设，用灰盒的
+  const packMat = new THREE.MeshStandardMaterial({ color: PR.pack, roughness: .8 }), bandMat = new THREE.MeshStandardMaterial({ color: PR.band, roughness: .9 });
+  const noteMats = PR.notes.map((c) => new THREE.MeshStandardMaterial({ color: c, roughness: .85 }));
   const y0 = rowY(R - 1); let x = -W / 2 + PAD + 1;
   const box = (w, h, d, px, py, pz, mat, rz) => { const m = new THREE.Mesh(unitBox, mat); m.scale.set(w, h, d); m.position.set(px, py, pz); if (rz) m.rotation.z = rz; m.castShadow = m.receiveShadow = true; scene.add(m); };
-  for (let k = 0; k < PROPS.packs; k++) { box(8.2, 12.4, 3.4, x + 4.1, y0 + 6.2, -RECESS - 2.2, packMat); box(8.25, 2.2, 3.45, x + 4.1, y0 + 9.4, -RECESS - 2.2, bandMat); x += 8.8; }
+  for (let k = 0; k < PROPS.packs; k++) { box(8.2, 12.4, 3.4, x + 4.1, y0 + 6.2, -RECESS - 2.2, packMat); box(8.25, PR.bandH, 3.45, x + 4.1, y0 + 9.4, -RECESS - 2.2, bandMat); if (PR.bandH < 1) box(8.25, PR.bandH, 3.45, x + 4.1, y0 + 3, -RECESS - 2.2, bandMat); x += 8.8; }
   x += 7;
   for (let k = 0; k < PROPS.notes; k++) { box(1.9, 21, 15, x + 1 + (k ? 2.4 : 0), y0 + 10.4, -RECESS - 7.5, noteMats[k], k ? -.16 : 0); x += 2.2; }
 }

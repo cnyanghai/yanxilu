@@ -1,5 +1,7 @@
-/* 拆包样机（灰盒）。只回答一件事：拆包的手感对不对。外观是占位的，不在这里讨论。
+/* 拆包样机。只回答一件事：拆包的手感对不对。
  * 2026-11-12 用户在手机上试过，开法定「热闹」；「安静」那一套参数留着备查，地址加 ?mode=quiet 才进。
+ * 2026-11-13 用户选定外观旧书房：这页的颜色、光、桌面、包和牌的画法接到 kit.js 的外观表上（每种外观的 pk 一栏），
+ *   做了旧书房（默认）和灰盒（过门时的样子，?look=grey）两种；动作、节拍、声音一点没动。
  *
  * 节拍（两种开法共用，强弱不同，差别全在下面 MODES 一张表里）：
  *   1 送到   一包牌从上面落到眼前，轻轻浮着；手指碰它它会偏一下
@@ -12,6 +14,7 @@
  * 结构：three.js 只画物件（桌面、包、牌、光），字用网页排；声音是 WebAudio 现场合成的，没有音频文件。
  * 调试：地址加 ?dev 显示帧率与状态；window.__lab 给测试脚本用。 */
 import * as THREE from "../vendor/three/three.module.min.js";   // 直接按相对路径引，不用 importmap（旧一点的手机浏览器不认）
+import { LOOK, patternTex, grainOver } from "./kit.js";       // 外观表、花纹。引进来的同时 kit.js 会把网页上那层字的颜色和顶栏的「外观」按钮接好
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -58,7 +61,8 @@ catch (e) {
   document.body.appendChild(d); throw e;
 }
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFShadowMap;
-const scene = new THREE.Scene(); scene.background = new THREE.Color(0x2a221c);
+const PK = LOOK.pk, STUDY = PK.style === "study";
+const scene = new THREE.Scene(); scene.background = new THREE.Color(PK.bg);
 const camera = new THREE.PerspectiveCamera(50, 1, .1, 200);
 const view = { dist: 14, tanV: 1, aspect: 1, portrait: true, target: new THREE.Vector3(0, 0, .25) };
 const camDir = new THREE.Vector3(0, Math.sin(ELEV), Math.cos(ELEV));       // 从目标指向镜头
@@ -69,12 +73,13 @@ const qLay = new THREE.Quaternion().setFromEuler(new THREE.Euler(-Math.PI / 2, 0
 const AX = new THREE.Vector3(1, 0, 0), AY = new THREE.Vector3(0, 1, 0), AZ = new THREE.Vector3(0, 0, 1);
 const qTmp = new THREE.Quaternion(), qTmp2 = new THREE.Quaternion(), vTmp = new THREE.Vector3(), vTmp2 = new THREE.Vector3();
 
-scene.add(new THREE.HemisphereLight(0xfff1dc, 0x3a2f26, 1.5));
-const key = new THREE.DirectionalLight(0xfff4e2, 2.5); key.position.set(-6, 15, 6); key.castShadow = true;
+scene.add(new THREE.HemisphereLight(PK.hemi[0], PK.hemi[1], PK.hemi[2]));
+const key = new THREE.DirectionalLight(PK.key[0], PK.key[1]); key.position.set(-6, 15, 6); key.castShadow = true;
 { const sm = innerWidth * Math.min(devicePixelRatio || 1, 2) < 1500 ? 1024 : 2048; key.shadow.mapSize.set(sm, sm); } key.shadow.bias = -.0004; key.shadow.normalBias = .03; key.shadow.radius = 5;
 Object.assign(key.shadow.camera, { left: -11, right: 11, top: 13, bottom: -11, near: 1, far: 50 });
 scene.add(key, key.target);
 const burstLight = new THREE.PointLight(0xffd9a0, 0, 30, 1.6); scene.add(burstLight);
+const lamp = PK.lamp ? new THREE.PointLight(PK.lamp[0], PK.lamp[1], 60, 1.5) : null; if (lamp) scene.add(lamp);   // 旧书房：桌子上方一盏灯，中间亮四周暗；位置在 fit() 里跟着镜头对准的地方走
 
 /* ---------- 画布贴图 ---------- */
 const maxAniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
@@ -84,8 +89,10 @@ function tex(w, h, draw) {
 }
 function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 const SERIF = '"Noto Serif SC","Songti SC",serif', MONO = '"IBM Plex Mono",ui-monospace,monospace', SANS = '"Noto Sans SC","PingFang SC",sans-serif';
-const COCOA = "#3B2416", COPPER = "#C4763A", CREAM = "#E6D2B0", INK = "#3E1D00", KRAFT = "#B98C5E";
+const COCOA = PK.cardBack, COPPER = PK.cardLine, CREAM = PK.cardFace, INK = PK.ink, KRAFT = PK.kraft, ACCENT = PK.accent;
+const inkA = (a) => { const n = parseInt(INK.slice(1), 16); return "rgba(" + (n >> 16) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; };   // 墨色带透明度
 function drawBack(g, w, h, c) {
+  if (STUDY) return drawBackStudy(g, w, h, c);
   g.fillStyle = COCOA; g.fillRect(0, 0, w, h);
   g.strokeStyle = COPPER; g.lineWidth = 5; rr(g, 36, 36, w - 72, h - 72, 22); g.stroke();
   g.lineWidth = 2.5; g.setLineDash([3, 10]); rr(g, 56, 56, w - 112, h - 112, 14); g.stroke(); g.setLineDash([]);
@@ -94,22 +101,57 @@ function drawBack(g, w, h, c) {
   g.save(); g.translate(w - 84, h - 104); g.rotate(Math.PI); g.fillText(c.no, 0, 0); g.restore();
 }
 function drawFront(g, w, h, c) {
-  g.fillStyle = CREAM; g.fillRect(0, 0, w, h);
-  g.strokeStyle = "rgba(62,29,0,.55)"; g.lineWidth = 3; rr(g, 34, 34, w - 68, h - 68, 20); g.stroke();
-  g.fillStyle = "#8B4319"; g.textAlign = "left"; g.textBaseline = "middle"; g.font = "600 30px " + MONO; g.fillText(c.no, 70, 96);
-  g.textAlign = "right"; g.font = "500 30px " + SANS; g.fillText(c.src, w - 70, 96);
-  g.fillStyle = "rgba(62,29,0,.35)"; g.fillRect(70, 132, w - 140, 2);
+  g.fillStyle = CREAM; g.fillRect(0, 0, w, h); grainOver(g, 0, 0, w, h, true);
+  g.strokeStyle = inkA(.55); g.lineWidth = 3; rr(g, 34, 34, w - 68, h - 68, 20); g.stroke();
+  if (STUDY) { g.lineWidth = 1.5; rr(g, 44, 44, w - 88, h - 88, 13); g.stroke(); }
+  g.fillStyle = ACCENT; g.textAlign = "left"; g.textBaseline = "middle"; g.font = "600 30px " + MONO; g.fillText(c.no, 70, 96);
+  g.textAlign = "right"; g.font = "500 30px " + (STUDY ? SERIF : SANS); g.fillText(c.src, w - 70, 96);
+  g.fillStyle = inkA(.35); g.fillRect(70, 132, w - 140, 2);
   // 标题：按字数折行，最多五行
   const per = 6, lines = []; let t = c.title;
   while (t.length && lines.length < 5) { let n = Math.min(per, t.length); if (t.length > n && /[，。：、？]/.test(t[n])) n++; lines.push(t.slice(0, n)); t = t.slice(n); }
   g.fillStyle = INK; g.textAlign = "left"; g.font = "700 82px " + SERIF;
   lines.forEach((ln, i) => g.fillText(ln, 70, 236 + i * 108));
-  g.fillStyle = "rgba(62,29,0,.35)"; g.fillRect(70, h - 150, w - 140, 2);
-  g.fillStyle = INK; g.font = "500 32px " + SANS; g.fillText("读完约 " + c.min + " 分钟", 70, h - 98);
+  g.fillStyle = inkA(.35); g.fillRect(70, h - 150, w - 140, 2);
+  g.fillStyle = INK; g.font = "500 32px " + (STUDY ? SERIF : SANS); g.fillText("读完约 " + c.min + " 分钟", 70, h - 98);
   // 篇幅用格子数表示（实心格越多越长），不靠颜色
   for (let i = 0; i < 4; i++) { g.beginPath(); g.rect(w - 70 - (4 - i) * 30, h - 112, 22, 28); if (i <= c.tier) g.fill(); else { g.lineWidth = 2; g.strokeStyle = INK; g.stroke(); } }
 }
+// 旧书房的牌背：藏青布面，烫金的两道框、四角的小菱花、当中一个圆章里一个大字
+function drawBackStudy(g, w, h, c) {
+  g.fillStyle = COCOA; g.fillRect(0, 0, w, h); grainOver(g, 0, 0, w, h, false);
+  g.strokeStyle = g.fillStyle = COPPER; g.lineWidth = 7; rr(g, 30, 30, w - 60, h - 60, 20); g.stroke();
+  g.lineWidth = 2; rr(g, 48, 48, w - 96, h - 96, 10); g.stroke();
+  const dia = (x, y, d) => { g.save(); g.translate(x, y); g.rotate(Math.PI / 4); g.fillRect(-d / 2, -d / 2, d, d); g.restore(); };
+  [[78, 78], [w - 78, 78], [78, h - 78], [w - 78, h - 78]].forEach(([x, y]) => dia(x, y, 20));
+  const cx = w / 2, cy = h / 2; g.lineWidth = 5; g.beginPath(); g.arc(cx, cy, 196, 0, 7); g.stroke(); g.lineWidth = 1.5; g.beginPath(); g.arc(cx, cy, 214, 0, 7); g.stroke();
+  for (let k = 0; k < 48; k++) { const a = k / 48 * Math.PI * 2; g.beginPath(); g.arc(cx + Math.cos(a) * 180, cy + Math.sin(a) * 180, 2.2, 0, 7); g.fill(); }   // 圆章里一圈小点
+  g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 250px " + SERIF; g.fillText(c.g, cx, cy + 8);
+  [cy - 290, cy + 290].forEach((y) => { dia(cx, y, 16); g.fillRect(cx - 120, y - 1, 92, 2); g.fillRect(cx + 28, y - 1, 92, 2); });
+  g.font = "600 30px " + MONO; g.textAlign = "left"; g.fillText(c.no, 104, 112);
+  g.save(); g.translate(w - 104, h - 112); g.rotate(Math.PI); g.fillText(c.no, 0, 0); g.restore();
+}
+// 旧书房的包：牛皮纸，当中贴一张米色的签，右下盖一枚邮戳；两道麻绳是真的两圈（见下面「包」那一节），不画在这里
+function drawPackFrontStudy(g, w, h) {
+  g.fillStyle = KRAFT; g.fillRect(0, 0, w, h);
+  g.strokeStyle = inkA(.5); g.lineWidth = 4; g.setLineDash([14, 12]); g.beginPath(); g.moveTo(0, 5); g.lineTo(w, 5); g.stroke(); g.setLineDash([]);
+  g.fillStyle = inkA(.66); g.textAlign = "center"; g.textBaseline = "middle"; g.font = "500 30px " + SANS; g.fillText("‹ ‹ ‹   沿 这 条 边 划 开   › › ›", w / 2, 50);
+  g.fillStyle = "rgba(60,34,10,.1)"; g.beginPath(); g.moveTo(0, h); g.lineTo(0, h - 120); g.lineTo(96, h); g.fill(); g.beginPath(); g.moveTo(w, h); g.lineTo(w, h - 120); g.lineTo(w - 96, h); g.fill();   // 包角的折痕
+  const lx = 64, ly = 176, lw = w - 128, lh = 330;                       // 签
+  g.fillStyle = "rgba(40,20,5,.28)"; g.fillRect(lx + 4, ly + 6, lw, lh); g.fillStyle = CREAM; g.fillRect(lx, ly, lw, lh);
+  g.strokeStyle = INK; g.lineWidth = 4; g.strokeRect(lx + 14, ly + 14, lw - 28, lh - 28); g.lineWidth = 1.5; g.strokeRect(lx + 24, ly + 24, lw - 48, lh - 48);
+  g.fillStyle = INK; g.font = "900 168px " + SERIF; g.fillText("剪报", w / 2, ly + 128);
+  g.fillRect(w / 2 - 110, ly + 226, 220, 3);
+  g.font = "500 38px " + SERIF; g.fillText("本周收件 · " + N + " 件", w / 2, ly + 272);
+  g.save(); g.translate(w - 150, 586); g.rotate(-.2); g.strokeStyle = g.fillStyle = inkA(.5);     // 邮戳
+  g.lineWidth = 4; g.beginPath(); g.arc(0, 0, 66, 0, 7); g.stroke(); g.lineWidth = 1.5; g.beginPath(); g.arc(0, 0, 54, 0, 7); g.stroke();
+  g.font = "700 40px " + SERIF; g.fillText("邮差", 0, -4); g.font = "600 17px " + MONO; g.fillText("NO. " + String(S.packNo).padStart(3, "0"), 0, 30);
+  g.lineWidth = 3; for (let k = -2; k <= 2; k++) { g.beginPath(); for (let x = -240; x <= -78; x += 6) g.lineTo(x, k * 15 + Math.sin(x / 14) * 4); g.stroke(); }
+  g.restore();
+  grainOver(g, 0, 0, w, h, true);
+}
 function drawPackFront(g, w, h) {
+  if (STUDY) return drawPackFrontStudy(g, w, h);
   g.fillStyle = KRAFT; g.fillRect(0, 0, w, h);
   g.strokeStyle = "rgba(62,29,0,.5)"; g.lineWidth = 4; g.setLineDash([14, 12]); g.beginPath(); g.moveTo(0, 5); g.lineTo(w, 5); g.stroke(); g.setLineDash([]);
   g.fillStyle = "rgba(62,29,0,.62)"; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "500 30px " + SANS; g.fillText("‹ ‹ ‹   沿 这 条 边 划 开   › › ›", w / 2, 50);
@@ -205,9 +247,15 @@ function tearSoundStop() {
 const buzz = (ms) => { try { if (navigator.vibrate) navigator.vibrate(ms); } catch (e) { /* 忽略 */ } };
 
 /* ---------- 桌面 ---------- */
-const table = new THREE.Mesh(new THREE.PlaneGeometry(90, 90), new THREE.MeshStandardMaterial({
-  roughness: 1, map: tex(256, 256, (g, w) => { const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); r.addColorStop(0, "#9a8b79"); r.addColorStop(.28, "#857665"); r.addColorStop(1, "#4d4239"); g.fillStyle = r; g.fillRect(0, 0, w, w); }),
-}));
+function tableMat() {
+  if (STUDY) {                                             // 胡桃木：木纹横着走
+    const t = patternTex("wood"); t.rotation = Math.PI / 2; t.repeat.set(13, 5); t.anisotropy = maxAniso;   // 转了九十度以后，前一个数管横纹有多密，后一个数管顺着纹的方向
+    return new THREE.MeshStandardMaterial({ roughness: .62, map: t, color: new THREE.Color(PK.table).multiplyScalar(t.userData.gain) });
+  }
+  const [c0, c1, c2] = PK.table;
+  return new THREE.MeshStandardMaterial({ roughness: 1, map: tex(256, 256, (g, w) => { const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); r.addColorStop(0, c0); r.addColorStop(.28, c1); r.addColorStop(1, c2); g.fillStyle = r; g.fillRect(0, 0, w, w); }) });
+}
+const table = new THREE.Mesh(new THREE.PlaneGeometry(90, 90), tableMat());
 table.rotation.x = -Math.PI / 2; table.receiveShadow = true; scene.add(table);
 
 /* ---------- 牌 ---------- */
@@ -220,7 +268,7 @@ const cardShape = rrShape(CW, CH, CR);
 const cardBody = new THREE.ExtrudeGeometry(cardShape, { depth: CT, bevelEnabled: false, curveSegments: 5 }); cardBody.translate(0, 0, -CT / 2);
 const cardFace = new THREE.ShapeGeometry(cardShape, 5);
 { const p = cardFace.attributes.position, uv = cardFace.attributes.uv; for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / CW + .5, p.getY(i) / CH + .5); uv.needsUpdate = true; }
-const edgeMat = new THREE.MeshStandardMaterial({ color: 0xd9c7a8, roughness: .9 });
+const edgeMat = new THREE.MeshStandardMaterial({ color: PK.edge, roughness: .9 });
 const glowMap = glowTex();
 const cards = [];
 function buildCards() {
@@ -253,10 +301,14 @@ function applyCard(c) {
 
 /* ---------- 包 ---------- */
 const pack = new THREE.Group(); scene.add(pack);
-const packMat = { side: new THREE.MeshStandardMaterial({ color: 0xa67a4e, roughness: .9 }), mouth: new THREE.MeshStandardMaterial({ color: 0x1e150e, roughness: 1 }), front: new THREE.MeshStandardMaterial({ roughness: .9 }), back: new THREE.MeshStandardMaterial({ color: 0xb98c5e, roughness: .9 }) };
+const packMat = { side: new THREE.MeshStandardMaterial({ color: PK.side, roughness: .9 }), mouth: new THREE.MeshStandardMaterial({ color: PK.mouth, roughness: 1 }), front: new THREE.MeshStandardMaterial({ roughness: .9 }), back: new THREE.MeshStandardMaterial({ color: PK.rear, roughness: .9 }) };
 const bodyMats = [packMat.side, packMat.side, packMat.mouth, packMat.side, packMat.front, packMat.back];
 const body = new THREE.Mesh(new THREE.BoxGeometry(PW, BH, PT), bodyMats); body.position.y = -STRIP / 2; body.castShadow = true; pack.add(body);
-const stripMat = new THREE.MeshStandardMaterial({ color: 0x9c6f44, roughness: .9, transparent: true });
+if (PK.twine) {                                            // 旧书房：包身上捆两道麻绳，真的两圈，前后左右都看得到
+  const tm = new THREE.MeshStandardMaterial({ color: PK.twine, roughness: 1 }), tg = new THREE.BoxGeometry(PW + .05, .055, PT + .05);
+  [.33, -.4].forEach((f) => { const m = new THREE.Mesh(tg, tm); m.position.y = -STRIP / 2 + f * BH; m.castShadow = true; pack.add(m); });
+}
+const stripMat = new THREE.MeshStandardMaterial({ color: PK.strip, roughness: .9, transparent: true });
 const segGeo = new THREE.BoxGeometry(SEG, STRIP, PT);
 const segs = []; for (let i = 0; i < K; i++) { const m = new THREE.Mesh(segGeo, stripMat); m.castShadow = true; pack.add(m); segs.push({ m, v: new THREE.Vector3(), w: new THREE.Vector3() }); }
 const mouthGlow = new THREE.Mesh(new THREE.PlaneGeometry(PW * 1.5, PT * 5), new THREE.MeshBasicMaterial({ map: glowMap, color: 0xffd9a0, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false }));
@@ -353,7 +405,7 @@ function fit() {
   view.dist = hi; view.target.set(0, 0, best.z);
   camBase.copy(view.target).addScaledVector(camDir, view.dist);
   slots = L.map(([x, z], i) => ({ pos: new THREE.Vector3(x, CT / 2 + .003 + i * .001, z), roll: ((i * 37) % 9 - 4) * .009 + (view.portrait ? 0 : -x * .012) }));
-  packPose();
+  packPose(); if (lamp) lamp.position.set(-1.2, 9.5, view.target.z - 1.5);
   cards.forEach((c) => { if (c.where === "table" && !c.busy) { c.pos.copy(slots[c.i].pos); c.roll = slots[c.i].roll; } });
 }
 function placeCamera() {

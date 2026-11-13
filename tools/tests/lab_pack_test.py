@@ -1,4 +1,5 @@
 """拆包样机（lab/）：送到、划开封口、发牌、翻牌、拿起来看、收下、下一包；热闹（默认，2026-11-12 用户定）与安静（?mode=quiet）各走一遍，手机竖屏。
+外观是默认的旧书房（2026-11-13 用户定）；灰盒下打不打得开在 lab_look_test.py 里看。
 用法：python3 tools/tests/lab_pack_test.py           # 自己起模拟服务（端口 8797），软件渲染
 截图落在 tools/out/lab/（已 gitignore）。样机看的是手感，这条测试只保证流程走得通、不报错。"""
 import os, sys, time, subprocess, urllib.request

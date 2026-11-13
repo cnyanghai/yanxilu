@@ -3,7 +3,9 @@
  * 2026-11-13 选外观阶段：三个瞬间都过门了，这里加一张外观表 LOOKS（颜色、材质、光、书脊怎么画、架子的样子、网页上那层字的颜色）。
  *   灰盒是过门时的样子，另外三个是候选的方向样张（纸模、玩具盒、旧书房），只用代码和仓库里已有的纸浆图做，不是成品。
  *   地址加 ?look=paper|toy|study|grey 切换，选过的记在这台设备上，几个样机页一起换；页面顶栏的「外观」按钮也能换。
- *   读没读的区分不变：没读是浅的（包着纸）、读过是深的、在读探出来带签，只靠明暗和形状。 */
+ *   读没读的区分不变：没读是浅的（包着纸）、读过是深的、在读探出来带签，只靠明暗和形状。
+ * 2026-11-13 用户选定旧书房：没选过的设备打开就是它，单子上只列旧书房和灰盒；纸模、玩具盒是落选的样张，留着对照，
+ *   只有地址带 ?look=paper|toy 才看得到，不再跟进。拆包页（pack.js）也接到这张表上（每种外观的 pk 一栏），只做了旧书房和灰盒。 */
 import * as THREE from "../vendor/three/three.module.min.js";   // 直接按相对路径引，不用 importmap（旧一点的手机浏览器不认）
 export { THREE };
 
@@ -81,6 +83,11 @@ export const LOOKS = {
     dim: { SH: 29, BT: 2, ST: 2, CD: 21, PL: 5 },
     cs: { frame: 0x8f7d6a, back: 0x51463d, wall: 0x40352e, floor: 0x2c231d, div: 0x2a221c, rough: .9, tex: null, ao: 0 },
     css: { bg: "#2A221C", ink: "#F3E7D3", ink2: "rgba(243,231,211,.72)", pane: "rgba(30,23,18,.78)", line: "rgba(243,231,211,.28)", on: "#2A221C", halo: "rgba(0,0,0,.8)", sheet: "20,15,12", lab: "rgba(24,18,14,.88)", scheme: "dark" }, veil: 0x120d0a,
+    props: { pack: 0x3b2a20, band: 0xc9b089, bandH: 2.2, notes: [0x5e5a48, 0x6a4a3a] },                          // 进门页最下面一层摆的牌盒和本子
+    // 拆包页：背景、天光、主光、桌面（三圈颜色的渐变）、牌背的底与线、牌面、墨、编号的颜色、包的正面与四周
+    pk: { style: "plain", bg: 0x2a221c, hemi: [0xfff1dc, 0x3a2f26, 1.5], key: [0xfff4e2, 2.5], table: ["#9a8b79", "#857665", "#4d4239"],
+      cardBack: "#3B2416", cardLine: "#C4763A", cardFace: "#E6D2B0", ink: "#3E1D00", accent: "#8B4319", kraft: "#B98C5E",
+      side: 0xa67a4e, rear: 0xb98c5e, strip: 0x9c6f44, mouth: 0x1e150e, edge: 0xd9c7a8 },
   },
   // 纸模：和每天用的纸模版一个色系（奶油、赤陶、可可），亮的桌面上一座卡纸折的架子
   paper: {
@@ -103,19 +110,27 @@ export const LOOKS = {
   },
   // 旧书房：暗处一盏暖灯，胡桃木的架子，布面烫金的书；没读的包着牛皮纸捆两道麻绳
   study: {
-    name: "旧书房", bg: 0x14100d, hemi: [0xffdcb0, 0x1c130d, .7], key: [0xffd29a, 3.5], sun: [-.38, .95, .72], soft: 4,
-    tones: ["#5C1F1F", "#1F3B2E", "#1E2A45", "#5A3B1E", "#3F2440", "#2A2420"], pale: "#DCCBA6", inkLt: "#E7D3A0", inkSoft: "#735536", paper: "#E6D9BC", tab: "#FFE2A8", tabGlow: .7,
+    name: "旧书房", bg: 0x1c1510, hemi: [0xffdcb0, 0x33241a, 1.05], key: [0xffd29a, 3.5], sun: [-.38, .95, .72], soft: 4,
+    tones: ["#5C1F1F", "#1F3B2E", "#1E2A45", "#5A3B1E", "#3F2440", "#2A2420"], pale: "#DCCBA6", inkLt: "#E7D3A0", inkSoft: "#5E4226", paper: "#E6D9BC", tab: "#FFE2A8", tabGlow: .7,
     gilt: "#D9B56A", twine: "#8A6A42",
     spine: "study", font: CJK, bookRough: .82, grain: "cloth", jit: .16,
     dim: { SH: 29, BT: 2.2, ST: 2.6, CD: 21, PL: 6 },
-    cs: { frame: 0x6f4526, back: 0x24160d, wall: 0x241a13, floor: 0x1a120c, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", crown: true, ao: .5 },
-    css: { bg: "#14100D", ink: "#F0DFC0", ink2: "rgba(240,223,192,.72)", pane: "rgba(22,15,10,.8)", line: "rgba(217,181,106,.5)", on: "#1A130E", halo: "rgba(0,0,0,.9)", sheet: "14,10,8", lab: "rgba(18,12,8,.9)", scheme: "dark" }, veil: 0x070504,
+    cs: { frame: 0x6f4526, back: 0x2c1b10, wall: 0x3a2a1d, floor: 0x2a1c12, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", crown: true, ao: .5 },
+    css: { bg: "#1C1510", ink: "#F0DFC0", ink2: "rgba(240,223,192,.76)", pane: "rgba(26,18,12,.8)", line: "rgba(217,181,106,.5)", on: "#1A130E", halo: "rgba(0,0,0,.9)", sheet: "18,13,9", lab: "rgba(22,15,10,.9)", scheme: "dark" }, veil: 0x0b0806,
+    props: { pack: 0xc2a06c, band: 0x7a5a36, bandH: .5, notes: [0x3a2618, 0x1e2a45] },                           // 牌包是牛皮纸捆麻绳，和拆包页的那一包一个样
+    // 拆包页：胡桃木的桌面上一盏灯；包是牛皮纸捆两道麻绳、贴一张签、盖一枚邮戳；牌背是藏青的布面烫金，牌面是米色的纸
+    pk: { style: "study", bg: 0x1c1510, hemi: [0xffdcb0, 0x33241a, .6], key: [0xffd29a, 1.7], lamp: [0xffc98a, 70], table: 0x5e3d24,
+      cardBack: "#1E2A45", cardLine: "#D9B56A", cardFace: "#EDE1C6", ink: "#2B1A0E", accent: "#7A4A1E", kraft: "#C9A877",
+      side: 0xb08f5f, rear: 0xc2a06c, strip: 0xb7996a, mouth: 0x140d08, edge: 0xcfae6a, twine: 0x7a5a36 },
   },
 };
+const SHOWN = ["study", "grey"], STORE = "lab-skin";      // 单子上列哪几种；记在设备上的名字（定了旧书房以后换过一次名，之前试候选时记下的不算数）
 function pickLook() {
+  const only = (document.documentElement.dataset.looks || "").split(" ").filter(Boolean);   // 这一页只做了哪几种（写在 <html data-looks> 上；没写就是都有）
+  const ok = (k) => !!LOOKS[k] && (!only.length || only.includes(k));
   let k = QS.get("look");
-  try { if (k && LOOKS[k]) localStorage.setItem("lab-look", k); else k = localStorage.getItem("lab-look"); } catch (e) { /* 存不了就只认地址 */ }
-  return LOOKS[k] ? k : "grey";
+  try { if (ok(k)) { if (SHOWN.includes(k)) localStorage.setItem(STORE, k); } else k = localStorage.getItem(STORE); } catch (e) { /* 存不了就只认地址 */ }
+  return ok(k) ? k : "study";
 }
 export const LOOK_KEY = pickLook(), LOOK = LOOKS[LOOK_KEY];
 
@@ -132,18 +147,19 @@ function applyLook() {
     .lookmenu button{appearance:none;border:0;background:none;color:var(--ink);font:500 15px/1 inherit;font-family:inherit;padding:12px 16px;border-radius:10px;text-align:left;cursor:pointer;white-space:nowrap}
     .lookmenu button[aria-pressed="true"]{background:var(--ink);color:var(--on);font-weight:700}
     .lookmenu small{display:block;margin-top:5px;font-size:11.5px;font-weight:400;opacity:.75}
-    html[data-look="study"] body::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 34%,rgba(255,186,104,.09),rgba(255,186,104,0) 58%),radial-gradient(ellipse at 50% 42%,rgba(0,0,0,0) 44%,rgba(0,0,0,.55) 100%)}
-    html[data-look="study"] .bar h1,html[data-look="study"] .go,html[data-look="study"] .snd,html[data-look="study"] .seg button,html[data-look="study"] .mini,html[data-look="study"] .bag{font-family:"Noto Serif SC","Songti SC",serif}
+    html[data-look="study"] body::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 34%,rgba(255,186,104,.09),rgba(255,186,104,0) 58%),radial-gradient(ellipse at 50% 42%,rgba(0,0,0,0) 46%,rgba(0,0,0,.4) 100%)}
+    html[data-look="study"] .bar h1,html[data-look="study"] .go,html[data-look="study"] .snd,html[data-look="study"] .seg button,html[data-look="study"] .mini,html[data-look="study"] .bag,html[data-look="study"] .acts button{font-family:"Noto Serif SC","Songti SC",serif}
     html[data-look="paper"] .go,html[data-look="paper"] .snd,html[data-look="paper"] .seg,html[data-look="paper"] .seg button,html[data-look="paper"] .mini,html[data-look="paper"] .bag,html[data-look="paper"] .lab,html[data-look="paper"] .tip,html[data-look="paper"] .sheet .main,html[data-look="paper"] .lookmenu,html[data-look="paper"] .lookmenu button{border-radius:5px}
     html[data-look="paper"] .bar h1,html[data-look="toy"] .bar h1{font-family:"Noto Sans SC","PingFang SC",sans-serif}
     html[data-look="toy"] .go,html[data-look="toy"] .snd,html[data-look="toy"] .seg button,html[data-look="toy"] .mini,html[data-look="toy"] .bag{font-weight:700}
   `;
   document.head.appendChild(css);
+  const sub = document.querySelector(".bar h1 small"); if (sub) sub.textContent = LOOK_KEY === "grey" ? "灰盒：只看手感，不看外观" : LOOK.name + "：样张，还没到成品";
   const btn = document.getElementById("look"); if (!btn) return;
   btn.textContent = innerWidth < 430 ? "外观" : "外观：" + LOOK.name;      // 窄屏只写两个字，点开的单子里看得到现在是哪个
   const menu = document.createElement("div"); menu.className = "lookmenu"; menu.setAttribute("role", "menu");
-  const NOTE = { grey: "过门时的占位样子", paper: "和日常纸模版一个色系", toy: "亮色，积木一样的书", study: "暗处一盏暖灯，布面烫金" };
-  Object.keys(LOOKS).forEach((k) => {
+  const NOTE = { grey: "过门时的占位样子", study: "暗处一盏暖灯，布面烫金" };
+  SHOWN.forEach((k) => {
     const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", String(k === LOOK_KEY)); b.dataset.look = k;
     b.textContent = LOOKS[k].name; const sm = document.createElement("small"); sm.textContent = NOTE[k]; b.appendChild(sm);
     b.addEventListener("click", () => { if (k === LOOK_KEY) { menu.classList.remove("on"); return; } const u = new URL(location.href); u.searchParams.set("look", k); location.href = u.href; });
@@ -183,7 +199,7 @@ const PATTERN = {
     g.fillStyle = "rgba(0,0,0,.6)"; g.fillRect(0, 0, 3, h); g.fillStyle = "rgba(255,230,200,.14)"; g.fillRect(3, 0, 2, h);
   }),
 };
-function patternTex(kind) {                                  // 浅底的花纹平均下来比白暗一点，面色乘回去
+export function patternTex(kind) {                                  // 浅底的花纹平均下来比白暗一点，面色乘回去
   const t = new THREE.CanvasTexture(PATTERN[kind]()); t.colorSpace = THREE.SRGBColorSpace;
   t.wrapS = t.wrapT = THREE.RepeatWrapping; t.center.set(.5, .5); t.userData.gain = kind === "pulp" ? 1.06 : 1.2; return t;
 }
