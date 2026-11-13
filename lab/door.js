@@ -15,7 +15,7 @@
  * 进法：2026-11-12 用户在手机上两种都试过，定「直接到」，不要敲门那一段。敲门进（一扇门、门牌、敲两下、门开、镜头穿过门）
  *   留在代码里对照用，地址加 ?way=knock 才走，页面上不再有切换。
  * 调试：地址加 ?dev 显示帧率与状态；window.__lab 给测试脚本用。 */
-import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, DIM, STN, CJK, PAPER, LOOK as SKIN } from "./kit.js";
+import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, DIM, STN, CJK, PAPER, LOOK as SKIN, whenReady } from "./kit.js";
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -396,5 +396,4 @@ window.__lab = {
   get doorOn() { return doorG.visible; },
   manual(on) { S.manual = !!on; }, step(sec) { let t = sec; while (t > 1e-6) { const d = Math.min(1 / 60, t); tick(d); t -= d; } },
 };
-fit(); enter(S.way);
-requestAnimationFrame(frame);
+whenReady().then(() => { fit(); enter(S.way); requestAnimationFrame(frame); });   // 等木纹的图到了再开场（最多等一秒半）

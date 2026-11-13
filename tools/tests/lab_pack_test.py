@@ -61,7 +61,9 @@ try:
             check(mode + " 点一张翻一张", n_up == 1, n_up); shot("7-one-up")
             pg.mouse.click(195, 440); pg.wait_for_timeout(700)
             check(mode + " 翻开的再点是拿起来看", pg.evaluate("window.__lab.S.inspect") >= 0); shot("8-inspect")
-            pg.mouse.click(195, 700); pg.wait_for_timeout(600)
+            pg.mouse.click(195, 700)
+            try: pg.wait_for_function("window.__lab.S.inspect === -1", timeout=15000, polling=100)      # 软件渲染一帧要一百多毫秒，放回去那一下等它做完，不卡死时间
+            except Exception: pass
             check(mode + " 再点放回去", pg.evaluate("window.__lab.S.inspect") == -1)
             pg.click("#b-all"); pg.wait_for_timeout(1800)
             check(mode + " 全部翻开", pg.evaluate("window.__lab.cards.every(c => c.up)")); shot("9-all-up")
@@ -87,9 +89,9 @@ try:
         ctx = br.new_context(viewport={"width": 1280, "height": 800}, device_scale_factor=1, service_workers="block"); pg = ctx.new_page(); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
         pg.goto(B + "/lab?mode=quiet"); pg.wait_for_function("window.__lab && window.__lab.state === 'idle'", timeout=15000)
-        pg.evaluate("window.__lab.manual(true)"); pg.evaluate("window.__lab.step(.5)"); pg.screenshot(path=os.path.join(OUT, "desk-1-idle.png"))
+        pg.evaluate("window.__lab.manual(true)"); pg.evaluate("window.__lab.step(.5)"); pg.screenshot(path=os.path.join(OUT, "desk-1-idle.png"), timeout=240000)   # 大窗口下软件渲染慢，截图多等一会儿
         pg.evaluate("window.__lab.tearTo(1)"); pg.evaluate("window.__lab.step(3)"); pg.evaluate("window.__lab.flipAll()"); pg.evaluate("window.__lab.step(2)")
-        pg.screenshot(path=os.path.join(OUT, "desk-2-all-up.png"))
+        pg.screenshot(path=os.path.join(OUT, "desk-2-all-up.png"), timeout=240000)
         check("桌面横屏走通", pg.evaluate("window.__lab.cards.every(c => c.up)") and not errs, "; ".join(errs)[:200])
         ctx.close(); br.close()
 finally:

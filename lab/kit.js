@@ -5,7 +5,10 @@
  *   地址加 ?look=paper|toy|study|grey 切换，选过的记在这台设备上，几个样机页一起换；页面顶栏的「外观」按钮也能换。
  *   读没读的区分不变：没读是浅的（包着纸）、读过是深的、在读探出来带签，只靠明暗和形状。
  * 2026-11-13 用户选定旧书房：没选过的设备打开就是它，单子上只列旧书房和灰盒；纸模、玩具盒是落选的样张，留着对照，
- *   只有地址带 ?look=paper|toy 才看得到，不再跟进。拆包页（pack.js）也接到这张表上（每种外观的 pk 一栏），只做了旧书房和灰盒。 */
+ *   只有地址带 ?look=paper|toy 才看得到，不再跟进。拆包页（pack.js）也接到这张表上（每种外观的 pk 一栏），只做了旧书房和灰盒。
+ * 2026-11-13「材质」一门（用户点头下载以后）：旧书房的架子、地、拆包页的桌面贴真的木纹，抽出来的那本书和牌背加布纹的凹凸，
+ *   烫金反环境光。木纹和布纹是 Poly Haven 的扫描图（CC0），转成 WebP 放在 vendor/tex/；环境光是这里用代码搭的，不是图。
+ *   图读不到就退回代码画的花纹，页面照常能用。整面墙上的书脊没有上金属反光（一本只有十几个像素宽，看不出来，反而会让书名发暗）。 */
 import * as THREE from "../vendor/three/three.module.min.js";   // 直接按相对路径引，不用 importmap（旧一点的手机浏览器不认）
 export { THREE };
 
@@ -118,9 +121,18 @@ export const LOOKS = {
     cs: { frame: 0x6f4526, back: 0x2c1b10, wall: 0x3a2a1d, floor: 0x2a1c12, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", crown: true, ao: .5 },
     css: { bg: "#1C1510", ink: "#F0DFC0", ink2: "rgba(240,223,192,.76)", pane: "rgba(26,18,12,.8)", line: "rgba(217,181,106,.5)", on: "#1A130E", halo: "rgba(0,0,0,.9)", sheet: "18,13,9", lab: "rgba(22,15,10,.9)", scheme: "dark" }, veil: 0x0b0806,
     props: { pack: 0xc2a06c, band: 0x7a5a36, bandH: .5, notes: [0x3a2618, 0x1e2a45] },                           // 牌包是牛皮纸捆麻绳，和拆包页的那一包一个样
+    // 真的材质（2026-11-13「材质」一门）：扫描的木头和书布，图在 vendor/tex/。tile：一张图铺多少厘米；grainX：木纹顺着图的横向走；
+    //   tint：乘在木头图上的颜色（线性的三个数，可以大于一），架子、背板、地、拆包页的桌面各一个；depth：布纹凹多深
+    real: {
+      wood: { map: "dark_wood_diff_1k.webp", rough: "dark_wood_rough_1k.webp", tile: 100, grainX: true, roughK: 1, tint: { frame: [1.45, 2.2, 2], back: [.25, .45, .5], floor: [.24, .5, .62], table: [.95, 1.3, 1.25] } },
+      cloth: { nor: "book_pattern_nor_gl_1k.webp", tile: 30, depth: 1.3 },
+    },
+    // 环境光（用代码搭一间暗屋子烘出来，不是下载的图）：屋子的底色与亮度；几盏灯（位置、大小、颜色、亮度）；k：烫金反多少
+    //   屋子要暗、灯要小而亮：金只在对着灯的角度亮起来，布面不会被环境光整片抬亮
+    env: { room: [0x8a6a48, .15], lamps: [[-2.4, 3.2, 2.8, 1.5, 0xffd9a8, 3.2], [.6, .3, 4.7, 1.7, 0xffcf9a, 1.5], [0, 4.8, .2, 2.2, 0xffd9a8, 3]], k: 1 },
     // 拆包页：胡桃木的桌面上一盏灯；包是牛皮纸捆两道麻绳、贴一张签、盖一枚邮戳；牌背是藏青的布面烫金，牌面是米色的纸
     pk: { style: "study", bg: 0x1c1510, hemi: [0xffdcb0, 0x33241a, .6], key: [0xffd29a, 1.7], lamp: [0xffc98a, 70], table: 0x5e3d24,
-      cardBack: "#1E2A45", cardLine: "#D9B56A", cardFace: "#EDE1C6", ink: "#2B1A0E", accent: "#7A4A1E", kraft: "#C9A877",
+      cardBack: "#1E2A45", cardLine: "#D9B56A", cardFace: "#EDE1C6", ink: "#2B1A0E", accent: "#7A4A1E", kraft: "#C9A877", tableTile: 16, clothTile: 9,   // 桌面的木纹一张图铺十六个单位（再大在高分屏上就糊了）；牌背的布纹一张图铺九个单位
       side: 0xb08f5f, rear: 0xc2a06c, strip: 0xb7996a, mouth: 0x140d08, edge: 0xcfae6a, twine: 0x7a5a36 },
   },
 };
@@ -204,6 +216,56 @@ export function patternTex(kind) {                                  // 浅底的
   t.wrapS = t.wrapT = THREE.RepeatWrapping; t.center.set(.5, .5); t.userData.gain = kind === "pulp" ? 1.06 : 1.2; return t;
 }
 
+/* ---------- 真的材质（旧书房）：扫描的木头和书布，转成 WebP 放在 vendor/tex/（来源见那里的 SOURCES.md） ---------- */
+const TEX = { wood: null, cloth: null };
+function loadTex() {
+  const R = LOOK.real; if (!R) return Promise.resolve(TEX);
+  const L = new THREE.TextureLoader(), W = R.wood;
+  const one = (f, srgb) => new Promise((res) => {
+    if (!f) return res(null);
+    L.load(new URL("../vendor/tex/" + f, import.meta.url).href, (t) => { t.wrapS = t.wrapT = THREE.RepeatWrapping; t.center.set(.5, .5); if (srgb) t.colorSpace = THREE.SRGBColorSpace; res(t); }, undefined, () => res(null));
+  });
+  return Promise.all([one(W.map, true), one(W.rough), one(R.cloth.nor)]).then(([map, rough, nor]) => {
+    if (map) TEX.wood = { ...W, map, rough }; if (nor) TEX.cloth = { ...R.cloth, nor }; return TEX;      // 哪张没读到就退回代码画的花纹
+  });
+}
+export const texReady = loadTex();                           // 图读完（或者读不到）以后才算数；没有真材质的外观马上就好
+export const whenReady = (ms = 1500) => Promise.race([texReady, new Promise((r) => setTimeout(r, ms))]);   // 样机页等它再开场，等不到就先开，图到了再换上
+// 真木纹的两张图，裁成一块板用的样子。across / along：横着木纹、顺着木纹各有多长（厘米，或者自己给 tile）；turn：木纹顺着这一面的横向走；seed：每块板错开一点，不长得一样
+export function woodMaps(across, along, turn, seed = 0, tile) {
+  const W = TEX.wood; if (!W) return null; const T = tile || W.tile, a = across / T, b = along / T;
+  const cut = (src) => { if (!src) return null; const t = src.clone(); t.repeat.set(W.grainX ? b : a, W.grainX ? a : b); t.rotation = (W.grainX ? !turn : turn) ? Math.PI / 2 : 0; t.offset.set((seed * .37) % 1, (seed * .61) % 1); t.needsUpdate = true; return t; };
+  return { map: cut(W.map), roughnessMap: cut(W.rough), cfg: W };
+}
+export function woodOn(mat, part, across, along, turn, seed, tile) {   // 把真木纹贴到一个材质上；回来的是新做的贴图（用完要自己 dispose），没有真木纹就回空
+  const w = woodMaps(across, along, turn, seed, tile); if (!w) return null; const c = w.cfg, t = c.tint[part] || [1, 1, 1];
+  mat.map = w.map; mat.roughnessMap = w.roughnessMap; mat.roughness = c.roughK; mat.color.setRGB(t[0], t[1], t[2]);
+  mat.needsUpdate = true;                                    // 木头不反环境光：桌面和地是铺满整屏的，每个像素都去查环境光太费，手机吃不消；亮哑靠那张反光图和灯
+  return [w.map, w.roughnessMap].filter(Boolean);
+}
+// 环境光：一间暗屋子加几盏灯，烘成一张模糊的全景，给烫金反光用
+let ENV = null;
+export function makeEnv(renderer) {
+  const e = LOOK.env; if (!e) return null;
+  const sc = new THREE.Scene(), junk = [];
+  const add = (geo, color, k, side) => { const m = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ color: new THREE.Color(color).multiplyScalar(k), side })); junk.push(geo, m.material); sc.add(m); return m; };
+  add(new THREE.BoxGeometry(10, 10, 10), e.room[0], e.room[1], THREE.BackSide);
+  e.lamps.forEach(([x, y, z, size, color, k]) => { const m = add(new THREE.PlaneGeometry(size, size), color, k, THREE.DoubleSide); m.position.set(x, y, z); m.lookAt(0, 0, 0); });
+  const pm = new THREE.PMREMGenerator(renderer); ENV = pm.fromScene(sc, .04).texture; pm.dispose(); junk.forEach((o) => o.dispose());
+  return ENV;
+}
+// 烫金：另画一张图说「哪里是金」（绿管粗糙、蓝管金属），金的地方反环境光。没有环境光的外观什么都不做
+export const MASK = { cloth: "rgb(0,214,0)", paper: "rgb(0,235,0)", gilt: "rgb(0,80,196)" };   // 金：比布面光滑得多；金属只给到七成多，留一点漆的底色，背着光的角度书名也还看得见
+export function foil(mat, maskTex) {
+  if (!ENV) return false; mat.metalnessMap = mat.roughnessMap = maskTex; mat.metalness = 1; mat.roughness = 1; mat.envMap = ENV; mat.envMapIntensity = LOOK.env.k; mat.needsUpdate = true; return true;
+}
+// 布纹的凹凸：这一面有多宽多高（厘米，或者自己给 tile）；on=false 是包着纸的，不要布纹
+export function weave(mat, w, h, on = true, tile) {
+  const c = TEX.cloth; if (!c) return;
+  if (!mat.normalMap) { mat.normalMap = c.nor.clone(); mat.normalMap.needsUpdate = true; mat.needsUpdate = true; }
+  mat.normalMap.repeat.set(w / (tile || c.tile), h / (tile || c.tile)); mat.normalScale.setScalar(on ? c.depth : 0);
+}
+
 /* ---------- 三维舞台：渲染器、镜头、一盏主光加天光 ---------- */
 export function createStage(canvas) {
   let renderer;
@@ -220,6 +282,7 @@ export function createStage(canvas) {
   const key = new THREE.DirectionalLight(LOOK.key[0], LOOK.key[1]); key.castShadow = true; scene.add(key, key.target);
   const sm = innerWidth * Math.min(devicePixelRatio || 1, 2) < 1500 ? 1024 : 2048; key.shadow.mapSize.set(sm, sm);
   key.shadow.bias = -.0006; key.shadow.normalBias = .12; key.shadow.radius = LOOK.soft;
+  makeEnv(renderer);
   return { renderer, scene, camera, key, maxAniso };
 }
 // 主光对着架子：左前上方打过来，影子的范围刚好罩住整座
@@ -260,17 +323,21 @@ const SPINES = {
     g.fillStyle = todo ? INK_SOFT : INK_LT; g.globalAlpha = todo ? .45 : .95; g.beginPath(); g.arc(0, h * .085, Math.min(tw * .22, h * .03), 0, 7); g.fill(); g.globalAlpha = 1;
     titleV(g, [...b.title], tw, h * .15, h * .75, todo ? INK_SOFT : INK_LT, SANS, 900, .68);
   },
-  study(g, tw, h, b, todo) {
+  study(g, tw, h, b, todo, mask) {                         // mask：只画「哪里是金」那张图
+    if (todo && mask) return;
     if (todo) {                                            // 没读：牛皮纸包着，上下折边，捆两道麻绳
       g.fillStyle = "rgba(90,60,30,.13)"; g.fillRect(-tw / 2, h * .04, tw, h * .035); g.fillRect(-tw / 2, h * .95, tw, h * .05);
       g.fillStyle = LOOK.twine; [.2, .8].forEach((f) => g.fillRect(-tw / 2, h * f, tw, Math.max(1.3, h * .009)));
       titleV(g, [...b.title], tw, h * .25, h * .76, INK_SOFT, CJK, 600); return;
     }
     const lw = Math.max(1, h * .007);                      // 读过：布面，书名压在一格深色的皮签上，三道竹节，烫金的线和一枚小菱花
-    g.fillStyle = "rgba(0,0,0,.26)"; g.fillRect(-tw / 2, h * .16, tw, h * .56);
-    [.115, .76, .885].forEach((f) => { g.fillStyle = "rgba(0,0,0,.42)"; g.fillRect(-tw / 2, h * f, tw, lw * 2.2); g.fillStyle = "rgba(255,255,255,.15)"; g.fillRect(-tw / 2, h * f - lw, tw, lw); });
-    g.fillStyle = LOOK.gilt; [.055, .07, .145, .735, .93, .945].forEach((f) => g.fillRect(-tw * .42, h * f, tw * .84, lw));
-    titleV(g, [...b.title], tw, h * .18, h * .7, LOOK.gilt, CJK, 700);
+    const gold = mask ? MASK.gilt : LOOK.gilt;
+    if (!mask) {
+      g.fillStyle = "rgba(0,0,0,.26)"; g.fillRect(-tw / 2, h * .16, tw, h * .56);
+      [.115, .76, .885].forEach((f) => { g.fillStyle = "rgba(0,0,0,.42)"; g.fillRect(-tw / 2, h * f, tw, lw * 2.2); g.fillStyle = "rgba(255,255,255,.15)"; g.fillRect(-tw / 2, h * f - lw, tw, lw); });
+    }
+    g.fillStyle = gold; [.055, .07, .145, .735, .93, .945].forEach((f) => g.fillRect(-tw * .42, h * f, tw * .84, lw));
+    titleV(g, [...b.title], tw, h * .18, h * .7, gold, CJK, 700);
     const d = Math.min(tw * .22, h * .024); g.save(); g.translate(0, h * .825); g.rotate(Math.PI / 4); g.fillRect(-d / 2, -d / 2, d, d); g.restore();
   },
 };
@@ -279,13 +346,13 @@ export function grainOver(g, x, y, w, h, todo) {           // 往刚画好的一
   const kind = LOOK.grain && (todo ? "pulp" : LOOK.grain); if (!kind) return; grainC[kind] = grainC[kind] || PATTERN[kind]();
   g.save(); g.globalCompositeOperation = "multiply"; g.fillStyle = g.createPattern(grainC[kind], "repeat"); g.fillRect(x, y, w, h); g.restore();
 }
-export function drawSpine(g, x, y, w, h, b, pale) {
+export function drawSpine(g, x, y, w, h, b, pale, mask) {  // mask：不画颜色，画「哪里是金」那张图（只有旧书房的书脊认）
   const todo = pale || b.st === "todo";
-  g.fillStyle = todo ? PALE : TONES[b.cat % TONES.length]; g.fillRect(x, y, w, h);
+  g.fillStyle = mask ? (todo ? MASK.paper : MASK.cloth) : todo ? PALE : TONES[b.cat % TONES.length]; g.fillRect(x, y, w, h);
   const sy = h / b.h, tw = b.t * sy;                    // 图上横竖的比例和真书脊不一样，按竖向的像素来排，横向整体拉开，贴上去才还原
-  if (LOOK.jit) { const j = ((Math.imul(b.i + 1, 2654435761) >>> 0) % 1000) / 1000 - .5; g.fillStyle = j > 0 ? "rgba(255,255,255," + (j * LOOK.jit).toFixed(3) + ")" : "rgba(0,0,0," + (-j * LOOK.jit).toFixed(3) + ")"; g.fillRect(x, y, w, h); }   // 每本深浅差一点点，不那么齐
+  if (LOOK.jit && !mask) { const j = ((Math.imul(b.i + 1, 2654435761) >>> 0) % 1000) / 1000 - .5; g.fillStyle = j > 0 ? "rgba(255,255,255," + (j * LOOK.jit).toFixed(3) + ")" : "rgba(0,0,0," + (-j * LOOK.jit).toFixed(3) + ")"; g.fillRect(x, y, w, h); }   // 每本深浅差一点点，不那么齐
   g.save(); g.translate(x + w / 2, y); g.scale((w / b.t) / sy, 1);
-  SPINES[LOOK.spine](g, tw, h, b, todo);
+  SPINES[LOOK.spine](g, tw, h, b, todo, mask);
   g.restore();
 }
 export function createBookKit(maxAniso) {
@@ -331,12 +398,21 @@ export function createCase(scene, unitBox) {
   const group = new THREE.Group(); scene.add(group);
   const caseMat = new THREE.MeshStandardMaterial({ color: C.frame, roughness: C.rough }), backMat = new THREE.MeshStandardMaterial({ color: C.back, roughness: .95 });
   const wallMat = new THREE.MeshStandardMaterial({ color: C.wall, roughness: 1 }), floorMat = new THREE.MeshStandardMaterial({ color: C.floor, roughness: 1 });
-  const tex = C.tex ? patternTex(C.tex) : null, wallTex = C.wallTex ? patternTex(C.wallTex) : tex, T = C.tile || 30, made = [];
-  // 盒子都是一个单位立方体拉出来的，贴花纹时每块板按自己看得见的那一面有多大，定花纹重复几遍；turn：木纹顺着长边走
-  const skin = (mat, t, rx, ry, turn) => {
-    if (!t) return mat; const m = mat.clone(), tt = t.clone(); tt.repeat.set(rx, ry); if (turn) tt.rotation = Math.PI / 2; tt.needsUpdate = true;
-    m.map = tt; m.color.multiplyScalar(t.userData.gain); made.push(m, tt); return m;
+  const tex = C.tex ? patternTex(C.tex) : null, wallTex = C.wallTex ? patternTex(C.wallTex) : tex, T = C.tile || 30;
+  // 盒子都是一个单位立方体拉出来的，贴花纹时每块板按自己看得见的那一面有多大，定花纹重复几遍；turn：木纹顺着长边走。
+  // 有真木纹（旧书房）就贴真的：part 说这块是架子、背板还是地（各有各的深浅），seed 让每块板的纹错开。图晚到的话到了以后原地重贴一遍
+  const skins = [];
+  const dress = (k) => {
+    k.own.forEach((o) => o.dispose()); k.own = [];
+    const wood = k.t === tex && C.tex === "wood" && k.part ? woodOn(k.m, k.part, k.rx * T, k.ry * T, k.turn, k.seed) : null;
+    if (wood) { k.own = wood; return; }
+    const tt = k.t.clone(); tt.repeat.set(k.rx, k.ry); if (k.turn) tt.rotation = Math.PI / 2; tt.needsUpdate = true;
+    k.m.map = tt; k.m.color.copy(k.base.color).multiplyScalar(k.t.userData.gain); k.own = [tt];
   };
+  const skin = (mat, t, rx, ry, turn, part, seed = 0) => {
+    if (!t) return mat; const k = { m: mat.clone(), base: mat, t, rx, ry, turn, part, seed, own: [] }; skins.push(k); dress(k); return k.m;
+  };
+  texReady.then(() => { if (TEX.wood) skins.forEach(dress); });
   // 每一层后面压一片上深下浅的影子：层板底下、书顶上面那一道暗下去，架子才有深度
   const shade = C.ao ? new THREE.MeshBasicMaterial({ transparent: true, depthWrite: false, opacity: C.ao, map: new THREE.CanvasTexture(canvasOf(64, 64, (g, w, h) => {
     const v = g.createLinearGradient(0, 0, 0, h); v.addColorStop(0, "rgba(0,0,0,1)"); v.addColorStop(.3, "rgba(0,0,0,.45)"); v.addColorStop(.75, "rgba(0,0,0,.1)"); v.addColorStop(1, "rgba(0,0,0,.28)"); g.fillStyle = v; g.fillRect(0, 0, w, h);
@@ -345,13 +421,13 @@ export function createCase(scene, unitBox) {
   const plane = new THREE.PlaneGeometry(1, 1);
   function build(W, R) {                                           // W：里面净宽，R：几层。回来的是整座的外宽和总高
     group.children.forEach((m) => { if (m.geometry !== unitBox && m.geometry !== plane) m.geometry.dispose(); }); group.clear();
-    made.forEach((o) => o.dispose()); made.length = 0;
+    skins.forEach((k) => { k.own.forEach((o) => o.dispose()); k.m.dispose(); }); skins.length = 0;
     const w = W + 2 * ST, h = R * (SH + BT) + BT + PL;
     const add = (bw, bh, bd, x, y, z, mat) => { const m = new THREE.Mesh(unitBox, mat); m.scale.set(bw, bh, bd); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; group.add(m); return m; };
-    add(w, h - PL, 1, 0, PL + (h - PL) / 2, -CD + .5, skin(backMat, tex, w / T, (h - PL) / T));                          // 背板
-    const sideMat = skin(caseMat, tex, CD / T, h / T), boardMat = skin(caseMat, tex, (CD - 1) / T, W / T, true);
-    [-1, 1].forEach((s) => add(ST, h, CD + .6, s * (W / 2 + ST / 2), h / 2, -CD / 2 + .3, sideMat));                    // 两侧
-    for (let k = 0; k <= R; k++) add(W, BT, CD - 1, 0, PL + BT / 2 + k * (SH + BT), -(CD - 1) / 2, boardMat);            // 层板
+    add(w, h - PL, 1, 0, PL + (h - PL) / 2, -CD + .5, skin(backMat, tex, w / T, (h - PL) / T, false, "back"));           // 背板
+    const board = (seed) => skin(caseMat, tex, (CD - 1) / T, W / T, true, "frame", seed), boardMat = board(11);
+    [-1, 1].forEach((s) => add(ST, h, CD + .6, s * (W / 2 + ST / 2), h / 2, -CD / 2 + .3, skin(caseMat, tex, CD / T, h / T, false, "frame", s + 3)));   // 两侧
+    for (let k = 0; k <= R; k++) add(W, BT, CD - 1, 0, PL + BT / 2 + k * (SH + BT), -(CD - 1) / 2, board(k + 1));        // 层板（一块一个材质，木纹错开）
     add(W, PL, CD - 3, 0, PL / 2, -(CD - 3) / 2 - 2, backMat);                                                          // 踢脚
     let top = h;
     if (C.crown) {                                                                                                     // 旧书房：顶上一道压顶线，脚下一圈底座
@@ -360,7 +436,7 @@ export function createCase(scene, unitBox) {
     }
     if (shade) for (let k = 0; k < R; k++) { const m = new THREE.Mesh(plane, shade); m.scale.set(W, SH, 1); m.position.set(0, PL + BT + k * (SH + BT) + SH / 2, -CD + 1.06); m.renderOrder = 1; group.add(m); }
     const wall = new THREE.Mesh(new THREE.PlaneGeometry(w + 900, h + 600), skin(wallMat, wallTex, (w + 900) / (C.wallTex ? 34 : T), (h + 600) / (C.wallTex ? 34 : T))); wall.position.set(0, h / 2, -CD - .2); wall.receiveShadow = true; group.add(wall);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(w + 900, 900), skin(floorMat, tex, (w + 900) / T, 900 / T)); floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, 450 - CD); floor.receiveShadow = true; group.add(floor);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(w + 900, 900), skin(floorMat, tex, (w + 900) / T, 900 / T, false, "floor")); floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, 450 - CD); floor.receiveShadow = true; group.add(floor);
     return { w, h: top };
   }
   return { group, build, caseMat, backMat, wallMat, floorMat };

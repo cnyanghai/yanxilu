@@ -1,6 +1,6 @@
 """样机的外观（lab/kit.js 的外观表）。2026-11-13 用户选定旧书房：没选过的设备打开就是旧书房，顶栏「外观」单子上只有旧书房和灰盒，
 换过以后三个样机页（书架、进门、拆包）一起换；纸模、玩具盒是落选的样张，地址带 ?look= 还打得开，但不记在设备上，拆包页没做它们。
-四种外观读没读的明暗差都要够大（不靠色相）。
+四种外观读没读的明暗差都要够大（不靠色相）。旧书房用的真木纹、布纹图要读得到。
 用法：python3 tools/tests/lab_look_test.py           # 自己起模拟服务（端口 8795），软件渲染，约三四分钟
 截图落在 tools/out/lab/（已 gitignore）。这条测试只保证切换走得通、状态分得清，好不好看要人在手机上看。"""
 import os, sys, time, subprocess, urllib.request
@@ -48,6 +48,8 @@ try:
         ctx, pg, errs = page()
         pg.goto(B + "/lab/shelf.html?n=40"); idle(pg); pg.wait_for_timeout(600)
         check("没选过外观：打开就是旧书房", look(pg) == "study", look(pg))
+        tx = pg.evaluate("import('./kit.js').then(m => m.texReady).then(t => ({ wood: !!t.wood, cloth: !!t.cloth }))")
+        check("旧书房：木纹和布纹的图（vendor/tex/）都读到了", tx == {"wood": True, "cloth": True}, tx)
         looks = pg.evaluate("import('./kit.js').then(m => Object.fromEntries(Object.entries(m.LOOKS).map(([k, L]) => [k, { name: L.name, pale: L.pale, tones: L.tones }])))")
         check("外观表里有旧书房、灰盒和两个落选的样张", sorted(looks) == ["grey", "paper", "study", "toy"], sorted(looks))
         for k, L in looks.items():               # 读没读只靠明暗：没读的那层纸要比任何一种读过的面都亮得多

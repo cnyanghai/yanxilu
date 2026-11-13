@@ -14,7 +14,7 @@
  * 动画轨、声音、舞台、书的样子、架子在 kit.js（和进门样机共用）。
  * 字（书名签、层板签、底下的纸）用网页排；声音是 WebAudio 现场合成的，没有音频文件。书名、作者都是编的。
  * 调试：地址加 ?dev 显示帧率与状态，?n=300 直接进三百本；window.__lab 给测试脚本用。 */
-import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, grainOver, LOOK, DIM, TONES, PALE, INK_LT, INK_SOFT, CJK, STN } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
+import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, grainOver, LOOK, DIM, TONES, PALE, INK_LT, INK_SOFT, CJK, STN, MASK, foil, weave, whenReady } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -112,14 +112,20 @@ const hSpineC = document.createElement("canvas"); hSpineC.width = 128; hSpineC.h
 const hFrontT = new THREE.CanvasTexture(hFrontC), hSpineT = new THREE.CanvasTexture(hSpineC);
 [hFrontT, hSpineT].forEach((t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso; });
 const hmFront = new THREE.MeshStandardMaterial({ map: hFrontT, roughness: LOOK.bookRough }), hmSpine = new THREE.MeshStandardMaterial({ map: hSpineT, roughness: LOOK.bookRough }), hmBack = new THREE.MeshStandardMaterial({ roughness: LOOK.bookRough });
+// 旧书房：封面和书脊各另画一张「哪里是金」的图，金的地方反环境光；布面再加布纹的凹凸。别的外观没有环境光，这几行什么都不做
+const hFrontM = document.createElement("canvas"); hFrontM.width = hFrontC.width; hFrontM.height = hFrontC.height;
+const hSpineM = document.createElement("canvas"); hSpineM.width = hSpineC.width; hSpineM.height = hSpineC.height;
+const hFrontMT = new THREE.CanvasTexture(hFrontM), hSpineMT = new THREE.CanvasTexture(hSpineM);
+const GILT = foil(hmFront, hFrontMT) && foil(hmSpine, hSpineMT);
 const heroBody = new THREE.Mesh(unitBox, [hmFront, hmBack, paperMat, paperMat, hmSpine, paperMat]); heroBody.castShadow = true; hero.add(heroBody);
 const heroTab = new THREE.Mesh(unitBox, tabMat); hero.add(heroTab);
-function drawFront(g, w, h, b) {                       // 封面跟着外观走：灰盒和纸模是两道框，玩具盒下面一截换色，旧书房读过的烫金、没读的捆麻绳
-  const todo = b.st === "todo", K = LOOK.spine, F = LOOK.font, ink = todo ? INK_SOFT : (LOOK.gilt || INK_LT), wt = K === "toy" ? "900 " : "700 ";
-  g.fillStyle = todo ? PALE : TONES[b.cat]; g.fillRect(0, 0, w, h);
+function drawFront(g, w, h, b, mask) {                 // 封面跟着外观走：灰盒和纸模是两道框，玩具盒下面一截换色，旧书房读过的烫金、没读的捆麻绳。mask：只画「哪里是金」
+  const todo = b.st === "todo", K = LOOK.spine, F = LOOK.font, ink = mask ? MASK.gilt : todo ? INK_SOFT : (LOOK.gilt || INK_LT), wt = K === "toy" ? "900 " : "700 ";
+  g.fillStyle = mask ? (todo ? MASK.paper : MASK.cloth) : todo ? PALE : TONES[b.cat]; g.fillRect(0, 0, w, h);
+  if (mask && todo) return;                               // 包着纸的没有金
   if (K === "toy") { g.fillStyle = todo ? LOOK.pale2 : LOOK.tones2[b.cat]; g.fillRect(0, h * .78, w, h * .22); }
   else if (K === "study" && todo) { g.fillStyle = LOOK.twine; g.fillRect(0, h * .2, w, 5); g.fillRect(0, h * .8, w, 5); g.fillRect(w * .3, 0, 5, h); }
-  else { g.strokeStyle = ink; g.globalAlpha = todo ? .5 : .75; g.lineWidth = 3; g.strokeRect(26, 26, w - 52, h - 52); g.lineWidth = 1.5; g.strokeRect(36, 36, w - 72, h - 72); g.globalAlpha = 1; }
+  else { g.strokeStyle = ink; g.globalAlpha = mask ? 1 : todo ? .5 : .75; g.lineWidth = 3; g.strokeRect(26, 26, w - 52, h - 52); g.lineWidth = 1.5; g.strokeRect(36, 36, w - 72, h - 72); g.globalAlpha = 1; }
   g.fillStyle = ink; g.textAlign = "center"; g.textBaseline = "middle";
   g.font = "500 22px " + F; g.fillText(CATS[b.cat], w / 2, 84);
   const chars = [...b.title], per = chars.length > 4 ? 3 : 2, lines = []; for (let k = 0; k < chars.length; k += per) lines.push(chars.slice(k, k + per).join(""));
@@ -128,12 +134,14 @@ function drawFront(g, w, h, b) {                       // 封面跟着外观走�
   g.fillRect(w / 2 - 40, h * .7, 80, 2);
   g.font = "500 26px " + F; g.fillText(b.by, w / 2, h * .76);
   if (todo) { g.font = "500 20px " + F; g.globalAlpha = .8; g.fillText("还包着纸，没读", w / 2, h - 70); g.globalAlpha = 1; }
-  grainOver(g, 0, 0, w, h, todo);
+  if (!mask) grainOver(g, 0, 0, w, h, todo);
 }
 function heroSetup(b) {
   drawFront(hFrontC.getContext("2d"), hFrontC.width, hFrontC.height, b); hFrontT.needsUpdate = true;
   drawSpine(hSpineC.getContext("2d"), 0, 0, hSpineC.width, hSpineC.height, b); grainOver(hSpineC.getContext("2d"), 0, 0, hSpineC.width, hSpineC.height, b.st === "todo"); hSpineT.needsUpdate = true;
   hmBack.color.set(b.st === "todo" ? PALE : TONES[b.cat]);
+  if (GILT) { drawFront(hFrontM.getContext("2d"), hFrontM.width, hFrontM.height, b, true); hFrontMT.needsUpdate = true; drawSpine(hSpineM.getContext("2d"), 0, 0, hSpineM.width, hSpineM.height, b, false, true); hSpineMT.needsUpdate = true; }
+  const cloth = b.st !== "todo"; weave(hmFront, b.d, b.h, cloth); weave(hmBack, b.d, b.h, cloth); weave(hmSpine, b.t, b.h, cloth);
   heroBody.scale.set(b.t, b.h, b.d);
   heroTab.visible = b.st === "doing"; heroTab.scale.set(b.t * .62, 2.6, .14); heroTab.position.set(0, b.h / 2 + .55, b.d / 2 + .05);
   hero.visible = true;
@@ -443,5 +451,4 @@ window.__lab = {
   hot: setHot, pull: pullOut, back: putBack, mark: setStatus, arrange, count: rebuild,
   manual(on) { S.manual = !!on; }, step(sec) { let t = sec; while (t > 1e-6) { const d = Math.min(1 / 60, t); tick(d); t -= d; } },
 };
-rebuild([40, 120, 300].includes(+Q.get("n")) ? +Q.get("n") : 120);
-requestAnimationFrame(frame);
+whenReady().then(() => { rebuild([40, 120, 300].includes(+Q.get("n")) ? +Q.get("n") : 120); requestAnimationFrame(frame); });   // 等木纹布纹的图到了再上架（最多等一秒半）

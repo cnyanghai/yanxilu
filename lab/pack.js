@@ -14,7 +14,7 @@
  * 结构：three.js 只画物件（桌面、包、牌、光），字用网页排；声音是 WebAudio 现场合成的，没有音频文件。
  * 调试：地址加 ?dev 显示帧率与状态；window.__lab 给测试脚本用。 */
 import * as THREE from "../vendor/three/three.module.min.js";   // 直接按相对路径引，不用 importmap（旧一点的手机浏览器不认）
-import { LOOK, patternTex, grainOver } from "./kit.js";       // 外观表、花纹。引进来的同时 kit.js 会把网页上那层字的颜色和顶栏的「外观」按钮接好
+import { LOOK, patternTex, grainOver, texReady, whenReady, woodOn, makeEnv, foil, weave, MASK } from "./kit.js";       // 外观表、花纹。引进来的同时 kit.js 会把网页上那层字的颜色和顶栏的「外观」按钮接好
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -79,13 +79,14 @@ const key = new THREE.DirectionalLight(PK.key[0], PK.key[1]); key.position.set(-
 Object.assign(key.shadow.camera, { left: -11, right: 11, top: 13, bottom: -11, near: 1, far: 50 });
 scene.add(key, key.target);
 const burstLight = new THREE.PointLight(0xffd9a0, 0, 30, 1.6); scene.add(burstLight);
+makeEnv(renderer);                                         // 旧书房：环境光，牌背的烫金反它
 const lamp = PK.lamp ? new THREE.PointLight(PK.lamp[0], PK.lamp[1], 60, 1.5) : null; if (lamp) scene.add(lamp);   // 旧书房：桌子上方一盏灯，中间亮四周暗；位置在 fit() 里跟着镜头对准的地方走
 
 /* ---------- 画布贴图 ---------- */
 const maxAniso = Math.min(8, renderer.capabilities.getMaxAnisotropy());
-function tex(w, h, draw) {
+function tex(w, h, draw, data) {                           // data：不是颜色，是数（「哪里是金」那张图）
   const c = document.createElement("canvas"); c.width = w; c.height = h; draw(c.getContext("2d"), w, h);
-  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso; return t;
+  const t = new THREE.CanvasTexture(c); if (!data) t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso; return t;
 }
 function rr(g, x, y, w, h, r) { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); }
 const SERIF = '"Noto Serif SC","Songti SC",serif', MONO = '"IBM Plex Mono",ui-monospace,monospace', SANS = '"Noto Sans SC","PingFang SC",sans-serif';
@@ -117,10 +118,10 @@ function drawFront(g, w, h, c) {
   // 篇幅用格子数表示（实心格越多越长），不靠颜色
   for (let i = 0; i < 4; i++) { g.beginPath(); g.rect(w - 70 - (4 - i) * 30, h - 112, 22, 28); if (i <= c.tier) g.fill(); else { g.lineWidth = 2; g.strokeStyle = INK; g.stroke(); } }
 }
-// 旧书房的牌背：藏青布面，烫金的两道框、四角的小菱花、当中一个圆章里一个大字
-function drawBackStudy(g, w, h, c) {
-  g.fillStyle = COCOA; g.fillRect(0, 0, w, h); grainOver(g, 0, 0, w, h, false);
-  g.strokeStyle = g.fillStyle = COPPER; g.lineWidth = 7; rr(g, 30, 30, w - 60, h - 60, 20); g.stroke();
+// 旧书房的牌背：藏青布面，烫金的两道框、四角的小菱花、当中一个圆章里一个大字。mask：只画「哪里是金」那张图
+function drawBackStudy(g, w, h, c, mask) {
+  g.fillStyle = mask ? MASK.cloth : COCOA; g.fillRect(0, 0, w, h); if (!mask) grainOver(g, 0, 0, w, h, false);
+  g.strokeStyle = g.fillStyle = mask ? MASK.gilt : COPPER; g.lineWidth = 7; rr(g, 30, 30, w - 60, h - 60, 20); g.stroke();
   g.lineWidth = 2; rr(g, 48, 48, w - 96, h - 96, 10); g.stroke();
   const dia = (x, y, d) => { g.save(); g.translate(x, y); g.rotate(Math.PI / 4); g.fillRect(-d / 2, -d / 2, d, d); g.restore(); };
   [[78, 78], [w - 78, 78], [78, h - 78], [w - 78, h - 78]].forEach(([x, y]) => dia(x, y, 20));
@@ -250,7 +251,9 @@ const buzz = (ms) => { try { if (navigator.vibrate) navigator.vibrate(ms); } cat
 function tableMat() {
   if (STUDY) {                                             // 胡桃木：木纹横着走
     const t = patternTex("wood"); t.rotation = Math.PI / 2; t.repeat.set(13, 5); t.anisotropy = maxAniso;   // 转了九十度以后，前一个数管横纹有多密，后一个数管顺着纹的方向
-    return new THREE.MeshStandardMaterial({ roughness: .62, map: t, color: new THREE.Color(PK.table).multiplyScalar(t.userData.gain) });
+    const m = new THREE.MeshStandardMaterial({ roughness: .62, map: t, color: new THREE.Color(PK.table).multiplyScalar(t.userData.gain) });
+    texReady.then(() => { const made = woodOn(m, "table", 90, 90, true, 3, PK.tableTile); if (made) { made.forEach((x) => { x.anisotropy = maxAniso; }); t.dispose(); } });   // 真木纹的图到了就换上（代码画的那张是垫底的）
+    return m;
   }
   const [c0, c1, c2] = PK.table;
   return new THREE.MeshStandardMaterial({ roughness: 1, map: tex(256, 256, (g, w) => { const r = g.createRadialGradient(w / 2, w / 2, 0, w / 2, w / 2, w / 2); r.addColorStop(0, c0); r.addColorStop(.28, c1); r.addColorStop(1, c2); g.fillStyle = r; g.fillRect(0, 0, w, w); }) });
@@ -290,6 +293,10 @@ function dressCards() {
     c.data = DECK[order[i]];
     if (c.front.material.map) c.front.material.map.dispose(); if (c.back.material.map) c.back.material.map.dispose();
     c.front.material.map = tex(640, 896, (g, w, h) => drawFront(g, w, h, c.data)); c.back.material.map = tex(640, 896, (g, w, h) => drawBack(g, w, h, c.data));
+    if (STUDY) {                                           // 牌背：烫金的地方反环境光，布面加布纹的凹凸
+      if (c.back.material.metalnessMap) c.back.material.metalnessMap.dispose();
+      foil(c.back.material, tex(640, 896, (g, w, h) => drawBackStudy(g, w, h, c.data, true), true)); weave(c.back.material, CW, CH, true, PK.clothTile);
+    }
     c.front.material.needsUpdate = c.back.material.needsUpdate = true;
   });
 }
@@ -614,7 +621,7 @@ function tick(raw) {
 buildCards(); fit();
 const texts = DECK.map((c) => c.g + c.title + c.src).join("") + "剪报本周收件件读完约分钟沿这条边划开";
 const fontsReady = document.fonts && document.fonts.load ? Promise.all([document.fonts.load('900 100px "Noto Serif SC"', texts), document.fonts.load('700 80px "Noto Serif SC"', texts), document.fonts.load('500 30px "Noto Sans SC"', texts), document.fonts.load('600 30px "IBM Plex Mono"', "F0123456789 NO.")]) : Promise.resolve();
-Promise.race([fontsReady, new Promise((r) => setTimeout(r, 2500))]).catch(() => {}).then(() => { arrive(); requestAnimationFrame(frame); });
+Promise.race([Promise.all([fontsReady, whenReady()]), new Promise((r) => setTimeout(r, 2500))]).catch(() => {}).then(() => { arrive(); requestAnimationFrame(frame); });
 
 window.__lab = {
   S, cards, get state() { return S.state; },
