@@ -11,7 +11,9 @@
  *   图读不到就退回代码画的花纹，页面照常能用。整面墙上的书脊没有上金属反光（一本只有十几个像素宽，看不出来，反而会让书名发暗）。
  * 2026-11-13「造型」一门：旧书房的架子加线脚（压顶线、平带、壁柱、层板的圆前沿、底座，剖面写在 createCase 里，沿外沿走一圈，
  *   架子多宽多高都跟着长）；书有封面板、飘口和圆脊（bookGeo，架上的书由着色器按每本的大小摆，抽出来的那本用 bakeBook）；
- *   切角的盒子 chamferBox 给纸包用。别的外观还是原来的方板和方盒子。 */
+ *   切角的盒子 chamferBox 给纸包用。别的外观还是原来的方板和方盒子。
+ * 2026-11-13「看光」一门：旧书房的灯光有一圈（圈心亮、圈外暗），架子里靠上、往里、贴着侧板的地方和墙根地脚暗下去。
+ *   都是在材质里按位置算的（aoHook），不换灯、不加贴图，影子不变；抽出来飞到眼前的书不受影响。网页上那层暗角里掺了一点颗粒。 */
 import * as THREE from "../vendor/three/three.module.min.js";   // 直接按相对路径引，不用 importmap（旧一点的手机浏览器不认）
 export { THREE };
 
@@ -123,8 +125,14 @@ export const LOOKS = {
     dim: { SH: 29, BT: 2.2, ST: 2.6, CD: 21, PL: 8 },
     // 造型（2026-11-13「造型」一门）。mould：架子的线脚，单位厘米。stile 壁柱比侧板往外宽多少、stileT 往前凸多少；frieze 压顶线下面那条平带多高；
     //   k 压顶线和底座线脚整体放大多少（1 是量参考时定的原大：压顶高 5.9 出 4.6，底座线脚出 2.2）
-    cs: { frame: 0x6f4526, back: 0x2c1b10, wall: 0x3a2a1d, floor: 0x2a1c12, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", ao: .5,
+    // aoK：角落里的暗有多重（看光一门；架子里靠上、往里、贴着侧板的地方，墙和地靠近架子的一圈，都是按位置算的，不用贴图）。有了它就不用每层后面那片影子了（ao 归零）
+    cs: { frame: 0x6f4526, back: 0x2c1b10, wall: 0x3a2a1d, floor: 0x2a1c12, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", ao: 0, aoK: .9,
       mould: { stile: 1, stileT: 1, frieze: 2.6, k: .75 } },
+    // 看光（2026-11-13「看光」一门）：灯光有一圈，不是到处一样亮。主光还是那盏平行光（影子不变），亮度按位置乘一个数：
+    //   x、y 最亮的那一点在架子的哪里（宽、高的比例，中线是 0）；r 光圈多大（按宽高里大的那个算）；hi 圈心亮多少、lo 圈外暗到多少。
+    //   只管贴着架子和墙的东西；抽出来飞到眼前的书不受影响
+    pool: { x: -.12, y: .7, r: .62, hi: 1.32, lo: .5 },
+    film: .035,                                              // 网页上那层暗角里掺的颗粒有多重（暗处的渐变在手机屏上容易看出一道道台阶，颗粒把它打散）
     // 书的样子：board 封面板厚、sq 封面比书芯多出来的一圈（飘口），都是厘米；sag 圆脊鼓出来多少（按书厚的比例）；seg 圆脊分几段
     book: { board: .25, sq: .3, sag: .22, seg: 6 },
     css: { bg: "#1C1510", ink: "#F0DFC0", ink2: "rgba(240,223,192,.76)", pane: "rgba(26,18,12,.8)", line: "rgba(217,181,106,.5)", on: "#1A130E", halo: "rgba(0,0,0,.9)", sheet: "18,13,9", lab: "rgba(22,15,10,.9)", scheme: "dark" }, veil: 0x0b0806,
@@ -139,7 +147,7 @@ export const LOOKS = {
     //   屋子要暗、灯要小而亮：金只在对着灯的角度亮起来，布面不会被环境光整片抬亮
     env: { room: [0x8a6a48, .15], lamps: [[-2.4, 3.2, 2.8, 1.5, 0xffd9a8, 3.2], [.6, .3, 4.7, 1.7, 0xffcf9a, 1.5], [0, 4.8, .2, 2.2, 0xffd9a8, 3]], k: 1 },
     // 拆包页：胡桃木的桌面上一盏灯；包是牛皮纸捆两道麻绳、贴一张签、盖一枚邮戳；牌背是藏青的布面烫金，牌面是米色的纸
-    pk: { style: "study", bg: 0x1c1510, hemi: [0xffdcb0, 0x33241a, .6], key: [0xffd29a, 1.7], lamp: [0xffc98a, 70], table: 0x5e3d24,
+    pk: { style: "study", bg: 0x1c1510, hemi: [0xffdcb0, 0x33241a, .5], key: [0xffd29a, 1.7], lamp: [0xffc98a, 88], table: 0x5e3d24,
       cardBack: "#1E2A45", cardLine: "#D9B56A", cardFace: "#EDE1C6", ink: "#2B1A0E", accent: "#7A4A1E", kraft: "#C9A877", tableTile: 16, clothTile: 9,   // 桌面的木纹一张图铺十六个单位（再大在高分屏上就糊了）；牌背的布纹一张图铺九个单位
       side: 0xb08f5f, rear: 0xc2a06c, strip: 0xb7996a, mouth: 0x140d08, edge: 0xcfae6a, twine: 0x7a5a36 },
   },
@@ -160,6 +168,10 @@ function applyLook() {
   Object.entries({ "--bg": c.bg, "--ink": c.ink, "--ink-2": c.ink2, "--pane": c.pane, "--line": c.line, "--on": c.on, "--halo": c.halo, "--sheet": c.sheet, "--lab": c.lab }).forEach(([k, v]) => st.setProperty(k, v));
   st.colorScheme = c.scheme; document.documentElement.dataset.look = LOOK_KEY;
   const tc = document.querySelector('meta[name="theme-color"]'); if (tc) tc.content = c.bg;
+  if (LOOK.film) {                                           // 一小块随机的黑白点，平铺在暗角那一层上
+    const n = canvasOf(128, 128, (g, w, h) => { const d = g.createImageData(w, h), r = rng(5); for (let i = 0; i < w * h; i++) { const v = r() < .5 ? 0 : 255; d.data.set([v, v, v, Math.round(r() * 255 * LOOK.film)], i * 4); } g.putImageData(d, 0, 0); });
+    st.setProperty("--film", "url(" + n.toDataURL("image/png") + ")");
+  }
   const css = document.createElement("style");
   css.textContent = `
     .lookmenu{position:fixed;z-index:30;display:none;flex-direction:column;gap:4px;padding:6px;border-radius:14px;background:var(--pane);border:1px solid var(--line);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);box-shadow:0 10px 28px rgba(0,0,0,.35)}
@@ -167,7 +179,7 @@ function applyLook() {
     .lookmenu button{appearance:none;border:0;background:none;color:var(--ink);font:500 15px/1 inherit;font-family:inherit;padding:12px 16px;border-radius:10px;text-align:left;cursor:pointer;white-space:nowrap}
     .lookmenu button[aria-pressed="true"]{background:var(--ink);color:var(--on);font-weight:700}
     .lookmenu small{display:block;margin-top:5px;font-size:11.5px;font-weight:400;opacity:.75}
-    html[data-look="study"] body::after{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 34%,rgba(255,186,104,.09),rgba(255,186,104,0) 58%),radial-gradient(ellipse at 50% 42%,rgba(0,0,0,0) 46%,rgba(0,0,0,.4) 100%)}
+    html[data-look="study"] body::after{content:"";position:fixed;inset:0;pointer-events:none;background-size:64px 64px,auto,auto;background:var(--film,none),radial-gradient(ellipse at 50% 34%,rgba(255,186,104,.09),rgba(255,186,104,0) 58%),radial-gradient(ellipse at 50% 42%,rgba(0,0,0,0) 46%,rgba(0,0,0,.4) 100%)}
     html[data-look="study"] .bar h1,html[data-look="study"] .go,html[data-look="study"] .snd,html[data-look="study"] .seg button,html[data-look="study"] .mini,html[data-look="study"] .bag,html[data-look="study"] .acts button{font-family:"Noto Serif SC","Songti SC",serif}
     html[data-look="paper"] .go,html[data-look="paper"] .snd,html[data-look="paper"] .seg,html[data-look="paper"] .seg button,html[data-look="paper"] .mini,html[data-look="paper"] .bag,html[data-look="paper"] .lab,html[data-look="paper"] .tip,html[data-look="paper"] .sheet .main,html[data-look="paper"] .lookmenu,html[data-look="paper"] .lookmenu button{border-radius:5px}
     html[data-look="paper"] .bar h1,html[data-look="toy"] .bar h1{font-family:"Noto Sans SC","PingFang SC",sans-serif}
@@ -388,6 +400,37 @@ function bookHook(sh) {
     .replace("#include <begin_vertex>", "#include <begin_vertex>\n#ifdef USE_INSTANCING\n\ttransformed += ins / bsc; transformed.z += spn.x * bsag;\n#endif");
 }
 
+/* ---------- 角落里的暗（旧书房「看光」一门）：不用贴图，按这一点在架子里的位置算 ----------
+ * 架子里面：离上面那块层板近、往里深、贴着侧板的地方暗下去；墙和地：靠近架子的一圈暗下去。书探出来、飞出来就离开了暗处，自己会亮。
+ * a：里面半宽、第一层层板面的高、层距、层高；b：外沿半宽、里面的顶、柜深、有多重。架子每次重建时更新。
+ * 同一段话里顺手把「灯光有一圈」也算了：离圈心近的亮、远的暗，离开架子往镜头来的东西不管 */
+const AOU = { a: { value: new THREE.Vector4(50, 10, 31, 29) }, b: { value: new THREE.Vector4(60, 180, 21, 0) }, p: { value: new THREE.Vector4(0, 100, 1e5, 1) }, q: { value: new THREE.Vector4(1, 0, 0, 0) } };   // p：光圈的圆心 x、y，半径，圈外暗到多少；q.x：圈心亮多少
+const AO_GLSL = {
+  in: `float aoIn = step( abs( vAoP.x ), uAoA.x + .5 ) * step( vAoP.z, .6 ) * step( uAoA.y - .5, vAoP.y ) * step( vAoP.y, uAoB.y );
+	float aoT = smoothstep( uAoA.w * .45, uAoA.w, mod( vAoP.y - uAoA.y, uAoA.z ) ) * smoothstep( 1., -7., vAoP.z );
+	float aoBk = smoothstep( 0., - uAoB.z, vAoP.z );
+	float aoSd = smoothstep( uAoA.x - 9., uAoA.x, abs( vAoP.x ) ) * smoothstep( 1., -5., vAoP.z );
+	float aoK = 1. - aoIn * uAoB.w * clamp( .6 * aoT + .32 * aoBk + .25 * aoSd, 0., .92 );`,
+  wall: `vec2 aoQ = abs( vAoP.xy - vec2( 0., uAoB.y * .5 ) ) - vec2( uAoB.x, uAoB.y * .5 );
+	float aoK = 1. - uAoB.w * .6 * exp( - length( max( aoQ, 0. ) ) / 16. );`,
+  floor: `vec2 aoQ = abs( vec2( vAoP.x, vAoP.z + uAoB.z * .5 ) ) - vec2( uAoB.x + 2., uAoB.z * .5 + 3. );
+	float aoK = 1. - uAoB.w * .65 * exp( - length( max( aoQ, 0. ) ) / 9. );`,
+};
+function aoHook(mat, mode, also) {                          // also：这个材质原来就有的那段改着色器的话（书脊图集、书的形状），接着用
+  if (!LOOK.cs.aoK) { if (also) mat.onBeforeCompile = also; return; }
+  mat.onBeforeCompile = (sh) => {
+    if (also) also(sh);
+    sh.uniforms.uAoA = AOU.a; sh.uniforms.uAoB = AOU.b; sh.uniforms.uAoP = AOU.p; sh.uniforms.uAoQ = AOU.q;
+    sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nvarying vec3 vAoP;")
+      .replace("#include <project_vertex>", "#include <project_vertex>\n\tvec4 aoW = vec4( transformed, 1.0 );\n#ifdef USE_INSTANCING\n\taoW = instanceMatrix * aoW;\n#endif\n\tvAoP = ( modelMatrix * aoW ).xyz;");
+    sh.fragmentShader = sh.fragmentShader.replace("#include <common>", "#include <common>\nvarying vec3 vAoP;\nuniform vec4 uAoA;\nuniform vec4 uAoB;\nuniform vec4 uAoP;\nuniform vec4 uAoQ;")
+      .replace("#include <aomap_fragment>", "#include <aomap_fragment>\n\t" + AO_GLSL[mode] + "\n\treflectedLight.indirectDiffuse *= aoK; reflectedLight.indirectSpecular *= aoK; reflectedLight.directDiffuse *= mix( 1., aoK, " + (mode === "in" ? ".45" : "1.") + " ); reflectedLight.directSpecular *= mix( 1., aoK, .6 );"
+        + "\n\tvec2 poQ = ( vAoP.xy - uAoP.xy ) / uAoP.z; float poK = mix( mix( uAoP.w, uAoQ.x, exp( - dot( poQ, poQ ) ) ), 1., smoothstep( 8., 60., vAoP.z ) );"
+        + "\n\treflectedLight.directDiffuse *= poK; reflectedLight.directSpecular *= poK; reflectedLight.indirectDiffuse *= mix( 1., poK, .6 );");
+  };
+  mat.customProgramCacheKey = () => "ao-" + mode + (also ? "-" + also.name : "");     // 同一段话配不同的算法，要让渲染器知道它们不是一个程序
+}
+
 /* ---------- 三维舞台：渲染器、镜头、一盏主光加天光 ---------- */
 export function createStage(canvas) {
   let renderer;
@@ -481,7 +524,7 @@ export function createBookKit(maxAniso) {
   const paperMat = new THREE.MeshStandardMaterial({ color: PAPER, roughness: .95 });
   const tabMat = new THREE.MeshStandardMaterial({ color: TAB, roughness: .8, emissive: new THREE.Color(TAB), emissiveIntensity: LOOK.tabGlow });
   const unitBox = new THREE.BoxGeometry(1, 1, 1);
-  const shape = LOOK.book ? bookGeo() : null, pagesMat = shape ? paperMat.clone() : null; if (pagesMat) pagesMat.onBeforeCompile = bookHook;   // 旧书房：书有封面板、飘口和圆脊
+  const shape = LOOK.book ? bookGeo() : null, pagesMat = shape ? paperMat.clone() : null; if (pagesMat) aoHook(pagesMat, "in", bookHook);   // 旧书房：书有封面板、飘口和圆脊
   // 书脊图集：每本一格，贴到书脊上；封面两侧只取这一格的底色。每张图集带自己的材质
   function makeAtlas(books, pale) {
     const canvas = document.createElement("canvas"), g = canvas.getContext("2d");
@@ -494,11 +537,12 @@ export function createBookKit(maxAniso) {
     books.forEach(draw);
     const tex = new THREE.CanvasTexture(canvas); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = maxAniso;
     const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: LOOK.bookRough, metalness: 0 });
-    mat.onBeforeCompile = (sh) => {          // 每本书用图集里自己那一格（uvo = 左下角 u、v，宽、高）
+    const cell = function atlasCell(sh) {     // 每本书用图集里自己那一格（uvo = 左下角 u、v，宽、高）
       sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nattribute vec4 uvo;")
         .replace("#include <uv_vertex>", "#include <uv_vertex>\n#ifdef USE_MAP\n\tvMapUv = uvo.xy + uv * uvo.zw;\n#endif");
       if (shape) bookHook(sh);
     };
+    aoHook(mat, "in", cell);
     return { canvas, tex, mat, redraw(b) { draw(b); tex.needsUpdate = true; }, dispose() { tex.dispose(); mat.dispose(); } };
   }
   // 一批书 = 一个实例化的盒子（三百本也只画两三次）。书脊朝 +z，前后封面是 ±x
@@ -540,7 +584,9 @@ export function createCase(scene, unitBox) {
     k.m.map = tt; k.m.color.copy(k.base.color).multiplyScalar(k.t.userData.gain); k.own = [tt];
   };
   const skin = (mat, t, rx, ry, turn, part, seed = 0) => {
-    if (!t) return mat; const k = { m: mat.clone(), base: mat, t, rx, ry, turn, part, seed, own: [] }; skins.push(k); dress(k); return k.m;
+    if (!t) return mat; const k = { m: mat.clone(), base: mat, t, rx, ry, turn, part, seed, own: [] }; skins.push(k); dress(k);
+    if (C.aoK) aoHook(k.m, part === "wall" || part === "floor" ? part : "in");
+    return k.m;
   };
   texReady.then(() => { if (TEX.wood) skins.forEach(dress); });
   // 每一层后面压一片上深下浅的影子：层板底下、书顶上面那一道暗下去，架子才有深度
@@ -571,6 +617,8 @@ export function createCase(scene, unitBox) {
     [-1, 1].forEach((s) => add(ST, h, CD + .6, s * (W / 2 + ST / 2), h / 2, -CD / 2 + .3, skin(caseMat, tex, CD / T, h / T, false, "frame", s + 3)));   // 两侧
     for (let k = 0; k <= R; k++) add(W, BT, CD - 1, 0, PL + BT / 2 + k * (SH + BT), -(CD - 1) / 2, board(k + 1));        // 层板（一块一个材质，木纹错开）
     let top = h, wOut = w;
+    AOU.a.value.set(W / 2, PL + BT, SH + BT, SH); AOU.b.value.set(W / 2 + ST + (M ? M.stile : 0), h, CD, C.aoK || 0);
+    if (LOOK.pool) { const L = LOOK.pool; AOU.p.value.set(L.x * w, L.y * h, L.r * Math.max(w, h), L.lo); AOU.q.value.x = L.hi; }
     if (M) {
       // 旧书房：两根壁柱、层板的圆前沿、顶上一条平带加压顶线、脚下一圈底座。线脚的贴图坐标是厘米，所以重复数给 1 / T
       const X0 = W / 2 + ST + M.stile, Z0 = .6 + M.stileT, zB = -CD, run = (seed) => skin(caseMat, tex, 1 / T, 1 / T, true, "frame", seed);
@@ -588,7 +636,7 @@ export function createCase(scene, unitBox) {
       top = cy + ch; wOut = 2 * X0 + cp;                                                                                                // 镜头按这个宽来装：压顶线两头各让它伸进边上的留白一半
     } else add(W, PL, CD - 3, 0, PL / 2, -(CD - 3) / 2 - 2, backMat);                                                    // 踢脚
     if (shade) for (let k = 0; k < R; k++) { const m = new THREE.Mesh(plane, shade); m.scale.set(W, SH, 1); m.position.set(0, PL + BT + k * (SH + BT) + SH / 2, -CD + 1.06); m.renderOrder = 1; group.add(m); }
-    const wall = new THREE.Mesh(new THREE.PlaneGeometry(w + 900, h + 600), skin(wallMat, wallTex, (w + 900) / (C.wallTex ? 34 : T), (h + 600) / (C.wallTex ? 34 : T))); wall.position.set(0, h / 2, -CD - .2); wall.receiveShadow = true; group.add(wall);
+    const wall = new THREE.Mesh(new THREE.PlaneGeometry(w + 900, h + 600), skin(wallMat, wallTex, (w + 900) / (C.wallTex ? 34 : T), (h + 600) / (C.wallTex ? 34 : T), false, "wall")); wall.position.set(0, h / 2, -CD - .2); wall.receiveShadow = true; group.add(wall);
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(w + 900, 900), skin(floorMat, tex, (w + 900) / T, 900 / T, false, "floor")); floor.rotation.x = -Math.PI / 2; floor.position.set(0, 0, 450 - CD); floor.receiveShadow = true; group.add(floor);
     return { w: wOut, h: top };
   }
