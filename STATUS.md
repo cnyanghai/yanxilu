@@ -190,6 +190,7 @@ updated: 2026-11-13
 - 宝石规则是否改成按"能不能回忆"定（沿自 BRIEF）。
 
 ## 日志
+- 2026-11-13 旧书房门 0 上线后的线上验证（提交 0dd9209）：baba.wogucloud.cn 与 GitHub Pages 两处，拆包页、书架页、进门页不带参数打开都是旧书房；拆包页拆开、发牌、全部翻开走通；「外观」单子上是旧书房和灰盒两项；拆包页带 `?look=grey` 是灰盒、能换回；没有失败的请求、没有报错。真机上的帧率和观感没法由我验证，等用户上手。
 - 2026-11-13 用户答「旧书房」：外观表改默认与单子、旧书房调亮、拆包页与进门页摆设接外观表（kit.js、pack.js、door.js、index.html）；lab_look_test.py 按新规矩重写（23 条），拆包、书架、进门三条流程测试在新默认下重跑，全过；对照图 docs/lab-study.jpg（三个瞬间八张）；查了 Poly Haven 的木纹与布纹清单（只读，没下载），一条进 REFERENCES；说明、CLAUDE.md 同步。
 - 2026-11-13 用户答「过，选外观」：进门过门记进已定决策；查外观的生产方式与现成素材（七条进 REFERENCES：烘焙光与实时光、黏土感配方、图生三维、CC0 素材站、Tiny Bookshop、Book of Hours、闪卡箔光）；kit.js 加外观表与「外观」菜单，shelf / door 两页颜色改成变量；三个候选样张纸模、玩具盒、旧书房；新测试 lab_look_test.py；对照图 docs/lab-looks.jpg；lab/README.md 加「选外观」一节，CLAUDE.md 同步。推送 1dc9a99 后线上 Baba 与 GitHub Pages 各用浏览器实际打开：不带参数是灰盒，三个候选各自打得开，进门页跟着换，无失败请求无报错；书架、进门、外观三条流程测试全过。真机上的帧率和观感没法由 Claude 验证。
 - 2026-11-12 用户答「直接到」：door.js 默认进法改成直接到、去掉切换（敲门进留 ?way=knock 对照），door.html 去掉切换条和用不到的样式；lab_door_test.py 按新默认改、分镜八拍重排，docs/lab-door-frames.jpg 重拍；lab/README.md、CLAUDE.md、STATUS 同步。推送 ba6c7f2 后线上 Baba 与 GitHub Pages 的 /lab/door.html 各用浏览器实际打开走过：默认直接到、约 1 秒能动、往下拉带走一排、无失败请求无报错。
