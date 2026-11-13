@@ -1,7 +1,7 @@
 ---
 type: references
 project: yanxilu
-last_scan: 2026-11-12
+last_scan: 2026-11-13
 ---
 
 # 已有方案与参考
@@ -33,6 +33,7 @@ last_scan: 2026-11-12
 | 2026-11-11 | gh search + WebSearch | card pack opening three.js / booster pack opening animation / hearthstone pack opening；宝可梦卡牌口袋版与炉石的开包设计 | GitHub 上没有能直接用的三维开包实现（只有文字模拟器和一个零星的网页组件），自己做；两款游戏的做法三条进条目 |
 | 2026-11-12 | gh search + WebSearch | 3d bookshelf / bookshelf threejs / virtual bookshelf 3d；3D bookshelf web UI book spines pull out；reading app spine view unread vs read at a glance | 有一个同类的开源整机（KoreShelf）和一个七本书的展示页（complete-shelf），都不是能嵌进来的部件，也都不回答「一眼看出读过多少」；自己做灰盒，四条进条目 |
 | 2026-11-12 | WebSearch | Letterboxd four favourites profile；Sims 4 Gallery download rooms save to my library；Notion duplicate public page | 「三秒看懂一个人」和「一个动作带走一整套」各有成熟做法，都是平面界面里的按钮和列表，没有能直接用的部件；三条做法进条目，进门样机自己做 |
+| 2026-11-13 | WebSearch | image to 3D model generator comparison 2026；three.js baked lighting mobile lightmap vs realtime；Book of Hours library art style；CC0 3D models books bookshelf；TCG Pocket pack opening foil shader three.js；Tiny Bookshop art style；three.js clay toy miniature look | 选外观前查生产方式与现成素材。没有能直接拿来当外观的现成整套：书、架子、牌都是规则形体，而且书是每个人自己的几百本，书脊只能现场排；图生三维各家评测互相打架，这一步用不上；材质贴图和环境光图有全 CC0 的来源（Poly Haven），旧书房方向用得上；光的做法有共识（静的烘、动的留一盏实时光）。七条进条目 |
 
 ## 条目
 
@@ -97,6 +98,13 @@ last_scan: 2026-11-12
 | Letterboxd 的「四部最爱」（The Spinoff 2025-04 https://thespinoff.co.nz/culture/24-04-2025/how-letterboxds-four-favourites-took-over-the-internet ；Young Hollywood https://younghollywood.com/scene/letterboxd-as-personality-gen-z-film-trend.html ） | 个人页最上面一排四张海报，自己挑的；被当成介绍自己的速记和搭话的由头 | 一眼看懂一个人，靠的是他自己挑出来的少数几样，不是全量清单；是主人摆的，不是系统算的 | 是影迷社区，四张海报是平面的 | 借鉴：进门第一眼是主人自己写的一句话加几排他摆好的科目，不是统计 |
 | The Sims 4 的图库（EA 帮助页 https://help.ea.com/en/help/the-sims/the-sims-4/the-sims-4-gallery/ ） | 逛别的玩家传上来的房间、房子、人物，点下载存进「我的收藏」，再放进自己的地块；对方用了你没有的内容时会缺件 | 「带走」分两步：先落进自己的收藏，再摆到自己的地方；缺件要说清楚 | 是游戏里的建造模式，要先开地块才能放 | 借鉴：带走的一排先进邮包，之后才放进自己的书架；带走的是书单和顺序，书的文件不跟着走，要在当场说明 |
 | Notion 的「复制公开页面」（官方帮助 https://www.notion.com/help/duplicate-public-pages ） | 公开页面右上角一个 Duplicate 按钮，选一个工作区，整页连子页复制过去，归自己改；页面主人可以关掉「允许复制」 | 一个按钮带走一整套；主人说了算哪些能被带走 | 一下点完没有任何过程，带走的东西去了哪要自己找 | 借鉴：以后每一排要有「许不许带走」的开关；我们把带走做成一个看得见的动作（拉出来、捆好、进包） |
+| three.js 论坛「烘焙光照还是实时阴影」（https://discourse.threejs.org/t/why-should-i-use-lightmap-instead-of-draw-shadow-in-diffusemap/46759 ） | 引擎维护者的回答：全烘最省；烘好的光上再叠实时灯会发灰发脏；折中是只烘环境遮蔽（缝里暗下去），直射光留实时 | 架子是静的，缝里的暗可以烘或用假的压暗片；书会动，留一盏实时主光投影 | 我们几百本书会被抽出、换位，没法全烘 | 借鉴（2026-11-13 外观样张里每层后面那片上深下浅的影子就是这个思路的最简版） |
+| Babylon.js 论坛「黏土渲染的样子怎么做」（https://forum.babylonjs.com/t/how-to-achieve-a-clay-render-look/19953 ） | 做法的共识：一盏投影的主光、很少的环境光、哑面的材质，缝里靠环境遮蔽压暗 | 玩具盒方向的光与材质配方 | 是别的引擎的帖子，参数要自己调；后处理的环境遮蔽在手机上贵 | 借鉴（玩具盒） |
+| 图生三维几家的对比（https://learn.rundiffusion.com/ai-3d-model-generators/ ；https://sorceress.games/blog/rank-the-best-image-to-3d-model-ai-six-model-test ） | Tripo、Meshy、Rodin、Hunyuan3D 等把一张图变成三维模型；各家评测的排名互相打架，版本号对不上，免费档的授权各不相同（有的不能商用、有的要署名） | 以后要做雕花、摆件这类不规则的东西时，拿自己的图各家试一轮再定 | 书、架子、卡包、牌都是规则形体，代码几何就够；几百本书也不可能一本本生成 | 这一步不用；雕花摆件进待办 |
+| CC0 素材站：Poly Haven、Kenney、Quaternius（清单 https://www.github.com/madjin/awesome-cc0 ；指南 https://app.cinevva.com/guides/free-3d-model-sites ；一个 CC0 旧书架 https://opengameart.org/content/old-bookshelf-with-books ） | 贴图、环境光图、低多边形家具，CC0 不用署名 | 旧书房方向要的木纹、布纹、环境光图从 Poly Haven 拿（下载前先问用户）；灰盒阶段已经没用外部模型 | 现成的书架模型不拿：我们的架子要跟着本数和屏幕自己变宽变高；现成的书是整排一个模型，抽不出单本 | 借鉴（只拿材质与环境光图，旧书房方向才需要） |
+| Tiny Bookshop 的美术（https://www.itsnicethat.com/features/neoludic-games-tiny-bookshop-illustration-spotlight-100226 ；评测 https://www.gamespew.com/2025/08/tiny-bookshop-review/ ） | 开书店的游戏：童书和旧明信片那样的手绘暖色，三维的人走在二维的画里 | 气质对：不正式、暖、和书有关 | 它靠整张手绘背景撑场面；我们 11-08 已经验证过「一张画当场景」在手机上只露一小块、拼不出自适应 | 仅参考气质，不照它的做法 |
+| Book of Hours（开发者日志 https://weatherfactory.biz/boh-the-early-draft-edition/ ；评测 https://www.noobfeed.com/reviews/book-of-hours-review ） | 经营一座图书馆的牌类游戏：牌用鲜亮平整的矢量图标，房间用有肌理的插画，两种画法并存；整体像手抄本和博物馆展柜 | 牌和书房可以是两种画法：牌面平整清楚，书房有肌理有光 | 整体偏阴郁神秘、信息很密，和「不正式、有游戏感」只对一半 | 借鉴（旧书房方向：牌面保持清楚，不跟着做旧） |
+| 闪卡的箔光（three.js 做法 https://feedbagel.com/post/creating-foil-sticker-effects-with-custom-threejs-shaders ；网页做法 https://hover-tilt.simey.me/bespoke/pokemon-cards/ ；宝可梦卡牌手游保底包的开包表现 https://gamewith.net/pokemon-tcg-pocket/49002 ） | 随角度变色的箔、亮片；保底包开包前包口先透出光 | 拆包换外观时，少数「长文 / 难得」的牌可以加一层随手机倾斜变的光；「包口先透光」样机里已经有 | 箔光是颜色在变，用户色弱，只能当锦上添花，不能拿它表示篇幅或稀有 | 进待办（外观选定、拆包换皮时再看） |
 
 ## 笔记本设计调研（2026-11-04，为书架里加笔记本做的查前作业）
 
