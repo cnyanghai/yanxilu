@@ -18,11 +18,7 @@
   .bar h1 small{display:block;margin-top:5px;font:400 11px/1 "Noto Sans SC",sans-serif;letter-spacing:0;color:var(--ink-2)}
   .go,.snd,.mini{appearance:none;color:var(--ink-2);font:500 14px/1 inherit;font-family:inherit;padding:9px 11px;border-radius:999px;cursor:pointer;background:var(--pane);border:1px solid var(--line);white-space:nowrap;text-decoration:none}
   .snd[aria-pressed="false"]{text-decoration:line-through;opacity:.7}
-  .seg{display:flex;padding:3px;border-radius:999px;background:var(--pane);border:1px solid var(--line)}
-  .seg button{appearance:none;border:0;background:none;color:var(--ink-2);font:500 14px/1 inherit;font-family:inherit;padding:9px 12px;border-radius:999px;cursor:pointer;white-space:nowrap}
-  /* 选中：实心底、深字、加粗，不靠颜色区分 */
-  .seg button[aria-pressed="true"]{background:var(--ink);color:#2A221C;font-weight:700}
-  /* 进了门以后顶上的门牌：这是谁的书房、他自己写的一句话 */
+  /* 顶上的门牌：这是谁的书房、他自己写的一句话 */
   .owner{position:fixed;left:0;right:0;top:calc(52px + env(safe-area-inset-top,0px));padding:0 16px;text-align:center;pointer-events:none;opacity:0;transform:translateY(-8px);transition:opacity .25s,transform .3s}
   .owner.on{opacity:1;transform:none}
   .owner b{display:block;font:700 19px/1.25 "Noto Serif SC","Songti SC",serif;letter-spacing:.04em}
@@ -64,7 +60,7 @@
   .sheet .main{appearance:none;border:0;background:var(--ink);color:#2A221C;font:700 15px/1 inherit;font-family:inherit;padding:13px 22px;border-radius:12px;cursor:pointer}
   .dev{position:fixed;left:8px;top:110px;font:11px/1.4 "IBM Plex Mono",monospace;color:#fff;background:rgba(0,0,0,.5);padding:4px 6px;border-radius:4px;pointer-events:none;white-space:pre}
   .nogl{position:fixed;inset:0;display:grid;place-items:center;padding:24px;text-align:center;line-height:1.7}
-  @media (max-width:420px){.bar h1 small{display:none}.seg button{padding:9px 10px;font-size:13px}.mini{font-size:13px}}
+  @media (max-width:420px){.bar h1 small{display:none}.mini{font-size:13px}}
 </style>
 </head>
 <body>
@@ -82,11 +78,7 @@
   <p class="hint" id="hint" aria-live="polite">到了…</p>
   <button type="button" class="bag" id="bag">邮包<small id="bag-n">空的</small></button>
   <div class="ctl">
-    <div class="seg" id="seg-way" role="group" aria-label="进法">
-      <button type="button" data-way="knock" aria-pressed="true">敲门进</button>
-      <button type="button" data-way="direct" aria-pressed="false">直接到</button>
-    </div>
-    <button type="button" class="mini" id="b-again">再进一次门</button>
+    <button type="button" class="mini" id="b-again">再进一次</button>
   </div>
 </footer>
 <section class="sheet" id="sheet">

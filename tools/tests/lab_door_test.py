@@ -1,5 +1,5 @@
-"""进门样机（lab/door.html）：到门口、敲门、进门、看懂（层板上的签）、左右划看书名、往下拉带走一排（没到弹回、过六成带走、拉到底自己带走）、
-点签带走、邮包、倒回去重来、直接到；手机竖屏走一遍真的指针操作，再按帧截分镜。
+"""进门样机（lab/door.html）：直接到（2026-11-12 用户定，页面上没有切换）、看懂（层板上的签）、左右划看书名、往下拉带走一排（没到弹回、过六成带走、
+拉到底自己带走）、点签带走、邮包、倒回去重来、再进一次；留作对照的敲门进（?way=knock）也走一遍；手机竖屏走真的指针操作，再按帧截分镜。
 用法：python3 tools/tests/lab_door_test.py           # 自己起模拟服务（端口 8796），软件渲染，约两三分钟
 截图落在 tools/out/lab/（已 gitignore）。样机看的是手感，这条测试只保证流程走得通、不报错。"""
 import os, sys, time, subprocess, urllib.request
@@ -42,11 +42,11 @@ try:
             pg.mouse.move(x, y); pg.mouse.down(); pg.wait_for_timeout(80); pg.mouse.move(x + 2, y + dy, steps=12); pg.wait_for_timeout(hold)
 
         pg.goto(B + "/lab/door.html?dev"); pg.wait_for_function("window.__lab", timeout=15000)
-        check("先到门口", st() == "door" and J("window.__lab.doorOn") and J("window.__lab.S.ent") < .05, st())
-        check("顶上写着谁的书房和他那句话", pg.locator("#owner.on b").inner_text() == J("window.__lab.OWNER.name") + "的书房" and pg.locator("#owner span").inner_text() == J("window.__lab.OWNER.line")); shot("1-door")
-        check("敲门进门后停在能动", idle(40), st()); pg.wait_for_timeout(400)
-        check("进门到看懂不超过三秒", 0 < J("window.__lab.S.tIdle") <= 3, J("window.__lab.S.tIdle"))
-        check("进了门，门收起来了", J("window.__lab.S.ent") == 1 and not J("window.__lab.doorOn"))
+        check("默认直接到：没有门，书架就在眼前", J("window.__lab.S.way") == "direct" and not J("window.__lab.doorOn") and J("window.__lab.S.ent") == 1, J("window.__lab.S.way"))
+        check("页面上没有进法的切换", pg.locator("#seg-way").count() == 0)
+        check("顶上写着谁的书房和他那句话", pg.locator("#owner.on b").inner_text() == J("window.__lab.OWNER.name") + "的书房" and pg.locator("#owner span").inner_text() == J("window.__lab.OWNER.line")); shot("1-arrive")
+        check("到了以后停在能动", idle(40), st()); pg.wait_for_timeout(400)
+        check("点开到能动不超过一秒半", 0 < J("window.__lab.S.tIdle") <= 1.5, J("window.__lab.S.tIdle"))
         check("五枚签都出来了（四排书加一层牌和本子）", pg.locator("#labs .lab.on").count() == 5, pg.locator("#labs .lab.on").count()); shot("2-in")
 
         # 左右划：看书名，不抽出来
@@ -82,28 +82,37 @@ try:
         pg.click("#b-reset"); pg.wait_for_timeout(350)
         check("倒回去重来", bag_n() == 0 and not J("window.__lab.ROWS.some(r => r.taken)") and pg.locator("#sheet.on").count() == 0 and pg.locator("#bag-n").inner_text() == "空的")
 
-        # 另一种进法：直接到
-        pg.click('#seg-way [data-way="direct"]'); check("直接到：没有门", st() == "door" and not J("window.__lab.doorOn") and J("window.__lab.S.ent") == 1, st())
-        check("直接到一秒多就能动", idle(20) and 0 < J("window.__lab.S.tIdle") <= 1.5, J("window.__lab.S.tIdle")); shot("8-direct")
-        pg.click("#b-again"); check("再进一次门", st() == "door"); idle(20)
-        pg.click('#seg-way [data-way="knock"]'); check("换回敲门进", st() == "door" and J("window.__lab.doorOn")); check("又进来了", idle(40), st())
+        pg.click("#b-again"); check("再进一次：签收回去重新冒", st() == "door" and pg.locator("#labs .lab.on").count() < 5 and not J("window.__lab.doorOn"), st())
+        check("又到了", idle(20) and pg.locator("#labs .lab.on").count() == 5, st())
         check("页面没报错", not errs, "; ".join(errs)[:300])
+
+        # 留作对照的敲门进：地址加 ?way=knock 才走
+        pg.goto(B + "/lab/door.html?dev&way=knock"); pg.wait_for_function("window.__lab", timeout=15000)
+        check("敲门进：先到门口", st() == "door" and J("window.__lab.doorOn") and J("window.__lab.S.ent") < .05, st()); shot("8-knock")
+        check("敲门进：三秒内进来、门收起来", idle(40) and 0 < J("window.__lab.S.tIdle") <= 3 and J("window.__lab.S.ent") == 1 and not J("window.__lab.doorOn"), J("window.__lab.S.tIdle"))
+        check("敲门进也没报错", not errs, "; ".join(errs)[:300])
 
         # 分镜：按帧走，截关键帧（给人看节拍用）
         pg.goto(B + "/lab/door.html"); pg.wait_for_function("window.__lab", timeout=15000)
-        J("window.__lab.manual(true); window.__lab.enter('knock')"); step = lambda s: J("window.__lab.step(%s)" % s)
+        J("window.__lab.manual(true); window.__lab.enter()"); step = lambda s: J("window.__lab.step(%s)" % s)
         kf = lambda name: (pg.wait_for_timeout(450), pg.screenshot(path=os.path.join(OUT, "door-kf-%s.png" % name)))
-        step(.2); kf("1"); step(.82); kf("2"); step(.4); kf("3"); step(.38); kf("4")
-        step(1.2); pg.wait_for_function("document.querySelectorAll('#labs .lab.on').length === 5", timeout=30000); kf("5")
-        J("window.__lab.pullTo(1, .55)"); step(.5); kf("6")
-        J("window.__lab.pullTo(1, 1.02)"); step(.62); kf("7"); step(.8)
-        pg.wait_for_function("document.querySelector('#bag').classList.contains('full')", timeout=30000); kf("8")
+        labs_on = lambda n: pg.wait_for_function("document.querySelectorAll('#labs .lab.on').length === %d" % n, timeout=30000)
+        step(.1); kf("1")                                                    # 到了：书架和顶上那句话，签还没出来
+        step(.22); labs_on(2); kf("2")                                       # 签一枚枚冒出来
+        step(1.0); labs_on(5); pg.wait_for_function("window.__lab.state === 'idle'", timeout=30000); kf("3")   # 看懂
+        r = J("window.__lab.rectOf(window.__lab.ROWS[0].books[6].i)"); pg.mouse.move(r["cx"], r["cy"]); pg.mouse.down(); step(.3)
+        pg.wait_for_function("document.querySelector('#tip').classList.contains('on')", timeout=30000); kf("4")   # 左右划看书名
+        pg.mouse.up(); step(.3)
+        J("window.__lab.pullTo(1, .4)"); step(.5); pg.wait_for_function("getComputedStyle(document.querySelector('#tip')).opacity === '0'", timeout=30000); kf("5")                   # 往下拉，出来一半
+        J("window.__lab.pullTo(1, .8)"); step(.4); pg.wait_for_function("document.querySelector('#hint').textContent === '松手就带走'", timeout=30000); kf("6")   # 过了六成
+        J("window.__lab.pullTo(1, 1.02)"); step(.62); kf("7"); step(.8)      # 捆好，飞进邮包
+        pg.wait_for_function("document.querySelector('#bag').classList.contains('full')", timeout=30000); kf("8")   # 落进邮包
         ctx.close()
 
         # 桌面横屏：鼠标移过去就探头，点签带走
         ctx = br.new_context(viewport={"width": 1280, "height": 800}, device_scale_factor=1, service_workers="block"); pg = ctx.new_page(); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
-        pg.goto(B + "/lab/door.html?way=direct"); pg.wait_for_function("window.__lab && window.__lab.state === 'idle'", timeout=60000); pg.wait_for_timeout(300)
+        pg.goto(B + "/lab/door.html"); pg.wait_for_function("window.__lab && window.__lab.state === 'idle'", timeout=60000); pg.wait_for_timeout(300)
         i = pg.evaluate("window.__lab.ROWS[1].books[5].i"); r = pg.evaluate("window.__lab.rectOf(%d)" % i)
         pg.mouse.move(r["cx"] - 20, r["cy"]); pg.mouse.move(r["cx"], r["cy"], steps=4); pg.wait_for_timeout(200)
         check("桌面：鼠标移上去就探头", pg.evaluate("window.__lab.S.hot") == i, pg.evaluate("window.__lab.S.hot")); pg.screenshot(path=os.path.join(OUT, "door-desk-1-hover.png"))

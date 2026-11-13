@@ -2,18 +2,19 @@
  * 外观是占位的，不在这里讨论。节拍照拆包那一轮定的「热闹」的力度来。人名、那句话、书名都是编的。
  *
  * 节拍：
- *   1 到门口 一扇门，门上一块门牌写着名字；屏幕顶上是「谁的书房」和他自己写的一句话（从头到尾都在）
- *   2 敲门   两下，门开，镜头穿过门走到书架前（点一下屏幕快进）；另一种进法「直接到」不要门，书架直接在眼前，两种对着比
- *   3 看懂   一座书架，一排一个科目；层板边上的签一枚枚冒出来（科目、多少本、读过多少），那一排书跟着抖一下。
+ *   1 到     点开链接，书架直接在眼前；屏幕顶上是「谁的书房」和他自己写的一句话（从头到尾都在）
+ *   2 看懂   一座书架，一排一个科目；层板边上的签一枚枚冒出来（科目、多少本、读过多少），那一排书跟着抖一下。
  *            读没读和书架样机同一套：浅的没读、深的读过、探出来带签的在读。最下面一层是他的牌盒和本子（样机里只是摆着）
- *   4 划过   手指按在书脊上左右划，碰到哪本哪本探头、报书名（只是看，不抽出来）
- *   5 带走   按住一排往下拉：这一排的一份（包着白纸，到你手里都是没读的）跟着手指一本本从架上出来，一本一声一震；
+ *   3 划过   手指按在书脊上左右划，碰到哪本哪本探头、报书名（只是看，不抽出来）
+ *   4 带走   按住一排往下拉：这一排的一份（包着白纸，到你手里都是没读的）跟着手指一本本从架上出来，一本一声一震；
  *            拉到底就带走，过了六成松手也带走，没到就弹回去。捆成一捆飞进底下的邮包。原来的书还在他的架上。
  *            层板上那枚签点一下，也是带走这一排
- *   6 邮包   点邮包看带走了什么；可以倒回去重来
+ *   5 邮包   点邮包看带走了什么；可以倒回去重来
  *
  * 结构：动画轨、声音、舞台、书的样子、架子都在 kit.js（和书架样机共用）；这里是门、这一位主人的书、带走的手势。
- * 调试：地址加 ?dev 显示帧率与状态，?way=direct 直接到；window.__lab 给测试脚本用。 */
+ * 进法：2026-11-12 用户在手机上两种都试过，定「直接到」，不要敲门那一段。敲门进（一扇门、门牌、敲两下、门开、镜头穿过门）
+ *   留在代码里对照用，地址加 ?way=knock 才走，页面上不再有切换。
+ * 调试：地址加 ?dev 显示帧率与状态；window.__lab 给测试脚本用。 */
 import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, DIM, STN, CJK, PAPER } from "./kit.js";
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
@@ -21,11 +22,11 @@ const $ = (s) => document.querySelector(s);
 
 /* ---------- 手感参数（要调就调这张表） ---------- */
 const P = {
-  knock1: .28, knock2: .5,       // 两下敲门各在什么时候
+  directLabels: .15, labelGap: .13,   // 到了以后签从什么时候开始冒、一枚隔多久
+  knock1: .28, knock2: .5,       // 以下四行只有 ?way=knock 用：两下敲门各在什么时候
   open: .74, openDur: .42,       // 门什么时候开、开多久
   push: .9, pushDur: .95,        // 镜头什么时候进门、走多久
-  labels: 1.5, labelGap: .13,    // 敲门进：签从什么时候开始冒、一枚隔多久
-  directLabels: .15,             // 直接到：签从什么时候开始冒
+  labels: 1.5,                   // 敲门进：签从什么时候开始冒
   pullPx: 150,                   // 往下拉多少像素算拉到底
   commit: .6,                    // 拉过这个比例松手就带走，没到弹回去
   outZ: 4, dropMax: 46,          // 带走的那一份：出了书架再往外多少厘米、跟着手指最多往下走多少厘米
@@ -100,7 +101,7 @@ const { w: caseW, h: caseH } = caseKit.build(W, R);
   for (let k = 0; k < PROPS.notes; k++) { box(1.9, 21, 15, x + 1 + (k ? 2.4 : 0), y0 + 10.4, -RECESS - 7.5, noteMats[k], k ? -.16 : 0); x += 2.2; }
 }
 
-/* ---------- 门：一面墙开一个门洞，门扇上钉着门牌 ---------- */
+/* ---------- 门（只有 ?way=knock 用）：一面墙开一个门洞，门扇上钉着门牌 ---------- */
 const DW = 86, DH = 204, EYE = 150, LOOK = 110, PLW = 56, PLH = 30;   // 门宽、门高、门牌挂多高、门外镜头看多高、门牌的宽与高
 const doorG = new THREE.Group(); scene.add(doorG);
 const doorPivot = new THREE.Group(); doorPivot.position.set(-DW / 2, 0, 0); doorG.add(doorPivot);
@@ -121,7 +122,7 @@ const doorPivot = new THREE.Group(); doorPivot.position.set(-DW / 2, 0, 0); door
 
 /* ---------- 状态 ---------- */
 const S = {
-  state: "boot", way: Q.get("way") === "direct" ? "direct" : "knock", ent: 0, lean: 0, hot: -1, pull: null, bag: [], fast: false, manual: false,
+  state: "boot", way: Q.get("way") === "knock" ? "knock" : "direct", ent: 0, lean: 0, hot: -1, pull: null, bag: [], fast: false, manual: false,
   t: 0, tEnter: 0, tIdle: 0, shake: 0, freeze: 0, lastTick: 0, par: { x: 0, y: 0, tx: 0, ty: 0 },
 };
 const CAM = { dist: 300, y: 80, fov: 34, wpp: 1, dz: 400, sd: 200 };
@@ -137,7 +138,7 @@ const SFX = {
   no() { tone({ f: 200, f2: 150, dur: .12, gain: .12, type: "triangle" }); },
 };
 
-/* ---------- 镜头：门外凑在门牌前，进了门整座书架装进一屏 ---------- */
+/* ---------- 镜头：整座书架装进一屏（敲门进时先在门外，再走进来） ---------- */
 function avail() {
   const vw = innerWidth, vh = innerHeight, portrait = vh >= vw, top = portrait ? 122 : 112, bot = portrait ? 178 : 156, side = portrait ? 12 : 28;
   return { vw, vh, top, bot, side, w: vw - 2 * side, h: vh - top - bot };
@@ -229,7 +230,6 @@ function ui() {
     : S.state === "pull" ? (pl && pl.pT >= P.commit ? "松手就带走" : "再往下，拉到底就带走")
       : S.state === "take" ? "捆好，进邮包"
         : S.last != null ? "带走了「" + ROWS[S.last].name + "」" + ROWS[S.last].n + " 本，在你的邮包里" : "按住一排往下拉，整排带走；左右划看书名";
-  document.querySelectorAll("#seg-way button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.way === S.way)));
   $("#snd").setAttribute("aria-pressed", String(AU.on));
 }
 function showTip(b, x, y) {
@@ -255,7 +255,7 @@ function openSheet() {
 }
 const closeSheet = () => sheet.classList.remove("on");
 
-/* ---------- 进门 ---------- */
+/* ---------- 进门：直接到；敲门进只留作对照 ---------- */
 function enter(way) {
   clearTracks(); S.way = way || S.way; S.state = "door"; S.fast = false; S.pull = null; S.last = null; S.tEnter = S.t; S.tIdle = 0; setHot(-1); closeSheet(); bag.classList.remove("aim");
   labEls.forEach((o) => o.el.classList.remove("on")); owner.classList.add("on");          // 谁的书房、那句话：从到门口起就在顶上
@@ -365,7 +365,6 @@ function endPointer(ev) {
 }
 canvas.addEventListener("pointerup", endPointer); canvas.addEventListener("pointercancel", endPointer);
 canvas.addEventListener("pointerleave", (ev) => { if (ev.pointerType === "mouse" && G.id === -1 && S.state === "idle") setHot(-1); });
-document.querySelectorAll("#seg-way button").forEach((b) => b.addEventListener("click", () => { au(true); enter(b.dataset.way); }));
 $("#b-again").addEventListener("click", () => { au(true); enter(S.way); });
 bag.addEventListener("click", () => { au(true); if (S.state === "idle") openSheet(); });
 $("#b-close").addEventListener("click", closeSheet);
@@ -386,7 +385,7 @@ function tick(raw) {
   S.t += dt; S.shake *= Math.exp(-10 * raw);
   stepTracks(dt); placeCamera(raw); applyBooks(dt ? raw : 0); placeLabels();
   renderer.render(scene, camera);
-  if (devEl) devEl.textContent = S.state + " · " + S.way + (S.tIdle ? " · 进门到看懂 " + S.tIdle.toFixed(2) + " 秒" : "") + "\n" + fps.toFixed(0) + " fps · " + renderer.info.render.calls + " calls";
+  if (devEl) devEl.textContent = S.state + " · " + S.way + (S.tIdle ? " · 点开到能动 " + S.tIdle.toFixed(2) + " 秒" : "") + "\n" + fps.toFixed(0) + " fps · " + renderer.info.render.calls + " calls";
 }
 
 /* ---------- 开场 ---------- */
