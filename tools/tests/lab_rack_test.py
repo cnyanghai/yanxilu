@@ -2,10 +2,12 @@
 档案架上是牌盒（厚跟着牌数走，有没读的顶上露一枚签）和没拆的邮包，笔记本架上的本子封面朝外；都能划过、抽出、放回；
 牌盒抽出来再点它一下就打开（没有「打开」的按钮）：牌排成一把扇子（一个大圆的弧，每张露出左边一条竖着的标题，没读的背面朝上、在右头），
 按着左右划整把跟着转，转到正中的那张立起来放大（转得快只探头），背面朝上的点一下翻开（翻过来就算读了），点扇面上的一张转到它，点底下的盒子或者「合上」合上；
+牌面是一张旧书页（浅的纸色，不发橙），牌背是老书的烫金封面（三种候选，工具纸里挑，默认跟着盒子的颜色）；
 换走再换回来，书架上改过的读没读还在。灰盒没做后两件，记号不出来。
 用法：python3 tools/tests/lab_rack_test.py           # 自己起模拟服务（端口 8797），软件渲染，约两三分钟
 截图落在 tools/out/lab/（已 gitignore）。这条测试只保证流程走得通、整座装得进一屏、不报错，好不好看、换的那一下顺不顺要人在手机上看。"""
-import os, sys, time, subprocess, urllib.request
+import os, sys, time, subprocess, urllib.request, io
+from PIL import Image
 from playwright.sync_api import sync_playwright
 
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(os.path.dirname(HERE))
@@ -73,7 +75,12 @@ try:
         check("整座档案架装在一屏里", J(INSIDE_JS) == 0, J(INSIDE_JS))
         pg.click("#grab"); pg.wait_for_timeout(450); hint = pg.locator("#hint").inner_text()
         check("工具纸上写着几盒几张牌、几包没拆", "共 22 盒" in hint and "没拆的邮包 3 包" in hint, hint[:60])
-        check("排法、在读的记号、本数这三行只有书架有", J("[...document.querySelectorAll('#tools [data-only]')].every(e => e.hidden && e.getBoundingClientRect().height === 0)")); shot("3-rack-tools")
+        check("排法、在读的记号、本数这三行只有书架有", J("[...document.querySelectorAll('#tools [data-only=shelf]')].every(e => e.hidden && e.getBoundingClientRect().height === 0)")); shot("3-rack-tools")
+        bkrow = J("(() => { const r = document.querySelector('#tools [data-only=rack]'), bs = [...r.querySelectorAll('#seg-back button')]; return { shown: !r.hidden && r.getBoundingClientRect().height > 0, kinds: bs.map(b => b.dataset.back), on: bs.filter(b => b.getAttribute('aria-pressed') === 'true').map(b => b.dataset.back) }; })()")
+        check("档案架的工具纸里多一行「牌背」：三种候选，默认跟着盒子的颜色", bkrow == {"shown": True, "kinds": ["family", "tulip", "calf"], "on": ["family"]}, bkrow)
+        pg.click('#seg-back button[data-back="tulip"]'); pg.wait_for_timeout(150)
+        check("挑一种：亮着的换成它，记在设备上", J("document.querySelector('#seg-back button[data-back=tulip]').getAttribute('aria-pressed')") == "true" and J("localStorage.getItem('lab-card-back')") == "tulip")
+        pg.click('#seg-back button[data-back="family"]'); pg.wait_for_timeout(150)
         pg.mouse.click(195, 120); pg.wait_for_timeout(450)
         b0 = J("window.__lab.books.findIndex(b => !b.pack && b.u > 0 && b.t > 3)"); title = J("window.__lab.books[%d].title" % b0); tip = tap_out(b0)
         check("按在一个盒子上：小签报盒名和几张牌", title in tip and "张" in tip, tip.replace("\n", " "))
@@ -93,7 +100,14 @@ try:
         tap_out(b0); box0 = J("(({ n, u }) => ({ n, u }))(window.__lab.books[%d])" % b0); n0, u0 = box0["n"], box0["u"]
         hr = J("window.__lab.heroRect()"); pg.mouse.click(hr["cx"], hr["cy"])
         check("再点一下盒子：盒子落到底下，牌飞出来", st() in ("opening", "open"), st())
-        check("牌成扇了", until("open", 40), st()); settle(); shot("5a-fan")
+        check("牌成扇了", until("open", 40), st()); settle()
+        pg.wait_for_function("%s.back.ready" % BX, timeout=20000); pg.wait_for_timeout(400); shot("5a-fan")
+        def seen(q):                                     # 立着的那张在屏上：按亮度排，第 q 成的那个颜色
+            d = J(BX + ".dispRect()"); im = Image.open(io.BytesIO(pg.screenshot())).convert("RGB").crop((int(d["x"] - d["w"] * .42), int(d["y"] - d["h"] * .42), int(d["x"] + d["w"] * .42), int(d["y"] + d["h"] * .42)))
+            px = sorted(im.get_flattened_data() if hasattr(im, "get_flattened_data") else im.getdata(), key=lambda c: c[0] * .2126 + c[1] * .7152 + c[2] * .0722); return px[int(len(px) * q)]
+        lum = lambda c: c[0] * .2126 + c[1] * .7152 + c[2] * .0722
+        bk = J(BX + ".back"); lo, hi = seen(.3), seen(.97)
+        check("牌背是老书的烫金封面（默认跟着盒子的颜色）：暗的皮面上有亮的金", bk == {"kind": "family", "ready": True} and lum(hi) > lum(lo) * 1.9 and lum(lo) < 110, (bk, lo, hi))
         cs = J(BX + ".cards.map(c => ({ read: c.c.read, back: Math.abs(c.ry - Math.PI) < .01, vis: c.g.visible, r: c.r, phi: c.phi, ax: c.ax, ay: c.ay, sx: c.sx, sy: c.sy }))")
         Lf = J("(({ W, H, s, s0, bigW, bigH, dispY, fanTop, fits, cx }) => ({ W, H, s, s0, bigW, bigH, dispY, fanTop, fits, cx }))(%s.L)" % BX); f0 = J(BX + ".focus")
         check("盒里几张牌扇子里就是几张", len(cs) == n0, (len(cs), n0))
@@ -111,6 +125,8 @@ try:
         d = J(BX + ".dispRect()"); pg.mouse.click(d["x"], d["y"]); pg.wait_for_function("!%s.busy" % BX, timeout=20000); pg.wait_for_timeout(200)
         c1 = J("(({ c, ry }) => ({ read: c.read, ry }))(%s.cards[%d])" % (BX, f0)); meta = pg.locator("#s-meta").inner_text()
         check("点立着的那张：翻过来了，翻过来就算读了，盒里没读的少一张，那行字跟着变", c1["read"] and abs(c1["ry"]) < .01 and J("window.__lab.books[%d].u" % b0) == u0 - 1 and "点它一下翻开" not in meta, (c1, meta)); shot("5b-flipped")
+        pg.wait_for_timeout(300); paper, ink = seen(.9), seen(.003)
+        check("牌面是一张浅的旧纸，不发橙（蓝不低于红的七成），字是深的墨色", paper[0] > 205 and paper[2] > paper[0] * .7 and lum(ink) < 80, (paper, ink))
         pg.mouse.click(d["x"], d["y"]); pg.wait_for_timeout(400)
         check("读过的再点一下：没有反应（正文还没接）", st() == "open" and J(BX + ".focus") == f0 and J("window.__lab.books[%d].u" % b0) == u0 - 1)
         # 按在扇面上往右拖两条：整把跟着转，转回前两张；不松手的时候就跟着，松手停在整张上
@@ -154,7 +170,7 @@ try:
         pg.click('#marks button[data-f="shelf"]')
         check("点书架的记号回去：还是四十本，刚才读了一下的那本还是在读", until("idle", 40) and J("window.__lab.kind") == "shelf" and J("window.__lab.books.length") == 40 and J("window.__lab.books[%d].st" % bi) == "doing", (J("window.__lab.kind"), J("window.__lab.books[%d].st" % bi)))
         pg.wait_for_timeout(300); pg.click("#grab"); pg.wait_for_timeout(450)
-        check("回到书架，工具纸里那三行又出来了", J("[...document.querySelectorAll('#tools [data-only]')].every(e => !e.hidden)") and "共 40 本" in pg.locator("#hint").inner_text())
+        check("回到书架，工具纸里那三行又出来了，「牌背」那一行收起来", J("[...document.querySelectorAll('#tools [data-only=shelf]')].every(e => !e.hidden)") and J("document.querySelector('#tools [data-only=rack]').hidden") and "共 40 本" in pg.locator("#hint").inner_text())
         pg.mouse.click(195, 120); pg.wait_for_timeout(400)
         pg.keyboard.press("ArrowRight"); check("键盘右箭头也能换到下一件", until("idle", 40) and J("window.__lab.kind") == "rack", J("window.__lab.kind"))
         check("换了一圈，页面没报错", not errs, "; ".join(errs)[:300]); ctx.close()

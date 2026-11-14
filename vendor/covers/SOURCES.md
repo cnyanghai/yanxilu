@@ -61,3 +61,7 @@ CC BY 2.0 的图（大多是波士顿公共图书馆 Boston Public Library 拍�
 | c60 | [-A blank album. The leaves are of different colours and some bear embossed patterns forming a frame. Some leaves have been removed.- - Upper cover (c154i14).jpg](https://commons.wikimedia.org/wiki/File:-A_blank_album._The_leaves_are_of_different_colours_and_some_bear_embossed_patterns_forming_a_frame._Some_leaves_have_been_removed.-_-_Upper_cover_(c154i14).jpg) | CC0 | Embossed binding |
 | c61 | [Niccolo Da Ponte - Dogale of Zuane Badoer - Walters W487 - Closed Front.jpg](https://commons.wikimedia.org/wiki/File:Niccolo_Da_Ponte_-_Dogale_of_Zuane_Badoer_-_Walters_W487_-_Closed_Front.jpg) | Public domain | Embossed binding |
 | c62 | [Pope Gregory I - Moralia in Job - Walters W338 - Closed.jpg](https://commons.wikimedia.org/wiki/File:Pope_Gregory_I_-_Moralia_in_Job_-_Walters_W338_-_Closed.jpg) | Public domain | Embossed binding |
+
+## 2026-11-14 另一处用途：样机里的牌背
+
+`lab/card.js` 把 c01（CC0）和 c62（公有领域）当开牌盒样机里的牌背用：裁去书口和白边、缩放到牌的比例；「跟盒子」那一种把 c01 的皮色换成各盒的色系，烫金不动；另从图里分出「哪里是金」去反环境光。图还是这里的这两个文件，没有另存。

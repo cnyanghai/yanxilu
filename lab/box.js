@@ -4,19 +4,18 @@
  *
  * 节拍：
  *   1 打开   盒子落到屏幕底下、盒口朝着人，盒盖往后掀开；里面的牌一张张飞出来
- *   2 成扇   牌排在一个大圆的弧上，后一张压着前一张，每张露出左边一条，上面竖着写标题；没读的背面朝上（藏青烫金），在扇子的右头
+ *   2 成扇   牌排在一个大圆的弧上，后一张压着前一张，每张露出左边一条，上面竖着写标题；没读的背面朝上，在扇子的右头
  *   3 转     手指按着左右划，整把扇子跟着转；转到正中的那张立起来、放大，停在扇子上面给人看（转得快的时候只探一点头）
  *   4 翻开   立着的那张要是背面朝上，点它一下翻过来（翻过来就算读了）
  *   5 合上   牌一张张回盒里，盒盖合上
  *
+ * 牌长什么样（牌面是旧书页、牌背是老书的烫金封面、在灯下的颜色怎么校）在 card.js，这里只管摆和动。
  * 结构：每张牌是正反两片（共用一张图集，一张牌一格；立起来的那张另画一张清楚的）。牌一直是真的大小（厘米），
  *   放在离镜头某个距离上，让它在屏上正好是要的宽；所以这里所有位置都是「屏上的像素 → 那个距离上的厘米」换出来的。
  *   扇面每一帧现算：pos 是转到第几张（可以是小数），牌的位置只跟着它走，所以转、松手滑一段、点某一张转过去是同一套。
  * 盒子本身的开合（下半截盒身、上半截盒盖，各取盒面那张图的一截）也在这里；盒子飞到哪、底下那张纸写什么，在 shelf.js。 */
-import { THREE, clamp, lerp, E, rng, LOOK, CJK, grainOver } from "./kit.js";
-
-const CW = 8.8, CH = 12.5;                                  // 一张牌多大（厘米）
-const COL = .24;                                            // 牌面左边竖着写标题的那一条占牌宽的几成：扇面上后一张压着前一张，露出来的就是这一条
+import { THREE, clamp, lerp, E, rng, LOOK } from "./kit.js";
+import { CW, CH, COL, drawFace, makeBack, cardMat, setMap, gild, backKind, lit } from "./card.js";      // 牌长什么样（牌面是旧书页、牌背是老书的烫金封面）在 card.js
 const P = {
   dealDur: .5, dealEach: .32,                               // 发出来：全部牌一共错开多久、每张飞多久
   backDur: .3, backEach: .22,                               // 收回去
@@ -42,55 +41,11 @@ export function makeCards(box, heads) {
   return out;
 }
 
-const rr = (g, x, y, w, h, r) => { g.beginPath(); g.moveTo(x + r, y); g.arcTo(x + w, y, x + w, y + h, r); g.arcTo(x + w, y + h, x, y + h, r); g.arcTo(x, y + h, x, y, r); g.arcTo(x, y, x + w, y, r); g.closePath(); };
-const inkA = (hex, a) => { const n = parseInt(hex.slice(1), 16); return "rgba(" + (n >> 16) + "," + (n >> 8 & 255) + "," + (n & 255) + "," + a + ")"; };
-const fit = (g, str, wMax) => { if (g.measureText(str).width <= wMax) return str; let s = str; while (s.length > 1 && g.measureText(s + "…").width > wMax) s = s.slice(0, -1); return s + "…"; };
 const sm = (v) => { v = clamp(v); return v * v * (3 - 2 * v); };
-// 竖排的标题，从上往下顶头排（扇面上露出来的那一条上宽下窄，字靠上）。排不下先缩字，再排不下截掉
-const ROT = "：；—–-…~（）()《》〈〉「」『』【】[]<>:;", CORNER = "，、。,.";      // 竖排时要躺倒的、要挪到右上角的标点
-function titleDown(g, cx, top, room, str, fsMax, fsMin, color) {
-  let chars = [...str]; const fs = clamp(room / (chars.length * 1.08), fsMin, fsMax), pitch = fs * 1.08, max = Math.max(1, Math.floor(room / pitch));
-  if (chars.length > max) chars = [...chars.slice(0, max - 1), "…"];
-  g.font = "700 " + fs.toFixed(1) + "px " + CJK; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = color;
-  chars.forEach((ch, k) => {
-    const cy = top + pitch * (k + .5);
-    if (ROT.includes(ch)) { g.save(); g.translate(cx, cy); g.rotate(Math.PI / 2); g.fillText(ch, 0, 0); g.restore(); }
-    else if (CORNER.includes(ch)) g.fillText(ch, cx + fs * .5, cy - fs * .5);
-    else g.fillText(ch, cx, cy);
-  });
-}
-// 牌面：左边一条竖着写标题（扇面上只露这一条），一道细线隔开；右边是编号、来处和日子、为什么存它、读完要多久
-function drawFace(g, x, y, w, h, c) {
-  const K = LOOK.pk, u = w / 100, F = CJK, cw = w * COL, line = Math.max(1, u * .35);
-  g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
-  g.fillStyle = K.cardFace; g.fillRect(x, y, w, h); grainOver(g, x, y, w, h, true);
-  g.strokeStyle = inkA(K.ink, .5); g.lineWidth = Math.max(1, u * .5); rr(g, x + u * 3, y + u * 3, w - u * 6, h - u * 6, u * 3); g.stroke();
-  g.fillStyle = inkA(K.ink, .32); g.fillRect(x + cw, y + u * 8, line, h - u * 16);
-  titleDown(g, x + u * 3 + (cw - u * 3) / 2, y + u * 9.5, h - u * 19, c.title, u * 12, u * 8.2, K.ink);
-  const x0 = x + cw + u * 6, tw = w - cw - u * 14;
-  g.textAlign = "left"; g.textBaseline = "middle"; g.fillStyle = K.accent; g.font = "600 " + (u * 5.6).toFixed(1) + "px " + F; g.fillText(c.no, x0, y + u * 13.5);
-  g.fillStyle = inkA(K.ink, .66); g.font = "500 " + (u * 5.2).toFixed(1) + "px " + F; g.fillText(fit(g, c.src + " · " + c.mon + " 月 " + c.day + " 日", tw), x0, y + u * 23);
-  g.fillStyle = inkA(K.ink, .32); g.fillRect(x0, y + u * 30, tw, line);
-  g.fillStyle = inkA(K.ink, .66); g.font = "500 " + (u * 5.4).toFixed(1) + "px " + F; g.fillText("存它是因为", x0, y + u * 42);
-  g.fillStyle = K.ink; g.font = "700 " + (u * 7.8).toFixed(1) + "px " + F;
-  const per = Math.max(3, Math.floor(tw / (u * 8))); for (let i = 0, ln = 0; i < c.why.length && ln < 5; i += per, ln++) g.fillText(c.why.slice(i, i + per), x0, y + u * (54.5 + ln * 11.5));
-  g.fillStyle = inkA(K.ink, .32); g.fillRect(x0, y + h - u * 22, tw, line);
-  g.fillStyle = inkA(K.ink, .66); g.font = "500 " + (u * 5.4).toFixed(1) + "px " + F; g.fillText("读完约 " + c.min + " 分钟", x0, y + h - u * 13.5);
-  g.restore();
-}
-// 牌背：藏青布面，烫金的两道框，当中一个圆里一个大字（这一盒是哪一类），和拆包页的牌背是同一种。扇面上露出来的是左边那两道金线
-function drawBackSide(g, w, h, ch, no) {
-  const K = LOOK.pk, u = w / 100;
-  g.fillStyle = K.cardBack; g.fillRect(0, 0, w, h); grainOver(g, 0, 0, w, h, false);
-  g.strokeStyle = g.fillStyle = K.cardLine; g.lineWidth = u * 1.5; rr(g, u * 5, u * 5, w - u * 10, h - u * 10, u * 3.5); g.stroke(); g.lineWidth = Math.max(1, u * .45); rr(g, u * 8.5, u * 8.5, w - u * 17, h - u * 17, u * 2); g.stroke();
-  const cx = w / 2, cy = h / 2; g.lineWidth = u; g.beginPath(); g.arc(cx, cy, u * 30, 0, 7); g.stroke(); g.lineWidth = Math.max(1, u * .35); g.beginPath(); g.arc(cx, cy, u * 33, 0, 7); g.stroke();
-  g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 " + (u * 38).toFixed(1) + "px " + CJK; g.fillText(ch, cx, cy + u * 1.5);
-  g.font = "600 " + (u * 5.4).toFixed(1) + "px " + CJK; g.fillText(no, cx, h - u * 19);
-}
 
 /* env：scene 场景；hero 抽出来那一件所在的组（盒身、盒盖挂在它下面）；play 动画轨；view() 现在的屏幕与镜头
  *   （vw、vh 屏幕多大，tanH 半个视角的正切，camY、camZ 镜头在哪，top、bottom 上下各让开多少像素，pr 画布的像素比）；
- *   boxPose() 打开的盒子在哪；glyph(b) 牌背上那个字；tick(i, n)、flipSnd() 出声；focus(i) 正中换了一张时叫一下（底下那行字跟着换） */
+ *   boxPose() 打开的盒子在哪；glyph(b) 这一盒是哪一类的那个字（盖在牌面的印里）；tick(i, n)、flipSnd() 出声；focus(i) 正中换了一张时叫一下（底下那行字跟着换） */
 export function createBoxView(env) {
   const { scene, hero, play, maxAniso } = env;
   const group = new THREE.Group(); group.visible = false; scene.add(group);
@@ -100,10 +55,16 @@ export function createBoxView(env) {
   const geo = new THREE.ShapeGeometry(shape, 4);
   { const p = geo.attributes.position, uv = geo.attributes.uv; for (let i = 0; i < p.count; i++) uv.setXY(i, p.getX(i) / CW + .5, p.getY(i) / CH + .5); }
   const mkTex = (c) => { const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso; return t; };
-  const atlasC = document.createElement("canvas"), backC = document.createElement("canvas"); backC.width = 512; backC.height = 728;
-  let atlasT = null; const backT = mkTex(backC), backMat = new THREE.MeshStandardMaterial({ map: backT, roughness: .8 });
+  const atlasC = document.createElement("canvas"), backC = document.createElement("canvas"), maskC = document.createElement("canvas"); backC.width = maskC.width = 640; backC.height = maskC.height = 908;
+  let atlasT = null, glyph = ""; const backT = mkTex(backC), maskT = new THREE.CanvasTexture(maskC), backMat = cardMat(backT, .8); gild(backMat, maskT);
+  // 牌背：card.js 里的某一种老书封面。图还没读到就先铺这一盒的颜色，读到了换上
+  function dressBack(b) {
+    const fam = b.bd && b.bd.fam, put = (bk) => { if (box !== b) return; backT.image = bk.c; maskT.image = bk.m; backT.needsUpdate = maskT.needsUpdate = true; };
+    const bk = makeBack(backKind(), fam, put);
+    if (bk) put(bk); else { const g = backC.getContext("2d"); g.fillStyle = lit("#3A2A20"); g.fillRect(0, 0, backC.width, backC.height); const gm = maskC.getContext("2d"); gm.fillStyle = "rgb(0,232,0)"; gm.fillRect(0, 0, maskC.width, maskC.height); backT.image = backC; maskT.image = maskC; backT.needsUpdate = maskT.needsUpdate = true; }
+  }
   // 立起来的那张另画一张清楚的。备两张：前一张还没落回去、后一张已经在往上走的时候各用各的
-  const big = [0, 1].map(() => { const c = document.createElement("canvas"); c.width = 640; c.height = 908; const t = mkTex(c); return { c, t, mat: new THREE.MeshStandardMaterial({ map: t, roughness: .86 }), who: -1 }; });
+  const big = [0, 1].map(() => { const c = document.createElement("canvas"); c.width = 640; c.height = 908; const t = mkTex(c); return { c, t, mat: cardMat(t), who: -1 }; });
   let cards = [], box = null, L = null;
   let pos = 0, tgt = 0, pos1 = 0, vel = 0, focus = -1, drag = null;       // pos：转到第几张（小数）；tgt：松手以后要转到的那张；vel：现在每秒转过几张
   let dealing = false, closing = false, flipping = false;
@@ -156,9 +117,9 @@ export function createBoxView(env) {
   function drawAtlas() {
     const V = env.view(), n = cards.length, cw = clamp(Math.round(L.W * Math.min(V.pr, 3) / 32) * 32, 192, 384), ch = Math.round(cw * CH / CW), cols = Math.min(n, Math.floor(4096 / cw)), rows = Math.ceil(n / cols);
     atlasC.width = cols * cw; atlasC.height = rows * ch; const g = atlasC.getContext("2d");
-    cards.forEach((c, i) => drawFace(g, (i % cols) * cw, Math.floor(i / cols) * ch, cw, ch, c.c));
+    cards.forEach((c, i) => drawFace(g, (i % cols) * cw, Math.floor(i / cols) * ch, cw, ch, c.c, glyph));
     if (atlasT) atlasT.dispose(); atlasT = mkTex(atlasC);
-    cards.forEach((c, i) => { const t = atlasT.clone(); t.repeat.set(1 / cols, 1 / rows); t.offset.set((i % cols) / cols, 1 - (Math.floor(i / cols) + 1) / rows); t.needsUpdate = true; c.faceMat.map = t; c.faceMat.needsUpdate = true; c.front.material = c.faceMat; });
+    cards.forEach((c, i) => { const t = atlasT.clone(); t.repeat.set(1 / cols, 1 / rows); t.offset.set((i % cols) / cols, 1 - (Math.floor(i / cols) + 1) / rows); t.needsUpdate = true; setMap(c.faceMat, t); c.front.material = c.faceMat; });
   }
   function clear() { cards.forEach((c) => { group.remove(c.g); if (c.faceMat.map) c.faceMat.map.dispose(); c.faceMat.dispose(); }); cards = []; big.forEach((s) => { s.who = -1; }); focus = -1; drag = null; }
 
@@ -166,9 +127,9 @@ export function createBoxView(env) {
   const mouthPose = () => { const b = env.boxPose(); return { x: b.x, y: b.y + box.h * .22 * b.k, z: b.z + 1.5, rx: b.tilt, k: b.k }; };
   function open(b, list, tex, cloth, done) {
     box = b; clear(); dealing = true; closing = flipping = false; group.visible = true;
-    drawBackSide(backC.getContext("2d"), backC.width, backC.height, env.glyph(b), b.vol); backT.needsUpdate = true;
+    glyph = env.glyph(b); dressBack(b);
     list.forEach((cd, i) => {
-      const g3 = new THREE.Group(), faceMat = new THREE.MeshStandardMaterial({ roughness: .86 });
+      const g3 = new THREE.Group(), faceMat = cardMat();
       const front = new THREE.Mesh(geo, faceMat); front.position.z = .012; const back = new THREE.Mesh(geo, backMat); back.position.z = -.012; back.rotation.y = Math.PI;
       g3.add(front, back); g3.visible = false; group.add(g3);
       cards.push({ c: cd, i, g: g3, front, back, faceMat, ry: cd.read ? 0 : Math.PI, k: 1, r: 0, d: 0, dk: 0, shown: false, big: null, sx: 0, sy: 0, ax: 0, ay: 0, phi: 0 });      // r：立起来几成；d：从盒口飞到扇面上走了几成
@@ -222,6 +183,7 @@ export function createBoxView(env) {
     return true;
   }
   function relayout() { if (box) layout(); }
+  function reback() { if (box) dressBack(box); }                                                            // 换了一种牌背
 
   const _e = new THREE.Euler(0, 0, 0, "ZXY");                                                               // 先翻面，再朝人倾，最后在屏幕里歪：背面朝上的牌歪的方向才和正面朝上的一样
   function step(raw) {
@@ -239,7 +201,7 @@ export function createBoxView(env) {
       if (want > .3 && !cd.big) {                                                                           // 要立起来了：换上那张画得清楚的
         const sl = big.find((s) => s.who < 0) || (cards[big[0].who].r <= cards[big[1].who].r ? big[0] : big[1]);
         if (sl.who >= 0) { const o = cards[sl.who]; o.big = null; o.front.material = o.faceMat; }
-        sl.who = i; cd.big = sl; drawFace(sl.c.getContext("2d"), 0, 0, sl.c.width, sl.c.height, cd.c); sl.t.needsUpdate = true; cd.front.material = sl.mat;
+        sl.who = i; cd.big = sl; drawFace(sl.c.getContext("2d"), 0, 0, sl.c.width, sl.c.height, cd.c, glyph); sl.t.needsUpdate = true; cd.front.material = sl.mat;
       } else if (cd.big && want === 0 && cd.r < .03) { cd.big.who = -1; cd.big = null; cd.front.material = cd.faceMat; }
       if (cd.r > 0) { if (!up) up = cd; else up2 = cd; }
     }
@@ -258,6 +220,6 @@ export function createBoxView(env) {
   // 给测试脚本和页面用：这张牌在扇面上露出来的那一条的中间（拿它当手指落点）；立着的那张在屏上占的方块
   function stripOf(i) { const cd = cards[i]; return L && cd ? { x: cd.ax, y: cd.ay } : null; }
   const dispRect = () => (L ? { x: L.cx, y: L.dispY, w: L.bigW, h: L.bigH } : null);
-  return { open, close, grab, dragTo, release, go, nudge, jump, hit, flip, relayout, step, stripOf, dispRect,
-    get cards() { return cards; }, get focus() { return focus; }, get pos() { return pos; }, get centre() { return L ? centre() : 0; }, get busy() { return dealing || flipping; }, get L() { return L; }, get box() { return box; } };
+  return { open, close, grab, dragTo, release, go, nudge, jump, hit, flip, relayout, reback, step, stripOf, dispRect,
+    get cards() { return cards; }, get back() { return { kind: backKind(), ready: backT.image !== backC }; }, get focus() { return focus; }, get pos() { return pos; }, get centre() { return L ? centre() : 0; }, get busy() { return dealing || flipping; }, get L() { return L; }, get box() { return box; } };
 }

@@ -24,7 +24,8 @@
  * 字（书名签、层板签、底下的纸）用网页排；声音是 WebAudio 现场合成的，没有音频文件。书名、作者都是编的。
  * 调试：地址加 ?dev 显示帧率与状态，?n=300 直接进三百本，?pr=2 把画布倍率钉死，?mark=tab 换在读的记号；window.__lab 给测试脚本用。 */
 import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, drawBand, drawBoxEnd, drawBoxFace, drawNote, grainOver, bindOf, clothOf, clothFill, LOOK, DIM, INK_LT, INK_SOFT, CJK, STN, MASK, foil, weave, whenReady, bakeBook } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
-import { createBoxView, makeCards } from "./box.js";             // 开盒：牌盒打开以后里面的牌（2026-11-14）
+import { createBoxView, makeCards } from "./box.js";
+import { backKind, setBackKind } from "./card.js";             // 开盒：牌盒打开以后里面的牌（2026-11-14）
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -436,6 +437,7 @@ function ui() {
   document.querySelectorAll("#seg-arr button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.arr === S.arr)));
   document.querySelectorAll("#seg-n button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.n === N)));
   document.querySelectorAll("#seg-mark button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mark === S.mark)));
+  { const bk = backKind(); document.querySelectorAll("#seg-back button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.back === bk))); }
   const cur = books[S.cur];
   if (cur) {
     const pct = Math.round(cur.prog * 100), book = S.kind === "shelf";
@@ -700,6 +702,7 @@ canvas.addEventListener("pointerleave", (ev) => { if (ev.pointerType === "mouse"
 document.querySelectorAll("#seg-arr button").forEach((b) => b.addEventListener("click", () => { au(true); toolsOpen(false); arrange(b.dataset.arr); }));
 document.querySelectorAll("#seg-n button").forEach((b) => b.addEventListener("click", () => { au(true); toolsOpen(false); if (S.state === "idle" && +b.dataset.n !== N) rebuild(+b.dataset.n); }));
 document.querySelectorAll("#seg-mark button").forEach((b) => b.addEventListener("click", () => { au(true); toolsOpen(false); setMark(b.dataset.mark); }));
+document.querySelectorAll("#seg-back button").forEach((b) => b.addEventListener("click", () => { au(true); setBackKind(b.dataset.back); if (boxView) boxView.reback(); ui(); }));   // 牌背的几种候选（等用户挑）：挑了记在设备上，下一次开盒就是它
 { let y0 = null, swiped = false;                                       // 把手：点一下开合，按住往上划也开（划开以后松手的那一下点击不算，不然又关上了）
   grab.addEventListener("pointerdown", (ev) => { y0 = ev.clientY; swiped = false; try { grab.setPointerCapture(ev.pointerId); } catch (e) { /* 忽略 */ } });   // 鼠标划出把手也接着收得到（手指本来就会）
   grab.addEventListener("pointermove", (ev) => { if (y0 != null && y0 - ev.clientY > 12) { y0 = null; swiped = true; au(true); toolsOpen(true); } });
