@@ -91,13 +91,14 @@ function makeBooks(n) {
  *   牌盒：一个课题一盒，厚跟着牌数走；n 张牌，u 张没读（有没读的就探出来一点、顶上露一枚签）；最后几件是没拆的邮包
  *   本子：封面朝外放（face），页越多越厚；ago 是几天前写过，今天写过的垂着丝带 */
 const item = (o) => ({ by: "", pages: 0, prog: 0, px: 0, py: 0, pz: 0, rx: 0, ry: 0, rz: 0, k: 1, pop: 0, popT: 0, out: 0, outT: 0, hero: false, ...o });
+const boxT = (n) => clamp(3.8 + n * .1, 4.2, 7.6);      // 牌盒多厚：最薄也有四厘米出头（2026-11-14：原来两张牌的盒只有一指宽，背上的签写不下能看清的字），牌多了再厚
 const BOXT = ["怎么看", "的来龙去脉", "为什么", "时间线", "案例", "之争", "备忘", "剪报", "十问", "的几种说法"];
 function makeBoxes() {
   const X = LOOK.bind.box, r = rng(20261114), out = [], seen = new Set();
   [5, 4, 4, 3, 3, 3].forEach((k, c) => { for (let j = 0; j < k; j++) {
     let title; do { title = HEADS[c][Math.floor(r() * 10)] + BOXT[Math.floor(r() * BOXT.length)]; } while (seen.has(title)); seen.add(title);
     const n = 3 + Math.floor(Math.pow(r(), 1.5) * 38), u = r() < .36 ? 1 + Math.floor(r() * Math.min(5, n - 1)) : 0;
-    out.push(item({ title, cat: c, vol: "FHGMLZ"[c] + String(j + 1).padStart(2, "0"), n, u, st: u ? "doing" : "done", t: clamp(1.5 + n * .15, 1.9, 7.6), h: X.h, d: X.d }));
+    out.push(item({ title, cat: c, vol: "FHGMLZ"[c] + String(j + 1).padStart(2, "0"), n, u, st: u ? "doing" : "done", t: boxT(n), h: X.h, d: X.d }));
   } });
   for (let k = 0; k < 3; k++) out.push(item({ title: "没拆的邮包", cat: 5, pack: true, n: 5, u: 5, st: "done", t: 3.4, h: 11.5, d: 8.6 }));
   out.forEach((b, i) => { b.i = i; });
@@ -109,6 +110,9 @@ function makeNotes() {
 }
 /* 真的那一批（嵌在主站里才有）：主站给的快照换成架上的东西。书有多厚多高主站不知道（没有页数），按书的 id 定一个，同一本书永远一个样；
  * 牌盒的厚还是跟着牌数走，本子的厚跟着页数走。牌的 read 管它现在哪一面朝上（翻开看一眼也算），real 才是账号里记的读没读 */
+// 调试：?few=3 样品里每件家具只留三件（档案架留一包邮包），看东西少的时候摆得怎么样
+const FEW = Math.max(0, Math.floor(+Q.get("few") || 0));
+const few = (list) => { if (!FEW || HOST || list.length <= FEW) return list; const pk = list.find((b) => b.pack), out = pk && FEW > 1 ? [...list.filter((b) => !b.pack).slice(0, FEW - 1), pk] : list.slice(0, FEW); out.forEach((b, i) => { b.i = i; }); return out; };
 const hashOf = (str) => { let h = 0; for (const ch of String(str)) h = h * 31 + ch.charCodeAt(0) | 0; return Math.abs(h); };
 const unread = (c) => !(HOST ? c.real : c.read);
 function fromHost(snap) {
@@ -119,7 +123,7 @@ function fromHost(snap) {
   }).sort((a, b) => a.cat - b.cat);
   if (LOOK.bind) {
     const X = LOOK.bind.box;
-    STORE.rack = snap.boxes.map((o) => { const cards = o.cards.map((c) => ({ ...c, real: c.read })), n = cards.length, u = cards.filter(unread).length; return item({ ...o, cards, n, u, st: u ? "doing" : "done", t: clamp(1.5 + n * .15, 1.9, 7.6), h: X.h, d: X.d }); })
+    STORE.rack = snap.boxes.map((o) => { const cards = o.cards.map((c) => ({ ...c, real: c.read })), n = cards.length, u = cards.filter(unread).length; return item({ ...o, cards, n, u, st: u ? "doing" : "done", t: boxT(n), h: X.h, d: X.d }); })
       .concat(snap.packs.map((o) => item({ ...o, pack: true, u: o.n, st: "done", t: 3.4, h: 11.5, d: 8.6 })));
     STORE.notes = snap.notes.map((o, i) => { const h = i % 3 === 2 ? 17.6 : 21; return item({ ...o, sub: o.pages + " 页", st: o.ago === 0 ? "doing" : "done", t: clamp(.9 + o.pages * .011, 1.1, 3.3), h, d: h * .705, face: true }); });
   }
@@ -349,8 +353,10 @@ function slotPos(i) {                                             // 一件东�
 }
 const LEAN = .13;
 function chooseW(aspect) {                                       // 架子的宽和层数跟着屏幕的形状走：两种排法都放得下、整座正好装进一屏；最底下一层别只剩零星几本
-  let best = null;
-  for (let W = 36; W <= 460; W += 2) {
+  let best = null, wide = 0; for (const b of books) wide = Math.max(wide, WX(b));
+  // 最窄能到多窄：原来一律三十六厘米起，东西只有几件时架子里空着一大半、东西在屏上又小（2026-11-14 用户说像一个小盒子、很空）。
+  // 现在窄到刚好放下最宽的那一件，件数少的时候架子跟着缩、镜头跟着靠近，东西在屏上就大
+  for (let W = Math.max(12, Math.ceil((wide + 2 * K.pad) / 2) * 2); W <= 460; W += 2) {
     const a1 = pack("topic", W), a2 = S.kind === "shelf" ? pack("state", W) : a1, big = a2.R > a1.R ? a2 : a1, R = big.R;
     const lastFill = big.rows[R - 1].reduce((sum, bi) => sum + WX(books[bi]), 0) / W;
     // 牌盒和本子件数少、一件又宽：每层右边空出一大截就像没摆满的书架，所以空得多的宽度扣分（最后一层不算）
@@ -518,7 +524,7 @@ function layoutFit() { const A = avail(), best = chooseW(A.w / A.h); S.W = best.
 // 换到某一件家具：架上的东西从各自那一批里拿（改过的读没读留着），层高换掉，架子重搭，东西重画
 function setKind(kind) {
   S.kind = kind; K = KINDS[kind]; SH = DIM.SH = K.SH;
-  books = STORE[kind] || (STORE[kind] = kind === "rack" ? makeBoxes() : kind === "notes" ? makeNotes() : makeBooks(NB)); N = books.length;
+  books = STORE[kind] || (STORE[kind] = few(kind === "rack" ? makeBoxes() : kind === "notes" ? makeNotes() : makeBooks(NB))); N = books.length;
   books.forEach((b) => { b.pop = b.popT = 0; b.hero = false; });
   S.hot = S.cur = -1; S.outReady = false; S.yaw = S.yawT = 0; hero.visible = false; dim.visible = false; tip.classList.remove("on");
   S.arr = kind === "shelf" ? S.arrBook : "topic";

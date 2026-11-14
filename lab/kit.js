@@ -610,6 +610,18 @@ export function drawSpine(g, x, y, w, h, b, pale, mask, bleed) {
  * 都分两步：先画布上的（缝、铜件、压的字），压布纹，再画纸做的（签），压纸浆。mask：只画「哪里是金、纸」那张图 */
 const fitText = (g, str, font, wMax, fs) => { g.font = "700 " + fs.toFixed(1) + "px " + font; const w = g.measureText(str).width; return w > wMax ? fs * wMax / w : fs; };
 // 牌盒朝外的那一头（窄的一面）。坐标和书脊一样：按竖向的像素排，横向整体拉开
+// 盒签上的字（2026-11-14 用户说架上看不清、抽出来才看得清）：只写冒号前面的主名（全名在抽出来的盒面和小签上）；六个字以内一列，再多排两列（右边一列先读），
+// 两列也排不下的截短加省略号。字尽量大：一列时占签宽的六成多，两列时各占四成多
+function labelV(g, title, w, y0, y1, color) {
+  let chars = [...String(title).split(/[：:]/)[0].replace(/\s+/g, "")]; const H = y1 - y0;
+  const two = chars.length > 6 && w * .44 > Math.min(w * .64, H * .94 / chars.length) * 1.1;
+  if (two && chars.length > 14) chars = [...chars.slice(0, 13), "…"];
+  if (!two && chars.length > 9) chars = [...chars.slice(0, 8), "…"];
+  const m = two ? Math.ceil(chars.length / 2) : chars.length, cols = two ? [chars.slice(0, m), chars.slice(m)] : [chars];
+  const fs = Math.min(w * (two ? .44 : .64), H * .94 / m), step = Math.min(fs * 1.12, H / m), top = (y0 + y1) / 2 - step * m / 2;
+  g.font = "700 " + fs.toFixed(2) + "px " + CJK; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = color; g.strokeStyle = color; g.lineWidth = fs * .03; g.lineJoin = "round";
+  cols.forEach((col, ci) => { const cx = two ? (ci ? -1 : 1) * w * .245 : 0; col.forEach((c, k) => { g.strokeText(c, cx, top + step * (k + .5)); g.fillText(c, cx, top + step * (k + .5)); }); });
+}
 export function drawBoxEnd(g, x, y, w, h, b, pale, mask, bleed) {
   const X = LOOK.bind.box, B = LOOK.bind, mx = bleed ? bleed[0] : 0, my = bleed ? bleed[1] : 0;
   const sy = h / b.h, tw = b.t * sy, kx = (w / b.t) / sy, lw = Math.max(1, h * .009);
@@ -629,7 +641,7 @@ export function drawBoxEnd(g, x, y, w, h, b, pale, mask, bleed) {
   const lab = local(() => {
     if (!mask) { g.fillStyle = "rgba(0,0,0,.42)"; g.fillRect(-tw * .47, h * .2, tw * .94, lw * 1.5); g.fillStyle = "rgba(255,255,255,.14)"; g.fillRect(-tw * .47, h * .2 + lw * 1.5, tw * .94, lw * .8); }   // 盒盖的缝
     if (stamp && b.vol) { const fs = Math.min(tw * .36, h * .075); g.font = "700 " + fs.toFixed(1) + "px " + CJK; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = stamp; g.fillText(b.vol, 0, h * .11); }
-    const fx = -tw * .38, fw = tw * .76, fy = h * .29, fh = h * .5;                              // 铜签框：一圈铜边，里面插一张纸签
+    const fx = -tw * .41, fw = tw * .82, fy = h * .245, fh = h * .585;                           // 铜签框：一圈铜边，里面插一张纸签（2026-11-14 加大：架上就要认得出盒名）
     g.fillStyle = brass; g.fillRect(fx, fy, fw, fh);
     const r = Math.min(tw * .15, h * .034); g.strokeStyle = brass; g.lineWidth = lw * 1.5; g.beginPath(); g.arc(0, h * .895, r, 0, 7); g.stroke();   // 拉环
     if (!mask) { g.fillStyle = "rgba(0,0,0,.5)"; g.beginPath(); g.arc(0, h * .895 - r, lw * 1.1, 0, 7); g.fill(); }
@@ -638,7 +650,7 @@ export function drawBoxEnd(g, x, y, w, h, b, pale, mask, bleed) {
   if (!mask) grainOver(g, x - mx, y - my, w + 2 * mx, h + 2 * my, false);
   local(() => {
     g.fillStyle = mask ? MASK.paper : X.label; g.fillRect(lab[0], lab[1], lab[2], lab[3]);
-    if (!mask) titleV(g, [...b.title], tw, lab[1] + h * .012, lab[1] + lab[3] - h * .012, B.ink, CJK, 700, .5, .03, B.capCm * .8 * sy);
+    if (!mask) labelV(g, b.title, lab[2], lab[1] + h * .012, lab[1] + lab[3] - h * .012, B.ink);
   });
   if (!mask) grainOver(g, x + w / 2 + lab[0] * kx, y + lab[1], lab[2] * kx, lab[3], true);
 }

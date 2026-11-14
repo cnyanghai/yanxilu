@@ -787,7 +787,8 @@
     }
     return { v: LOOK_V, read: READS.some(function (r) { return r[0] === v.read; }) ? v.read : LOOK_DEF.read, motion: v.motion !== false, sound: v.sound === true, dust: v.dust !== false, tod: v.tod !== false,
       fx: FXS.some(function (r) { return r[0] === v.fx; }) ? v.fx : LOOK_DEF.fx, binding: BINDINGS.some(function (r) { return r[0] === v.binding; }) ? v.binding : LOOK_DEF.binding, color: COLORS.some(function (r) { return r[0] === v.color; }) ? v.color : LOOK_DEF.color,
-      scene: APP ? "youchai" : SCENES.some(function (r) { return r[0] === v.scene; }) ? v.scene : LOOK_DEF.scene,
+      /* 墓园宽柜 2026-11-08 冻结，只留在独立入口 youchai/ 里。主站上「布置」的入口 11-09 就拿掉了，以前在这台设备上选过墓园的人换不回来（2026-11-14 用户从立体书房进本子页、拆包页，看到的是墓园）：主站不再认它 */
+      scene: APP ? "youchai" : v.scene !== "youchai" && SCENES.some(function (r) { return r[0] === v.scene; }) ? v.scene : LOOK_DEF.scene,
       deco: Array.isArray(v.deco) ? v.deco.filter(function (d) { return DECO[d]; }) : DECO_DEFAULT.slice(),
       place: (function () { var o = {}, p = v.place && typeof v.place === "object" ? v.place : {}; Object.keys(p).forEach(function (k) { if (DECO[k] && typeof p[k] === "string") o[k] = p[k]; }); return o; })() };
   }
@@ -1766,7 +1767,7 @@ var FOIL = (function () {
     return '<div class="look-pop" role="dialog" aria-label="书墙的布置">' +
       '<section class="lk-sec"><h3>挂法</h3>' + radios(HANGS, h, "hang", "data-h", true) + "</section>" +
       '<section class="lk-sec"><h3>在读的书</h3>' + radios(READS, L.read, "look-read", "data-v", false) + "</section>" +
-      '<section class="lk-sec"><h3>场景</h3>' + radios(SCENES, L.scene, "look-scene", "data-v", false) + "</section>" +
+      '<section class="lk-sec"><h3>场景</h3>' + radios(SCENES.filter(function (r) { return APP || r[0] !== "youchai"; }), L.scene, "look-scene", "data-v", false) + "</section>" +
       '<section class="lk-sec"><h3>装帧</h3>' + radios(BINDINGS, L.binding, "look-binding", "data-v", false) + "</section>" +
       '<section class="lk-sec"><h3>书的颜色</h3>' + radios(COLORS, L.color, "look-color", "data-v", false, true) + "</section>" +
       '<section class="lk-sec"><h3>指到一本书时</h3>' + radios(FXS, L.fx, "look-fx", "data-v", false) + "</section>" +
@@ -6101,7 +6102,7 @@ var FOIL = (function () {
    * 三维那一页自己不取数据、不认账号：它在 iframe 里向这里要一张快照（roomSnap），要打开什么也交回这里（roomOpen）。
    * 读没读、哪一盒有哪些牌、哪本本子有几页，都还是上面那些函数算的，只有这一处算法。这一步只读：三维那一页不写任何记录，
    * 读没读是在阅读器里读出来的（和纸模版一样）。iframe 挂在 body 上、不放进 #main：render() 每次都重写 #main，放进去会把它重载。 */
-  var ROOM = { el: null, got: {}, seen: false, t: 0 };
+  var ROOM = { el: null, got: {}, seen: false, t: 0, via: false };      // via：这一次是从书房走出来的（纸模页上留一枚「回书房」，手机装成 App 时没有返回键）
   function roomReady() { return S.mode === "local" || (S.mode === "db" && COLLS.every(function (c) { return ROOM.got[c]; })); }
   function roomMount() {
     if (ROOM.el) return;
@@ -6165,10 +6166,11 @@ var FOIL = (function () {
   function roomOpen(kind, id) {
     if (kind === "book") {
       if (ebookOf(id)) { readerOpen(id); return "reader"; }
+      ROOM.via = true;
       if (ROUTES["b-" + id]) { location.hash = "#b-" + id; return "page"; }
       S.shelfPick = id; location.hash = "#shelf"; return "page";             // 还没挂电子书：到纸模版的书架上，这本的书立里能挂
     }
-    if (kind === "note") { location.hash = id === NB_DAILY ? "#notes" : "#" + id; return "page"; }
+    if (kind === "note") { ROOM.via = true; location.hash = id === NB_DAILY ? "#notes" : "#" + id; return "page"; }
     if (kind === "card") {
       var c = (S.data.clips || {})[id];
       if (c && c.status !== "link") { readerOpen(id); return "reader"; }
@@ -6176,8 +6178,8 @@ var FOIL = (function () {
       if (href && (!c || /^https?:\/\//i.test(href))) { window.open(new URL(href, document.baseURI).href, "_blank", "noopener"); return "tab"; }      // 剪报的原文只认 http(s) 的地址；自己的档案是相对地址，要照主站这一页来拼（这个函数是三维那一页叫的，不拼会照它的地址拼成 lab/reports/…）
       return "";
     }
-    if (kind === "pack") { S.archPick = "cf:" + id; S.archF = "all"; S.deskOpen = true; S.clipDel = null; location.hash = "#archive"; return "page"; }      // 和在纸模版的架子上点这只袋子一样：桌面开着，袋子等着拆
-    if (kind === "paper") { location.hash = id === "rack" ? "#archive" : id === "notes" ? "#notes" : "#shelf"; return "page"; }
+    if (kind === "pack") { ROOM.via = true; S.archPick = "cf:" + id; S.archF = "all"; S.deskOpen = true; S.clipDel = null; location.hash = "#archive"; return "page"; }      // 和在纸模版的架子上点这只袋子一样：桌面开着，袋子等着拆
+    if (kind === "paper") { ROOM.via = true; location.hash = id === "rack" ? "#archive" : id === "notes" ? "#notes" : "#shelf"; return "page"; }
     if (kind === "login") { if (ON_SERVER && SRV) location.href = SRV.loginHref(); return "page"; }
     return "";
   }
@@ -6203,6 +6205,7 @@ var FOIL = (function () {
     var inRoom = S.route === "shufang";
     document.documentElement.classList.toggle("room-mode", inRoom);
     if (inRoom) roomMount(); else roomUnmount();
+    document.documentElement.classList.toggle("room-skin", ROOM.via && !inRoom && /^(shelf|archive|notes|nb-|np-t-)/.test(S.route));      // 从书房走出来的这几页换成旧书房的颜色（变量在 page.html）
     document.documentElement.classList.toggle("yx-scene", LK().scene === "youchai"); yxNightApply();
     document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai");
     document.documentElement.classList.toggle("yx-app", APP); document.documentElement.classList.toggle("yx-app-scene", APP && /^(shelf|archive|notes)/.test(S.route));
@@ -6229,7 +6232,8 @@ var FOIL = (function () {
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
-    $("#main").innerHTML = html + (r === "clip" || inRoom ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML()) + (r === "shelf" ? yxCoverHTML() : "");
+    $("#main").innerHTML = html + (r === "clip" || inRoom ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML()) + (r === "shelf" ? yxCoverHTML() : "") +
+      (ROOM.via && !inRoom && r !== "clip" ? '<a class="btn small room-back" href="#shufang">回书房</a>' : "");
     if (inRoom) roomSync();
     document.body.classList.toggle("desk-on", !!document.querySelector(".ydesk") || (!!document.querySelector(".ytable") && window.innerWidth < 1100));
     wallPack(); grimHydrate(); yxMount(); yxStageMount();

@@ -2691,6 +2691,17 @@ html.room-mode .topbar,html.room-mode .mainnav{display:none}
 html.room-mode main{padding:0;max-width:none}
 html.room-mode,html.room-mode body{overflow:hidden;background:#120D09}
 #room-frame{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:60;background:#120D09}
+/* 从立体书房走出来的纸模页（本子页、书架、档案架）换成旧书房的颜色（2026-11-14 用户：本子打开以后应该是现在的主题、现在的日记形式）。
+   只换纸模那一套变量，版面、材质、字一点不动：底是深胡桃木，面是旧纸（和牌面同一个纸色），品牌与主操作是枣红，没选中的砖是藏青。
+   选中没选中仍然靠明暗（旧纸对藏青），不靠色相。直接打开纸模页（不经过书房）还是原来的牛皮纸。阅读器不跟着变。 */
+html.room-skin.room-skin:root{--pp-kraft:#2B1C11;--pp-kraft-2:#5B3B22;--pp-kraft-3:#22150C;--pp-kraft-dk:#1B110A;--pp-kraft-bk:#120B06;
+  --pp-cream:#E2D1AC;--pp-cream-2:#EFE2C4;--pp-sheet:#EFE2C4;--pp-hi:#F6ECD2;--pp-well:#C8B48A;
+  --pp-terra:#8C2C1E;--pp-terra-dk:#6C2016;--pp-olive:#2C3857;--pp-olive-dk:#1E2740;
+  --pp-ink:#2A1A10;--pp-ink-2:#4A3320;--pp-ink-3:#6B5238;--pp-black:#1C1410;--pp-copper:#C9A24E;--pp-shade:8,5,2}
+body.desk-on .room-back{display:none}
+/* 从书房走到纸模页以后，左下角一枚「回书房」（手机装成 App 时没有返回键） */
+.room-back{position:fixed;left:0;right:0;margin:0 auto;width:max-content;bottom:calc(22px + env(safe-area-inset-bottom,0px));z-index:70;text-decoration:none}
+@media (max-width:720px){.room-back{bottom:calc(88px + env(safe-area-inset-bottom,0px))}}
 .yx-gate{position:relative;min-height:100vh;background:#0D141A url(vendor/ui/tiles/night.webp) center/512px;overflow:hidden}
 .yx-gate-img{position:relative;height:100vh;aspect-ratio:2/3;margin:0 auto;max-width:100%;overflow:hidden}
 @media (max-aspect-ratio:2/3){.yx-gate-img{height:auto;width:100%}}

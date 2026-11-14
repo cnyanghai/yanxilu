@@ -44,6 +44,8 @@ try:
         def page(login=True):
             ctx = br.new_context(viewport={"width": 390, "height": 844}, device_scale_factor=1, has_touch=True, service_workers="block")
             if login: ctx.add_cookies([{"name": "sid", "value": "u1", "url": B}])
+            # 这台设备以前在主站的「布置」里选过墓园宽柜（那个入口早拿掉了，换不回来）：主站不该再认它
+            ctx.add_init_script("try { if (!location.pathname.startsWith('/lab/')) localStorage.setItem('yanxilu-look', JSON.stringify({ v: 2, scene: 'youchai' })); } catch (e) {}")
             pg = ctx.new_page(); errs = []
             pg.on("pageerror", lambda e: errs.append(str(e)))
             pg.on("console", lambda m: errs.append("console: " + m.text) if m.type == "error" and "audio device" not in m.text and "/login" not in m.text and "404" not in m.text else None)
@@ -72,6 +74,7 @@ try:
         def tap_hero(F): r = F.evaluate("window.__lab.heroRect()"); pg.mouse.click(r["cx"], r["cy"])       # 真的点一下抽出来的那一件（iframe 铺满整屏，坐标就是屏上的）
         def swap(F, kind): F.evaluate("window.__lab.goto('%s')" % kind); return until(F, "window.__lab.state === 'idle' && window.__lab.kind === '%s'" % kind)
         hash_ = lambda: pg.evaluate("location.hash")
+        skin = lambda: pg.evaluate("(() => { const c = document.documentElement.classList; return { yx: c.contains('yx-scene') || c.contains('yx-dark'), room: c.contains('room-skin'), back: document.querySelectorAll('.room-back').length, bg: getComputedStyle(document.body).backgroundColor }; })()")
         def left(h): pg.wait_for_function("location.hash === '%s' && !document.querySelector('#room-frame')" % h, timeout=20000); pg.wait_for_timeout(500)      # 换页带一下淡接，等真的换完（书房那一页拿掉了）再看
         def settle(F, more="true"): ok = until(F, "window.__lab.state === 'open' && !window.__lab.box.busy && (%s)" % more, 40); pg.wait_for_timeout(250); return ok      # 牌还在发、还在翻的时候点了不算，等它停
 
@@ -94,6 +97,8 @@ try:
         check("抽出一本：底下写「再点一下这本书打开」，没有手标读没读的两行", "再点一下这本书打开" in sh["meta"] and "某人" in sh["meta"] and "页" not in sh["meta"] and sh["read"] == "去挂电子书" and sh["done"] and sh["todo"], sh); shot("1-book")
         tap_hero(F); left("#shelf")
         check("再点一下这本书：到纸模版的书架，这本的书立开着，书房那一页拿掉了", pg.locator("#room-frame").count() == 0 and pg.locator(".pstand").count() == 1 and "测试放的一本书" in pg.locator(".pstand").inner_text() and pg.evaluate("getComputedStyle(document.querySelector('.topbar')).display") != "none")
+        sk = skin()
+        check("这一页不是墓园，是旧书房的颜色（深木头的底），底下有「回书房」", sk["yx"] is False and sk["room"] is True and sk["back"] == 1 and sk["bg"] == "rgb(43, 28, 17)", sk)
         pg.go_back(); F = lab()
         check("按返回：回到书房，上架那一段快进", F is not None and hash_() == "#shufang" and "quick=1" in F.url, F and F.url)
         bi = F.evaluate("window.__lab.books.findIndex(b => b.page && !b.eb)"); pull(F, bi)
@@ -105,6 +110,8 @@ try:
         # ---- 三 档案架：真的盒、真的牌；面朝上的再点一下读全文，阅读器盖在书房上面，合上回到原处
         check("换到档案架", swap(F, "rack"))
         rk = F.evaluate("window.__lab.books.map(b => (b.pack ? 'pack' : 'box') + ':' + b.title + ':' + b.n + ':' + b.u)")
+        few = F.evaluate("(() => { const L = window.__lab, r = L.rectOf(L.books.findIndex(b => b.id === 'ab-t1')); return { W: L.S.W, R: L.S.R, t: Math.min(...L.books.filter(b => !b.pack).map(b => b.t)), w: Math.round(r.r - r.l), h: Math.round(r.b - r.t) }; })()")
+        check("只有四件东西：架子缩到刚好装下、镜头靠近，一个盒在屏上有五十像素宽以上（原来不到二十）；最薄的盒也有四厘米", few["W"] <= 24 and few["t"] >= 4.2 and few["w"] >= 50 and few["h"] >= 170, few)
         check("档案架上是账号里的盒和一包没拆的剪报", any(x.startswith("box:测试的盒:4:3") for x in rk) and any(x.startswith("pack:") and x.endswith(":1:1") for x in rk), rk); shot("2-rack")
         xi = F.evaluate("window.__lab.books.findIndex(b => b.id === 'ab-t1')"); pull(F, xi); tap_hero(F)
         check("抽出这一盒再点一下：打开成扇", settle(F))
@@ -146,13 +153,16 @@ try:
         pull(F, 1)
         check("抽出测试本：底下写「再点一下本子翻开」", "再点一下本子翻开" in F.evaluate("document.querySelector('#s-meta').textContent")); shot("7-note-out")
         tap_hero(F); left("#nb-t1")
+        sk = skin(); check("本子页不是墓园，是旧书房的颜色", sk["yx"] is False and sk["room"] is True and sk["back"] == 1, sk)
         txt = pg.locator("#main").inner_text()
         check("再点一下本子：翻开了，是这一本的这一页（纸模版的本子页，在那里写）", pg.locator("#room-frame").count() == 0 and "写了点什么" in txt and "第一页" in txt and "撕掉这一页" in txt)
         shot("8-note-page")
-        pg.go_back(); F = lab()
-        check("按返回：回到书房，还在笔记本架前", F is not None and F.evaluate("window.__lab.kind") == "notes")
+        pg.click(".room-back"); F = lab()
+        check("点「回书房」：回到书房，还在笔记本架前", F is not None and hash_() == "#shufang" and F.evaluate("window.__lab.kind") == "notes")
         pull(F, 0); tap_hero(F); left("#notes")
         pg.wait_for_timeout(500); check("随手本：翻到今天这一页", "今天的一段" in pg.locator("#main").inner_text())
+        pg.goto(B + "/#notes"); pg.reload(); pg.wait_for_timeout(1200); sk = skin()      # 重新载入：这一次不是从书房走出来的
+        check("直接打开纸模的本子页（不经过书房）：还是牛皮纸，也不是墓园，没有「回书房」", sk["yx"] is False and sk["room"] is False and sk["back"] == 0, sk)
         check("登录着走完一遍没有报错", not errs, errs[:6])
         ctx.close()
 
