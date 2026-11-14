@@ -8,7 +8,7 @@
  *
  * 2026-11-14 这一页里有三件家具（只有旧书房做了后两件）：书架、档案架（牌盒和没拆的邮包）、笔记本架（封面朝外的本子）。一次只摆一件，
  *   底下一排三个记号换（点，或者按在那一排上左右划），换的时候镜头顺着墙横着走。牌盒和本子都当成「一件立在架上的东西」，和书共用下面这套节拍；
- *   配置在 KINDS 一张表里，样子在 kit.js（drawBoxEnd / drawBoxFace / drawNote）。地址加 ?f=rack、?f=notes 直接进那一件。打开牌盒看牌、翻开本子还没做
+ *   配置在 KINDS 一张表里，样子在 kit.js（drawBoxEnd / drawBoxFace / drawNote）。地址加 ?f=rack、?f=notes 直接进那一件。牌盒抽出来可以打开（牌在 box.js，这里的 openBox / closeBox / takeCard / cardBack 管盒子和状态）；翻开本子还没做
  *
  * 节拍：
  *   1 上架   空架子先到，书一本本从外面推进去（多少本都是一秒出头），镜头同时往后退到看全；点一下屏幕快进
@@ -24,6 +24,7 @@
  * 字（书名签、层板签、底下的纸）用网页排；声音是 WebAudio 现场合成的，没有音频文件。书名、作者都是编的。
  * 调试：地址加 ?dev 显示帧率与状态，?n=300 直接进三百本，?pr=2 把画布倍率钉死，?mark=tab 换在读的记号；window.__lab 给测试脚本用。 */
 import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, drawBand, drawBoxEnd, drawBoxFace, drawNote, grainOver, bindOf, clothOf, clothFill, LOOK, DIM, INK_LT, INK_SOFT, CJK, STN, MASK, foil, weave, whenReady, bakeBook } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
+import { createBoxView, makeCards } from "./box.js";             // 开盒：牌盒打开以后里面的牌（2026-11-14）
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -40,6 +41,8 @@ const P = {
   backFly: .38, backPush: .13, // 放回：飞回去、推进去
   sortDur: .62, sortSpread: .55, sortArc: 20,   // 换排法：每本飞多久、先后错开的总时长、往外绕多远
   swapOut: .3, swapIn: .42,    // 换家具：镜头横着走出去、走进来各多久
+  openFly: .34,                // 开盒：盒子落到屏幕底下多久
+  openSheet: 100, openBox: 96, openBoxPx: 84, openK: .6, openTilt: .5,   // 开盒时底下让给那张纸、盒子各多少像素；盒子在屏上多宽、缩到几成（缩小了才能既显得小又离镜头近，不掉到架子里去）；盒口朝人倾多少（弧度）
   sway: .012,                  // 镜头一直在轻轻左右晃的幅度（弧度），0 是不晃
   shake: .5,                   // 推回去那一下镜头的震（厘米）
 };
@@ -119,7 +122,7 @@ const PR = { cur: +Q.get("pr") > 0 ? +Q.get("pr") : Math.min(devicePixelRatio ||
 
 /* ---------- 状态 ---------- */
 const S = {
-  state: "boot", kind: "shelf", arr: "topic", arrBook: "topic", pan: 0, W: 80, R: 4, hot: -1, cur: -1, outReady: false, yaw: 0, yawT: 0, fast: false, manual: false, tools: false, mark: "ribbon",
+  state: "boot", kind: "shelf", arr: "topic", arrBook: "topic", pan: 0, swayK: 1, W: 80, R: 4, hot: -1, cur: -1, outReady: false, yaw: 0, yawT: 0, fast: false, manual: false, tools: false, mark: "ribbon",
   t: 0, shake: 0, par: { x: 0, y: 0, tx: 0, ty: 0 }, needFit: false,
 };
 let N = 0, books = [], L = null;
@@ -137,6 +140,9 @@ const SFX = {
   sort() { for (let i = 0; i < 16; i++) { const f = 500 + Math.random() * 700; tone({ f, f2: f * .75, dur: .05, gain: .05, type: "triangle", when: i * (P.sortSpread + .3) / 16 }); } noise({ dur: P.sortSpread + .5, f: 900, f2: 1800, q: .7, gain: .07, attack: .15 }); },
   page() { noise({ dur: .13, f: 2000, f2: 900, q: .8, gain: .09 }); },
   swap() { noise({ dur: P.swapOut + P.swapIn, f: 500, f2: 1500, q: .7, gain: .08, attack: .12 }); },
+  lid() { tone({ f: 180, f2: 90, dur: .12, gain: .22 }); noise({ dur: .16, f: 900, f2: 2400, q: 1.2, gain: .1 }); },
+  card(k) { const f = 620 + k * 520; tone({ f, f2: f * .8, dur: .05, gain: .09, type: "triangle" }); noise({ dur: .02, type: "highpass", f: 3200, gain: .05 }); },   // 一张牌一声，越靠前越高
+  flip() { noise({ dur: .16, f: 1400, f2: 3200, q: .9, gain: .12 }); [659, 988].forEach((f, i) => tone({ f, dur: .3, gain: .09, when: .08 + i * .07 })); },
   mark(st) { (st === "done" ? [523, 659, 784, 1047] : st === "doing" ? [523, 784] : [330]).forEach((f, i) => tone({ f, dur: .3, gain: .1, when: i * .06 })); },
 };
 
@@ -294,6 +300,8 @@ function heroSetup(b) {
 const dim = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), new THREE.MeshBasicMaterial({ color: LOOK.veil, transparent: true, opacity: 0, depthWrite: false }));
 dim.renderOrder = 5; dim.visible = false; scene.add(dim);
 
+function placeDim(far) { const hh = 2 * far * Math.tan(rad(CAM.fov / 2)) * 1.7; dim.position.set(0, CAM.y, CAM.dist - far); dim.scale.set(hh * Math.max(1, innerWidth / innerHeight) * 1.4, hh, 1); }   // far：离镜头多远
+
 /* ---------- 排书：按顺序从左到右、一层放满换下一层 ---------- */
 function pack(arr, W) {
   const slots = new Array(N), rows = [[]], divs = [], heads = [], pad = K.pad, gap = K.gap; let x = -W / 2 + pad, r = 0, wasPack = false;
@@ -365,9 +373,12 @@ function fitCam() {
 }
 function placeCamera(raw) {
   const k = 1 - Math.exp(-6 * raw); S.par.x += (S.par.tx - S.par.x) * k; S.par.y += (S.par.ty - S.par.y) * k;
-  const d = CAM.dist * CAM.k, sw = Math.sin(S.t * .45) * P.sway * (S.state === "out" || S.state === "back" ? .3 : 1);
+  // 镜头一直轻轻左右晃；抽出一件的时候晃得小；开着盒的时候不晃（牌是按「镜头正对着」摆到屏幕上的，一晃就整片偏到一边去）
+  const still = S.state === "opening" || S.state === "open" || S.state === "card" || S.state === "closing", want = still ? 0 : S.state === "out" || S.state === "back" ? .3 : 1;
+  S.swayK += (want - S.swayK) * (1 - Math.exp(-(still ? 14 : 4) * raw));
+  const d = CAM.dist * CAM.k, sw = Math.sin(S.t * .45) * P.sway * S.swayK, pk = Math.min(1, S.swayK * 3.4);
   const sx = S.shake * Math.sin(S.t * 71), sy = S.shake * Math.cos(S.t * 57);
-  camera.position.set(Math.sin(sw) * d + S.par.x * d * .035 + sx + S.pan, CAM.y - S.par.y * d * .02 + sy, Math.cos(sw) * d);   // pan：换家具时镜头顺着墙横着走
+  camera.position.set(Math.sin(sw) * d + S.par.x * pk * d * .035 + sx + S.pan, CAM.y - S.par.y * pk * d * .02 + sy, Math.cos(sw) * d);   // pan：换家具时镜头顺着墙横着走
   camera.lookAt(S.pan, CAM.y, 0); camera.updateMatrixWorld();
 }
 function inspectPose(b) {                                            // 抽出来的书停在哪：眼前、偏上（底下留给那张纸）
@@ -413,12 +424,12 @@ function snapToSlots() { books.forEach((b) => { const sp = slotPos(b.i); b.px = 
 const hint = $("#hint"), grab = $("#grab"), tools = $("#tools"), veil = $("#veil"), sheet = $("#sheet"), tip = $("#tip"), labs = $("#labs"), marks = $("#marks");
 marks.hidden = !MULTI;
 function ui() {
-  const c = counts(), out = S.state === "out" || S.state === "back";
+  const c = counts(), out = S.cur >= 0 || S.state === "back", opened = S.state === "open", card = S.state === "card";
   const mk = S.mark === "ribbon" ? "垂着丝带的" : "顶上带签的";
   if (S.kind === "rack") { const bx = books.filter((b) => !b.pack); hint.innerHTML = "共 <b>" + bx.length + "</b> 盒 · <b>" + bx.reduce((n, b) => n + b.n, 0) + "</b> 张牌：顶上露着签的有没读的 <b>" + bx.filter((b) => b.u).length + "</b> 盒 · 没拆的邮包 <b>" + (N - bx.length) + "</b> 包<small>盒子越厚牌越多。手指按在盒子上划，松手就抽出那一盒</small>"; }
   else if (S.kind === "notes") hint.innerHTML = "共 <b>" + N + "</b> 本：垂着丝带的今天写过 <b>" + c.doing + "</b> 本<small>本子越厚页越多。手指按在本子上划，松手就抽出那一本</small>";
   else hint.innerHTML = "共 <b>" + N + "</b> 本：" + (LOOK.bind ? "带腰封的没读 <b>" + c.todo + "</b> · " + mk + "在读 <b>" + c.doing + "</b> · 摘了腰封的读过 <b>" + c.done + "</b>" : "深的读过 <b>" + c.done + "</b> · " + mk + "在读 <b>" + c.doing + "</b> · 浅的没读 <b>" + c.todo + "</b>") + "<small>手指按在书脊上划，松手就抽出那一本</small>";
-  grab.classList.toggle("off", out); sheet.classList.toggle("on", S.state === "out");
+  grab.classList.toggle("off", out); sheet.classList.toggle("on", S.state === "out" || opened || card); sheet.classList.toggle("slim", opened);
   marks.classList.toggle("off", out || S.tools || S.state === "enter");
   marks.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === S.kind)));
   document.querySelectorAll("#tools [data-only]").forEach((el) => { el.hidden = el.dataset.only !== S.kind; });      // 排法、在读的记号、本数只有书架有
@@ -436,6 +447,11 @@ function ui() {
     $("#b-read").hidden = !book || cur.st === "done"; $("#b-read").textContent = cur.st === "doing" ? "接着读" : "打开读";
     $("#b-done").hidden = !book || cur.st === "done"; $("#b-todo").hidden = !book || cur.st === "todo";
     $("#b-go").hidden = !cur.pack;                                     // 没拆的邮包：去拆包那一页拆
+    // 牌盒：抽出来有「打开」；打开以后底下只剩一行字和「合上」；拿起一张牌，底下写这张牌
+    const box = S.kind === "rack" && !cur.pack, cd = card && boxView ? boxView.cards[boxView.cur] : null;
+    $("#b-open").hidden = !(box && S.state === "out"); $("#b-back").hidden = opened || card; $("#b-close").hidden = !opened; $("#b-card").hidden = !card; $("#s-why").hidden = !cd;
+    if (opened) $("#s-meta").textContent = cur.n + " 张 · " + (cur.u ? cur.u + " 张没读（背面朝上）" : "都读过") + " · 手指划过牌，松手拿起来";
+    if (cd) { $("#s-title").textContent = cd.c.title; $("#s-meta").textContent = cd.c.no + " · " + cd.c.src + " · " + cd.c.mon + " 月 " + cd.c.day + " 日 · 读完约 " + cd.c.min + " 分钟"; $("#s-why").textContent = "存它是因为：" + cd.c.why; }
   }
   $("#snd").setAttribute("aria-pressed", String(AU.on));
 }
@@ -540,8 +556,7 @@ function pullOut(i) {
   b.pz += b.out * P.doingZ + b.pop * P.popZ; b.rx = b.face ? 0 : b.pop * P.popTilt; b.py += b.pop * .35; b.pop = b.popT = b.out = b.outT = 0;
   heroSetup(b); b.hero = true;
   const I = inspectPose(b), x0 = b.px, y0 = b.py, z0 = b.pz, rx0 = b.rx, ry0 = b.ry, rz0 = b.rz, zs = -RECESS + WZ(b) / 2 + 2.5;
-  dim.position.set(0, CAM.y, I.z - 16); { const hh = 2 * (I.di + 16) * Math.tan(rad(CAM.fov / 2)) * 1.7; dim.scale.set(hh * Math.max(1, innerWidth / innerHeight) * 1.4, hh, 1); }
-  dim.material.opacity = 0; dim.visible = true;
+  placeDim(I.di + 16); dim.material.opacity = 0; dim.visible = true;
   SFX.out(); vib(8); ui();
   play(P.outSlide, (e) => { b.pz = lerp(z0, zs, e); b.rx = lerp(rx0, 0, e); }, { ease: E.in2, done() {
     play(.3, (e) => { dim.material.opacity = .62 * e; }, { ease: E.lin });
@@ -583,6 +598,43 @@ function putBack() {
   } });
 }
 
+/* ---------- 开盒（牌在 box.js）：盒子落到屏幕底下、盒口朝人，牌摊开；划过、拿起一张、放回；合上，盒子回到眼前 ---------- */
+let OB = { x: 0, y: 0, z: 0, tilt: 0, k: 1 };                             // 打开的盒子在哪、缩到几成
+const boxView = MULTI ? createBoxView({
+  scene, hero, play, maxAniso,
+  view: () => { const A = avail(); return { vw: A.vw, vh: A.vh, tanH: Math.tan(rad(CAM.fov / 2)), camY: CAM.y, camZ: CAM.dist, top: A.top, bottom: A.bot - 60 + P.openSheet + P.openBox, pr: PR.cur }; },
+  boxPose: () => OB, glyph: (b) => CATS[b.cat][0],
+  tick: (i, n) => { SFX.card(n > 1 ? i / (n - 1) : 0); vib(3); }, flipSnd: () => { SFX.flip(); vib(10); },
+}) : null;
+function openBox() {
+  const b = books[S.cur]; if (!boxView || S.state !== "out" || !S.outReady || S.kind !== "rack" || !b || b.pack) return;
+  S.state = "opening"; S.outReady = false; b.cards = b.cards || makeCards(b, HEADS[b.cat]);
+  const A = avail(), py = A.vh - (A.bot - 60) - P.openSheet - P.openBox * .5, tanH = Math.tan(rad(CAM.fov / 2));
+  const D = Math.min(b.d * P.openK / P.openBoxPx * A.vh / (2 * tanH), CAM.dist - 60), wpp = 2 * D * tanH / A.vh;      // 盒子离镜头多远：照「缩小以后在屏上这么宽」算，但一定在架子前面
+  OB = { x: 0, y: CAM.y + (A.vh / 2 - py) * wpp, z: CAM.dist - D, tilt: P.openTilt, k: P.openK };
+  const x0 = b.px, y0 = b.py, z0 = b.pz, ry0 = b.ry + S.yaw, o0 = dim.material.opacity; S.yaw = S.yawT = 0; b.ry = ry0;
+  placeDim(Math.min(Math.max(D + 26, CAM.dist - dim.position.z), CAM.dist - 10)); SFX.out(); ui();
+  play(P.openFly, (e) => { b.px = lerp(x0, OB.x, e); b.py = lerp(y0, OB.y, e); b.pz = lerp(z0, OB.z, e); b.ry = lerp(ry0, -Math.PI / 2, e); b.rz = -P.openTilt * e; b.k = lerp(1, OB.k, e); dim.material.opacity = lerp(o0, .8, e); }, { ease: E.io3, done() {
+    heroBox.visible = false; heroTab.visible = false; SFX.lid(); vib(8);
+    boxView.open(b, b.cards, { front: hFrontT, back: hBackT, end: hSpineT }, clothOf(b), () => { S.state = "open"; S.shake = P.shake * .4; ui(); });
+  } });
+}
+function closeBox() {
+  const b = books[S.cur]; if (!boxView || S.state !== "open" || boxView.busy || !b) return;
+  S.state = "closing"; ui(); SFX.back();
+  boxView.close(() => {
+    b.u = b.cards.filter((c) => !c.read).length; b.st = b.u ? "doing" : "done"; atlas.redraw(b); heroSetup(b); SFX.lid();      // 读过几张，盒面上的数和顶上那枚签跟着变
+    const I = inspectPose(b), x0 = b.px, y0 = b.py, z0 = b.pz, ry0 = b.ry, rz0 = b.rz, k0 = b.k;
+    play(P.openFly, (e) => { b.px = lerp(x0, I.x, e); b.py = lerp(y0, I.y, e); b.pz = lerp(z0, I.z, e); b.ry = lerp(ry0, I.ry, e); b.rz = lerp(rz0, 0, e); b.k = lerp(k0, 1, e); dim.material.opacity = lerp(.8, .62, e); }, { ease: E.io3, done() { placeDim(I.di + 16); S.state = "out"; S.outReady = true; ui(); } });
+  });
+}
+function takeCard(i) {
+  if (!boxView || S.state !== "open") return;
+  const b = books[S.cur];
+  if (boxView.take(i, (fresh) => { if (fresh) b.u = b.cards.filter((c) => !c.read).length; ui(); })) { S.state = "card"; SFX.out(); vib(8); ui(); }
+}
+function cardBack() { if (boxView && S.state === "card" && boxView.back(() => { S.state = "open"; ui(); })) SFX.back(); }
+
 /* ---------- 手指 ---------- */
 const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
 function pick(cx, cy) {                                        // 手指底下是哪一本：先落到书脊那个平面上，再按层、按左右找最近的
@@ -602,20 +654,25 @@ canvas.addEventListener("pointerdown", (ev) => {
   if (S.state === "enter") S.fast = true;
   else if (S.state === "idle") { S.state = "scrub"; G.mode = "scrub"; setHot(pick(ev.clientX, ev.clientY), ev.clientX, ev.clientY); }
   else if (S.state === "out") G.mode = "spin";
+  else if (S.state === "open") { G.mode = "riffle"; boxView.hot(boxView.pick(ev.clientX, ev.clientY)); }       // 开着盒：按在牌上划，和划过书脊一样
+  else if (S.state === "card") G.mode = "card";
 });
 canvas.addEventListener("pointermove", (ev) => {
   if (ev.pointerType === "mouse") { S.par.tx = ev.clientX / innerWidth * 2 - 1; S.par.ty = ev.clientY / innerHeight * 2 - 1; }
-  if (G.id === -1) { if (ev.pointerType === "mouse" && S.state === "idle") setHot(pick(ev.clientX, ev.clientY), ev.clientX, ev.clientY); return; }   // 鼠标不用按住，移过去就探头
+  if (G.id === -1) { if (ev.pointerType === "mouse") { if (S.state === "idle") setHot(pick(ev.clientX, ev.clientY), ev.clientX, ev.clientY); else if (S.state === "open") boxView.hot(boxView.pick(ev.clientX, ev.clientY)); } return; }   // 鼠标不用按住，移过去就探头
   if (ev.pointerId !== G.id) return;
   G.moved = Math.max(G.moved, Math.hypot(ev.clientX - G.x0, ev.clientY - G.y0));
   if (G.mode === "scrub" && S.state === "scrub") setHot(pick(ev.clientX, ev.clientY), ev.clientX, ev.clientY);
   else if (G.mode === "spin" && S.state === "out") S.yawT = clamp((ev.clientX - G.x0) * .012, -2.6, 2.6);
+  else if (G.mode === "riffle" && S.state === "open") boxView.hot(boxView.pick(ev.clientX, ev.clientY));
 });
 function endPointer(ev) {
   if (ev.pointerId !== G.id) return; G.id = -1;
   const cancel = ev.type === "pointercancel";
   if (G.mode === "scrub" && S.state === "scrub") { const i = S.hot; S.state = "idle"; if (i >= 0 && !cancel) pullOut(i); else setHot(-1); }
   else if (G.mode === "spin" && S.state === "out") { S.yawT = 0; if (!cancel && G.moved < 8 && performance.now() - G.t0 < 450) putBack(); }
+  else if (G.mode === "riffle" && S.state === "open") { const i = boxView.hotI; boxView.hot(-1); if (i >= 0 && !cancel) takeCard(i); }
+  else if (G.mode === "card" && S.state === "card") { if (!cancel && G.moved < 8) cardBack(); }
   G.mode = "";
 }
 canvas.addEventListener("pointerup", endPointer); canvas.addEventListener("pointercancel", endPointer);
@@ -640,14 +697,17 @@ document.querySelectorAll("#seg-mark button").forEach((b) => b.addEventListener(
 }
 veil.addEventListener("click", () => toolsOpen(false));
 tools.querySelector(".grip").addEventListener("click", () => toolsOpen(false));
-addEventListener("keydown", (ev) => { if (ev.key === "Escape") toolsOpen(false); else if (ev.key === "ArrowRight") step(1); else if (ev.key === "ArrowLeft") step(-1); });
+addEventListener("keydown", (ev) => { if (ev.key === "Escape") { if (S.state === "card") cardBack(); else if (S.state === "open") closeBox(); else toolsOpen(false); } else if (ev.key === "ArrowRight") step(1); else if (ev.key === "ArrowLeft") step(-1); });
 $("#b-read").addEventListener("click", () => { au(true); readOn(); });
 $("#b-done").addEventListener("click", () => { au(true); setStatus("done"); });
 $("#b-todo").addEventListener("click", () => { au(true); setStatus("todo"); });
 $("#b-back").addEventListener("click", () => { au(true); putBack(); });
+$("#b-open").addEventListener("click", () => { au(true); openBox(); });
+$("#b-close").addEventListener("click", () => { au(true); closeBox(); });
+$("#b-card").addEventListener("click", () => { au(true); cardBack(); });
 $("#snd").addEventListener("click", () => { AU.on = !AU.on; try { localStorage.setItem("lab-pack-snd", AU.on ? "1" : "0"); } catch (e) { /* 忽略 */ } if (AU.on) { au(true); SFX.tick({ t: 2.5 }); } ui(); });
 function onResize() {
-  if (S.state !== "idle") { S.needFit = true; const A = avail(); renderer.setSize(A.vw, A.vh, false); camera.aspect = A.vw / A.vh; camera.updateProjectionMatrix(); return; }
+  if (S.state !== "idle") { S.needFit = true; const A = avail(); renderer.setSize(A.vw, A.vh, false); camera.aspect = A.vw / A.vh; camera.updateProjectionMatrix(); if (S.state === "open") boxView.relayout(); return; }
   S.needFit = false; layoutFit(); { const want = cellPx(); if (want > atlas.ch * 1.25 || want < atlas.ch * .6) buildBooks(); }   // 书在屏上的大小变了不少（转屏），书脊按新的大小重画
   snapToSlots(); setDividers(true); setLabels(true); ui();
 }
@@ -669,7 +729,7 @@ function tick(raw) {
   const dt = S.fast && S.state === "enter" ? raw * 6 : raw;
   S.t += raw; S.shake *= Math.exp(-10 * raw); S.yaw += (S.yawT - S.yaw) * (1 - Math.exp(-14 * raw));
   if (S.needFit && S.state === "idle") onResize();          // 转屏、改窗口大小要是赶上动画，等回到看全再重排
-  stepTracks(dt); placeCamera(raw); applyBooks(raw); placeLabels();
+  stepTracks(dt); placeCamera(raw); applyBooks(raw); if (boxView) boxView.step(raw); placeLabels();
   renderer.render(scene, camera);
   if (devEl) devEl.textContent = S.state + " · " + K.name + " " + N + " " + K.unit + " · " + S.W + "cm × " + S.R + " 层\n" + fps.toFixed(0) + " fps · " + renderer.info.render.calls + " calls · 画布 ×" + PR.cur + " · 书脊格 " + atlas.cw + "×" + atlas.ch;
 }
@@ -678,7 +738,7 @@ function tick(raw) {
 window.__lab = {
   S, P, get state() { return S.state; }, get books() { return books; }, get L() { return L; }, counts, rectOf,
   hot: setHot, pull: pullOut, back: putBack, mark: setStatus, read: readOn, arrange, count: rebuild, tools: toolsOpen, setMark, PR, get atlas() { return atlas; },
-  get kind() { return S.kind; }, goto, KINDS,
+  get kind() { return S.kind; }, goto, KINDS, openBox, closeBox, takeCard, cardBack, get box() { return boxView; },
   manual(on) { S.manual = !!on; }, step(sec) { let t = sec; while (t > 1e-6) { const d = Math.min(1 / 60, t); tick(d); t -= d; } },
 };
 whenReady().then(() => { NB = [40, 120, 300].includes(+Q.get("n")) ? +Q.get("n") : 40; setKind(MULTI && KINDS[Q.get("f")] ? Q.get("f") : "shelf"); enter(); requestAnimationFrame(frame); });   // 等木纹布纹的图到了再上架（最多等一秒半）

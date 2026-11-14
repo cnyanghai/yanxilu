@@ -1,5 +1,6 @@
 """三件家具（lab/shelf.html，旧书房）：书架、档案架、笔记本架同一页里换着看。底下一排三个记号，点哪个去哪个，按在那一排上左右划也行；
 档案架上是牌盒（厚跟着牌数走，有没读的顶上露一枚签）和没拆的邮包，笔记本架上的本子封面朝外；都能划过、抽出、放回；
+牌盒抽出来可以打开：牌叠着摊开（后面的每张露出顶上一条标题，没读的背面朝上、排在最前面），划过、拿起一张（没读的翻过来就算读了）、放回、合上；
 换走再换回来，书架上改过的读没读还在。灰盒没做后两件，记号不出来。
 用法：python3 tools/tests/lab_rack_test.py           # 自己起模拟服务（端口 8797），软件渲染，约两三分钟
 截图落在 tools/out/lab/（已 gitignore）。这条测试只保证流程走得通、整座装得进一屏、不报错，好不好看、换的那一下顺不顺要人在手机上看。"""
@@ -78,11 +79,41 @@ try:
         meta = pg.locator("#s-meta").inner_text()
         check("松手抽出来：底下写卷号、哪一类、几张牌、几张没读", pg.locator("#s-title").inner_text() == title and "张牌" in meta and "张没读" in meta, meta)
         hid = J("['#b-read', '#b-done', '#b-todo', '#b-go', '#s-prog'].map(s => getComputedStyle(document.querySelector(s)).display)")
-        check("牌盒底下只有「放回去」（没有读书的按钮，也没有「去拆」）", hid == ["none"] * 5 and pg.locator("#b-back").is_visible(), hid); shot("4-box-out")
+        check("牌盒底下是「打开」和「放回去」（没有读书的按钮，也没有「去拆」）", hid == ["none"] * 5 and pg.locator("#b-back").is_visible() and pg.locator("#b-open").is_visible(), hid); shot("4-box-out")
         check("放回去", put_back() and not J("window.__lab.books[%d].hero" % b0))
         pk = J("window.__lab.books.findIndex(b => b.pack)"); tap_out(pk)
         check("抽出一包没拆的邮包：写着还没拆，有「去拆这一包」，连到拆包页", "还没拆" in pg.locator("#s-meta").inner_text() and pg.locator("#b-go").is_visible() and pg.locator("#b-go").get_attribute("href") == "./", pg.locator("#s-meta").inner_text()); shot("5-pack-out")
         put_back()
+
+        # 开盒：抽出一个有没读的牌盒，打开，牌摊开；划过、拿起一张没读的（翻过来就算读了）、放回、再拿一张读过的、合上
+        tap_out(b0); box0 = J("(({ n, u }) => ({ n, u }))(window.__lab.books[%d])" % b0)
+        pg.click("#b-open"); check("点「打开」：盒子落到底下，牌飞出来", st() in ("opening", "open"), st())
+        check("牌摊开了", until("open", 40), st()); pg.wait_for_timeout(500); shot("5a-open")
+        cs = J("window.__lab.box.cards.map(c => ({ read: c.c.read, back: Math.abs(c.ry - Math.PI) < .01, vis: c.g.visible }))"); Lc = J("(({ cols, m, wpx, step }) => ({ cols, m, wpx, step }))(window.__lab.box.L)")
+        check("盒里几张牌就摊开几张", len(cs) == box0["n"] and all(c["vis"] for c in cs), (len(cs), box0["n"]))
+        check("没读的背面朝上、排在最前面，读过的正面朝上", all(c["back"] == (not c["read"]) for c in cs) and [c["read"] for c in cs] == [True] * (box0["n"] - box0["u"]) + [False] * box0["u"], [c["read"] for c in cs][-6:])
+        check("后面的牌每张至少露出十七像素的一条（标题在这一条上）", Lc["step"] >= 17 or Lc["m"] == 1, Lc)
+        ins = J("(() => { const b = window.__lab.box, L = b.L; return b.cards.every(c => c.sx - L.wpx / 2 >= -1 && c.sx + L.wpx / 2 <= innerWidth + 1 && c.sy - L.hpx / 2 >= 0 && c.sy + L.hpx / 2 <= innerHeight - 90); })()")
+        check("摊开的牌都在屏幕里，没压住底下那行字", ins, Lc)
+        slim = J("(() => { const s = document.querySelector('#sheet'); return { slim: s.classList.contains('slim'), title: getComputedStyle(document.querySelector('#s-title')).display, close: getComputedStyle(document.querySelector('#b-close')).display !== 'none', back: getComputedStyle(document.querySelector('#b-back')).display }; })()")
+        check("底下只剩一行字和「合上」", slim == {"slim": True, "title": "none", "close": True, "back": "none"} and "张没读" in pg.locator("#s-meta").inner_text(), (slim, pg.locator("#s-meta").inner_text()))
+        k1 = 2; s1 = J("window.__lab.box.stripOf(%d)" % k1); pg.mouse.move(s1["x"], s1["y"]); pg.mouse.down(); pg.wait_for_timeout(200)
+        check("按在一张牌露出来的那一条上：这张探头", J("window.__lab.box.hotI") == k1 and J("window.__lab.box.cards[%d].popT" % k1) == 1, J("window.__lab.box.hotI"))
+        last = box0["n"] - 1; s2 = J("window.__lab.box.stripOf(%d)" % last); pg.mouse.move(s2["x"], s2["y"], steps=5); pg.wait_for_timeout(150)
+        check("划到最前面那张：探头的换成它", J("window.__lab.box.hotI") == last, J("window.__lab.box.hotI")); shot("5b-riffle")
+        pg.mouse.up(); check("松手：这张拿到眼前", until("card", 20), st())
+        pg.wait_for_function("!window.__lab.box.busy", timeout=20000); pg.wait_for_timeout(300)
+        c1 = J("(({ c, ry }) => ({ read: c.read, ry, title: c.title, why: c.why }))(window.__lab.box.cards[%d])" % last)
+        check("没读的翻过来了，翻过来就算读了，盒里没读的少一张", c1["read"] and abs(c1["ry"]) < .01 and J("window.__lab.books[%d].u" % b0) == box0["u"] - 1, (c1["read"], J("window.__lab.books[%d].u" % b0)))
+        check("底下写这张牌的标题、来处和为什么存它", pg.locator("#s-title").inner_text() == c1["title"] and c1["why"] in pg.locator("#s-why").inner_text() and pg.locator("#b-card").is_visible(), pg.locator("#s-why").inner_text()); shot("5c-card")
+        pg.mouse.click(195, 300); check("点一下：放回原来的位置，已经是正面朝上", until("open", 20) and J("(() => { const c = window.__lab.box.cards[%d]; return Math.abs(c.x - c.slot.x) < 1e-3 && Math.abs(c.ry) < .01; })()" % last), st())
+        J("window.__lab.takeCard(0)"); until("card", 20); pg.wait_for_function("!window.__lab.box.busy", timeout=20000)
+        check("拿一张读过的：不用翻，没读的数不变", J("window.__lab.books[%d].u" % b0) == box0["u"] - 1 and J("window.__lab.box.cur") == 0)
+        pg.click("#b-card"); until("open", 20)
+        pg.click("#b-close"); check("合上：牌回盒里，盒子回到眼前", until("out", 40) and J("window.__lab.S.outReady") and J("window.__lab.box.cards.length") == 0, st()); pg.wait_for_timeout(300)
+        left = box0["u"] - 1; meta = pg.locator("#s-meta").inner_text()
+        check("盒子上的数跟着变了", (("%d 张没读" % left) in meta if left else "都读过" in meta), meta); shot("5d-closed")
+        put_back(); check("放回架上：还有没读的就还露着签，都读过了就不露", J("window.__lab.books[%d].st" % b0) == ("doing" if left else "done") and J("window.__lab.books[%d].outT" % b0) == (1 if left else 0), J("window.__lab.books[%d].st" % b0))
 
         # 按在记号那一排上往左划：去右边那一件（笔记本架）
         r = J("(() => { const r = document.querySelector('#marks').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()")

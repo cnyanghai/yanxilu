@@ -62,6 +62,10 @@
   .sheet [hidden]{display:none}
   .sheet a.main{display:inline-block;text-decoration:none}
   .sheet a.main[hidden]{display:none}
+  /* 开着盒的时候这张纸只留一行字和「合上」，屏幕让给牌 */
+  .sheet.slim{gap:8px;padding-top:10px}
+  .sheet.slim h2{display:none}
+  .sheet #s-why{font-size:14px;color:var(--ink)}
   .trow[hidden]{display:none}
   /* 读到哪了：一条细线，填了多少就是读了多少；只靠长短和明暗，不靠颜色 */
   .prog{width:min(240px,62vw);height:4px;border-radius:2px;background:var(--line);overflow:hidden}
@@ -118,11 +122,15 @@
 <section class="sheet" id="sheet" aria-live="polite">
   <h2 id="s-title"></h2>
   <p id="s-meta"></p>
+  <p id="s-why" hidden></p>
   <div class="prog" id="s-prog" role="progressbar" aria-label="读到哪了" aria-valuemin="0" aria-valuemax="100"><i></i></div>
   <div class="row">
     <button type="button" class="main" id="b-read">打开读</button>
+    <button type="button" class="main" id="b-open" hidden>打开</button>
     <a class="main" id="b-go" href="./" hidden>去拆这一包</a>
     <button type="button" class="sub" id="b-back">放回去</button>
+    <button type="button" class="sub" id="b-close" hidden>合上</button>
+    <button type="button" class="sub" id="b-card" hidden>放回这一张</button>
   </div>
   <div class="row">
     <button type="button" class="lnk" id="b-done">在别处读完了</button>
