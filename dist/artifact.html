@@ -11748,7 +11748,7 @@ var FOIL = (function () {
       var c = (S.data.clips || {})[id];
       if (c && c.status !== "link") { readerOpen(id); return "reader"; }
       var rp = c ? null : REPORTS.filter(function (x) { return x.id === id; })[0], href = c ? c.url : rp ? reportHref(rp) : "";
-      if (href && (!c || /^https?:\/\//i.test(href))) { window.open(href, "_blank", "noopener"); return "tab"; }      // 剪报的原文只认 http(s) 的地址
+      if (href && (!c || /^https?:\/\//i.test(href))) { window.open(new URL(href, document.baseURI).href, "_blank", "noopener"); return "tab"; }      // 剪报的原文只认 http(s) 的地址；自己的档案是相对地址，要照主站这一页来拼（这个函数是三维那一页叫的，不拼会照它的地址拼成 lab/reports/…）
       return "";
     }
     if (kind === "pack") { S.archPick = "cf:" + id; S.archF = "all"; S.deskOpen = true; S.clipDel = null; location.hash = "#archive"; return "page"; }      // 和在纸模版的架子上点这只袋子一样：桌面开着，袋子等着拆
