@@ -9,7 +9,7 @@
  * 节拍：
  *   1 上架   空架子先到，书一本本从外面推进去（多少本都是一秒出头），镜头同时往后退到看全；点一下屏幕快进
  *   2 看全   整座架子永远装进一屏：本数多了架子自己加宽加层。读没读只靠物件的样子说：
- *            没读的包着白纸（浅），读过的露出本来的布面（深），在读的探出来一截、脚下垂一条丝带（或者顶上露一枚签）
+ *            书的颜色是书自己的（一类一个色系，款式几种）；没读的腰封还在，读过的摘了，在读的探出来一截、脚下垂一条丝带（或者顶上露一枚签）
  *   3 划过   手指按住在书脊上划，碰到哪本哪本探头（一本一声一震），手指上方的小签报书名
  *   4 抽出   松手，那本滑出来、转过封面飞到眼前；左右拖动转着看；底下「打开读」（样机里没有阅读器，点一下算读了一段）
  *   5 放回   点「放回去」或点空白：飞回去、推进去一声闷响；按读没读放时，改过状态的书回到新的位置，别的书让位
@@ -19,7 +19,7 @@
  * 动画轨、声音、舞台、书的样子、架子在 kit.js（和进门样机共用）。
  * 字（书名签、层板签、底下的纸）用网页排；声音是 WebAudio 现场合成的，没有音频文件。书名、作者都是编的。
  * 调试：地址加 ?dev 显示帧率与状态，?n=300 直接进三百本，?pr=2 把画布倍率钉死，?mark=tab 换在读的记号；window.__lab 给测试脚本用。 */
-import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, grainOver, LOOK, DIM, TONES, PALE, INK_LT, INK_SOFT, CJK, STN, MASK, foil, weave, whenReady, bakeBook } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
+import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, drawBand, grainOver, bindOf, clothOf, clothFill, LOOK, DIM, INK_LT, INK_SOFT, CJK, STN, MASK, foil, weave, whenReady, bakeBook } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -140,6 +140,9 @@ const hSpineC = document.createElement("canvas"); hSpineC.width = 128; hSpineC.h
 const hFrontT = new THREE.CanvasTexture(hFrontC), hSpineT = new THREE.CanvasTexture(hSpineC);
 [hFrontT, hSpineT].forEach((t) => { t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = maxAniso; });
 const hmFront = new THREE.MeshStandardMaterial({ map: hFrontT, roughness: LOOK.bookRough }), hmSpine = new THREE.MeshStandardMaterial({ map: hSpineT, roughness: LOOK.bookRough }), hmBack = new THREE.MeshStandardMaterial({ roughness: LOOK.bookRough });
+// 有装帧的外观（旧书房）：封底也画一张（布面，没读的腰封围到背面）；封面板的边和里子取这张图左上角的布色
+const hBackC = LOOK.bind ? document.createElement("canvas") : null, hBackT = hBackC ? new THREE.CanvasTexture(hBackC) : null;
+if (hBackC) { hBackC.width = 192; hBackC.height = 288; hBackT.colorSpace = THREE.SRGBColorSpace; hBackT.anisotropy = maxAniso; hmBack.map = hBackT; }
 // 旧书房：封面和书脊各另画一张「哪里是金」的图，金的地方反环境光；布面再加布纹的凹凸。别的外观没有环境光，这几行什么都不做
 const hFrontM = document.createElement("canvas"); hFrontM.width = hFrontC.width; hFrontM.height = hFrontC.height;
 const hSpineM = document.createElement("canvas"); hSpineM.width = hSpineC.width; hSpineM.height = hSpineC.height;
@@ -150,12 +153,57 @@ const heroBody = bookShape ? new THREE.Mesh(bookShape, [hmSpine, hmFront, hmBack
 heroBody.castShadow = true; hero.add(heroBody);
 const heroTab = new THREE.Mesh(unitBox, tabMat); hero.add(heroTab);
 const heroRib = new THREE.Mesh(ribbonGeo, ribMat); heroRib.rotation.y = Math.PI / 2; hero.add(heroRib);   // 丝带转个面：封面朝着人的时候它也朝着人
-function drawFront(g, w, h, b, mask) {                 // 封面跟着外观走：灰盒和纸模是两道框，玩具盒下面一截换色，旧书房读过的烫金、没读的捆麻绳。mask：只画「哪里是金」
+/* 旧书房的封面：和书脊同一块布、同一个款式（kit.js 的 bindOf）。压在布上的先画（框、书名、作者；深布烫金、浅布印墨），压完布纹再画贴在外面的纸（题签、腰封）。
+ *   rule / bars：两道框，书名居中；label：书名在一格深色皮签里；slip：左上角一张竖的纸题签，墨字，别的地方留白（线装书的做法）
+ *   没读的腰封围在书脚，上面印一行小字（分类和页数）。mask：只画「哪里是金、纸、皮」 */
+function drawFrontBound(g, w, h, b, mask) {
+  const B = LOOK.bind, bd = bindOf(b), todo = b.st === "todo", F = LOOK.font, gold = mask ? MASK.gilt : bd.gold, stamp = bd.gilt ? gold : mask ? null : B.ink;
+  clothFill(g, 0, 0, w, h, b, false, mask);
+  const lines = (() => { const chars = [...b.title], per = chars.length > 4 ? 3 : 2, out = []; for (let k = 0; k < chars.length; k += per) out.push(chars.slice(k, k + per).join("")); return out; })();
+  const text = (c, font, str, x, y, align = "center") => { if (!c) return; g.fillStyle = c; g.font = font; g.textAlign = align; g.textBaseline = "middle"; g.fillText(str, x, y); };
+  const frame = (inset, lw, c = stamp) => { if (!c) return; g.strokeStyle = c; g.lineWidth = lw; g.strokeRect(inset, inset, w - 2 * inset, h - 2 * inset); };
+  const title = (c, cy, fs) => lines.forEach((ln, k) => text(c, "700 " + fs + "px " + F, ln, w / 2, cy + (k - (lines.length - 1) / 2) * fs * 1.2));
+  if (bd.style === "slip") {
+    frame(24, 1.5); text(stamp, "500 22px " + F, CATS[b.cat], w - 54, h * .62, "right"); text(stamp, "500 26px " + F, b.by, w - 54, h * .68, "right");
+  } else if (bd.style === "label") {
+    frame(26, 2.5); text(stamp, "500 22px " + F, CATS[b.cat], w / 2, 72);
+    g.fillStyle = mask ? MASK.leather : bd.label; g.fillRect(w * .19, h * .17, w * .62, h * .36);
+    g.strokeStyle = gold; g.lineWidth = 2; g.strokeRect(w * .19 + 9, h * .17 + 9, w * .62 - 18, h * .36 - 18);
+    title(gold, h * .35, lines.length > 2 ? 54 : 68);
+    if (stamp) { g.fillStyle = stamp; g.fillRect(w / 2 - 34, h * .6, 68, 2); } text(stamp, "500 26px " + F, b.by, w / 2, h * .655);
+  } else {
+    if (bd.style === "bars") { frame(26, 6); frame(42, 1.5); } else { frame(26, 3); frame(36, 1.5); }
+    text(stamp, "500 22px " + F, CATS[b.cat], w / 2, 86); title(stamp, h * .37, lines.length > 2 ? 70 : 86);
+    if (stamp) { g.fillStyle = stamp; g.fillRect(w / 2 - 40, h * .6, 80, 2); } text(stamp, "500 26px " + F, b.by, w / 2, h * .655);
+  }
+  if (!mask) grainOver(g, 0, 0, w, h, false);
+  const papers = [];
+  if (bd.style === "slip") {                               // 题签：竖着的一张纸，书名竖排
+    const x0 = w * .11, sw = w * .25, y0 = h * .07, sh = h * .62, chars = [...b.title], fs = Math.min(sw * .62, (sh - 44) / chars.length / 1.12);
+    if (mask) { g.fillStyle = MASK.paper; g.fillRect(x0, y0, sw, sh); }
+    else {
+      g.fillStyle = "rgba(0,0,0,.3)"; g.fillRect(x0 - 2, y0 - 2, sw + 4, sh + 5); g.fillStyle = B.slip; g.fillRect(x0, y0, sw, sh);
+      g.strokeStyle = B.ink; g.globalAlpha = .7; g.lineWidth = 1.5; g.strokeRect(x0 + 8, y0 + 8, sw - 16, sh - 16); g.globalAlpha = 1;
+      chars.forEach((c, k) => text(B.ink, "700 " + fs.toFixed(1) + "px " + F, c, x0 + sw / 2, y0 + sh / 2 + (k - (chars.length - 1) / 2) * fs * 1.12));
+      papers.push([x0, y0, sw, sh]);
+    }
+  }
+  if (todo) {
+    const r = drawBand(g, 0, 0, w, h, b, mask); papers.push(r);
+    if (!mask) { g.globalAlpha = .85; text(B.bandInk, "500 21px " + F, CATS[b.cat] + " · " + b.pages + " 页", w / 2, r[1] + r[3] * .56); g.globalAlpha = 1; }
+  }
+  if (!mask) papers.forEach((r) => grainOver(g, r[0], r[1], r[2], r[3], true));
+}
+function drawBackBound(g, w, h, b) {                   // 封底：布面，没读的腰封围过来
+  clothFill(g, 0, 0, w, h, b, false); grainOver(g, 0, 0, w, h, false);
+  if (b.st === "todo") { const r = drawBand(g, 0, 0, w, h, b); grainOver(g, r[0], r[1], r[2], r[3], true); }
+}
+function drawFront(g, w, h, b, mask) {                 // 封面跟着外观走：灰盒和纸模是两道框，玩具盒下面一截换色，旧书房另画（上面）。mask：只画「哪里是金」
+  if (LOOK.bind) return drawFrontBound(g, w, h, b, mask);
   const todo = b.st === "todo", K = LOOK.spine, F = LOOK.font, ink = mask ? MASK.gilt : todo ? INK_SOFT : (LOOK.gilt || INK_LT), wt = K === "toy" ? "900 " : "700 ";
-  g.fillStyle = mask ? (todo ? MASK.paper : MASK.cloth) : todo ? PALE : TONES[b.cat]; g.fillRect(0, 0, w, h);
+  g.fillStyle = mask ? (todo ? MASK.paper : MASK.cloth) : clothOf(b); g.fillRect(0, 0, w, h);
   if (mask && todo) return;                               // 包着纸的没有金
   if (K === "toy") { g.fillStyle = todo ? LOOK.pale2 : LOOK.tones2[b.cat]; g.fillRect(0, h * .78, w, h * .22); }
-  else if (K === "study" && todo) { g.fillStyle = LOOK.twine; g.fillRect(0, h * .2, w, 5); g.fillRect(0, h * .8, w, 5); g.fillRect(w * .3, 0, 5, h); }
   else { g.strokeStyle = ink; g.globalAlpha = mask ? 1 : todo ? .5 : .75; g.lineWidth = 3; g.strokeRect(26, 26, w - 52, h - 52); g.lineWidth = 1.5; g.strokeRect(36, 36, w - 72, h - 72); g.globalAlpha = 1; }
   g.fillStyle = ink; g.textAlign = "center"; g.textBaseline = "middle";
   g.font = "500 22px " + F; g.fillText(CATS[b.cat], w / 2, 84);
@@ -169,10 +217,10 @@ function drawFront(g, w, h, b, mask) {                 // 封面跟着外观走�
 }
 function heroSetup(b) {
   drawFront(hFrontC.getContext("2d"), hFrontC.width, hFrontC.height, b); hFrontT.needsUpdate = true;
-  drawSpine(hSpineC.getContext("2d"), 0, 0, hSpineC.width, hSpineC.height, b); grainOver(hSpineC.getContext("2d"), 0, 0, hSpineC.width, hSpineC.height, b.st === "todo"); hSpineT.needsUpdate = true;
-  hmBack.color.set(b.st === "todo" ? PALE : TONES[b.cat]);
+  drawSpine(hSpineC.getContext("2d"), 0, 0, hSpineC.width, hSpineC.height, b); if (!LOOK.bind) grainOver(hSpineC.getContext("2d"), 0, 0, hSpineC.width, hSpineC.height, b.st === "todo"); hSpineT.needsUpdate = true;
+  if (hBackC) { drawBackBound(hBackC.getContext("2d"), hBackC.width, hBackC.height, b); hBackT.needsUpdate = true; } else hmBack.color.set(clothOf(b));
   if (GILT) { drawFront(hFrontM.getContext("2d"), hFrontM.width, hFrontM.height, b, true); hFrontMT.needsUpdate = true; drawSpine(hSpineM.getContext("2d"), 0, 0, hSpineM.width, hSpineM.height, b, false, true); hSpineMT.needsUpdate = true; }
-  const cloth = b.st !== "todo"; weave(hmFront, b.d, b.h, cloth); weave(hmBack, b.d, b.h, cloth); weave(hmSpine, b.t, b.h, cloth);
+  const cloth = !!LOOK.bind || b.st !== "todo"; weave(hmFront, b.d, b.h, cloth); weave(hmBack, b.d, b.h, cloth); weave(hmSpine, b.t, b.h, cloth);
   if (bookShape) { if (heroBody.geometry !== bookShape) heroBody.geometry.dispose(); heroBody.geometry = bakeBook(bookShape, b.t, b.h, b.d); }
   heroBody.scale.set(b.t, b.h, b.d);
   heroTab.visible = b.st === "doing" && S.mark === "tab"; heroTab.scale.set(b.t * .62, 2.6, .14); heroTab.position.set(0, b.h / 2 + .55, b.d / 2 + .05);
@@ -294,7 +342,8 @@ function snapToSlots() { books.forEach((b) => { const sp = slotPos(b.i); b.px = 
 const hint = $("#hint"), grab = $("#grab"), tools = $("#tools"), veil = $("#veil"), sheet = $("#sheet"), tip = $("#tip"), labs = $("#labs");
 function ui() {
   const c = counts(), out = S.state === "out" || S.state === "back";
-  hint.innerHTML = "共 <b>" + N + "</b> 本：深的读过 <b>" + c.done + "</b> · " + (S.mark === "ribbon" ? "垂着丝带的" : "顶上带签的") + "在读 <b>" + c.doing + "</b> · 浅的没读 <b>" + c.todo + "</b><small>手指按在书脊上划，松手就抽出那一本</small>";
+  const mk = S.mark === "ribbon" ? "垂着丝带的" : "顶上带签的";
+  hint.innerHTML = "共 <b>" + N + "</b> 本：" + (LOOK.bind ? "带腰封的没读 <b>" + c.todo + "</b> · " + mk + "在读 <b>" + c.doing + "</b> · 摘了腰封的读过 <b>" + c.done + "</b>" : "深的读过 <b>" + c.done + "</b> · " + mk + "在读 <b>" + c.doing + "</b> · 浅的没读 <b>" + c.todo + "</b>") + "<small>手指按在书脊上划，松手就抽出那一本</small>";
   grab.classList.toggle("off", out); sheet.classList.toggle("on", S.state === "out");
   document.querySelectorAll("#seg-arr button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.arr === S.arr)));
   document.querySelectorAll("#seg-n button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.n === N)));
@@ -405,7 +454,7 @@ function setProg(p) {
   p = clamp(p, 0, 1); const st = p <= 0 ? "todo" : p >= 1 ? "done" : "doing", same = st === b.st; if (same && p === b.prog) return;
   b.prog = p;
   if (same) { SFX.page(); vib(4); ui(); return; }
-  b.st = st; atlas.redraw(b); heroSetup(b);                            // 没读变在读：包书纸拆了，露出布面
+  b.st = st; atlas.redraw(b); heroSetup(b);                            // 没读变在读：腰封摘了（灰盒：包的白纸拆了）
   play(.3, (e, kk) => { b.k = 1 + Math.sin(Math.PI * kk) * .07; }, { ease: E.lin });
   SFX.mark(st); vib(8); ui();
 }

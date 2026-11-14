@@ -1,10 +1,12 @@
 """样机的外观（lab/kit.js 的外观表）。2026-11-13 用户选定旧书房：没选过的设备打开就是旧书房，顶栏「外观」单子上只有旧书房和灰盒，
 换过以后三个样机页（书架、进门、拆包）一起换；纸模、玩具盒是落选的样张，地址带 ?look= 还打得开，但不记在设备上，拆包页没做它们。
-四种外观读没读的明暗差都要够大（不靠色相）。旧书房用的真木纹、布纹图要读得到。
+读没读的明暗差要够大（不靠色相）：灰盒和两种落选的样张是整本一浅一深，看外观表；旧书房的书各有各的颜色，没读的是书脚围一圈腰封，
+在屏上量（腰封那一段要比同一排紧挨着的读过的书同一段亮得多）。旧书房用的真木纹、布纹图要读得到。
 用法：python3 tools/tests/lab_look_test.py           # 自己起模拟服务（端口 8795），软件渲染，约三四分钟
 截图落在 tools/out/lab/（已 gitignore）。这条测试只保证切换走得通、状态分得清，好不好看要人在手机上看。"""
-import os, sys, time, subprocess, urllib.request
+import os, sys, io, time, subprocess, statistics, urllib.request
 from playwright.sync_api import sync_playwright
+from PIL import Image
 
 HERE = os.path.dirname(os.path.abspath(__file__)); ROOT = os.path.dirname(os.path.dirname(HERE))
 OUT = os.path.join(ROOT, "tools", "out", "lab"); os.makedirs(OUT, exist_ok=True)
@@ -50,11 +52,28 @@ try:
         check("没选过外观：打开就是旧书房", look(pg) == "study", look(pg))
         tx = pg.evaluate("import('./kit.js').then(m => m.texReady).then(t => ({ wood: !!t.wood, cloth: !!t.cloth }))")
         check("旧书房：木纹和布纹的图（vendor/tex/）都读到了", tx == {"wood": True, "cloth": True}, tx)
-        looks = pg.evaluate("import('./kit.js').then(m => Object.fromEntries(Object.entries(m.LOOKS).map(([k, L]) => [k, { name: L.name, pale: L.pale, tones: L.tones }])))")
+        looks = pg.evaluate("import('./kit.js').then(m => Object.fromEntries(Object.entries(m.LOOKS).map(([k, L]) => [k, { name: L.name, pale: L.pale, tones: L.tones, bind: !!L.bind }])))")
         check("外观表里有旧书房、灰盒和两个落选的样张", sorted(looks) == ["grey", "paper", "study", "toy"], sorted(looks))
         for k, L in looks.items():               # 读没读只靠明暗：没读的那层纸要比任何一种读过的面都亮得多
+            if L["bind"]: continue                 # 旧书房不是整本换色，下面在屏上量
             ratio = min((lum(L["pale"]) + .05) / (lum(t) + .05) for t in L["tones"])
             check("%s：没读的比读过的亮得多（对比不低于 4）" % L["name"], ratio >= 4, round(ratio, 2))
+        # 旧书房：书各有各的颜色（一类一个色系），没读的书脚围着腰封。在屏上量腰封那一段：每本没读的，都要比同一排离它最近的那本读过的同一段亮得多
+        im = Image.open(io.BytesIO(pg.screenshot())).convert("RGB")
+        bs = pg.evaluate("window.__lab.books.map((b, i) => ({ st: b.st, h: b.h, fam: b.bd && b.bd.fam, style: b.bd && b.bd.style, r: window.__lab.rectOf(i) }))")
+        def foot(b):                               # 这本书腰封那一段（没有腰封就是同一个位置的布面）在屏上的亮度
+            r = b["r"]; w = r["r"] - r["l"]; hh = r["b"] - r["t"]; top = r["t"] + hh * (1 - 5 / b["h"]); bh = r["b"] - top
+            px = list(im.crop((round(r["l"] + w * .3), round(top + bh * .3), round(r["r"] - w * .3) + 1, round(top + bh * .85) + 1)).getdata())
+            m = [statistics.median(q[k] for q in px) / 255 for k in range(3)]; m = [c / 12.92 if c <= .04045 else ((c + .055) / 1.055) ** 2.4 for c in m]
+            return .2126 * m[0] + .7152 * m[1] + .0722 * m[2]
+        wide = [b for b in bs if b["r"]["r"] - b["r"]["l"] >= 9]; ratios = []
+        for b in [b for b in wide if b["st"] == "todo"]:
+            near = [d for d in wide if d["st"] == "done" and abs(d["r"]["b"] - b["r"]["b"]) < 4]
+            if not near: continue
+            d = min(near, key=lambda d: abs(d["r"]["l"] - b["r"]["l"])); ratios.append((round((foot(b) + .05) / (foot(d) + .05), 2), d["fam"]))
+        ratios.sort()        # 最差的一对通常是腰封落在旁边探出来那本书的影子里、挨着的又是浅色布（赭黄、石青），所以最差的放宽，再看中间那一对
+        check("旧书房：没读的腰封比紧挨着的读过的书同一段亮（最差的一对不低于 1.25，中间的一对不低于 2）", len(ratios) >= 8 and ratios[0][0] >= 1.25 and ratios[len(ratios) // 2][0] >= 2, (ratios[:3], ratios[len(ratios) // 2] if ratios else None))
+        check("旧书房：一类一个色系，四十本里六个色系、四种款式都有", len({b["fam"] for b in bs}) == 6 and len({b["style"] for b in bs}) == 4, (sorted({b["fam"] for b in bs}), sorted({b["style"] for b in bs})))
         flow(pg, errs, "study", "旧书房")
         # 「外观」按钮（书架页收在底下的工具纸里，先点把手）：单子上两项，换成灰盒；换过以后进门页、拆包页跟着换
         pg.click("#grab"); pg.wait_for_timeout(450); pg.click("#look"); pg.wait_for_timeout(200)

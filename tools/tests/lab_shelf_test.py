@@ -97,11 +97,19 @@ try:
         check("层板上三枚小签", pg.locator("#labs .lab").count() == 3, pg.locator("#labs .lab").count()); shot("6-state")
         # 这种排法下抽一本没读的，点「打开读」：读没读不用手标，读了一点它自己变成在读；点空白放回，它该站到在读那一组去
         tid = J("window.__lab.books.find(b => b.st === 'todo').i")
+        # 书脊图集里这一本腰封那一段是不是纸的颜色（离腰封的纸色多远），顺带把它的布色和款式拿回来
+        FOOT_JS = """(i) => { const a = window.__lab.atlas, b = window.__lab.books[i], x = (b.i % a.cols) * a.cw + a.cw * .28, y = Math.floor(b.i / a.cols) * a.ch + a.ch * (1 - 2.5 / b.h);
+          const d = a.canvas.getContext('2d').getImageData(Math.round(x), Math.round(y), 1, 1).data, p = [244, 236, 216];
+          return { far: Math.max(Math.abs(d[0] - p[0]), Math.abs(d[1] - p[1]), Math.abs(d[2] - p[2])), cloth: b.bd.cloth, style: b.bd.style }; }"""
+        f0 = pg.evaluate(FOOT_JS, tid)
+        check("没读的书脚围着腰封（书脊图上那一段是纸的颜色）", f0["far"] < 40, f0)
         r = rect(tid); pg.mouse.move(r["cx"], r["cy"]); pg.mouse.down(); pg.wait_for_timeout(120); pg.mouse.up()
         pg.wait_for_function("window.__lab.S.outReady", timeout=15000)
         check("没读的抽出来：写着还没打开过，按钮是「打开读」", "还没打开过" in pg.locator("#s-meta").inner_text() and pg.locator("#b-read").inner_text() == "打开读" and not pg.locator("#b-todo").is_visible())
         pg.click("#b-read"); pg.wait_for_timeout(400)
         check("打开读了一下（百分之二），自己变成在读", J("window.__lab.books[%d].st" % tid) == "doing" and abs(J("window.__lab.books[%d].prog" % tid) - .02) < 1e-6 and "读到 2%" in pg.locator("#s-meta").inner_text() and pg.locator("#b-read").inner_text() == "接着读", pg.locator("#s-meta").inner_text())
+        f1 = pg.evaluate(FOOT_JS, tid)
+        check("读起来腰封就摘了，书还是原来那块布、那个款式", f1["far"] > 40 and f1["cloth"] == f0["cloth"] and f1["style"] == f0["style"], (f0, f1))
         pg.click("#b-read"); pg.wait_for_timeout(300)
         check("接着读：进度往前走，还是在读", J("window.__lab.books[%d].st" % tid) == "doing" and J("window.__lab.books[%d].prog" % tid) > .2 and J("document.querySelector('#s-prog i').style.width") == "22%", J("window.__lab.books[%d].prog" % tid)); shot("6b-reading")
         pg.mouse.move(40, 420); pg.mouse.down(); pg.wait_for_timeout(60); pg.mouse.up()            # 点空白处放回

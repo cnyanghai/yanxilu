@@ -88,7 +88,7 @@ try:
         # 横屏桌面：牌排成一排
         ctx = br.new_context(viewport={"width": 1280, "height": 800}, device_scale_factor=1, service_workers="block"); pg = ctx.new_page(); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
-        pg.goto(B + "/lab?mode=quiet"); pg.wait_for_function("window.__lab && window.__lab.state === 'idle'", timeout=15000)
+        t0 = time.time(); pg.goto(B + "/lab?mode=quiet"); pg.wait_for_function("window.__lab && window.__lab.state === 'idle'", timeout=60000); print("     横屏那一页从打开到就绪 %.1f 秒" % (time.time() - t0), flush=True)   # 大窗口下软件渲染慢，机器忙的时候十五秒不够
         pg.evaluate("window.__lab.manual(true)"); pg.evaluate("window.__lab.step(.5)"); pg.screenshot(path=os.path.join(OUT, "desk-1-idle.png"), timeout=240000)   # 大窗口下软件渲染慢，截图多等一会儿
         pg.evaluate("window.__lab.tearTo(1)"); pg.evaluate("window.__lab.step(3)"); pg.evaluate("window.__lab.flipAll()"); pg.evaluate("window.__lab.step(2)")
         pg.screenshot(path=os.path.join(OUT, "desk-2-all-up.png"), timeout=240000)

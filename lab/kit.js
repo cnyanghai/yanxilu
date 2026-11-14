@@ -116,12 +116,33 @@ export const LOOKS = {
     cs: { frame: 0xfaf4e8, back: 0x1c5a61, wall: 0x4a9a9d, floor: 0x44929a, div: 0xfaf4e8, rough: .55, tex: null, ao: .3 },
     css: { bg: "#4A9A9D", ink: "#FFFFFF", ink2: "rgba(255,255,255,.82)", pane: "rgba(16,62,68,.74)", line: "rgba(255,255,255,.42)", on: "#134A50", halo: "rgba(8,48,54,.7)", sheet: "16,62,68", lab: "rgba(16,62,68,.9)", scheme: "dark" }, veil: 0x0e3a40,
   },
-  // 旧书房：暗处一盏暖灯，胡桃木的架子，布面烫金的书；没读的包着牛皮纸捆两道麻绳
+  // 旧书房：暗处一盏暖灯，胡桃木的架子，各色布面的书；没读的腰封还在
   study: {
     name: "旧书房", bg: 0x1c1510, hemi: [0xffdcb0, 0x33241a, 1.35], key: [0xffd29a, 4.7], sun: [-.38, .95, .72], soft: 4,   // 2026-11-13 夜里用户在手机上看书发暗：天光 1.05 → 1.35，主光 3.5 → 4.7
-    tones: ["#5C1F1F", "#1F3B2E", "#1E2A45", "#5A3B1E", "#3F2440", "#2A2420"], pale: "#E3D3AE", inkLt: "#E7D3A0", inkSoft: "#3E2913", paper: "#E6D9BC", tab: "#FFE2A8", tabGlow: .7,
-    gilt: "#E6C478", twine: "#8A6A42",
-    spine: "study", font: CJK, bookRough: .82, grain: "cloth", jit: .16,
+    tones: ["#1E3F86", "#852B37", "#3A93A5", "#99CBFF", "#D1AC57", "#24201D"], pale: "#F4ECD8", inkLt: "#E7D3A0", inkSoft: "#3E2913", paper: "#E6D9BC", tab: "#FFE2A8", tabGlow: .7,   // tones：六类各自色系的头一个颜色（下面 bind.fams 的）；pale：腰封的纸
+    gilt: "#E6C478",
+    spine: "bound", font: CJK, bookRough: .82, grain: "cloth", jit: .1,
+    /* 书的装帧（2026-11-14。用户看了说整面墙只有两个颜色、不好看：原来没读的一律包牛皮纸，读过的六种布面全是深色、款式只有一种）。
+     * 现在颜色是书自己的：一类一个色系（fams，顺序跟着书的分类；样机里六类，第七个绛紫留给以后更多的分类），每个色系三个深浅，免得一类书像一套书。
+     * 色系按明度和蓝黄两条轴排开（用户红绿色弱，红绿这条轴靠不住）：藏青（深、冷）、枣红（深、暖）、青绿（中）、石青（浅、冷）、赭黄（浅、黄）、墨（最深）；
+     *   量的是屏上显示出来的颜色：绿色盲、红色盲的看法下色系两两之间都分得开（数字见 lab/README.md）。不用栗色、棕色：和胡桃木的架子混在一起。
+     * 这盏灯很暖（蓝光只剩三成多），表里写的布色和屏上看到的差很远：表里的石青是一块很艳的天蓝，在灯下才是一块灰蓝。所以布色是按屏上要看到的颜色反推出来的
+     * gilt：这种布上压的字和线是烫金（深布）还是印墨（浅布）；gold：这种布上的金用哪个颜色（青绿是中等明度，金要浅一点书名才清楚）。款式四种（style），按书名散开，同一本书永远是同一个样子：
+     *   rule 上下各一粗一细两道线；bars 上下各一道宽带；label 一格深色皮签加三道竹节；slip 贴一张纸题签（墨字）
+     * 读没读不再换颜色：没读的腰封还在（band，一圈浅色的纸围在书脚，从 bandY 到底），读起来就摘了；在读的垂丝带。腰封的纸比哪一种布都亮 */
+    bind: {
+      fams: [
+        { n: "藏青", c: ["#1E3F86", "#17326E", "#294E9E"], gilt: true },
+        { n: "枣红", c: ["#852B37", "#943543", "#74232F"], gilt: true },
+        { n: "青绿", c: ["#3A93A5", "#2F7A87", "#49ABBD"], gilt: true, gold: "#F6E6B0" },
+        { n: "石青", c: ["#99CBFF", "#87B6FF", "#B2E1FF"], gilt: false },
+        { n: "赭黄", c: ["#D1AC57", "#C19B49", "#DCBC6C"], gilt: false },
+        { n: "墨", c: ["#24201D", "#2B2622", "#1D1A18"], gilt: true },
+        { n: "绛紫", c: ["#50296A", "#5E3179", "#44215C"], gilt: true },
+      ],
+      labels: ["#1B1613", "#5A1C1E", "#1E2F4E"],                 // 皮签的颜色：黑、枣红、藏青（和布同一个色系的不用）
+      slip: "#EDE3C8", ink: "#2A1B10", band: "#F4ECD8", bandInk: "#3A2716", bandCm: 5, capCm: 2.7,   // bandCm：腰封多高（厘米，每本一样高，一排书的腰封上沿就齐成一条线）；capCm：书脊上的字最大多大
+    },
     dim: { SH: 29, BT: 2.2, ST: 2.6, CD: 21, PL: 8 },
     // 造型（2026-11-13「造型」一门）。mould：架子的线脚，单位厘米。stile 壁柱比侧板往外宽多少、stileT 往前凸多少；frieze 压顶线下面那条平带多高；
     //   k 压顶线和底座线脚整体放大多少（1 是量参考时定的原大：压顶高 5.9 出 4.6，底座线脚出 2.2）
@@ -277,7 +298,7 @@ export function makeEnv(renderer) {
   return ENV;
 }
 // 烫金：另画一张图说「哪里是金」（绿管粗糙、蓝管金属），金的地方反环境光。没有环境光的外观什么都不做
-export const MASK = { cloth: "rgb(0,214,0)", paper: "rgb(0,235,0)", gilt: "rgb(0,80,196)" };   // 金：比布面光滑得多；金属只给到七成多，留一点漆的底色，背着光的角度书名也还看得见
+export const MASK = { cloth: "rgb(0,214,0)", paper: "rgb(0,235,0)", gilt: "rgb(0,80,196)", leather: "rgb(0,150,0)" };   // 金：比布面光滑得多；金属只给到七成多，留一点漆的底色，背着光的角度书名也还看得见。皮签比布面光一点
 export function foil(mat, maskTex) {
   if (!ENV) return false; mat.metalnessMap = mat.roughnessMap = maskTex; mat.metalness = 1; mat.roughness = 1; mat.envMap = ENV; mat.envMapIntensity = LOOK.env.k; mat.needsUpdate = true; return true;
 }
@@ -459,14 +480,43 @@ export function lightCase(key, w, h) {
   Object.assign(key.shadow.camera, { left: -half, right: half, top: half, bottom: -half, near: 10, far: Lz * 2.4 }); key.shadow.camera.updateProjectionMatrix();
 }
 
-/* ---------- 书的样子（占位；读没读只靠明暗和形状，不靠色相） ---------- */
-export const TONES = LOOK.tones;   // 读过的书露出的面，按类各一种，都是深的
+/* ---------- 书的样子（读没读只靠明暗和形状，不靠色相） ---------- */
+export const TONES = LOOK.tones;   // 灰盒和两种落选的样张：读过的书露出的面，按类各一种，都是深的。旧书房的颜色在 LOOK.bind 里
 export const PALE = LOOK.pale, INK_LT = LOOK.inkLt, INK_SOFT = LOOK.inkSoft, PAPER = LOOK.paper, TAB = LOOK.tab;
 export const STN = { todo: "没读", doing: "在读", done: "读过" };
 const CELLW = 48, CELLH = 192, COLS = 42;
+// 一本书的装帧（只有旧书房有，别的外观回空）：从书名算出来，同一本书不管排在哪、读没读，都是同一块布、同一个款式
+function hsh(s) { let h = 2166136261; for (const ch of s) h = Math.imul(h ^ ch.codePointAt(0), 16777619); return h >>> 0; }
+export function bindOf(b) {
+  const B = LOOK.bind; if (!B) return null; if (b.bd) return b.bd;
+  const r = rng(hsh(b.title)), u = [r(), r(), r(), r(), r(), r()], fam = B.fams[b.cat % B.fams.length];
+  const kinds = fam.gilt ? [["rule", .34], ["label", .28], ["slip", .2], ["bars", .18]] : [["rule", .36], ["label", .26], ["slip", .14], ["bars", .24]];
+  let style = kinds[0][0], acc = 0; for (const [k, p] of kinds) { acc += p; if (u[3] < acc) { style = k; break; } }
+  if (style === "slip" && b.t < 1.7) style = "rule";                             // 太薄的书贴不下一张签
+  const labs = B.labels.filter((c, k) => !((k === 0 && fam.n === "墨") || (k === 1 && fam.n === "枣红") || (k === 2 && fam.n === "藏青")));
+  return (b.bd = { fam: fam.n, cloth: fam.c[Math.floor(u[2] * fam.c.length)], gilt: fam.gilt, gold: fam.gold || LOOK.gilt, style, label: labs[Math.floor(u[4] * labs.length)], dev: Math.floor(u[5] * 4) });
+}
+export function clothOf(b, pale) { const bd = bindOf(b); return bd ? bd.cloth : pale || b.st === "todo" ? PALE : TONES[b.cat % TONES.length]; }
+// 铺一块书皮的底色，每本深浅差一点点，不那么齐。mask：画「哪里是金」那张图时铺的是「这里是布」
+export function clothFill(g, x, y, w, h, b, pale, mask) {
+  const todo = pale || b.st === "todo";
+  g.fillStyle = mask ? (!LOOK.bind && todo ? MASK.paper : MASK.cloth) : clothOf(b, pale); g.fillRect(x, y, w, h);
+  if (LOOK.jit && !mask) { const j = ((Math.imul(b.i + 1, 2654435761) >>> 0) % 1000) / 1000 - .5; g.fillStyle = j > 0 ? "rgba(255,255,255," + (j * LOOK.jit).toFixed(3) + ")" : "rgba(0,0,0," + (-j * LOOK.jit).toFixed(3) + ")"; g.fillRect(x, y, w, h); }
+}
+// 腰封：一圈浅色的纸，上沿压一道影子（纸是围在布外面的），印两道细线。坐标是画布上的像素；回来的是这张纸占的那一块（好往上压纸浆的花纹）
+export const bandY = (b) => 1 - LOOK.bind.bandCm / b.h;      // 腰封的上沿在这本书高度的哪里（从上往下的比例）
+export function drawBand(g, x, y, w, h, b, mask, ext = 0) {  // ext：底下再多铺出去多少（书脊图集里铺到格子的留边上）
+  const B = LOOK.bind, y0 = y + h * bandY(b), bh = y + h + ext - y0, lw = Math.max(1, h * .005);
+  if (mask) { g.fillStyle = MASK.paper; g.fillRect(x, y0, w, bh); return [x, y0, w, bh]; }
+  g.fillStyle = "rgba(0,0,0,.34)"; g.fillRect(x, y0 - lw * 1.6, w, lw * 1.6);
+  g.fillStyle = B.band; g.fillRect(x, y0, w, bh);
+  g.fillStyle = "rgba(255,255,255,.5)"; g.fillRect(x, y0, w, lw * .8);
+  g.fillStyle = B.bandInk; g.globalAlpha = .8; g.fillRect(x, y0 + h * .022, w, lw * 1.5); g.fillRect(x, y0 + h * .034, w, lw * .6); g.fillRect(x, y + h * .962, w, lw); g.globalAlpha = 1;
+  return [x, y0, w, bh];
+}
 // 画一条书脊。pale：不管读没读都画成包着白纸的样子（别人那里带走的一份，到你手里都是没读的）
-function titleV(g, chars, tw, y0, y1, color, font, weight, wide = .6, fat = 0) {      // 竖排的书名，排在 y0 到 y1 之间，居中。fat：再描一道同色的边（字高的几分之几），宋体的细横在小字上才不断
-  const n = chars.length, fs = Math.min(tw * wide, ((y1 - y0) * .94) / n), step = Math.min(fs * 1.14, (y1 - y0) / n), top = (y0 + y1) / 2 - step * n / 2;
+function titleV(g, chars, tw, y0, y1, color, font, weight, wide = .6, fat = 0, cap = 1e9) {      // 竖排的书名，排在 y0 到 y1 之间，居中。fat：再描一道同色的边（字高的几分之几），宋体的细横在小字上才不断。cap：字最大多大
+  const n = chars.length, fs = Math.min(tw * wide, ((y1 - y0) * .94) / n, cap), step = Math.min(fs * 1.14, (y1 - y0) / n), top = (y0 + y1) / 2 - step * n / 2;
   g.font = weight + " " + fs.toFixed(2) + "px " + font; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = color;
   if (fat) { g.strokeStyle = color; g.lineWidth = fs * fat; g.lineJoin = "round"; }
   chars.forEach((c, k) => { if (fat) g.strokeText(c, 0, top + step * (k + .5)); g.fillText(c, 0, top + step * (k + .5)); });
@@ -491,22 +541,43 @@ const SPINES = {
     g.fillStyle = todo ? INK_SOFT : INK_LT; g.globalAlpha = todo ? .45 : .95; g.beginPath(); g.arc(0, h * .085, Math.min(tw * .22, h * .03), 0, 7); g.fill(); g.globalAlpha = 1;
     titleV(g, [...b.title], tw, h * .15, h * .75, todo ? INK_SOFT : INK_LT, SANS, 900, .68);
   },
-  study(g, tw, h, b, todo, mask) {                         // mask：只画「哪里是金」那张图
-    if (todo && mask) return;
-    if (todo) {                                            // 没读：牛皮纸包着，上下折边，捆两道麻绳
-      g.fillStyle = "rgba(90,60,30,.13)"; g.fillRect(-tw / 2, h * .04, tw, h * .035); g.fillRect(-tw / 2, h * .95, tw, h * .05);
-      g.fillStyle = LOOK.twine; [.2, .8].forEach((f) => g.fillRect(-tw / 2, h * f, tw, Math.max(1.3, h * .009)));
-      titleV(g, [...b.title], tw, h * .25, h * .76, INK_SOFT, CJK, 700, .72, .035); return;
+  // 旧书房：四种款式（见外观表 bind 的说明）。先画压在布上的（线、带、皮签、烫金或印墨的书名），回来一个函数画贴在布外面的纸（题签），
+  //   中间隔着往布上压布纹那一步，纸上不该有布纹。mask：只画「哪里是金、哪里是纸、哪里是皮」那张图（印墨不反光，不画）
+  //   横着贯通的东西（皮签、竹节、宽带）两边各留一点不画到头：封面取的是书脊最边上那一列的颜色，画到头封面上就多出几道横杠
+  bound(g, tw, h, b, todo, mask) {
+    const B = LOOK.bind, bd = bindOf(b), lw = Math.max(1, h * .006), gold = mask ? MASK.gilt : bd.gold, stamp = bd.gilt ? gold : mask ? null : B.ink, cap = B.capCm * h / b.h;
+    const bar = (f, k = 1, wd = .84, c = stamp) => { if (!c) return; g.fillStyle = c; g.fillRect(-tw * wd / 2, h * f, tw * wd, lw * k); };
+    const dev = (f) => {                                   // 书脚的小记号：菱、圆点、两道短线，或者没有
+      if (!stamp || !bd.dev) return; g.fillStyle = stamp; const d = Math.min(tw * .2, h * .022);
+      if (bd.dev === 1) { g.save(); g.translate(0, h * f); g.rotate(Math.PI / 4); g.fillRect(-d / 2, -d / 2, d, d); g.restore(); }
+      else if (bd.dev === 2) { g.beginPath(); g.arc(0, h * f, d * .55, 0, 7); g.fill(); }
+      else { g.fillRect(-tw * .2, h * f - lw * 1.6, tw * .4, lw); g.fillRect(-tw * .2, h * f + lw * .6, tw * .4, lw); }
+    };
+    if (bd.style === "rule") {                             // 上下各一粗一细两道线
+      bar(.048, 2.6); bar(.071); bar(.925); bar(.938, 2.6);
+      if (stamp) titleV(g, [...b.title], tw, h * .125, h * .71, stamp, CJK, 700, .72, .03, cap); dev(.835);
+    } else if (bd.style === "bars") {                      // 上下各一道宽带，里侧再跟一道细线
+      bar(.04, 6.5, .94); bar(.094, 1, .94); bar(.9, 1, .94); bar(.914, 6.5, .94);
+      if (stamp) titleV(g, [...b.title], tw, h * .15, h * .7, stamp, CJK, 700, .72, .03, cap);
+    } else if (bd.style === "label") {                     // 一格深色皮签（书名烫金），上下三道竹节
+      g.fillStyle = mask ? MASK.leather : bd.label; g.fillRect(-tw * .47, h * .165, tw * .94, h * .55);
+      if (!mask) [.118, .752, .88].forEach((f) => { g.fillStyle = "rgba(0,0,0,.4)"; g.fillRect(-tw * .47, h * f, tw * .94, lw * 2.2); g.fillStyle = "rgba(255,255,255,.16)"; g.fillRect(-tw * .47, h * f - lw, tw * .94, lw); });
+      bar(.052); bar(.068); bar(.932); bar(.948);
+      g.fillStyle = gold; g.fillRect(-tw * .4, h * .178, tw * .8, lw); g.fillRect(-tw * .4, h * .7, tw * .8, lw);
+      titleV(g, [...b.title], tw, h * .195, h * .69, gold, CJK, 700, .7, .03, cap); dev(.82);
+    } else {                                               // 题签：先只画布上的两道线和记号，纸在后面
+      bar(.05); bar(.72); bar(.94); dev(.83);
     }
-    const lw = Math.max(1, h * .007);                      // 读过：布面，书名压在一格深色的皮签上，三道竹节，烫金的线和一枚小菱花
-    const gold = mask ? MASK.gilt : LOOK.gilt;
-    if (!mask) {
-      g.fillStyle = "rgba(0,0,0,.26)"; g.fillRect(-tw / 2, h * .16, tw, h * .56);
-      [.115, .76, .885].forEach((f) => { g.fillStyle = "rgba(0,0,0,.42)"; g.fillRect(-tw / 2, h * f, tw, lw * 2.2); g.fillStyle = "rgba(255,255,255,.15)"; g.fillRect(-tw / 2, h * f - lw, tw, lw); });
-    }
-    g.fillStyle = gold; [.055, .07, .145, .735, .93, .945].forEach((f) => g.fillRect(-tw * .42, h * f, tw * .84, lw));
-    titleV(g, [...b.title], tw, h * .18, h * .7, gold, CJK, 700, .72, .03);
-    const d = Math.min(tw * .22, h * .024); g.save(); g.translate(0, h * .825); g.rotate(Math.PI / 4); g.fillRect(-d / 2, -d / 2, d, d); g.restore();
+    if (bd.style !== "slip") return null;
+    return () => {                                         // 一张窄的纸签贴在书脊上半，墨字，里面一圈细框
+      const x0 = -tw * .36, sw = tw * .72, y0 = h * .085, sh = h * .585;
+      if (mask) { g.fillStyle = MASK.paper; g.fillRect(x0, y0, sw, sh); return [x0, y0, sw, sh]; }
+      g.fillStyle = "rgba(0,0,0,.3)"; g.fillRect(x0 - lw * .6, y0 - lw * .6, sw + lw * 1.2, sh + lw * 1.4);
+      g.fillStyle = B.slip; g.fillRect(x0, y0, sw, sh);
+      g.strokeStyle = B.ink; g.globalAlpha = .7; g.lineWidth = Math.max(.6, lw * .7); g.strokeRect(x0 + sw * .09, y0 + lw * 2.2, sw * .82, sh - lw * 4.4); g.globalAlpha = 1;
+      titleV(g, [...b.title], tw, y0 + h * .02, y0 + sh - h * .02, B.ink, CJK, 700, .5, .03, cap * .82);
+      return [x0, y0, sw, sh];
+    };
   },
 };
 const grainC = {};
@@ -514,14 +585,20 @@ export function grainOver(g, x, y, w, h, todo) {           // 往刚画好的一
   const kind = LOOK.grain && (todo ? "pulp" : LOOK.grain); if (!kind) return; grainC[kind] = grainC[kind] || PATTERN[kind]();
   g.save(); g.globalCompositeOperation = "multiply"; g.fillStyle = g.createPattern(grainC[kind], "repeat"); g.fillRect(x, y, w, h); g.restore();
 }
-export function drawSpine(g, x, y, w, h, b, pale, mask) {  // mask：不画颜色，画「哪里是金」那张图（只有旧书房的书脊认）
-  const todo = pale || b.st === "todo";
-  g.fillStyle = mask ? (todo ? MASK.paper : MASK.cloth) : todo ? PALE : TONES[b.cat % TONES.length]; g.fillRect(x, y, w, h);
-  const sy = h / b.h, tw = b.t * sy;                    // 图上横竖的比例和真书脊不一样，按竖向的像素来排，横向整体拉开，贴上去才还原
-  if (LOOK.jit && !mask) { const j = ((Math.imul(b.i + 1, 2654435761) >>> 0) % 1000) / 1000 - .5; g.fillStyle = j > 0 ? "rgba(255,255,255," + (j * LOOK.jit).toFixed(3) + ")" : "rgba(0,0,0," + (-j * LOOK.jit).toFixed(3) + ")"; g.fillRect(x, y, w, h); }   // 每本深浅差一点点，不那么齐
-  g.save(); g.translate(x + w / 2, y); g.scale((w / b.t) / sy, 1);
-  SPINES[LOOK.spine](g, tw, h, b, todo, mask);
-  g.restore();
+// 画一条书脊。mask：不画颜色，画「哪里是金」那张图（只有旧书房的书脊认）。bleed：[左右, 上下] 这一格四周留的那一圈有多宽，底色和腰封一起铺到那里（缩小采样时不串到邻格）
+// 旧书房的花纹在这里面一起压了（布上压布纹，纸上压纸浆）；别的外观画完以后还要自己叫一次 grainOver
+export function drawSpine(g, x, y, w, h, b, pale, mask, bleed) {
+  const todo = pale || b.st === "todo", mx = bleed ? bleed[0] : 0, my = bleed ? bleed[1] : 0;
+  clothFill(g, x - mx, y - my, w + 2 * mx, h + 2 * my, b, pale, mask);
+  const sy = h / b.h, tw = b.t * sy, kx = (w / b.t) / sy;   // 图上横竖的比例和真书脊不一样，按竖向的像素来排，横向整体拉开，贴上去才还原
+  const local = (fn) => { g.save(); g.translate(x + w / 2, y); g.scale(kx, 1); const r = fn(); g.restore(); return r; };
+  const late = local(() => SPINES[LOOK.spine](g, tw, h, b, todo, mask));
+  if (!LOOK.bind) return;
+  if (!mask) grainOver(g, x - mx, y - my, w + 2 * mx, h + 2 * my, false);
+  const papers = [];
+  if (late) { const r = local(late); papers.push([x + w / 2 + r[0] * kx, y + r[1], r[2] * kx, r[3]]); }
+  if (todo) papers.push(drawBand(g, x - mx, y, w + 2 * mx, h, b, mask, my));
+  if (!mask) papers.forEach((r) => grainOver(g, r[0], r[1], r[2], r[3], true));
 }
 export function createBookKit(maxAniso) {
   const paperMat = new THREE.MeshStandardMaterial({ color: PAPER, roughness: .95 });
@@ -536,8 +613,8 @@ export function createBookKit(maxAniso) {
     canvas.width = cols * CW; canvas.height = Math.max(1, Math.ceil(books.length / cols)) * CH;
     function draw(b) {
       const x = (b.i % cols) * CW, y = Math.floor(b.i / cols) * CH;
-      g.fillStyle = pale || b.st === "todo" ? PALE : TONES[b.cat % TONES.length]; g.fillRect(x, y, CW, CH);   // 格子四周留一圈同色，缩小采样时不串到邻格
-      drawSpine(g, x + mx, y + my, CW - 2 * mx, CH - 2 * my, b, pale); grainOver(g, x, y, CW, CH, pale || b.st === "todo");
+      g.fillStyle = clothOf(b, pale); g.fillRect(x, y, CW, CH);   // 格子四周留一圈同色，缩小采样时不串到邻格
+      drawSpine(g, x + mx, y + my, CW - 2 * mx, CH - 2 * my, b, pale, false, [mx, my]); if (!LOOK.bind) grainOver(g, x, y, CW, CH, pale || b.st === "todo");
     }
     books.forEach(draw);
     const tex = new THREE.CanvasTexture(canvas); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = maxAniso;
@@ -555,7 +632,8 @@ export function createBookKit(maxAniso) {
     let g, mats;
     if (shape) {                                                                // 旧书房：书脊用图集里自己那一格，封面板只取格子左上角的一点底色，书芯是纸
       g = shape.clone(); mats = [atlas.mat, atlas.mat, atlas.mat, atlas.mat, pagesMat];
-      [1, 2].forEach((mi) => { const gr = g.groups[mi]; for (let v = gr.start; v < gr.start + gr.count; v++) g.attributes.uv.setXY(v, .06, .98); });
+      // 有装帧的外观：封面取书脊最边上那一列、同一个高度的颜色，腰封就从书脊一直围到封面上
+      [1, 2].forEach((mi) => { const gr = g.groups[mi]; for (let v = gr.start; v < gr.start + gr.count; v++) { if (LOOK.bind) g.attributes.uv.setX(v, .012); else g.attributes.uv.setXY(v, .06, .98); } });
     } else {
       g = new THREE.BoxGeometry(1, 1, 1); mats = [atlas.mat, paperMat];         // 面的顺序：+x -x +y -y +z -z
       [0, 0, 1, 1, 0, 1].forEach((m, k) => { g.groups[k].materialIndex = m; });   // 封面与书脊用图集，上下和书口是纸

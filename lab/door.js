@@ -4,9 +4,9 @@
  * 节拍：
  *   1 到     点开链接，书架直接在眼前；屏幕顶上是「谁的书房」和他自己写的一句话（从头到尾都在）
  *   2 看懂   一座书架，一排一个科目；层板边上的签一枚枚冒出来（科目、多少本、读过多少），那一排书跟着抖一下。
- *            读没读和书架样机同一套：浅的没读、深的读过、探出来带签的在读。最下面一层是他的牌盒和本子（样机里只是摆着）
+ *            读没读和书架样机同一套：腰封还在的没读、摘了的读过、探出来带签的在读（灰盒：浅的没读、深的读过）。最下面一层是他的牌盒和本子（样机里只是摆着）
  *   3 划过   手指按在书脊上左右划，碰到哪本哪本探头、报书名（只是看，不抽出来）
- *   4 带走   按住一排往下拉：这一排的一份（包着白纸，到你手里都是没读的）跟着手指一本本从架上出来，一本一声一震；
+ *   4 带走   按住一排往下拉：这一排的一份（都带着腰封，到你手里都是没读的；灰盒是包着白纸）跟着手指一本本从架上出来，一本一声一震；
  *            拉到底就带走，过了六成松手也带走，没到就弹回去。捆成一捆飞进底下的邮包。原来的书还在他的架上。
  *            层板上那枚签点一下，也是带走这一排
  *   5 邮包   点邮包看带走了什么；可以倒回去重来
@@ -75,7 +75,7 @@ const { AU, au, noise, tone, toggle: sndToggle } = createAudio();
 const { tabMat, unitBox, makeAtlas, makeMesh } = createBookKit(maxAniso);
 const caseKit = createCase(scene, unitBox);
 const books = makeBooks(), N = books.length, R = ROWS.length + 1;
-const atlas = makeAtlas(books, false, 256), paleAtlas = makeAtlas(books, true, 256);   // 他架上的样子；带走的那一份（都包着白纸）。一格画 256 高：这一页的书在两倍屏上最高一百七八十像素，原来的 192 贴上去略微放大
+const atlas = makeAtlas(books, false, 256), paleAtlas = makeAtlas(books, true, 256);   // 他架上的样子；带走的那一份（都是没读的样子：旧书房带着腰封，灰盒包着白纸）。一格画 256 高：这一页的书在两倍屏上最高一百七八十像素，原来的 192 贴上去略微放大
 const books3d = makeMesh(books, atlas), copies = makeMesh(books, paleAtlas);
 const tabs = new THREE.InstancedMesh(unitBox, tabMat, N); tabs.castShadow = true; tabs.frustumCulled = false;
 copies.receiveShadow = false; scene.add(books3d, tabs, copies);
@@ -228,7 +228,7 @@ function ui() {
   const booksIn = S.bag.reduce((s, r) => s + ROWS[r].n, 0), pl = S.pull;
   labEls.forEach(({ el, tx, r }) => { if (!tx) return; const row = ROWS[r]; tx.textContent = row.taken ? "已在你包里" : row.n + " 本 · 读过 " + readOf(row); el.classList.toggle("taken", row.taken); });
   bagN.textContent = S.bag.length ? S.bag.length + " 排 · " + booksIn + " 本" : "空的"; bag.classList.toggle("full", S.bag.length > 0);
-  hint.textContent = S.state === "door" ? (S.way === "knock" && S.ent < .5 ? "到了：" + OWNER.name + "的书房" : "一排一个科目，深的是他读过的")
+  hint.textContent = S.state === "door" ? (S.way === "knock" && S.ent < .5 ? "到了：" + OWNER.name + "的书房" : SKIN.bind ? "一排一个科目，腰封还在的是他没读的" : "一排一个科目，深的是他读过的")
     : S.state === "pull" ? (pl && pl.pT >= P.commit ? "松手就带走" : "再往下，拉到底就带走")
       : S.state === "take" ? "捆好，进邮包"
         : S.last != null ? "带走了「" + ROWS[S.last].name + "」" + ROWS[S.last].n + " 本，在你的邮包里" : "按住一排往下拉，整排带走；左右划看书名";
