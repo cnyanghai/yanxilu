@@ -141,7 +141,13 @@ export const LOOKS = {
         { n: "绛紫", c: ["#50296A", "#5E3179", "#44215C"], gilt: true },
       ],
       labels: ["#1B1613", "#5A1C1E", "#1E2F4E"],                 // 皮签的颜色：黑、枣红、藏青（和布同一个色系的不用）
-      slip: "#EDE3C8", ink: "#2A1B10", band: "#F4ECD8", bandInk: "#3A2716", bandCm: 5, capCm: 2.7,   // bandCm：腰封多高（厘米，每本一样高，一排书的腰封上沿就齐成一条线）；capCm：书脊上的字最大多大
+      slip: "#EDE3C8", ink: "#2A1B10", band: "#F4ECD8", bandInk: "#3A2716", bandCm: 5, capCm: 2.7,
+      /* 牌盒与笔记本（2026-11-14，档案架、笔记本架用；颜色还是上面那几个色系，一类一个）。
+       *   牌盒是布面的函盒，朝外的那一头装一只铜签框，里面插一张纸签写盒名，底下一个铜拉环，上面一道盒盖的缝；高、深是厘米，厚跟着牌数走。
+       *   没拆的邮包是牛皮纸捆两道麻绳，和拆包页的那一包一个样。
+       *   笔记本是布脊纸面的硬皮本：书脊那一条深色的布包到封面上五分之一，封面贴一张纸签写本名，右边一道松紧带；封面朝外放 */
+      box: { h: 13.5, d: 9.8, brass: "#D0AA5E", label: "#EFE5CB", kraft: "#C9A877", twine: "#7A5A36" },
+      note: { tape: "#221D1A", strap: "#191513", label: "#EFE5CB", tapeW: .18 },   // bandCm：腰封多高（厘米，每本一样高，一排书的腰封上沿就齐成一条线）；capCm：书脊上的字最大多大
     },
     dim: { SH: 29, BT: 2.2, ST: 2.6, CD: 21, PL: 8 },
     // 造型（2026-11-13「造型」一门）。mould：架子的线脚，单位厘米。stile 壁柱比侧板往外宽多少、stileT 往前凸多少；frieze 压顶线下面那条平带多高；
@@ -600,6 +606,86 @@ export function drawSpine(g, x, y, w, h, b, pale, mask, bleed) {
   if (todo) papers.push(drawBand(g, x - mx, y, w + 2 * mx, h, b, mask, my));
   if (!mask) papers.forEach((r) => grainOver(g, r[0], r[1], r[2], r[3], true));
 }
+/* ---------- 牌盒、没拆的邮包、笔记本（旧书房；档案架和笔记本架用） ----------
+ * 都分两步：先画布上的（缝、铜件、压的字），压布纹，再画纸做的（签），压纸浆。mask：只画「哪里是金、纸」那张图 */
+const fitText = (g, str, font, wMax, fs) => { g.font = "700 " + fs.toFixed(1) + "px " + font; const w = g.measureText(str).width; return w > wMax ? fs * wMax / w : fs; };
+// 牌盒朝外的那一头（窄的一面）。坐标和书脊一样：按竖向的像素排，横向整体拉开
+export function drawBoxEnd(g, x, y, w, h, b, pale, mask, bleed) {
+  const X = LOOK.bind.box, B = LOOK.bind, mx = bleed ? bleed[0] : 0, my = bleed ? bleed[1] : 0;
+  const sy = h / b.h, tw = b.t * sy, kx = (w / b.t) / sy, lw = Math.max(1, h * .009);
+  const local = (fn) => { g.save(); g.translate(x + w / 2, y); g.scale(kx, 1); const r = fn(); g.restore(); return r; };
+  if (b.pack) {                                            // 没拆的邮包：牛皮纸，两道麻绳，贴一张小签
+    g.fillStyle = mask ? MASK.paper : X.kraft; g.fillRect(x - mx, y - my, w + 2 * mx, h + 2 * my); if (mask) return;
+    grainOver(g, x - mx, y - my, w + 2 * mx, h + 2 * my, true);
+    local(() => {
+      g.fillStyle = "rgba(60,36,14,.16)"; g.fillRect(-tw / 2, 0, tw, h * .05); g.fillRect(-tw / 2, h * .95, tw, h * .05);
+      [.3, .7].forEach((f) => { g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(-tw / 2, h * f + lw * 1.4, tw, lw); g.fillStyle = X.twine; g.fillRect(-tw / 2, h * f, tw, lw * 1.6); });
+      g.fillStyle = X.label; g.fillRect(-tw * .3, h * .42, tw * .6, h * .16); g.fillStyle = B.ink; g.globalAlpha = .7; g.fillRect(-tw * .2, h * .48, tw * .4, lw * .8); g.fillRect(-tw * .2, h * .52, tw * .28, lw * .8); g.globalAlpha = 1;
+    });
+    return;
+  }
+  const bd = bindOf(b), brass = mask ? MASK.gilt : X.brass, stamp = bd.gilt ? (mask ? MASK.gilt : bd.gold) : mask ? null : B.ink;
+  clothFill(g, x - mx, y - my, w + 2 * mx, h + 2 * my, b, false, mask);
+  const lab = local(() => {
+    if (!mask) { g.fillStyle = "rgba(0,0,0,.42)"; g.fillRect(-tw * .47, h * .2, tw * .94, lw * 1.5); g.fillStyle = "rgba(255,255,255,.14)"; g.fillRect(-tw * .47, h * .2 + lw * 1.5, tw * .94, lw * .8); }   // 盒盖的缝
+    if (stamp && b.vol) { const fs = Math.min(tw * .36, h * .075); g.font = "700 " + fs.toFixed(1) + "px " + CJK; g.textAlign = "center"; g.textBaseline = "middle"; g.fillStyle = stamp; g.fillText(b.vol, 0, h * .11); }
+    const fx = -tw * .38, fw = tw * .76, fy = h * .29, fh = h * .5;                              // 铜签框：一圈铜边，里面插一张纸签
+    g.fillStyle = brass; g.fillRect(fx, fy, fw, fh);
+    const r = Math.min(tw * .15, h * .034); g.strokeStyle = brass; g.lineWidth = lw * 1.5; g.beginPath(); g.arc(0, h * .895, r, 0, 7); g.stroke();   // 拉环
+    if (!mask) { g.fillStyle = "rgba(0,0,0,.5)"; g.beginPath(); g.arc(0, h * .895 - r, lw * 1.1, 0, 7); g.fill(); }
+    return [fx + lw * 1.3, fy + lw * 1.3, fw - lw * 2.6, fh - lw * 2.6];
+  });
+  if (!mask) grainOver(g, x - mx, y - my, w + 2 * mx, h + 2 * my, false);
+  local(() => {
+    g.fillStyle = mask ? MASK.paper : X.label; g.fillRect(lab[0], lab[1], lab[2], lab[3]);
+    if (!mask) titleV(g, [...b.title], tw, lab[1] + h * .012, lab[1] + lab[3] - h * .012, B.ink, CJK, 700, .5, .03, B.capCm * .8 * sy);
+  });
+  if (!mask) grainOver(g, x + w / 2 + lab[0] * kx, y + lab[1], lab[2] * kx, lab[3], true);
+}
+// 牌盒的大面（抽出来看的那一面）。lines：签上的字，[小字, 大字…, 小字]
+export function drawBoxFace(g, w, h, b, mask, lines) {
+  const X = LOOK.bind.box, B = LOOK.bind, F = LOOK.font;
+  const text = (c, font, str, tx, ty, align = "center") => { if (!c) return; g.fillStyle = c; g.font = font; g.textAlign = align; g.textBaseline = "middle"; g.fillText(str, tx, ty); };
+  if (b.pack) {
+    g.fillStyle = mask ? MASK.paper : X.kraft; g.fillRect(0, 0, w, h); if (mask) return;
+    grainOver(g, 0, 0, w, h, true);
+    [[0, h * .3, w, 7], [0, h * .7, w, 7], [w * .34, 0, 7, h]].forEach(([rx, ry, rw, rh]) => { g.fillStyle = "rgba(0,0,0,.22)"; g.fillRect(rx + 3, ry + 3, rw, rh); g.fillStyle = X.twine; g.fillRect(rx, ry, rw, rh); });
+    const lx = w * .42, ly = h * .38, lw2 = w * .5, lh = h * .25; g.fillStyle = "rgba(0,0,0,.25)"; g.fillRect(lx + 2, ly + 3, lw2, lh); g.fillStyle = X.label; g.fillRect(lx, ly, lw2, lh);
+    text(B.ink, "700 " + fitText(g, lines[1], F, lw2 - 24, 40).toFixed(1) + "px " + F, lines[1], lx + lw2 / 2, ly + lh * .4); text(B.ink, "500 22px " + F, lines[2], lx + lw2 / 2, ly + lh * .75);
+    g.strokeStyle = "rgba(90,40,20,.55)"; g.lineWidth = 3; g.beginPath(); g.arc(w * .76, h * .18, 38, 0, 7); g.stroke(); g.lineWidth = 1.5; g.beginPath(); g.arc(w * .76, h * .18, 30, 0, 7); g.stroke();   // 邮戳
+    return;
+  }
+  const bd = bindOf(b), brass = mask ? MASK.gilt : X.brass, stamp = bd.gilt ? (mask ? MASK.gilt : bd.gold) : mask ? null : B.ink;
+  clothFill(g, 0, 0, w, h, b, false, mask);
+  if (!mask) { g.fillStyle = "rgba(0,0,0,.42)"; g.fillRect(0, h * .2, w, 5); g.fillStyle = "rgba(255,255,255,.14)"; g.fillRect(0, h * .2 + 5, w, 2.5); }
+  text(stamp, "700 34px " + F, b.vol, 34, h * .105, "left"); text(stamp, "500 24px " + F, lines[0], w - 34, h * .105, "right");
+  const fx = w * .13, fw = w * .74, fy = h * .3, fh = h * .42; g.fillStyle = brass; g.fillRect(fx, fy, fw, fh);
+  g.strokeStyle = brass; g.lineWidth = 6; g.beginPath(); g.arc(w / 2, h * .86, 24, 0, 7); g.stroke(); if (!mask) { g.fillStyle = "rgba(0,0,0,.5)"; g.beginPath(); g.arc(w / 2, h * .86 - 24, 5, 0, 7); g.fill(); }
+  if (!mask) grainOver(g, 0, 0, w, h, false);
+  const px = fx + 9, py = fy + 9, pw = fw - 18, ph = fh - 18; g.fillStyle = mask ? MASK.paper : X.label; g.fillRect(px, py, pw, ph); if (mask) return;
+  const big = lines.slice(1, -1), fs = Math.min(...big.map((ln) => fitText(g, ln, F, pw - 30, big.length > 1 ? 52 : 62))), top = py + ph * .42 - (big.length - 1) * fs * .6;
+  big.forEach((ln, k) => text(B.ink, "700 " + fs.toFixed(1) + "px " + F, ln, w / 2, top + k * fs * 1.2));
+  g.fillStyle = B.ink; g.globalAlpha = .6; g.fillRect(w / 2 - 36, py + ph * .72, 72, 1.5); g.globalAlpha = 1; text(B.ink, "500 21px " + F, lines[lines.length - 1], w / 2, py + ph * .85);
+  grainOver(g, px, py, pw, ph, true);
+}
+// 笔记本的封面（架上朝外的就是它，抽出来看的也是它）。sub：纸签上第二行小字
+export function drawNote(g, x, y, w, h, b, pale, mask, bleed) {
+  const T = LOOK.bind.note, B = LOOK.bind, F = LOOK.font, mx = bleed ? bleed[0] : 0, my = bleed ? bleed[1] : 0, lw = Math.max(1, h * .005);
+  clothFill(g, x - mx, y - my, w + 2 * mx, h + 2 * my, b, false, mask);
+  const bd = bindOf(b), gold = mask ? MASK.gilt : bd.gilt ? bd.gold : LOOK.gilt, tx = x + w * T.tapeW;
+  if (!mask) { g.fillStyle = T.tape; g.fillRect(x - mx, y - my, w * T.tapeW + mx, h + 2 * my); }                 // 包脊的布，包到封面上五分之一
+  g.fillStyle = gold; g.fillRect(tx + lw * 1.5, y - my, lw * 1.2, h + 2 * my);
+  if (!mask) { const sx = x + w * .845, sw = w * .04; g.fillStyle = "rgba(0,0,0,.28)"; g.fillRect(sx + sw, y - my, lw * 1.5, h + 2 * my); g.fillStyle = T.strap; g.fillRect(sx, y - my, sw, h + 2 * my); g.fillStyle = "rgba(255,255,255,.1)"; g.fillRect(sx, y - my, lw, h + 2 * my); }   // 松紧带
+  if (!mask) grainOver(g, x - mx, y - my, w + 2 * mx, h + 2 * my, false);
+  const px = x + w * .255, py = y + h * .16, pw = w * .54, ph = h * .27;                                           // 纸签：本名，一道线，一行小字
+  if (mask) { g.fillStyle = MASK.paper; g.fillRect(px, py, pw, ph); return; }
+  g.fillStyle = "rgba(0,0,0,.3)"; g.fillRect(px - lw * .5, py - lw * .5, pw + lw, ph + lw * 1.6); g.fillStyle = T.label; g.fillRect(px, py, pw, ph);
+  g.strokeStyle = B.ink; g.globalAlpha = .65; g.lineWidth = Math.max(.7, lw * .8); g.strokeRect(px + pw * .05, py + ph * .09, pw * .9, ph * .82); g.globalAlpha = 1;
+  const fs = fitText(g, b.title, F, pw * .8, ph * .34); g.fillStyle = B.ink; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "700 " + fs.toFixed(1) + "px " + F; g.fillText(b.title, px + pw / 2, py + ph * .4);
+  g.globalAlpha = .6; g.fillRect(px + pw * .34, py + ph * .62, pw * .32, Math.max(1, lw * .7)); g.globalAlpha = .85;
+  if (b.sub) { g.font = "500 " + (ph * .13).toFixed(1) + "px " + F; g.fillText(b.sub, px + pw / 2, py + ph * .77); } g.globalAlpha = 1;
+  grainOver(g, px, py, pw, ph, true);
+}
 export function createBookKit(maxAniso) {
   const paperMat = new THREE.MeshStandardMaterial({ color: PAPER, roughness: .95 });
   const tabMat = new THREE.MeshStandardMaterial({ color: TAB, roughness: .8, emissive: new THREE.Color(TAB), emissiveIntensity: LOOK.tabGlow });
@@ -607,33 +693,41 @@ export function createBookKit(maxAniso) {
   const shape = LOOK.book ? bookGeo() : null, pagesMat = shape ? paperMat.clone() : null; if (pagesMat) aoHook(pagesMat, "in", bookHook);   // 旧书房：书有封面板、飘口和圆脊
   // 书脊图集：每本一格，贴到书脊上；封面两侧只取这一格的底色。每张图集带自己的材质
   // ch：一格画多高（像素）。书在屏上有多大就该画多大：画小了贴上去是放大的，字就糊（2026-11-13 夜里用户在手机上看到的就是这个）。不给就是 192
-  function makeAtlas(books, pale, ch) {
-    const canvas = document.createElement("canvas"), g = canvas.getContext("2d");
-    const CH = Math.round(clamp((ch || CELLH) / 32, 6, 24)) * 32, CW = CH / 4, cols = Math.min(COLS, Math.floor(4096 / CW)), mx = Math.round(CW / 16), my = Math.round(CH / 96);   // 一张图最宽 4096，手机都吃得下
+  // opt：aspect 一格的高比宽（书脊是 4；牌盒矮胖用 2.5；笔记本画的是封面，用它自己的高比宽）；draw 这一格怎么画（不给就是书脊）；flat 这批东西是方盒子，不要书的圆脊和飘口
+  function makeAtlas(books, pale, ch, opt = {}) {
+    const canvas = document.createElement("canvas"), g = canvas.getContext("2d"), drawCell = opt.draw || drawSpine;
+    const CH = Math.round(clamp((ch || CELLH) / 32, 6, 24)) * 32, CW = Math.round(CH / (opt.aspect || 4)), cols = Math.min(COLS, Math.floor(4096 / CW)), mx = Math.max(1, Math.round(CH / 64)), my = Math.round(CH / 96);   // 一张图最宽 4096，手机都吃得下
     canvas.width = cols * CW; canvas.height = Math.max(1, Math.ceil(books.length / cols)) * CH;
     function draw(b) {
       const x = (b.i % cols) * CW, y = Math.floor(b.i / cols) * CH;
       g.fillStyle = clothOf(b, pale); g.fillRect(x, y, CW, CH);   // 格子四周留一圈同色，缩小采样时不串到邻格
-      drawSpine(g, x + mx, y + my, CW - 2 * mx, CH - 2 * my, b, pale, false, [mx, my]); if (!LOOK.bind) grainOver(g, x, y, CW, CH, pale || b.st === "todo");
+      drawCell(g, x + mx, y + my, CW - 2 * mx, CH - 2 * my, b, pale, false, [mx, my]); if (!LOOK.bind) grainOver(g, x, y, CW, CH, pale || b.st === "todo");
     }
     books.forEach(draw);
     const tex = new THREE.CanvasTexture(canvas); tex.colorSpace = THREE.SRGBColorSpace; tex.anisotropy = maxAniso;
     const mat = new THREE.MeshStandardMaterial({ map: tex, roughness: LOOK.bookRough, metalness: 0 });
-    const cell = function atlasCell(sh) {     // 每本书用图集里自己那一格（uvo = 左下角 u、v，宽、高）
+    const own = (sh) => {                     // 每本书用图集里自己那一格（uvo = 左下角 u、v，宽、高）
       sh.vertexShader = sh.vertexShader.replace("#include <common>", "#include <common>\nattribute vec4 uvo;")
         .replace("#include <uv_vertex>", "#include <uv_vertex>\n#ifdef USE_MAP\n\tvMapUv = uvo.xy + uv * uvo.zw;\n#endif");
-      if (shape) bookHook(sh);
     };
+    const cell = shape && !opt.flat ? function atlasCell(sh) { own(sh); bookHook(sh); } : function atlasFlat(sh) { own(sh); };   // 两个名字：渲染器按名字分辨它们是不是同一个程序
     aoHook(mat, "in", cell);
     return { canvas, tex, mat, cw: CW, ch: CH, cols, mx, my, redraw(b) { draw(b); tex.needsUpdate = true; }, dispose() { tex.dispose(); mat.dispose(); } };
   }
   // 一批书 = 一个实例化的盒子（三百本也只画两三次）。书脊朝 +z，前后封面是 ±x
-  function makeMesh(books, atlas) {
+  // opt：box 这批是方盒子（牌盒），朝外的那一头用图集里自己那一格，两侧取最边上一列的颜色，顶、底、背后取布色；
+  //   cover 这批封面朝外放（笔记本），封面用自己那一格，书脊取最左边一列（那里是包脊的布），封底和板边取布色
+  function makeMesh(books, atlas, opt = {}) {
     let g, mats;
-    if (shape) {                                                                // 旧书房：书脊用图集里自己那一格，封面板只取格子左上角的一点底色，书芯是纸
+    if (opt.box) {
+      g = new THREE.BoxGeometry(1, 1, 1); mats = [atlas.mat]; g.groups.forEach((gr) => { gr.materialIndex = 0; });   // 面的顺序：+x -x +y -y +z -z，一面四个点
+      for (let v = 0; v < 24; v++) { const f = v >> 2; if (f < 2) g.attributes.uv.setX(v, .012); else if (f !== 4) g.attributes.uv.setXY(v, .06, .985); }
+    } else if (shape) {                                                         // 旧书房：书脊用图集里自己那一格，封面板只取格子左上角的一点底色，书芯是纸
       g = shape.clone(); mats = [atlas.mat, atlas.mat, atlas.mat, atlas.mat, pagesMat];
+      const each = (mi, fn) => { const gr = g.groups[mi]; for (let v = gr.start; v < gr.start + gr.count; v++) fn(v); }, uv = g.attributes.uv;
+      if (opt.cover) { each(0, (v) => uv.setX(v, .03)); [2, 3].forEach((mi) => each(mi, (v) => uv.setXY(v, .55, .985))); }
       // 有装帧的外观：封面取书脊最边上那一列、同一个高度的颜色，腰封就从书脊一直围到封面上
-      [1, 2].forEach((mi) => { const gr = g.groups[mi]; for (let v = gr.start; v < gr.start + gr.count; v++) { if (LOOK.bind) g.attributes.uv.setX(v, .012); else g.attributes.uv.setXY(v, .06, .98); } });
+      else [1, 2].forEach((mi) => each(mi, (v) => { if (LOOK.bind) uv.setX(v, .012); else uv.setXY(v, .06, .98); }));
     } else {
       g = new THREE.BoxGeometry(1, 1, 1); mats = [atlas.mat, paperMat];         // 面的顺序：+x -x +y -y +z -z
       [0, 0, 1, 1, 0, 1].forEach((m, k) => { g.groups[k].materialIndex = m; });   // 封面与书脊用图集，上下和书口是纸
@@ -652,7 +746,7 @@ export function createBookKit(maxAniso) {
 /* ---------- 架子（灰盒：几块板，外加后面的墙和脚下的地）。一个单位是一厘米 ---------- */
 export const DIM = { ...LOOK.dim };      // 层高（净）、层板厚、侧板厚、柜深、踢脚高
 export function createCase(scene, unitBox) {
-  const { SH, BT, ST, CD, PL } = DIM, C = LOOK.cs;
+  const { BT, ST, CD, PL } = DIM, C = LOOK.cs;                    // 层高不在这里取：书架、档案架、笔记本架层高不一样，每次搭的时候看 DIM.SH
   const group = new THREE.Group(); scene.add(group);
   const caseMat = new THREE.MeshStandardMaterial({ color: C.frame, roughness: C.rough }), backMat = new THREE.MeshStandardMaterial({ color: C.back, roughness: .95 });
   const wallMat = new THREE.MeshStandardMaterial({ color: C.wall, roughness: 1 }), floorMat = new THREE.MeshStandardMaterial({ color: C.floor, roughness: 1 });
@@ -692,6 +786,7 @@ export function createCase(scene, unitBox) {
       return profile(1).line(o, 0, o, y - .4).line(o, y - .4, e, y - .4).line(e, y - .4, e, y).arc(e - r, y, r, 0, 90).arc(e - r, y + 2 * r, r, -90, -180).line(.15, y + 2 * r, .15, H - .15).line(.15, H - .15, 0, H - .15).line(0, H - .15, 0, H).strips; },
   };
   function build(W, R) {                                           // W：里面净宽，R：几层。回来的是整座的外宽和总高
+    const SH = DIM.SH;
     group.children.forEach((m) => { if (!keep.has(m.geometry)) m.geometry.dispose(); }); group.clear();
     skins.forEach((k) => { k.own.forEach((o) => o.dispose()); k.m.dispose(); }); skins.length = 0;
     const w = W + 2 * ST, h = R * (SH + BT) + BT + PL;

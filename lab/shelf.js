@@ -6,6 +6,10 @@
  *   二 书要清楚：书脊的字按书在屏上的大小画（原来固定 48×192 一格，四十本时是放大三倍贴上去的），画布按屏幕的真实像素出（最多三倍，跑不动自己退）
  *   三 读没读不用手标：打开读了就自己变成在读，读完自己变成读过；在别处读完的才用小字补标。在读的记号多做了一种「丝带」和原来的「白签」换着看
  *
+ * 2026-11-14 这一页里有三件家具（只有旧书房做了后两件）：书架、档案架（牌盒和没拆的邮包）、笔记本架（封面朝外的本子）。一次只摆一件，
+ *   底下一排三个记号换（点，或者按在那一排上左右划），换的时候镜头顺着墙横着走。牌盒和本子都当成「一件立在架上的东西」，和书共用下面这套节拍；
+ *   配置在 KINDS 一张表里，样子在 kit.js（drawBoxEnd / drawBoxFace / drawNote）。地址加 ?f=rack、?f=notes 直接进那一件。打开牌盒看牌、翻开本子还没做
+ *
  * 节拍：
  *   1 上架   空架子先到，书一本本从外面推进去（多少本都是一秒出头），镜头同时往后退到看全；点一下屏幕快进
  *   2 看全   整座架子永远装进一屏：本数多了架子自己加宽加层。读没读只靠物件的样子说：
@@ -19,7 +23,7 @@
  * 动画轨、声音、舞台、书的样子、架子在 kit.js（和进门样机共用）。
  * 字（书名签、层板签、底下的纸）用网页排；声音是 WebAudio 现场合成的，没有音频文件。书名、作者都是编的。
  * 调试：地址加 ?dev 显示帧率与状态，?n=300 直接进三百本，?pr=2 把画布倍率钉死，?mark=tab 换在读的记号；window.__lab 给测试脚本用。 */
-import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, drawBand, grainOver, bindOf, clothOf, clothFill, LOOK, DIM, INK_LT, INK_SOFT, CJK, STN, MASK, foil, weave, whenReady, bakeBook } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
+import { THREE, clamp, lerp, rad, E, vib, rng, createTracks, createAudio, createStage, lightCase, createBookKit, createCase, drawSpine, drawBand, drawBoxEnd, drawBoxFace, drawNote, grainOver, bindOf, clothOf, clothFill, LOOK, DIM, INK_LT, INK_SOFT, CJK, STN, MASK, foil, weave, whenReady, bakeBook } from "./kit.js";   // 公用零件：动画轨、声音、舞台、书的样子、架子
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
@@ -35,12 +39,13 @@ const P = {
   outSlide: .15, outFly: .44,  // 抽出：滑出来、飞到眼前
   backFly: .38, backPush: .13, // 放回：飞回去、推进去
   sortDur: .62, sortSpread: .55, sortArc: 20,   // 换排法：每本飞多久、先后错开的总时长、往外绕多远
+  swapOut: .3, swapIn: .42,    // 换家具：镜头横着走出去、走进来各多久
   sway: .012,                  // 镜头一直在轻轻左右晃的幅度（弧度），0 是不晃
   shake: .5,                   // 推回去那一下镜头的震（厘米）
 };
 
 /* ---------- 尺寸（一个单位是一厘米） ---------- */
-const { SH, BT, ST, CD, PL } = DIM;                 // 层高（净）、层板厚、侧板厚、柜深、踢脚高（架子在 kit.js）
+let SH = DIM.SH; const { BT, ST, CD, PL } = DIM;    // 层高（净；三件家具各不一样，换家具时跟着换）、层板厚、侧板厚、柜深、踢脚高（架子在 kit.js）
 const PAD = .7, GAPB = .06, RECESS = 1;              // 每层两头留空、书与书的缝、书脊比层板前沿缩进多少
 const DIVW = .9, DIVGAP = .5;                        // 分隔板的厚度与两边的空
 
@@ -74,6 +79,37 @@ function makeBooks(n) {
   return out;
 }
 
+/* ---------- 档案架上的牌盒、笔记本架上的本子（也是编的） ----------
+ * 都当成「一件立在架上的东西」，和书用同一套摆法、划过、抽出、放回：t 是它在架上占的宽里薄的那一边（牌盒的厚、本子的厚），h 高，d 深。
+ *   牌盒：一个课题一盒，厚跟着牌数走；n 张牌，u 张没读（有没读的就探出来一点、顶上露一枚签）；最后几件是没拆的邮包
+ *   本子：封面朝外放（face），页越多越厚；ago 是几天前写过，今天写过的垂着丝带 */
+const item = (o) => ({ by: "", pages: 0, prog: 0, px: 0, py: 0, pz: 0, rx: 0, ry: 0, rz: 0, k: 1, pop: 0, popT: 0, out: 0, outT: 0, hero: false, ...o });
+const BOXT = ["怎么看", "的来龙去脉", "为什么", "时间线", "案例", "之争", "备忘", "剪报", "十问", "的几种说法"];
+function makeBoxes() {
+  const X = LOOK.bind.box, r = rng(20261114), out = [], seen = new Set();
+  [5, 4, 4, 3, 3, 3].forEach((k, c) => { for (let j = 0; j < k; j++) {
+    let title; do { title = HEADS[c][Math.floor(r() * 10)] + BOXT[Math.floor(r() * BOXT.length)]; } while (seen.has(title)); seen.add(title);
+    const n = 3 + Math.floor(Math.pow(r(), 1.5) * 38), u = r() < .36 ? 1 + Math.floor(r() * Math.min(5, n - 1)) : 0;
+    out.push(item({ title, cat: c, vol: "FHGMLZ"[c] + String(j + 1).padStart(2, "0"), n, u, st: u ? "doing" : "done", t: clamp(1.5 + n * .15, 1.9, 7.6), h: X.h, d: X.d }));
+  } });
+  for (let k = 0; k < 3; k++) out.push(item({ title: "没拆的邮包", cat: 5, pack: true, n: 5, u: 5, st: "done", t: 3.4, h: 11.5, d: 8.6 }));
+  out.forEach((b, i) => { b.i = i; });
+  return out;
+}
+function makeNotes() {
+  const list = [["随手本", 5, 212, "一天一页", 0], ["做市笔记", 0, 96, "主题本", 2], ["读史札记", 1, 64, "主题本", 9], ["地图边上", 2, 38, "主题本", 30], ["错题本", 3, 120, "主题本", 4], ["语感练习", 4, 52, "主题本", 1], ["摘抄册", 0, 148, "划线与批注", 3], ["散步记", 2, 24, "主题本", 16]];
+  return list.map(([title, cat, pages, kindName, ago], i) => { const h = i % 3 === 2 ? 17.6 : 21; return item({ title, cat, pages, kindName, ago, sub: pages + " 页", st: ago === 0 ? "doing" : "done", t: clamp(.9 + pages * .011, 1.1, 3.3), h, d: h * .705, face: true, i }); });
+}
+/* 三件家具（2026-11-14）。同一页里一次只摆一件，底下一排记号换；换的时候镜头顺着墙横着走过去。只有旧书房做了后两件。
+ *   SH 层高；gap、pad 东西之间的缝和每层两头的空；aspect 图集里一格的高比宽；draw 一格怎么画；box 方盒子；cover 封面朝外；mark 探出来的那些带什么记号（书架的可以换，另两件定死） */
+const KINDS = {
+  shelf: { name: "书架", unit: "本", SH: DIM.SH, gap: GAPB, pad: PAD, aspect: 4 },
+  rack: { name: "档案架", unit: "盒", SH: 17.5, gap: .45, pad: 1.2, aspect: 2.5, draw: drawBoxEnd, box: true, mark: "tab" },
+  notes: { name: "笔记本架", unit: "本", SH: 25.5, gap: 2.4, pad: 2.6, aspect: 1 / .705, draw: drawNote, cover: true, mark: "ribbon" },
+}, ORDER = ["shelf", "rack", "notes"], MULTI = !!LOOK.bind, STORE = {};
+let K = KINDS.shelf, NB = 40;
+const WX = (b) => (b.face ? b.d : b.t), WZ = (b) => (b.face ? b.t : b.d);     // 在架上横着占多宽、往里占多深（封面朝外的本子反过来）
+
 /* ---------- 渲染器、镜头、光（kit.js） ---------- */
 const canvas = $("#gl");
 const { renderer, scene, camera, key, maxAniso } = createStage(canvas);
@@ -83,7 +119,7 @@ const PR = { cur: +Q.get("pr") > 0 ? +Q.get("pr") : Math.min(devicePixelRatio ||
 
 /* ---------- 状态 ---------- */
 const S = {
-  state: "boot", arr: "topic", W: 80, R: 4, hot: -1, cur: -1, outReady: false, yaw: 0, yawT: 0, fast: false, manual: false, tools: false, mark: "ribbon",
+  state: "boot", kind: "shelf", arr: "topic", arrBook: "topic", pan: 0, W: 80, R: 4, hot: -1, cur: -1, outReady: false, yaw: 0, yawT: 0, fast: false, manual: false, tools: false, mark: "ribbon",
   t: 0, shake: 0, par: { x: 0, y: 0, tx: 0, ty: 0 }, needFit: false,
 };
 let N = 0, books = [], L = null;
@@ -100,6 +136,7 @@ const SFX = {
   back() { noise({ dur: .22, f: 2200, f2: 600, q: 1.1, gain: .13 }); },
   sort() { for (let i = 0; i < 16; i++) { const f = 500 + Math.random() * 700; tone({ f, f2: f * .75, dur: .05, gain: .05, type: "triangle", when: i * (P.sortSpread + .3) / 16 }); } noise({ dur: P.sortSpread + .5, f: 900, f2: 1800, q: .7, gain: .07, attack: .15 }); },
   page() { noise({ dur: .13, f: 2000, f2: 900, q: .8, gain: .09 }); },
+  swap() { noise({ dur: P.swapOut + P.swapIn, f: 500, f2: 1500, q: .7, gain: .08, attack: .12 }); },
   mark(st) { (st === "done" ? [523, 659, 784, 1047] : st === "doing" ? [523, 784] : [330]).forEach((f, i) => tone({ f, dur: .3, gain: .1, when: i * .06 })); },
 };
 
@@ -107,10 +144,10 @@ const SFX = {
 const { paperMat, tabMat, unitBox, makeAtlas, makeMesh, shape: bookShape } = createBookKit(maxAniso);
 let atlas = null, books3d = null, tabs = null;
 // 书脊一格画多高：最高的那本在屏上有多少像素就画多少（再留一点余量）；本数多了按总面积封顶，三百本也不超过七百万像素
-function cellPx() { let hm = 0; for (const b of books) hm = Math.max(hm, b.h); return Math.min(hm / CAM.wpp * PR.cur * 1.05, Math.sqrt(28e6 / N)); }
+function cellPx() { let hm = 0; for (const b of books) hm = Math.max(hm, b.h); return Math.min(hm / CAM.wpp * PR.cur * 1.05, Math.sqrt(7e6 * K.aspect / N)); }
 function buildBooks() {
   if (books3d) { scene.remove(books3d); books3d.geometry.dispose(); books3d.dispose(); atlas.dispose(); }
-  atlas = makeAtlas(books, false, cellPx()); books3d = makeMesh(books, atlas);
+  atlas = makeAtlas(books, false, cellPx(), { aspect: K.aspect, draw: K.draw, flat: K.box }); books3d = makeMesh(books, atlas, { box: K.box, cover: K.cover });
   scene.add(books3d); buildMarks();
 }
 /* 在读的记号（2026-11-13 夜里用户问白签有没有更好的选择，做了一种换着看）：
@@ -122,9 +159,10 @@ function pickMark() { let m = Q.get("mark"); try { if (MARKS.includes(m)) localS
 S.mark = pickMark();
 const ribbonGeo = (() => { const sh = new THREE.Shape(); sh.moveTo(-.5, 0); sh.lineTo(-.5, -1); sh.lineTo(0, -.84); sh.lineTo(.5, -1); sh.lineTo(.5, 0); sh.closePath(); return new THREE.ShapeGeometry(sh); })();   // 上沿在 0，往下垂一个单位，底下一个燕尾
 const ribMat = tabMat.clone(); ribMat.side = THREE.DoubleSide;
+let MK = "ribbon";                                           // 现在这件家具上探出来的东西带什么记号（书架的跟着 S.mark，另两件定死）
 function buildMarks() {
   if (tabs) { scene.remove(tabs); tabs.dispose(); }
-  const rib = S.mark === "ribbon"; tabs = new THREE.InstancedMesh(rib ? ribbonGeo : unitBox, rib ? ribMat : tabMat, N); tabs.castShadow = !rib; tabs.frustumCulled = false;
+  MK = K.mark || S.mark; const rib = MK === "ribbon"; tabs = new THREE.InstancedMesh(rib ? ribbonGeo : unitBox, rib ? ribMat : tabMat, N); tabs.castShadow = !rib; tabs.frustumCulled = false;
   scene.add(tabs);
 }
 function setMark(m) {
@@ -151,6 +189,9 @@ const GILT = foil(hmFront, hFrontMT) && foil(hmSpine, hSpineMT);
 // 旧书房的书有封面板、飘口和圆脊（kit.js 的 bookGeo）：抽出来的这一本按它自己的大小摆好；别的外观还是一个盒子
 const heroBody = bookShape ? new THREE.Mesh(bookShape, [hmSpine, hmFront, hmBack, hmBack, paperMat]) : new THREE.Mesh(unitBox, [hmFront, hmBack, paperMat, paperMat, hmSpine, paperMat]);
 heroBody.castShadow = true; hero.add(heroBody);
+// 牌盒和邮包是方盒子：另备一个，大面和朝外的那一头用上面两张图，顶和底只要布色
+const hmCloth = new THREE.MeshStandardMaterial({ roughness: LOOK.bookRough });
+const heroBox = new THREE.Mesh(unitBox, [hmFront, hmBack, hmCloth, hmCloth, hmSpine, hmBack]); heroBox.castShadow = true; heroBox.visible = false; hero.add(heroBox);
 const heroTab = new THREE.Mesh(unitBox, tabMat); hero.add(heroTab);
 const heroRib = new THREE.Mesh(ribbonGeo, ribMat); heroRib.rotation.y = Math.PI / 2; hero.add(heroRib);   // 丝带转个面：封面朝着人的时候它也朝着人
 /* 旧书房的封面：和书脊同一块布、同一个款式（kit.js 的 bindOf）。压在布上的先画（框、书名、作者；深布烫金、浅布印墨），压完布纹再画贴在外面的纸（题签、腰封）。
@@ -215,16 +256,38 @@ function drawFront(g, w, h, b, mask) {                 // 封面跟着外观走�
   if (todo) { g.font = "500 20px " + F; g.globalAlpha = .8; g.fillText("还包着纸，没读", w / 2, h - 70); g.globalAlpha = 1; }
   if (!mask) grainOver(g, 0, 0, w, h, todo);
 }
+// 牌盒大面那张签上的字、底下那张纸上的一行说明
+const boxLines = (b) => (b.pack ? ["", "一包剪报", b.n + " 张 · 还没拆"] : [CATS[b.cat], ...(b.title.length > 4 ? [b.title.slice(0, Math.ceil(b.title.length / 2)), b.title.slice(Math.ceil(b.title.length / 2))] : [b.title]), b.n + " 张" + (b.u ? " · " + b.u + " 张没读" : "")]);
+function drawPlainBack(g, w, h, b) {                   // 牌盒、邮包、本子的背面：牌盒一道盖缝；本子包脊的布在右边、松紧带在左边
+  if (b.pack) { g.fillStyle = LOOK.bind.box.kraft; g.fillRect(0, 0, w, h); grainOver(g, 0, 0, w, h, true); return; }
+  clothFill(g, 0, 0, w, h, b, false);
+  if (b.face) { const T = LOOK.bind.note; g.fillStyle = T.tape; g.fillRect(w * (1 - T.tapeW), 0, w * T.tapeW, h); g.fillStyle = T.strap; g.fillRect(w * .115, 0, w * .04, h); }
+  else { g.fillStyle = "rgba(0,0,0,.42)"; g.fillRect(0, h * .2, w, 3); }
+  grainOver(g, 0, 0, w, h, false);
+}
 function heroSetup(b) {
-  drawFront(hFrontC.getContext("2d"), hFrontC.width, hFrontC.height, b); hFrontT.needsUpdate = true;
-  drawSpine(hSpineC.getContext("2d"), 0, 0, hSpineC.width, hSpineC.height, b); if (!LOOK.bind) grainOver(hSpineC.getContext("2d"), 0, 0, hSpineC.width, hSpineC.height, b.st === "todo"); hSpineT.needsUpdate = true;
-  if (hBackC) { drawBackBound(hBackC.getContext("2d"), hBackC.width, hBackC.height, b); hBackT.needsUpdate = true; } else hmBack.color.set(clothOf(b));
-  if (GILT) { drawFront(hFrontM.getContext("2d"), hFrontM.width, hFrontM.height, b, true); hFrontMT.needsUpdate = true; drawSpine(hSpineM.getContext("2d"), 0, 0, hSpineM.width, hSpineM.height, b, false, true); hSpineMT.needsUpdate = true; }
-  const cloth = !!LOOK.bind || b.st !== "todo"; weave(hmFront, b.d, b.h, cloth); weave(hmBack, b.d, b.h, cloth); weave(hmSpine, b.t, b.h, cloth);
-  if (bookShape) { if (heroBody.geometry !== bookShape) heroBody.geometry.dispose(); heroBody.geometry = bakeBook(bookShape, b.t, b.h, b.d); }
+  const fw = S.kind === "shelf" ? 384 : Math.round(576 * b.d / b.h / 8) * 8;                 // 封面那张图的宽跟着这件东西的宽高比走（书一律 384）
+  if (hFrontC.width !== fw) { hFrontC.width = hFrontM.width = fw; hFrontT.dispose(); hFrontMT.dispose(); }
+  const gf = hFrontC.getContext("2d"), gs = hSpineC.getContext("2d"), fh = hFrontC.height, sw = hSpineC.width, sh = hSpineC.height, box = S.kind === "rack", note = S.kind === "notes";
+  if (box) { drawBoxFace(gf, fw, fh, b, false, boxLines(b)); drawBoxEnd(gs, 0, 0, sw, sh, b); }
+  else if (note) { drawNote(gf, 0, 0, fw, fh, b); gs.fillStyle = LOOK.bind.note.tape; gs.fillRect(0, 0, sw, sh); gs.fillStyle = LOOK.gilt; gs.fillRect(0, sh * .06, sw, 3); gs.fillRect(0, sh * .94, sw, 3); grainOver(gs, 0, 0, sw, sh, false); }
+  else { drawFront(gf, fw, fh, b); drawSpine(gs, 0, 0, sw, sh, b); if (!LOOK.bind) grainOver(gs, 0, 0, sw, sh, b.st === "todo"); }
+  hFrontT.needsUpdate = true; hSpineT.needsUpdate = true;
+  if (hBackC) { if (box || note) drawPlainBack(hBackC.getContext("2d"), hBackC.width, hBackC.height, b); else drawBackBound(hBackC.getContext("2d"), hBackC.width, hBackC.height, b); hBackT.needsUpdate = true; } else hmBack.color.set(clothOf(b));
+  if (GILT) {
+    const mf = hFrontM.getContext("2d"), ms = hSpineM.getContext("2d");
+    if (box) { drawBoxFace(mf, fw, fh, b, true, boxLines(b)); drawBoxEnd(ms, 0, 0, sw, sh, b, false, true); }
+    else if (note) { drawNote(mf, 0, 0, fw, fh, b, false, true); ms.fillStyle = MASK.cloth; ms.fillRect(0, 0, sw, sh); ms.fillStyle = MASK.gilt; ms.fillRect(0, sh * .06, sw, 3); ms.fillRect(0, sh * .94, sw, 3); }
+    else { drawFront(mf, fw, fh, b, true); drawSpine(ms, 0, 0, sw, sh, b, false, true); }
+    hFrontMT.needsUpdate = true; hSpineMT.needsUpdate = true;
+  }
+  const cloth = b.pack ? false : !!LOOK.bind || b.st !== "todo"; weave(hmFront, b.d, b.h, cloth); weave(hmBack, b.d, b.h, cloth); weave(hmSpine, b.t, b.h, cloth);
+  heroBox.visible = box; heroBody.visible = !box;
+  if (box) { hmCloth.color.set(b.pack ? LOOK.bind.box.kraft : clothOf(b)); heroBox.scale.set(b.t, b.h, b.d); }
+  else if (bookShape) { if (heroBody.geometry !== bookShape) heroBody.geometry.dispose(); heroBody.geometry = bakeBook(bookShape, b.t, b.h, b.d); }
   heroBody.scale.set(b.t, b.h, b.d);
-  heroTab.visible = b.st === "doing" && S.mark === "tab"; heroTab.scale.set(b.t * .62, 2.6, .14); heroTab.position.set(0, b.h / 2 + .55, b.d / 2 + .05);
-  heroRib.visible = b.st === "doing" && S.mark === "ribbon"; heroRib.scale.set(clamp(b.t * RIB.k, RIB.wMin, RIB.wMax) * 1.6, RIB.len * .8, 1); heroRib.position.set(0, -b.h / 2 + .4, b.d / 2 - 2.2);
+  heroTab.visible = b.st === "doing" && MK === "tab"; if (box) { heroTab.scale.set(b.t * .56, 1.7, .12); heroTab.position.set(0, b.h / 2 + .45, b.d / 2 - .5); } else { heroTab.scale.set(b.t * .62, 2.6, .14); heroTab.position.set(0, b.h / 2 + .55, b.d / 2 + .05); }
+  heroRib.visible = b.st === "doing" && MK === "ribbon"; heroRib.scale.set(clamp(b.t * RIB.k, RIB.wMin, RIB.wMax) * 1.6, RIB.len * .8, 1); heroRib.position.set(0, -b.h / 2 + .4, b.d / 2 - 2.2);
   hero.visible = true;
 }
 // 抽出来以后压暗后面的书架
@@ -233,9 +296,10 @@ dim.renderOrder = 5; dim.visible = false; scene.add(dim);
 
 /* ---------- 排书：按顺序从左到右、一层放满换下一层 ---------- */
 function pack(arr, W) {
-  const slots = new Array(N), rows = [[]], divs = [], heads = []; let x = -W / 2 + PAD, r = 0;
-  const nl = () => { r++; rows.push([]); x = -W / 2 + PAD; };
-  const put = (b) => { if (x + b.t > W / 2 - PAD && rows[r].length) nl(); slots[b.i] = { r, x: x + b.t / 2 }; rows[r].push(b.i); x += b.t + GAPB; };
+  const slots = new Array(N), rows = [[]], divs = [], heads = [], pad = K.pad, gap = K.gap; let x = -W / 2 + pad, r = 0, wasPack = false;
+  const nl = () => { r++; rows.push([]); x = -W / 2 + pad; };
+  const put = (b) => { const w = WX(b); if (b.pack && !wasPack && rows[r].length) x += 2.2; wasPack = !!b.pack;      // 邮包和牌盒之间空开一点
+    if (x + w > W / 2 - pad && rows[r].length) nl(); slots[b.i] = { r, x: x + w / 2 }; rows[r].push(b.i); x += w + gap; };
   if (arr === "topic") books.forEach(put);
   else ["done", "doing", "todo"].forEach((st) => {          // 读过的站在最前面，接着是在读的、没读的；两组之间立一块分隔板
     const g = books.filter((b) => b.st === st); if (!g.length) return;
@@ -247,13 +311,19 @@ function pack(arr, W) {
   return { arr, W, slots, rows, divs, heads, R: rows.length };
 }
 const rowY = (r) => PL + BT + (S.R - 1 - r) * (SH + BT);       // 第 r 层（从上往下数）层板的上表面
-function slotPos(i) { const b = books[i], s = L.slots[i]; return { x: s.x, y: rowY(s.r) + b.h / 2, z: -RECESS - b.d / 2 }; }
+function slotPos(i) {                                             // 一件东西在架上的位置和朝向。封面朝外的本子转过来、往后仰一点靠着
+  const b = books[i], s = L.slots[i];
+  return b.face ? { x: s.x, y: rowY(s.r) + b.h / 2, z: -RECESS - 2.4 - b.t / 2, ry: -Math.PI / 2, rz: LEAN } : { x: s.x, y: rowY(s.r) + b.h / 2, z: -RECESS - b.d / 2, ry: 0, rz: 0 };
+}
+const LEAN = .13;
 function chooseW(aspect) {                                       // 架子的宽和层数跟着屏幕的形状走：两种排法都放得下、整座正好装进一屏；最底下一层别只剩零星几本
   let best = null;
   for (let W = 36; W <= 460; W += 2) {
-    const a1 = pack("topic", W), a2 = pack("state", W), big = a2.R > a1.R ? a2 : a1, R = big.R;
-    const lastFill = big.rows[R - 1].reduce((sum, bi) => sum + books[bi].t, 0) / W;
-    const a = (W + 2 * ST) / (R * (SH + BT) + BT + PL), sc = Math.abs(Math.log(a / aspect)) + .6 * Math.max(0, .5 - lastFill);
+    const a1 = pack("topic", W), a2 = S.kind === "shelf" ? pack("state", W) : a1, big = a2.R > a1.R ? a2 : a1, R = big.R;
+    const lastFill = big.rows[R - 1].reduce((sum, bi) => sum + WX(books[bi]), 0) / W;
+    // 牌盒和本子件数少、一件又宽：每层右边空出一大截就像没摆满的书架，所以空得多的宽度扣分（最后一层不算）
+    const slack = S.kind === "shelf" || R < 2 ? 0 : big.rows.slice(0, -1).reduce((sum, row) => sum + 1 - (row.reduce((u, bi) => u + WX(books[bi]) + K.gap, 0) + 2 * K.pad) / W, 0) / (R - 1);
+    const a = (W + 2 * ST) / (R * (SH + BT) + BT + PL), sc = Math.abs(Math.log(a / aspect)) * (a > aspect ? 1.3 : 1) + .6 * Math.max(0, .5 - lastFill) + 2.5 * Math.max(0, slack - .06);   // 比屏幕扁的多扣一点：宁可瘦高、把屏幕的高用满，上下不留一大片墙
     if (!best || sc < best.sc - 1e-6) best = { W, R, sc };
   }
   return best;
@@ -280,7 +350,7 @@ const safeEl = document.createElement("div");                        // 量刘�
 safeEl.style.cssText = "position:fixed;left:0;top:0;width:0;height:0;visibility:hidden;pointer-events:none;padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px)"; document.body.appendChild(safeEl);
 function avail() {                                                   // 整屏都给书架：上面只让开刘海，下面让开那道小把手
   const vw = innerWidth, vh = innerHeight, portrait = vh >= vw, cs = getComputedStyle(safeEl);
-  const top = 8 + (parseFloat(cs.paddingTop) || 0), bot = 26 + (parseFloat(cs.paddingBottom) || 0), side = portrait ? 6 : 24;
+  const top = 8 + (parseFloat(cs.paddingTop) || 0), bot = (MULTI ? 60 : 26) + (parseFloat(cs.paddingBottom) || 0), side = portrait ? 6 : 24;   // 底下：一道把手，旧书房上面还有换家具的一排记号
   return { vw, vh, top, bot, side, w: vw - 2 * side, h: vh - top - bot };
 }
 function fitCam() {
@@ -297,8 +367,8 @@ function placeCamera(raw) {
   const k = 1 - Math.exp(-6 * raw); S.par.x += (S.par.tx - S.par.x) * k; S.par.y += (S.par.ty - S.par.y) * k;
   const d = CAM.dist * CAM.k, sw = Math.sin(S.t * .45) * P.sway * (S.state === "out" || S.state === "back" ? .3 : 1);
   const sx = S.shake * Math.sin(S.t * 71), sy = S.shake * Math.cos(S.t * 57);
-  camera.position.set(Math.sin(sw) * d + S.par.x * d * .035 + sx, CAM.y - S.par.y * d * .02 + sy, Math.cos(sw) * d);
-  camera.lookAt(0, CAM.y, 0); camera.updateMatrixWorld();
+  camera.position.set(Math.sin(sw) * d + S.par.x * d * .035 + sx + S.pan, CAM.y - S.par.y * d * .02 + sy, Math.cos(sw) * d);   // pan：换家具时镜头顺着墙横着走
+  camera.lookAt(S.pan, CAM.y, 0); camera.updateMatrixWorld();
 }
 function inspectPose(b) {                                            // 抽出来的书停在哪：眼前、偏上（底下留给那张纸）
   const A = avail(), tanH = Math.tan(rad(CAM.fov / 2)), asp = A.vw / A.vh, sheetPx = Math.min(230, A.vh * .34);
@@ -309,7 +379,7 @@ function inspectPose(b) {                                            // 抽出�
 const _v = new THREE.Vector3();
 function screenOf(x, y, z) { _v.set(x, y, z).project(camera); return { x: (_v.x + 1) / 2 * innerWidth, y: (1 - _v.y) / 2 * innerHeight }; }
 function rectOf(i) {
-  const b = books[i], z = b.pz + b.d / 2 + b.out * P.doingZ + b.pop * P.popZ, a = screenOf(b.px - b.t / 2, b.py + b.h / 2, z), c = screenOf(b.px + b.t / 2, b.py - b.h / 2, z);
+  const b = books[i], wx = WX(b), z = b.pz + WZ(b) / 2 + b.out * P.doingZ + b.pop * P.popZ, a = screenOf(b.px - wx / 2, b.py + b.h / 2, z), c = screenOf(b.px + wx / 2, b.py - b.h / 2, z);
   return { l: a.x, t: a.y, r: c.x, b: c.y, cx: (a.x + c.x) / 2, cy: (a.y + c.y) / 2 };
 }
 
@@ -321,7 +391,7 @@ function applyBooks(raw) {
     b.pop += (b.popT - b.pop) * (1 - Math.exp(-(b.popT > b.pop ? P.popUp : P.popDown) * raw));
     b.out += (b.outT - b.out) * (1 - Math.exp(-10 * raw));
     _p.set(b.px, b.py + b.pop * .35, b.pz + b.out * P.doingZ + b.pop * P.popZ);
-    _e.set(b.rx + b.pop * P.popTilt, b.ry, b.rz);
+    if (b.face) _e.set(b.rx, b.ry, b.rz - b.pop * LEAN * .7); else _e.set(b.rx + b.pop * P.popTilt, b.ry, b.rz);   // 手指碰到：书是书顶往外倾，封面朝外的本子是立直一点
     if (b.hero) {
       if (S.state === "out" && S.outReady) { _e.y += S.yaw; _e.z += Math.sin(S.t * 1.1) * .012; _p.y += Math.sin(S.t * 1.7) * .2; }
       hero.position.copy(_p); hero.quaternion.setFromEuler(_e); hero.scale.setScalar(b.k);
@@ -330,32 +400,42 @@ function applyBooks(raw) {
     _q.setFromEuler(_e); _m.compose(_p, _q, _s.set(b.k, b.k, b.k));
     _m2.copy(_m).scale(_s.set(b.t, b.h, b.d)); books3d.setMatrixAt(b.i, _m2);
     if (b.st !== "doing") tabs.setMatrixAt(b.i, _zero);
-    else if (S.mark === "ribbon") {                                    // 丝带不跟着书歪：从书脚垂下来，至少在层板前沿的外面
-      _m2.makeTranslation(_p.x, _p.y - b.h / 2 * b.k + .3, Math.max(_p.z + b.d / 2 - .3, RIB.z)).scale(_s.set(clamp(b.t * RIB.k, RIB.wMin, RIB.wMax) * b.k, RIB.len * b.k, 1)); tabs.setMatrixAt(b.i, _m2);
-    } else { _m2.copy(_m).multiply(_t.makeTranslation(0, b.h / 2 + .55, b.d / 2 + .05)).scale(_s.set(b.t * .62, 2.6, .14)); tabs.setMatrixAt(b.i, _m2); }
+    else if (MK === "ribbon") {                                        // 丝带不跟着书歪：从书脚垂下来，至少在层板前沿的外面
+      _m2.makeTranslation(_p.x, _p.y - b.h / 2 * b.k + .3, Math.max(_p.z + WZ(b) / 2 - .3, RIB.z)).scale(_s.set(clamp(WX(b) * RIB.k, RIB.wMin, RIB.wMax) * b.k, RIB.len * b.k, 1)); tabs.setMatrixAt(b.i, _m2);
+    } else if (K.box) { _m2.copy(_m).multiply(_t.makeTranslation(0, b.h / 2 + .45, b.d / 2 - .5)).scale(_s.set(b.t * .56, 1.7, .12)); tabs.setMatrixAt(b.i, _m2); }   // 牌盒：顶上露一枚签
+    else { _m2.copy(_m).multiply(_t.makeTranslation(0, b.h / 2 + .55, b.d / 2 + .05)).scale(_s.set(b.t * .62, 2.6, .14)); tabs.setMatrixAt(b.i, _m2); }
   }
   books3d.instanceMatrix.needsUpdate = true; tabs.instanceMatrix.needsUpdate = true;
 }
-function snapToSlots() { books.forEach((b) => { const sp = slotPos(b.i); b.px = sp.x; b.py = sp.y; b.pz = sp.z; b.rx = b.ry = b.rz = 0; b.k = 1; b.outT = b.st === "doing" ? 1 : 0; }); }
+function snapToSlots() { books.forEach((b) => { const sp = slotPos(b.i); b.px = sp.x; b.py = sp.y; b.pz = sp.z; b.rx = 0; b.ry = sp.ry; b.rz = sp.rz; b.k = 1; b.outT = b.st === "doing" ? 1 : 0; }); }
 
 /* ---------- 界面 ---------- */
-const hint = $("#hint"), grab = $("#grab"), tools = $("#tools"), veil = $("#veil"), sheet = $("#sheet"), tip = $("#tip"), labs = $("#labs");
+const hint = $("#hint"), grab = $("#grab"), tools = $("#tools"), veil = $("#veil"), sheet = $("#sheet"), tip = $("#tip"), labs = $("#labs"), marks = $("#marks");
+marks.hidden = !MULTI;
 function ui() {
   const c = counts(), out = S.state === "out" || S.state === "back";
   const mk = S.mark === "ribbon" ? "垂着丝带的" : "顶上带签的";
-  hint.innerHTML = "共 <b>" + N + "</b> 本：" + (LOOK.bind ? "带腰封的没读 <b>" + c.todo + "</b> · " + mk + "在读 <b>" + c.doing + "</b> · 摘了腰封的读过 <b>" + c.done + "</b>" : "深的读过 <b>" + c.done + "</b> · " + mk + "在读 <b>" + c.doing + "</b> · 浅的没读 <b>" + c.todo + "</b>") + "<small>手指按在书脊上划，松手就抽出那一本</small>";
+  if (S.kind === "rack") { const bx = books.filter((b) => !b.pack); hint.innerHTML = "共 <b>" + bx.length + "</b> 盒 · <b>" + bx.reduce((n, b) => n + b.n, 0) + "</b> 张牌：顶上露着签的有没读的 <b>" + bx.filter((b) => b.u).length + "</b> 盒 · 没拆的邮包 <b>" + (N - bx.length) + "</b> 包<small>盒子越厚牌越多。手指按在盒子上划，松手就抽出那一盒</small>"; }
+  else if (S.kind === "notes") hint.innerHTML = "共 <b>" + N + "</b> 本：垂着丝带的今天写过 <b>" + c.doing + "</b> 本<small>本子越厚页越多。手指按在本子上划，松手就抽出那一本</small>";
+  else hint.innerHTML = "共 <b>" + N + "</b> 本：" + (LOOK.bind ? "带腰封的没读 <b>" + c.todo + "</b> · " + mk + "在读 <b>" + c.doing + "</b> · 摘了腰封的读过 <b>" + c.done + "</b>" : "深的读过 <b>" + c.done + "</b> · " + mk + "在读 <b>" + c.doing + "</b> · 浅的没读 <b>" + c.todo + "</b>") + "<small>手指按在书脊上划，松手就抽出那一本</small>";
   grab.classList.toggle("off", out); sheet.classList.toggle("on", S.state === "out");
+  marks.classList.toggle("off", out || S.tools || S.state === "enter");
+  marks.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === S.kind)));
+  document.querySelectorAll("#tools [data-only]").forEach((el) => { el.hidden = el.dataset.only !== S.kind; });      // 排法、在读的记号、本数只有书架有
   document.querySelectorAll("#seg-arr button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.arr === S.arr)));
   document.querySelectorAll("#seg-n button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.n === N)));
   document.querySelectorAll("#seg-mark button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mark === S.mark)));
   const cur = books[S.cur];
   if (cur) {
-    const pct = Math.round(cur.prog * 100);
+    const pct = Math.round(cur.prog * 100), book = S.kind === "shelf";
     $("#s-title").textContent = cur.title;
-    $("#s-meta").textContent = cur.by + " · " + cur.pages + " 页 · " + CATS[cur.cat] + " · " + (cur.st === "todo" ? "还没打开过" : cur.st === "done" ? "读完了" : "读到 " + pct + "%");
-    $("#s-prog").firstElementChild.style.width = pct + "%"; $("#s-prog").setAttribute("aria-valuenow", pct);
-    $("#b-read").hidden = cur.st === "done"; $("#b-read").textContent = cur.st === "doing" ? "接着读" : "打开读";
-    $("#b-done").hidden = cur.st === "done"; $("#b-todo").hidden = cur.st === "todo";
+    $("#s-meta").textContent = book ? cur.by + " · " + cur.pages + " 页 · " + CATS[cur.cat] + " · " + (cur.st === "todo" ? "还没打开过" : cur.st === "done" ? "读完了" : "读到 " + pct + "%")
+      : S.kind === "rack" ? (cur.pack ? "邮差送来的一包剪报 · " + cur.n + " 张 · 还没拆" : cur.vol + " · " + CATS[cur.cat] + " · " + cur.n + " 张牌 · " + (cur.u ? cur.u + " 张没读" : "都读过"))
+        : cur.kindName + " · " + cur.pages + " 页 · " + (cur.ago === 0 ? "今天写过" : cur.ago + " 天前写过");
+    $("#s-prog").hidden = !book; $("#s-prog").firstElementChild.style.width = pct + "%"; $("#s-prog").setAttribute("aria-valuenow", pct);
+    $("#b-read").hidden = !book || cur.st === "done"; $("#b-read").textContent = cur.st === "doing" ? "接着读" : "打开读";
+    $("#b-done").hidden = !book || cur.st === "done"; $("#b-todo").hidden = !book || cur.st === "todo";
+    $("#b-go").hidden = !cur.pack;                                     // 没拆的邮包：去拆包那一页拆
   }
   $("#snd").setAttribute("aria-pressed", String(AU.on));
 }
@@ -376,7 +456,8 @@ function placeLabels() {
   labEls.forEach(({ el, h }) => { const b = books[h.bi], s = L.slots[h.bi], p = screenOf(s.x - b.t / 2, rowY(s.r) + SH + BT / 2, 0); el.style.transform = "translate(" + Math.round(p.x) + "px," + Math.round(p.y) + "px) translateY(-50%)"; });
 }
 function showTip(b, x, y) {
-  tip.firstElementChild.textContent = b.title; tip.lastElementChild.textContent = b.by + " · " + STN[b.st];
+  tip.firstElementChild.textContent = b.title;
+  tip.lastElementChild.textContent = S.kind === "rack" ? (b.pack ? b.n + " 张 · 还没拆" : b.n + " 张" + (b.u ? " · " + b.u + " 张没读" : "")) : S.kind === "notes" ? b.pages + " 页 · " + (b.ago === 0 ? "今天写过" : b.ago + " 天前") : b.by + " · " + STN[b.st];
   tip.classList.add("on"); moveTip(x, y);
 }
 function moveTip(x, y) {
@@ -386,13 +467,32 @@ function moveTip(x, y) {
 
 /* ---------- 节拍 ---------- */
 function layoutFit() { const A = avail(), best = chooseW(A.w / A.h); S.W = best.W; S.R = best.R; L = pack(S.arr, S.W); buildCase(S.W, S.R); fitCam(); }
-function rebuild(n) {
-  clearTracks(); N = n; books = makeBooks(n); S.hot = S.cur = -1; S.outReady = false; S.yaw = S.yawT = 0; hero.visible = false; dim.visible = false; tip.classList.remove("on");
-  layoutFit(); buildBooks(); setDividers(false); setLabels(false); enter();
+// 换到某一件家具：架上的东西从各自那一批里拿（改过的读没读留着），层高换掉，架子重搭，东西重画
+function setKind(kind) {
+  S.kind = kind; K = KINDS[kind]; SH = DIM.SH = K.SH;
+  books = STORE[kind] || (STORE[kind] = kind === "rack" ? makeBoxes() : kind === "notes" ? makeNotes() : makeBooks(NB)); N = books.length;
+  books.forEach((b) => { b.pop = b.popT = 0; b.hero = false; });
+  S.hot = S.cur = -1; S.outReady = false; S.yaw = S.yawT = 0; hero.visible = false; dim.visible = false; tip.classList.remove("on");
+  S.arr = kind === "shelf" ? S.arrBook : "topic";
+  layoutFit(); buildBooks(); setDividers(false); setLabels(false);
 }
+function rebuild(n) { clearTracks(); NB = n; STORE.shelf = null; setKind("shelf"); enter(); }      // 换本数（只有书架有）
+// 换家具：镜头顺着墙横着走。先走到看不见这一件，架子在镜头外换好，再从另一头走进来
+const panDist = () => caseW / 2 + CAM.dist * Math.tan(rad(CAM.fov / 2)) * camera.aspect + 8;      // 刚好走到这一件出了屏幕：中间只看见墙的那一下越短越好
+function goto(kind) {
+  if (!MULTI || S.state !== "idle" || kind === S.kind || !KINDS[kind]) return;
+  toolsOpen(false); setHot(-1); S.state = "swap"; setDividers(false); setLabels(false);
+  const dir = ORDER.indexOf(kind) > ORDER.indexOf(S.kind) ? 1 : -1, d0 = panDist();
+  SFX.swap(); ui();
+  play(P.swapOut, (e) => { S.pan = dir * d0 * e; }, { ease: E.in2, done() {
+    setKind(kind); snapToSlots(); const d1 = panDist(); S.pan = -dir * d1; ui();
+    play(P.swapIn, (e) => { S.pan = -dir * d1 * (1 - e); }, { ease: E.out3, done() { S.pan = 0; S.state = "idle"; SFX.thud(); vib(10); S.shake = P.shake * .6; setDividers(true); setLabels(true); ui(); } });
+  } });
+}
+const step = (d) => goto(ORDER[ORDER.indexOf(S.kind) + d]);             // 往左、往右换一件
 function enter() {
   S.state = "enter"; S.fast = false;
-  books.forEach((b) => { const sp = slotPos(b.i); b.px = sp.x; b.py = sp.y; b.pz = sp.z + P.enterZ; b.k = 0; b.rx = b.ry = b.rz = 0; b.pop = b.popT = b.out = b.outT = 0; b.hero = false; });
+  books.forEach((b) => { const sp = slotPos(b.i); b.px = sp.x; b.py = sp.y; b.pz = sp.z + P.enterZ; b.k = 0; b.rx = 0; b.ry = sp.ry; b.rz = sp.rz; b.pop = b.popT = b.out = b.outT = 0; b.hero = false; });
   const seq = L.rows.flat();                                       // 一层一层、从左到右推进去；推过头一点再弹回来
   seq.forEach((bi, k) => {
     const b = books[bi], z1 = slotPos(bi).z;
@@ -419,8 +519,8 @@ function flyToSlots(done, skip, quick) {
   if (!n) done();
 }
 function arrange(a) {
-  if (S.state !== "idle" || a === S.arr) return;
-  setHot(-1); S.arr = a; S.state = "sort"; L = pack(a, S.W); setDividers(false); setLabels(false); SFX.sort(); ui();
+  if (S.state !== "idle" || a === S.arr || S.kind !== "shelf") return;
+  setHot(-1); S.arr = S.arrBook = a; S.state = "sort"; L = pack(a, S.W); setDividers(false); setLabels(false); SFX.sort(); ui();
   flyToSlots(() => { S.state = "idle"; SFX.thud(); vib(10); S.shake = P.shake * .6; setDividers(true); setLabels(true); ui(); });
 }
 
@@ -437,15 +537,15 @@ function pullOut(i) {
   if (S.hot >= 0 && S.hot !== i) books[S.hot].popT = 0;
   S.hot = -1; tip.classList.remove("on"); S.state = "out"; S.cur = i; S.outReady = false; S.yaw = S.yawT = 0; b.st0 = b.st;
   // 接着当前探出来的姿态往外走，换成单独那本
-  b.pz += b.out * P.doingZ + b.pop * P.popZ; b.rx = b.pop * P.popTilt; b.py += b.pop * .35; b.pop = b.popT = b.out = b.outT = 0;
+  b.pz += b.out * P.doingZ + b.pop * P.popZ; b.rx = b.face ? 0 : b.pop * P.popTilt; b.py += b.pop * .35; b.pop = b.popT = b.out = b.outT = 0;
   heroSetup(b); b.hero = true;
-  const I = inspectPose(b), x0 = b.px, y0 = b.py, z0 = b.pz, rx0 = b.rx, zs = -RECESS + b.d / 2 + 2.5;
+  const I = inspectPose(b), x0 = b.px, y0 = b.py, z0 = b.pz, rx0 = b.rx, ry0 = b.ry, rz0 = b.rz, zs = -RECESS + WZ(b) / 2 + 2.5;
   dim.position.set(0, CAM.y, I.z - 16); { const hh = 2 * (I.di + 16) * Math.tan(rad(CAM.fov / 2)) * 1.7; dim.scale.set(hh * Math.max(1, innerWidth / innerHeight) * 1.4, hh, 1); }
   dim.material.opacity = 0; dim.visible = true;
   SFX.out(); vib(8); ui();
   play(P.outSlide, (e) => { b.pz = lerp(z0, zs, e); b.rx = lerp(rx0, 0, e); }, { ease: E.in2, done() {
     play(.3, (e) => { dim.material.opacity = .62 * e; }, { ease: E.lin });
-    play(P.outFly, (e, kk) => { b.px = lerp(x0, I.x, e); b.py = lerp(y0, I.y, e); b.pz = lerp(zs, I.z, e); b.ry = lerp(0, I.ry, E.out3(kk)); }, { ease: E.back, done() { S.outReady = true; SFX.shown(); } });
+    play(P.outFly, (e, kk) => { b.px = lerp(x0, I.x, e); b.py = lerp(y0, I.y, e); b.pz = lerp(zs, I.z, e); b.ry = lerp(ry0, I.ry, E.out3(kk)); b.rz = lerp(rz0, 0, E.out3(kk)); }, { ease: E.back, done() { S.outReady = true; SFX.shown(); } });
   } });
 }
 // 读没读不用手标，跟着读到哪走：一点没读是没读，读完是读过，中间都是在读（2026-11-13 夜里用户提的：打开读了百分之一二，它应该自己变）
@@ -471,12 +571,12 @@ function putBack() {
   // 状态改过、又是按读没读放：这本要去新的位置，别的书先让位
   if (S.arr === "state" && b.st !== b.st0) { L = pack("state", S.W); refit = L.R > S.R; setDividers(false); setLabels(false); if (refit) fin(); else flyToSlots(fin, b.i, true); }
   else fin();
-  const sp = refit ? { x: b.px, y: b.py - 40, z: b.pz - 60 } : slotPos(b.i), x0 = b.px, y0 = b.py, z0 = b.pz, ry0 = b.ry + S.yaw, zf = sp.z + b.d + 3.5;
+  const sp = refit ? { x: b.px, y: b.py - 40, z: b.pz - 60, ry: 0, rz: 0 } : slotPos(b.i), x0 = b.px, y0 = b.py, z0 = b.pz, ry0 = b.ry + S.yaw, zf = sp.z + WZ(b) + 3.5;
   S.yaw = S.yawT = 0; b.ry = ry0; b.outT = b.st === "doing" ? 1 : 0;
   SFX.back(); play(.25, (e) => { dim.material.opacity = .62 * (1 - e); }, { ease: E.lin, done() { dim.visible = false; } });
-  play(P.backFly, (e) => { b.px = lerp(x0, sp.x, e); b.py = lerp(y0, sp.y, e); b.pz = lerp(z0, zf, e); b.ry = lerp(ry0, 0, e); }, { ease: E.io3, done() {
+  play(P.backFly, (e) => { b.px = lerp(x0, sp.x, e); b.py = lerp(y0, sp.y, e); b.pz = lerp(z0, zf, e); b.ry = lerp(ry0, sp.ry, e); b.rz = lerp(0, sp.rz, e); }, { ease: E.io3, done() {
     play(P.backPush, (e) => { b.pz = lerp(zf, sp.z, e); }, { ease: E.in2, done() {
-      b.hero = false; hero.visible = false; b.ry = 0; S.cur = -1; SFX.thud(); vib(12); S.shake = P.shake;
+      b.hero = false; hero.visible = false; b.ry = sp.ry; b.rz = sp.rz; S.cur = -1; SFX.thud(); vib(12); S.shake = P.shake;
       const row = L.rows[L.slots[b.i].r], k = row.indexOf(b.i); [k - 1, k + 1].forEach((j) => { const nb = books[row[j]]; if (nb) nb.pop = .3; });   // 左右两本跟着顿一下
       fin();
     } });
@@ -491,7 +591,7 @@ function pick(cx, cy) {                                        // 手指底下�
   const t = (-RECESS - o.z) / d.z, x = o.x + d.x * t, y = o.y + d.y * t;
   const r = S.R - 1 - Math.floor((y - PL) / (SH + BT)), row = L.rows[r]; if (!row) return -1;
   let best = -1, bd = Math.max(.8, 7 * CAM.wpp);
-  for (const bi of row) { const dd = Math.abs(x - L.slots[bi].x) - books[bi].t / 2; if (dd < bd) { bd = dd; best = bi; } }
+  for (const bi of row) { const dd = Math.abs(x - L.slots[bi].x) - WX(books[bi]) / 2; if (dd < bd) { bd = dd; best = bi; } }
   return best;
 }
 const G = { id: -1, x0: 0, y0: 0, t0: 0, moved: 0, mode: "" };
@@ -530,9 +630,17 @@ document.querySelectorAll("#seg-mark button").forEach((b) => b.addEventListener(
   ["pointerup", "pointercancel"].forEach((t) => grab.addEventListener(t, () => { y0 = null; }));
   grab.addEventListener("click", () => { if (swiped) { swiped = false; return; } au(true); toolsOpen(!S.tools); });
 }
+// 底下那排记号：点哪个去哪个；按在这一排上左右划也行（往左划去右边那件）。不做整屏左右滑：手指在书脊上左右划已经是「划过书脊」了
+{ let x0 = null, btn = null;                                           // 手指按下时记住按的是哪个记号：这一排接管了手指（划出去也收得到），松手时点击就落不到按钮自己身上了
+  marks.addEventListener("pointerdown", (ev) => { x0 = ev.clientX; btn = ev.target.closest("button"); try { marks.setPointerCapture(ev.pointerId); } catch (e) { /* 忽略 */ } });
+  marks.addEventListener("pointermove", (ev) => { if (x0 != null && Math.abs(ev.clientX - x0) > 26) { const d = ev.clientX < x0 ? 1 : -1; x0 = null; btn = null; au(true); step(d); } });
+  marks.addEventListener("pointerup", () => { if (x0 != null && btn) { au(true); goto(btn.dataset.f); } x0 = null; btn = null; });
+  marks.addEventListener("pointercancel", () => { x0 = null; btn = null; });
+  marks.querySelectorAll("button").forEach((b) => b.addEventListener("click", (ev) => { if (ev.detail === 0) goto(b.dataset.f); }));   // 键盘上按回车、空格
+}
 veil.addEventListener("click", () => toolsOpen(false));
 tools.querySelector(".grip").addEventListener("click", () => toolsOpen(false));
-addEventListener("keydown", (ev) => { if (ev.key === "Escape") toolsOpen(false); });
+addEventListener("keydown", (ev) => { if (ev.key === "Escape") toolsOpen(false); else if (ev.key === "ArrowRight") step(1); else if (ev.key === "ArrowLeft") step(-1); });
 $("#b-read").addEventListener("click", () => { au(true); readOn(); });
 $("#b-done").addEventListener("click", () => { au(true); setStatus("done"); });
 $("#b-todo").addEventListener("click", () => { au(true); setStatus("todo"); });
@@ -563,13 +671,14 @@ function tick(raw) {
   if (S.needFit && S.state === "idle") onResize();          // 转屏、改窗口大小要是赶上动画，等回到看全再重排
   stepTracks(dt); placeCamera(raw); applyBooks(raw); placeLabels();
   renderer.render(scene, camera);
-  if (devEl) devEl.textContent = S.state + " · " + N + " 本 · " + S.W + "cm × " + S.R + " 层\n" + fps.toFixed(0) + " fps · " + renderer.info.render.calls + " calls · 画布 ×" + PR.cur + " · 书脊格 " + atlas.cw + "×" + atlas.ch;
+  if (devEl) devEl.textContent = S.state + " · " + K.name + " " + N + " " + K.unit + " · " + S.W + "cm × " + S.R + " 层\n" + fps.toFixed(0) + " fps · " + renderer.info.render.calls + " calls · 画布 ×" + PR.cur + " · 书脊格 " + atlas.cw + "×" + atlas.ch;
 }
 
 /* ---------- 开场 ---------- */
 window.__lab = {
   S, P, get state() { return S.state; }, get books() { return books; }, get L() { return L; }, counts, rectOf,
   hot: setHot, pull: pullOut, back: putBack, mark: setStatus, read: readOn, arrange, count: rebuild, tools: toolsOpen, setMark, PR, get atlas() { return atlas; },
+  get kind() { return S.kind; }, goto, KINDS,
   manual(on) { S.manual = !!on; }, step(sec) { let t = sec; while (t > 1e-6) { const d = Math.min(1 / 60, t); tick(d); t -= d; } },
 };
-whenReady().then(() => { rebuild([40, 120, 300].includes(+Q.get("n")) ? +Q.get("n") : 40); requestAnimationFrame(frame); });   // 等木纹布纹的图到了再上架（最多等一秒半）
+whenReady().then(() => { NB = [40, 120, 300].includes(+Q.get("n")) ? +Q.get("n") : 40; setKind(MULTI && KINDS[Q.get("f")] ? Q.get("f") : "shelf"); enter(); requestAnimationFrame(frame); });   // 等木纹布纹的图到了再上架（最多等一秒半）

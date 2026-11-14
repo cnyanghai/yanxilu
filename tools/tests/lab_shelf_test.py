@@ -50,8 +50,8 @@ try:
         check("不带参数打开是四十本", until("idle", 40) and J("window.__lab.books.length") == 40, st()); pg.wait_for_timeout(400)
         # 2026-11-13 夜里用户定：进书架只看到书架。没有顶栏、底栏，工具纸收在屏幕外面，只有底下一道小把手
         bare = J("""(() => { const vis = [...document.body.querySelectorAll('header, footer, .bar, .foot, a, button, p, h1, h2')].filter(e => { const r = e.getBoundingClientRect(), c = getComputedStyle(e);
-          return e.id !== 'grab' && r.width > 0 && r.height > 0 && r.top < innerHeight && r.bottom > 0 && c.visibility !== 'hidden' && +c.opacity > .01 && !e.closest('#sheet'); }); return vis.map(e => e.id || e.className || e.tagName); })()""")
-        check("屏幕上只有书架：没有字和按钮，只有一道把手", bare == [] and grab_on() and not J("window.__lab.S.tools"), bare); shot("0-bare")
+          return e.id !== 'grab' && !e.closest('#marks') && r.width > 0 && r.height > 0 && r.top < innerHeight && r.bottom > 0 && c.visibility !== 'hidden' && +c.opacity > .01 && !e.closest('#sheet'); }); return vis.map(e => e.id || e.className || e.tagName); })()""")
+        check("屏幕上只有书架：没有字，只有底下一排换家具的记号和一道把手", bare == [] and grab_on() and not J("window.__lab.S.tools") and J("document.querySelector('#marks').innerText.trim()") == "", bare); shot("0-bare")
         check("四十本整座装在一屏里", J(INSIDE_JS) == 0, J(INSIDE_JS))
         r = pg.evaluate("(() => { const r = document.querySelector('#grab').getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()")
         pg.mouse.move(r["x"], r["y"]); pg.mouse.down(); pg.mouse.move(r["x"], r["y"] - 40, steps=4); pg.mouse.up(); pg.wait_for_timeout(500)
