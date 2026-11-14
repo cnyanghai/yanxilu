@@ -116,9 +116,18 @@ export const LOOKS = {
     cs: { frame: 0xfaf4e8, back: 0x1c5a61, wall: 0x4a9a9d, floor: 0x44929a, div: 0xfaf4e8, rough: .55, tex: null, ao: .3 },
     css: { bg: "#4A9A9D", ink: "#FFFFFF", ink2: "rgba(255,255,255,.82)", pane: "rgba(16,62,68,.74)", line: "rgba(255,255,255,.42)", on: "#134A50", halo: "rgba(8,48,54,.7)", sheet: "16,62,68", lab: "rgba(16,62,68,.9)", scheme: "dark" }, veil: 0x0e3a40,
   },
-  // 旧书房：暗处一盏暖灯，胡桃木的架子，各色布面的书；没读的腰封还在
+  // 旧书房：一盏暖灯，浅色木头的架子，各色布面的书；没读的腰封还在
+  /* 亮度（2026-11-15。用户在手机上看了说整间屋子特别暗、不好看，第一版那样亮一些才好）。量的是整屏平均明度 L*（0 黑、100 白，390×844 的屏）：
+   *   改之前四十本书的书架 28、只有几件东西时 16 到 23，暗像素（L* 不到 15）占三到五成；改之后 37 到 40，暗像素一成以内。
+   * 怎么亮起来的，书的颜色一点没动（布色是按这盏灯反推的，灯对着书脊的那一份不能变）：
+   *   1 主光放低（sun 的仰角从五十多度降到三十度），亮度跟着调小（4.7 → 3.3），朝前的面（书脊、架子正面、飞到眼前的牌）受的光和原来一样；
+   *     原来上面一层的层板把背板整片遮在影子里，背板只吃得到天光，所以架子里是黑的；现在背板大半照得到；
+   *   2 影子不压到全黑（shadowK：影子里还剩三成半的主光）；角落里的暗减轻（aoK .68 → .4）；灯光那一圈放大、圈外不再暗那么多（pool）；
+   *   3 木头浅一档：还是那张深色木纹的图，乘的颜色加大并且偏向绿和蓝（灯很暖，红不用加那么多），屏上是浅橡木色；背板比边框再浅一点，书的轮廓更清楚；
+   *   4 墙换成浅色的护墙板，地亮一档（底下那排记号是浅色的，地不能太亮）；网页上那层暗角从 .2 减到 .08。
+   * 木头别再往浅里调：赭黄那一系的书会和背板混在一起（现在背板亮处 L* 50，赭黄的书 70 上下） */
   study: {
-    name: "旧书房", bg: 0x1c1510, hemi: [0xffdcb0, 0x33241a, 1.35], key: [0xffd29a, 4.7], sun: [-.38, .95, .72], soft: 4,   // 2026-11-13 夜里用户在手机上看书发暗：天光 1.05 → 1.35，主光 3.5 → 4.7
+    name: "旧书房", bg: 0x4a3a2c, hemi: [0xffdcb0, 0x33241a, 1.35], key: [0xffd29a, 3.3], sun: [-.3, .5, .85], soft: 4,   // 2026-11-13 夜里用户在手机上看书发暗：天光 1.05 → 1.35，主光 3.5 → 4.7；2026-11-15 用户说整间屋子太暗：主光放低（见下面「亮度」）
     tones: ["#1E3F86", "#852B37", "#3A93A5", "#99CBFF", "#D1AC57", "#24201D"], pale: "#F4ECD8", inkLt: "#E7D3A0", inkSoft: "#3E2913", paper: "#E6D9BC", tab: "#FFE2A8", tabGlow: .7,   // tones：六类各自色系的头一个颜色（下面 bind.fams 的）；pale：腰封的纸
     gilt: "#E6C478",
     spine: "bound", font: CJK, bookRough: .82, grain: "cloth", jit: .1,
@@ -153,21 +162,21 @@ export const LOOKS = {
     // 造型（2026-11-13「造型」一门）。mould：架子的线脚，单位厘米。stile 壁柱比侧板往外宽多少、stileT 往前凸多少；frieze 压顶线下面那条平带多高；
     //   k 压顶线和底座线脚整体放大多少（1 是量参考时定的原大：压顶高 5.9 出 4.6，底座线脚出 2.2）
     // aoK：角落里的暗有多重（看光一门；架子里靠上、往里、贴着侧板的地方，墙和地靠近架子的一圈，都是按位置算的，不用贴图）。有了它就不用每层后面那片影子了（ao 归零）
-    cs: { frame: 0x6f4526, back: 0x2c1b10, wall: 0x3a2a1d, floor: 0x2a1c12, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", ao: 0, aoK: .68,
+    cs: { frame: 0x6f4526, back: 0x2c1b10, wall: 0xb9a585, floor: 0x2a1c12, div: 0x2a1a10, rough: .72, tex: "wood", tile: 64, wallTex: "panel", ao: 0, aoK: .4,
       mould: { stile: 1, stileT: 1, frieze: 2.6, k: .75 } },
     // 看光（2026-11-13「看光」一门）：灯光有一圈，不是到处一样亮。主光还是那盏平行光（影子不变），亮度按位置乘一个数：
     //   x、y 最亮的那一点在架子的哪里（宽、高的比例，中线是 0）；r 光圈多大（按宽高里大的那个算）；hi 圈心亮多少、lo 圈外暗到多少。
     //   只管贴着架子和墙的东西；抽出来飞到眼前的书不受影响
-    pool: { x: -.12, y: .7, r: .62, hi: 1.22, lo: .72 },
-    film: .02, vig: .2,                                              // 网页上那层暗角里掺的颗粒有多重（暗处的渐变在手机屏上容易看出一道道台阶，颗粒把它打散）
+    pool: { x: -.12, y: .62, r: .8, hi: 1.12, lo: .94 },
+    film: .02, vig: .08, shadowK: .65,                                              // 网页上那层暗角里掺的颗粒有多重（暗处的渐变在手机屏上容易看出一道道台阶，颗粒把它打散）
     // 书的样子：board 封面板厚、sq 封面比书芯多出来的一圈（飘口），都是厘米；sag 圆脊鼓出来多少（按书厚的比例）；seg 圆脊分几段
     book: { board: .25, sq: .3, sag: .22, seg: 6 },
-    css: { bg: "#1C1510", ink: "#F0DFC0", ink2: "rgba(240,223,192,.76)", pane: "rgba(26,18,12,.8)", line: "rgba(217,181,106,.5)", on: "#1A130E", halo: "rgba(0,0,0,.9)", sheet: "18,13,9", lab: "rgba(22,15,10,.9)", scheme: "dark" }, veil: 0x0b0806,
+    css: { bg: "#4A3423", ink: "#F0DFC0", ink2: "rgba(240,223,192,.76)", pane: "rgba(26,18,12,.8)", line: "rgba(217,181,106,.5)", on: "#1A130E", halo: "rgba(0,0,0,.9)", sheet: "18,13,9", lab: "rgba(22,15,10,.9)", scheme: "dark" }, veil: 0x0b0806,
     props: { pack: 0xc2a06c, band: 0x7a5a36, bandH: .5, notes: [0x3a2618, 0x1e2a45] },                           // 牌包是牛皮纸捆麻绳，和拆包页的那一包一个样
     // 真的材质（2026-11-13「材质」一门）：扫描的木头和书布，图在 vendor/tex/。tile：一张图铺多少厘米；grainX：木纹顺着图的横向走；
     //   tint：乘在木头图上的颜色（线性的三个数，可以大于一），架子、背板、地、拆包页的桌面各一个；depth：布纹凹多深
     real: {
-      wood: { map: "dark_wood_diff_1k.webp", rough: "dark_wood_rough_1k.webp", tile: 100, grainX: true, roughK: 1, tint: { frame: [1.45, 2.2, 2], back: [.25, .45, .5], floor: [.24, .5, .62], table: [.95, 1.3, 1.25] } },
+      wood: { map: "dark_wood_diff_1k.webp", rough: "dark_wood_rough_1k.webp", tile: 100, grainX: true, roughK: 1, tint: { frame: [2.5, 5.6, 5.2], back: [2.3, 5.9, 7.1], floor: [.9, 1.7, 2], table: [.95, 1.3, 1.25] } },
       cloth: { nor: "book_pattern_nor_gl_1k.webp", tile: 30, depth: 1.3 },
     },
     // 环境光（用代码搭一间暗屋子烘出来，不是下载的图）：屋子的底色与亮度；几盏灯（位置、大小、颜色、亮度）；k：烫金反多少
@@ -217,7 +226,7 @@ function applyLook() {
   const btn = document.getElementById("look"); if (!btn) return;
   btn.textContent = innerWidth < 430 ? "外观" : "外观：" + LOOK.name;      // 窄屏只写两个字，点开的单子里看得到现在是哪个
   const menu = document.createElement("div"); menu.className = "lookmenu"; menu.setAttribute("role", "menu");
-  const NOTE = { grey: "过门时的占位样子", study: "暗处一盏暖灯，布面烫金" };
+  const NOTE = { grey: "过门时的占位样子", study: "浅色的木头架子，一盏暖灯，布面烫金" };
   SHOWN.forEach((k) => {
     const b = document.createElement("button"); b.type = "button"; b.setAttribute("aria-pressed", String(k === LOOK_KEY)); b.dataset.look = k;
     b.textContent = LOOKS[k].name; const sm = document.createElement("small"); sm.textContent = NOTE[k]; b.appendChild(sm);
@@ -475,7 +484,7 @@ export function createStage(canvas) {
   scene.add(new THREE.HemisphereLight(LOOK.hemi[0], LOOK.hemi[1], LOOK.hemi[2]));
   const key = new THREE.DirectionalLight(LOOK.key[0], LOOK.key[1]); key.castShadow = true; scene.add(key, key.target);
   const sm = innerWidth * Math.min(devicePixelRatio || 1, 2) < 1500 ? 1024 : 2048; key.shadow.mapSize.set(sm, sm);
-  key.shadow.bias = -.0006; key.shadow.normalBias = .12; key.shadow.radius = LOOK.soft;
+  key.shadow.bias = -.0006; key.shadow.normalBias = .12; key.shadow.radius = LOOK.soft; if (LOOK.shadowK != null) key.shadow.intensity = LOOK.shadowK;
   makeEnv(renderer);
   return { renderer, scene, camera, key, maxAniso };
 }

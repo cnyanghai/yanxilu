@@ -1,6 +1,6 @@
 """立体书房（主站的 #shufang 一页）：把 lab/shelf.html 嵌进主站，架上摆的是账号里真的书、牌盒、本子，不是编的样品。
 三维那一页自己不取数据、不认账号，向主站要快照（window.parent.YXL_ROOM.snap()），要打开什么也交回主站：
-抽出来的书、本子、邮包再点它一下就进去（书到阅读器、书页或纸模版的书立，本子到本子页，邮包到纸模版的档案架去拆）；
+抽出来的书、本子、邮包再点它一下就进去（书到阅读器、书页或书立，本子到本子页，邮包到拆包页）；开的都是第二版自己的页，第一版（纸模直板）的顶栏、数字砖、架子不露面，两个版面只在工具纸和第一版页底明着换；
 开着的牌盒里，立着的那张背面朝上点一下翻开，面朝上再点一下读全文（主站的阅读器盖在书房上面，合上回到原处）。
 这一步只读：读没读是在阅读器里读出来的，翻开看一眼牌面不算。没登录时架上是书单里的书，工具纸里有「登录」。
 单独打开 lab/shelf.html 还是样品，工具纸里有一行「进我的书房」。
@@ -74,7 +74,8 @@ try:
         def tap_hero(F): r = F.evaluate("window.__lab.heroRect()"); pg.mouse.click(r["cx"], r["cy"])       # 真的点一下抽出来的那一件（iframe 铺满整屏，坐标就是屏上的）
         def swap(F, kind): F.evaluate("window.__lab.goto('%s')" % kind); return until(F, "window.__lab.state === 'idle' && window.__lab.kind === '%s'" % kind)
         hash_ = lambda: pg.evaluate("location.hash")
-        skin = lambda: pg.evaluate("(() => { const c = document.documentElement.classList; return { yx: c.contains('yx-scene') || c.contains('yx-dark'), room: c.contains('room-skin'), back: document.querySelectorAll('.room-back').length, bg: getComputedStyle(document.body).backgroundColor }; })()")
+        # 现在这一页是哪个版面：yx 墓园；page、rp 第二版自己的页和它是哪一种；bar 顶上那条「回书房」；v1 第一版的东西露出来几样（顶栏、数字砖、纸模的本子架、书墙、档案架那一栏、底下「换到第二版」）
+        skin = lambda: pg.evaluate("(() => { const d = document.documentElement, c = d.classList, on = (q) => [...document.querySelectorAll(q)].filter((e) => e.offsetParent !== null || getComputedStyle(e).position === 'fixed' && getComputedStyle(e).display !== 'none').length; return { yx: c.contains('yx-scene') || c.contains('yx-dark'), page: c.contains('room-page'), rp: d.getAttribute('data-rp') || '', bar: on('.rm-bar'), v1: on('.topbar') + on('.shelf-seg') + on('.nrack') + on('.w-left') + on('.arch-col') + on('.ver-sw'), bg: getComputedStyle(document.body).backgroundColor }; })()")
         def left(h): pg.wait_for_function("location.hash === '%s' && !document.querySelector('#room-frame')" % h, timeout=20000); pg.wait_for_timeout(500)      # 换页带一下淡接，等真的换完（书房那一页拿掉了）再看
         def settle(F, more="true"): ok = until(F, "window.__lab.state === 'open' && !window.__lab.box.busy && (%s)" % more, 40); pg.wait_for_timeout(250); return ok      # 牌还在发、还在翻的时候点了不算，等它停
 
@@ -91,14 +92,14 @@ try:
         rows = F.evaluate("({ demo: document.querySelector('#t-demo').hidden, host: document.querySelector('#t-host').hidden, n: document.querySelector('#seg-n').closest('.trow').hidden, who: document.querySelector('#t-who').textContent, login: document.querySelector('#b-login').hidden, lab: document.querySelector('#t-lab').hidden })")
         check("工具纸：写着谁的书房，没有「本数」「样品」「别的样机」，登录了就没有「登录」", rows == {"demo": True, "host": False, "n": True, "who": "测试用户 的书房", "login": True, "lab": True}, rows); shot("0-shelf")
 
-        # ---- 二 书：抽出来再点一下就进去。没挂电子书、没有书页的，去纸模版的书架（那里能挂）；有书页的去书页
+        # ---- 二 书：抽出来再点一下就进去。没挂电子书、没有书页的，开这本书的书立（第二版自己的页，那里能挂）；有书页的去书页
         bi = F.evaluate("window.__lab.books.findIndex(b => b.id === 'mb-t1')"); pull(F, bi)
         sh = F.evaluate("({ meta: document.querySelector('#s-meta').textContent, read: document.querySelector('#b-read').textContent, done: document.querySelector('#b-done').hidden, todo: document.querySelector('#b-todo').hidden })")
         check("抽出一本：底下写「再点一下这本书打开」，没有手标读没读的两行", "再点一下这本书打开" in sh["meta"] and "某人" in sh["meta"] and "页" not in sh["meta"] and sh["read"] == "去挂电子书" and sh["done"] and sh["todo"], sh); shot("1-book")
         tap_hero(F); left("#shelf")
-        check("再点一下这本书：到纸模版的书架，这本的书立开着，书房那一页拿掉了", pg.locator("#room-frame").count() == 0 and pg.locator(".pstand").count() == 1 and "测试放的一本书" in pg.locator(".pstand").inner_text() and pg.evaluate("getComputedStyle(document.querySelector('.topbar')).display") != "none")
+        check("再点一下这本书：这本的书立开着（能挂电子书），书房那一页拿掉了", pg.locator("#room-frame").count() == 0 and pg.locator(".pstand").count() == 1 and "测试放的一本书" in pg.locator(".pstand").inner_text() and "回书房" in pg.locator(".rm-bar").inner_text() and "测试放的一本书" in pg.locator(".rm-title").inner_text())
         sk = skin()
-        check("这一页不是墓园，是旧书房的颜色（深木头的底），底下有「回书房」", sk["yx"] is False and sk["room"] is True and sk["back"] == 1 and sk["bg"] == "rgb(43, 28, 17)", sk)
+        check("开的是第二版自己的页：不是墓园，第一版的顶栏、数字砖、书墙一样不露，顶上一条「回书房」，底是浅色的木头", sk["yx"] is False and sk["page"] is True and sk["rp"] == "book" and sk["bar"] == 1 and sk["v1"] == 0 and sk["bg"] == "rgb(138, 98, 56)", sk); shot("1b-book-page")
         pg.go_back(); F = lab()
         check("按返回：回到书房，上架那一段快进", F is not None and hash_() == "#shufang" and "quick=1" in F.url, F and F.url)
         bi = F.evaluate("window.__lab.books.findIndex(b => b.page && !b.eb)"); pull(F, bi)
@@ -110,8 +111,9 @@ try:
         # ---- 三 档案架：真的盒、真的牌；面朝上的再点一下读全文，阅读器盖在书房上面，合上回到原处
         check("换到档案架", swap(F, "rack"))
         rk = F.evaluate("window.__lab.books.map(b => (b.pack ? 'pack' : 'box') + ':' + b.title + ':' + b.n + ':' + b.u)")
-        few = F.evaluate("(() => { const L = window.__lab, r = L.rectOf(L.books.findIndex(b => b.id === 'ab-t1')); return { W: L.S.W, R: L.S.R, t: Math.min(...L.books.filter(b => !b.pack).map(b => b.t)), w: Math.round(r.r - r.l), h: Math.round(r.b - r.t) }; })()")
-        check("只有四件东西：架子缩到刚好装下、镜头靠近，一个盒在屏上有五十像素宽以上（原来不到二十）；最薄的盒也有四厘米", few["W"] <= 24 and few["t"] >= 4.2 and few["w"] >= 50 and few["h"] >= 170, few)
+        few = F.evaluate("(() => { const L = window.__lab, rs = L.books.map((b, i) => L.rectOf(i)), r = rs[L.books.findIndex(b => b.id === 'ab-t1')]; return { W: L.S.W, R: L.S.R, n: L.books.length, t: Math.min(...L.books.filter(b => !b.pack).map(b => b.t)), w: Math.round(r.r - r.l), h: Math.round(r.b - r.t), low: Math.round(Math.max(...rs.map(x => x.b))), left: Math.round(Math.min(...rs.map(x => x.l))) }; })()")
+        check("只有四件东西：架子还是固定的大小（三层、装满一屏），东西从左上角摆起，下面两层空着等着添；一个盒在屏上三十六像素宽以上，最薄的盒也有四厘米",
+              few["R"] == 3 and 24 <= few["W"] <= 34 and few["n"] == 4 and few["t"] >= 4.2 and few["w"] >= 36 and few["h"] >= 110 and few["low"] < 844 * .42 and few["left"] < 390 * .3, few)
         check("档案架上是账号里的盒和一包没拆的剪报", any(x.startswith("box:测试的盒:4:3") for x in rk) and any(x.startswith("pack:") and x.endswith(":1:1") for x in rk), rk); shot("2-rack")
         xi = F.evaluate("window.__lab.books.findIndex(b => b.id === 'ab-t1')"); pull(F, xi); tap_hero(F)
         check("抽出这一盒再点一下：打开成扇", settle(F))
@@ -142,9 +144,13 @@ try:
         pi = F.evaluate("window.__lab.books.findIndex(b => b.pack)"); pull(F, pi)
         check("没拆的邮包：底下写「再点一下去拆」", "再点一下去拆" in F.evaluate("document.querySelector('#s-meta').textContent"))
         tap_hero(F); left("#archive")
-        check("再点一下邮包：到纸模版的档案架，这一袋摆在桌上等着拆", pg.locator("#room-frame").count() == 0 and pg.locator(".ytable .ybag.sealed").count() == 1)
+        sk = skin()
+        check("再点一下邮包：开的是第二版自己的拆包页，这一袋摆在桌上等着拆；第一版的顶栏、数字砖、档案架都不露", pg.locator("#room-frame").count() == 0 and pg.locator(".ytable .ybag.sealed").count() == 1 and sk["yx"] is False and sk["rp"] == "pack" and sk["bar"] == 1 and sk["v1"] == 0, sk); shot("5b-pack-page")
         pg.go_back(); F = lab()
         check("按返回：回到书房，还在档案架前", F is not None and F.evaluate("window.__lab.kind") == "rack" and "f=rack" in F.url, F and F.url)
+        pi = F.evaluate("window.__lab.books.findIndex(b => b.pack)"); pull(F, pi); tap_hero(F); left("#archive")
+        pg.keyboard.press("Escape"); F = lab()
+        check("拆包页上按 Esc 合上：直接回书房，不落到第一版的档案架上", F is not None and hash_() == "#shufang" and F.evaluate("window.__lab.kind") == "rack", hash_())
 
         # ---- 四 笔记本架：抽出来再点一下就翻开（到本子页，能写）
         check("换到笔记本架", swap(F, "notes"))
@@ -153,16 +159,25 @@ try:
         pull(F, 1)
         check("抽出测试本：底下写「再点一下本子翻开」", "再点一下本子翻开" in F.evaluate("document.querySelector('#s-meta').textContent")); shot("7-note-out")
         tap_hero(F); left("#nb-t1")
-        sk = skin(); check("本子页不是墓园，是旧书房的颜色", sk["yx"] is False and sk["room"] is True and sk["back"] == 1, sk)
+        sk = skin(); check("本子页是第二版自己的页：不是墓园，第一版的顶栏、数字砖、纸模本子架一样不露，顶上一条「回书房」写着本名", sk["yx"] is False and sk["page"] is True and sk["rp"] == "note" and sk["bar"] == 1 and sk["v1"] == 0 and "测试本" in pg.locator(".rm-title").inner_text(), sk)
         txt = pg.locator("#main").inner_text()
-        check("再点一下本子：翻开了，是这一本的这一页（纸模版的本子页，在那里写）", pg.locator("#room-frame").count() == 0 and "写了点什么" in txt and "第一页" in txt and "撕掉这一页" in txt)
+        check("再点一下本子：翻开了，是这一本的这一页，能在上面写", pg.locator("#room-frame").count() == 0 and "写了点什么" in txt and "第一页" in txt and "撕掉这一页" in txt)
         shot("8-note-page")
-        pg.click(".room-back"); F = lab()
+        pg.reload(); pg.wait_for_timeout(1200); sk = skin()
+        check("在本子页上刷新：还是第二版自己的页", sk["page"] is True and sk["rp"] == "note" and sk["v1"] == 0 and "写了点什么" in pg.locator("#main").inner_text(), sk)
+        pg.click(".rm-back"); F = lab()
         check("点「回书房」：回到书房，还在笔记本架前", F is not None and hash_() == "#shufang" and F.evaluate("window.__lab.kind") == "notes")
         pull(F, 0); tap_hero(F); left("#notes")
-        pg.wait_for_timeout(500); check("随手本：翻到今天这一页", "今天的一段" in pg.locator("#main").inner_text())
-        pg.goto(B + "/#notes"); pg.reload(); pg.wait_for_timeout(1200); sk = skin()      # 重新载入：这一次不是从书房走出来的
-        check("直接打开纸模的本子页（不经过书房）：还是牛皮纸，也不是墓园，没有「回书房」", sk["yx"] is False and sk["room"] is False and sk["back"] == 0, sk)
+        pg.wait_for_timeout(500); sk = skin(); check("随手本：翻到今天这一页，也是第二版自己的页", "今天的一段" in pg.locator("#main").inner_text() and sk["rp"] == "note" and sk["v1"] == 0 and "随手本" in pg.locator(".rm-title").inner_text(), sk); shot("9-note-daily")
+        pg.click(".rm-back"); F = lab()
+        # 明着换版面：第二版工具纸里的「换到第一版」，第一版页底的「换到第二版」
+        lbl = F.evaluate("document.querySelector('#b-paper').textContent"); F.evaluate("document.querySelector('#b-paper').click()"); left("#notes"); sk = skin()
+        check("工具纸里点「换到第一版」：是原样的第一版（顶栏、数字砖、纸模本子架都在，牛皮纸的底），不带第二版的东西", lbl == "换到第一版" and sk["yx"] is False and sk["page"] is False and sk["rp"] == "" and sk["bar"] == 0 and sk["v1"] >= 4 and sk["bg"] != "rgb(138, 98, 56)", (lbl, sk)); shot("10-v1-notes")
+        pg.click(".ver-sw a"); F = lab()
+        check("第一版页底点「换到第二版」：回到书房", F is not None and hash_() == "#shufang")
+        pg2 = ctx.new_page(); pg2.goto(B + "/#notes"); pg2.wait_for_timeout(1500)      # 新开一个标签页：这一次不是从书房翻开的
+        d = pg2.evaluate("(() => { const d = document.documentElement; return { page: d.classList.contains('room-page'), yx: d.classList.contains('yx-scene'), bar: document.querySelectorAll('.rm-bar').length, top: getComputedStyle(document.querySelector('.topbar')).display }; })()"); pg2.close()
+        check("直接打开第一版的本子页（不经过书房）：还是第一版，也不是墓园，没有「回书房」", d == {"page": False, "yx": False, "bar": 0, "top": d["top"]} and d["top"] != "none", d)
         check("登录着走完一遍没有报错", not errs, errs[:6])
         ctx.close()
 

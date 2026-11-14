@@ -2689,19 +2689,39 @@ html.gate-mode main{padding:0;max-width:none}
 /* 立体书房 #shufang（2026-11-14）：整屏一页嵌着 lab/shelf.html；主站的顶栏、导航收起，阅读器（.rd，80）还盖得住它 */
 html.room-mode .topbar,html.room-mode .mainnav{display:none}
 html.room-mode main{padding:0;max-width:none}
-html.room-mode,html.room-mode body{overflow:hidden;background:#120D09}
-#room-frame{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:60;background:#120D09}
-/* 从立体书房走出来的纸模页（本子页、书架、档案架）换成旧书房的颜色（2026-11-14 用户：本子打开以后应该是现在的主题、现在的日记形式）。
-   只换纸模那一套变量，版面、材质、字一点不动：底是深胡桃木，面是旧纸（和牌面同一个纸色），品牌与主操作是枣红，没选中的砖是藏青。
-   选中没选中仍然靠明暗（旧纸对藏青），不靠色相。直接打开纸模页（不经过书房）还是原来的牛皮纸。阅读器不跟着变。 */
-html.room-skin.room-skin:root{--pp-kraft:#2B1C11;--pp-kraft-2:#5B3B22;--pp-kraft-3:#22150C;--pp-kraft-dk:#1B110A;--pp-kraft-bk:#120B06;
-  --pp-cream:#E2D1AC;--pp-cream-2:#EFE2C4;--pp-sheet:#EFE2C4;--pp-hi:#F6ECD2;--pp-well:#C8B48A;
+html.room-mode,html.room-mode body{overflow:hidden;background:#4A3423}
+#room-frame{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:60;background:#4A3423}
+/* 第二版自己的页（2026-11-15 用户定：两个版面分开，第二版里翻开本子不能变成第一版的版面）。
+   在书房里翻开本子、拆邮包、看一本书的页时，html 上挂 room-page，data-rp 说是哪一种（note / pack / book，见 app.js 的 ROOM）。
+   第一版的东西一样不露：顶栏（邮差、搜索、账号）、三块数字砖、纸模的架子、底下一排导航都收起；只留那一样东西，顶上一条「回书房」。
+   颜色是第二版的：浅色的木头桌面上一张旧纸（和牌面同一个纸色），主操作枣红，没选中的砖藏青；选中没选中仍然靠明暗，不靠色相。
+   纸上不叠纸浆的颗粒（用户说那层雪花纹不好看）。直接打开第一版的页一点不变。阅读器不跟着变。 */
+html.room-page.room-page:root{--pp-kraft:#8A6238;--pp-kraft-2:#A87A48;--pp-kraft-3:#77532E;--pp-kraft-dk:#5E4124;--pp-kraft-bk:#3A2715;
+  --pp-cream:#E8D9B6;--pp-cream-2:#F3E8CC;--pp-sheet:#F3E8CC;--pp-hi:#FAF2DC;--pp-well:#D2BF96;
   --pp-terra:#8C2C1E;--pp-terra-dk:#6C2016;--pp-olive:#2C3857;--pp-olive-dk:#1E2740;
-  --pp-ink:#2A1A10;--pp-ink-2:#4A3320;--pp-ink-3:#6B5238;--pp-black:#1C1410;--pp-copper:#C9A24E;--pp-shade:8,5,2}
-body.desk-on .room-back{display:none}
-/* 从书房走到纸模页以后，左下角一枚「回书房」（手机装成 App 时没有返回键） */
-.room-back{position:fixed;left:0;right:0;margin:0 auto;width:max-content;bottom:calc(22px + env(safe-area-inset-bottom,0px));z-index:70;text-decoration:none}
-@media (max-width:720px){.room-back{bottom:calc(88px + env(safe-area-inset-bottom,0px))}}
+  --pp-ink:#2A1A10;--pp-ink-2:#4A3320;--pp-ink-3:#6B5238;--pp-black:#1C1410;--pp-copper:#C9A24E;--pp-shade:40,24,10;--pp-pulp:none}
+html.room-page .topbar,html.room-page .banner{display:none}
+html.room-page body{background:#8A6238 linear-gradient(180deg,rgba(255,236,200,.16),rgba(40,22,8,.2)) fixed}
+html.room-page main{max-width:1040px;padding:0 16px calc(48px + env(safe-area-inset-bottom,0px))}
+.rm-bar{position:sticky;top:0;z-index:40;display:flex;align-items:center;gap:14px;margin:0 -16px 14px;padding:calc(10px + env(safe-area-inset-top,0px)) 16px 10px;background:linear-gradient(180deg,#77532E,rgba(119,83,46,.94));box-shadow:0 1px 0 rgba(255,236,200,.18),0 6px 14px -8px rgba(30,16,6,.7)}
+.rm-back{flex:none;display:inline-flex;align-items:center;gap:6px;min-height:40px;padding:0 16px 0 12px;border-radius:20px;background:#8C2C1E;color:#FAF2DC;font:600 15px/1 var(--f-display);letter-spacing:.08em;text-decoration:none;box-shadow:inset 0 1px 0 rgba(255,236,200,.25),0 2px 0 #5A1A10}
+.rm-back b{font-size:20px;font-weight:400;line-height:1;margin-top:-2px}
+.rm-back:hover,.rm-back:focus-visible{background:#9C3424;color:#FFF8E4;outline:none}
+.rm-back:focus-visible{box-shadow:0 0 0 2px #FAF2DC}
+.rm-title{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#FAF2DC;font:600 17px/1.2 var(--f-display);letter-spacing:.1em;text-shadow:0 1px 0 rgba(30,16,6,.5)}
+.ver-sw{margin:26px 0 0;text-align:center;font:13px/1.6 var(--f-ui);letter-spacing:.08em}
+.ver-sw a{color:var(--pp-ink-2);text-decoration:underline;text-underline-offset:4px;text-decoration-color:rgba(var(--pp-shade),.4)}
+.ver-sw a:hover{color:var(--pp-ink)}
+html.room-page .ver-sw,body.desk-on .ver-sw{display:none}
+html.room-page[data-rp="note"] .notes-v > .phead,html.room-page[data-rp="note"] .nrack{display:none}
+html.room-page[data-rp="note"] .nbk{min-height:calc(100vh - 150px)}
+html.room-page[data-rp="pack"] .archive-v > .phead,html.room-page[data-rp="pack"] .arch-col,html.room-page[data-rp="pack"] .yd-eye [data-act="desk-close"]{display:none}
+html.room-page[data-rp="pack"] .arch-main{display:block;margin:0}
+html.room-page[data-rp="pack"] .ytable{position:static;z-index:auto;max-width:none;border-radius:12px;overflow:visible;padding:18px 18px 28px;box-shadow:var(--raise)}
+html.room-page[data-rp="pack"] body.desk-on{overflow:auto}
+html.room-page[data-rp="book"] .w-head,html.room-page[data-rp="book"] .w-left{display:none}
+html.room-page[data-rp="book"] .w-main{display:block;max-width:420px;margin:0 auto}
+html.room-page[data-rp="book"] .view > header .eyebrow a{pointer-events:none;color:inherit;text-decoration:none}
 .yx-gate{position:relative;min-height:100vh;background:#0D141A url(vendor/ui/tiles/night.webp) center/512px;overflow:hidden}
 .yx-gate-img{position:relative;height:100vh;aspect-ratio:2/3;margin:0 auto;max-width:100%;overflow:hidden}
 @media (max-aspect-ratio:2/3){.yx-gate-img{height:auto;width:100%}}

@@ -352,15 +352,19 @@ function slotPos(i) {                                             // 一件东�
   return b.face ? { x: s.x, y: rowY(s.r) + b.h / 2, z: -RECESS - 2.4 - b.t / 2, ry: -Math.PI / 2, rz: LEAN } : { x: s.x, y: rowY(s.r) + b.h / 2, z: -RECESS - b.d / 2, ry: 0, rz: 0 };
 }
 const LEAN = .13;
-function chooseW(aspect) {                                       // 架子的宽和层数跟着屏幕的形状走：两种排法都放得下、整座正好装进一屏；最底下一层别只剩零星几本
+/* 架子有一个固定的大小，东西少也是这么大（2026-11-15 用户定）：一上来就是一座装满一屏的架子，东西从左上角一件一件往上添，空着的地方就是还能放的地方。
+ * 竖屏三层、横屏两层，宽跟着屏幕的形状定，三件家具一个规矩。装不下了才长：再往下找一个两种排法都放得下、整座正好装进一屏的宽和层数。
+ * 试过两种都被用户否了：一律三十六厘米宽、一层（屏幕中间一个小盒子）；跟着东西缩到刚好装下（2026-11-14，只有一两件时就剩一格） */
+function chooseW(aspect) {
   let best = null, wide = 0; for (const b of books) wide = Math.max(wide, WX(b));
-  // 最窄能到多窄：原来一律三十六厘米起，东西只有几件时架子里空着一大半、东西在屏上又小（2026-11-14 用户说像一个小盒子、很空）。
-  // 现在窄到刚好放下最宽的那一件，件数少的时候架子跟着缩、镜头跟着靠近，东西在屏上就大
-  for (let W = Math.max(12, Math.ceil((wide + 2 * K.pad) / 2) * 2); W <= 460; W += 2) {
-    const a1 = pack("topic", W), a2 = S.kind === "shelf" ? pack("state", W) : a1, big = a2.R > a1.R ? a2 : a1, R = big.R;
-    const lastFill = big.rows[R - 1].reduce((sum, bi) => sum + WX(books[bi]), 0) / W;
+  const minW = Math.max(12, Math.ceil((wide + 2 * K.pad) / 2) * 2), need = (W) => { const a1 = pack("topic", W), a2 = S.kind === "shelf" ? pack("state", W) : a1; return a2.R > a1.R ? a2 : a1; };
+  const R0 = aspect < 1 ? 3 : 2, W0 = Math.max(minW, Math.round((Math.min(aspect, 1.8) * (R0 * (SH + BT) + BT + PL) - 2 * ST) / 2) * 2);
+  if (need(W0).R <= R0) return { W: W0, R: R0, sc: 0 };
+  for (let W = minW; W <= 460; W += 2) {
+    const big = need(W), R = Math.max(big.R, R0);
+    const lastFill = big.R < R ? 1 : big.rows[R - 1].reduce((sum, bi) => sum + WX(books[bi]), 0) / W;
     // 牌盒和本子件数少、一件又宽：每层右边空出一大截就像没摆满的书架，所以空得多的宽度扣分（最后一层不算）
-    const slack = S.kind === "shelf" || R < 2 ? 0 : big.rows.slice(0, -1).reduce((sum, row) => sum + 1 - (row.reduce((u, bi) => u + WX(books[bi]) + K.gap, 0) + 2 * K.pad) / W, 0) / (R - 1);
+    const slack = S.kind === "shelf" || big.R < 2 ? 0 : big.rows.slice(0, -1).reduce((sum, row) => sum + 1 - (row.reduce((u, bi) => u + WX(books[bi]) + K.gap, 0) + 2 * K.pad) / W, 0) / (big.R - 1);
     const a = (W + 2 * ST) / (R * (SH + BT) + BT + PL), sc = Math.abs(Math.log(a / aspect)) * (a > aspect ? 1.3 : 1) + .6 * Math.max(0, .5 - lastFill) + 2.5 * Math.max(0, slack - .06);   // 比屏幕扁的多扣一点：宁可瘦高、把屏幕的高用满，上下不留一大片墙
     if (!best || sc < best.sc - 1e-6) best = { W, R, sc };
   }

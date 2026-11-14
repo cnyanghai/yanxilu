@@ -3138,7 +3138,7 @@ var FOIL = (function () {
     return '<div class="view shelf archive-v">' + bannerHTML() +
       '<header class="phead arch-head"><div>' + shelfSeg("archive") + "</div>" +
       '<div class="arch-side"><label class="arch-q"><span aria-hidden="true">找</span><input id="arch-q" type="search" autocomplete="off" placeholder="按问题找：周期、利率、库存" value="' + esc(S.archQ || "") + '" aria-label="在档案架里找"></label></div></header>' +
-      '<div class="arch-main' + (S.deskOpen ? " has-desk" : "") + '"><div class="arch-col">' + cabSec + boxOffHTML() + clipBarHTML() + "</div>" + deskHTML() + "</div>" + boxSheetHTML() + "</div>";
+      '<div class="arch-main' + (S.deskOpen ? " has-desk" : "") + '"><div class="arch-col">' + cabSec + boxOffHTML() + clipBarHTML() + "</div>" + deskHTML() + "</div>" + boxSheetHTML() + verSwHTML() + "</div>";
   }
   /* 搜索框：不重画页面，只把不相关的盒子调暗 */
   function applyArchFilter() {
@@ -3584,10 +3584,12 @@ var FOIL = (function () {
       });
     });
   }
+  /* 第一版三件家具的页最底下一行小字：换到第二版（实木书架的书房）。两个版面各走各的，只在这里和第二版的工具纸里明着换 */
+  function verSwHTML() { return APP ? "" : '<p class="ver-sw"><a href="#shufang">换到第二版：实木书架</a></p>'; }
   function shelfHTML() {
     return '<div class="view shelf wallv">' + bannerHTML() +
       '<header class="w-head">' + shelfSeg("shelf") + '<div class="w-tools">' + (S.canEdit ? '<button type="button" class="btn small w-add" data-act="add-book" aria-label="放一本书"><b aria-hidden="true">＋</b><span>放一本书</span></button>' : "") + "</div></header>" +
-      '<div class="w-main"><div class="w-left">' + wallHTML() + hiddenListHTML() + "</div>" + stageHTML() + "</div>" + addSheetHTML() + domSheetHTML() + "</div>";
+      '<div class="w-main"><div class="w-left">' + wallHTML() + hiddenListHTML() + "</div>" + stageHTML() + "</div>" + addSheetHTML() + domSheetHTML() + verSwHTML() + "</div>";
   }
 
   /* ---------- 方向页 ---------- */
@@ -4406,7 +4408,7 @@ var FOIL = (function () {
     var head = '<div class="view shelf notes-v">' + bannerHTML() +
       '<header class="phead arch-head"><div>' + shelfSeg("notes") + "</div>" +
       (S.canEdit ? '<button type="button" class="btn ghost np-jot" data-act="jot">✎ 记一笔 <kbd>N</kbd></button>' : "") + "</header>" + rack;
-    return head + (ctx.nb === NB_DAILY ? dailySpreadHTML(ctx.date) : topicSpreadHTML(ctx)) + nbSheetHTML() + "</div>";
+    return head + (ctx.nb === NB_DAILY ? dailySpreadHTML(ctx.date) : topicSpreadHTML(ctx)) + nbSheetHTML() + verSwHTML() + "</div>";
   }
   function npBodyHTML(key, text, editing, label) {
     var rows = Math.max(8, text.split("\n").length + 2);
@@ -6102,7 +6104,21 @@ var FOIL = (function () {
    * 三维那一页自己不取数据、不认账号：它在 iframe 里向这里要一张快照（roomSnap），要打开什么也交回这里（roomOpen）。
    * 读没读、哪一盒有哪些牌、哪本本子有几页，都还是上面那些函数算的，只有这一处算法。这一步只读：三维那一页不写任何记录，
    * 读没读是在阅读器里读出来的（和纸模版一样）。iframe 挂在 body 上、不放进 #main：render() 每次都重写 #main，放进去会把它重载。 */
-  var ROOM = { el: null, got: {}, seen: false, t: 0, via: false };      // via：这一次是从书房走出来的（纸模页上留一枚「回书房」，手机装成 App 时没有返回键）
+  /* 两个版面分开（2026-11-15 用户定）：第一版是纸模的直板版面（顶上邮差、三块数字砖、底下一排导航），第二版是实木书架的书房。两版都留着，互不串：
+   * 在第二版里翻开本子、拆邮包、看一本书的页，开的是第二版自己的页（page）：只有那一样东西和顶上一条「回书房」，没有第一版的顶栏、数字砖、纸模架子和底栏。
+   * 读写的规矩还是下面那些函数（一处算法），只是换了外壳：html 上挂 room-page 和 data-rp，样式在 page.html「第二版自己的页」。
+   * page 记在这个标签页里（刷新、前进后退都还在）；走到别的页、或者点了「第一版」就清掉，之后看到的就是原样的第一版。 */
+  var ROOM = { el: null, got: {}, seen: false, t: 0, page: "" };
+  var ROOM_RP = { note: /^(notes|nb-|np-t-)/, pack: /^archive$/, book: /^(shelf$|b-|r-)/ };
+  try { ROOM.page = sessionStorage.getItem("yxl-room-page") || ""; if (!ROOM_RP[ROOM.page]) ROOM.page = ""; } catch (e) { /* 忽略 */ }
+  function roomPage(k) { ROOM.page = k || ""; try { sessionStorage.setItem("yxl-room-page", ROOM.page); } catch (e) { /* 忽略 */ } }
+  function roomBarHTML() {
+    var r = S.route, t = "";
+    if (ROOM.page === "note") { var cx = npCtx(), bk = nbGet(cx.nb); t = bk ? bk.name : "本子"; }
+    else if (ROOM.page === "pack") t = "拆邮包";
+    else { var bid = /^[br]-/.test(r) ? r.replace(/^r-(.+)-\d+$/, "$1").replace(/^b-/, "") : S.shelfPick, it = ITEMS[bid] || LIB.books[bid]; t = it ? String(it.title).replace(/（.*）$/, "") : "这本书"; }
+    return '<div class="rm-bar"><a class="rm-back" href="#shufang" aria-label="合上，回书房"><b aria-hidden="true">‹</b>回书房</a><span class="rm-title">' + esc(t) + "</span></div>";
+  }
   function roomReady() { return S.mode === "local" || (S.mode === "db" && COLLS.every(function (c) { return ROOM.got[c]; })); }
   function roomMount() {
     if (ROOM.el) return;
@@ -6166,11 +6182,11 @@ var FOIL = (function () {
   function roomOpen(kind, id) {
     if (kind === "book") {
       if (ebookOf(id)) { readerOpen(id); return "reader"; }
-      ROOM.via = true;
+      roomPage("book");
       if (ROUTES["b-" + id]) { location.hash = "#b-" + id; return "page"; }
-      S.shelfPick = id; location.hash = "#shelf"; return "page";             // 还没挂电子书：到纸模版的书架上，这本的书立里能挂
+      S.shelfPick = id; S.shelfF = "all"; location.hash = "#shelf"; return "page";             // 还没挂电子书：只开这本书的书立（能挂、能改状态），不带书墙
     }
-    if (kind === "note") { ROOM.via = true; location.hash = id === NB_DAILY ? "#notes" : "#" + id; return "page"; }
+    if (kind === "note") { roomPage("note"); location.hash = id === NB_DAILY ? "#notes" : "#" + id; return "page"; }
     if (kind === "card") {
       var c = (S.data.clips || {})[id];
       if (c && c.status !== "link") { readerOpen(id); return "reader"; }
@@ -6178,8 +6194,8 @@ var FOIL = (function () {
       if (href && (!c || /^https?:\/\//i.test(href))) { window.open(new URL(href, document.baseURI).href, "_blank", "noopener"); return "tab"; }      // 剪报的原文只认 http(s) 的地址；自己的档案是相对地址，要照主站这一页来拼（这个函数是三维那一页叫的，不拼会照它的地址拼成 lab/reports/…）
       return "";
     }
-    if (kind === "pack") { ROOM.via = true; S.archPick = "cf:" + id; S.archF = "all"; S.deskOpen = true; S.clipDel = null; location.hash = "#archive"; return "page"; }      // 和在纸模版的架子上点这只袋子一样：桌面开着，袋子等着拆
-    if (kind === "paper") { ROOM.via = true; location.hash = id === "rack" ? "#archive" : id === "notes" ? "#notes" : "#shelf"; return "page"; }
+    if (kind === "pack") { roomPage("pack"); S.archPick = "cf:" + id; S.archF = "all"; S.deskOpen = true; S.clipDel = null; location.hash = "#archive"; return "page"; }      // 和在纸模版的架子上点这只袋子一样：桌面开着，袋子等着拆
+    if (kind === "paper") { roomPage(""); location.hash = id === "rack" ? "#archive" : id === "notes" ? "#notes" : "#shelf"; return "page"; }      // 明着换到第一版：原样的第一版，不带第二版的任何东西
     if (kind === "login") { if (ON_SERVER && SRV) location.href = SRV.loginHref(); return "page"; }
     return "";
   }
@@ -6205,7 +6221,12 @@ var FOIL = (function () {
     var inRoom = S.route === "shufang";
     document.documentElement.classList.toggle("room-mode", inRoom);
     if (inRoom) roomMount(); else roomUnmount();
-    document.documentElement.classList.toggle("room-skin", ROOM.via && !inRoom && /^(shelf|archive|notes|nb-|np-t-)/.test(S.route));      // 从书房走出来的这几页换成旧书房的颜色（变量在 page.html）
+    if (ROOM.page && !inRoom && !ROOM_RP[ROOM.page].test(S.route)) roomPage("");                                    // 走到别的页去了：不再是第二版的页
+    if (ROOM.page === "pack" && S.route === "archive" && !(S.deskOpen && looseClips(/^cf:/.test(S.archPick || "") ? S.archPick.slice(3) : "\u0000").length)) { location.replace("#shufang"); return; }      // 拆完了，或者合上了：回书房（第一版的档案架不露面）
+    if (ROOM.page === "book" && S.route === "shelf" && !(S.shelfPick && ITEMS[S.shelfPick])) { location.replace("#shufang"); return; }      // 书立上没有书了（刷新过、或者把书收起了）：回书房
+    var rp = inRoom ? "" : ROOM.page;
+    document.documentElement.classList.toggle("room-page", !!rp);
+    if (rp) document.documentElement.setAttribute("data-rp", rp); else document.documentElement.removeAttribute("data-rp");
     document.documentElement.classList.toggle("yx-scene", LK().scene === "youchai"); yxNightApply();
     document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai");
     document.documentElement.classList.toggle("yx-app", APP); document.documentElement.classList.toggle("yx-app-scene", APP && /^(shelf|archive|notes)/.test(S.route));
@@ -6232,8 +6253,8 @@ var FOIL = (function () {
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
-    $("#main").innerHTML = html + (r === "clip" || inRoom ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML()) + (r === "shelf" ? yxCoverHTML() : "") +
-      (ROOM.via && !inRoom && r !== "clip" ? '<a class="btn small room-back" href="#shufang">回书房</a>' : "");
+    $("#main").innerHTML = (rp ? roomBarHTML() : "") + html + (r === "clip" || inRoom ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML()) + (r === "shelf" ? yxCoverHTML() : "") +
+      "";
     if (inRoom) roomSync();
     document.body.classList.toggle("desk-on", !!document.querySelector(".ydesk") || (!!document.querySelector(".ytable") && window.innerWidth < 1100));
     wallPack(); grimHydrate(); yxMount(); yxStageMount();
