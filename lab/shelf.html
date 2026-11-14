@@ -101,7 +101,7 @@
       <button type="button" data-mark="tab" aria-pressed="false">白签</button>
     </div>
   </div>
-  <div class="trow" data-only="shelf"><span>本数</span>
+  <div class="trow" data-only="shelf" data-demo><span>本数</span>
     <div class="seg" id="seg-n" role="group" aria-label="本数">
       <button type="button" data-n="40" aria-pressed="true">40 本</button>
       <button type="button" data-n="120" aria-pressed="false">120</button>
@@ -119,7 +119,15 @@
     <button type="button" class="snd" id="snd" aria-pressed="true" aria-label="声音">声音</button>
     <button type="button" class="go" id="look" aria-haspopup="menu">外观</button>
   </div>
-  <div class="trow"><span>别的样机</span>
+  <!-- 单独打开这一页是样品（书是编的）；嵌在主站的 #shufang 里才是账号里真的书、牌盒、本子 -->
+  <div class="trow" id="t-demo"><span>这一页是样品，书是编的</span>
+    <a class="go" href="../#shufang" target="_top">进我的书房</a>
+  </div>
+  <div class="trow" id="t-host" hidden><span id="t-who"></span>
+    <button type="button" class="go" id="b-login" hidden>登录</button>
+    <button type="button" class="go" id="b-paper">纸模版</button>
+  </div>
+  <div class="trow" id="t-lab"><span>别的样机</span>
     <a class="go" href="./">拆包</a>
     <a class="go" href="./door.html">进门</a>
   </div>

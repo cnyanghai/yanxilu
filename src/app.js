@@ -202,7 +202,7 @@
         try {
           db.collection(c).onSnapshot(function (snap) {
             var m = {}; snap.docs.forEach(function (d) { if (d.exists) m[d.id] = d.data(); });
-            S.data[c] = m; scheduleRender();
+            S.data[c] = m; ROOM.got[c] = 1; scheduleRender();
           }, function (e) {
             if (e && e.code === "revoked") { S.canEdit = false; scheduleRender(); return; }
             toast("记录同步中断，刷新页面即可恢复。");
@@ -6097,7 +6097,97 @@ var FOIL = (function () {
   }
 
   /* ---------- 主渲染 ---------- */
-  var ROUTES = { home: 1, gate: 1, shelf: 1, archive: 1, journal: 1, clip: 1, marks: 1, notes: 1 };
+  /* ---------- 立体书房 #shufang（2026-11-14）：把 lab/shelf.html 嵌进来，架上摆账号里真的书、牌盒、本子 ----------
+   * 三维那一页自己不取数据、不认账号：它在 iframe 里向这里要一张快照（roomSnap），要打开什么也交回这里（roomOpen）。
+   * 读没读、哪一盒有哪些牌、哪本本子有几页，都还是上面那些函数算的，只有这一处算法。这一步只读：三维那一页不写任何记录，
+   * 读没读是在阅读器里读出来的（和纸模版一样）。iframe 挂在 body 上、不放进 #main：render() 每次都重写 #main，放进去会把它重载。 */
+  var ROOM = { el: null, got: {}, seen: false, t: 0 };
+  function roomReady() { return S.mode === "local" || (S.mode === "db" && COLLS.every(function (c) { return ROOM.got[c]; })); }
+  function roomMount() {
+    if (ROOM.el) return;
+    var f = document.createElement("iframe"), k = "";
+    try { k = sessionStorage.getItem("yxl-room-f") || ""; } catch (e) { /* 忽略 */ }
+    f.id = "room-frame"; f.title = "书房";
+    f.src = (APP ? "../" : "") + "lab/shelf.html?host=1" + (/^(shelf|rack|notes)$/.test(k) ? "&f=" + k : "") + (ROOM.seen ? "&quick=1" : "");      // 从阅读页、本子页回来：回到刚才那一件家具前，上架那一段快进
+    document.body.appendChild(f); ROOM.el = f; ROOM.seen = true;
+  }
+  function roomUnmount() { if (!ROOM.el) return; if (ROOM.el.parentNode) ROOM.el.parentNode.removeChild(ROOM.el); ROOM.el = null; }
+  /* 记录变了（读完一篇、别的设备上加了书）：叫三维那一页自己比一下、有变化再重摆。render() 调得勤，这里攒一下 */
+  function roomSync() {
+    clearTimeout(ROOM.t);
+    ROOM.t = setTimeout(function () { try { var w = ROOM.el && ROOM.el.contentWindow; if (w && w.__lab && w.__lab.sync) w.__lab.sync(); } catch (e) { /* 那一页还没起来 */ } }, 80);
+  }
+  function roomCard(rp, tp, vol, i) {
+    var c = rp.clip, d = String(rp.date || ""), min = c ? cardMin(rp) : "", kind = reportKind(rp);
+    var o = { id: rp.id, title: String(rp.title || ""), src: cardSrc(rp).label, why: "", whyLab: "", min: +min || 0, mark: c ? "链" : kind.charAt(0), foot: c ? "原文在外面的网页上" : kind,
+      mon: +d.slice(5, 7) || 0, day: +d.slice(8, 10) || 0, no: vol + "·" + pad2(i + 1), read: cardGem(rp, tp) >= 1, kind: c ? (c.status === "link" ? "link" : "clip") : "report" };
+    if (c && c.note) o.why = String(c.note);
+    else if (c && c.excerpt) { o.why = String(c.excerpt); o.whyLab = "开头几句"; }
+    else if (!c && rp.desc) { o.why = String(rp.desc); o.whyLab = "里面是"; }
+    return o;
+  }
+  function roomSnap() {
+    syncMyBooks(); syncBoxes();
+    var me = ON_SERVER && SRV ? SRV.me() : null, cats = [], ci = {};
+    function cat(k) { k = k || ""; if (!(k in ci)) { ci[k] = cats.length; cats.push(k ? domInfo(k).name : "没分领域"); } return ci[k]; }
+    var books = pwallBooks().map(function (it) {
+      var bs = bookState(it.id), s = bs.s === "doing" ? "doing" : bs.s === "done" || bs.s === "review" ? "done" : "todo";
+      return { id: it.id, title: String(it.title || "").replace(/（.*）$/, ""), by: String(it.by || ""), cat: cat(it.home), st: s,
+        prog: s === "done" ? 1 : s === "doing" ? Math.max(0, Math.min(.99, bs.epct || bs.pct || 0)) : 0, eb: !!ebookOf(it.id), page: !!ROUTES["b-" + it.id] };
+    });
+    var order = [], boxes = [], packs = [];
+    ARCH_ROWS.forEach(function (row) { row.forEach(function (c) { if (c[0] !== "+") order.push(c[0]); }); });
+    order = order.concat(archCustom());
+    order.forEach(function (k) {
+      boxesOf(k).forEach(function (tp) {
+        var vol = domGlyph(tp.track) + pad2(tp.no || 1);
+        boxes.push({ id: tp.id, title: String(tp.title), cat: cat(tp.track), vol: vol, glyph: domGlyph(tp.track), cards: topicItems(tp).map(function (rp, i) { return roomCard(rp, tp, vol, i); }) });
+      });
+    });
+    /* 没装盒的剪报：拆过的算这个领域的一盒「散页」，没拆的是一包邮包（拆还在纸模版的档案架上拆） */
+    order.concat([""]).forEach(function (k) {
+      var l = looseClips(k); if (!l.length) return;
+      var seen = l.filter(function (c) { return c.seen; }), fresh = l.length - seen.length, name = k ? domInfo(k).name : "收件匣", vol = (k ? domGlyph(k) : "匣") + "散";
+      if (seen.length) boxes.push({ id: "cf:" + k, title: k ? name + "散页" : "收件匣", cat: cat(k), vol: vol, glyph: k ? domGlyph(k) : "匣", loose: true, cards: seen.map(function (c, i) { return roomCard(clipItem(c), null, vol, i); }) });
+      if (fresh) packs.push({ id: k, title: name + "的新剪报", cat: cat(k), n: fresh });
+    });
+    var NBF = { ink: 2, kraft: 4, olive: 3, terra: 1, cream: 0, black: 5 }, t0 = Date.parse(today());
+    var notes = nbList().map(function (b) {
+      var daily = b.id === NB_DAILY, last = "";
+      if (daily) last = npDays().slice(-1)[0] || "";
+      else nbPages(b.id).forEach(function (p) { var d = String(p.m || p.t || "").slice(0, 10); if (d > last) last = d; });
+      return { id: b.id, title: String(b.name), cat: NBF[b.color] != null ? NBF[b.color] : 2, pages: nbCount(b.id), kindName: daily ? "一天一页" : "主题本",
+        ago: last && t0 ? Math.max(0, Math.round((t0 - Date.parse(last)) / 86400000)) : -1 };
+    });
+    return { user: me ? { name: String(me.name || "") } : null, login: ON_SERVER && SRV && !me, cats: cats, books: books, boxes: boxes, packs: packs, notes: notes };
+  }
+  /* 三维那一页要打开一样东西。返回 "reader"（阅读器盖在书房上面，合上就回到原处）/ "page"（换到别的页，按返回回书房）/ "tab"（新标签页）/ "" */
+  function roomOpen(kind, id) {
+    if (kind === "book") {
+      if (ebookOf(id)) { readerOpen(id); return "reader"; }
+      if (ROUTES["b-" + id]) { location.hash = "#b-" + id; return "page"; }
+      S.shelfPick = id; location.hash = "#shelf"; return "page";             // 还没挂电子书：到纸模版的书架上，这本的书立里能挂
+    }
+    if (kind === "note") { location.hash = id === NB_DAILY ? "#notes" : "#" + id; return "page"; }
+    if (kind === "card") {
+      var c = (S.data.clips || {})[id];
+      if (c && c.status !== "link") { readerOpen(id); return "reader"; }
+      var rp = c ? null : REPORTS.filter(function (x) { return x.id === id; })[0], href = c ? c.url : rp ? reportHref(rp) : "";
+      if (href && (!c || /^https?:\/\//i.test(href))) { window.open(href, "_blank", "noopener"); return "tab"; }      // 剪报的原文只认 http(s) 的地址
+      return "";
+    }
+    if (kind === "pack") { S.archPick = "cf:" + id; S.archF = "all"; S.deskOpen = true; S.clipDel = null; location.hash = "#archive"; return "page"; }      // 和在纸模版的架子上点这只袋子一样：桌面开着，袋子等着拆
+    if (kind === "paper") { location.hash = id === "rack" ? "#archive" : id === "notes" ? "#notes" : "#shelf"; return "page"; }
+    if (kind === "login") { if (ON_SERVER && SRV) location.href = SRV.loginHref(); return "page"; }
+    return "";
+  }
+  window.YXL_ROOM = {
+    ready: roomReady, snap: roomSnap, open: roomOpen,
+    busy: function () { return !!RD; },                                     // 阅读器正盖在书房上面：那一页先不画
+    remember: function (k) { try { sessionStorage.setItem("yxl-room-f", String(k)); } catch (e) { /* 忽略 */ } }
+  };
+
+  var ROUTES = { home: 1, gate: 1, shelf: 1, archive: 1, journal: 1, clip: 1, marks: 1, notes: 1, shufang: 1 };
   COURSES.forEach(function (k) { ROUTES["c-" + k] = 1; });
   LIB.tracks.forEach(function (t) { ROUTES["t-" + t.id] = 1; });
   Object.keys(LIB.books).forEach(function (b) {
@@ -6110,6 +6200,9 @@ var FOIL = (function () {
     syncMyBooks(); syncBoxes();
     document.documentElement.classList.toggle("clip-mode", S.route === "clip");
     document.documentElement.classList.toggle("gate-mode", S.route === "gate");
+    var inRoom = S.route === "shufang";
+    document.documentElement.classList.toggle("room-mode", inRoom);
+    if (inRoom) roomMount(); else roomUnmount();
     document.documentElement.classList.toggle("yx-scene", LK().scene === "youchai"); yxNightApply();
     document.documentElement.classList.toggle("yx-dark", LK().scene === "youchai");
     document.documentElement.classList.toggle("yx-app", APP); document.documentElement.classList.toggle("yx-app-scene", APP && /^(shelf|archive|notes)/.test(S.route));
@@ -6132,10 +6225,12 @@ var FOIL = (function () {
     else if (/^(notes|nb-|np-t-)/.test(r)) html = notesHTML();
     else if (r === "marks") html = marksPageHTML();
     else if (r === "clip") html = clipPageHTML();
+    else if (inRoom) html = "";
     else html = homeHTML();
     if (FILM.root && FILM.root.parentNode) FILM.root.parentNode.removeChild(FILM.root);
     var sy = window.scrollY;
-    $("#main").innerHTML = html + (r === "clip" ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML()) + (r === "shelf" ? yxCoverHTML() : "");
+    $("#main").innerHTML = html + (r === "clip" || inRoom ? "" : ritualHTML() + reviewHTML() + keysHTML() + jotHTML()) + (r === "shelf" ? yxCoverHTML() : "");
+    if (inRoom) roomSync();
     document.body.classList.toggle("desk-on", !!document.querySelector(".ydesk") || (!!document.querySelector(".ytable") && window.innerWidth < 1100));
     wallPack(); grimHydrate(); yxMount(); yxStageMount();
     if (!scrollTop && window.scrollY !== sy) window.scrollTo(0, sy);

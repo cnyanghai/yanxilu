@@ -2686,6 +2686,11 @@ html.clip-mode main{padding:18px 18px 40px}
 /* ---- 邮差奇幻界面：首页大门与墓园宽柜（第四稿，vendor/ui） ---- */
 html.gate-mode .topbar,html.gate-mode .mainnav{display:none}
 html.gate-mode main{padding:0;max-width:none}
+/* 立体书房 #shufang（2026-11-14）：整屏一页嵌着 lab/shelf.html；主站的顶栏、导航收起，阅读器（.rd，80）还盖得住它 */
+html.room-mode .topbar,html.room-mode .mainnav{display:none}
+html.room-mode main{padding:0;max-width:none}
+html.room-mode,html.room-mode body{overflow:hidden;background:#120D09}
+#room-frame{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:60;background:#120D09}
 .yx-gate{position:relative;min-height:100vh;background:#0D141A url(vendor/ui/tiles/night.webp) center/512px;overflow:hidden}
 .yx-gate-img{position:relative;height:100vh;aspect-ratio:2/3;margin:0 auto;max-width:100%;overflow:hidden}
 @media (max-aspect-ratio:2/3){.yx-gate-img{height:auto;width:100%}}

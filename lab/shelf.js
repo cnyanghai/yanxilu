@@ -29,6 +29,9 @@ import { backKind, setBackKind } from "./card.js";             // 开盒：牌�
 
 const Q = new URLSearchParams(location.search), DEV = Q.has("dev");
 const $ = (s) => document.querySelector(s);
+/* 嵌在主站里（主站的 #shufang 一页，2026-11-14）：架上的书、牌盒、本子向主站要（window.parent.YXL_ROOM.snap()），要打开什么也交回主站（open）；
+ * 这一页自己不取数据、不认账号、不写任何记录。单独打开这一页（没有 ?host）还是下面编出来的样品。 */
+const HOST = (() => { try { return Q.has("host") && window.parent !== window && window.parent.YXL_ROOM || null; } catch (e) { return null; } })();
 
 /* ---------- 手感参数（要调就调这张表） ---------- */
 const P = {
@@ -54,7 +57,7 @@ const PAD = .7, GAPB = .06, RECESS = 1;              // 每层两头留空、书
 const DIVW = .9, DIVGAP = .5;                        // 分隔板的厚度与两边的空
 
 /* ---------- 书（编的） ---------- */
-const CATS = ["金融", "历史", "地缘", "数学", "语言", "杂书"], CATW = [.24, .2, .14, .14, .12, .16];
+let CATS = ["金融", "历史", "地缘", "数学", "语言", "杂书"]; const CATW = [.24, .2, .14, .14, .12, .16];
 const HEADS = [
   ["利率", "久期", "做市", "波动", "信用", "账本", "复利", "杠杆", "票据", "汇兑"],
   ["漕运", "驿站", "盐铁", "市舶", "科举", "边镇", "里甲", "钱庄", "书院", "行会"],
@@ -104,6 +107,26 @@ function makeNotes() {
   const list = [["随手本", 5, 212, "一天一页", 0], ["做市笔记", 0, 96, "主题本", 2], ["读史札记", 1, 64, "主题本", 9], ["地图边上", 2, 38, "主题本", 30], ["错题本", 3, 120, "主题本", 4], ["语感练习", 4, 52, "主题本", 1], ["摘抄册", 0, 148, "划线与批注", 3], ["散步记", 2, 24, "主题本", 16]];
   return list.map(([title, cat, pages, kindName, ago], i) => { const h = i % 3 === 2 ? 17.6 : 21; return item({ title, cat, pages, kindName, ago, sub: pages + " 页", st: ago === 0 ? "doing" : "done", t: clamp(.9 + pages * .011, 1.1, 3.3), h, d: h * .705, face: true, i }); });
 }
+/* 真的那一批（嵌在主站里才有）：主站给的快照换成架上的东西。书有多厚多高主站不知道（没有页数），按书的 id 定一个，同一本书永远一个样；
+ * 牌盒的厚还是跟着牌数走，本子的厚跟着页数走。牌的 read 管它现在哪一面朝上（翻开看一眼也算），real 才是账号里记的读没读 */
+const hashOf = (str) => { let h = 0; for (const ch of String(str)) h = h * 31 + ch.charCodeAt(0) | 0; return Math.abs(h); };
+const unread = (c) => !(HOST ? c.real : c.read);
+function fromHost(snap) {
+  CATS = snap.cats.length ? snap.cats : ["书"];
+  STORE.shelf = snap.books.map((o) => {
+    const r = rng(hashOf(o.id) + 17), pages = 140 + Math.floor(Math.pow(r(), 1.7) * 620), h = [18.5, 21, 21, 23, 23, 24, 26][Math.floor(r() * 7)];
+    return item({ ...o, pages, noPages: true, t: clamp(1 + pages * .0062, 1.2, 5.8), h, d: h * (.63 + r() * .06) });
+  }).sort((a, b) => a.cat - b.cat);
+  if (LOOK.bind) {
+    const X = LOOK.bind.box;
+    STORE.rack = snap.boxes.map((o) => { const cards = o.cards.map((c) => ({ ...c, real: c.read })), n = cards.length, u = cards.filter(unread).length; return item({ ...o, cards, n, u, st: u ? "doing" : "done", t: clamp(1.5 + n * .15, 1.9, 7.6), h: X.h, d: X.d }); })
+      .concat(snap.packs.map((o) => item({ ...o, pack: true, u: o.n, st: "done", t: 3.4, h: 11.5, d: 8.6 })));
+    STORE.notes = snap.notes.map((o, i) => { const h = i % 3 === 2 ? 17.6 : 21; return item({ ...o, sub: o.pages + " 页", st: o.ago === 0 ? "doing" : "done", t: clamp(.9 + o.pages * .011, 1.1, 3.3), h, d: h * .705, face: true }); });
+  }
+  Object.values(STORE).forEach((list) => list && list.forEach((b, i) => { b.i = i; }));
+}
+const agoText = (b, long) => (b.ago === 0 ? "今天写过" : b.ago > 0 ? b.ago + " 天前" + (long ? "写过" : "") : "还没写过");
+
 /* 三件家具（2026-11-14）。同一页里一次只摆一件，底下一排记号换；换的时候镜头顺着墙横着走过去。只有旧书房做了后两件。
  *   SH 层高；gap、pad 东西之间的缝和每层两头的空；aspect 图集里一格的高比宽；draw 一格怎么画；box 方盒子；cover 封面朝外；mark 探出来的那些带什么记号（书架的可以换，另两件定死） */
 const KINDS = {
@@ -433,7 +456,10 @@ function ui() {
   grab.classList.toggle("off", out); sheet.classList.toggle("on", S.state === "out" || opened); sheet.classList.toggle("slim", opened);
   marks.classList.toggle("off", out || S.tools || S.state === "enter");
   marks.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.f === S.kind)));
-  document.querySelectorAll("#tools [data-only]").forEach((el) => { el.hidden = el.dataset.only !== S.kind; });      // 排法、在读的记号、本数只有书架有
+  document.querySelectorAll("#tools [data-only]").forEach((el) => { el.hidden = el.dataset.only !== S.kind || (!!HOST && el.dataset.demo != null); });      // 排法、在读的记号、本数只有书架有；本数只有样品有
+  $("#t-demo").hidden = !!HOST; $("#t-host").hidden = !HOST; $("#t-lab").hidden = !!HOST;
+  if (HOST && !SNAP) $("#t-who").textContent = "没拿到记录，架上是样品";
+  if (HOST && SNAP) { $("#t-who").textContent = SNAP.user ? (SNAP.user.name ? SNAP.user.name + " 的书房" : "你的书房") : SNAP.login ? "没登录，架上只有书单里的书" : "这台设备上的记录"; $("#b-login").hidden = !SNAP.login; }
   document.querySelectorAll("#seg-arr button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.arr === S.arr)));
   document.querySelectorAll("#seg-n button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.n === N)));
   document.querySelectorAll("#seg-mark button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mark === S.mark)));
@@ -442,12 +468,12 @@ function ui() {
   if (cur) {
     const pct = Math.round(cur.prog * 100), book = S.kind === "shelf";
     $("#s-title").textContent = cur.title;
-    $("#s-meta").textContent = book ? cur.by + " · " + cur.pages + " 页 · " + CATS[cur.cat] + " · " + (cur.st === "todo" ? "还没打开过" : cur.st === "done" ? "读完了" : "读到 " + pct + "%")
-      : S.kind === "rack" ? (cur.pack ? "邮差送来的一包剪报 · " + cur.n + " 张 · 还没拆" : cur.vol + " · " + CATS[cur.cat] + " · " + cur.n + " 张牌 · " + (cur.u ? cur.u + " 张没读" : "都读过") + " · 再点一下盒子打开")
-        : cur.kindName + " · " + cur.pages + " 页 · " + (cur.ago === 0 ? "今天写过" : cur.ago + " 天前写过");
+    $("#s-meta").textContent = book ? [cur.by, cur.noPages ? "" : cur.pages + " 页", CATS[cur.cat], cur.st === "todo" ? "还没打开过" : cur.st === "done" ? "读完了" : pct ? "读到 " + pct + "%" : "在读", HOST ? "再点一下这本书打开" : ""].filter(Boolean).join(" · ")
+      : S.kind === "rack" ? (cur.pack ? "邮差送来的一包剪报 · " + cur.n + " 张 · 还没拆" + (HOST ? " · 再点一下去拆" : "") : cur.vol + " · " + CATS[cur.cat] + " · " + (cur.n ? cur.n + " 张牌 · " + (cur.u ? cur.u + " 张没读" : "都读过") + " · 再点一下盒子打开" : "空盒，还没有牌"))
+        : cur.kindName + " · " + cur.pages + " 页 · " + agoText(cur, true) + (HOST ? " · 再点一下本子翻开" : "");
     $("#s-prog").hidden = !book; $("#s-prog").firstElementChild.style.width = pct + "%"; $("#s-prog").setAttribute("aria-valuenow", pct);
-    $("#b-read").hidden = !book || cur.st === "done"; $("#b-read").textContent = cur.st === "doing" ? "接着读" : "打开读";
-    $("#b-done").hidden = !book || cur.st === "done"; $("#b-todo").hidden = !book || cur.st === "todo";
+    $("#b-read").hidden = !book || (!HOST && cur.st === "done"); $("#b-read").textContent = HOST && !cur.eb ? (cur.page ? "看这本书的页" : "去挂电子书") : cur.st === "doing" ? "接着读" : cur.st === "done" ? "再读" : "打开读";
+    $("#b-done").hidden = !book || cur.st === "done" || !!HOST; $("#b-todo").hidden = !book || cur.st === "todo" || !!HOST;      // 真的书房里读没读是读出来的，不手标
     $("#b-go").hidden = !cur.pack;                                     // 没拆的邮包：去拆包那一页拆
     // 牌盒：抽出来再点它一下就打开（没有「打开」的按钮）；打开以后底下只剩一行字和「合上」，那行字跟着正中那张牌换
     $("#b-back").hidden = opened; $("#b-close").hidden = !opened;
@@ -459,7 +485,7 @@ function ui() {
 function uiCard() {
   const b = books[S.cur]; if (!b || !boxView || S.state !== "open") return;
   const i = boxView.focus, cd = boxView.cards[i]; if (!cd) return;
-  $("#s-meta").textContent = "第 " + (i + 1) + " / " + b.n + " 张 · " + (cd.c.read ? (b.u ? b.u + " 张没读（背面朝上）" : "都读过") + " · 左右划着翻" : "这张还没读，点它一下翻开");
+  $("#s-meta").textContent = "第 " + (i + 1) + " / " + b.n + " 张 · " + (!cd.c.read ? "这张还没读，点它一下翻开" : HOST ? (cd.c.real ? "读过" : "还没读") + " · 再点一下" + (cd.c.kind === "clip" ? "读全文" : cd.c.kind === "link" ? "去看原文" : "打开") : (b.u ? b.u + " 张没读（背面朝上）" : "都读过") + " · 左右划着翻");
 }
 // 工具纸：平时收着，点把手或者在把手上往上划才出来；点外面收回去
 function toolsOpen(on) {
@@ -479,7 +505,7 @@ function placeLabels() {
 }
 function showTip(b, x, y) {
   tip.firstElementChild.textContent = b.title;
-  tip.lastElementChild.textContent = S.kind === "rack" ? (b.pack ? b.n + " 张 · 还没拆" : b.n + " 张" + (b.u ? " · " + b.u + " 张没读" : "")) : S.kind === "notes" ? b.pages + " 页 · " + (b.ago === 0 ? "今天写过" : b.ago + " 天前") : b.by + " · " + STN[b.st];
+  tip.lastElementChild.textContent = S.kind === "rack" ? (b.pack ? b.n + " 张 · 还没拆" : b.n + " 张" + (b.u ? " · " + b.u + " 张没读" : "")) : S.kind === "notes" ? b.pages + " 页 · " + agoText(b) : [b.by, STN[b.st]].filter(Boolean).join(" · ");
   tip.classList.add("on"); moveTip(x, y);
 }
 function moveTip(x, y) {
@@ -508,6 +534,7 @@ function goto(kind) {
   SFX.swap(); ui();
   play(P.swapOut, (e) => { S.pan = dir * d0 * e; }, { ease: E.in2, done() {
     setKind(kind); snapToSlots(); const d1 = panDist(); S.pan = -dir * d1; ui();
+    if (HOST) HOST.remember(kind);
     play(P.swapIn, (e) => { S.pan = -dir * d1 * (1 - e); }, { ease: E.out3, done() { S.pan = 0; S.state = "idle"; SFX.thud(); vib(10); S.shake = P.shake * .6; setDividers(true); setLabels(true); ui(); } });
   } });
 }
@@ -609,13 +636,13 @@ let OB = { x: 0, y: 0, z: 0, tilt: 0, k: 1, px: 0, py: 0 };               // 打
 const boxView = MULTI ? createBoxView({
   scene, hero, play, maxAniso,
   view: () => { const A = avail(); return { vw: A.vw, vh: A.vh, tanH: Math.tan(rad(CAM.fov / 2)), camY: CAM.y, camZ: CAM.dist, top: A.top, bottom: A.bot - 60 + P.openSheet + P.openBox, pr: PR.cur }; },
-  boxPose: () => OB, glyph: (b) => CATS[b.cat][0],
+  boxPose: () => OB, glyph: (b) => b.glyph || CATS[b.cat][0],
   tick: (i, n) => { SFX.card(n > 1 ? i / (n - 1) : 0); vib(3); }, flipSnd: () => { SFX.flip(); vib(10); }, focus: () => uiCard(),
 }) : null;
-const isBox = (b) => !!boxView && S.kind === "rack" && !!b && !b.pack;
+const isBox = (b) => !!boxView && S.kind === "rack" && !!b && !b.pack && b.n > 0;
 function heroRect() {                                                     // 抽出来的那一件在屏上占的方块（点在它上面是「打开」，点在外面是「放回去」）
   const b = books[S.cur]; if (!b) return null;
-  const wpp = 2 * (CAM.dist - b.pz) * Math.tan(rad(CAM.fov / 2)) / innerHeight, c = screenOf(b.px, b.py, b.pz), hw = (WZ(b) + WX(b) * .3) / 2 / wpp + 10, hh = b.h / 2 / wpp + 10;
+  const wpp = 2 * (CAM.dist - b.pz) * Math.tan(rad(CAM.fov / 2)) / innerHeight, c = screenOf(b.px, b.py, b.pz), hw = (b.d + b.t * .3) / 2 / wpp + 10, hh = b.h / 2 / wpp + 10;      // 抽出来的都是大的那一面朝人：宽是 d
   return { l: c.x - hw, r: c.x + hw, t: c.y - hh, b: c.y + hh, cx: c.x, cy: c.y };
 }
 function openBox() {
@@ -635,19 +662,37 @@ function closeBox() {
   const b = books[S.cur]; if (!boxView || S.state !== "open" || boxView.busy || !b) return;
   S.state = "closing"; ui(); SFX.back();
   boxView.close(() => {
-    b.u = b.cards.filter((c) => !c.read).length; b.st = b.u ? "doing" : "done"; atlas.redraw(b); heroSetup(b); SFX.lid();      // 读过几张，盒面上的数和顶上那枚签跟着变
+    b.u = b.cards.filter(unread).length; b.st = b.u ? "doing" : "done"; atlas.redraw(b); heroSetup(b); SFX.lid();      // 读过几张，盒面上的数和顶上那枚签跟着变
     const I = inspectPose(b), x0 = b.px, y0 = b.py, z0 = b.pz, ry0 = b.ry, rz0 = b.rz, k0 = b.k;
     play(P.openFly, (e) => { b.px = lerp(x0, I.x, e); b.py = lerp(y0, I.y, e); b.pz = lerp(z0, I.z, e); b.ry = lerp(ry0, I.ry, e); b.rz = lerp(rz0, 0, e); b.k = lerp(k0, 1, e); dim.material.opacity = lerp(.8, .62, e); }, { ease: E.io3, done() { placeDim(I.di + 16); S.state = "out"; S.outReady = true; ui(); } });
   });
 }
 function flipCard() {                                                     // 立着的那张背面朝上：翻过来，翻过来就算读了
   const b = books[S.cur]; if (!boxView || S.state !== "open" || !b) return false;
-  return boxView.flip(() => { b.u = b.cards.filter((c) => !c.read).length; uiCard(); });
+  return boxView.flip(() => { b.u = b.cards.filter(unread).length; uiCard(); });
+}
+/* 嵌在主站里才有的两步：抽出来的书、本子、邮包再点它一下就进去（和牌盒一样点物件本身）；立着的那张牌面朝上时再点一下读全文。
+ * 往哪去是主站定的：阅读器盖在书房上面（这一页先停下不画，合上就回到原处）、换到别的页（这一页被拿掉，按返回再回来）、新标签页 */
+const canEnter = (b) => !!HOST && !!b && (S.kind !== "rack" || !!b.pack);
+function went(how) { if (how === "reader") S.paused = true; return how; }
+function enterItem() {
+  const b = books[S.cur]; if (!HOST || S.state !== "out" || !S.outReady || !canEnter(b)) return;
+  const z0 = b.pz, k0 = b.k, undo = () => { b.pz = z0; b.k = k0; if (S.state === "out") S.outReady = true; };
+  S.outReady = false; SFX.page(); vib(8);
+  play(.18, (e) => { b.pz = z0 + 12 * e; b.k = k0 * (1 + .05 * e); }, { ease: E.in2, done() {       // 朝人探一下再进去
+    const how = went(HOST.open(b.pack ? "pack" : S.kind === "notes" ? "note" : "book", b.id));
+    if (how === "page") wait(.8, undo); else undo();                   // 换页的话这一页马上被拿掉；万一没换成，退回来
+  } });
+}
+function tapBig() {                                                       // 点了立着的那张：背面朝上是翻开；嵌在主站里、已经面朝上，是读全文
+  const cd = boxView && boxView.cards[boxView.focus];
+  if (HOST && cd && cd.c.read && S.state === "open") { SFX.page(); vib(8); went(HOST.open("card", cd.c.id)); return true; }
+  return flipCard();
 }
 // 开着盒的时候点了一下：点在立着的那张上是翻开（读过的没有反应，正文还没接）；点在扇面的某一张上是转到它；点在底下的盒子上是合上
 function tapOpen(x, y) {
   const h = boxView.hit(x, y);
-  if (h && h.big) flipCard();
+  if (h && h.big) tapBig();
   else if (h) boxView.go(h.i);
   else if (Math.abs(x - OB.px) <= 62 && Math.abs(y - OB.py) <= P.openBox * .7) closeBox();
 }
@@ -665,7 +710,7 @@ function pick(cx, cy) {                                        // 手指底下�
 }
 const G = { id: -1, x0: 0, y0: 0, t0: 0, moved: 0, mode: "", turn: false };
 canvas.addEventListener("pointerdown", (ev) => {
-  au(true); if (G.id !== -1) return;
+  au(true); S.paused = false; if (G.id !== -1) return;
   G.id = ev.pointerId; G.x0 = ev.clientX; G.y0 = ev.clientY; G.t0 = ev.timeStamp; G.moved = 0; G.mode = "";      // 按了多久照事件自己带的时刻算，不照处理它的时刻：卡了一帧不该把「点一下」算成长按
   try { canvas.setPointerCapture(ev.pointerId); } catch (e) { /* 忽略 */ }
   if (S.state === "enter") S.fast = true;
@@ -688,7 +733,10 @@ function endPointer(ev) {
   if (G.mode === "scrub" && S.state === "scrub") { const i = S.hot; S.state = "idle"; if (i >= 0 && !cancel) pullOut(i); else setHot(-1); }
   else if (G.mode === "spin" && S.state === "out") {                  // 点一下：点在牌盒上是打开它，别的（点在外面，或者抽出来的是书、本子、邮包）是放回去
     S.yawT = 0;
-    if (!cancel && G.moved < 8 && ev.timeStamp - G.t0 < 450) { const r = isBox(books[S.cur]) && S.outReady ? heroRect() : null; if (r && ev.clientX >= r.l && ev.clientX <= r.r && ev.clientY >= r.t && ev.clientY <= r.b) openBox(); else putBack(); }
+    if (!cancel && G.moved < 8 && ev.timeStamp - G.t0 < 450) {
+      const cur = books[S.cur], r = S.outReady && (isBox(cur) || canEnter(cur)) ? heroRect() : null, on = !!r && ev.clientX >= r.l && ev.clientX <= r.r && ev.clientY >= r.t && ev.clientY <= r.b;
+      if (on && isBox(cur)) openBox(); else if (on) enterItem(); else putBack();
+    }
   }
   else if (G.mode === "fan" && S.state === "open") { boxView.release(); if (!cancel && !G.turn && ev.timeStamp - G.t0 < 450) tapOpen(ev.clientX, ev.clientY); }
   G.mode = "";
@@ -723,9 +771,12 @@ addEventListener("keydown", (ev) => {                                  // 键盘
   const open = S.state === "open", tag = document.activeElement && document.activeElement.tagName;
   if (ev.key === "Escape") { if (open) closeBox(); else toolsOpen(false); }
   else if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") { const d = ev.key === "ArrowRight" ? 1 : -1; if (open) boxView.nudge(d); else step(d); }
-  else if (ev.key === "Enter" && tag !== "BUTTON" && tag !== "A") { if (open) flipCard(); else if (S.state === "out") openBox(); }
+  else if (ev.key === "Enter" && tag !== "BUTTON" && tag !== "A") { if (open) tapBig(); else if (S.state === "out") { if (isBox(books[S.cur])) openBox(); else enterItem(); } }
 });
-$("#b-read").addEventListener("click", () => { au(true); readOn(); });
+$("#b-read").addEventListener("click", () => { au(true); if (HOST) enterItem(); else readOn(); });
+$("#b-go").addEventListener("click", (ev) => { if (!HOST) return; ev.preventDefault(); au(true); enterItem(); });
+$("#b-login").addEventListener("click", () => { if (HOST) HOST.open("login"); });
+$("#b-paper").addEventListener("click", () => { if (HOST) HOST.open("paper", S.kind); });
 $("#b-done").addEventListener("click", () => { au(true); setStatus("done"); });
 $("#b-todo").addEventListener("click", () => { au(true); setStatus("todo"); });
 $("#b-back").addEventListener("click", () => { au(true); putBack(); });
@@ -744,6 +795,8 @@ let last = performance.now(), fps = 60;
 function frame(now) {
   requestAnimationFrame(frame);
   const raw = Math.min(.05, (now - last) / 1000); last = now; fps = lerp(fps, 1 / Math.max(raw, 1e-3), .05);
+  if (S.paused) return;                                                // 主站的阅读器盖在上面的时候不画
+  if (FRESH && (S.state === "idle" || S.state === "out" || S.state === "open")) applySnap();
   if (!S.manual) tick(raw);
   if (!PR.pin && PR.cur > 1.5 && S.t > 2) {                       // 开头两秒在编译、传图，不算
     PR.slow = raw > 1 / 38 ? PR.slow + raw : Math.max(0, PR.slow - raw * 2);
@@ -759,11 +812,38 @@ function tick(raw) {
   if (devEl) devEl.textContent = S.state + " · " + K.name + " " + N + " " + K.unit + " · " + S.W + "cm × " + S.R + " 层\n" + fps.toFixed(0) + " fps · " + renderer.info.render.calls + " calls · 画布 ×" + PR.cur + " · 书脊格 " + atlas.cw + "×" + atlas.ch;
 }
 
+/* ---------- 主站的记录变了（读完一篇、别的设备上加了书）：比一下，有变化才动 ----------
+ * 手里正拿着一本书、开着一盒牌的时候只改这一件自己的读没读，整批等放回去、回到看全的时候再换（不带上架那一段） */
+let SNAP = null, SIG = "", FRESH = null;
+function sync() {
+  if (!HOST) return;
+  let snap = null; try { S.paused = !!HOST.busy(); snap = HOST.snap(); } catch (e) { S.paused = false; return; }
+  const sig = JSON.stringify(snap); if (!snap || sig === SIG) return;
+  SIG = sig; FRESH = snap;
+}
+function applySnap() {
+  const snap = FRESH, cur = books[S.cur];
+  if (S.state === "out" && cur && S.kind === "shelf") { const o = snap.books.find((x) => x.id === cur.id); if (o && (o.st !== cur.st || o.prog !== cur.prog || o.eb !== cur.eb)) { cur.st = o.st; cur.prog = o.prog; cur.eb = o.eb; atlas.redraw(cur); heroSetup(cur); ui(); } return; }
+  if (S.state === "open" && cur && cur.cards) { const o = snap.boxes.find((x) => x.id === cur.id), m = new Map(o ? o.cards.map((c) => [c.id, c.read]) : []); cur.cards.forEach((c) => { if (m.get(c.id)) c.real = true; }); cur.u = cur.cards.filter(unread).length; uiCard(); return; }
+  if (S.state !== "idle") return;
+  FRESH = null; SNAP = snap; fromHost(snap);
+  setKind(STORE[S.kind] && STORE[S.kind].length ? S.kind : "shelf"); snapToSlots(); books.forEach((b) => { b.out = b.outT = b.st === "doing" ? 1 : 0; }); setDividers(true); setLabels(true); ui();
+}
+
 /* ---------- 开场 ---------- */
 window.__lab = {
   S, P, get state() { return S.state; }, get books() { return books; }, get L() { return L; }, counts, rectOf,
+  host: !!HOST, sync, enterItem, tapBig, get snap() { return SNAP; },
   hot: setHot, pull: pullOut, back: putBack, mark: setStatus, read: readOn, arrange, count: rebuild, tools: toolsOpen, setMark, PR, get atlas() { return atlas; },
   get kind() { return S.kind; }, goto, KINDS, openBox, closeBox, flipCard, heroRect, get box() { return boxView; }, get OB() { return OB; },
   manual(on) { S.manual = !!on; }, step(sec) { let t = sec; while (t > 1e-6) { const d = Math.min(1 / 60, t); tick(d); t -= d; } },
 };
-whenReady().then(() => { NB = [40, 120, 300].includes(+Q.get("n")) ? +Q.get("n") : 40; setKind(MULTI && KINDS[Q.get("f")] ? Q.get("f") : "shelf"); enter(); requestAnimationFrame(frame); });   // 等木纹布纹的图到了再上架（最多等一秒半）
+// 嵌在主站里：等主站的记录到齐再上架（最多等六秒，到不齐就先摆到了的）
+const hostReady = () => new Promise((ok) => { if (!HOST) return ok(); const t0 = performance.now(), look = () => { let r = false; try { r = HOST.ready(); } catch (e) { r = true; } if (r || performance.now() - t0 > 6000) ok(); else setTimeout(look, 80); }; look(); });
+Promise.all([whenReady(), hostReady()]).then(() => {
+  if (HOST) { try { SNAP = HOST.snap(); SIG = JSON.stringify(SNAP); fromHost(SNAP); } catch (e) { SNAP = null; } }
+  NB = [40, 120, 300].includes(+Q.get("n")) ? +Q.get("n") : 40;
+  const k0 = MULTI && KINDS[Q.get("f")] ? Q.get("f") : "shelf"; setKind(HOST && !(STORE[k0] && STORE[k0].length) ? "shelf" : k0); enter();
+  if (Q.has("quick")) S.fast = true;                                   // 从别的页回来：上架那一段快进
+  requestAnimationFrame(frame);
+});   // 等木纹布纹的图到了再上架（最多等一秒半）

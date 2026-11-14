@@ -104,12 +104,12 @@ export function drawFace(g, x, y, w, h, c, glyph) {
   g.fillStyle = ink; rule(g, x + cw + u * .4, y + u * 5.9, hair, h - u * 11.8);
   const mx = x + u * 5.9 + (cw - u * 5.5) / 2, my = y + u * 15.4, mr = u * 6.6;
   g.fillStyle = lit("#E3CFA6"); g.beginPath(); g.arc(mx, my, mr, 0, 7); g.fill(); g.strokeStyle = red; g.lineWidth = Math.max(1, u * .7); g.stroke(); g.lineWidth = hair; g.beginPath(); g.arc(mx, my, mr - u * 1.3, 0, 7); g.stroke();
-  g.fillStyle = red; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 " + (u * (c.min > 9 ? 7.4 : 8.6)).toFixed(1) + "px " + F; g.fillText(String(c.min), mx, my + u * .4);
+  g.fillStyle = red; g.textAlign = "center"; g.textBaseline = "middle"; g.font = "900 " + (u * (c.min > 9 ? 7.4 : 8.6)).toFixed(1) + "px " + F; g.fillText(c.min ? String(c.min) : (c.mark || "·"), mx, my + u * .4);      // 真的牌不一定有分钟数（外链、自己的档案）：圈里换成一个字
   titleDown(g, mx, y + u * 25.5, h - u * 34.5, c.title, u * 11.6, u * 7.8, ink);
   // 右边：编号、来处和日子，右上角一枚印
   const x0 = x + cw + u * 6, x1 = x + w - u * 10, tw = x1 - x0, sz = u * 17, sx = x1 - sz, sy = y + u * 10.5;
   g.textAlign = "left"; g.fillStyle = red; g.font = "700 " + (u * 5.8).toFixed(1) + "px " + F; g.fillText(c.no, x0, y + u * 14.5);
-  g.fillStyle = soft; g.font = "500 " + (u * 5).toFixed(1) + "px " + F; g.fillText(fit(g, c.src, tw - sz - u * 3), x0, y + u * 22.6); g.fillText(c.mon + " 月 " + c.day + " 日", x0, y + u * 29.4);
+  g.fillStyle = soft; g.font = "500 " + (u * 5).toFixed(1) + "px " + F; g.fillText(fit(g, c.src, tw - sz - u * 3), x0, y + u * 22.6); if (c.mon) g.fillText(c.mon + " 月 " + c.day + " 日", x0, y + u * 29.4);
   if (glyph) {                                              // 印：朱底白字，边上缺几口，像盖上去的
     const rr = rng(hsh + 7); g.fillStyle = lit(PAGE.seal); g.fillRect(sx, sy, sz, sz);
     g.fillStyle = lit(PAGE.paper); g.font = "900 " + (sz * .74).toFixed(1) + "px " + F; g.textAlign = "center"; g.fillText(glyph, sx + sz / 2, sy + sz * .54);
@@ -119,13 +119,14 @@ export function drawFace(g, x, y, w, h, c, glyph) {
   flourish(g, x0, x1, y + u * 38.5, u, soft);
   // 为什么存它：摆在两道花线当中，上下居中、左右居中（像一页书名页），字少的时候下半张不空着
   g.font = "700 " + (u * 8.2).toFixed(1) + "px " + F;
-  const lines = wrap(c.why, Math.max(3, Math.floor(tw / (u * 8.4))));
+  const lines = c.why ? wrap(c.why, Math.max(3, Math.floor(tw / (u * 8.4)))) : [];      // 没写为什么存它的（真的牌才会有）：当中只留一行小字
   const top = y + u * 38.5, bot = y + h - u * 24.5, bh = u * (11 + lines.length * 12.4), by = (top + bot) / 2 - bh / 2, cx = (x0 + x1) / 2;
-  g.textAlign = "center"; g.fillStyle = red; g.font = "700 " + (u * 5.2).toFixed(1) + "px " + F; g.fillText("存它是因为", cx, by + u * 3);
+  g.textAlign = "center"; g.fillStyle = red; g.font = "700 " + (u * 5.2).toFixed(1) + "px " + F; g.fillText(c.why ? c.whyLab || "存它是因为" : "", cx, by + u * 3);
+  if (!c.why) { g.fillStyle = soft; g.font = "500 " + (u * 5.6).toFixed(1) + "px " + F; g.fillText("没写为什么存它", cx, (top + bot) / 2); }
   g.fillStyle = ink; g.font = "700 " + (u * 8.2).toFixed(1) + "px " + F; lines.forEach((ln, k) => g.fillText(ln, cx, by + u * (11 + k * 12.4 + 6.2)));
   // 底下：一道花线，读完要多久
   flourish(g, x0, x1, y + h - u * 24.5, u, soft);
-  g.fillStyle = soft; g.font = "500 " + (u * 5.2).toFixed(1) + "px " + F; g.fillText("读完约 " + c.min + " 分钟", cx, y + h - u * 15.2);
+  g.fillStyle = soft; g.font = "500 " + (u * 5.2).toFixed(1) + "px " + F; g.fillText(c.min ? "读完约 " + c.min + " 分钟" : c.foot || "", cx, y + h - u * 15.2);
   g.restore();
 }
 
